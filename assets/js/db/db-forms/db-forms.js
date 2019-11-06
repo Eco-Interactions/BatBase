@@ -24,7 +24,6 @@
  *     getRcrd                  edit-forms
  *     getSrcTypeRows           edit-forms
  *     getFormFieldRows         ""
- *     getParentEntity          ""
  *     ifAllRequiredFieldsFilled    ""
  *     addDataToCntDetailPanel  ""
  *     loadSrcTypeFields        ""
@@ -40,23 +39,25 @@
  *     getNextFormLevel         f-errs
  *     toggleSubmitBttn         edit-forms, f-errs
  *     focusParentAndShowChildLocs      edit-forms
- *     enableTaxonCombos        f-confg 
+ *     enableTaxonLvls          f-confg 
  *     enableCountryRegionField     f-confg
  *     enablePubField           f-confg
  *     resetInteractionForm     f-confg
+ *     submitFormData               edit-forms
  */
 import * as _u from '../util.js';
 import * as db_sync from '../db-sync.js';
 import * as db_page from '../db-page.js';
 import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
-
 import * as _errs from './f-errs.js';
 import * as form_ui from './form-ui.js';
 import * as _cmbx from './combobox-util.js';
 import * as _fCnfg from './f-confg.js';
 import { buildFormBttns } from './form-ui/save-exit-bttns.js';
 import { showEntityEditForm } from './edit/edit-forms.js';
+import { getFormValueData, getSelectedVals } from './get-form-data.js';
+import { formatDataForServer } from './validate-data.js';
 
 let fP = {};
 /* ======= SORT ============= */
@@ -575,7 +576,7 @@ function ifNoChildFormOpen(fLvl) {
  */
 function buildCitationText(fLvl) {
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
-    return getFormValueData('citation', null, null).then(generateCitText); 
+    return getFormValueData(fP, 'citation', null, null).then(generateCitText); 
 
     function generateCitText(formVals) {                                        //console.log('generateCitText. formVals = %O', formVals);
         const builder = { 'Article': articleCit, 'Book': bookCit, 
@@ -1313,6 +1314,10 @@ function onObjectSelection(val) {                                               
     enableTaxonCombos();
     if (!fP.editing) { $('#Object_pin').focus(); }
 }
+export function enableTaxonCombos() {
+    _cmbx.enableCombobox('#Subject-sel');
+    _cmbx.enableCombobox('#Object-sel');
+}
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
@@ -1336,7 +1341,7 @@ function initTaxonForm(value) {                                                 
     if (selLvl === 'Species' && !$('#Genus-sel').val()) {
         return _errs.formInitErr(selLvl, 'noGenus', fLvl);
     }
-    enableTaxonCombos(false);
+    enableTaxonLvls(false);
     showNewTaxonForm(val, selLvl, fLvl);
 } 
 function showNewTaxonForm(val, selLvl, fLvl) {                                  //console.log("showNewTaxonForm. val, selVal, fLvl = %O", arguments)
@@ -1370,7 +1375,7 @@ function submitSpecies(fLvl) {                                                  
         return genus !== speciesParts[0];
     }
 }
-export function enableTaxonCombos(disable) {
+export function enableTaxonLvls(disable) {
     const enable = disable == undefined ? true : false;
     $.each($('#sub-form select'), (i, sel) => _cmbx.enableCombobox('#'+sel.id, enable));
 }
@@ -1415,7 +1420,7 @@ function customizeElemsForTaxonSelectForm(role) {
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
 }
 function getTaxonExitButton(role) {
-    const bttn = getExitButton();
+    const bttn = form_ui.getExitButton();
     bttn.id = 'exit-sub-form';
     $(bttn).unbind("click").click(exitTaxonSelectForm.bind(null, role));
     return bttn;
@@ -2501,421 +2506,18 @@ function appendWaitingOverlay() {
     $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
 }
 export function getFormValuesAndSubmit(id, fLvl, entity) {                             console.log("       --getFormValuesAndSubmit. id = %s, fLvl = %s, entity = %s", id, fLvl, entity);
-    getFormValueData(entity, fLvl, true)
-        .then(submitFormIfNoErrors);
-
-    function submitFormIfNoErrors(formVals) {
-        if (formVals.err) { return; }
-        buildFormDataAndSubmit(fLvl, formVals);  
-    }
+    getFormValueData(fP, entity, fLvl, true)
+        .then(buildFormDataAndSubmit.bind(null, entity, fLvl))
+        .catch(() => {}); //Err caught in validation process and handled elsewhere.
 }
-/**
- * Loops through all rows in the form with the passed id and returns an object 
- * of the form values. Entity data not contained in an input on the form is 
- * added @handleAdditionalEntityData.
- */
-function getFormValueData(entity, fLvl, submitting) {
-    const elems = $('#'+entity+'_Rows')[0].children;                            console.log('           --getFormValueData. [%s]', entity);
-    const formVals = {};
-    for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
-    return handleAdditionalEntityData(entity)
-        .then(returnFormVals);
-
-    /** Get's the value from the form elem and set it into formVals. */
-    function getInputData(elem) {                                           
-        if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
-        const fieldName = _u.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-        const input = elem.children[1].children[1];                             //console.log("---------[%s] = %O", fieldName, input);
-        formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
-        
-        /** 
-         * Returns the input value from specialized parsing methods or trims the 
-         * field value and returns the value, with numbers parsed as integers. 
-         */
-        function parseFieldData() {
-            const val = $(input).data('inputType') ? 
-                getInputVals(fieldName, input, $(input).data('inputType')) : 
-                input.value.trim() || null; 
-            return Number.isInteger(val) ? parseInt(val) : val;                                         
-        }
-    }
-    /** Edge case input type values are processed via their type handlers. */
-    function getInputVals(fieldName, input, type) {
-        const typeHandlers = {
-            'multiSelect': getSelectedVals, 'tags': getTagVals
-        };
-        return typeHandlers[type](input, fieldName);
-    }
-    /** Adds an array of tag values. */
-    function getTagVals(input, fieldName) {                                 
-        return _cmbx.getSelVal('#'+_u.ucfirst(fieldName)+'-sel');
-    }
-    function handleAdditionalEntityData(entity) {
-        if (!submitting) { return Promise.resolve(); }
-        const dataHndlrs = {
-            'author': [ getAuthFullName, getAuthDisplayName ],
-            'editor': [ getAuthFullName, getAuthDisplayName ],
-            'citation': [ getPublicationData, addCitDisplayName, ifFullWorkCited,
-                addContributorData ], 
-            'interaction': [ handleUnspecifiedLocs ],
-            'location': [ addElevUnits, padLatLong, getLocType ], 
-            'publication': [ addContributorData ],
-            'taxon': [ getTaxonData ],
-        };
-        if (!dataHndlrs[entity]) { return Promise.resolve(); }
-        return Promise.all(dataHndlrs[entity].map(func => Promise.resolve(func())));
-    }
-    /** ---- Additional Author data ------ */
-    /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
-    function getAuthFullName() { 
-        const nameFields = ['firstName', 'middleName', 'lastName', 'suffix'];
-        const fullName = [];
-        nameFields.forEach(function(field) {
-            if (formVals[field]) { fullName.push(formVals[field]) };
-        });
-        formVals.fullName = fullName.join(" ");
-    }
-    /** Concats author Last, First Middle Suffix as the author display name.*/
-    function getAuthDisplayName() {  
-        let displayName = formVals.lastName + ',';
-        ["firstName", "middleName", "suffix"].forEach(function(name){
-            if (formVals[name]) { addToDisplayName(formVals[name]); };
-        });
-        formVals.displayName = displayName;
-
-        function addToDisplayName(namePiece) {
-            if (namePiece.length === 1) { namePiece += '.'; }
-            displayName += ' '+namePiece; 
-         } 
-    } /* End getAuthDisplayName */
-    /** ---- Additional Citation data ------ */
-    function getPublicationData() {
-        formVals.publication = fP.editing ? 
-            fP.forms[fLvl].pub.src.id : $('#Publication-sel').val();
-    }
-    /** Adds 'displayName', which will be added to both the form data objects. */
-    function addCitDisplayName() { 
-        formVals.displayName = formVals.title ? formVals.title : formVals.chapterTitle;
-    }
-    /** 
-     * Appends '(citation)' to citations that are attributed to entire books 
-     * to maintain unique display names for both the publication and its citation.
-     */
-    function ifFullWorkCited() { 
-        const type = $('#CitationType-sel option:selected').text();
-        const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other', 
-            'Ph.D. Dissertation', 'Report' ];
-        if (fulls.indexOf(type) === -1) { return; }
-        const pubTitle = fP.forms[fLvl].pub.src.displayName;
-        if (formVals.displayName.includes('(citation)')) { return; }
-        if (pubTitle != formVals.displayName) { return; }
-        formVals.displayName += '(citation)';
-    }
-    /** ---- Additional Location data ------ */
-    /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
-    function addElevUnits() {
-        if (formVals.elevation) { formVals.elevUnitAbbrv = 'm'; }
-    }
-    /** Pads each to the 13 scale set by the db. This eliminates false change flags. */
-    function padLatLong() {
-        if (formVals.latitude) {            
-            formVals.latitude = parseFloat(formVals.latitude).toFixed(14); 
-        }
-        if (formVals.longitude) {            
-            formVals.longitude = parseFloat(formVals.longitude).toFixed(14); 
-        }
-    }
-    /**
-     * Sets location type according to the most specific data entered. 
-     * "Point": if there is lat/long data. "Area" otherwise.
-     */
-    function getLocType() {
-        return _u.getData('locTypeNames').then(locTypes => {
-            const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
-            formVals.locationType = locTypes[type];  
-        });
-    }
-    /**
-     * If no location is selected for an interaction record, the country field 
-     * is checked for a value. If set, it is added as the interaction's location;
-     * if not, the 'Unspecfied' location is added.
-     */
-    function handleUnspecifiedLocs(entity) {
-        if (formVals.location) { return; }
-        if (formVals.country) { return getUnspecifiedLocId(); }
-        formVals.location = formVals.country;
-    }
-    /** Returns the id of the Unspecified region. */
-    function getUnspecifiedLocId() {
-        return _u.getData('topRegionNames').then(regions => regions['Unspecified']);
-    }
-    /** ---- Additional Publication data ------ */
-    /**
-     * Builds contributor object with all contributing authors and editors, 
-     * distinguished by an isEditor flag.  
-     */
-    function addContributorData() {
-        if (!formVals.contributor) { formVals.contributor = {}; } 
-        if (formVals.editors) { addContribs(formVals.editors, true); }
-        if (formVals.authors) { addContribs(formVals.authors, false); }  
-        
-        function addContribs(vals, isEd) {                                      //console.log('addContributorData. editors ? [%s] formVals = %O', isEd, vals)
-            for (let ord in vals) {
-                let id = vals[ord];
-                formVals.contributor[id] = { isEditor: isEd, ord: ord };
-            }
-        }
-    } /* End addContributorData */
-    /** ---- Additional Taxon data ------ */
-    function getTaxonData() {
-        const formTaxonLvl = fP.forms.taxonPs.formTaxonLvl;
-        formVals.parentTaxon = getParentTaxon(formTaxonLvl);
-        formVals.level = formTaxonLvl;
-    }
-    /** -------------------- Additional Taxon Data -----------------------*/ 
-    /**
-     * Checks each parent-level combo for a selected taxon. If none, the realm
-     * taxon is added as the new Taxon's parent.
-     */
-    function getParentTaxon(lvl) {
-        var lvls = fP.forms.taxonPs.lvls;
-        var parentLvl = lvls[lvls.indexOf(lvl)-1];
-        if ($('#'+parentLvl+'-sel').length) { 
-            return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
-        } 
-        return fP.forms.taxonPs.realmTaxon.id;
-    }
-    function returnFormVals() {
-        checkForErrors(entity, formVals, fLvl);
-        return formVals;
-    }
-} /* End getFormValueData */
-function checkForErrors(entity, formVals, fLvl) {
-    const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
-    if (!errs[entity]) { return; }
-    errs[entity](entity, formVals, fLvl);
-}
-/**
- * Checks to ensure the new author's name doesn't already exist in the database. 
- * If it does, a prompt is given to the user to check to ensure they are not 
- * creating a duplicate, and to add initials if they are sure this is a new author. 
- */
-function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
-    if (fP.action === 'edit') { return; }
-    const cntnr = $('#'+_u.ucfirst(entity)+'s-sel1')[0];
-    const opts = cntnr.selectize.options;  
-    const dup = checkForDuplicate(opts, vals.displayName);  
-    if (!dup) { return; }
-    _errs.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
-    vals.err = true;
-}
-function checkForDuplicate(opts, name) {  
-    const newName = name.replace(/\./g,'').toLowerCase(); 
-    const optKeys = Object.keys(opts);
-    return optKeys.find(k => {
-        let optName = opts[k].text.replace(/\./g,'').toLowerCase(); 
-        return optName == newName
-    });
-}
-/** -------------- Form Data Helpers ------------ */
-/** Returns an obj with the order (k) of the values (v) inside of the container. */
-function getSelectedVals(cntnr, fieldName) {
-    let vals = {};
-    $.each(cntnr.children, (i, elem) => getCntnrFieldValue(i+1, elem.children));              
-    return vals;
-        
-    function getCntnrFieldValue(cnt, subElems) {                                     
-        $.each(subElems, (i, subEl) => { 
-            if (subEl.value) { vals[cnt] = subEl.value; }});  
-    }                                                                   
-}
-/**
- * Builds a form data object @buildFormData. Sends it to the server @submitFormData
- */
-export function buildFormDataAndSubmit(fLvl, formVals) {                        
-    let entity = fP.forms[fLvl].entity;                                         //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
-    if (entity === 'editor') { entity = 'author'; }
-    const formData = buildFormData(entity, formVals, fLvl);                     //console.log("formData = %O", formData);
-    submitFormData(formData, fLvl, entity);
-}                
-/**
- * Returns an object with the entity names' as keys for their field-val objects, 
- * which are grouped into flat data and related-entity data objects. 
- */
-function buildFormData(entity, formVals, fLvl) { 
-    var pEntity = getParentEntity(entity);                                  
-    var parentFields = !pEntity || getParentFields(entity);                     //console.log("buildFormDataObj. pEntity = %s, formVals = %O, parentFields = %O", pEntity, formVals, parentFields);
-    var fieldTrans = getFieldTranslations(entity); 
-    var rels = getRelationshipFields(entity);
-    var data = buildFormDataObj();
-
-    for (var field in formVals) { getFormFieldData(field, formVals[field]); }
-    if (pEntity === "source") { handleDetailTypeField(); }                      //console.log("formData = %O", data);
-    if (entity === "location") { handleGeoJson(); }
-    return data;
-
-    function buildFormDataObj() {
-        var data = {};
-        data[pEntity] = { flat: {}, rel: {} };
-        data[entity] = { flat: {}, rel: {} };
-        return data;
-    }
-    /** 
-     * Adds the field's value to the appropriate entity's form data-group object. 
-     * Field name translations are handled @addTransFormData. 
-     */
-    function getFormFieldData(field, val) {
-        var dataGroup = rels.indexOf(field) !== -1 ? 'rel' : 'flat';
-        if (field in fieldTrans) { addTransFormData(); 
-        } else { addFormData(); }
-        /** Renames the field and stores the value for each entity in the map. */
-        function addTransFormData() {  
-            var transMap = fieldTrans[field];
-            for (var ent in transMap) { 
-                addTransFieldData(data[ent][dataGroup], transMap[ent]); 
-            }
-        }
-        /** Adds the value to formData, if the newField name isn't false. */
-        function addTransFieldData(formData, newField) {
-            if (newField === false) { return; }
-            if (Array.isArray(newField)) {
-                newField.forEach(fieldName => formData[fieldName] = val);
-            } else { formData[newField] = val; }
-        }
-        /** Adds the field and value to the appropriate entity data-type object. */
-        function addFormData() { 
-            var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
-            data[ent][dataGroup][field] = val;
-        }
-    } /* End getFormFieldData */
-    /**
-     * If the form entity is a detail entity for a 'parent' entity (e.g. as citation
-     * or author are to Source), that entity is added as the 'type' of it's parent and 
-     * 'hasDetail' is added to trigger detail entity processing on the server.
-     * Note: currently, only sources have detail entities.
-     */
-    function handleDetailTypeField() { 
-        if (pEntity) {
-            data[pEntity].rel[pEntity+'Type'] = entity; 
-            data[pEntity].hasDetail = true;
-        } 
-    }
-    /**
-     * If the location has GPS data, a geoJson detail entity is added to the 
-     * form data. If the location already has geoJson, coordinates are only 
-     * overwritten if the type is 'Point'. Otherwise, (multi)polygon coords
-     * would be overwritten. Once map editing is complete, this will be revised.
-     */
-    function handleGeoJson() {
-        if (!fP.editing && (!formVals.latitude || !formVals.longitude)) { return; }
-        const displayPoint = JSON.stringify([ formVals.longitude, formVals.latitude ]);
-        const geoJson = fP.forms.top.geoJson; 
-        const coords = !geoJson || geoJson.type === 'Point' ? 
-            displayPoint : fP.forms[fLvl].geoJson.coordinates;
-        data.geoJson = {
-            flat: { 
-                'displayPoint': displayPoint, 
-                'coordinates': coords, 
-                'locationName': formVals.displayName,
-                'type': 'Point' },
-            rel: {}
-        };
-        data.location.hasDetail = true;
-    }
-} /* End buildFormDataObj */
-/** Returns the core entity. (eg, Source is returned for author, citation, etc.) */
-function getCoreFormEntity(entity) {
-    var coreEntities = {
-        'author': 'source',         'citation': 'source', 
-        'publication': 'source',    'publisher': 'source', 
-        'location': 'location',     'taxon': 'taxon', 
-        'interaction': 'interaction'
-    };
-    return coreEntities[entity];
-}
-export function getParentEntity(entity) {                                          
-    const details = ['author', 'citation', 'publication', 'publisher'];         //console.log("hasParentEntity? [%s]. Entity = %s", details.indexOf(entity) !== -1, entity);
-    return details.indexOf(entity) !== -1 ? 'source' : false;
-}
-/** Returns an array of the parent entity's field names. */
-function getParentFields(entity) {
-    var parentFields = Object.keys(_fCnfg.getCoreFieldDefs(entity));
-    return  parentFields.map(function(field) {
-        return _u.lcfirst(field.split(' ').join(''));
-    });
-}
-/**
- * Returns the fields that need to be renamed and the entity they belong to. 
- * A "false" field will not be added to the final form data. An array of 
- * fields will add the form value to each field for the specified entity.
- */
-function getFieldTranslations(entity) {                                         //console.log("entity = ", entity)
-    var fieldTrans = {
-        'author': {
-            'displayName': { 'source': 'displayName', 'author': 'displayName' }
-        },
-        'citation': { 
-            'authors': { 'source': false },
-            'contributor': { 'source': 'contributor' },
-            'citationText': { 'source': 'description', 'citation': 'fullText' }, 
-            'publication': { 'source': 'parentSource' },
-            'title': { 'source': 'displayName', 'citation': ['displayName', 'title'] },
-            'chapterTitle': { 'source': 'displayName', 
-                'citation': ['displayName', 'title'] },
-            'volume': { 'citation': 'publicationVolume' },
-            'edition': { 'citation': 'publicationVolume' },
-            'issue': { 'citation': 'publicationIssue' },
-            'pages': { 'citation': 'publicationPages' },
-            'reportType': { 'citation': 'subType' }
-            // "tags": { "source": "tags" }
-        },
-        'interaction': {
-            'citationTitle': { 'interaction': 'source' },
-            'country/Region': { 'interaction': false },
-            'interactionTags': { 'interaction': 'tags' },
-            'notes': { 'interaction': 'note' }, 
-            'publication': { 'interaction': false }
-        },
-        'location': {
-            'country': { 'location': 'parentLoc' }
-        },
-        'publication': { 
-            'authors': { "source": false },
-            'editors': { "source": false }, 
-            'contributor': { 'source': 'contributor' },
-            'publisher': { 'source': 'parentSource' }, 
-            'description': { 'source': 'description', 'publication': 'description' },
-            'title': { 'source': 'displayName', 'publication': 'displayName' },
-            'publisher/University': { 'source': 'parentSource' }
-        },
-        'publisher': {
-            'displayName': { 'source': 'displayName', 'publisher': 'displayName' }
-        },
-    };
-    return fieldTrans[entity] || {};
-}
-/**
- * Returns an array of fields that are relationships with other entities. 
- * Note: use field names before field translations/renamings.
- */
-function getRelationshipFields(entity) {
-    var relationships = {
-        'author': ['sourceType'], 
-        'citation': ['citationType', 'contributor', 'publication'], 
-        'location': ['locationType', 'habitatType', 'country'],
-        'publication': ['publicationType', 'contributor', 'publisher', 
-            'publisher/University'],
-        'publisher': [],
-        'taxon': ['level', 'parentTaxon'],
-        'interaction': ['citationTitle', 'location', 'subject', 'object', 
-            'interactionTags', 'interactionType' ]
-    };
-    return relationships[entity];
+export  function buildFormDataAndSubmit(entity, fLvl, formVals) {
+    const data = formatDataForServer(fP, fLvl, formVals)
+    submitFormData(data, fLvl, entity);
 }
 /*------------------ Form Submit Methods ---------------------------------*/
 /** Sends the passed form data object via ajax to the appropriate controller. */
-function submitFormData(formData, fLvl, entity) {                               console.log("   --submitFormData [ %s ]= %O", fLvl, formData);
-    var coreEntity = getCoreFormEntity(entity);       
+export function submitFormData(formData, fLvl, entity) {                               console.log("   --submitFormData [ %s ]= %O", fLvl, formData);
+    var coreEntity = _fCnfg.getCoreFormEntity(entity);       
     var url = getEntityUrl(fP.forms[fLvl].action);
     if (fP.editing) { formData.ids = fP.editing; }
     formData.coreEntity = coreEntity;
@@ -3299,296 +2901,3 @@ function parseData(data) {
     data.detailEntity = JSON.parse(data.detailEntity);
     return data;
 }
-// /*------------------- Form Error Handlers --------------------------------*/
-// /**------------- Form Submit-Errors --------------*/
-// /** Builds and appends an error elem that displays the error to the user. */
-// function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-//     const fLvl = fP.ajaxFormLvl;                                          
-//     const elem = getFormErrElem(fLvl);
-//     const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
-//     const msg = getFormErrMsg(errTag);
-//     toggleWaitOverlay(false);
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     disableSubmitBttn('#'+fLvl+'-submit');
-// }
-// /**
-//  * Returns an error tag based on the server error text. Reports duplicated 
-//  * authors or editors, non-unique display names, or returns a generic 
-//  * form-error message.
-//  */
-// function getFormErrTag(errTxt) {                                                //console.log("errTxt = %O", errTxt) 
-//     return isDuplicateAuthorErr(errTxt) ?
-//         'dupSelAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
-//         'dupEnt'  : 'genSubmitErr';
-// }
-// function isDuplicateAuthorErr(errTxt) {
-//     return errTxt.DBALException.includes("Duplicate entry") &&
-//         errTxt.DBALException.includes("contribution");
-// }
-// function getFormErrMsg(errTag) {
-//     var msg = {
-//         'dupSelAuth': 'An author is selected multiple times.',
-//         'dupEnt' : 'A record with this display name already exists.',
-//         'genSubmitErr': 'There was an error during form submission. Please note the ' + 
-//             'record ID and the changes attempted and send to the developer.'
-//     };
-//     return '<span>' + msg[errTag] + '</span>'; 
-// }
-// /**------------- Data Storage Errors --------------*/
-// function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-//     const errMsg = data.msg;
-//     const errTag = data.tag;
-//     const cntnr = _u.buildElem('div', { class: 'flex-col', id:'data_errs' });
-//     const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
-//         ${errTag}</b><br><br>This form will close and all stored data will be 
-//         redownloaded.</span>`;
-//     const confirm = _u.buildElem('span', { class: 'flex-row', 
-//             'text': `Please click "OK" to continue.` });
-//     const bttn = _u.buildElem('input', { type: 'button', value: 'OK', 
-//             class: 'tbl-bttn exit-bttn' });
-//     $(confirm).append(bttn);
-//     $(cntnr).append([msg, confirm]);
-//     $('#top-hdr').after(cntnr);
-//     $(bttn).click(reloadAndRedownloadData);
-//     $('#top-submit, #top-cancel, #exit-form').off('click')
-//         .css('disabled', 'disabled').fadeTo('400', 0.5);
-// }
-// function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
-//     form_ui.exitFormPopup(null, 'skipTableReset');
-//     db_sync.resetStoredData();
-// }
-// /**
-//  * When the user attempts to create an entity that uses the sub-form and there 
-//  * is already an instance using that form, show the user an error message and 
-//  * reset the select elem. 
-//  */
-// function _errs.openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, fP = %O ", selId, fP)
-//     var selId = id || '#'+field+'-sel';
-//     return _errs.formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
-// }
-// /** 
-//  * When an error prevents a form init, this method shows an error to the user
-//  * and resets the combobox that triggered the form. 
-//  */
-// function _errs.formInitErr(field, errTag, fLvl, id, skipClear) {                      //console.log("_errs.formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
-//     const selId = id || '#'+field+'-sel';
-//     _errs.reportFormFieldErr(field, errTag, fLvl);
-//     if (skipClear) { return; }
-//     window.setTimeout(function() {_cmbx.clearCombobox(selId)}, 10);
-//     return { 'value': '', 'text': 'Select ' + field };
-// }
-// /**
-//  * Shows the user an error message above the field row. The user can clear the 
-//  * error manually with the close button, or automatically by resolving the error.
-//  */
-// function _errs.reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
-//     const errMsgMap = {
-//         'dupAuth': handleDupAuth,
-//         'fillAuthBlanks': handleAuthBlanks,
-//         'fillEdBlanks': handleEdBlanks,
-//         'isGenusPrnt': handleIsGenusPrnt,
-//         'invalidCoords': handleInvalidCoords,
-//         'needsGenusName': handleNeedsGenusName,
-//         'needsGenusPrnt': handleNeedsGenusParent, 
-//         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
-//         'needsHigherLvl': handleNeedsHigherLvl,
-//         'needsLocData': handleNeedsLocData,
-//         'noGenus': handleNoGenus,
-//         'openSubForm': handleOpenSubForm,
-//     };
-//     const errElem = getFieldErrElem(fieldName, fLvl);
-//     errMsgMap[errTag](errElem, errTag, fLvl, fieldName);
-// }
-// /* ----------- Field-Error Handlers --------------------------------------*/
-// function handleDupAuth(elem, errTag, fLvl, fieldName) {  
-//     const msg = `<span>An author with this name already exists in the database.\n
-//         If you are sure this is a new author, add initials or modify their name 
-//         and submit again. </span>`;
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// function clrDupAuth(elem, fLvl, e) { 
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {  
-//     const msg = "<span>Genus' with species children must remain at genus.</span>";
-//     setErrElemAndExitBttn(elem, msg, errTag, 'top');
-// }
-// function clrIsGenusPrnt(elem, fLvl, e) { 
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
-//     clearErrElemAndEnableSubmit(elem, 'top');
-// }
-// /** Note: error used for the location form. */
-// function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
-//     const msg = `<span>Invalid coordinate format.</span>`;
-//     $(`#${fieldName}_row input[type="text"]`).on('input', 
-//         clrInvalidCoords.bind(null, elem, fLvl, null, fieldName)); 
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     $('.err-exit').hide();
-// }
-// function clrInvalidCoords(elem, fLvl, e, fieldName) {
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
-// }
-// function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
-//     const genus = _cmbx.getSelTxt('#Genus-sel');
-//     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
-//     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// function clrNeedsGenusName(elem, fLvl, e) {
-//     $('#DisplayName_row input')[0].value = '';
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {  
-//     const msg = '<span>Please select a genus parent for the species taxon.</span>';
-//     setErrElemAndExitBttn(elem, msg, errTag, 'top');
-// }
-// function clrNeedsGenusPrntErr(elem, fLvl, e) {            
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
-//     clearErrElemAndEnableSubmit(elem, 'top');
-// }
-// /** Note: error for the create-taxon form. */
-// function handleNoGenus(elem, errTag, fLvl, fieldName) {  
-//     const msg = '<span>Please select a genus before creating a species.</span>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     $('#Genus-sel').change(function(e){
-//         if (e.target.value) { clrNoGenusErr(elem, fLvl); }
-//     });
-// }
-// function clrNoGenusErr(elem, fLvl, e) {                                            
-//     $('#Genus-sel').off('change');
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) { 
-//     const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// /** Clears the cause, either the parent-selection process or the taxon's level. */
-// function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     if ($('#sub-form').length) { return selectParentTaxon(
-//         $('#txn-prnt').data('txn'), fP.forms.taxonPs.curRealmLvls[0]); 
-//     }
-//     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
-//     var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
-//     var lvlName = fP.forms.taxonPs.lvls[childLvl-1];
-//     var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
-//         'Please select a level higher than '+lvlName+'</div>';
-//     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
-//     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
-//     $('#txn-lvl').data('lvl', txnLvl);
-//     clearLvlErrs('#Taxon_errs', fLvl);
-//     enableChngPrntBtttn();
-// }
-// /** Enables the button if the change-parent form isn't already open. */
-// function enableChngPrntBtttn() {
-//     if ($('#sub-form').length ) { return; }
-//     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
-// }
-// /** Note: error used for the location form when selecting new location from map. */
-// function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
-//     const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     $('div.new-loc-popup').prepend(msg);
-// }
-// function clrNeedsLocData(elem, fLvl, e) {
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     $('.new-loc-popup #err').remove();
-// }
-// /** Note: error used for the publication form. */
-// function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
-//     var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-//     var msg = '<p>Please finish the open '+ _u.ucfirst(subEntity) + ' form.</p>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     setOnFormCloseListenerToClearErr(elem, fLvl);
-// }
-// /** Note: error used for the publication/citation form. */
-// function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
-//     var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-//     var msg = '<p>Please fill the blank in the order of authors.</p>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     setOnFormCloseListenerToClearErr(elem, fLvl);
-// }
-// /** Note: error used for the publication form. */
-// function handleEdBlanks(elem, errTag, fLvl, fieldName) {  
-//     var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-//     var msg = '<p>Please fill the blank in the order of editors.</p>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     setOnFormCloseListenerToClearErr(elem, fLvl);
-// }
-// function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
-//     const elem = $('#'+field+'_errs')[0];    
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-submit'); }
-// }
-// /* ----------- Error-Elem Methods -------------- */
-// function setOnFormCloseListenerToClearErr(elem, fLvl) {
-//     $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem, fLvl));
-// }
-// function clrOpenSubForm(elem, fLvl) {   
-//     clearLvlErrs(elem, fLvl);
-// }
-// /** Returns the error div for the passed field. */
-// function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
-//     var field = fieldName.split(' ').join('');
-//     var elem = $('#'+field+'_errs')[0];    
-//     $(elem).addClass(fLvl+'-active-errs');
-//     return elem;
-// }   
-// function getFormErrElem(fLvl) {
-//     const elem = _u.buildElem('div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }); 
-//     $('#'+fLvl+'-hdr').after(elem);
-//     return elem;
-// }
-// function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
-//     elem.innerHTML = msg;
-//     $(elem).append(getErrExitBttn(errTag, elem, fLvl));
-//     disableSubmitBttn('#'+fLvl+'-submit');
-// }
-// function getErrExitBttn(errTag, elem, fLvl) {
-//     const exitHdnlrs = {
-//         'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
-//         'needsGenusName': clrNeedsGenusName, 
-//         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
-//         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
-//         'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm, 
-//         'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
-//         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr, 
-//         'fillAuthBlanks': false, 'fillEdBlanks': false
-//     };
-//     if (!exitHdnlrs[errTag]) { return []; }
-//     const bttn = getExitButton();
-//     bttn.className += ' err-exit';
-//     $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
-//     return bttn;
-// }
-// function clrFormLvlErr(elem, fLvl) {
-//     const childFormLvl = getNextFormLevel('child', fLvl);
-//     $('#'+fLvl+'_errs').remove();
-//     if (!$('#'+childFormLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) {
-//         enableSubmitBttn('#'+fLvl+'-submit');
-//     }
-// }
-// function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
-//     const subLvl = getNextFormLevel('child', fLvl);
-//         $(elem).fadeTo(400, 0, clearErrElem);
-//     if (!$('#'+subLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) { 
-//         enableSubmitBttn('#'+fLvl+'-submit'); }
-
-//     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);
-//         $(elem).removeClass(fLvl+'-active-errs');
-//         if (elem.innerHTML) { elem.innerHTML = ''; }
-//         $(elem).fadeTo(0, 1);
-//     }
-// } 

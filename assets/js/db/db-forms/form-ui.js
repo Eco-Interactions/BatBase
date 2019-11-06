@@ -17,6 +17,7 @@
  *     finishEntityFormBuild    db-forms
  *     setCoreRowStyles         db-forms
  *     exitFormPopup            db-forms
+ *     getExitButtonRow         db-forms
  */
 import * as _u from '../util.js';
 import * as _cmbx from './combobox-util.js';
@@ -58,7 +59,7 @@ function getExitButtonRow() {
     $(row).append(getExitButton());
     return row;        
 }
-function getExitButton() {
+export function getExitButton() {
     const bttn = _u.buildElem('input', { 'id': 'exit-form', 
         'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' });
     $(bttn).click(exitFormPopup);

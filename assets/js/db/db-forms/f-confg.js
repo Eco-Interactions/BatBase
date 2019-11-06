@@ -4,6 +4,9 @@
  * Exports:         Imported by:
  *     getFormConfg         db-forms, edit-forms
  *     getCoreFieldDefs     db-forms, edit-forms
+ *     getParentEntity      db-forms, edit-forms
+ *     getFieldTranslations     validate-data
+ *     getCoreFormEntity        validate-data
  */
 import * as db_forms from './db-forms.js';
 
@@ -276,7 +279,7 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["DisplayName"],
                 "opt": false },
-            "exitHandler": { create: db_forms.enableTaxonCombos }
+            "exitHandler": { create: db_forms.enableTaxonLvls }
         },
     };
     return fieldMap[entity];
@@ -315,3 +318,86 @@ export function getCoreFieldDefs(entity) {
     };
     return fields[coreEntityMap[entity]];
 }    
+
+/** Returns the core entity. (eg, Source is returned for author, citation, etc.) */
+export function getCoreFormEntity(entity) {
+    var coreEntities = {
+        'author': 'source',         'citation': 'source', 
+        'publication': 'source',    'publisher': 'source', 
+        'location': 'location',     'taxon': 'taxon', 
+        'interaction': 'interaction'
+    };
+    return coreEntities[entity];
+}
+export function getParentEntity(entity) {                                          
+    const details = ['author', 'citation', 'publication', 'publisher'];         //console.log("hasParentEntity? [%s]. Entity = %s", details.indexOf(entity) !== -1, entity);
+    return details.indexOf(entity) !== -1 ? 'source' : false;
+}
+/**
+ * Returns the fields that need to be renamed and the entity they belong to. 
+ * A "false" field will not be added to the final form data. An array of 
+ * fields will add the form value to each field for the specified entity.
+ */
+export function getFieldTranslations(entity) {                                         //console.log("entity = ", entity)
+    var fieldTrans = {
+        'author': {
+            'displayName': { 'source': 'displayName', 'author': 'displayName' }
+        },
+        'citation': { 
+            'authors': { 'source': false },
+            'contributor': { 'source': 'contributor' },
+            'citationText': { 'source': 'description', 'citation': 'fullText' }, 
+            'publication': { 'source': 'parentSource' },
+            'title': { 'source': 'displayName', 'citation': ['displayName', 'title'] },
+            'chapterTitle': { 'source': 'displayName', 
+                'citation': ['displayName', 'title'] },
+            'volume': { 'citation': 'publicationVolume' },
+            'edition': { 'citation': 'publicationVolume' },
+            'issue': { 'citation': 'publicationIssue' },
+            'pages': { 'citation': 'publicationPages' },
+            'reportType': { 'citation': 'subType' }
+            // "tags": { "source": "tags" }
+        },
+        'interaction': {
+            'citationTitle': { 'interaction': 'source' },
+            'country/Region': { 'interaction': false },
+            'interactionTags': { 'interaction': 'tags' },
+            'notes': { 'interaction': 'note' }, 
+            'publication': { 'interaction': false }
+        },
+        'location': {
+            'country': { 'location': 'parentLoc' }
+        },
+        'publication': { 
+            'authors': { "source": false },
+            'editors': { "source": false }, 
+            'contributor': { 'source': 'contributor' },
+            'publisher': { 'source': 'parentSource' }, 
+            'description': { 'source': 'description', 'publication': 'description' },
+            'title': { 'source': 'displayName', 'publication': 'displayName' },
+            'publisher/University': { 'source': 'parentSource' }
+        },
+        'publisher': {
+            'displayName': { 'source': 'displayName', 'publisher': 'displayName' }
+        },
+    };
+    return fieldTrans[entity] || {};
+}
+/**
+ * Returns an array of fields that are relationships with other entities. 
+ * Note: use field names before field translations/renamings.
+ */
+export function getRelationshipFields(entity) {
+    var relationships = {
+        'author': ['sourceType'], 
+        'citation': ['citationType', 'contributor', 'publication'], 
+        'location': ['locationType', 'habitatType', 'country'],
+        'publication': ['publicationType', 'contributor', 'publisher', 
+            'publisher/University'],
+        'publisher': [],
+        'taxon': ['level', 'parentTaxon'],
+        'interaction': ['citationTitle', 'location', 'subject', 'object', 
+            'interactionTags', 'interactionType' ]
+    };
+    return relationships[entity];
+}

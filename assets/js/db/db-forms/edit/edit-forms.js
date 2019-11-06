@@ -9,9 +9,9 @@ import * as _cmbx from '../combobox-util.js';
 import * as _errs from '../f-errs.js';
 import * as db_forms from '../db-forms.js';
 import * as form_ui from '../form-ui.js';
-import { buildFormBttns } from '../form-ui/save-exit-bttns.js';
 import * as db_map from '../../db-map/db-map.js';
 import * as _fCnfg from '../f-confg.js';
+import { buildFormBttns } from '../form-ui/save-exit-bttns.js';
 
 
 let fP;
@@ -30,27 +30,14 @@ function initEditForm(id, entity) {
         .then(fields => form_ui.buildAndAppendForm(fP, 'top', fields, id))
         .then(() => finishEditFormBuild(entity))
         .then(() => fillExistingData(entity, id));
-
-    //     if (entity !== 'interaction') { return fillExistingData(entity, id); }
-    //     _u.getData('interaction').then(ints => {
-    //         fP.records.interaction = ints;
-    //         fillExistingData(entity, id);
-    //     });
-    // });
 }   
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
-    // const rowCntnr = _u.buildElem('div', {
-    //     id: entity+'_Rows', class: 'flex-row flex-wrap'});
     const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
         'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
     const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
     fP.forms.expanded[entity] = true;
     return fieldBldr(entity, id);
-    // .then(fields => {
-    //     $(rowCntnr).append(fields);                              
-    //     return rowCntnr;
-    // });
 }   
 function getIntFormFields(entity, id) {
     return db_forms.buildIntFormFields('edit');
@@ -98,7 +85,7 @@ function fillFormWithEntityData(entity, id) {
 }
 function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
-    const prnt = db_forms.getParentEntity(ent);
+    const prnt = _fCnfg.getParentEntity(ent);
     const entity = prnt || ent;
     const rcrd = db_forms.getRcrd(entity, id);                                           
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
@@ -592,12 +579,12 @@ function buildTaxonEditFormRow(field, inputElems, fLvl) {
     return rowDiv;
 } 
 function submitTaxonEdit() {
-    var vals = {
+    const vals = {
         displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
-        level: $('#Taxon_row select').text(),
+        level:       $('#Taxon_row select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                                          //console.log("taxon vals = %O", vals);
-    db_forms.buildFormDataAndSubmit('top', vals);
+    db_forms.buildFormDataAndSubmit('taxon', 'top', vals);
 }
 /*-------- Edit Citation Methods ----------*/
 function finishCitEditFormBuild() {
