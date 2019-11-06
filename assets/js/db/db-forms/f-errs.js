@@ -209,7 +209,7 @@ export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
     $('#txn-lvl').data('lvl', txnLvl);
-    clearLvlErrs('#Taxon_errs', fLvl);
+    clearErrElemAndEnableSubmit($('#Taxon_errs')[0], fLvl);
     enableChngPrntBtttn();
 }
 /** Enables the button if the change-parent form isn't already open. */
@@ -258,7 +258,7 @@ function setOnFormCloseListenerToClearErr(elem, fLvl) {
     $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem, fLvl));
 }
 function clrOpenSubForm(elem, fLvl) {   
-    clearLvlErrs(elem, fLvl);
+    clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Returns the error div for the passed field. */
 function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
