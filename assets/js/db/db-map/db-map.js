@@ -432,7 +432,7 @@ function buildIntMarker(focus, intCnt, latLng, intData) {
         new MM.IntCluster(app.map, intCnt, params) : new MM.IntMarker(params);
 }
 function getCoords(geoId) {
-    return getLatLngObj(app.data.geo[geoId].displayPoint);
+    return getLatLngObj(null, app.data.geo[geoId]);
 }
 function zoomIfAllInSameRegion(data) {  
     let region, latLng;
@@ -463,15 +463,16 @@ function zoomIfAllInSameRegion(data) {
 /* -------------- Helpers ------------------------------------------------ */
 function getCenterCoordsOfLoc(loc, geoId) { 
     if (!geoId) { return false; }                                               //console.log('geoJson obj = %O', app.data.geo[geoId]);
-    return getLatLngObj(app.data.geo[geoId].displayPoint); 
+    return getLatLngObj(loc, app.data.geo[geoId]); 
 } 
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
-function getLatLngObj(point) {  
-    if (!point) { return getLocCenterPoint(loc, locGeoJson); }                  //console.log('point = ', point)
-    let array = JSON.parse(point); 
+function getLatLngObj(loc, locGeoJson) {  
+    if (!locGeoJson.displayPoint) { return getLocCenterPoint(loc, locGeoJson); }
+    let array = JSON.parse(locGeoJson.displayPoint); 
     return L.latLng(array[1], array[0]);
 }
-function getLocCenterPoint(loc, locGeoJson) {
+function getLocCenterPoint(loc, locGeoJson) {                                   console.log('getLocCenterPoint. loc = %O, locGeoJson = %O', loc, locGeoJson);
+    if (!loc || !locGeoJson) { return false; }
     const feature = buildFeature(loc, locGeoJson);
     const polygon = L.geoJson(feature);
     console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
@@ -606,7 +607,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const markerType = zoomFlag === 'edit' ? 'edite-loc' : 'new-loc';
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
-    if (loc && zoomFlag !== 'edit') {                                           console.log('Adding parent data for loc = %O', loc)
+    if (loc && zoomFlag !== 'edit') {                                           console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
         addParentLocDataToMap(loc.cntryId, true);
     }
