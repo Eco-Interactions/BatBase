@@ -10,6 +10,7 @@
  *     clrContribFieldErr       db-forms
  */
 import * as _u from '../util.js';
+import * as _elems from './form-ui/form-elems.js';
 import * as db_sync from '../db-sync.js';
 import * as form_ui from './form-ui.js';
 import * as _cmbx from './combobox-util.js';
@@ -251,7 +252,7 @@ function handleEdBlanks(elem, errTag, fLvl, fieldName) {
 export function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
     const elem = $('#'+field+'_errs')[0];    
     clearErrElemAndEnableSubmit(elem, fLvl);
-    if (db_forms.ifAllRequiredFieldsFilled(fLvl)) { db_forms.toggleSubmitBttn('#sub-submit', true); }
+    if (_elems.ifAllRequiredFieldsFilled(fLvl)) { db_forms.toggleSubmitBttn('#sub-submit', true); }
 }
 /* ----------- Error-Elem Methods -------------- */
 function setOnFormCloseListenerToClearErr(elem, fLvl) {
@@ -297,14 +298,14 @@ function getErrExitBttn(errTag, elem, fLvl) {
 function clrFormLvlErr(elem, fLvl) {
     const childFormLvl = db_forms.getNextFormLevel('child', fLvl);
     $('#'+fLvl+'_errs').remove();
-    if (!$('#'+childFormLvl+'-form').length && db_forms.ifAllRequiredFieldsFilled(fLvl)) {
+    if (!$('#'+childFormLvl+'-form').length && _elems.ifAllRequiredFieldsFilled(fLvl)) {
         db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);
     }
 }
 export function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
     const subLvl = db_forms.getNextFormLevel('child', fLvl);
         $(elem).fadeTo(400, 0, clearErrElem);
-    if (!$('#'+subLvl+'-form').length && db_forms.ifAllRequiredFieldsFilled(fLvl)) { 
+    if (!$('#'+subLvl+'-form').length && _elems.ifAllRequiredFieldsFilled(fLvl)) { 
         db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);
     }
 
