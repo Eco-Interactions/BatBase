@@ -9,7 +9,7 @@
  * Exports:             Imported by:
  *     accessFormState          form_ui
  *     addNewLocation
- *     clearFormMemory          form-ui
+ *     clearForMemory          form-ui
  *     editEntity
  *     initLocForm
  *     initNewDataForm          db-ui
@@ -23,8 +23,6 @@
  *     buildIntFormFields
  *     getRcrd                  edit-forms, generate-citation
  *     getSrcTypeRows           edit-forms
- *     getFormFieldRows         ""
- *     ifAllRequiredFieldsFilled    ""
  *     addDataToCntDetailPanel  ""
  *     loadSrcTypeFields        ""
  *     fieldIsDisplayed         ""
@@ -32,11 +30,11 @@
  *     getTaxonDisplayName      ""
  *     addMapToLocForm          ""
  *     initTaxonParams
- *     buildFormRows
  *     getSelectedTaxon
+ *     initFormLevelParamsObj
  *     buildFormDataAndSubmit
  *     addListenerToGpsFields
- *     getNextFormLevel         f-errs
+ *     getNextFormLevel         f-errs, form-elems
  *     toggleSubmitBttn         edit-forms, f-errs
  *     focusParentAndShowChildLocs      edit-forms
  *     enableTaxonLvls          f-confg 
@@ -44,8 +42,20 @@
  *     enablePubField           f-confg
  *     resetInteractionForm     f-confg
  *     submitFormData               edit-forms
+ *     citationFormNeedsCitTextUpdate       form-elems
+ *     handleCitText                ""
+ *     getSubFormLvl                ""
+ *     resetIfFormWaitingOnChanges              ""
+ *     disableSubmitBttn            ""
+ *     enableSubmitBttn             "", [something else, didn't doc]
+ *     addRequiredFieldInputToMemory            ""
+ *     getFormEntity                ""
+ *     setFormParam                 ""
+ *     setFormFieldValueMemory
+ *     setFormFieldConfg
  */
 import * as _u from '../util.js';
+import * as _elems from './form-ui/form-elems.js';
 import * as db_sync from '../db-sync.js';
 import * as db_page from '../db-page.js';
 import * as db_map from '../db-map/db-map.js';
@@ -195,7 +205,7 @@ function initFormParams(action, entity, id) {
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
  * > Taxon forms: taxonPs - added to fP.forms (see props @initTaxonParams)
  */
-function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       //console.log("initLvlParams. fP = %O, arguments = %O", fP, arguments)
+export function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       //console.log("initLvlParams. fP = %O, arguments = %O", fP, arguments)
     fP.forms[entity] = level;
     fP.forms[level] = {
         action: action,
@@ -209,7 +219,8 @@ function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       
         selElems: [], 
         typeConfg: false,
         vals: {}
-    };                                                                          //console.log("fLvl params = %O", fP.forms[level]);
+    };   
+    return fP;                                                                       //console.log("fLvl params = %O", fP.forms[level]);
 }
 /**
  * Returns the exitHandler stored in the form confg for the current action, or, 
@@ -220,6 +231,24 @@ function getFormExitHandler(confg, action) {                                    
     return confg.exitHandler && confg.exitHandler[action] ? 
         confg.exitHandler[action] :
         action === 'edit' ? form_ui.exitFormPopup : Function.prototype;
+}
+export function addRequiredFieldInputToMemory(fLvl, input) {
+    fP.forms[fLvl].reqElems.push(input);
+}
+export function getFormEntity(fLvl) {
+    return fP.forms[fLvl].entity;
+}
+export function setFormParam(fLvl, prop, val) {
+    fP.forms[fLvl][prop] = val;
+}
+export function setFormFieldConfg(fLvl, field, confg) {
+    fP.forms[fLvl].fieldConfg.vals[field] = confg
+}
+export function setFormFieldValueMemory(fLvl, field, val) {
+    fP.forms[fLvl].fieldConfg.vals[field].val = val;
+}
+export function addComboToFormMemory(fLvl, field) {
+    fP.forms[fLvl].selElems.push(field);    
 }
 /*------------------- Form Functions -------------------------------------------------------------*/
 // /*--------------------------- Edit Form --------------------------------------*/
@@ -279,12 +308,13 @@ function ifSelectAddToInitAry(field) {
  * current publication titles.
  */
 function buildPubFieldRow() {                                                   console.log('       --buildPubFieldRow');
-    return getSrcOpts('pubSrcs').then(buildPubRow);
+    return _elems.getSrcOpts('pubSrcs', null, fP.records.source)
+        .then(buildPubRow);
 }
 function buildPubRow(opts) {
     const attr = { id: 'Publication-sel', class: 'lrg-field' };
     const selElem = _u.buildSelectElem(opts, attr);
-    return buildFormRow('Publication', selElem, 'top', true);
+    return _elems.buildFormRow('Publication', selElem, 'top', true);
 }
 /** 
  * When an existing publication is selected, the citation field is filled with 
@@ -313,7 +343,7 @@ function initPubForm(value) {                                                   
     const fLvl = getSubFormLvl('sub');
     const val = value === 'create' ? '' : value;
     if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr('Publication', null, fLvl); }
-    initSubForm('publication', fLvl, 'flex-row med-sub-form', {'Title': val}, 
+    initEntitySubForm('publication', fLvl, 'flex-row med-sub-form', {'Title': val}, 
         '#Publication-sel')
     .then(appendPubFormAndFinishBuild);
 }
@@ -350,7 +380,7 @@ function ifBookAddAuthEdNote() {
 /** Returns a form row with an empty citation select dropdown. */
 function buildCitFieldRow() {                                                   console.log('       --buildPubFieldRow');
     const selElem = _u.buildSelectElem([], {id: 'CitationTitle-sel', class: 'lrg-field'});
-    return buildFormRow('CitationTitle', selElem, 'top', true);
+    return _elems.buildFormRow('CitationTitle', selElem, 'top', true);
 }
 /** Fills the citation combobox with all citations for the selected publication. */
 function fillCitationField(pubId) {                                             //console.log("initCitSelect for publication = ", pubId);
@@ -380,7 +410,7 @@ function initCitForm(v) {                                                       
     const fLvl = getSubFormLvl('sub');
     const val = v === 'create' ? '' : v;
     if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
-    initSubForm('citation', fLvl, 'flex-row med-sub-form', {'Title': val}, 
+    initEntitySubForm('citation', fLvl, 'flex-row med-sub-form', {'Title': val}, 
         '#CitationTitle-sel')
     .then(appendCitFormAndFinishBuild.bind(null, fLvl));
     _u.getData(['author', 'publication']).then(data => addSourceDataToMemory(data));
@@ -394,7 +424,7 @@ function finishCitFormUiLoad(fLvl) {
     _cmbx.enableCombobox('#Publication-sel', false);
     $('#Abstract_row textarea').focus();
     form_ui.setCoreRowStyles('#citation_Rows', '.sub-row');
-    if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#'+fLvl+'-submit'); }
+    if (_elems.ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#'+fLvl+'-submit'); }
 }
 function addSourceDataToMemory(data) {
     Object.keys(data).forEach(k => fP.records[k] = data[k]);
@@ -538,7 +568,7 @@ function addExistingPubContribs(fLvl, auths) {
  * displayed. If not, the default text is displayed in the disabled textarea.
  * Note: to prevent multiple rebuilds, a timeout is used.
  */
-function handleCitText(formLvl) {                                               //console.log('   --handleCitText')
+export function handleCitText(formLvl) {                                               //console.log('   --handleCitText')
     fP.citTimeout = window.setTimeout(buildCitTextAndUpdateField, 500);
 
     function buildCitTextAndUpdateField() {                                     console.log('           --buildCitTextAndUpdateField')
@@ -564,7 +594,7 @@ function getCitationFieldText($elem, fLvl) {
     return Promise.resolve(getCitationText());
 
     function getCitationText() {
-        return ifNoChildFormOpen(fLvl) && ifAllRequiredFieldsFilled(fLvl) ? 
+        return ifNoChildFormOpen(fLvl) && _elems.ifAllRequiredFieldsFilled(fLvl) ? 
            buildCitationText(fP, fLvl) : ($elem.val() === dfault ? false : dfault);
     }
 }
@@ -671,7 +701,7 @@ export function loadSrcTypeFields(subEntity, typeId, elem, typeName) {          
         $('#'+subEntity+'_Rows').append(rows);
         _cmbx.initFormCombos(subEntity, fLvl, fP.forms[fLvl].selElems);
         fillComplexFormFields(fLvl);
-        checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
+        _elems.checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
         updateFieldLabelsForType(subEntity, fLvl);
         focusFieldInput(subEntity);
     }
@@ -688,15 +718,17 @@ function resetOnFormTypeChange(subEntity, typeId, fLvl) {
  */
 export function getSrcTypeRows(entity, typeId, fLvl, type) {                           //console.log('getSrcTypeRows. type = ', type);
     const fVals = getCurrentFormFieldVals(fLvl);
-    setSourceTypeConfg(entity, typeId, fLvl, type); 
+    const fConfg = _fCnfg.getFormConfg(entity);
+    const tConfg = setSourceTypeConfg(entity, typeId, fLvl, type); 
     $('#'+entity+'_Rows').empty();     
-    return getFormFieldRows(entity, _fCnfg.getFormConfg(entity), fVals, fLvl);
+    return _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl);
 }
 /** Sets the type confg for the selected source type in form params. */
 function setSourceTypeConfg(entity, id, fLvl, tName) {
     const typeElemId = '#'+_u.ucfirst(entity)+'Type-sel'; 
     const type = tName || _cmbx.getSelTxt(typeElemId);
-    fP.forms[fLvl].typeConfg = _fCnfg.getFormConfg(entity).types[type];                //console.log('srcTypeConfg for [%s] = [%O]', type, fP.forms[fLvl].typeConfg);             
+    fP.forms[fLvl].typeConfg = _fCnfg.getFormConfg(entity).types[type]; 
+    return fP.forms[fLvl].typeConfg;
 }
 /**
  * Changes form-field labels to more specific and user-friendly labels for 
@@ -758,7 +790,7 @@ function buildCntryRegFieldRow() {                                              
 function buildCntryRegRow(opts) {
     const attr = {id: 'Country-Region-sel', class: 'lrg-field'};
     const selElem = _u.buildSelectElem(opts, attr);
-    return buildFormRow('Country-Region', selElem, 'top', false);
+    return _elems.buildFormRow('Country-Region', selElem, 'top', false);
 }
 /** Returns options for each country and region. */ 
 function getCntryRegOpts() {
@@ -789,7 +821,7 @@ function buildLocFieldRow() {                                                   
     const locOpts = getLocationOpts();                                          //console.log("locOpts = %O", locOpts);
     const selElem = _u.buildSelectElem(
         locOpts, {id: "Location-sel", class: "lrg-field"});
-    return buildFormRow("Location", selElem, "top", false);
+    return _elems.buildFormRow("Location", selElem, "top", false);
 }
 /** Returns an array of option objects with all unique locations.  */
 function getLocationOpts() {
@@ -834,7 +866,7 @@ function onLocSelection(val) {                                                  
     _cmbx.setSelVal('#Country-Region-sel', prntVal, 'silent');
     fillLocDataInDetailPanel(val);
     if (!fP.editing) { $('#Location_pin').focus(); }
-    checkIntFieldsAndEnableSubmit();
+    _elems.checkIntFieldsAndEnableSubmit();
 }
 /** Displays the selected location's data in the side detail panel. */
 function fillLocDataInDetailPanel(id) {  
@@ -876,7 +908,7 @@ function buildLocForm(val, fLvl) {
     const vals = {
         'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#Country-Region-sel').val() }; 
-    return initSubForm('location', fLvl, 'flex-row med-sub-form', vals, '#Location-sel')
+    return initEntitySubForm('location', fLvl, 'flex-row med-sub-form', vals, '#Location-sel')
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
@@ -921,13 +953,6 @@ function getHowToCreateLocWithoutGpsDataNote() {
         in available data and click "Create without GPS data" at the bottom of 
         the form.</p>`;
 }
-/** Prevents the location form's submit button from enabling when GPS data entered.*/
-function locHasGpsData(fLvl) {
-    if (fP.forms[fLvl].entity !== 'location') { return false; }
-    return ['Latitude', 'Longitude'].some(field => {
-        return $(`#${field}_row input`).val();
-    });
-}
 export function addListenerToGpsFields(func) {
     const method = func || db_map.addVolatileMapPin;
     $('#Latitude_row input, #Longitude_row input').change(
@@ -957,7 +982,7 @@ export function mergeLocs(id) {                                                 
  */
 export function addNewLocation() {
     const fLvl = fP.forms['location'];
-    if (ifAllRequiredFieldsFilled(fLvl)) {
+    if (_elems.ifAllRequiredFieldsFilled(fLvl)) {
         getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'location');
     } else { showFillAllLocFieldsError(fLvl); }
 }
@@ -1057,12 +1082,12 @@ function getObjectRealm() {
 /** Builds the Subject combobox that will trigger the select form @initSubjectSelect. */
 function initSubjField() {                                                      console.log('       --initSubjField');
     var subjElem = _u.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
-    return buildFormRow("Subject", subjElem, "top", true);
+    return _elems.buildFormRow("Subject", subjElem, "top", true);
 }
 /** Builds the Object combobox that will trigger the select form @initObjectSelect. */
 function initObjField() {                                                       console.log('       --initObjField');
     var objElem =  _u.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
-    return buildFormRow("Object", objElem, "top", true);
+    return _elems.buildFormRow("Object", objElem, "top", true);
 }
 /**
  * Shows a sub-form to 'Select Subject' of the interaction with a combobox for
@@ -1078,7 +1103,7 @@ export function initSubjectSelect() {                                           
     .then(appendSubjFormAndFinishBuild);
 
     function initSubjForm() {
-        return initSubForm('subject', fLvl, 'sml-sub-form', {}, '#Subject-sel');
+        return initEntitySubForm('subject', fLvl, 'sml-sub-form', {}, '#Subject-sel');
     }
     function appendSubjFormAndFinishBuild(form) {
         $('#Subject_row').append(form);
@@ -1103,7 +1128,7 @@ export function initObjectSelect() {                                            
     .then(appendObjFormAndFinishBuild);
 
     function initObjForm() {
-        return initSubForm('object', fLvl, 'sml-sub-form', {}, '#Object-sel');
+        return initEntitySubForm('object', fLvl, 'sml-sub-form', {}, '#Object-sel');
     }
     function appendObjFormAndFinishBuild(form) {
         $('#Object_row').append(form);
@@ -1178,7 +1203,7 @@ function showNewTaxonForm(val, selLvl, fLvl) {                                  
     buildTaxonForm().then(disableSubmitButtonIfEmpty.bind(null, '#sub2-submit', val));
 
     function buildTaxonForm() {
-        return initSubForm('taxon', fLvl, 'sml-sub-form', {'DisplayName': val}, 
+        return initEntitySubForm('taxon', fLvl, 'sml-sub-form', {'DisplayName': val}, 
             '#'+selLvl+'-sel')
             .then(appendTxnFormAndFinishBuild);
     }
@@ -1227,7 +1252,7 @@ function onRealmSelection(val) {                                                
     }
     /** A row for each level present in the realm filled with the taxa at that level.  */
     function buildAndAppendRealmRows(realm) {
-        buildFormRows(realm, {}, fLvl, null)
+        _elems.buildFormRows(realm, {}, fLvl, null)
         .then(rows => appendRealmRowsAndFinishBuild(realm, rows, fLvl));
     }
     function appendRealmRowsAndFinishBuild(realm, rows, fLvl) {
@@ -1485,24 +1510,24 @@ function buildIntTypeField() {                                                  
 function buildIntTypeRow(opts) {
     const attr = {id: 'InteractionType-sel', class: 'lrg-field'};
     const field = _u.buildSelectElem(opts, attr);
-    return buildFormRow('InteractionType', field, 'top', true);
+    return _elems.buildFormRow('InteractionType', field, 'top', true);
 }
 function focusIntTypePin() {
     if (!fP.editing) { $('#InteractionType_pin').focus(); }
 }
 function buildIntTagField() {                                                   console.log('       --buildIntTagField');
-    return buildTagField('interaction', 'InteractionTags', 'top')
+    return _elems.buildTagField('interaction', 'InteractionTags', 'top')
         .then(buildTagRow);
 }
 function buildTagRow(field) {
     field.className = 'lrg-field';
-    $(field).change(checkIntFieldsAndEnableSubmit);
-    return buildFormRow('InteractionTags', field, 'top', false);
+    $(field).change(_elems.checkIntFieldsAndEnableSubmit);
+    return _elems.buildFormRow('InteractionTags', field, 'top', false);
 }
 function buildIntNoteField() {                                                  console.log('       --buildIntNoteField');
-    const txtElem = buildLongTextArea('interaction', 'Note', 'top');
-    $(txtElem).change(checkIntFieldsAndEnableSubmit);
-    return buildFormRow('Note', txtElem, 'top', false);
+    const txtElem = _elems.buildLongTextArea('interaction', 'Note', 'top');
+    $(txtElem).change(_elems.checkIntFieldsAndEnableSubmit);
+    return _elems.buildFormRow('Note', txtElem, 'top', false);
 }
 /*-------------- Sub Form Helpers ----------------------------------------------------------*/
 /*-------------- Publisher -----------------------------------------------*/
@@ -1523,7 +1548,7 @@ function initPublisherForm (value) {                                            
     const fLvl = getSubFormLvl('sub2');
     const prntLvl = getNextFormLevel('parent', fLvl);
     if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr('Publisher', null, fLvl); }
-    initSubForm('publisher', fLvl, 'sml-sub-form', {'DisplayName': val}, 
+    initEntitySubForm(fP, fLvl, 'sml-sub-form', {'DisplayName': val}, 
         '#Publisher-sel')
     .then(appendPublFormAndFinishBuild);
 
@@ -1569,7 +1594,7 @@ function handleAuthSelect(val, ed) {
     if (lastAuthComboEmpty(cnt-1, authType)) { return; }
     buildNewAuthorSelect(cnt, val, fLvl, authType);
 }
-function citationFormNeedsCitTextUpdate(fLvl) {
+export function citationFormNeedsCitTextUpdate(fLvl) {
     return fP.forms[fLvl].entity === 'citation' && !fP.citTimeout;
 }
 /** Stops the form from adding multiple empty combos to the end of the field. */
@@ -1624,7 +1649,7 @@ function handleNewAuthForm(authCnt, value, authType) {
     const singular = authType.slice(0, -1);
     const val = value === 'create' ? '' : value;
     if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr(authType, parentSelId, fLvl); }
-    initSubForm( _u.lcfirst(singular), fLvl, 'sml-sub-form', {'LastName': val}, 
+    initEntitySubForm( _u.lcfirst(singular), fLvl, 'sml-sub-form', {'LastName': val}, 
         parentSelId)
     .then(appendAuthFormAndFinishBuild);
 
@@ -1636,7 +1661,7 @@ function handleNewAuthForm(authCnt, value, authType) {
     function handleSubmitBttns() {
         const prntLvl = getNextFormLevel('parent', fLvl);
         disableSubmitBttn('#'+prntLvl+'-submit');  
-        return ifAllRequiredFieldsFilled(fLvl) ? 
+        return _elems.ifAllRequiredFieldsFilled(fLvl) ? 
             enableSubmitBttn('#'+fLvl+'-submit') : 
             disableSubmitBttn('#'+fLvl+'-submit');
     }
@@ -1675,9 +1700,10 @@ export function toggleShowAllFields(entity, fLvl) {                             
     fP.forms.expanded[entity] = this.checked;         
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
     const fConfg = fP.forms[fLvl].confg;                                        //console.log('toggling optional fields. Show? [%s]', fP.forms.expanded[entity]);
+    const tConfg = fP.forms[fLvl].typeConfg;
     $('#'+entity+'_Rows').empty();
     fP.forms[fLvl].reqElems = [];
-    getFormFieldRows(entity, fConfg, fVals, fLvl)
+    _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl)
     .then(appendAndFinishRebuild);
 
     function appendAndFinishRebuild(rows) {
@@ -1711,501 +1737,10 @@ function showOpenSubFormErr(fLvl) {
     $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
 }
 /*------------------- Form Builders --------------------------------------*/    
-/**
- * Builds and returns the subForm according to the passed params. Disables the 
- * select elem 'parent' of the sub-form. 
- * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
- */
-function initSubForm(formEntity, fLvl, formClasses, fVals, selId) {             //console.log('initSubForm called. args = %O', arguments)
-    return buildFormRows(formEntity, fVals, fLvl, selId)
-        .then(buildFormContainer)
-
-    function buildFormContainer(rows) {
-        const subFormContainer = buildSubFormCntnr(); 
-        const bttns = buildFormBttns(formEntity, fLvl, 'create', null, fP);
-        $(subFormContainer).append([buildFormHdr(), rows, bttns]);
-        fP.forms[fLvl].pSelId = selId; 
-        _cmbx.enableCombobox(selId, false)
-        return subFormContainer;
-    }
-    function buildSubFormCntnr() {
-        const attr = {id: fLvl+'-form', class: formClasses + ' flex-wrap'};
-        return _u.buildElem('div', attr);
-    }
-    function buildFormHdr() {
-        const attr = { text: 'New '+_u.ucfirst(formEntity), id: fLvl+'-hdr' };
-        return _u.buildElem('p', attr);
-    }
-}
-/** 
- * Builds and returns the default fields for entity sub-form and returns the 
- * row elems. Inits the params for the sub-form in the global fP obj.
- */
-export function buildFormRows(entity, fVals, level, pSel, action) {                    //console.log('buildFormRows. args = %O', arguments)
+function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
     const formConfg = _fCnfg.getFormConfg(entity);                                 
-    initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));        
-    return getFormFieldRows(entity, formConfg, fVals, level, false)
-        .then(returnFinishedRows.bind(null, entity));
-}
-function returnFinishedRows(entity, rows) {
-    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap'};
-    const rowCntnr = _u.buildElem('div', attr);
-    $(rowCntnr).append(rows);
-    return rowCntnr;
-}
-/** -------------------- Form Row Builders ------------------------------ */
-/**
- * Returns rows for the entity form fields. If the form is a source-type, 
- * the type-entity form config is used. 
- */
-export function getFormFieldRows(entity, fConfg, fVals, fLvl) {
-    const typeConfg = fP.forms[fLvl].typeConfg;
-    const fObj = getFieldTypeObj(entity, fConfg, fLvl, typeConfg);
-    return buildRows(fObj, entity, fVals, fLvl)
-        .then(orderRows.bind(null, fObj.order));
-}
-/**
- * Returns an obj with the entity's field defs and all required fields.
- * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
- *               .required Ary of required fields
- */
-function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                     //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
-    const allFields = Object.assign(_fCnfg.getCoreFieldDefs(entity), fConfg.add);
-    const include = getFormFields(fConfg, typeConfg, entity);       
-    const fieldConfg = fP.forms[fLvl].fieldConfg;     
-    fieldConfg.order = getFieldOrder(fConfg, typeConfg, entity);                     
-    fieldConfg.required = typeConfg ? 
-        typeConfg.required.concat(fConfg.required) : fConfg.required;
-    fieldConfg.fields = {};
-    include.forEach(field => fieldConfg.fields[field] = allFields[field]);    
-    return fieldConfg;
-}   
-/**
- * Returns an array of fields to include in the form. If the form is a 
- * source-type, the type-entity form config is combined with the main-entity's.
- * Eg, Publication-type confgs are combined with publication's form confg.
- */
-function getFormFields(fConfg, typeConfg, entity) {                             //console.log('getting form fields for fConfg = %O typeConfg = %O', fConfg, typeConfg);
-    const shwAll = fP.forms.expanded[entity];
-    const dfault = shwAll ? 
-        fConfg.required.concat(fConfg.suggested).concat(fConfg.optional) :
-        fConfg.required.concat(fConfg.suggested); 
-    const typeFields = typeConfg && shwAll ? 
-        typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
-        typeConfg ? typeConfg.required.concat(typeConfg.suggested) : []; 
-    return dfault.concat(typeFields);
-}
-/** Returns the order the form fields should be displayed. */
-function getFieldOrder(fConfg, typeConfg, entity) {
-    const shwAll = fP.forms.expanded[entity];
-    const order = typeConfg && shwAll ? 
-        fConfg.order.opt.concat(typeConfg.order.opt) : 
-        typeConfg ? 
-            fConfg.order.sug.concat(typeConfg.order.sug) : 
-            shwAll && fConfg.order.opt ? fConfg.order.opt : fConfg.order.sug; 
-    return order.map(field => field); //removes references to confg obj.
-}
-/** @return {ary} Rows for each field in the entity field obj. */
-function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
-    const rows = [];
-    for (let field in fieldObj.fields) {                                        //console.log("  field = ", field);
-        rows.push(buildRow(field, fieldObj, entity, fVals, fLvl));
-    }  
-    return Promise.all(rows);
-}
-/**
- * @return {div} Form field row with required-state and value (if passed) set.  
- */
-function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
-    return buildFieldInput(fieldsObj.fields[field], entity, field, fLvl)
-        .then(buildFieldRow);
-
-    function buildFieldRow(input) {                                             //console.log('input = %O', input);
-        const isReq = isFieldRequried(field, fLvl, fieldsObj.required);    
-        addFieldToFormFieldObj();
-        fillFieldIfValuePassed(input);
-        $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));
-        return buildFormRow(_u.ucfirst(field), input, fLvl, isReq, "");
-    }
-    /** Adds the field, and it's type and value, to the form's field obj.  */
-    function addFieldToFormFieldObj() {
-        fP.forms[fLvl].fieldConfg.vals[field] = {
-            val: fVals[field], type: fieldsObj.fields[field]
-        };
-    }
-    /** Sets the value for the field if it is in the passed 'fVals' obj. */
-    function fillFieldIfValuePassed(input) {                                    //console.log('filling value in [%s]', field);
-        if (field in fVals) { 
-            if (fieldsObj.fields[field] === "multiSelect") { return; }          //console.log('---filling');
-            $(input).val(fVals[field]); 
-        }
-    }
-} /* End buildRow */ 
-function buildFieldInput(fieldType, entity, field, fLvl) {                      //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
-    const buildFieldType = { 'text': buildTextInput, 'tags': buildTagField, 
-        'select': buildSelectCombo, 'multiSelect': buildMultiSelectCntnr,  
-        'textArea': buildTextArea, 'fullTextArea': buildLongTextArea };
-    return Promise.resolve(buildFieldType[fieldType](entity, field, fLvl));
-}
-function getFieldClass(fLvl, fieldType) {  
-    const classes = { 'top': 'lrg-field', 'sub': 'med-field', 'sub2': 'med-field' };
-    return fieldType === 'long' ? (fLvl === 'top' ? 'xlrg-field top' :
-        'xlrg-field') : classes[fLvl];
-}
-/** Returns true if field is in the required fields array. */
-function isFieldRequried(field, fLvl, reqFields) {                              //console.log('isFieldRequried. fLvl = [%s], fP = %O', fLvl, fP);
-    return reqFields.indexOf(field) !== -1;
-}
-/**
- * Adds field value to the form's confg object. Calls @handleCitText to check 
- * citation fields for any changes to the generated and displayed citation text.
- */
-function storeFieldValue(elem, fieldName, fLvl, value) {            
-    const val = value || $(elem).val();                             
-    if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
-    if (citationFormNeedsCitTextUpdate(fLvl) && fieldName !== "CitationText") { handleCitText(fLvl); }
-    fP.forms[fLvl].fieldConfg.vals[fieldName].val = val;
-}
-/** Stores value at index of the order on form, ie the cnt position. */
-function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
-    if (e.target.value === "create") { return; }
-    const vals = fP.forms[fLvl].fieldConfg.vals;                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
-    const value = e.target.value || null;
-    if (!vals[field].val) { vals[field].val = {}; }
-    vals[field].val[cnt] = value;
-    checkForBlanksInOrder(vals[field].val, field, fLvl);    
-}
-/**
- * Author/editor fields must have all fields filled continuously. There can 
- * be extra blanks on the end, but none at the beginning. If blanks are found,
- * an error is shown to the user, otherwise any active errors are cleared. 
- */
-function checkForBlanksInOrder(vals, field, fLvl) {                             //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
-    const map = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
-    let blank = false;
-
-    for (let ord in vals) {
-        blank = vals[ord] && blank ? "found" :
-            !vals[ord] && !blank ? "maybe" : blank;  
-    } 
-    if (blank === "found") { return _errs.reportFormFieldErr(field, map[field], fLvl); }
-    if ($('#'+field+'_errs.'+fLvl+'-active-errs')) { _errs.clrContribFieldErr(field, fLvl); }
-}
-/** Reorders the rows into the order set in the form config obj. */
-function orderRows(order, rows) {                                               //console.log("    ordering rows = %O, order = %O", rows, order);
-    rows.sort((a, b) => {
-        let x = order.indexOf(a.id.split("_row")[0]);  
-        let y = order.indexOf(b.id.split("_row")[0]); 
-        return x < y ? -1 : x > y ? 1 : 0;
-    });
-    return rows;
-}
-/*----------------------- Form Input Builders ----------------------------*/
-function buildTextInput(entity, field, fLvl) { 
-    return _u.buildElem('input', { 'type': 'text', class: getFieldClass(fLvl) });
-}
-function buildTextArea(entity, field, fLvl) {                                     
-    return _u.buildElem('textarea', {class: getFieldClass(fLvl) });
-}
-function buildLongTextArea(entity, field, fLvl) {
-    return _u.buildElem('textarea', 
-        { class: getFieldClass(fLvl, 'long'), id:field+'-txt' });
-}
-/**
- * Creates and returns a select dropdown for the passed field. If it is one of 
- * a larger set of select elems, the current count is appended to the id. Adds 
- * the select's fieldName to the subForm config's 'selElem' array to later 
- * init the 'selectize' combobox. 
- */
-function buildSelectCombo(entity, field, fLvl, cnt) {                           //console.log("buildSelectCombo [%s] field %s, fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
-    return getSelectOpts(field).then(finishComboBuild);
-
-    function finishComboBuild(opts) {
-        const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
-        const sel = _u.buildSelectElem(opts, { id: fieldId , class: getFieldClass(fLvl)});
-        fP.forms[fLvl].selElems.push(field);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
-        return sel;
-    }
-}
-/**
- * Creates a select dropdown field wrapped in a div container that will
- * be reaplced inline upon selection. Either with an existing Author's name, 
- * or the Author create form when the user enters a new Author's name. 
- */
-function buildMultiSelectCntnr(entity, field, fLvl) {                           //console.log("entity = %s. field = ", entity, field);
-    const cntnr = _u.buildElem('div', { id: field+'-sel-cntnr'});
-    return buildMultiSelectElems(entity, field, fLvl, 1)
-        .then(returnFinishedMultiSelectFields);
-
-    function returnFinishedMultiSelectFields(fields) {
-        $(cntnr).data('inputType', 'multiSelect').data('cnt', 1);
-        $(cntnr).append(fields);
-        return cntnr;
-    }
-}
-function buildMultiSelectElems(entity, field, fLvl, cnt) {
-    return buildSelectCombo(entity, field, fLvl, cnt)
-        .then(returnFinishedMultiSelectField);
-
-    function returnFinishedMultiSelectField(fieldElem) {
-        const wrapper = _u.buildElem('div', {class: 'flex-row'});
-        const lbl = buildMultiSelectLbl(cnt)
-        $(fieldElem).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
-        $(wrapper).append([lbl, fieldElem]);
-        return wrapper;
-    }
-
-} /* End buildMultiSelectElems */
-function buildMultiSelectLbl(cnt) {
-    const lbl = _u.buildElem('span', {text: getCntLabel(cnt), class:'multi-span'});
-    $(lbl).css({padding: '.2em .5em 0 0', width: '2.2em'});
-}
-function getCntLabel(cnt) {
-    const map = {1: '1st: ', 2:'2nd: ', 3:'3rd: '};
-    return cnt in map ? map[cnt] : cnt+'th: '; 
-}
-/**
- * Creates and returns a select dropdown that will be initialized with 'selectize'
- * to allow multiple selections. A data property is added for use form submission.
- */
-function buildTagField(entity, field, fLvl) {
-    return getSelectOpts(field).then(buildTagElem);
-
-    function buildTagElem(opts) {
-        const tagSel = _u.buildSelectElem(opts, { id: field + '-sel', 
-            class: getFieldClass(fLvl)});
-        $(tagSel).data('inputType', 'tags');
-        return tagSel;
-    }
-}
-/* ---------- Option Builders --------------------------------------------*/
-/** Returns and array of options for the passed field type. */
-function getSelectOpts(field) {                                                 //console.log("getSelectOpts. for %s", field);
-    var optMap = {
-        "Authors": [ getSrcOpts, 'authSrcs'],
-        "CitationType": [ getCitTypeOpts, 'citTypeNames'],
-        "Class": [ getTaxonOpts, 'Class' ],
-        "Country": [ _u.getOptsFromStoredData, 'countryNames' ],
-        "Editors": [ getSrcOpts, 'authSrcs'],
-        "Family": [ getTaxonOpts, 'Family' ],
-        "Genus": [ getTaxonOpts, 'Genus' ],
-        "HabitatType": [ _u.getOptsFromStoredData, 'habTypeNames'],
-        "InteractionTags": [ getTagOpts, 'interaction' ],
-        "InteractionType": [ _u.getOptsFromStoredData, 'intTypeNames' ],
-        "Order": [ getTaxonOpts, 'Order' ],
-        "PublicationType": [ _u.getOptsFromStoredData, 'pubTypeNames'],
-        "Publisher": [ getSrcOpts, 'publSrcs'],
-        "Realm": [ getRealmOpts, null ],
-        "Species": [ getTaxonOpts, 'Species' ],
-        // "Tags": [ getTagOpts, 'source' ],
-    };
-    var getOpts = optMap[field][0];
-    var fieldKey = optMap[field][1];
-    return getOpts(fieldKey, field);
-}
-/** Builds options out of the passed ids and their entity records. */
-function getRcrdOpts(ids, rcrds) {          
-    var idAry = ids || Object.keys(rcrds);
-    return idAry.map(function(id) {
-        let text = rcrds[id].displayName.includes('(citation)') ? 
-            rcrds[id].displayName.split('(citation)')[0] : rcrds[id].displayName;
-        return { value: id, text: text };
-    });
-}
-/** Returns an array of options objects for tags of the passed entity. */
-function getTagOpts(entity) {
-    return _u.getOptsFromStoredData(entity+"Tags");
-}
-/** Returns an array of source-type (prop) options objects. */
-function getSrcOpts(prop, field) {   console.log('getSrcOpts [%s]', prop);
-    const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
-        'authSrcs': field ? field.slice(0, -1) : 'Author' };
-    return _u.getData(prop).then(buildSrcOpts);
-
-    function buildSrcOpts(ids) {
-        let opts = getRcrdOpts(ids, fP.records.source);
-        opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
-        return opts;
-    }
-}
-/**
- * Return the citation type options available for the parent publication type.
- * Also adds the parent publication and source records to the fP obj. 
- */
-function getCitTypeOpts(prop) {  
-    const fLvl = getSubFormLvl('sub');
-    return _u.getData(prop).then(buildCitTypeOpts);
-
-    function buildCitTypeOpts(types) {
-        return _u.buildOptsObj(types, getCitTypeNames().sort())
-    }
-    function getCitTypeNames() {
-        const opts = {
-            'Book': ['Book', 'Chapter'], 'Journal': ['Article'],
-            'Other': ['Museum record', 'Other', 'Report'],
-            'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
-        };
-        setPubInParams()
-        return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
-    }
-    function setPubInParams() {
-        const pubSrc = getSrcRcrd($('#Publication-sel').val());
-        const pub = getRcrd('publication', pubSrc.publication);
-        fP.forms[fLvl].pub = { pub: pub, src: pubSrc};
-    }
-    function getSrcRcrd(pubId) {
-        if (pubId) { return fP.records.source[pubId]; } //When not editing citation record.
-        const rcrd = getRcrd('source', fP.editing.core)
-        return fP.records.source[rcrd.parent];
-    }
-} /* End getCitTypeOpts */
-/** Returns an array of taxonyms for the passed level and the form's realm. */
-function getTaxonOpts(level) {
-    return _u.getOptsFromStoredData(fP.forms.taxonPs.realm+level+'Names')
-        .then(buildTaxonOpts);
-
-        function buildTaxonOpts(opts) {                                         //console.log("taxon opts for [%s] = %O", fP.forms.taxonPs.realm+level+"Names", opts)        
-            opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
-            return opts;
-        }
-}
-function getRealmOpts() {
-    return _u.getOptsFromStoredData('objectRealmNames');  
-}
-/* -----------------------------------------------------------------------*/
-/**
- * Each element is built, nested, and returned as a completed row. 
- * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
- */
-function buildFormRow(field, input, fLvl, isReq, rowClss) {                     //console.log('building form row for [%s], req? [%s]', field, isReq);
-    const fieldName = field.replace(/([A-Z])/g, ' $1'); //Adds space between pascal-cased words
-    const rowDiv = _u.buildElem('div', { class: getRowClasses(), 
-        id: field + '_row'});
-    const errorDiv = _u.buildElem('div', { id: field+'_errs'}); 
-    const fieldCntnr = _u.buildElem('div', { class: 'field-row flex-row'});
-    const label = _u.buildElem('label', {text: _u.ucfirst(fieldName).trim(), id:field+'-lbl'});
-    const pin = fLvl === 'top' ? getPinElem(field) : null;     
-    if (isReq) { handleRequiredField(label, input, fLvl); } 
-    $(fieldCntnr).append([label, input, pin]);
-    $(rowDiv).append([errorDiv, fieldCntnr]);
-    return rowDiv;
-    /** Returns the style classes for the row. */
-    function getRowClasses() { 
-         var rowClass = input.className.includes('xlrg-field') ? 
-            'full-row' : (fLvl + '-row') + (rowClss ? (' '+rowClss) : '');      //console.log("rowClass = ", rowClass)
-        return rowClass; 
-    }
-} /* End buildFormRow */
-function getPinElem(field) {
-    var relFields = ["CitationTitle", "Country-Region", "Location", "Publication"];
-    var pinClasses = 'top-pin' + (fP.editing ? ' invis' : '');
-    var pin = _u.buildElem("input", {type: "checkbox", id: field+"_pin", class: pinClasses});
-    _u.addEnterKeypressClick(pin);
-    if (relFields.indexOf(field) !== -1) { $(pin).click(checkConnectedFieldPin); }
-    return pin;
-}
-/**
- * When a dependent field is pinned, the connected field will also be pinned.
- * If the connected field is unpinned, the dependant field is as well.
- */
-function checkConnectedFieldPin() {
-    var field = this.id.split("_pin")[0]; 
-    var params = {
-        "CitationTitle": { checked: true, relField: "Publication" },
-        "Country-Region": { checked: false, relField: "Location" },
-        "Location": { checked: true, relField: "Country-Region" },
-        "Publication": { checked: false, relField: "CitationTitle" },
-    }
-    checkFieldPins(this, params[field].checked, params[field].relField);
-}
-function checkFieldPins(curPin, checkState, relField) {
-    if (curPin.checked === checkState) {
-        if ($('#'+relField+'_pin')[0].checked === checkState) { return; }
-        $('#'+relField+'_pin')[0].checked = checkState;
-    }
-}
-/**
- * Required field's have a 'required' class added which appends '*' to their 
- * label. Added to the input elem is a change event reponsible for enabling/
- * disabling the submit button and a form-level data property. The input elem
- * is added to the form param's reqElems property. 
- */
-function handleRequiredField(label, input, fLvl) {
-    $(label).addClass('required');  
-    $(input).change(checkRequiredFields);
-    $(input).data('fLvl', fLvl);
-    fP.forms[fLvl].reqElems.push(input);
-}
-/**
- * On a required field's change event, the submit button for the element's form 
- * is enabled if all of it's required fields have values and it has no open child 
- * forms. 
- */
-function checkRequiredFields(e) {                                               //console.log('checkRequiredFields e = %O', e)
-    const input = e.currentTarget;
-    const fLvl = $(input).data('fLvl');  
-    checkReqFieldsAndToggleSubmitBttn(input, fLvl);
-    if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }  
-}
-/**
- * Note: The 'unchanged' property exists only after the create interaction form 
- * has been submitted and before any changes have been made.
- */
-function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, fP.forms.top.unchanged);
-    const subBttnId = '#'+fLvl+'-submit';
-    if (fP.forms.top.unchanged) { resetForNewForm(); }
-    if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
-        disableSubmitBttn(subBttnId); 
-    } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
-        if (locHasGpsData(fLvl)) { return; }
-        enableSubmitBttn(subBttnId);
-    }
-}
-/**
- * After the interaction form is submitted, the submit button is disabled to 
- * eliminate accidently creating duplicate interactions. This change event is
- * added to the non-required fields of the form to enable to submit as soon as 
- * any change happens in the form, if the required fields are filled. Also 
- * removes the success message from the form.
- */
-function checkIntFieldsAndEnableSubmit() {
-    if (ifAllRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
-    if (fP.forms.top.unchanged) { resetForNewForm(); }
-}
-/** Returns true if all the required elements for the current form have a value. */
-export function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s. fP = %O", fLvl, fP)
-    const reqElems = fP.forms[fLvl].reqElems;                                   //console.log('reqElems = %O', reqElems);          
-    return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
-}
-/** Note: checks the first input of multiSelect container elems.  */
-function isRequiredFieldFilled(fLvl, elem) {                                    
-    if ($('.'+fLvl+'-active-errs').length) { return false; }                    //console.log('       --checking [%s] = %O, value ? ', elem.id, elem, getElemValue(elem));
-    return getElemValue(elem);
-
-    function getElemValue(elem) {
-        return elem.value ? true : 
-            elem.id.includes('-cntnr') ? isCntnrFilled(elem) : false;  
-    }
-}
-/**
- * Returns true if the first field of the author/editor container has a value. 
- * For book publications, either authors or editors are required. If there is 
- * no author value, the first editor value is returned instead. 
- */
-function isCntnrFilled(elem) {                                                  //console.log('isCntnrFilled? elem = %O', elem);
-    return isAFieldSelected('Authors') || isAFieldSelected('Editors');         
-}
-function isAFieldSelected(entity) {                                             //console.log('[%s] field = %O', entity, $('#'+entity+'-sel-cntnr')[0]);
-    if (!$('#'+entity+'-sel-cntnr').length) { return false; } //When no editor select is loaded.
-    const fields = $('#'+entity+'-sel-cntnr')[0].firstChild.children;           //console.log('fields = %O', fields);
-    let isSelected = false;
-    $.each(fields, (i, field) => { if ($(field).val()) { isSelected = true; } });
-    return isSelected;
-}
-/** Returns true if the next sub-level form exists in the dom. */
-function hasOpenSubForm(fLvl) {
-    const childFormLvl = getNextFormLevel('child', fLvl);
-    return $('#'+childFormLvl+'-form').length > 0;
+    initFormLevelParamsObj(entity, fLvl, pSel, formConfg, 'create');        
+    return _elems.initSubForm(fP, fLvl, fClasses, fVals, pSel);
 }
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
@@ -2219,7 +1754,7 @@ export function getNextFormLevel(next, curLvl) {
  * Returns the sub form's lvl. If the top form is not the interaction form,
  * the passed form lvl is reduced by one and returned. 
  */
-function getSubFormLvl(intFormLvl) {  
+export function getSubFormLvl(intFormLvl) {  
     var fLvls = fP.formLevels;
     return fP.forms.top.entity === 'interaction' ? 
         intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
@@ -2267,7 +1802,7 @@ export function fieldIsDisplayed(field, fLvl) {
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
     const parentLvl = getNextFormLevel('parent', fLvl);
-    if (ifAllRequiredFieldsFilled(parentLvl)) {
+    if (_elems.ifAllRequiredFieldsFilled(parentLvl)) {
         enableSubmitBttn('#'+parentLvl+'-submit');
     }
 }
@@ -2279,7 +1814,7 @@ export function enableSubmitBttn(bttnId) {
     $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
 }  
 /** Enables passed submit button */
-function disableSubmitBttn(bttnId) {                                            //console.log('disabling bttn = ', bttnId)
+export function disableSubmitBttn(bttnId) {                                            //console.log('disabling bttn = ', bttnId)
     $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
 }  
 function disableSubmitButtonIfEmpty(bttnId, val) {
@@ -2480,7 +2015,8 @@ function initInteractionParams() {
  * are made. This removes the change listeners from non-required elems and the 
  * flag tracking the state of the new interaction form.  
  */
-function resetForNewForm() {  
+export function resetIfFormWaitingOnChanges() {  
+    if (fP.forms.top.unchanged) { db_forms.resetForNewForm(); }
     exitSuccessMsg();
     delete fP.forms.top.unchanged;
 }
@@ -2529,8 +2065,9 @@ function updatedCitationData(citSrc, text) {
  */
 function exitFormAndSelectNewEntity(data) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
     const fLvl = fP.ajaxFormLvl;           
-    exitForm('#'+fLvl+'-form', fLvl, false, data); 
-    if (fP.forms[fLvl].pSelId) { addAndSelectEntity(data, fLvl); }
+    exitForm('#'+fLvl+'-form', fLvl, null, data); 
+    if (fP.forms[fLvl].pSelId) { addAndSelectEntity(data, fLvl); 
+    } else { fP = {}; }
 }
 /** Adds and option for the new entity to the form's parent elem, and selects it. */
 function addAndSelectEntity(data, fLvl) {

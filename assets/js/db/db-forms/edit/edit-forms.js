@@ -5,6 +5,7 @@
  *     showEntityEditForm       db-forms
  */
 import * as _u from '../../util.js';
+import * as _elems from '../form-ui/form-elems.js';
 import * as _cmbx from '../combobox-util.js';
 import * as _errs from '../f-errs.js';
 import * as db_forms from '../db-forms.js';
@@ -28,9 +29,14 @@ export function showEntityEditForm(id, entity, params) {                        
 function initEditForm(id, entity) {  
     return getEditFormFields(id, entity)
         .then(fields => form_ui.buildAndAppendForm(fP, 'top', fields, id))
+        .then(hideFieldCheckboxes)
         .then(() => finishEditFormBuild(entity))
         .then(() => fillExistingData(entity, id));
 }   
+function hideFieldCheckboxes() {
+    $('.top-pin').addClass('invis');
+    return Promise.resolve();
+}
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
     const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
@@ -51,7 +57,7 @@ function getSrcTypeFields(entity, id) {
 /** Returns the passed entity's form fields. */
 function buildEditFormFields(entity, id) {
     const formConfg = _fCnfg.getFormConfg(entity);
-    return db_forms.getFormFieldRows(entity, formConfg, {}, 'top', false);
+    return _elems.getFormFieldRows(entity, formConfg, {}, 'top', false);
 }
 function finishEditFormBuild(entity) {
     const hndlrs = {
@@ -81,7 +87,7 @@ function fillInteractionData(id) {
 function fillFormWithEntityData(entity, id) {
     addDisplayNameToForm(entity, id);
     fillEntityData(entity, id); 
-    if (db_forms.ifAllRequiredFieldsFilled('top')) { db_forms.toggleSubmitBttn('#top-submit', true); }
+    if (_elems.ifAllRequiredFieldsFilled('top')) { db_forms.toggleSubmitBttn('#top-submit', true); }
 }
 function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
@@ -300,7 +306,7 @@ function addSource(fieldId, prop, rcrd) {
 /* ---- On Form Fill Complete --- */
 function onEditFormLoadComplete(id, entity) {                                       //console.log('onEditFormLoadComplete. entity = ', entity);
     const map = { 
-        'citation': setSrcEditRowStyle, 'location': finishLocEditForm,
+        'citation': setSrcEditRowStyle, 'location': finishLocEditForm, 
         'publication': setSrcEditRowStyle };
     if (!map[entity]) { return; }
     map[entity](id);
@@ -423,11 +429,13 @@ function buildEditParentHdr() {
 }
 function getParentEditFields(prnt) {  
     const realm = _u.lcfirst(prnt.realm.displayName);      
-    const realmSelRow = getRealmLvlRow(prnt);
-    return db_forms.buildFormRows(realm, {}, 'sub', null, 'edit')
+    const confg = _fCnfg.getFormConfg(realm);
+    return db_forms.initFormLevelParamsObj(realm, 'sub', null, confg, 'edit')
+        .then(fP => _elems.buildFormRows(realm, {}, 'sub', null, fP))
         .then(modifyAndReturnPrntRows);
     
     function modifyAndReturnPrntRows(rows) {
+        const realmSelRow = getRealmLvlRow(prnt);
         $(rows).css({ 'padding-left': '.7em' });
         fP.forms.taxonPs.prntSubFormLvl = 'sub2';
         return [realmSelRow, rows];
