@@ -65,17 +65,6 @@ function getBttnEvents(entity, level) {                                         
     const cnclFunc = fP.forms[level] ? fP.forms[level].exitHandler : Function.prototype;
     return { 
         submit: db_forms.getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-        cancel: exitForm.bind(null, '#'+level+'-form', level, true, cnclFunc) 
+        cancel: db_forms.exitForm.bind(null, '#'+level+'-form', level, true, cnclFunc) 
     };
-}
-/**
- * Removes the form container with the passed id, clears and enables the combobox,
- * and contextually enables to parent form's submit button. Calls the exit 
- * handler stored in the form's params object.
- */
-function exitForm(formId, fLvl, focus, onExit, data) {                                  //console.log("               --exitForm id = %s, fLvl = %s, exitHandler = %O", formId, fLvl, fP.forms[fLvl].exitHandler);      
-    $(formId).remove();  
-    _cmbx.resetFormCombobox(fLvl, focus);
-    if (fLvl !== 'top') { db_forms.ifParentFormValidEnableSubmit(fLvl); }
-    onExit(data);
 }

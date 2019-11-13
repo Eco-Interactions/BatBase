@@ -17,7 +17,7 @@
  *     finishEntityFormBuild    db-forms
  *     setCoreRowStyles         db-forms
  *     exitFormPopup            db-forms
- *     getExitButtonRow         db-forms
+ *     getExitButton            db-forms, f-errs
  */
 import * as _u from '../util.js';
 import * as _cmbx from './combobox-util.js';
