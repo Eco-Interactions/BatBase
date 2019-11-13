@@ -14,7 +14,7 @@ import * as db_forms from './db-forms.js';
  * that allow users to search by typing and, when configured, add new options 
  * not in the list by triggering a sub-form for that entity.
  */
-export function initSingle(confg, fLvl) {                                      //console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
+export function initSingle(confg, fLvl) {                                       //console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
     var options = {
         create: confg.add,
         onChange: confg.change,
@@ -28,23 +28,22 @@ export function initSingle(confg, fLvl) {                                      /
             options[opt] = confg.options[opt];
         }
     }
-} /* End initSingle */
+} 
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, elems) {     //console.log('args = %O', arguments); console.trace();                                 //console.log("initFormCombos. [%s] formLvl = [%s] fields = %O", entity, formLvl, fP.forms[formLvl].selElems);
-    // const fLvl = formLvl || fP.forms[entity];  
+export function initFormCombos(entity, fLvl, elems) {                           //console.log("initFormCombos. [%s] formLvl = [%s] fields = %O", entity, formLvl, fP.forms[formLvl].selElems);
     const selConfgs = db_forms.getSelConfgs();
     elems.forEach(selectizeElem);
     elems = [];
 
-    function selectizeElem(fieldName) {                                             //console.log("Initializing --%s-- select", field);
+    function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
         const confg = selConfgs[fieldName];
         confg.id = confg.id || '#'+fieldName+'-sel';
         initSingle(confg, fLvl);
     }
-} /* End initFormCombos */
+} 
 export function enableCombobox(selId, enable) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
@@ -56,11 +55,11 @@ export function focusCombobox(selId, focus) {
     if (!focus) { return $(selId)[0].selectize.blur(); }
     $(selId)[0].selectize.focus();
 }
-export function focusFirstCombobox(cntnrId, focus) {
-    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("cntnr = %s, elems[0] = %O", cntnrId, selElems[0]);
+export function focusFirstCombobox(cntnrId, focus) {  
+    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
     focusCombobox('#'+ selElems[0].id, focus);
 }
-export function clearCombobox(selId) {                                                 //console.log("clearCombobox [%s]", selId);
+export function clearCombobox(selId) {                                          //console.log("clearCombobox [%s]", selId);
     const selApi = $(selId)[0].selectize;
     selApi.clear(true);
     selApi.updatePlaceholder();
@@ -88,13 +87,13 @@ export function updateComboboxOptions(selId, opts, focus) {
     selApi.refreshOptions(false);
     if (focus === true) {  }
 }
-export function getSelVal(id) {                                                        //console.log('getSelVal [%s]', id);
+export function getSelVal(id) {                                                 //console.log('getSelVal [%s]', id);
     return $(id)[0].selectize.getValue();  
 }
-export function getSelTxt(id) {                                                        //console.log('getSelTxt. id = ', id);
+export function getSelTxt(id) {                                                 //console.log('getSelTxt. id = ', id);
     return $(id)[0].innerText;
 }
-export function setSelVal(id, val, silent) {                                           //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
+export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
     const $selApi = $(id)[0].selectize; 
     $selApi.addItem(val, silent); 
 }

@@ -96,9 +96,9 @@ Writing tests:
 
 ## Generate Assets ##
 > Asset generation commands: 
-    - $ yarn run encore dev --config-name local
-    - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
-    - $ yarn run encore production --config-name server
+    - $ yarn run encore dev 
+    - $ yarn run encore dev --watch (run while actively working on asset code)
+    - $ yarn run encore production (Switch output path in webpack.config.js first)
 
 ## Live & Learn ##
 > Changing Servers
