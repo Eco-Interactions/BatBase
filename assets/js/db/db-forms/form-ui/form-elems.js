@@ -12,6 +12,8 @@
  *     buildTagField            db-forms
  *     buildLongTextArea        db-forms
  *     checkIntFieldsAndEnableSubmit    db-forms
+ *     getRcrdOpts              db-forms
+ *     getTaxonOpts             db-forms
  */
 
 import * as _u from '../../util.js';
@@ -20,6 +22,8 @@ import * as _errs from '../f-errs.js';
 import { buildFormBttns } from './save-exit-bttns.js';
 import * as _cmbx from '../combobox-util.js';
 import { getCoreFieldDefs } from '../f-confg.js';
+import * as _fCnfg from '../f-confg.js';
+
 
 let fP;
 /**
@@ -30,7 +34,7 @@ let fP;
 export function initSubForm(params, fLvl, fClasses, fVals, selId) {             //console.log('initSubForm called. args = %O', arguments)
     fP  = params;
     const formEntity = fP.forms[fLvl].entity;
-    return buildFormRows(formEntity, fVals, fLvl, selId)
+    return buildFormRows(formEntity, fVals, fLvl)
         .then(buildFormContainer)
 
     function buildFormContainer(rows) {
@@ -55,12 +59,13 @@ export function initSubForm(params, fLvl, fClasses, fVals, selId) {             
  * Builds and returns the default fields for entity sub-form and returns the 
  * row elems. Inits the params for the sub-form in the global fP obj.
  */
-export function buildFormRows(entity, fVals, fLvl, pSel, params) {                    //console.log('buildFormRows. args = %O', arguments)
+export function buildFormRows(entity, fVals, fLvl, params) {                    //console.log('buildFormRows. args = %O', arguments)
     if (params) { fP = params; }
-    const formConfg = fP.forms[fLvl].confg;
-    // const formConfg = _fCnfg.getFormConfg(entity);                                 
-    // initFormLevelParamsObj(entity, fLvl, pSel, formConfg, (action || 'create'));   
-    return getFormFieldRows(entity, formConfg, fVals, fLvl, false)
+    // const formConfg = fP.forms[fLvl].confg;
+    const typeConfg = fP.forms[fLvl].typeConfg;
+    const formConfg = _fCnfg.getFormConfg(entity);                                 
+
+    return getFormFieldRows(entity, formConfg, typeConfg, fVals, fLvl)
         .then(returnFinishedRows.bind(null, entity, params));
 }
 function returnFinishedRows(entity, params, rows) {
@@ -166,7 +171,7 @@ function storeFieldValue(elem, fieldName, fLvl, value) {
     if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
     if (db_forms.citationFormNeedsCitTextUpdate(fLvl) && fieldName !== "CitationText") { 
         db_forms.handleCitText(fLvl); }
-    db_forms.setFormFieldValueMemory(fLvl, field, val);
+    db_forms.setFormFieldValueMemory(fLvl, fieldName, val);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
@@ -322,7 +327,7 @@ function getSelectOpts(field) {                                                 
     return getOpts(fieldKey, field);
 }
 /** Builds options out of the passed ids and their entity records. */
-function getRcrdOpts(ids, rcrds) {
+export function getRcrdOpts(ids, rcrds) {
     var idAry = ids || Object.keys(rcrds);
     return idAry.map(function(id) {
         let text = rcrds[id].displayName.includes('(citation)') ? 
@@ -379,8 +384,9 @@ function getCitTypeOpts(prop) {
     }
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
-function getTaxonOpts(level) {
-    return _u.getOptsFromStoredData(fP.forms.taxonPs.realm+level+'Names')
+export function getTaxonOpts(level, field, r) {
+    let realm = r || fP.forms.taxonPs.realm;
+    return _u.getOptsFromStoredData(realm+level+'Names')
         .then(buildTaxonOpts);
 
         function buildTaxonOpts(opts) {                                         //console.log("taxon opts for [%s] = %O", fP.forms.taxonPs.realm+level+"Names", opts)        
@@ -491,7 +497,7 @@ export function checkIntFieldsAndEnableSubmit() {
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s. fP = %O", fLvl, fP)
-    const reqElems = fP.forms[fLvl].reqElems;                                   //console.log('reqElems = %O', reqElems);          
+    const reqElems = db_forms.getFormReqElems(fLvl);                                   //console.log('reqElems = %O', reqElems);          
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */

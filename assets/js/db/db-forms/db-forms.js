@@ -53,6 +53,7 @@
  *     setFormParam                 ""
  *     setFormFieldValueMemory
  *     setFormFieldConfg
+ *     getFormReqElems              ""
  */
 import * as _u from '../util.js';
 import * as _elems from './form-ui/form-elems.js';
@@ -250,6 +251,9 @@ export function setFormFieldValueMemory(fLvl, field, val) {
 export function addComboToFormMemory(fLvl, field) {
     fP.forms[fLvl].selElems.push(field);    
 }
+export function getFormReqElems(fLvl) {
+    return fP.forms[fLvl].reqElems;
+}
 /*------------------- Form Functions -------------------------------------------------------------*/
 // /*--------------------------- Edit Form --------------------------------------*/
 // /** Shows the entity's edit form in a pop-up window on the search page. */
@@ -391,7 +395,7 @@ function fillCitationField(pubId) {                                             
 function getPubCitationOpts(pubId) {
     const pubRcrd = fP.records.source[pubId];  
     if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
-    const opts = getRcrdOpts(pubRcrd.children, fP.records.source);
+    const opts = _elems.getRcrdOpts(pubRcrd.children, fP.records.source);
     opts.unshift({ value: 'create', text: 'Add a new Citation...'});
     return opts;
 }
@@ -1251,11 +1255,11 @@ function onRealmSelection(val) {                                                
         return setTaxonParams('Object', _u.ucfirst(realm)).then(() => realm);
     }
     /** A row for each level present in the realm filled with the taxa at that level.  */
-    function buildAndAppendRealmRows(realm) {
-        _elems.buildFormRows(realm, {}, fLvl, null)
+    function buildAndAppendRealmRows(realm) {  
+        _elems.buildFormRows(realm, {}, fLvl, fP)
         .then(rows => appendRealmRowsAndFinishBuild(realm, rows, fLvl));
     }
-    function appendRealmRowsAndFinishBuild(realm, rows, fLvl) {
+    function appendRealmRowsAndFinishBuild(realm, rows, fLvl) {  
         const realmElems = _u.buildElem('div', { id: 'realm-lvls' });
         $(realmElems).append(rows);
         $('#Realm_row').append(realmElems);
@@ -1392,12 +1396,16 @@ function getChildlevelOpts(lvlName) {
     var opts = {};
     var lvls = fP.forms.taxonPs.lvls;
     var lvlIdx = lvls.indexOf(lvlName)+2; //Skips selected level
+    const realm = fP.forms.taxonPs.realm;
+
     return buildChildLvlOpts().then(() => opts);
 
     function buildChildLvlOpts() {
         const proms = [];
         for (var i = lvlIdx; i <= 7; i++) { 
-            proms.push(getTaxonOpts(lvls[i-1]).then(addToOpts.bind(null, i)));
+            let p = _elems.getTaxonOpts(lvls[i-1], null, realm)
+                .then(addToOpts.bind(null, i));
+            proms.push(p);
         }                                                                       //console.log("getChildlevelOpts. opts = %O", opts);
         return Promise.all(proms);
     }
@@ -1416,7 +1424,8 @@ function repopulateCombosWithRelatedTaxa(selId) {
     var opts = {}, selected = {};                                               
     var lvls = fP.forms.taxonPs.lvls;  
     var taxon = fP.records.taxon[selId];                                        //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
-    
+    const realm = fP.forms.taxonPs.realm;
+
     taxon.children.forEach(addRelatedChild); 
     return buildUpdatedTaxonOpts()
         .then(repopulateLevelCombos.bind(null, opts, selected));
@@ -1437,7 +1446,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
         .then(addCreateOpts);
     }
     function getSiblingOpts(taxon) {                                            
-        return getTaxonOpts(taxon.level.displayName).then(o => {                //console.log('getSiblingOpts. taxon = %O', taxon);
+        return _elems.getTaxonOpts(taxon.level.displayName, null, realm).then(o => {                //console.log('getSiblingOpts. taxon = %O', taxon);
             opts[taxon.level.id] = o;
             selected[taxon.level.id] = taxon.id;
         });  
@@ -1447,7 +1456,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
         if (realmTaxa.indexOf(prntId) !== -1 ) { return Promise.resolve(); }
         const prntTaxon = getRcrd('taxon', prntId);
         selected[prntTaxon.level.id] = prntTaxon.id;                            
-        return getTaxonOpts(prntTaxon.level.displayName)
+        return _elems.getTaxonOpts(prntTaxon.level.displayName, null, realm)
             .then(o => {                                                        //console.log("--getAncestorOpts - setting lvl = ", prntTaxon.level)
                 opts[prntTaxon.level.id] = o;
                 return getAncestorOpts(prntTaxon.parent);
@@ -1473,7 +1482,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
         }
         function buildAncestorOpts(id) {
             selected[id] = 'none';
-            proms.push(getTaxonOpts(lvls[id-1])
+            proms.push(_elems.getTaxonOpts(lvls[id-1], null, realm)
                 .then(o => opts[id] = o ));
         }
     }
@@ -1695,11 +1704,11 @@ export function getRcrd(entity, id) {                                           
  * Toggles between displaying all fields for the entity and only showing the 
  * default (required and suggested) fields.
  */
-export function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
+export function toggleShowAllFields(entity, fLvl) {                             //console.log('--- Showing all Fields [%s] -------', this.checked);
     if (ifOpenSubForm(fLvl)) { return show_errs.openSubFormErr(fLvl); }
     fP.forms.expanded[entity] = this.checked;         
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
-    const fConfg = fP.forms[fLvl].confg;                                        //console.log('toggling optional fields. Show? [%s]', fP.forms.expanded[entity]);
+    const fConfg = _fCnfg.getFormConfg(entity);                                 
     const tConfg = fP.forms[fLvl].typeConfg;
     $('#'+entity+'_Rows').empty();
     fP.forms[fLvl].reqElems = [];
