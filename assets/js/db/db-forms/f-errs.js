@@ -290,7 +290,7 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'fillAuthBlanks': false, 'fillEdBlanks': false
     };
     if (!exitHdnlrs[errTag]) { return []; }
-    const bttn = getExitButton();
+    const bttn = form_ui.getExitButton();
     bttn.className += ' err-exit';
     $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
     return bttn;

@@ -14,6 +14,7 @@
  *     checkIntFieldsAndEnableSubmit    db-forms
  *     getRcrdOpts              db-forms
  *     getTaxonOpts             db-forms
+ *     buildMultiSelectElems    db-forms
  */
 
 import * as _u from '../../util.js';
@@ -80,8 +81,9 @@ function returnFinishedRows(entity, params, rows) {
  * Returns rows for the entity form fields. If the form is a source-type, 
  * the type-entity form config is used. 
  */
-export function getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl) {
+export function getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl, params) {
     // const typeConfg = fP.forms[fLvl].typeConfg;
+    if (params) { fP = params; }
     const fObj = getFieldTypeObj(entity, fConfg, fLvl, tConfg);
     return buildRows(fObj, entity, fVals, fLvl)
         .then(orderRows.bind(null, fObj.order));
@@ -176,11 +178,11 @@ function storeFieldValue(elem, fieldName, fLvl, value) {
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === "create") { return; }
-    const vals = fP.forms[fLvl].fieldConfg.vals;                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
-    const value = e.target.value || null;
-    if (!vals[field].val) { vals[field].val = {}; }
-    vals[field].val[cnt] = value;
-    checkForBlanksInOrder(vals[field].val, field, fLvl);    
+    const fieldObj = db_forms.getFormFieldConfg(fLvl, field);                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
+    if (!fieldObj.val) { fieldObj.val = {}; }
+    fieldObj.val[cnt] = e.target.value || null;
+    db_forms.setFormFieldConfg(fLvl, field, fieldObj);
+    checkForBlanksInOrder(fieldObj.val, field, fLvl);    
 }
 /**
  * Author/editor fields must have all fields filled continuously. There can 
@@ -266,7 +268,7 @@ function buildMultiSelectCntnr(entity, field, fLvl) {                           
         return cntnr;
     }
 }
-function buildMultiSelectElems(entity, field, fLvl, cnt) {
+export function buildMultiSelectElems(entity, field, fLvl, cnt) {
     return buildSelectCombo(entity, field, fLvl, cnt)
         .then(returnFinishedMultiSelectField);
 
@@ -374,12 +376,12 @@ function getCitTypeOpts(prop) {
     }
     function setPubInParams() {
         const pubSrc = getSrcRcrd($('#Publication-sel').val());
-        const pub = getRcrd('publication', pubSrc.publication);
+        const pub = db_forms.getRcrd('publication', pubSrc.publication);
         db_forms.setFormParam(fLvl, 'pub', { pub: pub, src: pubSrc});
     }
     function getSrcRcrd(pubId) {
         if (pubId) { return fP.records.source[pubId]; } //When not editing citation record.
-        const rcrd = getRcrd('source', fP.editing.core)
+        const rcrd = db_forms.getRcrd('source', fP.editing.core)
         return fP.records.source[rcrd.parent];
     }
 } /* End getCitTypeOpts */

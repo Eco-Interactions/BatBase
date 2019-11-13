@@ -21,7 +21,7 @@
  *     getFormValuesAndSubmit
  *     ifParentFormValidEnableSubmit
  *     buildIntFormFields
- *     getRcrd                  edit-forms, generate-citation
+ *     getRcrd                  edit-forms, generate-citation, form-elems
  *     getSrcTypeRows           edit-forms
  *     addDataToCntDetailPanel  ""
  *     loadSrcTypeFields        ""
@@ -54,6 +54,7 @@
  *     setFormFieldValueMemory
  *     setFormFieldConfg
  *     getFormReqElems              ""
+ *     exitForm                save-exit-bttns
  */
 import * as _u from '../util.js';
 import * as _elems from './form-ui/form-elems.js';
@@ -233,11 +234,22 @@ function getFormExitHandler(confg, action) {                                    
         confg.exitHandler[action] :
         action === 'edit' ? form_ui.exitFormPopup : Function.prototype;
 }
+/* --- Getters --- */
+export function getFormEntity(fLvl) {
+    return fP.forms[fLvl].entity;
+}
+export function getFormReqElems(fLvl) {
+    return fP.forms[fLvl].reqElems;
+}
+export function getFormFieldConfg(fLvl, field) {
+    return fP.forms[fLvl].fieldConfg.vals[field];
+}
+/* --- Setters --- */
 export function addRequiredFieldInputToMemory(fLvl, input) {
     fP.forms[fLvl].reqElems.push(input);
 }
-export function getFormEntity(fLvl) {
-    return fP.forms[fLvl].entity;
+export function addComboToFormMemory(fLvl, field) {
+    fP.forms[fLvl].selElems.push(field);    
 }
 export function setFormParam(fLvl, prop, val) {
     fP.forms[fLvl][prop] = val;
@@ -247,12 +259,6 @@ export function setFormFieldConfg(fLvl, field, confg) {
 }
 export function setFormFieldValueMemory(fLvl, field, val) {
     fP.forms[fLvl].fieldConfg.vals[field].val = val;
-}
-export function addComboToFormMemory(fLvl, field) {
-    fP.forms[fLvl].selElems.push(field);    
-}
-export function getFormReqElems(fLvl) {
-    return fP.forms[fLvl].reqElems;
 }
 /*------------------- Form Functions -------------------------------------------------------------*/
 // /*--------------------------- Edit Form --------------------------------------*/
@@ -725,7 +731,7 @@ export function getSrcTypeRows(entity, typeId, fLvl, type) {                    
     const fConfg = _fCnfg.getFormConfg(entity);
     const tConfg = setSourceTypeConfg(entity, typeId, fLvl, type); 
     $('#'+entity+'_Rows').empty();     
-    return _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl);
+    return _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl, fP);
 }
 /** Sets the type confg for the selected source type in form params. */
 function setSourceTypeConfg(entity, id, fLvl, tName) {
@@ -1557,7 +1563,7 @@ function initPublisherForm (value) {                                            
     const fLvl = getSubFormLvl('sub2');
     const prntLvl = getNextFormLevel('parent', fLvl);
     if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr('Publisher', null, fLvl); }
-    initEntitySubForm(fP, fLvl, 'sml-sub-form', {'DisplayName': val}, 
+    initEntitySubForm('publisher', fLvl, 'sml-sub-form', {'DisplayName': val}, 
         '#Publisher-sel')
     .then(appendPublFormAndFinishBuild);
 
@@ -1612,7 +1618,7 @@ function lastAuthComboEmpty(cnt, authType) {
 }
 /** Builds a new, empty author combobox */
 function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
-    return buildMultiSelectElems(null, authType, prntLvl, cnt)
+    return _elems.buildMultiSelectElems(null, authType, prntLvl, cnt)
     .then(appendNewAuthSelect);
 
     function appendNewAuthSelect(sel) {
@@ -1712,7 +1718,7 @@ export function toggleShowAllFields(entity, fLvl) {                             
     const tConfg = fP.forms[fLvl].typeConfg;
     $('#'+entity+'_Rows').empty();
     fP.forms[fLvl].reqElems = [];
-    _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl)
+    _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl, fP)
     .then(appendAndFinishRebuild);
 
     function appendAndFinishRebuild(rows) {
@@ -2025,7 +2031,7 @@ function initInteractionParams() {
  * flag tracking the state of the new interaction form.  
  */
 export function resetIfFormWaitingOnChanges() {  
-    if (fP.forms.top.unchanged) { db_forms.resetForNewForm(); }
+    if (!fP.forms.top.unchanged) { return; }
     exitSuccessMsg();
     delete fP.forms.top.unchanged;
 }
@@ -2074,7 +2080,7 @@ function updatedCitationData(citSrc, text) {
  */
 function exitFormAndSelectNewEntity(data) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
     const fLvl = fP.ajaxFormLvl;           
-    exitForm('#'+fLvl+'-form', fLvl, null, data); 
+    exitForm('#'+fLvl+'-form', fLvl); 
     if (fP.forms[fLvl].pSelId) { addAndSelectEntity(data, fLvl); 
     } else { fP = {}; }
 }
@@ -2085,6 +2091,18 @@ function addAndSelectEntity(data, fLvl) {
         'value': data.coreEntity.id, 'text': data.coreEntity.displayName 
     });
     selApi.addItem(data.coreEntity.id);
+}
+/**
+ * Removes the form container with the passed id, clears and enables the combobox,
+ * and contextually enables to parent form's submit button. Calls the exit 
+ * handler stored in the form's params object.
+ */
+export function exitForm(formId, fLvl, focus, onExit, data) {                                  //console.log("               --exitForm id = %s, fLvl = %s, exitHandler = %O", formId, fLvl, fP.forms[fLvl].exitHandler);      
+    const exitFunc = onExit || fP.forms[fLvl].exitHandler;
+    $(formId).remove();  
+    _cmbx.resetFormCombobox(fLvl, focus);
+    if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
+    if (exitFunc) { exitFunc(data); }
 }
 /** --------------- Helpers --------------------- */
 /**
