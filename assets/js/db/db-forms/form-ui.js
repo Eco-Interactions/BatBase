@@ -8,6 +8,7 @@
  *         INTERACTION CREATE FORM
  *         EDIT FORMS
  *         ENTITY FORMS
+ *     DETAIL PANEL
  *     EXIT FORM
  *     HELPERS
  *         
@@ -21,6 +22,7 @@
  */
 import * as _u from '../util.js';
 import * as _cmbx from './combobox-util.js';
+import * as _detPnl from './form-ui/detail-panel.js';
 import * as db_map from '../db-map/db-map.js';
 import * as db_page from '../db-page.js';
 import * as db_forms from './db-forms.js';
@@ -67,7 +69,8 @@ export function getExitButton() {
 }
 function getFormHtml(entity, id, action) {
     const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    $(cntnr).append([getMainFormHtml(entity, action), getDetailPanelElems(entity, id)]);
+    const detailPanelHtml = _detPnl.getDetailPanelElems(entity, id, fP);
+    $(cntnr).append([getMainFormHtml(entity, action), detailPanelHtml]);
     return cntnr;
 }
 function getMainFormHtml(entity, action) { 
@@ -79,49 +82,8 @@ function getHeaderHtml(entity, action) {
     const title = (action == 'New' ? 'New ' : 'Editing ') + _u.ucfirst(entity);    
     return _u.buildElem('h1', { 'id': 'top-hdr', 'text': title });
 }
-function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
-    var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?
-        getSubEntityEditDetailElems : getInteractionDetailElems;
-    var cntnr = _u.buildElem('div', { 'id': 'form-details' });
-    var intIdStr = id ? 'Id:  ' + id : '';
-    $(cntnr).append(_u.buildElem('h3', { 'text': _u.ucfirst(entity) + ' Details' }));
-    $(cntnr).append(getDetailElemFunc(entity, id, cntnr));
-    $(cntnr).append(_u.buildElem('p', { id: 'ent-id',  'text': intIdStr }));
-    return cntnr;
-}
-function getInteractionDetailElems(entity, id, cntnr) {
-    return ['src','loc'].map(en => initDetailDiv(en));
-}
-function initDetailDiv(ent) {
-    var entities = {'src': 'Source', 'loc': 'Location'};
-    var div = _u.buildElem('div', { 'id': ent+'-det', 'class': 'det-div' });
-    $(div).append(_u.buildElem('h5', { 'text': entities[ent]+':' }));        
-    $(div).append(_u.buildElem('div', { 'text': 'None selected.' }));
-    return div;
-}
-/** Returns the elems that will display the count of references to the entity. */
-function getSubEntityEditDetailElems(entity, id, cntnr) {                       console.log("getSubEntityEditDetailElems for [%s]", entity);
-    var refEnts = {
-        'author': [ 'cit', 'int' ],     'citation': [ 'int' ],
-        'location': [ 'int' ],          'publication': ['cit', 'int' ],
-        'taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],   
-        'publisher': [ 'pub', 'int']  
-    };
-    var div = _u.buildElem('div', { 'id': 'det-cnt-cntnr' });
-    $(div).append(_u.buildElem('span'));        
-    $(div).append(refEnts[entity].map(en => initCountDiv(en)));
-    return div;
-}
-function initCountDiv(ent) { 
-    var entities = { 'cit': 'Citations', 'fam': 'Families', 'gen': 'Genera', 
-        'int': 'Interactions', 'loc': 'Locations', 'ord': 'Orders',
-        'pub': 'Publications', 'spc': 'Species', 'txn': 'Taxa', 
-    };
-    var div = _u.buildElem('div', { 'id': ent+'-det', 'class': 'cnt-div flex-row' });
-    $(div).append(_u.buildElem('div', {'text': '0' }));
-    $(div).append(_u.buildElem('span', {'text': entities[ent] }));
-    return div;
-}
+/* ======================== DETAIL PANEL ================================== */
+
 /* -------------------- APPEND FIELDS AND FORM ------------------------------ */
 export function buildAndAppendForm(params, fLvl, fields, id) {  //console.log('params = %O', params);
     fP = params;
@@ -208,6 +170,19 @@ function addReqElemsToConfg() {
 }
 /* ---------- EDIT FORMS ------------------- */
 /* --------- ENTITY FORMS ------------------ */
+/* ========================= DETAIL PANEL =================================== */
+export function clearFieldDetailPanel(field) {
+    _detPnl.clearFieldDetailPanel(field);
+}
+export function clearDetailPanel(ent, reset, html) {
+    _detPnl.clearDetailPanel(ent, reset, html);
+}
+export function fillLocDataInDetailPanel(locRcrd) {
+    _detPnl.fillLocDataInDetailPanel(locRcrd);
+}
+export function updateSrcDetailPanel(entity) {
+    _detPnl.updateSrcDetailPanel(entity);
+}
 /* ============================ EXIT FORM =================================== */
 /** Returns popup and overlay to their original/default state. */
 export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
