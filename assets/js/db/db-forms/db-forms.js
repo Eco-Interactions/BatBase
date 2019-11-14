@@ -23,7 +23,6 @@
  *     buildIntFormFields
  *     getRcrd                  edit-forms, generate-citation, form-elems
  *     getSrcTypeRows           edit-forms
- *     addDataToCntDetailPanel  ""
  *     loadSrcTypeFields        ""
  *     fieldIsDisplayed         ""
  *     selectExistingAuthors    ""
@@ -111,46 +110,6 @@ export function clearFormMemory() {
 }
 export function getFormParams() {
     return fP;
-}
-
-/** Adds a count of references to the entity-being-edited, by entity, to the panel. */
-export function addDataToCntDetailPanel(refObj) {
-    for (var ent in refObj) {
-        $('#'+ent+'-det div')[0].innerText = refObj[ent];    
-    }
-}
-/**
- * When the Publication, Citation, or Location fields are selected, their data 
- * is added se the side detail panel of the form. For other entity edit-forms: 
- * the total number of referencing records is added. 
- */
-function addDataToIntDetailPanel(ent, propObj) {                                //console.log('ent = [%s], propObj = %O', ent, propObj);
-    var html = getDataHtmlString(propObj);   
-    clearDetailPanel(ent, false, html)   
-}
-/** Returns a ul with an li for each data property */
-function getDataHtmlString(props) {
-    var html = [];
-    for (var prop in props) {
-        html.push('<li><b>'+prop+'</b>: '+ props[prop]+ '</li>');
-    }
-    return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
-}
-function clearDetailPanel(ent, reset, html) {                                   //console.log('clearDetailPanel for [%s]. html = ', ent, html)
-    if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
-    if (ent === 'pub') { ent = 'src'; }
-    const newDetails = reset ? 'None selected.' : html;
-    $('#'+ent+'-det div').empty();
-    $('#'+ent+'-det div').append(newDetails); 
-    return Promise.resolve();
-}
-/** Builds the form elem container. */
-function buildFormElem() {
-    var form = document.createElement("form");
-    $(form).attr({"action": "", "method": "POST", "name": "top"});
-    form.className = "flex-row";
-    form.id = "top-form";
-    return form;
 }
 /*------------------- FORM Params Object -------------------------------------*/
 /**
@@ -341,14 +300,14 @@ function onPubSelection(val) {                                                  
     if (val === 'create') { return openCreateForm('Publication'); }        
     if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
     fillCitationField(val);
-    updateSrcDetailPanel('pub');
+    form_ui.updateSrcDetailPanel('pub', fP.records.source);
     if (!fP.records.source[val].children.length) { return initCitForm(); }
     if (!fP.editing) { $('#Publication_pin').focus(); }
 }
 function onPubClear() {
     _cmbx.clearCombobox('#CitationTitle-sel');
     _cmbx.enableCombobox('#CitationTitle-sel', false);
-    clearDetailPanel('pub', true);
+    form_ui.clearDetailPanel('pub', true);
 }
 /**
  * When a user enters a new publication into the combobox, a create-publication
@@ -417,8 +376,8 @@ function getPubCitationOpts(pubId) {
  */    
 function onCitSelection(val) {                                                  console.log('       --onCitSelection [%s]', val);
     if (val === 'create') { return openCreateForm('CitationTitle'); }
-    if (val === '' || isNaN(parseInt(val))) { return clearDetailPanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
-    updateSrcDetailPanel('cit');
+    if (val === '' || isNaN(parseInt(val))) { return form_ui.clearDetailPanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
+    form_ui.updateSrcDetailPanel('cit', fP.records.source);
     if (!fP.editing) { $('#CitationTitle_pin').focus(); }
 }    
 /** Shows the Citation sub-form and disables the publication combobox. */
@@ -623,84 +582,6 @@ export function enablePubField() {
     fillCitationField($('#Publication-sel').val());
 }
 /** ----- Publication and Citation Shared form helpers ------------ */
-/** Adds source data to the interaction form's detail panel. */
-function updateSrcDetailPanel(entity) {                                         console.log('           --updateSrcDetailPanel');
-    const data = {}; 
-    buildSourceData();
-    addDataToIntDetailPanel('src', data);
-
-    function buildSourceData() {
-        const pubSrc = fP.records.source[$('#Publication-sel').val()];
-        const pub = getRcrd('publication', pubSrc.publication);
-        const pubType = getSrcType(pub, 'publication');  
-        const citId = $('#CitationTitle-sel').val();
-        const citSrc = citId ? fP.records.source[citId] : false;  
-        const cit = citSrc ? getRcrd('citation', citSrc.citation) : false;
-        const citType = cit ? getSrcType(cit, 'citation') : false;   console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit); 
-
-        addCitationText();
-        addPubTitleData();
-        addCitTitleData();
-        addAuths();
-        addEds();
-        addYear();
-        addAbstract();
-
-        function addCitationText() {
-            data['Citation'] = cit ? cit.fullText : '(Select Citation)';  console.log('cit full text', cit.fullText)
-        }
-        function addPubTitleData() {
-            const pubTitleField = pubType && pubType !== 'Other' ? 
-                pubType + ' Title' : 'Publication Title';  
-            data[pubTitleField] = pub.displayName;
-            addDescription(pubSrc.description, pubType);
-
-            function addDescription(desc, type) {
-                if (!desc) { return; } 
-                const prefix = type !== 'Other' ? type : 'Publication';
-                data[prefix+' Description'] = desc;
-            }
-        } /* End addPubTitleData */
-        function addCitTitleData() {
-            const subTitle = getCitTitle();  
-            if (!subTitle) { return; }
-            const citTitleField = citType && citType !== 'Other' ? 
-                citType + ' Title' : 'Citation Title';
-            data[citTitleField] = subTitle;
-            
-            function getCitTitle() {  
-                if (!cit) { return false; }
-                return cit.displayName === pub.displayName ? false : cit.displayName;
-            }
-        } /* End addCitTitleData */
-        function addAuths() {
-            const rcrdWithAuths = pubSrc.authors ? pubSrc : 
-                citSrc && citSrc.authors ? citSrc : false; 
-            if (!rcrdWithAuths) { return; }
-            const cnt = Object.keys(rcrdWithAuths.authors).length; 
-            const prop = 'Author' + (cnt === 1 ? '' : 's'); 
-            data[prop] = getAuthorNames(rcrdWithAuths);
-        }
-        function addEds() {  
-            if (!pubSrc.editors) { return; }
-            const cnt = Object.keys(pubSrc.editors).length;
-            const prop = 'Editor' + (cnt === 1 ? '' : 's'); 
-            data[prop] =  getAuthorNames(pubSrc, true);
-        }
-        function addYear() {
-            const yr = pubSrc.year ? pubSrc.year : citSrc ? citSrc.year : false;
-            if (!yr) { return; }
-            data['Year'] = yr;
-        }
-        function addAbstract() {
-            if (!cit || !cit.abstract) { return; }
-            data.Abstract = cit.abstract;
-        }
-        function getSrcType(rcrd, entity) { 
-            return rcrd[entity+'Type'] ? rcrd[entity+'Type'].displayName : false;
-        }
-    } /* End buildSourceData */
-} /* End updateSrcDetailPanel */
 /**
  * Loads the deafult fields for the selected Source Type's type. Clears any 
  * previous type-fields and initializes the selectized dropdowns. Updates 
@@ -875,42 +756,14 @@ function getOptsForLoc(loc) {
  */     
 function onLocSelection(val) {                                                  console.log('           --onLocSelection [%s]', val);
     if (val === 'create') { return openCreateForm('Location'); }
-    if (val === '' || isNaN(parseInt(val))) { return clearDetailPanel('loc', true); }   
+    if (val === '' || isNaN(parseInt(val))) { return form_ui.clearDetailPanel('loc', true); }   
     if ($('#loc-map').length) { removeLocMap(); }
     var locRcrd = fP.records.location[val];                                     //console.log("location = %O", locRcrd);
     var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _cmbx.setSelVal('#Country-Region-sel', prntVal, 'silent');
-    fillLocDataInDetailPanel(val);
+    form_ui.fillLocDataInDetailPanel(fP.records.location[val]);
     if (!fP.editing) { $('#Location_pin').focus(); }
     _elems.checkIntFieldsAndEnableSubmit();
-}
-/** Displays the selected location's data in the side detail panel. */
-function fillLocDataInDetailPanel(id) {  
-    var locRcrd = fP.records.location[id];  
-    var propObj = getLocDetailDataObj(locRcrd);
-    addDataToIntDetailPanel('loc', propObj);
-}
-/** Returns an object with selected location's data. */
-function getLocDetailDataObj(locRcrd) {  
-    const data = {};
-    const allData = getAllLocData(locRcrd);
-
-    for (let field in allData) {
-        if (!allData[field]) { continue; }
-        data[field] = allData[field];
-    }
-    return data;
-}
-function getAllLocData(locRcrd) {
-    return {
-        'Name': locRcrd.displayName, 
-        'Description': locRcrd.description || '',            
-        'Habitat Type': locRcrd.habitatType ? locRcrd.habitatType.displayName : '', 
-        'Latitude': locRcrd.latitude || '',
-        'Longitude': locRcrd.longitude || '',
-        'Elevation': locRcrd.elevation || '',            
-        'Elevation Max': locRcrd.elevationMax || '',       
-    };
 }
 /** Inits the location form and disables the country/region combobox. */
 export function initLocForm(val) {                                              console.log("       --initLocForm [%s]", val);
@@ -1687,21 +1540,6 @@ function handleNewAuthForm(authCnt, value, authType) {
             disableSubmitBttn('#'+fLvl+'-submit');
     }
 } /* End handleNewAuthForm */
-/** Returns a comma seperated sting of all authors attributed to the source. */
-function getAuthorNames(srcRcrd, editors) {
-    const authStr = [];  
-    const prop = editors ? 'editors' : 'authors'; 
-    for (let ord in srcRcrd[prop]) {
-        let authId = srcRcrd[prop][ord];
-        authStr.push(getAuthName(authId));
-    }
-    return authStr.length ? authStr.join('. ')+'.' : authStr;
-}
-/** Returns the name of the author with the passed id. */
-function getAuthName(id) {
-    const auth = fP.records.source[id];
-    return auth.displayName;  
-}
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fP = %O', entity, id, fP);
@@ -1710,14 +1548,13 @@ export function getRcrd(entity, id) {                                           
         if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, fP.records); console.trace() }
         return _u.snapshot(fP.records[entity][id]); }
 }
-
 /*--------------- Shared Form Methods -------------------------------*/
 /**
  * Toggles between displaying all fields for the entity and only showing the 
  * default (required and suggested) fields.
  */
 export function toggleShowAllFields(entity, fLvl) {                             //console.log('--- Showing all Fields [%s] -------', this.checked);
-    if (ifOpenSubForm(fLvl)) { return show_errs.openSubFormErr(fLvl); }
+    if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
     fP.forms.expanded[entity] = this.checked;         
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
     const fConfg = _fCnfg.getFormConfg(entity);                                 
@@ -2002,18 +1839,11 @@ function resetUnpinnedFields(vals) {
 }
 function clearField(fieldName) {
     if (fieldName === 'Note') { return $('#Note-txt').val(""); }
-    clearFieldDetailPanel(fieldName);
+   form_ui.clearFieldDetailPanel(fieldName);
     _cmbx.clearCombobox('#'+fieldName+'-sel');
 }
-function clearFieldDetailPanel(field) {
-    let detailFields = {
-        'Location': 'loc', 'CitationTitle': 'src', 'Publication': 'src' };
-    if (Object.keys(detailFields).indexOf(field) !== -1) {  
-        clearDetailPanel(detailFields[field], true);
-    }
-}
 function fillPubDetailsIfPinned(pub) {
-    if (pub) { updateSrcDetailPanel('pub'); 
+    if (pub) { form_ui.updateSrcDetailPanel('pub', fP.records.source); 
     } else { _cmbx.enableCombobox('#CitationTitle-sel', false); }
 }
 /** Inits the necessary interaction form params after form reset. */

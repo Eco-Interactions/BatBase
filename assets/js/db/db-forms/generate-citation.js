@@ -9,14 +9,14 @@
  */
 import * as _u from '../util.js';
 import { getFormValueData, getSelectedVals } from './get-form-data.js';
-import { getRcrd } from './db-forms.js';
+import { getFormLevelParams, getRcrd } from './db-forms.js';
 
 /**
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
 export function buildCitationText(params, fLvl) {
-    const pubData = db_forms.getFormLevelParams(fLvl).pub;
+    const pubData = getFormLevelParams(fLvl).pub;
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
     return getFormValueData(params, 'citation', null, null).then(generateCitText); 
 
