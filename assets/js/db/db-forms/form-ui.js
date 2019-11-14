@@ -76,7 +76,7 @@ function getMainFormHtml(entity, action) {
     return formWin;
 }
 function getHeaderHtml(entity, action) {
-    const title = (action == 'New' ? 'New ' : 'Editing ') + entity;    
+    const title = (action == 'New' ? 'New ' : 'Editing ') + _u.ucfirst(entity);    
     return _u.buildElem('h1', { 'id': 'top-hdr', 'text': title });
 }
 function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
@@ -84,7 +84,7 @@ function getDetailPanelElems(entity, id) {                                      
         getSubEntityEditDetailElems : getInteractionDetailElems;
     var cntnr = _u.buildElem('div', { 'id': 'form-details' });
     var intIdStr = id ? 'Id:  ' + id : '';
-    $(cntnr).append(_u.buildElem('h3', { 'text': entity + ' Details' }));
+    $(cntnr).append(_u.buildElem('h3', { 'text': _u.ucfirst(entity) + ' Details' }));
     $(cntnr).append(getDetailElemFunc(entity, id, cntnr));
     $(cntnr).append(_u.buildElem('p', { id: 'ent-id',  'text': intIdStr }));
     return cntnr;

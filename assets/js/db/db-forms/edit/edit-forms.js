@@ -57,7 +57,7 @@ function getSrcTypeFields(entity, id) {
 /** Returns the passed entity's form fields. */
 function buildEditFormFields(entity, id) {
     const formConfg = _fCnfg.getFormConfg(entity);
-    return _elems.getFormFieldRows(entity, formConfg, {}, 'top', false);
+    return _elems.getFormFieldRows(entity, formConfg, null, {}, 'top', fP);
 }
 function finishEditFormBuild(entity) {
     const hndlrs = {
