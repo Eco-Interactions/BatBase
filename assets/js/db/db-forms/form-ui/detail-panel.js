@@ -2,27 +2,28 @@
  *
  * Code Contents:
  *     INIT DETAIL PANEL
- *     ADD TO PANEL
- *         INTERACTION PANEL
- *         LOCATION PANEL
- *         SOURCE PANEL
- *         TAXON PANEL
+ *     EDIT FORM RELATIONAL DETAILS
+ *         LOCATION
+ *         SOURCE
+ *         TAXON
+ *         HELPERS
+ *     INTERACTION FORM SUB-ENTITY DETAIL PANEL
+ *         LOCATION DETAILS
+ *         SOURCE DETAILS
  *     CLEAR PANELS
- *     HELPERS
  *
  * Exports:                 Imported by:
  *     clearDetailPanel             form-ui
  *     clearFieldDetailPanel        db-forms
+ *     fillRelationalDataInPanel    edit-forms
  *     getDetailPanelElems          form-ui
  *     updateSrcDetailPanel         form-ui
  */
 import * as _u from '../../util.js';
 import { getRcrd, getEntityRcrds } from '../db-forms.js';
 
-
-
 /* ===================== INIT DETAIL PANEL ================================== */
-export function getDetailPanelElems(entity, id, fP) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
+export function getDetailPanelElems(entity, id, fP) {                           //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
     var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?
         getSubEntityEditDetailElems : getInteractionDetailElems;
     var cntnr = _u.buildElem('div', { 'id': 'form-details' });
@@ -43,7 +44,7 @@ function initDetailDiv(ent) {
     return div;
 }
 /** Returns the elems that will display the count of references to the entity. */
-function getSubEntityEditDetailElems(entity, id, cntnr) {                       console.log("getSubEntityEditDetailElems for [%s]", entity);
+function getSubEntityEditDetailElems(entity, id, cntnr) {                       //console.log("getSubEntityEditDetailElems for [%s]", entity);
     var refEnts = {
         'author': [ 'cit', 'int' ],     'citation': [ 'int' ],
         'location': [ 'int' ],          'publication': ['cit', 'int' ],
@@ -65,8 +66,93 @@ function initCountDiv(ent) {
     $(div).append(_u.buildElem('span', {'text': entities[ent] }));
     return div;
 }
-/* ========================== ADD TO PANEL ================================== */
-/* -------------------- INTERACTION PANEL ----------------------------------- */
+/* ================== EDIT FORM RELATIONAL DETAILS ========================== */
+export function fillRelationalDataInPanel(entity, rcrd) {
+    const map = {
+        'author': fillSrcDetailData,        'citation': fillSrcDetailData,
+        'location': fillLocDetailData,      'publication': fillSrcDetailData, 
+        'publisher': fillSrcDetailData,     'taxon': fillTxnDetailData 
+    };
+    map[entity](entity, rcrd);
+}
+/* ----------- LOCATION --------- */
+function fillLocDetailData(entity, rcrd) {
+    addCntToEditFormDetailPanel({ 'int': rcrd.interactions.length });
+}
+/* ----------- SOURCE --------- */
+/** Adds a count of all refences to the entity to the form's detail-panel. */
+function fillSrcDetailData(entity, srcRcrd) {                                   //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
+    var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
+    addAddtionalRefs();                                                         //console.log('refObj = %O', refObj);
+    addCntToEditFormDetailPanel(refObj);
+
+    function addAddtionalRefs() {
+        if (entity === 'citation') { return; }
+        const ref = entity === 'publisher' ? 'pub' : 'cit';
+        refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
+    }
+} /* End fillSrcDataInDetailPanel */
+function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
+    return entity === 'citation' ? 
+        rcrd.interactions.length : getAllSourceInts(rcrd); 
+}
+function getAllSourceInts(rcrd) {
+    return getTtlIntCnt(rcrd, 'interactions', getEntityRcrds('source'));
+}
+/* ------------- TAXON --------- */
+function fillTxnDetailData(entity, rcrd) {
+    const txnRcrds = getEntityRcrds('taxon');
+    var refs = { 
+        'int': getTtlIntCnt(rcrd, 'objectRoles', txnRcrds) || 
+            getTtlIntCnt(rcrd, 'subjectRoles', txnRcrds)
+    };
+    getTaxonChildRefs(rcrd, txnRcrds);  
+    addCntToEditFormDetailPanel(refs);
+    removeEmptyDetailPanelElems();
+    
+    function getTaxonChildRefs(txn) {
+        txn.children.forEach(child => addChildRefData(child));
+    }
+    function addChildRefData(id) {
+        var lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
+        var child = txnRcrds[id];              
+        var lvlK = lvlKeys[child.level.displayName];       
+        if (!refs[lvlK]) { refs[lvlK] = 0; }
+        refs[lvlK] += 1;
+        getTaxonChildRefs(child);
+    }
+} 
+function removeEmptyDetailPanelElems() {  
+    var singular = { 'Orders': 'Order', 'Families': 'Family', 'Genera': 'Genus',
+        'Species': 'Species', 'Interactions': 'Interaction' };                                       
+    $.each($('[id$="-det"] div'), function(i, elem) {
+        if (elem.innerText == 0) {  elem.parentElement.remove(); }
+        if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
+    });
+}
+/* -------- HELPERS ----------- */
+/** Adds a count of realted entities to the edit form's detail panel. */
+function addCntToEditFormDetailPanel(refObj) {
+    for (var ent in refObj) {
+        $('#'+ent+'-det div')[0].innerText = refObj[ent];    
+    }
+}
+function getTtlIntCnt(rcrd, intProp, entityRcrds) {                             //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
+    var ints = rcrd[intProp].length;
+    if (rcrd.children.length) { ints += getChildIntCnt(rcrd.children);}
+    if (rcrd.contributions) { ints += getChildIntCnt(rcrd.contributions);}        
+    return ints;
+    
+    function getChildIntCnt(children) {
+        var ints = 0;
+        children.forEach(function(child){ 
+            child = entityRcrds[child];
+            ints += getTtlIntCnt(child, intProp, entityRcrds); 
+        });
+        return ints;
+    }
+}
+/* ========== INTERACTION FORM SUB-ENTITY DETAIL PANEL ====================== */
 /**
  * When the Publication, Citation, or Location fields are selected, their data 
  * is added se the side detail panel of the form. For other entity edit-forms: 
@@ -84,7 +170,7 @@ function getDataHtmlString(props) {
     }
     return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
 }
-/* ------------------------- LOCATION PANEL --------------------------------- */
+/* --------- LOCATION DETAILS --------- */
 /** Displays the selected location's data in the side detail panel. */
 export function fillLocDataInDetailPanel(locRcrd) {  
     addDataToIntDetailPanel('loc', getLocDetailDataObj(locRcrd));
@@ -111,9 +197,9 @@ function getAllLocData(locRcrd) {
         'Elevation Max': locRcrd.elevationMax || '',       
     };
 }
-/* ------------------------- SOURCE PANEL ----------------------------------- */
+/* ----------- SOURCE DETAILS --------- */
 /** Adds source data to the interaction form's detail panel. */
-export function updateSrcDetailPanel(entity) {                        console.log('           --updateSrcDetailPanel');
+export function updateSrcDetailPanel(entity) {                                  //console.log('           --updateSrcDetailPanel');
     const data = {}; 
     const srcRcrds = getEntityRcrds('source');
     buildSourceData();
@@ -126,7 +212,7 @@ export function updateSrcDetailPanel(entity) {                        console.lo
         const citId = $('#CitationTitle-sel').val();
         const citSrc = citId ? srcRcrds[citId] : false;  
         const cit = citSrc ? getRcrd('citation', citSrc.citation) : false;
-        const citType = cit ? getSrcType(cit, 'citation') : false;   console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit); 
+        const citType = cit ? getSrcType(cit, 'citation') : false;              //console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit); 
 
         addCitationText();
         addPubTitleData();
@@ -137,7 +223,7 @@ export function updateSrcDetailPanel(entity) {                        console.lo
         addAbstract();
 
         function addCitationText() {
-            data['Citation'] = cit ? cit.fullText : '(Select Citation)';  console.log('cit full text', cit.fullText)
+            data['Citation'] = cit ? cit.fullText : '(Select Citation)';        //console.log('cit full text', cit.fullText)
         }
         function addPubTitleData() {
             const pubTitleField = pubType && pubType !== 'Other' ? 
@@ -204,7 +290,7 @@ export function updateSrcDetailPanel(entity) {                        console.lo
     function getAuthName(id) {
         const auth = srcRcrds[id];
         return auth.displayName;  
-} /* End updateSrcDetailPanel */
+    } 
 }
 /* =========================== CLEAR PANEL ================================== */
 export function clearDetailPanel(ent, reset, html) {                                   //console.log('clearDetailPanel for [%s]. html = ', ent, html)

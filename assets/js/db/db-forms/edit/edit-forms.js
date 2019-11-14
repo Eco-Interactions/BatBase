@@ -13,11 +13,10 @@ import * as form_ui from '../form-ui.js';
 import * as db_map from '../../db-map/db-map.js';
 import * as _fCnfg from '../f-confg.js';
 import { buildFormBttns } from '../form-ui/save-exit-bttns.js';
-
+import { fillRelationalDataInPanel } from '../form-ui/detail-panel.js';
 
 let fP;
 
-/*--------------------------- Edit Form --------------------------------------*/
 /** Shows the entity's edit form in a pop-up window on the search page. */
 export function showEntityEditForm(id, entity, params) {                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
     fP = params;
@@ -117,7 +116,7 @@ function fillLocData(entity, id, rcrd) {
     const fields = _fCnfg.getCoreFieldDefs(entity);  
     handleLatLongFields();
     fillFields(rcrd, fields);
-    db_forms.addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
+    fillRelationalDataInPanel(entity, rcrd);
     fP.editing.detail = rcrd.geoJsonId || null;
     if (rcrd.geoJsonId) { storeLocGeoJson(rcrd.geoJsonId); }
     /* Sets values without triggering each field's change method. */
@@ -134,33 +133,7 @@ function fillLocData(entity, id, rcrd) {
     }
 } /* End fillLocData */
 function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
-    var refs = { 
-        'int': getTtlIntCnt('taxon', rcrd, 'objectRoles') || 
-            getTtlIntCnt('taxon', rcrd, 'subjectRoles')
-    };
-    getTaxonChildRefs(rcrd);  
-    db_forms.addDataToCntDetailPanel(refs);
-    removeEmptyDetailPanelElems();
-
-    function getTaxonChildRefs(txn) {
-        txn.children.forEach(function(child) { addChildRefData(child); });
-    }
-    function addChildRefData(id) {
-        var lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
-        var child = fP.records.taxon[id];              
-        var lvlK = lvlKeys[child.level.displayName];       
-        if (!refs[lvlK]) { refs[lvlK] = 0; }
-        refs[lvlK] += 1;
-        getTaxonChildRefs(child);
-    }
-} /* End fillTaxonData */
-function removeEmptyDetailPanelElems() {  
-    var singular = { 'Orders': 'Order', 'Families': 'Family', 'Genera': 'Genus',
-        'Species': 'Species', 'Interactions': 'Interaction' };                                       
-    $.each($('[id$="-det"] div'), function(i, elem) {
-        if (elem.innerText == 0) {  elem.parentElement.remove(); }
-        if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
-    });
+    fillRelationalDataInPanel(entity, rcrd);
 }
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, rcrd) { 
@@ -182,7 +155,7 @@ function fillSrcData(entity, id, rcrd) {
     }
     function setSrcData() {
         fillFields(src, fields.core);
-        fillSrcDataInDetailPanel(entity, src);            
+        fillRelationalDataInPanel(entity, src);            
     }
     function setDetailData() {
         fillFields(detail, fields.detail);
@@ -193,37 +166,7 @@ function fillSrcData(entity, id, rcrd) {
 function getSourceFields(entity) {
     return { core: _fCnfg.getCoreFieldDefs(entity), detail: _fCnfg.getFormConfg(entity).add };
 }
-/** Adds a count of all refences to the entity to the form's detail-panel. */
-function fillSrcDataInDetailPanel(entity, srcRcrd) {                            //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
-    var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
-    addAddtionalRefs();                                                         //console.log('refObj = %O', refObj);
-    db_forms.addDataToCntDetailPanel(refObj);
-
-    function addAddtionalRefs() {
-        if (entity === 'citation') { return; }
-        const ref = entity === 'publisher' ? 'pub' : 'cit';
-        refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
-    }
-} /* End fillSrcDataInDetailPanel */
-function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
-    return entity === 'citation' ? 
-        rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
-}
 /** ----------- Shared ---------------------------- */
-function getTtlIntCnt(entity, rcrd, intProp) {                                  //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
-    var ints = rcrd[intProp].length;
-    if (rcrd.children.length) { ints += getChildIntCnt(entity, rcrd.children, intProp);}
-    if (rcrd.contributions) { ints += getChildIntCnt(entity, rcrd.contributions, intProp);}        
-    return ints;
-}
-function getChildIntCnt(entity, children, intProp) {
-    var ints = 0;
-    children.forEach(function(child){ 
-        child = fP.records[entity][child];
-        ints += getTtlIntCnt(entity, child, intProp); 
-    });
-    return ints;
-}
 function fillFields(rcrd, fields, shwAll) {                                     //console.log('rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
         'text': setText, 'textArea': setTextArea, 'select': setSelect, 
