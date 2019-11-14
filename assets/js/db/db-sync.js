@@ -489,12 +489,9 @@ function ifEditedSourceDataUpdatedCitations(data) {
     return updateRelatedCitations(data);
 }
 function isSrcDataEdited(data) {
-    return data.core == 'source' && (hasEdits(data.coreEdits) || hasEdits(data.coreEdits));
+    return data.core == 'source' && (hasEdits(data.coreEdits) || hasEdits(data.detailEdits));
 }
-/**
- * Updates the full text of related citations for edited Authors, Publications 
- * or Publishers.
- */
+/** Updates the citations for edited Authors, Publications or Publishers. */
 function updateRelatedCitations(data) {                                         //console.log('updateRelatedCitations. data = %O', data);
     const srcData = data.coreEntity;
     const srcType = srcData.sourceType.displayName;
@@ -502,7 +499,8 @@ function updateRelatedCitations(data) {                                         
         srcType == 'Publication' ? srcData.children : 
         srcType == 'Publisher' ? getChildCites(srcData.children) : false;
     if (!cites) { return; }
-    return getStoredData('citation').then(rcrds => updateCitations(rcrds));  
+    return Promise.all(['author', 'citation', 'publisher'].map(e => getStoredData(e)))
+        .then(rcrds => updateCitations(rcrds));  
 
     function getChildCites(srcs) {  
         const cites = [];
@@ -513,7 +511,7 @@ function updateRelatedCitations(data) {                                         
         });
         return cites;
     }
-    function updateCitations(citationRcrds) {                                   console.log('updateCitations. citationRcrds = %O cites = %O', citationRcrds, cites);
+    function updateCitations(rcrds) {                                           //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
         const proms = [];
         cites.forEach(id => proms.push(updateCitText(id)));
         return Promise.all(proms).then(onUpdateSuccess)
@@ -521,8 +519,8 @@ function updateRelatedCitations(data) {                                         
         function updateCitText(id) {
             const citSrc = mmryData['source'][id];
             const pub = mmryData['source'][citSrc.parent];
-            const cit = citationRcrds[citSrc.citation];  console.log('citSrc = %O', citSrc)
-            const citText = rebuildCitationText(citSrc, cit, pub);             console.log('--------------citation text = ', citText);
+            const cit = rcrds[1][citSrc.citation];                              
+            const citText = rebuildCitationText(citSrc, cit, pub, rcrds, mmryData['source']);       
             return updateCitationData(citSrc, citText);
         }
     }
@@ -536,7 +534,7 @@ function updateCitationData(citSrc, text) {
 function onUpdateSuccess(ajaxData) { 
     return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
 }
-function handledUpdatedSrcData(data) {                                          console.log('------- handledUpdatedSrcData. data = %O', data);
+function handledUpdatedSrcData(data) {                                          
     if (data.errors) { return Promise.resolve(_errs.errUpdatingData(data.errors)); }
     parseEntityData(data.results);
     return updateEntityData(data.results);

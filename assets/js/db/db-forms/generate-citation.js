@@ -170,7 +170,10 @@ export function buildCitationText(params, fLvl) {
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
-export function rebuildCitationText(citSrc, cit, pubSrc) {                      console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
+export function rebuildCitationText(citSrc, cit, pubSrc, rcrds, sRcrds) {                      console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
+    const aRcrds = rcrds[0]; //authors
+    const cRcrds = rcrds[1]; //citations
+    const pRcrds = rcrds[2]; //publishers
     const type = cit.citationType.displayName;                                  //console.log("type = ", type);
     const getFullText = { 'Article': rbldArticleCit, 'Book': rbldBookCit, 
         'Chapter': rbldChapterCit, 'Ph.D. Dissertation': rbldDissertThesisCit, 
@@ -207,7 +210,7 @@ export function rebuildCitationText(citSrc, cit, pubSrc) {                      
         const titlesAndEds = getCitTitlesAndEditors();
         const ed = citSrc.publicationVolume;
         const pages = getCitBookPages();
-        const publ = buildPublString(pubSrc) || '[NEEDS PUBLISHER DATA]';  
+        const publ = buildPublString(pubSrc, sRcrds, pRcrds) || '[NEEDS PUBLISHER DATA]';  
         const allFields = [athrs, year, titlesAndEds, ed, pages, publ];
         return allFields.filter(f=>f).map(addPunc).join(' ');
     }
@@ -223,7 +226,7 @@ export function rebuildCitationText(citSrc, cit, pubSrc) {                      
         const year = pubSrc.year;
         const titlesAndEds = getCitTitlesAndEditors();
         const pages = getCitBookPages();
-        const publ = buildPublString(pubSrc) || '[NEEDS PUBLISHER DATA]';
+        const publ = buildPublString(pubSrc, sRcrds, pRcrds) || '[NEEDS PUBLISHER DATA]';
         const allFields = [athrs, year, titlesAndEds, pages, publ]; 
         return allFields.filter(f => f).join('. ')+'.';
     }
@@ -238,7 +241,7 @@ export function rebuildCitationText(citSrc, cit, pubSrc) {                      
         const year = pubSrc.year;
         const title = _u.stripString(cit.title);
         const degree = type === "Master's Thesis" ? 'M.S. Thesis' : type;
-        const publ = buildPublString(pubSrc) || '[NEEDS PUBLISHER DATA]';
+        const publ = buildPublString(pubSrc, sRcrds, pRcrds) || '[NEEDS PUBLISHER DATA]';
         return [athrs, year, title, degree, publ].join('. ')+'.';
     }
     /**
@@ -252,7 +255,7 @@ export function rebuildCitationText(citSrc, cit, pubSrc) {                      
         const year = citSrc.year ? _u.stripString(citSrc.year) : pubSrc.year;
         const title = _u.stripString(cit.title);
         const vip = getCiteVolumeIssueAndPages();
-        const publ = buildPublString(pubSrc);
+        const publ = buildPublString(pubSrc, sRcrds, pRcrds);
         return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
     }
         /** ---------- citation full text helpers ----------------------- */
@@ -263,17 +266,17 @@ export function rebuildCitationText(citSrc, cit, pubSrc) {                      
     function getCitAuthors() { 
         const auths = citSrc.authors;                                           //console.log('auths = %O', auths);
         if (!Object.keys(auths).length) { return false; }
-        return getFormattedAuthorNames(auths);
+        return getFormattedAuthorNames(auths, null, aRcrds, sRcrds);
     }
     function getPubSrcAuthors() {
         const auths = pubSrc.authors;
         if (!auths) { return false; }
-        return getFormattedAuthorNames(auths);
+        return getFormattedAuthorNames(auths, null, aRcrds, sRcrds);
     }
     function getPubEditors() {
         const eds = pubSrc.editors;  
         if (!eds) { return false }
-        const names = getFormattedAuthorNames(eds, true);
+        const names = getFormattedAuthorNames(eds, true, aRcrds, sRcrds);
         const edStr = Object.keys(eds).length > 1 ? ', eds.' : ', ed.';
         return '('+ names + edStr + ')';
     }
@@ -308,7 +311,7 @@ export function rebuildCitationText(citSrc, cit, pubSrc) {                      
 
 /** ======================== HELPERS ======================================== */
 /** Formats publisher data and returns the Name, City, Country. */
-function buildPublString(pub) {
+function buildPublString(pub, srcRcrds, publRcrds) {
     const publ = getPublRcrd(pub);
     if (!publ) { return false; }
     const name = publ.displayName;
@@ -318,8 +321,8 @@ function buildPublString(pub) {
 
     function getPublRcrd(pub) {
         if (!pub.parent) { return false; }
-        const publSrc = getRcrd('source', pub.parent);
-        return getRcrd('publisher', publSrc.publisher);
+        const publSrc = srcRcrds ? srcRcrds[pub.parent] : getRcrd('source', pub.parent);
+        return publRcrds ? publRcrds[publSrc.publisher] : getRcrd('publisher', publSrc.publisher);
     }
 } /* End buildPublString */
 /** 
@@ -329,7 +332,7 @@ function buildPublString(pub) {
  * with '&'. If the names are of editors, they are returned [Initials. Last].
  * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
  */
-function getFormattedAuthorNames(auths, eds) {                                  //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
+function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {                                  //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
     if (Object.keys(auths).length > 3) { return getFirstEtAl(auths[1]); }
     let athrs = '';
     for (let ord in auths) {  
@@ -344,9 +347,9 @@ function getFormattedAuthorNames(auths, eds) {                                  
         return name +', et al';
     }
     function getFormattedName(i, srcId) {                                       //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
-        const src = getRcrd('source', srcId);                      
+        const src = srcRcrds ? srcRcrds[srcId] : getRcrd('source', srcId);                      
         const athrId = src[_u.lcfirst(src.sourceType.displayName)];  
-        const athr = getRcrd('author', athrId);        
+        const athr = authRcrds ? authRcrds[athrId] : getRcrd('author', athrId);        
         return getCitAuthName(i, athr, eds);
     }
     /**
