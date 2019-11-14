@@ -1,23 +1,24 @@
 /**
  * Builds the citation text from the provided data. 
  *
+ * 
+ *
  * Exports:                Imported by:
  *     buildCitationText            db-forms
- *     rebuildCitationText          db-forms
+ *     rebuildCitationText          db_sync
  */
 import * as _u from '../util.js';
 import { getFormValueData, getSelectedVals } from './get-form-data.js';
 import { getRcrd } from './db-forms.js';
 
-let fP;
 /**
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
 export function buildCitationText(params, fLvl) {
-    fP = params; 
+    const pubData = db_forms.getFormLevelParams(fLvl).pub;
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
-    return getFormValueData(fP, 'citation', null, null).then(generateCitText); 
+    return getFormValueData(params, 'citation', null, null).then(generateCitText); 
 
     function generateCitText(formVals) {                                        //console.log('generateCitText. formVals = %O', formVals);
         const builder = { 'Article': articleCit, 'Book': bookCit, 
@@ -105,10 +106,10 @@ export function buildCitationText(params, fLvl) {
         }
             /** ---------- citation full text helpers ----------------------- */
         function getPubYear() {
-            return _u.stripString(fP.forms[fLvl].pub.src.year);
+            return _u.stripString(pubData.src.year);
         }
         function getPublicationName() {
-            return _u.stripString(fP.forms[fLvl].pub.src.displayName);
+            return _u.stripString(pubData.src.displayName);
         }
         function getBookPages(argument) {
             if (!formVals.pages) { return false; }
@@ -120,12 +121,12 @@ export function buildCitationText(params, fLvl) {
             return getFormattedAuthorNames(auths, eds);
         }
         function getPubAuthors() {
-            const auths = fP.forms[fLvl].pub.src.authors;
+            const auths = pubData.src.authors;
             if (!auths) { return false; }
             return getFormattedAuthorNames(auths);
         }
         function getPubEditors() {
-            const eds = fP.forms[fLvl].pub.src.editors;  
+            const eds = pubData.src.editors;  
             if (!eds) { return false }
             const names = getFormattedAuthorNames(eds, true);
             const edStr = Object.keys(eds).length > 1 ? ', eds.' : ', ed.';
@@ -133,7 +134,7 @@ export function buildCitationText(params, fLvl) {
         }
         /** Formats publisher data and returns the Name, City, Country. */
         function getPublisherData() {
-            return buildPublString(fP.forms[fLvl].pub.src);
+            return buildPublString(pubData.src);
         } 
         /**
          * Returns: Chapter title. In: Publication title [if there are editors,
@@ -169,9 +170,7 @@ export function buildCitationText(params, fLvl) {
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
-export function rebuildCitationText(params, citSrc, cit) {
-    fP = params;
-    const pubSrc = getRcrd('source', citSrc.parent);                    //console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
+export function rebuildCitationText(citSrc, cit, pubSrc) {                      console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
     const type = cit.citationType.displayName;                                  //console.log("type = ", type);
     const getFullText = { 'Article': rbldArticleCit, 'Book': rbldBookCit, 
         'Chapter': rbldChapterCit, 'Ph.D. Dissertation': rbldDissertThesisCit, 
@@ -319,7 +318,7 @@ function buildPublString(pub) {
 
     function getPublRcrd(pub) {
         if (!pub.parent) { return false; }
-        const publSrc = fP.records.source[pub.parent];
+        const publSrc = getRcrd('source', pub.parent);
         return getRcrd('publisher', publSrc.publisher);
     }
 } /* End buildPublString */
@@ -345,9 +344,9 @@ function getFormattedAuthorNames(auths, eds) {                                  
         return name +', et al';
     }
     function getFormattedName(i, srcId) {                                       //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
-        const src = fP.records.source[srcId];                      
+        const src = getRcrd('source', srcId);                      
         const athrId = src[_u.lcfirst(src.sourceType.displayName)];  
-        const athr = fP.records.author[athrId];        
+        const athr = getRcrd('author', athrId);        
         return getCitAuthName(i, athr, eds);
     }
     /**
