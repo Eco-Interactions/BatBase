@@ -55,6 +55,7 @@
  *     setFormFieldConfg
  *     getFormReqElems              ""
  *     exitForm                save-exit-bttns
+ *     getFormLevelParams           generate-citation
  */
 import * as _u from '../util.js';
 import * as _elems from './form-ui/form-elems.js';
@@ -70,7 +71,7 @@ import { buildFormBttns } from './form-ui/save-exit-bttns.js';
 import { showEntityEditForm } from './edit/edit-forms.js';
 import { getFormValueData } from './get-form-data.js';
 import { formatDataForServer } from './validate-data.js';
-import { buildCitationText, rebuildCitationText } from './generate-citation.js';
+import { buildCitationText } from './generate-citation.js';
 
 let fP = {};
 /* ======= SORT ============= */
@@ -238,11 +239,22 @@ function getFormExitHandler(confg, action) {                                    
 export function getFormEntity(fLvl) {
     return fP.forms[fLvl].entity;
 }
+export function getFormLevelParams(fLvl) {
+    return fP.forms[fLvl];
+}
 export function getFormReqElems(fLvl) {
     return fP.forms[fLvl].reqElems;
 }
 export function getFormFieldConfg(fLvl, field) {
     return fP.forms[fLvl].fieldConfg.vals[field];
+}
+export function getEntityRcrds(entity) {
+    return typeof entity == 'string' ? fP.records[entity] : buildRcrdsObj(entity);
+}
+function buildRcrdsObj(entities) {
+    const rcrds = {};
+    entities.forEach(ent => { rcrds[ent] = fP.records[entity]});
+    return rcrds;
 }
 /* --- Setters --- */
 export function addRequiredFieldInputToMemory(fLvl, input) {
@@ -284,13 +296,7 @@ export function initNewDataForm() {                                             
     .catch(err => _u.alertErr(err));
 }
 /*------------------- Interaction Form Methods (Shared) ----------------------*/ 
-function addReqElemsToConfg() {
-    const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
-        "InteractionType"];
-    fP.forms.top.reqElems = reqFields.map(function(field) {
-        return $('#'+field+'-sel')[0];
-    });
-}
+
 /*-------------- Form Builders -------------------------------------------------------------------*/
 /** Builds and returns all interaction-form elements. */
 export function buildIntFormFields(action) {                                           console.log('       --buildIntFormFields');
@@ -1882,29 +1888,20 @@ function getEntityUrl(action) {
  * the stored core records in the fP object. Exit's the successfully submitted 
  * form @exitFormAndSelectNewEntity.  
  */
-function formSubmitSucess(ajaxData, textStatus, jqXHR) {                        console.log("       --Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
-    var data = parseData(ajaxData.results);
-    storeData(data);
+function formSubmitSucess(data, textStatus, jqXHR) {                            console.log("       --Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);                   
+    db_sync.updateLocalDb(data.results).then(onDataSynced);
 }
-/** Calls the appropriate data storage method and updates fP. */  
-function storeData(data) {  
-    db_sync.updateLocalDb(data).then(onDataSynced);
-}
-/** afterStoredDataUpdated callback */
 function onDataSynced(data) {                                                   console.log('       --Data update complete. data = %O', data);
     toggleWaitOverlay(false);
     if (data.errors) { return _errs.errUpdatingData(data.errors); }
-    if (data.citationUpdate) { return; }
-    if (isEditForm() && !hasChngs(data)) { 
-        return showSuccessMsg('No changes detected.', 'red'); }  
-    if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
+    if (noDataChanges()) { return showSuccessMsg('No changes detected.', 'red'); }  
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
 
-    function isEditForm() {
-        return fP.forms[fP.ajaxFormLvl].action === 'edit';
+    function noDataChanges() {
+        return fP.forms[fP.ajaxFormLvl].action === 'edit'  && !hasChngs(data);
     }
-} /* End afterStoredDataUpdated */
+}
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {                           console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
     return _u.getData(entity).then(newData => {
@@ -2025,6 +2022,11 @@ function initInteractionParams() {
         "interaction", "top", null, _fCnfg.getFormConfg("interaction"), "create");
     addReqElemsToConfg();
 }
+function addReqElemsToConfg() {
+    const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
+        "InteractionType"];
+    fP.forms.top.reqElems = reqFields.map(field => $('#'+field+'-sel')[0]);
+}
 /**
  * After an interaction is created, the form can not be submitted until changes
  * are made. This removes the change listeners from non-required elems and the 
@@ -2034,44 +2036,6 @@ export function resetIfFormWaitingOnChanges() {
     if (!fP.forms.top.unchanged) { return; }
     exitSuccessMsg();
     delete fP.forms.top.unchanged;
-}
-/** ---------------- After Source Data Edited --------------------------- */
-/**
- * Updates the full text of related citations for edited Authors, Publications 
- * or Publishers.
- */
-function updateRelatedCitations(data) {                                         //console.log('updateRelatedCitations. data = %O', data);
-    const srcData = data.coreEntity;
-    const srcType = srcData.sourceType.displayName;
-    const cites = srcType == 'Author' ? getChildCites(srcData.contributions) : 
-        srcType == 'Publication' ? srcData.children : 
-        srcType == 'Publisher' ? getChildCites(srcData.children) : false;
-    if (!cites) { return; }
-    updateCitations();
-
-    function getChildCites(srcs) {  
-        const cites = [];
-        srcs.forEach(id => {
-            const src = getRcrd('source', id); 
-            if (src.citation) { return cites.push(id); }
-            src.children.forEach(cId => cites.push(cId))
-        });
-        return cites;
-    }
-    function updateCitations() {                                                //console.log('updateCitations. cites = %O', cites);
-        cites.forEach(id => updateCitText(id, srcData));
-    }
-    function updateCitText(id, chngdSrc) {
-        const citSrc = getRcrd('source', id);
-        const cit = getRcrd('citation', citSrc.citation);
-        const citText = rebuildCitationText(fP, citSrc, cit, chngdSrc);             //console.log('citation text = ', citText);
-        updatedCitationData(citSrc, citText);
-    }
-} /* End updateRelatedCitations */
-/** Sends ajax data to update citation and source entities. */
-function updatedCitationData(citSrc, text) { 
-    const data = { srcId: citSrc.id, text: text };
-    _u.sendAjaxQuery(data, 'crud/citation/edit', formSubmitSucess, _errs.formSubmitError);
 }
 /*------------------ After Sub-Entity Created ----------------------------*/
 /**
@@ -2103,15 +2067,4 @@ export function exitForm(formId, fLvl, focus, onExit, data) {                   
     _cmbx.resetFormCombobox(fLvl, focus);
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
     if (exitFunc) { exitFunc(data); }
-}
-/** --------------- Helpers --------------------- */
-/**
- * Parses the nested objects in the returned JSON data. This is because the 
- * data comes back from the server having been double JSON-encoded, due to the 
- * 'serialize' library and the JSONResponse object. 
- */
-function parseData(data) {  
-    data.coreEntity = JSON.parse(data.coreEntity);
-    data.detailEntity = JSON.parse(data.detailEntity);
-    return data;
 }

@@ -14,12 +14,16 @@
  *     AFTER FORM SUBMIT
  *         ADD DATA
  *         REMOVE DATA
+ *         UPDATE RELATED DATA
  *     INIT DATABASE
  *     HELPERS
  *         ERRS
  * 
  */
 import * as _u from './util.js';
+import { getRcrd } from './db-forms/db-forms.js';
+import * as _errs from './db-forms/f-errs.js';
+import { rebuildCitationText } from './db-forms/generate-citation.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 
 let failed = { errors: [], updates: {}};
@@ -471,6 +475,64 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
     const nameObj = mmryData[entity].value;
     delete nameObj[taxonName];
     storeData(nameProp, nameObj);  
+}
+/** ---------------------- UPDATE RELATED DATA ------------------------------ */
+function ifEditedSourceDataUpdatedCitations(data) {
+    if (!isSrcDataEdited(data)) { return Promise.resolve(); }
+    return updateRelatedCitations(data);
+}
+function isSrcDataEdited(data) {
+    return data.core == 'source' && (hasEdits(data.coreEdits) || hasEdits(data.coreEdits));
+}
+/**
+ * Updates the full text of related citations for edited Authors, Publications 
+ * or Publishers.
+ */
+function updateRelatedCitations(data) {                                         //console.log('updateRelatedCitations. data = %O', data);
+    const srcData = data.coreEntity;
+    const srcType = srcData.sourceType.displayName;
+    const cites = srcType == 'Author' ? getChildCites(srcData.contributions) : 
+        srcType == 'Publication' ? srcData.children : 
+        srcType == 'Publisher' ? getChildCites(srcData.children) : false;
+    if (!cites) { return; }
+    return getStoredData('citation').then(rcrds => updateCitations(rcrds));  
+
+    function getChildCites(srcs) {  
+        const cites = [];
+        srcs.forEach(id => {
+            const src = getRcrd('source', id); 
+            if (src.citation) { return cites.push(id); }
+            src.children.forEach(cId => cites.push(cId))
+        });
+        return cites;
+    }
+    function updateCitations(citationRcrds) {                                   console.log('updateCitations. citationRcrds = %O cites = %O', citationRcrds, cites);
+        const proms = [];
+        cites.forEach(id => proms.push(updateCitText(id)));
+        return Promise.all(proms).then(onUpdateSuccess)
+        
+        function updateCitText(id) {
+            const citSrc = mmryData['source'][id];
+            const pub = mmryData['source'][citSrc.parent];
+            const cit = citationRcrds[citSrc.citation];  console.log('citSrc = %O', citSrc)
+            const citText = rebuildCitationText(citSrc, cit, pub);             console.log('--------------citation text = ', citText);
+            return updateCitationData(citSrc, citText);
+        }
+    }
+} /* End updateRelatedCitations */
+/** Sends ajax data to update citation and source entities. */
+function updateCitationData(citSrc, text) { 
+    const data = { srcId: citSrc.id, text: text };
+    return _u.sendAjaxQuery(
+        data, 'crud/citation/edit', Function.prototype, _errs.formSubmitError);
+}
+function onUpdateSuccess(ajaxData) { 
+    return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
+}
+function handledUpdatedSrcData(data) {                                          console.log('------- handledUpdatedSrcData. data = %O', data);
+    if (data.errors) { return Promise.resolve(_errs.errUpdatingData(data.errors)); }
+    parseEntityData(data.results);
+    return updateEntityData(data.results);
 }
 /*---------------- Update User Named Lists -----------------------------------*/
 export function updateUserNamedList(data, action) {                             console.log('   --Updating [%s] stored list data. %O', action, data);
