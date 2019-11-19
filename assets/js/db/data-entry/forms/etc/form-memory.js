@@ -169,6 +169,12 @@ function buildRcrdsObj(entities) {
     const rcrds = {};
     entities.forEach(ent => { rcrds[ent] = formMemory.records[entity]});
     return rcrds;
+}/** Returns the record for the passed id and entity-type. */
+export function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fP = %O', entity, id, fP);
+    if (!formMemory.records[entity]) { return; }
+    const rcrd = formMemory.records[entity][id];
+    if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, formMemory.records); console.trace() }
+    return _forms._util('snapshot', [formMemory.records[entity][id]]); 
 }
 /* ---------------------------- Setters ------------------------------------- */
 export function addRequiredFieldInput(fLvl, input) {  
@@ -177,7 +183,7 @@ export function addRequiredFieldInput(fLvl, input) {
 export function addComboToMemory(fLvl, field) {
     formMemory.forms[fLvl].selElems.push(field);    
 }
-export function setFormMemory(fLvl, prop, val) {
+export function setFormProp(fLvl, prop, val) {
     formMemory.forms[fLvl][prop] = val;
 }
 export function setFormFieldConfg(fLvl, field, confg) {

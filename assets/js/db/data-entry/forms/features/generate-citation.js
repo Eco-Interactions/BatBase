@@ -9,14 +9,17 @@
  */
 import * as _u from '../../../util.js';
 import { getFormValueData, getSelectedVals } from '../validation/get-form-data.js';
-import { getFormLevelParams, getRcrd } from '../../db-forms.js';
+import { getFormLevelParams } from '../../db-forms.js';
+import * as _forms from '../forms-main.js';
+
+const _mmry = _forms.memory;
 
 /**
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
 export function buildCitationText(params, fLvl) {
-    const pubData = _forms.memory('getFormProp', ['pub', fLvl]);
+    const pubData = _mmry('getFormProp', ['pub', fLvl]);
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
     return getFormValueData(params, 'citation', null, null).then(generateCitText); 
 
@@ -321,8 +324,8 @@ function buildPublString(pub, srcRcrds, publRcrds) {
 
     function getPublRcrd(pub) {
         if (!pub.parent) { return false; }
-        const publSrc = srcRcrds ? srcRcrds[pub.parent] : getRcrd('source', pub.parent);
-        return publRcrds ? publRcrds[publSrc.publisher] : getRcrd('publisher', publSrc.publisher);
+        const publSrc = getPublRcrd(srcRcrds, pub.parent, 'source');
+        return getPublRcrd(publRcrds, publSrc.publisher, 'publisher');
     }
 } /* End buildPublString */
 /** 
@@ -347,9 +350,9 @@ function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {             
         return name +', et al';
     }
     function getFormattedName(i, srcId) {                                       //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
-        const src = srcRcrds ? srcRcrds[srcId] : getRcrd('source', srcId);                      
+        const src = getEntityRcrd(srcRcrds, srcId, 'source');
         const athrId = src[_u.lcfirst(src.sourceType.displayName)];  
-        const athr = authRcrds ? authRcrds[athrId] : getRcrd('author', athrId);        
+        const athr = getEntityRcrd(authRcrds, authId, 'author');
         return getCitAuthName(i, athr, eds);
     }
     /**
@@ -367,4 +370,8 @@ function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {             
 /** Handles adding the punctuation for the data in the citation. */
 function addPunc(data) {  
     return /[.!?,;:]$/.test(data) ? data : data+'.';
+}
+
+function getEntityRcrd(rcrds, id, entity) {
+    return  rcrds ? rcrds[id] : _mmry('getRcrd', [entity, id]);
 }

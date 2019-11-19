@@ -74,7 +74,7 @@ export function errUpdatingData(data) {                                      //c
         .css('disabled', 'disabled').fadeTo('400', 0.5);
 }
 function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
-    form_ui.exitFormPopup(null, 'skipTableReset');
+    _forms.exitFormPopup(null, 'skipTableReset');
     db_sync.resetStoredData();
 }
 /**
@@ -289,7 +289,7 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'fillAuthBlanks': false, 'fillEdBlanks': false
     };
     if (!exitHdnlrs[errTag]) { return []; }
-    const bttn = form_ui.getExitButton();
+    const bttn = _elems.getExitButton();
     bttn.className += ' err-exit';
     $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
     return bttn;

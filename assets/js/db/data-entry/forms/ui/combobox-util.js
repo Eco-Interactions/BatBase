@@ -34,10 +34,11 @@ export function initSingle(confg, fLvl) {                                       
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, elems) {                           //console.log("initFormCombos. [%s] formLvl = [%s] fields = %O", entity, formLvl, fP.forms[formLvl].selElems);
+export function initFormCombos(entity, fLvl) {                           //console.log("initFormCombos. [%s] formLvl = [%s] fields = %O", entity, formLvl, fP.forms[formLvl].selElems);
+    const elems = _forms.memory('getFormProp', ['selElems', fLvl]);
     const comboEvents = _forms.getComboboxEvents(entity);
     elems.forEach(selectizeElem);
-    elems = [];
+    _forms.memory('setFormProp', [fLvl, 'selElems', []]);
 
     function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
         const confg = getFieldConfg(comboEvents, fieldName);
@@ -100,7 +101,7 @@ export function setSelVal(id, val, silent) {                                    
 }
 
 function getFieldConfg(comboEvents, fieldName) {
-    const baseConfg = getBaseFieldConfg(fieldName) ;  console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
+    const baseConfg = getBaseFieldConfg(fieldName) ;                            //console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
     const eventConfg = comboEvents[fieldName] || {};
     return Object.assign(baseConfg, eventConfg);
 }

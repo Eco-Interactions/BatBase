@@ -48,7 +48,7 @@
  *     showSuccessMsg               interaction-form
  */
 import * as _u from '../util.js';
-import * as _elems from './forms/ui/form-elems.js';
+// import * as _elems from './forms/ui/form-elems.js';
 import * as _forms from './forms/forms-main.js';
 import * as db_sync from '../db-sync.js';
 import * as db_page from '../db-page.js';
@@ -64,6 +64,8 @@ import { formatDataForServer } from './forms/validation/validate-data.js';
 import { buildCitationText } from './forms/features/generate-citation.js';
 
 let fP = {};
+
+const _elems = _forms.uiElems;
 /* ================== FORM "STATE" ========================================= */
 export function clearFormMemory() {
     fP = {};
@@ -79,21 +81,6 @@ export function editEntity(id, entity) {                                        
     .then(() => showEntityEditForm(id, entity, fP));
 }   
 /*--------------------------- Create Form --------------------------------------------------------*/
-/**
- * Fills the global fP obj with the basic form params @_forms.initFormMemory. 
- * Inits the interaction form with all fields displayed and the first field, 
- * publication, in focus. From within many of the fields the user can create 
- * new entities of the field-type by selecting the 'add...' option from the 
- * field's combobox and completing the appended sub-form.
- */
-export function initNewDataForm() {                                             console.log('   //Building New Interaction Form');
-    _forms.initFormMemory('create', 'interaction')
-    .then(fP => _forms.getFormFields('interaction', fP))
-    .then(fields => form_ui.buildAndAppendForm('top', fields))
-    .then(() => form_ui.finishEntityFormBuild('interaction'))
-    .then(form_ui.finishCreateFormBuild)
-    .catch(err => _u.alertErr(err));
-}
 /*------------------- Interaction Form Methods (Shared) ----------------------*/ 
 
 /*-------------- Form Builders -------------------------------------------------------------------*/
@@ -118,11 +105,11 @@ function buildLocForm(val, fLvl) {
 
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row').after(form);
-        _cmbx.initFormCombos('location', 'sub', fP.forms.sub.selElems);
-        _cmbx.enableCombobox('#Country-Region-sel', false);
+        _cmbx('initFormCombos', ['location', 'sub']);
+        _cmbx('enableCombobox', ['#Country-Region-sel', false]);
         $('#Latitude_row input').focus();
         $('#sub-submit').val('Create without GPS data');
-        form_ui.setCoreRowStyles('#location_Rows', '.sub-row');
+        _forms.ui('setCoreRowStyles', ['#location_Rows', '.sub-row']);
         if (vals.DisplayName && vals.Country) { enableSubmitBttn('#sub-submit'); }
     }
 }
@@ -185,14 +172,6 @@ export function locCoordErr(field) {
     _errs.reportFormFieldErr(field, 'invalidCoords', fLvl);
 }
 /*--------------- Map methods ---------------------------*/
-/** Open popup with the map interface for location selection. */
-export function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
-    if ($('#loc-map').length) { return; }
-    addMapToLocForm('#Location_row', 'int');
-    if (!_cmbx.getSelVal('#Country-Region-sel')) {
-        _cmbx.focusCombobox('#Country-Region-sel', true);
-    }
-}
 export function addMapToLocForm(elemId, type) {                                        console.log('           --addMapToLocForm');
     const map = _u.buildElem('div', { id: 'loc-map', class: 'skipFormData' }); 
     const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
@@ -288,7 +267,7 @@ function onRealmSelection(val) {                                                
         $(realmElems).append(rows);
         $('#Realm_row').append(realmElems);
         fP.forms[fLvl].fieldConfg.vals.Realm = { val: null, type: 'select' };
-        _cmbx.initFormCombos(realm, fLvl, fP.forms[fLvl].selElems);  
+        _cmbx('initFormCombos', [realm, fLvl]);  
         _forms.finishTaxonSelectUi('Object');          
     }
 }
@@ -302,7 +281,7 @@ function customizeElemsForTaxonSelectForm(role) {
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
 }
 function getTaxonExitButton(role) {
-    const bttn = form_ui.getExitButton();
+    const bttn = _elems('getExitButton');
     bttn.id = 'exit-sub-form';
     $(bttn).unbind("click").click(exitTaxonSelectForm.bind(null, role));
     return bttn;
@@ -670,13 +649,6 @@ function handleNewAuthForm(authCnt, value, authType) {
     }
 } /* End handleNewAuthForm */
 /*------------------- Shared Form Builders ---------------------------------------------------*/
-/** Returns the record for the passed id and entity-type. */
-export function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fP = %O', entity, id, fP);
-    if (fP.records[entity]) { 
-        const rcrd = fP.records[entity][id];
-        if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, fP.records); console.trace() }
-        return _u.snapshot(fP.records[entity][id]); }
-}
 /*--------------- Shared Form Methods -------------------------------*/
 /**
  * Toggles between displaying all fields for the entity and only showing the 
@@ -695,7 +667,7 @@ export function toggleShowAllFields(entity, fLvl) {                             
 
     function appendAndFinishRebuild(rows) {
         $('#'+entity+'_Rows').append(rows);
-        _cmbx.initFormCombos(entity, fLvl, fP.forms[fLvl].selElems);
+        _cmbx('initFormCombos', [entity, fLvl]);
         fillComplexFormFields(fLvl);
         finishComplexForms();
     }
@@ -709,7 +681,7 @@ export function toggleShowAllFields(entity, fLvl) {                             
         if (entity !== 'location') {
             updateFieldLabelsForType(entity, fLvl);
         }
-        form_ui.setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
+        _forms.ui('setCoreRowStyles', ['#'+entity+'_Rows', '.'+fLvl+'-row']);
     }
 } /* End toggleShowAllFields */
 function ifOpenSubForm(fLvl) {
@@ -854,13 +826,16 @@ function formSubmitSucess(data, textStatus, jqXHR) {                            
 function onDataSynced(data) {                                                   console.log('       --Data update complete. data = %O', data);
     toggleWaitOverlay(false);
     if (data.errors) { return _errs.errUpdatingData(data.errors); }
-    if (noDataChanges()) { return showSuccessMsg('No changes detected.', 'red'); }  
+    if (noDataChanges()) { return showNoChangesMessage(); }  
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
 
     function noDataChanges() {
         return fP.forms[fP.ajaxFormLvl].action === 'edit'  && !hasChngs(data);
     }
+}
+function showNoChangesMessage() {
+    _forms.ui('showSuccessMsg', ['No changes detected.', 'red']); 
 }
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
@@ -960,16 +935,6 @@ function hasChngs(data) {
 //         "InteractionType"];
 //     fP.forms.top.reqElems = reqFields.map(field => $('#'+field+'-sel')[0]);
 // }
-/**
- * After an interaction is created, the form can not be submitted until changes
- * are made. This removes the change listeners from non-required elems and the 
- * flag tracking the state of the new interaction form.  
- */
-export function resetIfFormWaitingOnChanges() {  
-    if (!fP.forms.top.unchanged) { return; }
-    exitSuccessMsg();
-    delete fP.forms.top.unchanged;
-}
 /*------------------ After Sub-Entity Created ----------------------------*/
 /**
  * Exits the successfully submitted form @exitForm. Adds and selects the new 
@@ -1004,25 +969,3 @@ export function exitForm(formId, fLvl, focus, onExit, data) {                   
 }
 
 
-
-/** Shows a form-submit success message at the top of the interaction form. */
-export function showSuccessMsg(msg, color) {
-    const cntnr = _u.buildElem('div', { id: 'success' });
-    const div = _u.buildElem('div', { class: 'flex-row' });
-    const p = _u.buildElem('p', { text: msg });
-    const bttn = getSuccessMsgExitBttn();
-    div.append(p, bttn);
-    cntnr.append(div);
-    $(cntnr).css('border-color', color);
-    $('#top-hdr').after(cntnr); 
-    $(cntnr).fadeTo('400', .8);
-}
-function getSuccessMsgExitBttn() {
-    const bttn = _u.buildElem('input', { 'id': 'sucess-exit', 
-        'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' });
-    $(bttn).click(exitSuccessMsg);
-    return bttn;
-}
-function exitSuccessMsg() {
-    $('#success').fadeTo('400', 0, () => $('#success').remove());
-}
