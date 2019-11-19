@@ -4,8 +4,8 @@
  * Exports:             Imported by:
  *     formatDataForServer       db-forms, edit-forms
  */
-import { lcfirst } from '../util.js';
-import * as _fCnfg from './f-confg.js';
+import { lcfirst } from '../../../util.js';
+import * as _fCnfg from '../etc/form-config.js';
 
 let fP;
 

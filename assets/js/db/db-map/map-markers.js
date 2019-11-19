@@ -1,6 +1,6 @@
 import * as _u from '../util.js';
 import { showLocInDataTable } from '../db-page.js';
-import * as db_forms from '../db-forms/db-forms.js';
+import * as db_forms from '../data-entry/db-forms.js';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -444,7 +444,7 @@ function getCoordsHtml(loc) {
 }
 function getSelectLocationBttn(loc, editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
-    const clickFunc = editing ? db_forms.mergeLocs : db_forms.selectLoc; 
+    const clickFunc = editing ? Function.prototype : _forms.selectInteractionLocation; 
     const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn popup-bttn', value: text});
     $(bttn).click(clickFunc.bind(null, loc.id));

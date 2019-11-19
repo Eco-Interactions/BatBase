@@ -4,16 +4,17 @@
  * Exports:             Imported by:
  *     showEntityEditForm       db-forms
  */
-import * as _u from '../../util.js';
-import * as _elems from '../form-ui/form-elems.js';
-import * as _cmbx from '../combobox-util.js';
-import * as _errs from '../f-errs.js';
-import * as db_forms from '../db-forms.js';
-import * as form_ui from '../form-ui.js';
-import * as db_map from '../../db-map/db-map.js';
-import * as _fCnfg from '../f-confg.js';
-import { buildFormBttns } from '../form-ui/save-exit-bttns.js';
-import { fillRelationalDataInPanel } from '../form-ui/detail-panel.js';
+import * as _u from '../../../util.js';
+import * as _elems from '../ui/form-elems.js';
+import * as _cmbx from '../ui/combobox-util.js';
+import * as _errs from '../validation/f-errs.js';
+import * as _forms from '../forms-main.js';
+import * as db_forms from '../../db-forms.js';
+import * as form_ui from '../ui/form-ui.js';
+import * as db_map from '../../../db-map/db-map.js';
+import * as _fCnfg from '../etc/form-config.js';
+import { buildFormFooter } from '../ui/form-footer.js';
+import { fillRelationalDataInPanel } from '../ui/detail-panel.js';
 
 let fP;
 
@@ -27,7 +28,7 @@ export function showEntityEditForm(id, entity, params) {                        
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
     return getEditFormFields(id, entity)
-        .then(fields => form_ui.buildAndAppendForm(fP, 'top', fields, id))
+        .then(fields => form_ui.buildAndAppendForm('top', fields, id))
         .then(hideFieldCheckboxes)
         .then(() => finishEditFormBuild(entity))
         .then(() => fillExistingData(entity, id));
@@ -45,13 +46,13 @@ function getEditFormFields(id, entity) {
     return fieldBldr(entity, id);
 }   
 function getIntFormFields(entity, id) {
-    return db_forms.buildIntFormFields('edit');
+    return _forms.getFormFields('interaction', fP);
 }
 function getSrcTypeFields(entity, id) {
     const srcRcrd = db_forms.getRcrd('source', id);
     const type = db_forms.getRcrd(entity, srcRcrd[entity]);
     const typeId = type[entity+'Type'].id;
-    return db_forms.getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
+    return _forms.getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
 }
 /** Returns the passed entity's form fields. */
 function buildEditFormFields(entity, id) {
@@ -151,7 +152,7 @@ function fillSrcData(entity, id, rcrd) {
         const typeId = detail[typeProp].id;
         const typeName = detail[typeProp].displayName;
         const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
-        return db_forms.loadSrcTypeFields(entity, typeId, typeElem, typeName);
+        return _forms.loadSrcTypeFields(entity, typeId, typeElem, typeName);
     }
     function setSrcData() {
         fillFields(src, fields.core);
@@ -363,7 +364,7 @@ function appendPrntFormElems(elems) {
 function buildParentTaxonEditElems(prntId) {
     var prnt = fP.records.taxon[prntId];
     var hdr = [buildEditParentHdr()];
-    var bttns = [buildFormBttns("parent", "sub", "edit", true, fP)];
+    var bttns = [buildFormFooter("parent", "sub", "edit", true, fP)];
     return getParentEditFields(prnt).then(fields => hdr.concat(fields, bttns));
 }
 function buildEditParentHdr() {
@@ -372,8 +373,7 @@ function buildEditParentHdr() {
 }
 function getParentEditFields(prnt) {  
     const realm = _u.lcfirst(prnt.realm.displayName);      
-    const confg = _fCnfg.getFormConfg(realm);
-    return db_forms.initFormLevelParamsObj(realm, 'sub', null, confg, 'edit')
+    return _forms.initEntityFormMemory(realm, 'sub', null, 'edit')
         .then(fP => _elems.buildFormRows(realm, {}, 'sub', null, fP))
         .then(modifyAndReturnPrntRows);
     
@@ -542,7 +542,7 @@ function finishCitEditFormBuild() {
     _cmbx.initFormCombos('citaion', 'top', fP.forms.top.selElems); 
     $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
     $('.all-fields-cntnr').hide();
-    db_forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
+    _forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
 /*-------- Edit Location Methods ----------*/
 function finishLocEditFormBuild() {  

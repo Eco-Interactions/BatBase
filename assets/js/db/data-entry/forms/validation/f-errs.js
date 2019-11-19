@@ -9,15 +9,14 @@
  *     clrNeedsHigherLvl        edit-forms
  *     clrContribFieldErr       db-forms
  */
-import * as _u from '../util.js';
-import * as _elems from './form-ui/form-elems.js';
-import * as db_sync from '../db-sync.js';
-import * as form_ui from './form-ui.js';
-import * as _cmbx from './combobox-util.js';
-import * as db_forms from './db-forms.js';
+import * as _u from '../../../util.js';
+import * as _elems from '../ui/form-elems.js';
+import * as db_sync from '../../../db-sync.js';
+import * as form_ui from '../ui/form-ui.js';
+import * as _cmbx from '../ui/combobox-util.js';
+import * as db_forms from '../../db-forms.js';
 
 let fP;
-
 /*------------------- Form Error Handlers --------------------------------*/
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */

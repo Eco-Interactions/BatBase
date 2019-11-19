@@ -7,16 +7,16 @@
  *     buildCitationText            db-forms
  *     rebuildCitationText          db_sync
  */
-import * as _u from '../util.js';
-import { getFormValueData, getSelectedVals } from './get-form-data.js';
-import { getFormLevelParams, getRcrd } from './db-forms.js';
+import * as _u from '../../../util.js';
+import { getFormValueData, getSelectedVals } from '../validation/get-form-data.js';
+import { getFormLevelParams, getRcrd } from '../../db-forms.js';
 
 /**
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
 export function buildCitationText(params, fLvl) {
-    const pubData = getFormLevelParams(fLvl).pub;
+    const pubData = _forms.memory('getFormProp', ['pub', fLvl]);
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
     return getFormValueData(params, 'citation', null, null).then(generateCitText); 
 
