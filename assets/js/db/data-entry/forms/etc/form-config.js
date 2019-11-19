@@ -1,14 +1,13 @@
 /**
  * Config for all entity forms.
  *
- * Exports:         Imported by:
- *     getFormConfg         db-forms, edit-forms
- *     getCoreFieldDefs     db-forms, edit-forms
- *     getParentEntity      db-forms, edit-forms
+ * Exports:             Imported by:
+ *     getFormConfg             db-forms, edit-forms
+ *     getCoreFieldDefs         db-forms, edit-forms
+ *     getParentEntity          db-forms, edit-forms
  *     getFieldTranslations     validate-data
  *     getCoreFormEntity        validate-data
  */
-import * as db_forms from './db-forms.js';
 
 /**
  * Returns a form-config object for the passed entity. 
@@ -20,7 +19,7 @@ import * as db_forms from './db-forms.js';
  *   NOTE: The required and suggested fields will be the default shown in form. 
  * > optional - All remaining available fields for the entity.
  * > order - Order to display the fields in both the default and expanded forms. 
- * > exitHandler - optional Obj with handlers for exiting create/edit forms.
+// * > exitHandler - optional Obj with handlers for exiting create/edit forms.
  */
 export function getFormConfg(entity) {                                                 //console.log('getFormConfg [%s]', entity);
     const fieldMap = { 
@@ -32,7 +31,7 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Species", "Genus", "Family", "Order", "Class"],
                 "opt": false },
-            "exitHandler": { create: db_forms.enableTaxonCombos }
+            // "exitHandler": { create: db_forms.enableTaxonCombos }
         },
         "author": { 
             "add": { "FirstName": "text", "MiddleName": "text", 
@@ -144,7 +143,7 @@ export function getFormConfg(entity) {                                          
                             'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
                 }
             },
-            'exitHandler': { create: db_forms.enablePubField }
+            // 'exitHandler': { create: db_forms.enablePubField }
         },    
         'editor': { 
             "add": { "FirstName": "text", "MiddleName": "text", 
@@ -165,7 +164,6 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["InteractionType","InteractionTags", "Note"],
                 "opt": false },
-            "exitHandler": { create: db_forms.resetInteractionForm }
         },
         'location': {
             'add': {},  
@@ -177,7 +175,7 @@ export function getFormConfg(entity) {                                          
                 'sug': ['Latitude', 'Longitude', 'DisplayName', 'Description', 
                     'Country', 'HabitatType', 'Elevation', 'ElevationMax' ],
                 'opt': false },
-            'exitHandler': { create: db_forms.enableCountryRegionField }
+            // 'exitHandler': { create: db_forms.enableCountryRegionField }
         },
         'object': {
             "add": {"Realm": "select"},  
@@ -196,7 +194,7 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Species", "Genus", "Family"],
                 "opt": false},
-            "exitHandler": { create: db_forms.enableTaxonCombos }
+            // "exitHandler": { create: db_forms.enableTaxonCombos }
         },
         'publication': {
             "add": { "Title" : "text", "PublicationType": "select", 
@@ -269,7 +267,7 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Species", "Genus", "Family"],
                 "opt": false },
-            "exitHandler": { create: db_forms.enableTaxonCombos }
+            // "exitHandler": { create: db_forms.enableTaxonCombos }
         },
         'taxon': {
             "add": {},  
@@ -279,7 +277,7 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["DisplayName"],
                 "opt": false },
-            "exitHandler": { create: db_forms.enableTaxonLvls }
+            // "exitHandler": { create: db_forms.enableTaxonLvls }
         },
     };
     return fieldMap[entity];

@@ -5,7 +5,7 @@
  *     init            db_page, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
-import * as db_forms from '../db-forms/db-forms.js';
+import * as db_forms from '../data-entry/db-forms.js';
 import { updateFilterStatusMsg } from './db-filters.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';

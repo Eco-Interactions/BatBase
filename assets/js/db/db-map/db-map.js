@@ -12,7 +12,7 @@
  *   showLoc                    db_page
  */
 import * as _u from '../util.js';
-import * as db_forms from '../db-forms/db-forms.js';
+import * as db_forms from '../data-entry/db-forms.js';
 import * as MM from './map-markers.js'; 
 import buildMapDataObj from './map-data.js';
 import { accessTableState as tState } from '../db-page.js';

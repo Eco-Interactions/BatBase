@@ -4,16 +4,20 @@
  * pushes the buttons to the bottom right of their form container.
  *
  * Exports:             Imported by:
- *     buildFormBttns       form-ui
+ *     buildFormFooter       form-ui
  *     
  */
-import * as _u from '../../util.js';
-import * as db_forms from '../db-forms.js';
-import * as _cmbx from '../combobox-util.js';
+import * as _u from '../../../util.js';
+import * as db_forms from '../../db-forms.js';
+import * as _cmbx from './combobox-util.js';
+import * as _fCnfg from '../etc/form-config.js';
 
 let fP;
-
-export function buildFormBttns(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
+/**
+ * Returns row with a checkbox that will toggle optional form fields on the left 
+ * and the submit/cancel buttons on the right.
+ */
+export function buildFormFooter(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
     fP = params;   
     const cntnr = _u.buildElem("div", { class: "flex-row bttn-cntnr" });
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
@@ -29,7 +33,7 @@ export function buildFormBttns(entity, level, action, noShwFields, params) {    
  * @return {elem} Checkbox and label that will 'Show all fields'
  */
 function buildAddFieldsCheckbox(entity, level) {                                //console.log('fP = %O', fP);
-    if (fP.forms[level].confg.order.opt === false) { return; }
+    if (_fCnfg.getFormConfg(entity).order.opt === false) { return; }
     const cntnr = _u.buildElem('div', {class: 'all-fields-cntnr'});
     const chckBox = _u.buildElem('input', { id: level+'-all-fields', 
         type: 'checkbox', value: 'Show all fields' }) 

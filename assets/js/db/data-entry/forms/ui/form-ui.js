@@ -13,6 +13,7 @@
  *     HELPERS
  *         
  * Exports:             Imported by:
+ *     buildAndAppendForm       
  *     finishCreateFormBuild    db-forms
  *     finishIntFormBuild       db-forms
  *     finishEntityFormBuild    db-forms
@@ -20,14 +21,15 @@
  *     exitFormPopup            db-forms
  *     getExitButton            db-forms, f-errs
  */
-import * as _u from '../util.js';
+import * as _u from '../../../util.js';
 import * as _cmbx from './combobox-util.js';
-import * as _detPnl from './form-ui/detail-panel.js';
-import * as db_map from '../db-map/db-map.js';
-import * as db_page from '../db-page.js';
-import * as db_forms from './db-forms.js';
-import { showTodaysUpdates } from '../db-table/db-filters.js';
-import { buildFormBttns } from './form-ui/save-exit-bttns.js';
+import * as _forms from '../forms-main.js';
+import * as _detPnl from './detail-panel.js';
+import * as db_map from '../../../db-map/db-map.js';
+import * as db_page from '../../../db-page.js';
+import * as db_forms from '../../db-forms.js';
+import { showTodaysUpdates } from '../../../db-table/db-filters.js';
+import { buildFormFooter } from './form-footer.js';
 
 let fP;
 /* ======================== INIT FORM HTML ================================== */
@@ -85,12 +87,12 @@ function getHeaderHtml(entity, action) {
 /* ======================== DETAIL PANEL ================================== */
 
 /* -------------------- APPEND FIELDS AND FORM ------------------------------ */
-export function buildAndAppendForm(params, fLvl, fields, id) {  //console.log('params = %O', params);
-    fP = params;
+export function buildAndAppendForm(fLvl, fields, id) { 
+    fP = _forms.getFormMemory();
     showFormPopup(fP.action, fP.entity, id);
     const form = buildFormElem();  
-    const fieldContainer = buildEntityFieldContainer(params.entity, fields);
-    $(form).append([fieldContainer, buildFormBttns(params.entity, fLvl, params.action, null, fP)]);
+    const fieldContainer = buildEntityFieldContainer(fP.entity, fields);
+    $(form).append([fieldContainer, buildFormFooter(fP.entity, fLvl, fP.action, null, fP)]);
     $('#form-main').append(form);  
     return Promise.resolve();
 }
@@ -136,19 +138,13 @@ export function finishCreateFormBuild() {
  */
 export function finishIntFormBuild() {                                                 console.log('           --finishIntFormBuild');
     _cmbx.initFormCombos('interaction', 'top', fP.forms.top.selElems);
-    ['Subject', 'Object'].forEach(addTaxonFocusListener);
     $('#top-cancel').unbind('click').click(exitFormPopup);
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     addLocationSelectionMethodsNote();
-    addReqElemsToConfg();    
     $('.all-fields-cntnr').hide();
     _cmbx.focusCombobox('#Publication-sel', true);
-}
-/** Displays the [Role] Taxon select form when the field gains focus. */ 
-function addTaxonFocusListener(role) {
-    const func = { 'Subject': db_forms.initSubjectSelect, 'Object': db_forms.initObjectSelect };
-    $('#form-main').on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
+    _forms.onFormInitComplete('interaction');
 }
 /** Adds a message above the location fields in interaction forms. */
 function addLocationSelectionMethodsNote() {
@@ -161,28 +157,8 @@ function addLocationSelectionMethodsNote() {
     $(cntnr).append(note);
     $('#Country-Region_row').before(cntnr);
 }
-function addReqElemsToConfg() {
-    const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
-        "InteractionType"];
-    fP.forms.top.reqElems = reqFields.map(function(field) {
-        return $('#'+field+'-sel')[0];
-    });
-}
 /* ---------- EDIT FORMS ------------------- */
 /* --------- ENTITY FORMS ------------------ */
-/* ========================= DETAIL PANEL =================================== */
-export function clearFieldDetailPanel(field) {
-    _detPnl.clearFieldDetailPanel(field);
-}
-export function clearDetailPanel(ent, reset, html) {
-    _detPnl.clearDetailPanel(ent, reset, html);
-}
-export function fillLocDataInDetailPanel(locRcrd) {
-    _detPnl.fillLocDataInDetailPanel(locRcrd);
-}
-export function updateSrcDetailPanel(entity) {
-    _detPnl.updateSrcDetailPanel(entity);
-}
 /* ============================ EXIT FORM =================================== */
 /** Returns popup and overlay to their original/default state. */
 export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')

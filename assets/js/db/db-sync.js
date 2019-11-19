@@ -21,9 +21,9 @@
  * 
  */
 import * as _u from './util.js';
-import { getRcrd } from './db-forms/db-forms.js';
-import * as _errs from './db-forms/f-errs.js';
-import { rebuildCitationText } from './db-forms/generate-citation.js';
+import { getRcrd } from './data-entry/db-forms.js';
+import * as _errs from './data-entry/forms/validation/f-errs.js';
+import { rebuildCitationText } from './data-entry/forms/features/generate-citation.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 
 let failed = { errors: [], updates: {}};

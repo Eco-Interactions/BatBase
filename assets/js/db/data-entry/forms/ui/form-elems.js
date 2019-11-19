@@ -17,13 +17,13 @@
  *     buildMultiSelectElems    db-forms
  */
 
-import * as _u from '../../util.js';
-import * as db_forms from '../db-forms.js';
-import * as _errs from '../f-errs.js';
-import { buildFormBttns } from './save-exit-bttns.js';
-import * as _cmbx from '../combobox-util.js';
-import { getCoreFieldDefs } from '../f-confg.js';
-import * as _fCnfg from '../f-confg.js';
+import * as _u from '../../../util.js';
+import * as _forms from '../forms-main.js';
+import * as db_forms from '../../db-forms.js';
+import * as _errs from '../validation/f-errs.js';
+import { buildFormFooter } from './form-footer.js';
+import * as _cmbx from './combobox-util.js';
+import * as _fCnfg from '../etc/form-config.js';
 
 
 let fP;
@@ -40,9 +40,9 @@ export function initSubForm(params, fLvl, fClasses, fVals, selId) {             
 
     function buildFormContainer(rows) {
         const subFormContainer = buildSubFormCntnr(); 
-        const bttns = buildFormBttns(formEntity, fLvl, 'create', null, fP);
+        const bttns = buildFormFooter(formEntity, fLvl, 'create', null, fP);
         $(subFormContainer).append([buildFormHdr(), rows, bttns]);
-        db_forms.setFormParam(fLvl, 'pSelId', selId);
+        _forms.memory('addToFormMemory', [fLvl, 'pSelId', selId]);
         _cmbx.enableCombobox(selId, false);
         fP = null;
         return subFormContainer;
@@ -62,11 +62,7 @@ export function initSubForm(params, fLvl, fClasses, fVals, selId) {             
  */
 export function buildFormRows(entity, fVals, fLvl, params) {                    //console.log('buildFormRows. args = %O', arguments)
     if (params) { fP = params; }
-    // const formConfg = fP.forms[fLvl].confg;
-    const typeConfg = fP.forms[fLvl].typeConfg;
-    const formConfg = _fCnfg.getFormConfg(entity);                                 
-
-    return getFormFieldRows(entity, formConfg, typeConfg, fVals, fLvl)
+    return getFormFieldRows(entity, fVals, fLvl)
         .then(returnFinishedRows.bind(null, entity, params));
 }
 function returnFinishedRows(entity, params, rows) {
@@ -81,43 +77,60 @@ function returnFinishedRows(entity, params, rows) {
  * Returns rows for the entity form fields. If the form is a source-type, 
  * the type-entity form config is used. 
  */
-export function getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl, params) {
+export function getFormFieldRows(entity, fVals, fLvl, params) {
     // const typeConfg = fP.forms[fLvl].typeConfg;
     if (params) { fP = params; }
-    const fObj = getFieldTypeObj(entity, fConfg, fLvl, tConfg);
+    const fObj = getFieldTypeObj(entity, fLvl);
     return buildRows(fObj, entity, fVals, fLvl)
         .then(orderRows.bind(null, fObj.order));
 }
+/* ------------ BUILD FORM FIELDS' TYPE OBJ ------------- */
 /**
  * Returns an obj with the entity's field defs and all required fields.
  * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
  *               .required Ary of required fields
  */
-function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                     //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
-    const allFields = Object.assign(getCoreFieldDefs(entity), fConfg.add);
-    const include = getFormFields(fConfg, typeConfg, entity);       
-    const fieldConfg = fP.forms[fLvl].fieldConfg;     
-    fieldConfg.order = getFieldOrder(fConfg, typeConfg, entity);                     
-    fieldConfg.required = typeConfg ? 
-        typeConfg.required.concat(fConfg.required) : fConfg.required;
-    fieldConfg.fields = {};
-    include.forEach(field => fieldConfg.fields[field] = allFields[field]);    
-    return fieldConfg;
+function getFieldTypeObj(entity, fLvl) {                     //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
+    const formConfg = _fCnfg.getFormConfg(entity);
+    const typeConfg = getEntityTypeFormConfg(entity);
+    return buildFieldTypeObj(formConfg, typeConfg, fP.forms[fLvl].fieldConfg);
 }   
+function getEntityTypeFormConfg() {
+    const type = fP.forms[fLvl].entityType;
+    return type ? _fCnfg.getFormConfg(entity).types[type] : false;
+}
+function buildFieldTypeObj(formConfg, typeConfg, fieldConfg) {
+    fieldConfg.fields = getIncludedFields(entity, fConfg, tConfg);
+    fieldConfg.order = getFieldOrder(fConfg, tConfg, entity);                     
+    fieldConfg.required = getRequiredFields(fConfg, tConfg);
+    return fieldConfg;
+}
+function getIncludedFields(entity, fConfg, tConfg) {
+    const included = getFormFields(fConfg, typeConfg, entity);       
+    const allFields = Object.assign(_fCnfg.getCoreFieldDefs(entity), fConfg.add);
+    included.forEach(field => fieldConfg.fields[field] = allFields[field]);    
+    return included;
+}
 /**
  * Returns an array of fields to include in the form. If the form is a 
  * source-type, the type-entity form config is combined with the main-entity's.
  * Eg, Publication-type confgs are combined with publication's form confg.
  */
 function getFormFields(fConfg, typeConfg, entity) {                             //console.log('getting form fields for fConfg = %O typeConfg = %O', fConfg, typeConfg);
-    const shwAll = fP.forms.expanded[entity];
-    const dfault = shwAll ? 
+    const showAllFields = fP.forms.expanded[entity];
+    const dfault = getCoreFields(entity, fConfg, showAllFields);
+    const typeFields = getEntityTypeFields(entity, typeConfg, showAllFields);
+    return dfault.concat(typeFields);
+}
+function getCoreFields(entity, fConfg, showAllFields) {
+    return fP.forms.expanded[entity] ? 
         fConfg.required.concat(fConfg.suggested).concat(fConfg.optional) :
         fConfg.required.concat(fConfg.suggested); 
-    const typeFields = typeConfg && shwAll ? 
+}
+function getEntityTypeFields(entity, typeConfg, showAllFields) {
+    return typeConfg && shwAll ? 
         typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
         typeConfg ? typeConfg.required.concat(typeConfg.suggested) : []; 
-    return dfault.concat(typeFields);
 }
 /** Returns the order the form fields should be displayed. */
 function getFieldOrder(fConfg, typeConfg, entity) {
@@ -129,6 +142,10 @@ function getFieldOrder(fConfg, typeConfg, entity) {
             shwAll && fConfg.order.opt ? fConfg.order.opt : fConfg.order.sug; 
     return order.map(field => field); //removes references to confg obj.
 }
+function getRequiredFields(fConfg, tConfg) {
+    return tConfg ? tConfg.required.concat(fConfg.required) : fConfg.required;
+}
+/* ===================== BUILD FORM FIELD ROW =============================== */
 /** @return {ary} Rows for each field in the entity field obj. */
 function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
     const rows = [];
@@ -154,7 +171,8 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
     /** Adds the field, and it's type and value, to the form's field obj.  */
     function addFieldToFormFieldObj() {
         const confg = { val: fVals[field], type: fieldsObj.fields[field] };
-        db_forms.setFormFieldConfg(fLvl, field, confg);
+        _forms.memory('setFormFieldConfg', [fLvl, field, fieldObj]);
+        // db_forms.setFormFieldConfg(fLvl, field, confg);
     }
     /** Sets the value for the field if it is in the passed 'fVals' obj. */
     function fillFieldIfValuePassed(input) {                                    //console.log('filling value in [%s]', field);
@@ -171,17 +189,18 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
 function storeFieldValue(elem, fieldName, fLvl, value) {            
     const val = value || $(elem).val();                             
     if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
-    if (db_forms.citationFormNeedsCitTextUpdate(fLvl) && fieldName !== "CitationText") { 
-        db_forms.handleCitText(fLvl); }
-    db_forms.setFormFieldValueMemory(fLvl, fieldName, val);
+    if (fieldName !== "CitationText") { _forms.handleCitText(fLvl); }
+    _forms.memory('setFormFieldValueMemory', [fLvl, fieldName, val]);
+    // db_forms.setFormFieldValueMemory(fLvl, fieldName, val);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === "create") { return; }
-    const fieldObj = db_forms.getFormFieldConfg(fLvl, field);                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
+    const fieldObj = _forms.memory('getFormFieldConfg', [fLvl, field]);                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
     if (!fieldObj.val) { fieldObj.val = {}; }
     fieldObj.val[cnt] = e.target.value || null;
-    db_forms.setFormFieldConfg(fLvl, field, fieldObj);
+    _forms.memory('setFormFieldConfg', [fLvl, field, fieldObj]);
+    // db_forms.setFormFieldConfg(fLvl, field, fieldObj);
     checkForBlanksInOrder(fieldObj.val, field, fLvl);    
 }
 /**
@@ -248,7 +267,7 @@ function buildSelectCombo(entity, field, fLvl, cnt) {                           
     function finishComboBuild(opts) {
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const sel = _u.buildSelectElem(opts, { id: fieldId , class: getFieldClass(fLvl)});
-        db_forms.addComboToFormMemory(fLvl, field);
+        _forms.memory('addComboToMemory', [fLvl, field]);
         return sel;
     }
 }
@@ -359,7 +378,7 @@ export function getSrcOpts(prop, field, rcrds) {
  * Also adds the parent publication and source records to the fP obj. 
  */
 function getCitTypeOpts(prop) {  
-    const fLvl = db_forms.getSubFormLvl('sub');
+    const fLvl = _forms.getSubFormLvl('sub');
     return _u.getData(prop).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
@@ -377,7 +396,8 @@ function getCitTypeOpts(prop) {
     function setPubInParams() {
         const pubSrc = getSrcRcrd($('#Publication-sel').val());
         const pub = db_forms.getRcrd('publication', pubSrc.publication);
-        db_forms.setFormParam(fLvl, 'pub', { pub: pub, src: pubSrc});
+        _forms.memory('addToFormMemory', [fLvl, 'pub', { pub: pub, src: pubSrc}]);
+        // db_forms.setFormParam(fLvl, 'pub', { pub: pub, src: pubSrc});
     }
     function getSrcRcrd(pubId) {
         if (pubId) { return fP.records.source[pubId]; } //When not editing citation record.
@@ -459,7 +479,8 @@ function handleRequiredField(label, input, fLvl) {
     $(label).addClass('required');  
     $(input).change(checkRequiredFields);
     $(input).data('fLvl', fLvl);
-    db_forms.addRequiredFieldInputToMemory(fLvl, input);
+    _forms.memory('addRequiredFieldInput', [fLvl, input]);
+    // db_forms.addRequiredFieldInputToMemory(fLvl, input);
 }
 /**
  * On a required field's change event, the submit button for the element's form 
@@ -470,7 +491,7 @@ function checkRequiredFields(e) {                                               
     const input = e.currentTarget;
     const fLvl = $(input).data('fLvl');  
     checkReqFieldsAndToggleSubmitBttn(input, fLvl);
-    if (db_forms.citationFormNeedsCitTextUpdate(fLvl)) { db_forms.handleCitText(fLvl); }  
+    _forms.handleCitText(fLvl);
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
@@ -498,8 +519,8 @@ export function checkIntFieldsAndEnableSubmit() {
     db_forms.resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
 /** Returns true if all the required elements for the current form have a value. */
-export function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s. fP = %O", fLvl, fP)
-    const reqElems = db_forms.getFormReqElems(fLvl);                                   //console.log('reqElems = %O', reqElems);          
+export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)
+    const reqElems = _forms.memory('getFormProp', ['reqElems', fLvl]);          //console.log('reqElems = %O', reqElems);
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
@@ -529,12 +550,12 @@ function isAFieldSelected(entity) {                                             
 }
 /** Returns true if the next sub-level form exists in the dom. */
 function hasOpenSubForm(fLvl) {
-    const childFormLvl = db_forms.getNextFormLevel('child', fLvl);
+    const childFormLvl = _forms.getNextFormLevel('child', fLvl);
     return $('#'+childFormLvl+'-form').length > 0;
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {
-    if (db_forms.getFormEntity(fLvl) !== 'location') { return false; }
+    if (_forms.memory('getFormProp', ['entity', fLvl]) !== 'location') { return false; }
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });

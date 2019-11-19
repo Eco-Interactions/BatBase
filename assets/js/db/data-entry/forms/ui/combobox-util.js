@@ -5,7 +5,7 @@
  *     initFormCombos       db-forms   
  *     initSingle           db-forms
  */
-import * as db_forms from './db-forms.js';
+import * as db_forms from '../../db-forms.js';
 
 /*------------------- Combobox (selectized) Methods ----------------------*/
 /**
@@ -34,12 +34,12 @@ export function initSingle(confg, fLvl) {                                       
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, elems) {                           //console.log("initFormCombos. [%s] formLvl = [%s] fields = %O", entity, formLvl, fP.forms[formLvl].selElems);
-    const selConfgs = db_forms.getSelConfgs();
+    const selConfgs = _forms.getComboboxEvents(entity);
     elems.forEach(selectizeElem);
     elems = [];
 
     function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
-        const confg = selConfgs[fieldName];
+        const confg = getFieldConfg(selConfgs, fieldName);
         confg.id = confg.id || '#'+fieldName+'-sel';
         initSingle(confg, fLvl);
     }
@@ -97,3 +97,20 @@ export function setSelVal(id, val, silent) {                                    
     const $selApi = $(id)[0].selectize; 
     $selApi.addItem(val, silent); 
 }
+
+function getFieldConfg(selConfgs, fieldName) {
+    const baseConfg = getBaseFieldConfg(fieldName) ;
+    const eventConfg = selConfgs[fieldName] || {};
+    return Object.assign(baseConfg, confgEvents);
+}
+function getBaseFieldConfg(fieldName) {
+    const confgName = fieldName.replace(/([A-Z])/g, ' $1');
+    const confgs = { 
+        'Authors': { name: 'Authors', id: '#Authors-sel1' },
+        'Editors': { name: 'Editors', id: '#Editors-sel1' },
+        'InteractionTags': { name: 'Interaction Tags', 
+            options: { delimiter: ",", maxItems: null }},         
+    };
+    return confgs[fieldName] || { name: confgName };
+}
+

@@ -12,15 +12,16 @@
  *         SOURCE DETAILS
  *     CLEAR PANELS
  *
- * Exports:                 Imported by:
+ * Exports:                 Consumers:
  *     clearDetailPanel             form-ui
- *     clearFieldDetailPanel        db-forms
+ *     clearFieldDetails            db-forms
  *     fillRelationalDataInPanel    edit-forms
+ *     fillLocDataInDetailPanel     int-form
  *     getDetailPanelElems          form-ui
- *     updateSrcDetailPanel         form-ui
+ *     updateSrcDetails             form-ui
  */
-import * as _u from '../../util.js';
-import { getRcrd, getEntityRcrds } from '../db-forms.js';
+import * as _u from '../../../util.js';
+import { getRcrd } from '../../db-forms.js';
 
 /* ===================== INIT DETAIL PANEL ================================== */
 export function getDetailPanelElems(entity, id, fP) {                           //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
@@ -97,11 +98,11 @@ function getSrcIntCnt(entity, rcrd) {                                           
         rcrd.interactions.length : getAllSourceInts(rcrd); 
 }
 function getAllSourceInts(rcrd) {
-    return getTtlIntCnt(rcrd, 'interactions', getEntityRcrds('source'));
+    return getTtlIntCnt(rcrd, 'interactions', _forms.memory('getEntityRcrds', ['source']));
 }
 /* ------------- TAXON --------- */
 function fillTxnDetailData(entity, rcrd) {
-    const txnRcrds = getEntityRcrds('taxon');
+    const txnRcrds = _forms.memory('getEntityRcrds', ['taxon']);
     var refs = { 
         'int': getTtlIntCnt(rcrd, 'objectRoles', txnRcrds) || 
             getTtlIntCnt(rcrd, 'subjectRoles', txnRcrds)
@@ -160,7 +161,7 @@ function getTtlIntCnt(rcrd, intProp, entityRcrds) {                             
  */
 function addDataToIntDetailPanel(ent, propObj) {                                //console.log('ent = [%s], propObj = %O', ent, propObj);
     var html = getDataHtmlString(propObj);   
-    clearDetailPanel(ent, false, html)   
+    clearDetailPanel(ent, true, html)   
 }
 /** Returns a ul with an li for each data property */
 function getDataHtmlString(props) {
@@ -199,9 +200,9 @@ function getAllLocData(locRcrd) {
 }
 /* ----------- SOURCE DETAILS --------- */
 /** Adds source data to the interaction form's detail panel. */
-export function updateSrcDetailPanel(entity) {                                  //console.log('           --updateSrcDetailPanel');
+export function updateSrcDetails(entity) {                                  //console.log('           --updateSrcDetails');
     const data = {}; 
-    const srcRcrds = getEntityRcrds('source');
+    const srcRcrds = _forms.memory('getEntityRcrds', ['source']);
     buildSourceData();
     addDataToIntDetailPanel('src', data);
 
@@ -294,17 +295,17 @@ export function updateSrcDetailPanel(entity) {                                  
 }
 /* =========================== CLEAR PANEL ================================== */
 export function clearDetailPanel(ent, reset, html) {                                   //console.log('clearDetailPanel for [%s]. html = ', ent, html)
-    if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
+    if (ent === 'cit') { return updateSrcDetails('cit'); }
     if (ent === 'pub') { ent = 'src'; }
-    const newDetails = reset ? 'None selected.' : html;
+    const newDetails = reset ? html : 'None selected.';
     $('#'+ent+'-det div').empty();
     $('#'+ent+'-det div').append(newDetails); 
     return Promise.resolve();
 }
-export function clearFieldDetailPanel(field) {
+export function clearFieldDetails(field) {
     let detailFields = {
         'Location': 'loc', 'CitationTitle': 'src', 'Publication': 'src' };
     if (Object.keys(detailFields).indexOf(field) !== -1) {  
-        clearDetailPanel(detailFields[field], true);
+        clearDetailPanel(detailFields[field]);
     }
 }

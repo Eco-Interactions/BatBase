@@ -22,7 +22,7 @@
 import * as _u from './util.js';
 import { accessTableState as tState } from './db-page.js';
 import exportCsvData from './db-table/csv-data.js';
-import { initNewDataForm } from './db-forms/db-forms.js';
+import { initNewDataForm } from './data-entry/forms/forms-main.js';
 import * as db_page from './db-page.js';
 import * as db_filters from './db-table/db-filters.js';
 import { showInts } from './db-map/db-map.js';
