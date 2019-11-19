@@ -11,7 +11,6 @@
  *     buildFormRow             db-forms
  *     buildTagField            db-forms
  *     buildLongTextArea        db-forms
- *     checkIntFieldsAndEnableSubmit    db-forms
  *     getRcrdOpts              db-forms
  *     getTaxonOpts             db-forms
  *     buildMultiSelectElems    db-forms
@@ -20,13 +19,14 @@
 import * as _u from '../../../util.js';
 import * as _forms from '../forms-main.js';
 import * as db_forms from '../../db-forms.js';
-import * as _errs from '../validation/f-errs.js';
+// import * as _errs from '../validation/f-errs.js';
 import { buildFormFooter } from './form-footer.js';
 import * as _cmbx from './combobox-util.js';
 import * as _fCnfg from '../etc/form-config.js';
 
 
 let fP;
+const _errs = _forms.err;
 /**
  * Builds and returns the subForm according to the passed params. Disables the 
  * select elem 'parent' of the sub-form. 
@@ -506,17 +506,6 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
         if (locHasGpsData(fLvl)) { return; }
         db_forms.enableSubmitBttn(subBttnId);
     }
-}
-/**
- * After the interaction form is submitted, the submit button is disabled to 
- * eliminate accidently creating duplicate interactions. This change event is
- * added to the non-required fields of the form to enable to submit as soon as 
- * any change happens in the form, if the required fields are filled. Also 
- * removes the success message from the form.
- */
-export function checkIntFieldsAndEnableSubmit() {
-    if (ifAllRequiredFieldsFilled('top')) { db_forms.enableSubmitBttn('#top-submit'); }
-    db_forms.resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)

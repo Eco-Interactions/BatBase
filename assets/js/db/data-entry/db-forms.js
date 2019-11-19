@@ -54,7 +54,7 @@ import * as db_sync from '../db-sync.js';
 import * as db_page from '../db-page.js';
 import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
-import * as _errs from './forms/validation/f-errs.js';
+import * as _errs from './forms/validation/form-errors.js';
 import * as form_ui from './forms/ui/form-ui.js';
 import * as _cmbx from './forms/ui/combobox-util.js';
 import * as _fCnfg from './forms/etc/form-config.js';
@@ -203,46 +203,8 @@ export function focusParentAndShowChildLocs(type, val) {
     if (!val) { return; }                                                       console.log('           --focusParentAndShowChildLocs [%s] [%s]', type, val);
     db_map.initFormMap(val, fP.records.location, type);
 }
-/*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */
-/**
- * Inits the taxon params object.
- * > lvls - All taxon levels
- * > realm - realm taxon display name
- * > realmLvls - All levels for the selected realm
- * > realmTaxon - realm taxon record
- * > prevSel - Taxon already selected when form opened, or null.
- * > objectRealm - Object realm display name. (Added elsewhere.)
- */
-export function initTaxonParams(role, realmName, id) {                                 //console.log('###### INIT ######### role [%s], realm [%s], id [%s]', role, realmName, id);
-    const realmLvls = {
-        'Bat': ['Order', 'Family', 'Genus', 'Species'],
-        'Arthropod': ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
-        'Plant': ['Kingdom', 'Family', 'Genus', 'Species']
-    };
-    return getRealmTaxon(realmName).then(buildBaseTaxonParams);                 console.log('       --taxon params = %O', fP.forms.taxonPs)
 
-    function buildBaseTaxonParams(realmTaxon) {
-        const prevSel = getPrevSelId(role);
-        const reset = fP.forms.taxonPs ? fP.forms.taxonPs.prevSel.reset : false;
-        fP.forms.taxonPs = { 
-            lvls: ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
-            realm: realmName, 
-            allRealmLvls: realmLvls, 
-            curRealmLvls: realmLvls[realmName],
-            realmTaxon: realmTaxon,
-            prevSel: (prevSel ? 
-                { val: prevSel, text: getTaxonDisplayName(fP.records.taxon[prevSel]) } :
-                { val: null, text: null })
-        };         
-        if (reset) { fP.forms.taxonPs.prevSel.reset = true; } //removed once reset complete
-        if (role === 'Object') { fP.forms.taxonPs.objectRealm = realmName; }
-    }
-}
-function getPrevSelId(role) {
-    return $('#'+role+'-sel').val() || 
-        (fP.forms.taxonPs ? fP.forms.taxonPs.prevSel.val : false);
-}
 function setTaxonParams(role, realmName, id) {                                  //console.log('setTaxonParams. args = %O', arguments)
     const tPs = fP.forms.taxonPs;
     tPs.realm = realmName;
@@ -253,19 +215,6 @@ function setTaxonParams(role, realmName, id) {                                  
         tPs.curRealmLvls = tPs.allRealmLvls[realmName];
     }
 }
-function getRealmTaxon(realm) {  
-    const lvls = { 'Arthropod': 'Phylum', 'Bat': 'Order', 'Plant': 'Kingdom' };
-    const realmName = realm || getObjectRealm();
-    const dataProp = realmName + lvls[realmName] + 'Names'; 
-    return _u.getData(dataProp).then(returnRealmTaxon);
-}
-function returnRealmTaxon(realmRcrds) {
-    return fP.records.taxon[realmRcrds[Object.keys(realmRcrds)[0]]];  
-}
-/** Returns either the preivously selected object realm or the default. */
-export function getObjectRealm() {
-    return !fP.forms.taxonPs ? 'Plant' : (fP.forms.taxonPs.objectRealm || 'Plant');
-}   
 /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
 function initTaxonForm(value) {                                                 console.log('           --initTaxonForm [%s]', value);
     const val = value === 'create' ? '' : value;
@@ -389,7 +338,7 @@ function realmTaxonPrevSelected(taxon) {
     return fP.forms.taxonPs.curRealmLvls[0] == taxon.level.displayName;
 }
 function selectPrevTaxon(taxon) {
-    fP.forms.taxonPs.prevSel = {val: taxon.id, text: getTaxonDisplayName(taxon)};        
+    fP.forms.taxonPs.prevSel = {val: taxon.id, text: _forms.getTaxonDisplayName(taxon)};        
     if (ifRealmReset(taxon.realm)) { return _cmbx.setSelVal('#Realm-sel', taxon.realm.id); }
     _cmbx.setSelVal('#'+taxon.level.displayName+'-sel', taxon.id);
     window.setTimeout(() => { delete fP.forms.taxonPs.reset; }, 1000);
@@ -415,11 +364,7 @@ function selectTaxon() {
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption() {
     const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
-    return { value: taxon.id, text: getTaxonDisplayName(taxon) };
-}
-export function getTaxonDisplayName(taxon) { 
-    return taxon.level.displayName === 'Species' ? 
-        taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
+    return { value: taxon.id, text: _forms.getTaxonDisplayName(taxon) };
 }
 /** Finds the most specific level with a selection and returns that taxon record. */
 export function getSelectedTaxon(aboveLvl) {

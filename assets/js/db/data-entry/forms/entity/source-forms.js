@@ -14,6 +14,8 @@ import * as _forms from '../forms-main.js';
  * citTimeout - prevents citation text being generated multiple times.
  */
 const app = {};
+const _errs = _forms.err;
+
 
 /* -------------------------- FACADE ---------------------------------------- */
 export function getComboEvents(entity) {
@@ -95,34 +97,6 @@ function ifBookAddAuthEdNote() {
     $('#Authors_row').before(note);
 }
 /*-------------- Citation ------------------------------------------------*/
-/** Returns a form row with an empty citation select dropdown. */
-// function buildCitFieldRow() {                                                   console.log('       --buildCitFieldRow');
-//     const selElem = _u.buildSelectElem([], {id: 'CitationTitle-sel', class: 'lrg-field'});
-//     return _elems.buildFormRow('CitationTitle', selElem, 'top', true);
-// }
-// /** Fills the citation combobox with all citations for the selected publication. */
-// function fillCitationField(pubId) {                                             //console.log("initCitSelect for publication = ", pubId);
-//     _cmbx.enableCombobox('#CitationTitle-sel');
-//     _cmbx.updateComboboxOptions('#CitationTitle-sel', getPubCitationOpts(pubId));
-// }
-// /** Returns an array of option objects with citations for this publication.  */
-// function getPubCitationOpts(pubId) {
-//     const pubRcrd = fP.records.source[pubId];  
-//     if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
-//     const opts = _elems.getRcrdOpts(pubRcrd.children, fP.records.source);
-//     opts.unshift({ value: 'create', text: 'Add a new Citation...'});
-//     return opts;
-// }
-// /** 
-//  * When a Citation is selected, both 'top' location fields are initialized
-//  * and the publication combobox is reenabled. 
-//  */    
-// function onCitSelection(val) {                                                  console.log('       --onCitSelection [%s]', val);
-//     if (val === 'create') { return openCreateForm('CitationTitle'); }
-//     if (val === '' || isNaN(parseInt(val))) { return form_ui.clearDetailPanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
-//     form_ui.updateSrcDetailPanel('cit', fP.records.source);
-//     if (!fP.editing) { $('#CitationTitle_pin').focus(); }
-// }    
 /** Shows the Citation sub-form and disables the publication combobox. */
 export function initCitForm(v) {                                                       console.log("       --initCitForm [%s]", v);
     const fLvl = getSubFormLvl('sub');

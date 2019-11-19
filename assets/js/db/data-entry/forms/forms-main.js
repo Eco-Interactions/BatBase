@@ -16,6 +16,7 @@
  *     
  */
 import * as _u from '../../util.js';
+import * as _errs from './validation/form-errors.js'
 import * as _mmry from './etc/form-memory.js';
 import * as db_forms from '../db-forms.js';
 import * as form_util from './etc/form-util.js';
@@ -31,12 +32,16 @@ const forms = {
     };
 
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
-export function pgUtil(funcName, params) {
+export function _util(funcName, params) {
     return _u[funcName](...params);
 }
-/** -------------------  FORM UTILITY ------------------------------ */
+/** ------------------------  FORM UTILITY ---------------------------------- */
 export function util(funcName, params) {
     return form_util[funcName](...params);
+}
+/** ----------------------  ERROR HANDLERS ---------------------------------- */
+export function err(funcName, params) {
+    return _errs[funcName](...params);
 }
 /** --------------------------- FORM UI ---------------------------------- */
 // export function ui(funcName, params) {
@@ -76,7 +81,7 @@ export function getFormMemory() {
 }
 /** ------------------------ INIT FORMS ------------------------------------- */
 export function initNewDataForm() {
-    _int.initNewInteractionForm();
+    forms.interaction.initCreateForm();
 }
 export function createSubEntity(ent, cnt) {
     const entity = ent == 'Citation' ? 'CitationTitle' : ent;
@@ -84,18 +89,23 @@ export function createSubEntity(ent, cnt) {
      $(selId)[0].selectize.createItem('create'); 
 }
 export function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
-    initEntityFormMemory(entity, fLvl, pSel, 'create');        
-    return _elems.initSubForm(fP, fLvl, fClasses, fVals, pSel);
+    _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
+    return _ui.elems.initSubForm(fP, fLvl, fClasses, fVals, pSel);
+}
+export function buildTaxonSelectForm(role, realm, fLvl) {
+    _mmry.initEntityFormMemory(role, fLvl, '#'+role+'-sel', 'create');
+    _mmry.initTaxonMemory(role, realm);
+    return _ui.elems.initSubForm(fP, fLvl, fClasses, fVals, pSel);
 }
 /** --------- ON FORM INIT COMPLETE ------------- */
 export function onFormInitComplete(entity) {
-    forms[entity].onInitComplete();
+    forms[_u.lcfirst(entity)].onInitComplete();
 }
 /** --------- EXIT HANDLERS ------------- */
 // edit form default handler: form_ui.exitFormPopup
 export function onFormSubmitSuccess(entity, action) {
     const defaultHandlr = action === 'edit' ? form_ui.exitFormPopup : Function.prototype;
-    return forms[entity].onSubmitSuccess || defaultHandlr; 
+    return forms[_u.lcfirst(entity)].onSubmitSuccess || defaultHandlr; 
 }
 export function submitForm(formId, fLvl, entity) {
     db_forms.getFormValuesAndSubmit(formId, fLvl, entity);
@@ -103,9 +113,13 @@ export function submitForm(formId, fLvl, entity) {
 /** ------------------------ FORM ELEMENTS ---------------------------------- */
 export function getFormFields(entity, params) {
     const map = {
-        'interaction': _int.getIntFormFields
+        'interaction': _int.getInteractionFormFields
     };
     return map[entity](params);
+}
+/** ------------------------ CREATE FORMS ----------------------------------- */
+export function create(entity) {
+    forms[_u.lcfirst(entity)].initCreateForm();
 }
 /** ------------------------ FORM SPECIFIC ---------------------------------- */
 export function finishTaxonSelectUi(role) {
@@ -128,24 +142,33 @@ export function selectInteractionLocation(id) {
     _int.selectLoc(id);
 }
 export function getFormFunc(entity, funcName) {
-    return forms[entity][funcName];
-}
-export function newCitation() {
-    return _src.initCitForm();
+    return forms[_u.lcfirst(entity)][funcName];
 }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
-    return _fUtil.getNextFormLevel(next, curLvl);
+    return util('getNextFormLevel', [next, curLvl]);
 }
 export function getSubFormLvl(intFormLvl) {  
-    return _fUtil.getSubFormLvl(intFormLvl);
+    return util('getSubFormLvl', [intFormLvl]);
+}
+export function getComboboxEvents(entity) {  console.log('entity = ', entity)
+    return forms[entity].getComboEvents();
 }
 
-export function getComboboxEvents(entity) {
-    return forms[entity].getComboEvents(entity);
-}
 
-export function onCitSelection(val) {
-    _int.onCitSelection(val);
+/* ------- sort --------- */
+export function getTaxonDisplayName(taxon) { 
+    return taxon.level.displayName === 'Species' ? 
+        taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
+}
+export function getRealmTaxon(realm) {  
+    const lvls = { 'Arthropod': 'Phylum', 'Bat': 'Order', 'Plant': 'Kingdom' };
+    const realmName = realm || _mmry('getObjectRealm');
+    const dataProp = realmName + lvls[realmName] + 'Names'; 
+    return _u.getData(dataProp).then(returnRealmTaxon);
+}
+function returnRealmTaxon(realmRcrds) {
+    const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
+    return _mmry('getEntityRcrds', ['taxon']);  
 }

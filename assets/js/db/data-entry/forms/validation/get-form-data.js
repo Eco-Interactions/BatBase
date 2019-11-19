@@ -6,10 +6,13 @@
  *     getSelectedVals
  */
 import * as _u from '../../../util.js';
-import * as _errs from './f-errs.js';
+// import * as _errs from './f-errs.js';
 import * as _cmbx from '../ui/combobox-util.js';
+import * as _forms from '../forms-main.js';
 
 let fP;
+const _errs = _forms.err;
+
 /**
  * Loops through all rows in the form with the passed id and returns an object 
  * of the form values. Entity data not contained in an input on the form is 

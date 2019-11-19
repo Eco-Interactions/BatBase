@@ -8,7 +8,7 @@
  *     initEntityFormMemory     
  */
 import { getData, snapshot } from '../../../util.js';
-
+import * as _forms from '../forms-main.js';
 let formMemory = {};
 
 export function clearMemory() {
@@ -91,6 +91,52 @@ export function initEntityFormMemory(entity, level, pSel, action) {       //cons
     };   
     return formMemory;                                                                       //console.log("fLvl params = %O", formMemory.forms[level]);
 }
+/*------------- Taxon --------------------*/
+/**
+ * Inits the taxon params object.
+ * > lvls - All taxon levels
+ * > realm - realm taxon display name
+ * > realmLvls - All levels for the selected realm
+ * > curRealmLvls - Levels present in selected realm.
+ * > realmTaxon - realm taxon record
+ * > prevSel - Taxon already selected when form opened, or null.
+ * > objectRealm - Object realm display name. (Added elsewhere.)
+ */
+export function initTaxonMemory(role, realmName) {                                 //console.log('###### INIT ######### role [%s], realm [%s], id [%s]', role, realmName, id);
+    const realmLvls = {
+        'Bat': ['Order', 'Family', 'Genus', 'Species'],
+        'Arthropod': ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
+        'Plant': ['Kingdom', 'Family', 'Genus', 'Species']
+    };
+    return _forms.getRealmTaxon(realmName).then(buildBaseTaxonParams);                 console.log('       --taxon params = %O', fP.forms.taxonPs)
+
+    function buildBaseTaxonParams(realmTaxon) {
+        const prevSelectedTxnOpt = buildOptForPrevSelectedTaxon(role);
+        const reset = fP.forms.taxonPs ? fP.forms.taxonPs.prevSel.reset : false;
+        fP.forms.taxonPs = { 
+            lvls: ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
+            realm: realmName, 
+            allRealmLvls: realmLvls, 
+            curRealmLvls: realmLvls[realmName],
+            realmTaxon: realmTaxon,
+            prevSel: prevSelectedTxnOpt
+        };         
+        if (reset) { fP.forms.taxonPs.prevSel.reset = true; } //removed once reset complete
+        if (role === 'Object') { fP.forms.taxonPs.objectRealm = realmName; }
+    }
+}
+function buildOptForPrevSelectedTaxon(role) {
+    const id = $('#'+role+'-sel').val() || 
+        (fP.forms.taxonPs ? fP.forms.taxonPs.prevSel.val : false);
+    return id ? 
+        { val: id, text: _forms.getTaxonDisplayName(fP.records.taxon[id]) } :
+        { val: null, text: null };
+}
+
+/** Returns either the preivously selected object realm or the default. */
+export function getObjectRealm() {
+    return !fP.forms.taxonPs ? 'Plant' : (fP.forms.taxonPs.objectRealm || 'Plant');
+}   
 // /* ---------------------------- Getters ------------------------------------- */
 export function getAllFormMemory() {
     return formMemory;
@@ -106,6 +152,9 @@ export function getFormEntity(fLvl) {
 }
 export function getFormParentId(fLvl) {
     return formMemory.forms[fLvl].pSelId;
+}
+export function getTaxonProp(prop) {
+    return formMemory.forms.taxonPs[prop];
 }
 // export function getFormLevelParams(fLvl) {
 //     return formMemory.forms[fLvl];
