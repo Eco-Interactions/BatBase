@@ -395,13 +395,12 @@ function getCitTypeOpts(prop) {
     }
     function setPubInParams() {
         const pubSrc = getSrcRcrd($('#Publication-sel').val());
-        const pub = db_forms.getRcrd('publication', pubSrc.publication);
-        _forms.memory('addToFormMemory', [fLvl, 'pub', { pub: pub, src: pubSrc}]);
-        // db_forms.setFormParam(fLvl, 'pub', { pub: pub, src: pubSrc});
+        const pub = _mmry('getRcrd', ['publication', pubSrc.publication]);
+        _mmry('addToFormMemory', [fLvl, 'pub', { pub: pub, src: pubSrc}]);
     }
     function getSrcRcrd(pubId) {
         if (pubId) { return fP.records.source[pubId]; } //When not editing citation record.
-        const rcrd = db_forms.getRcrd('source', fP.editing.core)
+        const rcrd = _mmry('getRcrd', ['source', fP.editing.core]);
         return fP.records.source[rcrd.parent];
     }
 } /* End getCitTypeOpts */
@@ -499,7 +498,7 @@ function checkRequiredFields(e) {                                               
  */
 export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, fP.forms.top.unchanged);
     const subBttnId = '#'+fLvl+'-submit';
-    db_forms.resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
+    _forms.callFormFunc('interaction', 'resetIfFormWaitingOnChanges');  //After interaction form submit, the submit button is disabled until form data changes
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
         db_forms.disableSubmitBttn(subBttnId); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
@@ -548,4 +547,83 @@ function locHasGpsData(fLvl) {
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });
+}
+
+
+/* -------------------- APPEND FIELDS AND FORM ------------------------------ */
+export function buildAndAppendForm(fLvl, fields, id) { 
+    fP = _forms.getFormMemory();
+    showFormPopup(fP.action, fP.entity, id);
+    const form = buildFormElem();  
+    const fieldContainer = buildEntityFieldContainer(fP.entity, fields);
+    $(form).append([fieldContainer, buildFormFooter(fP.entity, fLvl, fP.action, null, fP)]);
+    $('#form-main').append(form);  
+    return Promise.resolve();
+}
+/** Builds the form elem container. */
+function buildFormElem() {
+    var form = document.createElement("form");
+    $(form).attr({"action": "", "method": "POST", "name": "top"});
+    form.className = "flex-row";
+    form.id = "top-form";
+    return form;
+}
+function buildEntityFieldContainer(entity, fields) {
+    const div = _u.buildElem('div', { id: entity+'_Rows', class: 'flex-row flex-wrap' });
+    $(div).append(fields); 
+    return div;
+}
+
+/* ======================== INIT FORM HTML ================================== */
+
+/** Builds and shows the popup form's structural elements. */
+function showFormPopup(action, entity, id) {
+    $('#b-overlay').addClass('form-ovrly');
+    $('#b-overlay-popup').addClass('form-popup');
+    $('#b-overlay-popup').append(getFormWindowElems(entity, id, action));
+    addFormStyleClass(entity);
+}
+/** Adds the width to both the popup window and the form element for each entity. */
+function addFormStyleClass(entity, remove) {
+    const map = {
+        'interaction': 'lrg-form',  'publication': 'med-form',
+        'publisher': 'sml-form',    'citation': 'med-form',
+        'author': 'sml-form',       'location': 'med-form',
+        'taxon': 'sml-form'
+    };
+    $('#form-main, .form-popup').removeClass(['lrg-form', 'med-form', 'sml-form']);
+    $('#form-main, .form-popup').addClass(map[entity]);
+}
+/**
+ * Returns the form window elements - the form and the detail panel.
+ * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
+ */
+function getFormWindowElems(entity, id, action) {
+    return [getExitButtonRow(), getFormHtml(entity, id, action)];
+}
+function getExitButtonRow() {
+    var row = _u.buildElem('div', { class: 'exit-row' });
+    $(row).append(getExitButton());
+    return row;        
+}
+export function getExitButton() {
+    const bttn = _u.buildElem('input', { 'id': 'exit-form', 
+        'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' });
+    $(bttn).click(_forms.exitFormPopup);
+    return bttn;
+}
+function getFormHtml(entity, id, action) {
+    const cntnr = _u.buildElem('div', { class: 'flex-row' });
+    const detailPanelHtml = _forms.uiPanel('getDetailPanelElems', [entity, id, fP]);
+    $(cntnr).append([getMainFormHtml(entity, action), detailPanelHtml]);
+    return cntnr;
+}
+function getMainFormHtml(entity, action) { 
+    const formWin = _u.buildElem('div', { id: 'form-main', class: fP.action });
+    $(formWin).append(getHeaderHtml(entity, action));
+    return formWin;
+}
+function getHeaderHtml(entity, action) {
+    const title = (action == 'New' ? 'New ' : 'Editing ') + _u.ucfirst(entity);    
+    return _u.buildElem('h1', { 'id': 'top-hdr', 'text': title });
 }

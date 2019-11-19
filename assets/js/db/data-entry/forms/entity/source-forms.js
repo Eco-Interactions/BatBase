@@ -16,7 +16,6 @@ import * as _forms from '../forms-main.js';
 const app = {};
 const _errs = _forms.err;
 
-
 /* -------------------------- FACADE ---------------------------------------- */
 export function getComboEvents(entity) {
     const events = {
@@ -32,6 +31,16 @@ export function getComboEvents(entity) {
         }
     };
     return events[entity] ? events[entity] : {}
+}
+export function initCreateForm(entity) {
+    const funcs = {
+        'author': initAuthForm, 
+        'editor': initEdForm,
+        'citation': initCitForm,
+        'publication': initPubForm,
+        'publisher': initPublisherForm
+    };
+    func[entity]();
 }
 // export function initAuthForm(val) {
 //     _auth.initAuthForm(val);    
@@ -69,7 +78,7 @@ export function initPubForm(value) {                                            
 }
 function appendPubFormAndFinishBuild(form) {
     $('#CitationTitle_row').after(form);
-    _cmbx.initFormCombos('publication', 'sub', fP.forms.sub.selElems);
+    _cmbx('initFormCombos', ['publication', 'sub']);
     $('#Title_row input').focus();
     form_ui.setCoreRowStyles('#publication_Rows', '.sub-row');
 }
@@ -109,7 +118,7 @@ export function initCitForm(v) {                                                
 }
 function appendCitFormAndFinishBuild(fLvl, form) {                              console.log('           --appendCitFormAndFinishBuild');
     $('#CitationTitle_row').after(form);
-    _cmbx.initFormCombos('citation', 'sub', fP.forms.sub.selElems);
+    _cmbx('initFormCombos', ['citation', 'sub']);
     selectDefaultCitType(fLvl).then(finishCitFormUiLoad.bind(null, fLvl));
 }
 function finishCitFormUiLoad(fLvl) {
@@ -308,7 +317,7 @@ export function loadSrcTypeFields(subEntity, typeId, elem, typeName) {          
         
     function finishSrcTypeFormBuild(rows) {
         $('#'+subEntity+'_Rows').append(rows);
-        _cmbx.initFormCombos(subEntity, fLvl, fP.forms[fLvl].selElems);
+        _cmbx('initFormCombos', [subEntity, fLvl]);
         fillComplexFormFields(fLvl);
         _elems.checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
         updateFieldLabelsForType(subEntity, fLvl);
@@ -335,7 +344,7 @@ export function getSrcTypeRows(entity, typeId, fLvl, type) {                    
 function setSourceType(entity, id, fLvl, tName) {
     const typeElemId = '#'+_u.ucfirst(entity)+'Type-sel'; 
     const type = tName || _cmbx.getSelTxt(typeElemId);
-    _forms.memory('setFormMemory', [fLvl, 'entityType', type]);
+    _forms.memory('setFormProp', [fLvl, 'entityType', type]);
 }
 /**
  * Changes form-field labels to more specific and user-friendly labels for 

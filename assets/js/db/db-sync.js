@@ -21,7 +21,6 @@
  * 
  */
 import * as _u from './util.js';
-import { getRcrd } from './data-entry/db-forms.js';
 import * as _errs from './data-entry/forms/validation/form-errors.js';
 import { rebuildCitationText } from './data-entry/forms/features/generate-citation.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
@@ -498,7 +497,7 @@ function updateRelatedCitations(data) {                                         
     function getChildCites(srcs) {  
         const cites = [];
         srcs.forEach(id => {
-            const src = getRcrd('source', id); 
+            const src = mmryData['source'][id]; 
             if (src.citation) { return cites.push(id); }
             src.children.forEach(cId => cites.push(cId))
         });

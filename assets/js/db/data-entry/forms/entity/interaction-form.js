@@ -11,7 +11,7 @@
 // import * as _u from '../../../util.js';
 import * as _forms from '../forms-main.js';
 // import * as _elems from '../ui/form-elems.js';
-import * as form_ui from '../ui/form-ui.js';
+// import * as form_ui from '../ui/form-ui.js';
 // import * as _cmbx from '../ui/combobox-util.js';
 import * as db_forms from '../../db-forms.js';
 
@@ -30,12 +30,11 @@ const _u = _forms._util;
  * new entities of the field-type by selecting the 'add...' option from the 
  * field's combobox and completing the appended sub-form.
  */
-export function initCreateForm() {                                              console.log('   //Building New Interaction Form');
+export function initCreateForm(entity) {                                        console.log('   //Building New Interaction Form');
     _mmry('initFormMemory', ['create', 'interaction'])
     .then(fP => getInteractionFormFields(fP))
-    .then(fields => form_ui.buildAndAppendForm('top', fields))
-    .then(() => form_ui.finishEntityFormBuild('interaction'))
-    .then(form_ui.finishCreateFormBuild)
+    .then(fields => _elems('buildAndAppendForm', ['top', fields]))
+    .then(() => finishInteractionFormBuild())
     .catch(err => _u('alertErr', [err]));
 }
 export function getComboEvents() {
@@ -125,7 +124,7 @@ function fillCitationField(pubId) {                                             
 function getPubCitationOpts(pubId) {
     const pubRcrd = fP.records.source[pubId];  
     if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
-    const opts = _elems.getRcrdOpts(pubRcrd.children, fP.records.source);
+    const opts = _elems('getRcrdOpts', [pubRcrd.children, fP.records.source]);
     opts.unshift({ value: 'create', text: 'Add a new Citation...'});
     return opts;
 }
@@ -304,8 +303,8 @@ function getTaxonSelectForm(role, realm, fLvl) {
 function appendTxnFormAndInitCombos(role, fLvl, form) {
     const lcRole = _u('lcfirst', [role]);
     $('#'+role+'_row').append(form);
-    _cmbx('initFormCombos', [lcRole, fLvl, _mmry('getFormProp', ['selElems', fLvl])]);           
-        _forms.finishTaxonSelectUi(role);  
+    _cmbx('initFormCombos', [lcRole, fLvl]);           
+    _forms.finishTaxonSelectUi(role);  
 }
 /**
  * When complete, the select form is removed and the most specific taxon is displayed 
@@ -349,10 +348,54 @@ function buildIntNoteField() {                                                  
     return _elems('buildFormRow', ['Note', txtElem, 'top', false]);
 }
 /** =================== ON FORM INIT COMPLETE =============================== */
-export function onInitComplete() {
-    _mmry('setOnSubmitSuccessHandler', ['top', resetInteractionForm]);
-    ['Subject', 'Object'].forEach(addTaxonFocusListener);
+/**
+ * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
+ * required field elems to the form's config object.  
+ */
+function finishInteractionFormBuild() {                                         console.log('           --finishIntFormBuild');
+    modifyFormDisplay();
+    addLocationSelectionMethodsNote();
+    finishComboboxInit();
     addReqElemsToConfg();    
+    _mmry('setOnSubmitSuccessHandler', ['top', resetInteractionForm]);
+}
+function modifyFormDisplay() {
+    $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
+    $('#Note_row label')[0].innerText += 's';
+    $('#Country-Region_row label')[0].innerText = 'Country/Region';
+    $('.all-fields-cntnr').hide();
+    _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
+}
+/** Adds a message above the location fields in interaction forms. */
+function addLocationSelectionMethodsNote() {
+    const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
+    const mapInfo = getMapInfoText();
+    $(cntnr).append(mapInfo);
+    $('#Country-Region_row').before(cntnr);
+}
+function getMapInfoText() {
+    const text = `<span>Select or create a location using the fields below or </span>`;
+    const link = getInfoLinkTextToOpenMap();
+    return [ text, link ];
+}
+function getInfoLinkTextToOpenMap(argument) {
+    const attr = {class:'map-link', text: 'click here to use the map interface.'};
+    const span = _u('buildElem', ['span', attr]);
+    $(span).click(showInteractionFormMap);
+    return span;
+}
+/** Open popup with the map interface for location selection. */
+function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
+    if ($('#loc-map').length) { return; }
+    db_forms.addMapToLocForm('#Location_row', 'int');
+    if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
+    _cmbx('focusCombobox', ['#Country-Region-sel', true]);
+}
+function finishComboboxInit() {
+    _cmbx('initFormCombos', ['interaction', 'top']);
+    _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
+    _cmbx('focusCombobox', ['#Publication-sel', true]);
+    ['Subject', 'Object'].forEach(addTaxonFocusListener);
 }
 /** Displays the [Role] Taxon select form when the field gains focus. */ 
 function addTaxonFocusListener(role) {
@@ -367,7 +410,7 @@ function addTaxonFocusListener(role) {
  */
 function resetInteractionForm() {
     const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
-    db_forms.showSuccessMsg('New Interaction successfully created.', 'green');
+    _forms.ui('showSuccessMsg', ['New Interaction successfully created.']);
     _mmry('initFormMemory', ['create', 'interaction'])
     .then(resetFormUi);
 
@@ -375,7 +418,7 @@ function resetInteractionForm() {
         resetIntFields(vals); 
         $('#top-cancel').val(' Close ');  
         db_forms.toggleSubmitBttn('#top-submit', false);
-        _mmry('setFormMemory', ['top', 'unchanged', true]);
+        _mmry('setFormProp', ['top', 'unchanged', true]);
     }
 }
 /** Returns an obj with the form fields and either their pinned values or false. */
@@ -426,10 +469,9 @@ function initInteractionParams() {
     addReqElemsToConfg();
 }
 function addReqElemsToConfg() {
-    const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
-        "InteractionType"];
+    const reqFields = ['Publication', 'CitationTitle', 'Subject', 'Object', 'InteractionType'];
     const elems = reqFields.map(field => $('#'+field+'-sel')[0]);
-    _mmry('setFormMemory', ['top', 'reqElems', elems]);
+    _mmry('setFormProp', ['top', 'reqElems', elems]);
 }
 /** ================== SHARED HELPERS ======================================= */
 /**
@@ -441,5 +483,15 @@ function addReqElemsToConfg() {
  */
 function checkIntFieldsAndEnableSubmit() {
     if (_elems('ifAllRequiredFieldsFilled', ['top'])) { db_forms.toggleSubmitBttn('#top-submit', true); }
-    db_forms.resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
+    resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
+}
+/**
+ * After an interaction is created, the form can not be submitted until changes
+ * are made. This removes the change listeners from non-required elems and the 
+ * flag tracking the state of the new interaction form.  
+ */
+export function resetIfFormWaitingOnChanges() {  
+    if (!_mmry('getFormProp', ['unchanged', 'top'])) { return; }
+    _forms.ui('exitSuccessMsg');
+    _mmry('setFormProp', ['top', 'unchanged', false]);
 }

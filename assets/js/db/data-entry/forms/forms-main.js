@@ -27,38 +27,40 @@ import * as _txn from './entity/taxon-form.js';
 import * as _ui from './ui/form-ui-main.js';
 
 const forms = {
-        'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-        'publication': _src, 'publisher': _src, 'taxon': _txn
-    };
-
+    'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
+    'publication': _src, 'publisher': _src, 'taxon': _txn
+};
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
-export function _util(funcName, params) {
+export function _util(funcName, params = []) {
     return _u[funcName](...params);
 }
 /** ------------------------  FORM UTILITY ---------------------------------- */
-export function util(funcName, params) {
+export function util(funcName, params = []) {
     return form_util[funcName](...params);
 }
 /** ----------------------  ERROR HANDLERS ---------------------------------- */
-export function err(funcName, params) {
+export function err(funcName, params = []) {
     return _errs[funcName](...params);
 }
 /** --------------------------- FORM UI ---------------------------------- */
 // export function ui(funcName, params) {
 //     return _ui[funcName](...params);
 // }
-export function uiElems(funcName, params) {
+export function uiElems(funcName, params = []) {
     return _ui.elems(funcName, params);
 }
-export function uiCombos(funcName, params) {
+export function uiCombos(funcName, params = []) {
     return _ui.combos(funcName, params);
 }
-export function uiPanel(funcName, params) {
+export function uiPanel(funcName, params = []) {
     return _ui.panel(funcName, params);
+}
+export function ui(funcName, params = []) {
+    return _ui[funcName](...params);
 }
 /** ------------------------ STATE MANAGMENT -------------------------------- */
 // How to call a function with the string name passed? Including all methods seems super redundant
-export function memory(funcName, params) {
+export function memory(funcName, params = []) {
     return _mmry[funcName](...params);
 }
 export function initFormMemory(action, entity, id) {
@@ -111,7 +113,7 @@ export function submitForm(formId, fLvl, entity) {
     db_forms.getFormValuesAndSubmit(formId, fLvl, entity);
 }
 /** ------------------------ FORM ELEMENTS ---------------------------------- */
-export function getFormFields(entity, params) {
+export function getFormFields(entity, params = []) {
     const map = {
         'interaction': _int.getInteractionFormFields
     };
@@ -119,7 +121,7 @@ export function getFormFields(entity, params) {
 }
 /** ------------------------ CREATE FORMS ----------------------------------- */
 export function create(entity) {
-    forms[_u.lcfirst(entity)].initCreateForm();
+    forms[_u.lcfirst(entity)].initCreateForm(entity);
 }
 /** ------------------------ FORM SPECIFIC ---------------------------------- */
 export function finishTaxonSelectUi(role) {
@@ -142,8 +144,14 @@ export function selectInteractionLocation(id) {
     _int.selectLoc(id);
 }
 export function getFormFunc(entity, funcName) {
-    return forms[_u.lcfirst(entity)][funcName];
+    return forms[entity][funcName];
 }
+export function callFormFunc(entity, funcName, params = []) {  console.log('args = %O, forms = %O', arguments, forms);
+    return forms[entity][funcName](...params);
+}
+// export function finishIntFormBuild() {
+//     _int.finishInteractionFormBuild();
+// }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
@@ -171,4 +179,40 @@ export function getRealmTaxon(realm) {
 function returnRealmTaxon(realmRcrds) {
     const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
     return _mmry('getEntityRcrds', ['taxon']);  
+}
+
+
+/* ============================ EXIT FORM =================================== */
+/** Returns popup and overlay to their original/default state. */
+export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
+    fP = db_forms.getFormParams();
+    hideSearchFormPopup();
+    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
+    $("#b-overlay").removeClass("form-ovrly");
+    $("#b-overlay-popup").removeClass("form-popup");
+    $("#b-overlay-popup").empty();
+    db_map.clearMemory();
+    db_forms.clearFormMemory();
+    fP = null;
+}
+function hideSearchFormPopup() {
+    $('#b-overlay').css({display: 'none'});
+}
+/**
+ * If the form was not submitted the table does not reload. Otherwise, if exiting 
+ * the edit-forms, the table will reload with the current focus; or, after creating 
+ * an interaction, the table will refocus into source-view. Exiting the interaction
+ * forms also sets the 'int-updated-at' filter to 'today'.
+ */
+function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
+    if (!fP.submitFocus) { return; }
+    if (fP.submitFocus == 'int') { return refocusAndShowUpdates(); }   
+    db_page.initDataTable(fP.submitFocus);
+}
+function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
+    var focus  = fP.action === 'create' ? 'srcs' : getCurFocus();
+    showTodaysUpdates(focus);   
+}
+function getCurFocus() {
+    return db_page.accessTableState().get('curFocus');
 }

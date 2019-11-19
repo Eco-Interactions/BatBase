@@ -30,7 +30,7 @@ export function showEntityEditForm(id, entity, params) {                        
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
     return getEditFormFields(id, entity)
-        .then(fields => form_ui.buildAndAppendForm('top', fields, id))
+        .then(fields => _elems.buildAndAppendForm('top', fields, id))
         .then(hideFieldCheckboxes)
         .then(() => finishEditFormBuild(entity))
         .then(() => fillExistingData(entity, id));
@@ -51,8 +51,8 @@ function getIntFormFields(entity, id) {
     return _forms.getFormFields('interaction', fP);
 }
 function getSrcTypeFields(entity, id) {
-    const srcRcrd = db_forms.getRcrd('source', id);
-    const type = db_forms.getRcrd(entity, srcRcrd[entity]);
+    const srcRcrd = _mmry('getRcrd', ['source', id]);
+    const type = _mmry('getRcrd', [entity, srcRcrd[entity]]);
     const typeId = type[entity+'Type'].id;
     return _forms.getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
 }
@@ -63,13 +63,13 @@ function buildEditFormFields(entity, id) {
 }
 function finishEditFormBuild(entity) {
     const hndlrs = {
-        'citation': finishCitEditFormBuild, 'interaction': form_ui.finishEntityFormBuild.bind(null, 'interaction'), 
+        'citation': finishCitEditFormBuild, 'interaction': _forms.callFormFunc('interaction', 'finishIntFormBuild'), 
         'location': finishLocEditFormBuild, 'taxon': finishTaxonEditFormBuild,
     };
     if (entity in hndlrs) { hndlrs[entity]()  
     } else {
-        _cmbx.initFormCombos(entity, 'top', fP.forms.top.selElems); 
-        $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+        _cmbx('initFormCombos', [entity, 'top']); 
+        $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
         $('.all-fields-cntnr').hide();
     }
 }
@@ -95,7 +95,7 @@ function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
     const prnt = _fCnfg.getParentEntity(ent);
     const entity = prnt || ent;
-    const rcrd = db_forms.getRcrd(entity, id);                                           
+    const rcrd = _mmry('getRcrd', [entity, id]);                                           
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
@@ -105,7 +105,7 @@ function fillEntityData(ent, id) {
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
         'interaction': fillIntData };
-    const rcrd = db_forms.getRcrd(ent, id);                                              console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    const rcrd = _mmry('getRcrd', [ent, id]);                                              console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     hndlrs[ent](ent, id, rcrd);
 }
 function fillIntData(entity, id, rcrd) {  
@@ -140,30 +140,38 @@ function fillTaxonData(entity, id, rcrd) {                                      
 }
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, rcrd) { 
-    var src = db_forms.getRcrd("source", id);                                            
-    var detail = db_forms.getRcrd(entity, src[entity]);                                  //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
-    var fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
-    setSrcType()
-    .then(() => {
+    const detail = _mmry('getRcrd', [entity, src[entity]]);                     //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+    loadSourceTypeFields()
+    .then(fillAllSrcData);
+
+    function loadSourceTypeFields() {
+        if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
+        const type = getDetailTypeDataObj();
+        const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
+        return _forms.loadSrcTypeFields(entity, type.id, typeElem, type.name);
+    }
+    function getDetailTypeDataObj() {
+        const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
+        return {
+            typeId: detail[typeProp].id,
+            typeName: detail[typeProp].displayName
+        };
+    }
+    function fillAllSrcData() {
+        const src = _mmry('getRcrd', ['source', id]);
+        const fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
         setSrcData();
         setDetailData();
-    });
-    function setSrcType() {
-        if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
-        const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
-        const typeId = detail[typeProp].id;
-        const typeName = detail[typeProp].displayName;
-        const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
-        return _forms.loadSrcTypeFields(entity, typeId, typeElem, typeName);
-    }
-    function setSrcData() {
-        fillFields(src, fields.core);
-        fillRelationalDataInPanel(entity, src);            
-    }
-    function setDetailData() {
-        fillFields(detail, fields.detail);
-        setAdditionalFields(entity, src, detail);
-        fP.editing.detail = detail.id;
+        
+        function setSrcData() {
+            fillFields(src, fields.core);
+            fillRelationalDataInPanel(entity, src);            
+        }
+        function setDetailData() {
+            fillFields(detail, fields.detail);
+            setAdditionalFields(entity, src, detail);
+            fP.editing.detail = detail.id;
+        }
     }
 } /* End fillSrcData */
 function getSourceFields(entity) {
@@ -224,7 +232,7 @@ function setTitleField(entity, srcRcrd) {                                       
     $('#Title_row input[type="text"]').val(name).change();
 
     function getCitTitle(citId) {
-        return db_forms.getRcrd('citation', citId).displayName;
+        return _mmry('getRcrd', ['citation', citId]).displayName;
     }
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) { 
@@ -258,7 +266,7 @@ function onEditFormLoadComplete(id, entity) {                                   
     map[entity](id);
 }
 function setSrcEditRowStyle() {
-    form_ui.setCoreRowStyles('#form-main', '.top-row');
+    _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
 }
 function finishLocEditForm(id) {
     db_forms.addMapToLocForm('#location_Rows', 'edit');
@@ -266,7 +274,7 @@ function finishLocEditForm(id) {
 }
 function finishLocFormAfterMapLoad(id) {
     if ($('#loc-map').data('loaded')) {
-        form_ui.setCoreRowStyles('#form-main', '.top-row');
+        _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
         db_map.addVolatileMapPin(id, 'edit', _cmbx.getSelVal('#Country-sel'));
     } else {
         window.setTimeout(() => finishLocFormAfterMapLoad(id), 500);
@@ -288,7 +296,7 @@ export function getTaxonEditFields(entity, id) {
         .then(() => buildTaxonEditFields(taxon));
 }
 function finishTaxonEditFormBuild() {
-    $('#top-cancel').off('click').click(form_ui.exitFormPopup);
+    $('#top-cancel').off('click').click(_forms.exitFormPopup);
     $('#top-submit').off('click').click(submitTaxonEdit);
     initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
     $('.all-fields-cntnr').hide();
@@ -399,7 +407,7 @@ function getRealmLvlRow(taxon) {
  */
 function finishPrntFormBuild() {                                                //console.log("fP = %O", fP);    
     var realmLvl = fP.forms.taxonPs.curRealmLvls[0];
-    _cmbx.initFormCombos(null, 'sub', fP.forms.sub.selElems);
+    _cmbx('initFormCombos', [null, 'sub']);
     selectParentTaxon($('#txn-prnt').data('txn'), realmLvl);
     $('#Species_row').hide();
     $('#'+realmLvl+'_row .field-row')[0].className += ' realm-row';
@@ -541,18 +549,18 @@ function submitTaxonEdit() {
 }
 /*-------- Edit Citation Methods ----------*/
 function finishCitEditFormBuild() {
-    _cmbx.initFormCombos('citaion', 'top', fP.forms.top.selElems); 
-    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+    _cmbx('initFormCombos', ['citaion', 'top']); 
+    $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('.all-fields-cntnr').hide();
     _forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
 /*-------- Edit Location Methods ----------*/
 function finishLocEditFormBuild() {  
-    _cmbx.initFormCombos('Location', 'top', fP.forms.top.selElems); 
+    _cmbx('initFormCombos', ['Location', 'top']); 
     updateCountryChangeMethod();
     db_forms.addListenerToGpsFields(
         db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit', false));
-    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+    $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('.all-fields-cntnr').hide();
 }
 function updateCountryChangeMethod() {
