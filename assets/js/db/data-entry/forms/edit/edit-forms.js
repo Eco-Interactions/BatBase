@@ -7,7 +7,7 @@
 import * as _u from '../../../util.js';
 import * as _elems from '../ui/form-elems.js';
 import * as _cmbx from '../ui/combobox-util.js';
-import * as _errs from '../validation/f-errs.js';
+// import * as _errs from '../validation/f-errs.js';
 import * as _forms from '../forms-main.js';
 import * as db_forms from '../../db-forms.js';
 import * as form_ui from '../ui/form-ui.js';
@@ -17,6 +17,8 @@ import { buildFormFooter } from '../ui/form-footer.js';
 import { fillRelationalDataInPanel } from '../ui/detail-panel.js';
 
 let fP;
+const _errs = _forms.err;
+const _mmry = _forms.memory;
 
 /** Shows the entity's edit form in a pop-up window on the search page. */
 export function showEntityEditForm(id, entity, params) {                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
@@ -239,7 +241,7 @@ function setCitationEdgeCaseFields(entity, citRcrd) {
 function addTaxon(fieldId, prop, rcrd) {                                        //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
     var selApi = $('#'+ fieldId + '-sel')[0].selectize;
     var taxon = fP.records.taxon[rcrd[prop]];                          
-    selApi.addOption({ value: taxon.id, text: db_forms.getTaxonDisplayName(taxon) });
+    selApi.addOption({ value: taxon.id, text: _forms.getTaxonDisplayName(taxon) });
     selApi.addItem(taxon.id);
 }
 function addSource(fieldId, prop, rcrd) {
@@ -282,8 +284,8 @@ export function getTaxonEditFields(entity, id) {
     const taxon = fP.records.taxon[id];  
     const realm = taxon.realm.displayName;
     const role = realm === 'Bat' ? 'Subject' : 'Object';
-    return db_forms.initTaxonParams(role, realm, id)
-        .then(buildTaxonEditFields.bind(null, taxon));
+    return _mmry('initTaxonParams', [role, realm])
+        .then(() => buildTaxonEditFields(taxon));
 }
 function finishTaxonEditFormBuild() {
     $('#top-cancel').off('click').click(form_ui.exitFormPopup);
@@ -309,7 +311,7 @@ function buildNameElem(prnt) {
 }
 function setTaxonPrntNameElem(prnt, elem, pText) {
     var div = elem || $('#txn-prnt')[0];
-    var text = pText || db_forms.getTaxonDisplayName(prnt);
+    var text = pText || _forms.getTaxonDisplayName(prnt);
     div.innerHTML = '<b>Taxon Parent</b>: &nbsp ' + text;
     if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
 }

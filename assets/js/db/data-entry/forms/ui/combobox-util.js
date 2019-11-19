@@ -6,6 +6,7 @@
  *     initSingle           db-forms
  */
 import * as db_forms from '../../db-forms.js';
+import * as _forms from '../forms-main.js';
 
 /*------------------- Combobox (selectized) Methods ----------------------*/
 /**
@@ -34,12 +35,12 @@ export function initSingle(confg, fLvl) {                                       
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, elems) {                           //console.log("initFormCombos. [%s] formLvl = [%s] fields = %O", entity, formLvl, fP.forms[formLvl].selElems);
-    const selConfgs = _forms.getComboboxEvents(entity);
+    const comboEvents = _forms.getComboboxEvents(entity);
     elems.forEach(selectizeElem);
     elems = [];
 
     function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
-        const confg = getFieldConfg(selConfgs, fieldName);
+        const confg = getFieldConfg(comboEvents, fieldName);
         confg.id = confg.id || '#'+fieldName+'-sel';
         initSingle(confg, fLvl);
     }
@@ -98,10 +99,10 @@ export function setSelVal(id, val, silent) {                                    
     $selApi.addItem(val, silent); 
 }
 
-function getFieldConfg(selConfgs, fieldName) {
-    const baseConfg = getBaseFieldConfg(fieldName) ;
-    const eventConfg = selConfgs[fieldName] || {};
-    return Object.assign(baseConfg, confgEvents);
+function getFieldConfg(comboEvents, fieldName) {
+    const baseConfg = getBaseFieldConfg(fieldName) ;  console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
+    const eventConfg = comboEvents[fieldName] || {};
+    return Object.assign(baseConfg, eventConfg);
 }
 function getBaseFieldConfg(fieldName) {
     const confgName = fieldName.replace(/([A-Z])/g, ' $1');

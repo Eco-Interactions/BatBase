@@ -22,7 +22,7 @@
  */
 import * as _u from './util.js';
 import { getRcrd } from './data-entry/db-forms.js';
-import * as _errs from './data-entry/forms/validation/f-errs.js';
+import * as _errs from './data-entry/forms/validation/form-errors.js';
 import { rebuildCitationText } from './data-entry/forms/features/generate-citation.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 

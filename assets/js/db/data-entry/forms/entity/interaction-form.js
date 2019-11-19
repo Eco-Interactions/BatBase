@@ -8,20 +8,21 @@
  *     getIntFormFields         forms-main
  *     selectLoc                forms-main
  */
-import * as _u from '../../../util.js';
+// import * as _u from '../../../util.js';
 import * as _forms from '../forms-main.js';
-import * as _elems from '../ui/form-elems.js';
+// import * as _elems from '../ui/form-elems.js';
 import * as form_ui from '../ui/form-ui.js';
-import * as _cmbx from '../ui/combobox-util.js';
+// import * as _cmbx from '../ui/combobox-util.js';
 import * as db_forms from '../../db-forms.js';
 
 let fP;
 /** ====================== ALIAS HELPERS ==================================== */
 // const _ui = _forms.ui;
-const _combos = _forms.uiCombos;
+const _cmbx = _forms.uiCombos;
+const _elems = _forms.uiElems;
 const _panel = _forms.uiPanel;
 const _mmry = _forms.memory;
-
+const _u = _forms._util;
 /** ================ INIT INTERACTION FORM ================================== *//**
  * Fills the global fP obj with the basic form params @_forms.initFormMemory. 
  * Inits the interaction form with all fields displayed and the first field, 
@@ -29,30 +30,30 @@ const _mmry = _forms.memory;
  * new entities of the field-type by selecting the 'add...' option from the 
  * field's combobox and completing the appended sub-form.
  */
-export function initNewInteractionForm() {                                             console.log('   //Building New Interaction Form');
-    _forms.initFormMemory('create', 'interaction')
-    .then(fP => _forms.getFormFields('interaction', fP))
+export function initCreateForm() {                                              console.log('   //Building New Interaction Form');
+    _mmry('initFormMemory', ['create', 'interaction'])
+    .then(fP => getInteractionFormFields(fP))
     .then(fields => form_ui.buildAndAppendForm('top', fields))
     .then(() => form_ui.finishEntityFormBuild('interaction'))
     .then(form_ui.finishCreateFormBuild)
-    .catch(err => _u.alertErr(err));
+    .catch(err => _u('alertErr', [err]));
 }
-export function getComboboxEvents() {
+export function getComboEvents() {
     return {
-        'CitationTitle': { add: false, change: onCitSelection },
+        'CitationTitle': { change: onCitSelection, add: _forms.create.bind(null, 'citation') },
         'Country-Region': { change: onCntryRegSelection },
         'InteractionType': { change: focusIntTypePin },
-        'Location': { change: onLocSelection, add: _forms.getFormFunc('location', 'initLocForm')},
-        'Publication': { change: _src.onPubSelection, add: _forms.getFormFunc('publication', 'initPubForm')},
-        'Subject': { change: onSubjectSelection },
-        'Object': { change: onObjectSelection },
+        'Location': { change: onLocSelection, add: _forms.create.bind(null, 'location')},
+        'Publication': { change: onPubSelection, add: _forms.create.bind(null, 'publication')},
+        'Subject': { change: onTaxonSelection.bind(null, 'Subject') },
+        'Object': { change: onTaxonSelection.bind(null, 'Object') },
     };
 }
 /** ==================== INIT FORM FIELDS =================================== */
 /** Builds and returns all interaction-form elements. */
-export function getIntFormFields(params) {                                      
+export function getInteractionFormFields(params) {                                      
     fP = params;                                                                console.log('       --buildIntFormFields. fP = %O', fP);
-    const builders = [ _src.buildPubFieldRow, _src.buildCitFieldRow, buildCntryRegFieldRow,
+    const builders = [ buildPubFieldRow, buildCitFieldRow, buildCntryRegFieldRow,
         buildLocFieldRow, initSubjField, initObjField, buildIntTypeField,
         buildIntTagField, buildIntNoteField ];
     return Promise.all([...builders.map(buildField)]);
@@ -66,58 +67,59 @@ function buildField(builder) {
 function ifSelectElemAddToComboboxInitAry(field) {
     const fieldType = field.children[1].children[1].nodeName; 
     if (fieldType !== "SELECT") { return; }  
-    const fieldName = field.id.split('_row')[0];
-    fP.forms.top.selElems.push(fieldName);
+    _mmry('addComboToMemory', ['top', field.id.split('_row')[0]]);
 }
 /*------------------ Publication ---------------------------------------------*/
 /**
  * Returns a form row with a publication select dropdown populated with all 
  * current publication titles.
  */
-export function buildPubFieldRow(fP) {                                          console.log('       --buildPubFieldRow');
-    return _forms.uiElems('getSrcOpts', ['pubSrcs', null, fP.records.source])
+function buildPubFieldRow() {                                                 console.log('       --buildPubFieldRow');
+    return _elems('getSrcOpts', ['pubSrcs', null, fP.records.source])
         .then(buildPubRow);
 }
 function buildPubRow(opts) {
     const attr = { id: 'Publication-sel', class: 'lrg-field' };
-    const selElem = _forms.pgUtil('buildSelectElem', [opts, attr]);
-    return _forms.uiElems('buildFormRow', ['Publication', selElem, 'top', true]);
+    const selElem = _u('buildSelectElem', [opts, attr]);
+    return _elems('buildFormRow', ['Publication', selElem, 'top', true]);
 }
 /** 
  * When an existing publication is selected, the citation field is filled with 
  * all current citations for the publciation. When a publication is created, 
  * the citation form is automatically opened. 
  */
-export function onPubSelection(val) {                                                  console.log('   --onPubSelection'); 
-    if (val === 'create') { return _forms.createSubEntity('Publication'); }        
+function onPubSelection(val) {                                                  console.log('   --onPubSelection'); 
+    if (val === 'create') { return _forms.create('publication'); }        
     if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
-    const srcRcrds = _mmry('getEntityRcrds', ['source']); 
     fillCitationField(val);
     _panel('updateSrcDetails', ['pub']);
-    if (!fP.records.source[val].children.length) { return _forms.newCitation(); }
+    if (!hasCitation(val)) { return _forms.create('citation'); }
     if (!fP.editing) { $('#Publication_pin').focus(); }
 }
+function hasCitation(val) {
+    return fP.records.source[val].children.length;
+}
 function onPubClear() {
-    _combos('clearCombobox', ['#CitationTitle-sel']);
-    _combos('enableCombobox', ['#CitationTitle-sel', false]);
+    _cmbx('clearCombobox', ['#CitationTitle-sel']);
+    _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     _panel('clearDetailPanel', ['pub']);
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
-    _combos('enableCombobox', ['#Publication-sel']);
+    _cmbx('enableCombobox', ['#Publication-sel']);
     fillCitationField($('#Publication-sel').val());
 }
 /*------------------ Citation ------------------------------------------------*/
 /** Returns a form row with an empty citation select dropdown. */
-export function buildCitFieldRow() {                                                   console.log('       --buildCitFieldRow');
+function buildCitFieldRow() {                                                   console.log('       --buildCitFieldRow');
     const attr = {id: 'CitationTitle-sel', class: 'lrg-field'};
-    const selElem = _forms.pgUtil('buildSelectElem', [ [], attr]);
-    return _elems.buildFormRow('CitationTitle', selElem, 'top', true);
+    const selElem = _u('buildSelectElem', [ [], attr]);
+    return _elems('buildFormRow', ['CitationTitle', selElem, 'top', true]);
 }
 /** Fills the citation combobox with all citations for the selected publication. */
 function fillCitationField(pubId) {                                             //console.log("initCitSelect for publication = ", pubId);
-    _cmbx.enableCombobox('#CitationTitle-sel');
-    _cmbx.updateComboboxOptions('#CitationTitle-sel', getPubCitationOpts(pubId));
+    _cmbx('enableCombobox', ['#CitationTitle-sel']);
+    _cmbx('updateComboboxOptions', ['#CitationTitle-sel', getPubCitationOpts(pubId)]);
 }
 /** Returns an array of option objects with citations for this publication.  */
 function getPubCitationOpts(pubId) {
@@ -131,11 +133,11 @@ function getPubCitationOpts(pubId) {
  * When a Citation is selected, both 'top' location fields are initialized
  * and the publication combobox is reenabled. 
  */    
-export function onCitSelection(val) {                                                  console.log('       --onCitSelection [%s]', val);
-    if (val === 'create') { return _forms.createSubEntity('Citation'); }
+function onCitSelection(val) {                                                  console.log('       --onCitSelection [%s]', val);
+    if (val === 'create') { return _forms.create('citation'); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['cit']); }                     //console.log("cit selection = ", parseInt(val));                          
     _panel('updateSrcDetails', ['cit']);
-    _cmbx.enableCombobox('#Publication-sel');
+    _cmbx('enableCombobox', ['#Publication-sel']);
     if (!fP.editing) { $('#CitationTitle_pin').focus(); }
 }    
 /*-------------- Country/Region ------------------------------------------*/
@@ -145,12 +147,12 @@ function buildCntryRegFieldRow() {                                              
 }
 function buildCntryRegRow(opts) {
     const attr = {id: 'Country-Region-sel', class: 'lrg-field'};
-    const selElem = _u.buildSelectElem(opts, attr);
-    return _elems.buildFormRow('Country-Region', selElem, 'top', false);
+    const selElem = _u('buildSelectElem', [opts, attr]);
+    return _elems('buildFormRow', ['Country-Region', selElem, 'top', false]);
 }
 /** Returns options for each country and region. */ 
 function getCntryRegOpts() {
-    const proms = ['countryNames', 'regionNames'].map(k => _u.getOptsFromStoredData(k));
+    const proms = ['countryNames', 'regionNames'].map(k => _u('getOptsFromStoredData', [k]));
     return Promise.all(proms).then(data => data[0].concat(data[1]));
 }
 /** 
@@ -173,20 +175,21 @@ function onCntryRegSelection(val) {                                             
  */
 function buildLocFieldRow() {                                                   console.log('       --buildLocFieldRow');
     const locOpts = getLocationOpts();                                          //console.log("locOpts = %O", locOpts);
-    const selElem = _u.buildSelectElem(
-        locOpts, {id: "Location-sel", class: "lrg-field"});
-    return _elems.buildFormRow("Location", selElem, "top", false);
+    const attr = {id: 'Location-sel', class: 'lrg-field'};
+    const selElem = _u('buildSelectElem', [locOpts, attr]);
+    return _elems('buildFormRow', ['Location', selElem, 'top', false]);
 }
 /** Returns an array of option objects with all unique locations.  */
 function getLocationOpts() {
-    let opts = [];
-    for (var id in fP.records.location) {
-        opts.push({ 
-            value: id, text: fP.records.location[id].displayName });
-    }
-    opts = opts.sort(_u.alphaOptionObjs);
+    const rcrds = fP.records.location;
+    let opts = Object.keys(rcrds).map(buildLocOpt);
+    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
     opts.unshift({ value: 'create', text: 'Add a new Location...'});
     return opts;
+    
+    function buildLocOpt(id) {
+        return { value: id, text: rcrds[id].displayName };
+    }
 }
 /**
  * When a country/region is selected, the location combobox is repopulated with its 
@@ -194,17 +197,20 @@ function getLocationOpts() {
  * repopulated with all locations. 
  */ 
 function fillLocationSelect(loc) {                                              //console.log("fillLocationSelect for parent Loc = %O", loc);
-    var opts = loc ? getOptsForLoc(loc) : getLocationOpts();    
-    _cmbx.updateComboboxOptions('#Location-sel', opts);
+    const opts = loc ? getOptsForLoc(loc) : getLocationOpts();    
+    _cmbx('updateComboboxOptions', ['#Location-sel', opts]);
 }          
 /** Returns an array of options for the locations of the passed country/region. */
 function getOptsForLoc(loc) {
-    let opts = loc.children.map(id => ({
-        value: id, text: fP.records.location[id].displayName}));
-    opts = opts.concat([{ value: loc.id, text: loc.displayName }])
-        .sort(_u.alphaOptionObjs);
+    let opts = getChildLocOpts(loc.children)
+    opts.push({ value: loc.id, text: loc.displayName });
+    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
     opts.unshift({ value: 'create', text: 'Add a new Location...'});
     return opts;
+}
+function getChildLocOpts(children) {
+    return children.map(id => ({
+        value: id, text: fP.records.location[id].displayName }));
 }
 /** 
  * When a location is selected, its country/region is selected in the top-form
@@ -212,120 +218,104 @@ function getOptsForLoc(loc) {
  * the location was cleared, the detail panel is cleared. 
  */     
 function onLocSelection(val) {                                                  console.log('           --onLocSelection [%s]', val);
-    if (val === 'create') { return _forms.createSubEntity('Location'); }
+    if (val === 'create') { return _forms.create('Location'); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['loc']); }   
     if ($('#loc-map').length) { removeLocMap(); }
-    const locRcrd = _mmry('getEntityRcrds', ['location'])[val];         //console.log("location = %O", locRcrd);
+    const locRcrd = fP.records.location[val];                                   //console.log("location = %O", locRcrd);
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
-    _cmbx.setSelVal('#Country-Region-sel', prntVal, 'silent');
-    _forms.uiPanel('fillLocDataInDetailPanel', locRcrd);
+    _cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
+    _panel('fillLocDataInDetailPanel', [locRcrd]);
     if (!fP.editing) { $('#Location_pin').focus(); }
-    _elems.checkIntFieldsAndEnableSubmit();
+    checkIntFieldsAndEnableSubmit();
 }
 function removeLocMap() {
     $('#loc-map').fadeTo(400, 0, () => $('#loc-map').remove());
 }
 export function selectLoc(id) {
     $('#sub-form').remove();
-    _cmbx.setSelVal('#Location-sel', id);
+    _cmbx('setSelVal', ['#Location-sel', id]);
     enableCountryRegionField();
-    _cmbx.enableCombobox('#Location-sel');
+    _cmbx('enableCombobox', ['#Location-sel']);
     removeLocMap();
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 export function enableCountryRegionField() {  
-    _cmbx.enableCombobox('#Country-Region-sel');
+    _cmbx('enableCombobox', ['#Country-Region-sel']);
     $('#loc-note').fadeTo(400, 1);
 }
 /*--------------------- Taxon ------------------------------------------------*/
 /** Builds the Subject combobox that will trigger the select form @initSubjectSelect. */
 function initSubjField() {                                                      console.log('       --initSubjField');
-    var subjElem = _u.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
-    return _elems.buildFormRow("Subject", subjElem, "top", true);
+    return buildTaxonField('Subject');
 }
 /** Builds the Object combobox that will trigger the select form @initObjectSelect. */
 function initObjField() {                                                       console.log('       --initObjField');
-    var objElem =  _u.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
-    return _elems.buildFormRow("Object", objElem, "top", true);
+    return buildTaxonField('Object');
 }
-/**
- * Shows a sub-form to 'Select Subject' of the interaction with a combobox for
- * each level present in the Bat realm, (Family, Genus, and Species), filled 
- * with the taxa at that level. When one is selected, the remaining boxes
- * are repopulated with related taxa and the 'select' button is enabled.
- */
+function buildTaxonField(role) {
+    const attr = {id: role + '-sel', class: 'lrg-field'};
+    const sel = _u('buildSelectElem', [ [], attr]);
+    return _elems('buildFormRow', [ role, sel, 'top', true]);
+}
 export function initSubjectSelect() {                                                  console.log('       --initSubjectSelect [%s]?', $('#Subject-sel').val());
     const fLvl = _forms.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', fLvl); }  
-    return db_forms.initTaxonParams('Subject', 'Bat')
-    .then(initSubjForm)
-    .then(appendSubjFormAndFinishBuild);
-
-    function initSubjForm() {
-        return initEntitySubForm('subject', fLvl, 'sml-sub-form', {}, '#Subject-sel');
-    }
-    function appendSubjFormAndFinishBuild(form) {
-        $('#Subject_row').append(form);
-        _cmbx.initFormCombos('subject', fLvl, fP.forms[fLvl].selElems);           
-        _forms.finishTaxonSelectUi('Subject');  
-        _cmbx.enableCombobox('#Object-sel', false);
-    }
+    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen('Subject', fLvl); }  
+    return getTaxonSelectForm('Subject', 'Bat', fLvl)
+        .then(form => appendTxnFormAndInitCombos('Subject', fLvl, form))
+        .then(() => finishTaxonSelectUi('Subject'));
 }
-/**
- * Shows a sub-form to 'Select Object' of the interaction with a combobox for
- * each level present in the selected Object realm, plant (default) or arthropod, 
- * filled with the taxa at that level. When one is selected, the remaining boxes
- * are repopulated with related taxa and the 'select' button is enabled. 
- * Note: The selected realm's level combos are built @onRealmSelection. 
- */
+/** Note: The selected realm's level combos are built @onRealmSelection. */
 export function initObjectSelect() {                                                   console.log('       --initObjectSelect [%s]?', $('#Object-sel').val());
     const fLvl = _forms.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', fLvl); }
+    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen('Object', fLvl); }
     const realmName = getSelectedObjectRealm($('#Object-sel').val()); 
-    return db_forms.initTaxonParams('Object', realmName)
-    .then(initObjForm)
-    .then(appendObjFormAndFinishBuild);
+    return getTaxonSelectForm('Object', realmName, fLvl)
+        .then(form => appendTxnFormAndInitCombos('Object', fLvl, form))
+        .then(buildRealmFields);
 
-    function initObjForm() {
-        return _forms.initEntitySubForm('object', fLvl, 'sml-sub-form', {}, '#Object-sel');
-    }
-    function appendObjFormAndFinishBuild(form) {
-        $('#Object_row').append(form);
-        _cmbx.initFormCombos('object', fLvl, fP.forms[fLvl].selElems);             
-        _cmbx.setSelVal('#Realm-sel', fP.forms.taxonPs.realmTaxon.realm.id, 'silent');
-        _cmbx.enableCombobox('#Subject-sel', false);
-        return onRealmSelection(fP.forms.taxonPs.realmTaxon.realm.id);
+    function buildRealmFields() {    
+        const realmId = _mmry('getTaxonProp', realmTaxon).realm.id;       
+        _cmbx('setSelVal', ['#Realm-sel', realmId, 'silent']);
+        return onRealmSelection(realmId);
     }
 } 
 /** Returns the realm taxon's lower-case name for a selected object taxon. */
 function getSelectedObjectRealm(id) {                                       
-    if (!id) { return db_forms.getObjectRealm(); }
+    if (!id) { return _mmry('getObjectRealm'); }
     return fP.records.taxon[id].realm.displayName;
 }
+/* -------- SHARED TAXON SELECT FORM INIT METHODS --------- */
 /** Note: Taxon fields often fire their focus event twice. */
-function errIfAnotherSubFormOpen(role, fLvl) {
+function errIfSubFormOpen(role, fLvl) {
     if (fP.forms[fLvl].entity === _u.lcfirst(role)) { return; }
-    _errs.openSubFormErr(role, null, fLvl);
+    _errs('openSubFormErr', [role, null, fLvl]);
 }
 /**
- * When complete, the 'Select Subject' form is removed and the most specific 
- * taxonomic data is displayed in the interaction-form Subject combobox. 
+ * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
+ * each level present in the realm, (eg: Bat - Family, Genus, and Species), filled 
+ * with the taxa at that level. When one is selected, the remaining boxes
+ * are repopulated with related taxa and the 'select' button is enabled.
  */
-function onSubjectSelection(val) {                                              //console.log("subject selected = ", val);
+function getTaxonSelectForm(role, realm, fLvl) {
+    const lcRole = _u('lcfirst', [role]);
+    const formParams = [lcRole, fLvl, 'sml-sub-form', {}, '#'+role+'-sel'];
+    return _forms.buildTaxonSelectForm(role, realm, fLvl);
+}
+function appendTxnFormAndInitCombos(role, fLvl, form) {
+    const lcRole = _u('lcfirst', [role]);
+    $('#'+role+'_row').append(form);
+    _cmbx('initFormCombos', [lcRole, fLvl, _mmry('getFormProp', ['selElems', fLvl])]);           
+        _forms.finishTaxonSelectUi(role);  
+}
+/**
+ * When complete, the select form is removed and the most specific taxon is displayed 
+ * in the interaction-form <role> combobox. 
+ */
+function onTaxonSelection(role, val) {                                          //console.log("onTaxonSelection [%s] = ", role, val);
     if (val === "" || isNaN(parseInt(val))) { return; }         
     $('#'+_forms.getSubFormLvl('sub')+'-form').remove();
     enableTaxonCombos();
-    if (!fP.editing) { $('#Subject_pin').focus(); }
-}
-/**
- * When complete, the 'Select Object' form is removed and the most specific 
- * taxonomic data is displayed in the interaction-form Object combobox. 
- */
-function onObjectSelection(val) {                                               //console.log("object selected = ", val);
-    if (val === "" || isNaN(parseInt(val))) { return; } 
-    $('#'+_forms.getSubFormLvl('sub')+'-form').remove();
-    enableTaxonCombos();
-    if (!fP.editing) { $('#Object_pin').focus(); }
+    if (!fP.editing) { $('#'+role+'_pin').focus(); }
 }
 export function enableTaxonCombos() {
     _cmbx.enableCombobox('#Subject-sel');
@@ -333,34 +323,34 @@ export function enableTaxonCombos() {
 }
 /*-------------- Interaction Detail Fields -------------------------------*/
 function buildIntTypeField() {                                                  console.log('       --buildIntTypeField');
-    return _u.getOptsFromStoredData('intTypeNames')
+    return _u('getOptsFromStoredData', ['intTypeNames'])
     .then(buildIntTypeRow);
 }
 function buildIntTypeRow(opts) {
     const attr = {id: 'InteractionType-sel', class: 'lrg-field'};
-    const field = _u.buildSelectElem(opts, attr);
-    return _elems.buildFormRow('InteractionType', field, 'top', true);
+    const field = _u('buildSelectElem', [opts, attr]);
+    return _elems('buildFormRow', ['InteractionType', field, 'top', true]);
 }
 function focusIntTypePin() {
     if (!fP.editing) { $('#InteractionType_pin').focus(); }
 }
 function buildIntTagField() {                                                   console.log('       --buildIntTagField');
-    return _elems.buildTagField('interaction', 'InteractionTags', 'top')
+    return _elems('buildTagField', ['interaction', 'InteractionTags', 'top'])
         .then(buildTagRow);
 }
 function buildTagRow(field) {
     field.className = 'lrg-field';
-    $(field).change(_elems.checkIntFieldsAndEnableSubmit);
-    return _elems.buildFormRow('InteractionTags', field, 'top', false);
+    $(field).change(checkIntFieldsAndEnableSubmit);
+    return _elems('buildFormRow', ['InteractionTags', field, 'top', false]);
 }
 function buildIntNoteField() {                                                  console.log('       --buildIntNoteField');
-    const txtElem = _elems.buildLongTextArea('interaction', 'Note', 'top');
-    $(txtElem).change(_elems.checkIntFieldsAndEnableSubmit);
-    return _elems.buildFormRow('Note', txtElem, 'top', false);
+    const txtElem = _elems('buildLongTextArea', ['interaction', 'Note', 'top']);
+    $(txtElem).change(checkIntFieldsAndEnableSubmit);
+    return _elems('buildFormRow', ['Note', txtElem, 'top', false]);
 }
 /** =================== ON FORM INIT COMPLETE =============================== */
 export function onInitComplete() {
-    _forms.setOnSubmitSuccessHandler('top', resetInteractionForm);
+    _mmry('setOnSubmitSuccessHandler', ['top', resetInteractionForm]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
     addReqElemsToConfg();    
 }
@@ -378,21 +368,21 @@ function addTaxonFocusListener(role) {
 function resetInteractionForm() {
     const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
     db_forms.showSuccessMsg('New Interaction successfully created.', 'green');
-    _forms.initFormMemory('create', 'interaction')
+    _mmry('initFormMemory', ['create', 'interaction'])
     .then(resetFormUi);
 
     function resetFormUi() {
         resetIntFields(vals); 
         $('#top-cancel').val(' Close ');  
-        db_forms.toggleSubmitBttn("#top-submit", false);
-        _forms.memory('setFormMemory', ['top', 'unchanged', true]);
+        db_forms.toggleSubmitBttn('#top-submit', false);
+        _mmry('setFormMemory', ['top', 'unchanged', true]);
     }
 }
 /** Returns an obj with the form fields and either their pinned values or false. */
 function getPinnedFieldVals() {
     const pins = $('form[name="top"] [id$="_pin"]').toArray();                  //console.log("pins = %O", pins);
     const vals = {};
-    pins.forEach(function(pin) {  
+    pins.forEach(pin => {  
         if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]); 
         } else { addFalseValue(pin.id.split("_pin")[0]); }
     });
@@ -432,12 +422,24 @@ function fillPubDetailsIfPinned(pub) {
 }
 /** Inits the necessary interaction form params after form reset. */
 function initInteractionParams() {
-    _forms.initEntityFormMemory("interaction", "top", null,"create");
+    _mmry('initEntityFormMemory', ['interaction', 'top', null, 'create']);
     addReqElemsToConfg();
 }
 function addReqElemsToConfg() {
     const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
         "InteractionType"];
     const elems = reqFields.map(field => $('#'+field+'-sel')[0]);
-    _forms.memory('setFormMemory', ['top', 'reqElems', elems]);
+    _mmry('setFormMemory', ['top', 'reqElems', elems]);
+}
+/** ================== SHARED HELPERS ======================================= */
+/**
+ * After the interaction form is submitted, the submit button is disabled to 
+ * eliminate accidently creating duplicate interactions. This change event is
+ * added to the non-required fields of the form to enable to submit as soon as 
+ * any change happens in the form, if the required fields are filled. Also 
+ * removes the success message from the form.
+ */
+function checkIntFieldsAndEnableSubmit() {
+    if (_elems('ifAllRequiredFieldsFilled', ['top'])) { db_forms.toggleSubmitBttn('#top-submit', true); }
+    db_forms.resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
