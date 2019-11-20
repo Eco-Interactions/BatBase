@@ -26,10 +26,7 @@
  *     loadSrcTypeFields        ""
  *     fieldIsDisplayed         ""
  *     selectExistingAuthors    ""
- *     getTaxonDisplayName      ""
  *     addMapToLocForm          ""
- *     initTaxonParams          "", interaction-form
- *     getSelectedTaxon
  *     buildFormDataAndSubmit
  *     addListenerToGpsFields
  *     toggleSubmitBttn         edit-forms, f-errs
@@ -635,7 +632,7 @@ function addAndSelectEntity(data, formParent) {
  * handler stored in the form's params object.
  */
 export function exitForm(formId, fLvl, focus, onExit, data) {                                  //console.log("               --exitForm id = %s, fLvl = %s, exitHandler = %O", formId, fLvl, fP.forms[fLvl].exitHandler);      
-    const exitFunc = onExit || fP.forms[fLvl].exitHandler;
+    const exitFunc = onExit || _mmry('getFormProp', ['exitHandler']);
     $(formId).remove();  
     _cmbx.resetFormCombobox(fLvl, focus);
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }

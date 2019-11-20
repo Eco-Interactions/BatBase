@@ -37,16 +37,32 @@ export function initCreateForm(entity) {                                        
     .then(() => finishInteractionFormBuild())
     .catch(err => _u('alertErr', [err]));
 }
-export function getComboEvents() {
+export function getComboEvents(entity) {
+    return entity === 'interaction' ? getInteractionEvents() : getTaxonEvents();
+}
+function getInteractionEvents() {
     return {
-        'CitationTitle': { change: onCitSelection, add: _forms.create.bind(null, 'citation') },
+        'CitationTitle': { change: onCitSelection, add: create('Citation') },
         'Country-Region': { change: onCntryRegSelection },
         'InteractionType': { change: focusIntTypePin },
-        'Location': { change: onLocSelection, add: _forms.create.bind(null, 'location')},
-        'Publication': { change: onPubSelection, add: _forms.create.bind(null, 'publication')},
+        'Location': { change: onLocSelection, add: create('Location')},
+        'Publication': { change: onPubSelection, add: create('Publication')},
         'Subject': { change: onTaxonSelection.bind(null, 'Subject') },
         'Object': { change: onTaxonSelection.bind(null, 'Object') },
     };
+}
+function getTaxonEvents() {
+    return {
+        'Species': { change: onLevelSelection, add: create('Species') },
+        'Genus': { change: onLevelSelection, add: create('Genus') },
+        'Family': { change: onLevelSelection, add: create('Family') },
+        'Order': { change: onLevelSelection, add: create('Order') },
+        'Class': { change: onLevelSelection, add: create('Class') },
+        'Realm': { change: onRealmSelection }
+    };
+}
+function create(entity) {
+    return _forms.createSubEntity.bind(null, entity);
 }
 /** ==================== INIT FORM FIELDS =================================== */
 /** Builds and returns all interaction-form elements. */
@@ -58,7 +74,7 @@ export function getInteractionFormFields(params) {
     return Promise.all([...builders.map(buildField)]);
 }
 function buildField(builder) { 
-    return Promise.resolve(builder(fP)).then(field => {
+    return Promise.resolve(builder()).then(field => {
         ifSelectElemAddToComboboxInitAry(field); 
         return field;
     });                                                
@@ -209,7 +225,8 @@ function getOptsForLoc(loc) {
 }
 function getChildLocOpts(children) {
     return children.map(id => ({
-        value: id, text: fP.records.location[id].displayName }));
+        value: id, text: fP.records.location[id].displayName 
+    }));
 }
 /** 
  * When a location is selected, its country/region is selected in the top-form
@@ -262,23 +279,18 @@ function buildTaxonField(role) {
  * with the taxa at that level. When one is selected, the remaining boxes
  * are repopulated with related taxa and the 'select' button is enabled.
  */
-export function initSubjectSelect() {                                                  console.log('       --initSubjectSelect [%s]?', $('#Subject-sel').val());
-    const fLvl = _forms.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen('Subject', fLvl); }  
-    return _forms.buildTaxonSelectForm('Subject', 'Bat', fLvl)
-        .then(form => appendTxnFormAndInitCombos('Subject', fLvl, form));
+export function initSubjectSelect() {                                           console.log('       --initSubjectSelect [%s]?', $('#Subject-sel').val());
+    return initTaxonSelect('Subject', 'Bat')
+        .then(() => finishTaxonSelectBuild('Subject'));
 }
 /** Note: The selected realm's level combos are built @onRealmSelection. */
-export function initObjectSelect() {                                                   console.log('       --initObjectSelect [%s]?', $('#Object-sel').val());
-    const fLvl = _forms.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen('Object', fLvl); }
+export function initObjectSelect() {                                            console.log('       --initObjectSelect [%s]?', $('#Object-sel').val());
     const realm = getSelectedObjectRealm($('#Object-sel').val()); 
-    return _forms.buildTaxonSelectForm('Object', realm, fLvl)
-        .then(form => appendTxnFormAndInitCombos('Object', fLvl, form))
+    return initTaxonSelect('Object', realm)
         .then(buildRealmFields);
 
     function buildRealmFields() {    
-        const realmId = _mmry('getTaxonProp', realmTaxon).realm.id;       
+        const realmId = fP.forms.taxonPs.realmTaxon.realm.id;       
         _cmbx('setSelVal', ['#Realm-sel', realmId, 'silent']);
         return onRealmSelection(realmId);
     }
@@ -289,16 +301,22 @@ function getSelectedObjectRealm(id) {
     return fP.records.taxon[id].realm.displayName;
 }
 /* -------- SHARED TAXON SELECT FORM INIT METHODS --------- */
+function initTaxonSelect(role, realm) {
+    const fLvl = _forms.getSubFormLvl('sub');
+    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen(role, fLvl); }
+    return getRealmTaxon(realm)
+        .then(rTaxon => _forms.buildTaxonSelectForm(role, realm, rTaxon, fLvl))
+        .then(form => appendTxnFormAndInitCombos(role, fLvl, form))
+}
 /** Note: Taxon fields often fire their focus event twice. */
 function errIfSubFormOpen(role, fLvl) {
-    if (fP.forms[fLvl].entity === _u.lcfirst(role)) { return; }
-    _errs('openSubFormErr', [role, null, fLvl]);
+    if (fP.forms.taxonPs.entity === _u('lcfirst', [role])) { return; }
+    _forms.err('openSubFormErr', [role, null, fLvl]);
 }
 function appendTxnFormAndInitCombos(role, fLvl, form) {
     const lcRole = _u('lcfirst', [role]);
     $('#'+role+'_row').append(form);
-    _cmbx('initFormCombos', [lcRole, fLvl]);           
-    _forms.finishTaxonSelectUi(role);  
+    _cmbx('initFormCombos', [lcRole, fLvl, getTaxonEvents()]);           
 }
 /**
  * When complete, the select form is removed and the most specific taxon is displayed 
@@ -311,8 +329,348 @@ function onTaxonSelection(role, val) {                                          
     if (!fP.editing) { $('#'+role+'_pin').focus(); }
 }
 export function enableTaxonCombos() {
-    _cmbx.enableCombobox('#Subject-sel');
-    _cmbx.enableCombobox('#Object-sel');
+    _cmbx('enableCombobox', ['#Subject-sel']);
+    _cmbx('enableCombobox', ['#Object-sel']);
+}
+/**
+ * Removes any previous realm comboboxes. Shows a combobox for each level present 
+ * in the selected Taxon realm, plant (default) or arthropod, filled with the 
+ * taxa at that level. 
+ */
+function onRealmSelection(val) {                                                console.log("               --onRealmSelection. val = ", val)
+    if (val === '' || isNaN(parseInt(val))) { return Promise.resolve(); }          
+    if ($('#realm-lvls').length) { $('#realm-lvls').remove(); } 
+    const fLvl = _forms.getSubFormLvl('sub');
+    return _u('getData', ['realm'])
+        .then(setRealmTaxonParams)
+        .then(buildAndAppendRealmRows);
+
+    function setRealmTaxonParams(realms) {
+        const realm = realms[val].slug;
+        return setTaxonParams('Object', _u('ucfirst', [realm])).then(() => realm);
+    }
+    /** A row for each level present in the realm filled with the taxa at that level.  */
+    function buildAndAppendRealmRows(realm) {  
+        _elems('buildFormRows', [realm, {}, fLvl])
+        .then(rows => appendRealmRowsAndFinishBuild(realm, rows, fLvl));
+    }
+    function appendRealmRowsAndFinishBuild(realm, rows, fLvl) {  
+        const realmElems = _u('buildElem', ['div', { id: 'realm-lvls' }]);
+        $(realmElems).append(rows);
+        $('#Realm_row').append(realmElems);
+        _mmry('setFormFieldConfg', [fLvl, 'Realm', { val: null, type: 'select' }]);
+        _cmbx('initFormCombos', [realm, fLvl, getTaxonEvents()]);  
+        finishTaxonSelectBuild('Object');          
+    }
+}
+/**
+ * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
+ * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
+ */
+export function finishTaxonSelectBuild(role) {                                     //console.log('finishTaxonSelectBuild')
+    const fLvl = _forms.getSubFormLvl('sub');
+    const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
+    fP.forms.taxonPs = _mmry('getTaxonMemory');
+    customizeElemsForTaxonSelectForm(role);
+    if (ifResettingTxn(role)) { resetPrevTaxonSelection($('#'+role+'-sel').val());
+    } else { _cmbx('focusFirstCombobox', [selCntnr]); }
+    _u('replaceSelOpts', ['#'+role+'-sel', []]);
+}
+function ifResettingTxn(role) {  
+    const prevSel = fP.forms.taxonPs.prevSel;
+    const resetting = prevSel ? prevSel.reset : false;
+    return $('#'+role+'-sel').val() || resetting;
+}
+export function enableTaxonLvls(disable) {
+    const enable = disable == undefined ? true : false;
+    $.each($('#sub-form select'), (i, sel) => _cmbx('enableCombobox', ['#'+sel.id, enable]));
+}
+
+function setTaxonParams(role, realmName, id) {                                  //console.log('setTaxonParams. args = %O', arguments)
+    const tPs = fP.forms.taxonPs;
+    tPs.realm = realmName;
+    return getRealmTaxon(realmName).then(updateTaxonParams);
+
+    function updateTaxonParams(realmTaxon) {
+        tPs.realmTaxon = realmTaxon;
+        tPs.curRealmLvls = tPs.allRealmLvls[realmName];
+        _mmry('setMemoryProp', ['taxonPs', tPs]);
+    }
+}
+function getRealmTaxon(realm) {
+    const lvls = { 'Arthropod': 'Phylum', 'Bat': 'Order', 'Plant': 'Kingdom' };
+    const realmName = realm || _mmry.getObjectRealm();
+    const dataProp = realmName + lvls[realmName] + 'Names'; 
+    return _u('getData', [dataProp]).then(returnRealmTaxon);
+}
+function returnRealmTaxon(realmRcrds) {                                         //console.log('---realmTaxonRcrds = %O', realmRcrds);
+    const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
+    return fP.records.taxon[realmId];  
+}
+/** Adds a close button. Updates the Header and the submit/cancel buttons. */
+function customizeElemsForTaxonSelectForm(role) {
+    $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
+    $('#sub-hdr').append(getTaxonExitButton(role));
+    $('#sub-submit')[0].value = "Select Taxon";        
+    $('#sub-cancel')[0].value = "Reset";
+    $('#sub-submit').unbind("click").click(selectTaxon);
+    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
+}
+function getTaxonExitButton(role) {
+    const bttn = _elems('getExitButton');
+    bttn.id = 'exit-sub-form';
+    $(bttn).unbind("click").click(exitTaxonSelectForm.bind(null, role));
+    return bttn;
+}
+/** Exits sub form and restores any previous taxon selection. */
+function exitTaxonSelectForm(role) {
+    db_forms.exitForm('#sub-form', 'sub', false, enableTaxonCombos);
+    const prevTaxon = fPs.forms.taxonPs.prevSel; 
+    if (!prevTaxon) { return; }
+    resetTaxonCombobox(role, prevTaxon);
+}
+function resetTaxonCombobox(role, prevTaxon) {
+    const opt = { value: prevTaxon.val, text: prevTaxon.text };
+    _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
+    _cmbx('setSelVal', ['#'+role+'-sel', prevTaxon.val]);
+}
+/** Removes and replaces the taxon form. */
+function resetTaxonSelectForm() {                                               //console.log('resetTaxonSelectForm')                                     
+    const realm = fP.forms.taxonPs.realm;
+    const reset =  realm == 'Bat' ? initSubjectSelect : initObjectSelect;
+    _mmry('setTaxonProp', ['reset', true]);
+    $('#sub-form').remove();
+    reset();
+}
+/** Resets the taxon to the one previously selected in the interaction form.  */
+function resetPrevTaxonSelection(selId) {                                       //console.log('seId = %s, prevSel = %O', selId, fP.forms.taxonPs.prevSel);
+    const id = selId || fP.forms.taxonPs.prevSel.val;
+    if (!id) { return; }
+    const taxon = fP.records.taxon[id];                                         
+    if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                              console.log('           --resetPrevTaxonSelection. [%s] = %O', id, taxon);
+    selectPrevTaxon(taxon);
+}
+function ifSelectedTaxonIsRealmTaxon(taxon) { 
+    return fP.forms.taxonPs.curRealmLvls[0] == taxon.level.displayName;
+}
+function selectPrevTaxon(taxon) {
+    addTaxonOptToTaxonMemory(taxon);
+    if (ifTaxonInDifferentRealm(taxon.realm)) { return selectTaxonRealm(taxon); }
+    _cmbx('setSelVal', ['#'+taxon.level.displayName+'-sel', taxon.id]);
+    window.setTimeout(() => { deleteResetFlag(); }, 1000);   //refactor
+}
+function addTaxonOptToTaxonMemory(taxon) {
+    const displayName = _forms.getTaxonDisplayName(taxon);
+    _mmry('setTaxonProp', ['prevSel', {val: taxon.id, text: displayName }]);
+}
+function ifTaxonInDifferentRealm(realm) {  
+    return realm.displayName !== 'Bat' && $('#Realm-sel').val() != realm.id;
+}
+function selectTaxonRealm(taxon) {
+    _cmbx('setSelVal', ['#Realm-sel', taxon.realm.id]);
+}
+function deleteResetFlag() {
+    _mmry('setTaxonProp', ['reset', null]);
+}
+// function preventComboboxFocus(realm) {
+//     const role = realm === 'Bat' ? 'subject' : 'object';  
+//     const fLvl = fP.forms[role];
+//     const selCntnr = realm === 'Bat' ? '#'+fLvl+'-form' : '#realm-lvls';        
+//     _cmbx('focusFirstCombobox', [selCntnr, false]);
+// }
+/** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
+function selectTaxon() {
+    const role = fP.forms.taxonPs.realm === 'Bat' ? 'Subject' : 'Object';
+    const opt = getSelectedTaxonOption();
+    $('#sub-form').remove();
+    _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
+    _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
+    _cmbx('enableCombobox', ['#'+role+'-sel', true]);
+}
+/** Returns an option object for the most specific taxon selected. */
+function getSelectedTaxonOption() {
+    const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
+    return { value: taxon.id, text: _forms.getTaxonDisplayName(taxon) };
+}
+/** Finds the most specific level with a selection and returns that taxon record. */
+export function getSelectedTaxon(aboveLvl) {
+    // fP = fP || _mmry('getAllFormMemory');
+    const selElems = $('#sub-form .selectized').toArray();  
+    if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
+    const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
+    return !selected ? false : fP.records.taxon[$(selected).val()];
+    
+    function ifEditingTaxon() {
+        return fP.action == 'edit' && fP.forms.top.entity == 'taxon';
+    }
+}
+function isSelectedTaxon(resetLvl, elem) { 
+    if (!ifIsLevelComboElem(elem)) { return; }
+    if (resetLvl && ifLevelChildOfResetLevel(resetLvl, elem)) { return; }
+    return $(elem).val(); 
+}  
+function ifLevelChildOfResetLevel() {
+    const allLevels = fP.forms.taxonPs.lvls;
+    const level = elem.id.split('-sel')[0];
+    return allLevels.indexOf(level) > allLevels.indexOf(level);
+}
+function ifIsLevelComboElem(elem) {
+    return elem.id.includes('-sel') && !elem.id.includes('Realm');
+ } 
+/**
+ * When a taxon at a level is selected, all child level comboboxes are
+ * repopulated with related taxa and the 'select' button is enabled. If the
+ * combo was cleared, ensure the remaining dropdowns are in sync or, if they
+ * are all empty, disable the 'select' button.
+ */
+function onLevelSelection(val) {                                                console.log("           --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
+    if (val === 'create') { return openLevelCreateForm(this.$input[0]); }
+    if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
+    const fLvl = _forms.getSubFormLvl('sub');
+    repopulateCombosWithRelatedTaxa(val);
+    db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);             
+}
+function openLevelCreateForm(selElem) {
+    _forms.createSubEntity(selElem.id.split('-sel')[0]);
+}
+function syncTaxonCombos(elem) {                                                
+    resetChildLevelCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
+}
+function resetChildLevelCombos(selTxn) {                                        //console.log("resetChildLevelCombos. selTxn = %O", selTxn)
+    const lvlName = selTxn ? selTxn.level.displayName : getRealmTopLevel();
+    if (lvlName == 'Species') { return; }
+    getChildlevelOpts(lvlName)
+    .then(opts => repopulateLevelCombos(opts, {}));
+}
+function getRealmTopLevel() {
+    return fP.forms.taxonPs.curRealmLvls[1];
+}
+function getChildlevelOpts(lvlName) { 
+    const opts = {};
+    const realm = fP.forms.taxonPs.realm;
+    return buildChildLvlOpts().then(() => opts);
+
+    function buildChildLvlOpts() {
+        const lvls = fP.forms.taxonPs.lvls;
+        const lvlIdx = lvls.indexOf(lvlName)+2; //Skips selected level
+        const optProms = [];
+        return getAllChildTaxonOpts();
+
+        function getAllChildTaxonOpts() {
+            for (var i = lvlIdx; i <= 7; i++) { 
+                optProms.push(getTaxonOpts(i, lvls[i-1], realm));
+            }
+            return Promise.all(optProms);
+        }
+    }
+    function getTaxonOpts(idx, level, realm) {
+        return _elems('getTaxonOpts', [level, null, realm])
+        .then(addToOpts.bind(null, idx));
+    }
+    function addToOpts(i, o) {  
+        opts[i] = o;
+    }
+}
+/**
+ * Repopulates the comboboxes of child levels when a taxon is selected. Selected
+ * and ancestor levels are populated with all taxa at the level and the direct 
+ * ancestors selected. Child levels populate with only decendant taxa and
+ * have no initial selection.
+ * TODO: Fix bug with child taxa opt refill sometimes filling with all taxa.
+ */
+function repopulateCombosWithRelatedTaxa(selId) {
+    const opts = {}, selected = {};                                               
+    const lvls = fP.forms.taxonPs.lvls;  
+    const taxon = fP.records.taxon[selId];                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
+    const realm = fP.forms.taxonPs.realm;
+
+    taxon.children.forEach(addRelatedChild); 
+    return buildUpdatedTaxonOpts()
+        .then(repopulateLevelCombos.bind(null, opts, selected));
+
+    function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
+        const childTxn = fP.records.taxon[id];  
+        const level = childTxn.level.id;
+        addOptToLevelAry(childTxn, level);
+        childTxn.children.forEach(addRelatedChild);
+    }
+    function addOptToLevelAry(childTxn, level) {
+        if (!opts[level]) { opts[level] = []; }                                 //console.log("setting lvl = ", taxon.level)
+        opts[level].push({ value: childTxn.id, text: childTxn.displayName });                                   
+    }
+    function buildUpdatedTaxonOpts() {
+        return Promise.all([getSiblingOpts(taxon), getAncestorOpts(taxon.parent)])
+        .then(buildOptsForEmptyLevels)
+        .then(addCreateOpts);
+    }
+    function getSiblingOpts(taxon) {                                            
+        return _elems('getTaxonOpts', [taxon.level.displayName, null, realm])
+            .then(o => {                                                        //console.log('getSiblingOpts. taxon = %O', taxon);
+                opts[taxon.level.id] = o;
+                selected[taxon.level.id] = taxon.id;
+            });  
+    }
+    function getAncestorOpts(prntId) {                                          //console.log('getAncestorOpts. prntId = [%s]', prntId);
+        const realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda
+        if (realmTaxa.indexOf(prntId) !== -1 ) { return Promise.resolve(); }
+        const prntTaxon = _mmry('getRcrd', ['taxon', prntId]);
+        selected[prntTaxon.level.id] = prntTaxon.id;                            
+        return _elems('getTaxonOpts', [prntTaxon.level.displayName, null, realm])
+            .then(o => {                                                        //console.log("--getAncestorOpts - setting lvl = ", prntTaxon.level)
+                opts[prntTaxon.level.id] = o;
+                return getAncestorOpts(prntTaxon.parent);
+            });
+    }
+    /**
+     * Builds the opts for each level without taxa related to the selected taxon.
+     * Ancestor levels are populated with all taxa at the level and will have 
+     * the 'none' value selected.
+     */
+    function buildOptsForEmptyLevels() {                                        
+        const topLvl = fP.forms.taxonPs.realm === "Arthropod" ? 3 : 5;  
+        const proms = [];
+        fillOptsForEmptyLevels();  
+        return Promise.all(proms);
+
+        function fillOptsForEmptyLevels() {             
+            for (let i = 7; i >= topLvl; i--) {                                 //console.log('fillOptsForEmptyLevels. lvl = ', i);
+                if (opts[i]) { continue; } 
+                if (i > taxon.level.id) { opts[i] = []; continue; }
+                buildAncestorOpts(i);
+            }
+        }
+        function buildAncestorOpts(id) {
+            selected[id] = 'none';
+            proms.push(_elems('getTaxonOpts', [lvls[id-1], null, realm])
+                .then(o => opts[id] = o ));
+        }
+    }
+    function addCreateOpts() {                      
+        for (let lvl in opts) {                                                 //console.log("lvl = %s, name = ", lvl, lvls[lvl-1]);
+            opts[lvl].unshift({ value: 'create', text: 'Add a new '+lvls[lvl-1]+'...'});
+        }
+        return Promise.resolve();
+    }
+} /* End fillAncestorTaxa */    
+function repopulateLevelCombos(optsObj, selected) {                             //console.log('repopulateLevelCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
+    const lvls = fP.forms.taxonPs.lvls;
+    Object.keys(optsObj).forEach(l => {                                         //console.log("lvl = %s, name = ", l, lvls[l-1]); 
+        repopulateLevelCombo(optsObj[l], lvls[l-1], l, selected)
+    });
+}
+/**
+ * Replaces the options for the level combo. Selects the selected taxon and 
+ * its direct ancestors.
+ */
+function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName);
+    _u('replaceSelOpts', ['#'+lvlName+'-sel', opts, () => {}]);
+    $('#'+lvlName+'-sel')[0].selectize.on('change', onLevelSelection);
+    if (!lvl in selected) { return; }
+    if (selected[lvl] == 'none') { return resetPlaceholer(lvlName); }
+    _cmbx('setSelVal', ['#'+lvlName+'-sel', selected[lvl], 'silent']); 
+}
+function resetPlaceholer(lvlName) {
+    _u('updatePlaceholderText', ['#'+lvlName+'-sel', null, 0]); 
 }
 /*-------------- Interaction Detail Fields -------------------------------*/
 function buildIntTypeField() {                                                  console.log('       --buildIntTypeField');
@@ -386,7 +744,7 @@ function showInteractionFormMap() {                                             
     _cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }
 function finishComboboxInit() {
-    _cmbx('initFormCombos', ['interaction', 'top']);
+    _cmbx('initFormCombos', ['interaction', 'top', getInteractionEvents()]);
     _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     _cmbx('focusCombobox', ['#Publication-sel', true]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
