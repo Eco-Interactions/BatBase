@@ -31,7 +31,6 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Species", "Genus", "Family", "Order", "Class"],
                 "opt": false },
-            // "exitHandler": { create: db_forms.enableTaxonCombos }
         },
         "author": { 
             "add": { "FirstName": "text", "MiddleName": "text", 
@@ -52,7 +51,6 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Family", "Genus", "Species"],
                 "opt": false }, 
-            //Because there is only one subject realm, the exithandler lives in the subject confg 
         },
         'citation': {
             'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
@@ -143,7 +141,6 @@ export function getFormConfg(entity) {                                          
                             'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
                 }
             },
-            // 'exitHandler': { create: db_forms.enablePubField }
         },    
         'editor': { 
             "add": { "FirstName": "text", "MiddleName": "text", 
@@ -175,7 +172,6 @@ export function getFormConfg(entity) {                                          
                 'sug': ['Latitude', 'Longitude', 'DisplayName', 'Description', 
                     'Country', 'HabitatType', 'Elevation', 'ElevationMax' ],
                 'opt': false },
-            // 'exitHandler': { create: db_forms.enableCountryRegionField }
         },
         'object': {
             "add": {"Realm": "select"},  
@@ -194,7 +190,6 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Species", "Genus", "Family"],
                 "opt": false},
-            // "exitHandler": { create: db_forms.enableTaxonCombos }
         },
         'publication': {
             "add": { "Title" : "text", "PublicationType": "select", 
@@ -267,7 +262,6 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["Species", "Genus", "Family"],
                 "opt": false },
-            // "exitHandler": { create: db_forms.enableTaxonCombos }
         },
         'taxon': {
             "add": {},  
@@ -277,7 +271,6 @@ export function getFormConfg(entity) {                                          
             "order": {
                 "sug": ["DisplayName"],
                 "opt": false },
-            // "exitHandler": { create: db_forms.enableTaxonLvls }
         },
     };
     return fieldMap[entity];
@@ -313,7 +306,7 @@ export function getCoreFieldDefs(entity) {
             "Genus": "select", "Species": "select"
         },
         "taxon": { "DisplayName": "text" }
-    };
+    };  console.log('getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
     return fields[coreEntityMap[entity]];
 }    
 

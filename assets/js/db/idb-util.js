@@ -46,7 +46,7 @@ export function downloadFullDb(reset) {                                         
  * db_sync calls @initSearchPage. 
  */
 function checkForServerUpdates() {
-    _u.getData('lclDataUpdtdAt').then(syncLocalDbWithServer);
+    getData('lclDataUpdtdAt').then(syncLocalDbWithServer);
 }
 /**
  * Updates user specific data in local storage. Useful when the user changes on the
@@ -65,10 +65,10 @@ function checkUserData(dbUser) {
  */
 export function getData(keys, returnUndefined) {                                //console.log('     GET [%O]', keys);
     if (!Array.isArray(keys)) { return getStoredData(keys, returnUndefined); }
-    return Promise.resolve(getStoredDataObj(keys, returnUndefined));
+    return getStoredDataObj(keys, returnUndefined);
 }
 function getStoredData(key, returnUndefined) {
-    return Promise.resolve(idb.get(key).then(d => returnStoredData(d, key, returnUndefined)));
+    return idb.get(key).then(d => returnStoredData(d, key, returnUndefined));
 }
 function returnStoredData(data, key, returnUndefined) {                         //console.log('[%s] = %O (returnUndefined ? [%s])', key, data, returnUndefined);
     if (data == undefined && !returnUndefined) { return logAndAlert(key); }  

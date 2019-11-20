@@ -431,7 +431,7 @@ function clearAllOtherLvls() {
     });
 }
 function closePrntEdit() {                                                  
-    var prnt =  db_forms.getSelectedTaxon() || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
+    var prnt =  _forms.getSelectedTaxon() || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
     exitPrntEdit(prnt);
 }
 function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");

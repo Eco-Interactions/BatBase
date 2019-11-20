@@ -28,7 +28,7 @@ import * as _ui from './ui/form-ui-main.js';
 
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-    'publication': _src, 'publisher': _src, 'taxon': _txn
+    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _txn, 'object': _txn
 };
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
 export function _util(funcName, params = []) {
@@ -92,12 +92,12 @@ export function createSubEntity(ent, cnt) {
 }
 export function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
     _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
-    return _ui.elems.initSubForm(fP, fLvl, fClasses, fVals, pSel);
+    return _ui.elems.initSubForm(fLvl, fClasses, fVals, pSel);
 }
-export function buildTaxonSelectForm(role, realm, fLvl) {
-    _mmry.initEntityFormMemory(role, fLvl, '#'+role+'-sel', 'create');
-    _mmry.initTaxonMemory(role, realm);
-    return _ui.elems.initSubForm(fP, fLvl, fClasses, fVals, pSel);
+export function buildTaxonSelectForm(role, realm, fLvl) {  console.log('-------------buildTaxonSelectForm. args = %O', arguments);
+    _mmry.initEntityFormMemory(_u.lcfirst(role), fLvl, '#'+role+'-sel', 'create');
+    return _mmry.initTaxonMemory(role, realm)
+    .then(() => _ui.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
 }
 /** --------- ON FORM INIT COMPLETE ------------- */
 export function onFormInitComplete(entity) {
@@ -149,6 +149,9 @@ export function getFormFunc(entity, funcName) {
 export function callFormFunc(entity, funcName, params = []) {  console.log('args = %O, forms = %O', arguments, forms);
     return forms[entity][funcName](...params);
 }
+export function getSelectedTaxon() {
+    return _txn.getSelectedTaxon();
+}
 // export function finishIntFormBuild() {
 //     _int.finishInteractionFormBuild();
 // }
@@ -172,13 +175,13 @@ export function getTaxonDisplayName(taxon) {
 }
 export function getRealmTaxon(realm) {  
     const lvls = { 'Arthropod': 'Phylum', 'Bat': 'Order', 'Plant': 'Kingdom' };
-    const realmName = realm || _mmry('getObjectRealm');
-    const dataProp = realmName + lvls[realmName] + 'Names'; 
+    const realmName = realm || _mmry.getObjectRealm();
+    const dataProp = realmName + lvls[realmName] + 'Names'; console.log('dataProp = %O', dataProp)
     return _u.getData(dataProp).then(returnRealmTaxon);
 }
-function returnRealmTaxon(realmRcrds) {
+function returnRealmTaxon(realmRcrds) { console.log('---realmTaxonRcrds = %O', realmRcrds);
     const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
-    return _mmry('getEntityRcrds', ['taxon']);  
+    return _mmry.getEntityRcrds('taxon')[realmId];  
 }
 
 
