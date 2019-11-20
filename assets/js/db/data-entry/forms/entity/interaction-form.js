@@ -256,19 +256,24 @@ function buildTaxonField(role) {
     const sel = _u('buildSelectElem', [ [], attr]);
     return _elems('buildFormRow', [ role, sel, 'top', true]);
 }
+/**
+ * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
+ * each level present in the realm, (eg: Bat - Family, Genus, and Species), filled 
+ * with the taxa at that level. When one is selected, the remaining boxes
+ * are repopulated with related taxa and the 'select' button is enabled.
+ */
 export function initSubjectSelect() {                                                  console.log('       --initSubjectSelect [%s]?', $('#Subject-sel').val());
     const fLvl = _forms.getSubFormLvl('sub');
     if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen('Subject', fLvl); }  
-    return getTaxonSelectForm('Subject', 'Bat', fLvl)
-        .then(form => appendTxnFormAndInitCombos('Subject', fLvl, form))
-        .then(() => finishTaxonSelectUi('Subject'));
+    return _forms.buildTaxonSelectForm('Subject', 'Bat', fLvl)
+        .then(form => appendTxnFormAndInitCombos('Subject', fLvl, form));
 }
 /** Note: The selected realm's level combos are built @onRealmSelection. */
 export function initObjectSelect() {                                                   console.log('       --initObjectSelect [%s]?', $('#Object-sel').val());
     const fLvl = _forms.getSubFormLvl('sub');
     if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen('Object', fLvl); }
-    const realmName = getSelectedObjectRealm($('#Object-sel').val()); 
-    return getTaxonSelectForm('Object', realmName, fLvl)
+    const realm = getSelectedObjectRealm($('#Object-sel').val()); 
+    return _forms.buildTaxonSelectForm('Object', realm, fLvl)
         .then(form => appendTxnFormAndInitCombos('Object', fLvl, form))
         .then(buildRealmFields);
 
@@ -288,17 +293,6 @@ function getSelectedObjectRealm(id) {
 function errIfSubFormOpen(role, fLvl) {
     if (fP.forms[fLvl].entity === _u.lcfirst(role)) { return; }
     _errs('openSubFormErr', [role, null, fLvl]);
-}
-/**
- * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
- * each level present in the realm, (eg: Bat - Family, Genus, and Species), filled 
- * with the taxa at that level. When one is selected, the remaining boxes
- * are repopulated with related taxa and the 'select' button is enabled.
- */
-function getTaxonSelectForm(role, realm, fLvl) {
-    const lcRole = _u('lcfirst', [role]);
-    const formParams = [lcRole, fLvl, 'sml-sub-form', {}, '#'+role+'-sel'];
-    return _forms.buildTaxonSelectForm(role, realm, fLvl);
 }
 function appendTxnFormAndInitCombos(role, fLvl, form) {
     const lcRole = _u('lcfirst', [role]);
