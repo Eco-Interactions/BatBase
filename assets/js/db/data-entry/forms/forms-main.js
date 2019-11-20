@@ -28,7 +28,7 @@ import * as _ui from './ui/form-ui-main.js';
 
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _txn, 'object': _txn
+    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 'object': _int
 };
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
 export function _util(funcName, params = []) {
@@ -72,9 +72,9 @@ export function initEntityFormMemory(entity, level, pSel, action) {
 export function setOnSubmitSuccessHandler(formField, fLvl) {
     const hndlrs = {
         'location': _int.enableCountryRegionField,
-        'object': _int.enableTaxonCombos,
-        'subject': _int.enableTaxonCombos,
-        'taxon': _txn.enableTaxonLvls
+        // 'object': _int.enableTaxonCombos,
+        // 'subject': _int.enableTaxonCombos,
+        'taxon': _int.enableTaxonLvls
     };
     _mmry.setOnSubmitSuccessHandler(fLvl, hndlrs[formField]);
 }
@@ -94,10 +94,10 @@ export function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
     _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
     return _ui.elems.initSubForm(fLvl, fClasses, fVals, pSel);
 }
-export function buildTaxonSelectForm(role, realm, fLvl) {  console.log('-------------buildTaxonSelectForm. args = %O', arguments);
+export function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {           console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     _mmry.initEntityFormMemory(_u.lcfirst(role), fLvl, '#'+role+'-sel', 'create');
-    return _mmry.initTaxonMemory(role, realm)
-    .then(() => _ui.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
+    return _mmry.initTaxonMemory(role, realm, realmTaxon)
+        .then(() => _ui.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
 }
 /** --------- ON FORM INIT COMPLETE ------------- */
 export function onFormInitComplete(entity) {
@@ -124,9 +124,6 @@ export function create(entity) {
     forms[_u.lcfirst(entity)].initCreateForm(entity);
 }
 /** ------------------------ FORM SPECIFIC ---------------------------------- */
-export function finishTaxonSelectUi(role) {
-    _txn.finishTaxonSelectUi(role);
-}
 export function getSrcTypeRows(entity, typeId, fLvl, type) {
     return _src.getSrcTypeRows(entity, typeId, fLvl, type)
 }
@@ -150,7 +147,7 @@ export function callFormFunc(entity, funcName, params = []) {  console.log('args
     return forms[entity][funcName](...params);
 }
 export function getSelectedTaxon() {
-    return _txn.getSelectedTaxon();
+    return _int.getSelectedTaxon();
 }
 // export function finishIntFormBuild() {
 //     _int.finishInteractionFormBuild();
@@ -163,28 +160,14 @@ export function getNextFormLevel(next, curLvl) {
 export function getSubFormLvl(intFormLvl) {  
     return util('getSubFormLvl', [intFormLvl]);
 }
-export function getComboboxEvents(entity) {  console.log('entity = ', entity)
-    return forms[entity].getComboEvents();
-}
-
-
+// export function getComboboxEvents(entity) {                                     console.log('entity = ', entity)
+//     return forms[entity].getComboEvents(entity);
+// }
 /* ------- sort --------- */
 export function getTaxonDisplayName(taxon) { 
     return taxon.level.displayName === 'Species' ? 
         taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
 }
-export function getRealmTaxon(realm) {  
-    const lvls = { 'Arthropod': 'Phylum', 'Bat': 'Order', 'Plant': 'Kingdom' };
-    const realmName = realm || _mmry.getObjectRealm();
-    const dataProp = realmName + lvls[realmName] + 'Names'; console.log('dataProp = %O', dataProp)
-    return _u.getData(dataProp).then(returnRealmTaxon);
-}
-function returnRealmTaxon(realmRcrds) { console.log('---realmTaxonRcrds = %O', realmRcrds);
-    const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
-    return _mmry.getEntityRcrds('taxon')[realmId];  
-}
-
-
 /* ============================ EXIT FORM =================================== */
 /** Returns popup and overlay to their original/default state. */
 export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')

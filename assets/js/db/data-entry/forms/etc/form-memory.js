@@ -9,6 +9,7 @@
  */
 import { getData, snapshot } from '../../../util.js';
 import * as _forms from '../forms-main.js';
+
 let formMemory = {};
 
 export function clearMemory() {
@@ -100,18 +101,17 @@ export function initEntityFormMemory(entity, level, pSel, action) {
  * > prevSel - Taxon already selected when form opened, or null.
  * > objectRealm - Object realm display name. (Added elsewhere.)
  */
-export function initTaxonMemory(role, realmName) {                              console.log('###### INIT ######### role [%s], realm [%s]', role, realmName);
+export function initTaxonMemory(role, realmName, realmTaxon) {                              console.log('###### INIT ######### role [%s], realm [%s]', role, realmName);
     const realmLvls = {
         'Bat': ['Order', 'Family', 'Genus', 'Species'],
         'Arthropod': ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
         'Plant': ['Kingdom', 'Family', 'Genus', 'Species']
     };
-    return _forms.getRealmTaxon(realmName)
-        .then(buildBaseTaxonParams);          
+    const reset = ifResettingTxnForm(formMemory.forms.taxonPs);
+    const prevSelectedTxnOpt = buildOptForPrevSelectedTaxon(role);
+    return Promise.resolve(buildBaseTaxonParams());
 
-    function buildBaseTaxonParams(realmTaxon) {  console.log('------------ realmTaxon = %O', realmTaxon)
-        const reset = ifResettingTxnForm(formMemory.forms.taxonPs);
-        const prevSelectedTxnOpt = buildOptForPrevSelectedTaxon(role);
+    function buildBaseTaxonParams() {                                           console.log('------------ realmTaxon = %O', realmTaxon)
         formMemory.forms.taxonPs = { 
             lvls: ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
             realm: realmName, 
@@ -150,14 +150,17 @@ export function getMemoryProp(prop) {
 export function getFormProp(prop, fLvl) {
     return formMemory.forms[fLvl][prop];
 }
-export function getFormEntity(fLvl) {  console.log('getFormEntity [%O]', fLvl);
+export function getFormEntity(fLvl) { 
     return formMemory.forms[fLvl].entity;
 }
 export function getFormParentId(fLvl) {
     return formMemory.forms[fLvl].pSelId;
 }
-export function getTaxonProp(prop) {  console.log('txnMmry = %O', formMemory.forms)
+export function getTaxonProp(prop) {  
     return formMemory.forms.taxonPs[prop];
+}
+export function getTaxonMemory() {
+    return formMemory.forms.taxonPs;
 }
 // export function getFormLevelParams(fLvl) {
 //     return formMemory.forms[fLvl];
@@ -191,6 +194,9 @@ export function setMemoryProp(prop, val) {
 }
 export function setFormProp(fLvl, prop, val) {
     formMemory.forms[fLvl][prop] = val;
+}
+export function setTaxonProp(prop, val) {  
+    return formMemory.forms.taxonPs[prop] = val;
 }
 export function setFormFieldConfg(fLvl, field, confg) {
     formMemory.forms[fLvl].fieldConfg.vals[field] = confg

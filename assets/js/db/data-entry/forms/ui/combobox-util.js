@@ -34,9 +34,8 @@ export function initSingle(confg, fLvl) {                                       
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl) {                                  console.log("initFormCombos. [%s] formLvl = [%s]", entity, fLvl);
+export function initFormCombos(entity, fLvl, comboEvents) {                                  console.log("initFormCombos. [%s] formLvl = [%s]", entity, fLvl);
     const elems = _forms.memory('getFormProp', ['selElems', fLvl]);
-    const comboEvents = _forms.getComboboxEvents(entity);
     elems.forEach(selectizeElem);
     _forms.memory('setFormProp', [fLvl, 'selElems', []]);
 
@@ -58,7 +57,7 @@ export function focusCombobox(selId, focus) {
     $(selId)[0].selectize.focus();
 }
 export function focusFirstCombobox(cntnrId, focus) {  
-    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
+    const selElems = $(cntnrId+' .selectized').toArray();                       console.log("[%s] first elem = %O", cntnrId, selElems[0]);
     focusCombobox('#'+ selElems[0].id, focus);
 }
 export function clearCombobox(selId) {                                          //console.log("clearCombobox [%s]", selId);
