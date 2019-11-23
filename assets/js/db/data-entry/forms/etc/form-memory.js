@@ -23,7 +23,6 @@ export function clearMemory() {
         ids are added later). False if not editing.
  * > entity - Name of this form's entity     
  * > forms - Container for form-specific params 
- *  >> expanded - Obj of form entities(k) and their showAll/showDefault fields state(v)
  * > formLevels - An array of the form level names/tags/prefixes/etc.
  * > records - An object of all records, with id keys, for each of the 
  *   root entities - Location, Source and Taxa, and any sub entities as needed.
@@ -34,7 +33,7 @@ export function initFormMemory(action, entity, id) {
     const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
         'author', 'publisher'];
     const prevSubmitFocus = formMemory.submitFocus;
-    const xpandedForms = formMemory.forms ? formMemory.forms.expanded : {};
+    // const xpandedForms = formMemory.forms ? formMemory.forms.expanded : {};
     return getData(entities).then(data => {
         initMainMemory(data);
         initEntityFormMemory(entity, 'top', null, action);                      console.log("#### Init formMemory = %O, curFormMemory = %O", snapshot(formMemory), formMemory);
@@ -46,7 +45,7 @@ export function initFormMemory(action, entity, id) {
             action: action,
             editing: action === 'edit' ? { core: id || null, detail: null } : false,
             entity: entity,
-            forms: { expanded: xpandedForms },
+            forms: {},  // expanded: xpandedForms 
             formLevels: ['top', 'sub', 'sub2'],
             records: data,
             submitFocus: prevSubmitFocus || false
@@ -59,10 +58,11 @@ export function initFormMemory(action, entity, id) {
  * -- Property descriptions:
  * > action - create || edit
  * > confg - The form config object used during form building.
+ * > expanded - show all fields (true) or show default.
  * > fieldConfg - Form fields and types, values entered, and the required fields.
  * > entity - Name of this form's entity.
  * > entityType - Sub-entity type. Eg, publication-types: Book, Journal, etc.
- * > onSubmitSuccess - Handles form exit/reset.
+ * > onFormClose - Handles form exit/reset.
  * > fieldConfg - Form fields and types, values entered, and the required fields.
  * > misc - object to hold the various special-case props
  * > pSelId - The id of the parent select of the form.
@@ -78,17 +78,18 @@ export function initEntityFormMemory(entity, level, pSel, action) {
     formMemory.forms[entity] = level;
     formMemory.forms[level] = {
         action: action,
+        expanded: false,
         fieldConfg: { fields: {}, vals: {}, required: [] },
         entity: entity,
         entityType: false,
-        onSubmitSuccess: null,
+        onFormClose: null,
         misc: {},
         pSelId: pSel,
         reqElems: [],
         selElems: [], 
         vals: {}
     };                                                                          console.log("initEntityFormMemory. formMemory = %O, arguments = %O", formMemory, arguments)
-    return formMemory;                                                                       //console.log("fLvl params = %O", formMemory.forms[level]);
+    return formMemory;                                                                       
 }
 /*------------- Taxon --------------------*/
 /**
@@ -101,40 +102,26 @@ export function initEntityFormMemory(entity, level, pSel, action) {
  * > prevSel - Taxon already selected when form opened, or null.
  * > objectRealm - Object realm display name. (Added elsewhere.)
  */
-export function initTaxonMemory(role, realmName, realmTaxon) {                              console.log('###### INIT ######### role [%s], realm [%s]', role, realmName);
-    const realmLvls = {
+export function initTaxonMemory(role, realmName, realmTaxon, reset) {           //console.log('###### INIT ######### role [%s], realm [%s]', role, realmName);
+    const realmLvls = {                                             //realm-refact
         'Bat': ['Order', 'Family', 'Genus', 'Species'],
         'Arthropod': ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
         'Plant': ['Kingdom', 'Family', 'Genus', 'Species']
     };
-    const reset = ifResettingTxnForm(formMemory.forms.taxonPs);
-    const prevSelectedTxnOpt = buildOptForPrevSelectedTaxon(role);
     return Promise.resolve(buildBaseTaxonParams());
 
-    function buildBaseTaxonParams() {                                           console.log('------------ realmTaxon = %O', realmTaxon)
+    function buildBaseTaxonParams() {                                           
         formMemory.forms.taxonPs = { 
-            lvls: ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
+            lvls: ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],  //realm-refact
             realm: realmName, 
             allRealmLvls: realmLvls, 
             curRealmLvls: realmLvls[realmName],
             realmTaxon: realmTaxon,
-            prevSel: prevSelectedTxnOpt
-        };           console.log('-----------------------realmTaxon = %O, tP = %O', realmTaxon, formMemory.forms.taxonPs)
-        if (reset) { formMemory.forms.taxonPs.prevSel.reset = true; } //removed once reset complete
-        if (role === 'Object') { formMemory.forms.taxonPs.objectRealm = realmName; }  console.log('       --taxon params = %O', formMemory.forms.taxonPs)
+        };           
+        if (role === 'Object') { formMemory.forms.taxonPs.objectRealm = realmName; }  
+        console.log('       --taxon params = %O', formMemory.forms.taxonPs)
     }
 }
-function ifResettingTxnForm(txnMemory) {
-    return txnMemory ? txnMemory.prevSel.reset : false;
-}
-function buildOptForPrevSelectedTaxon(role) {
-    const id = $('#'+role+'-sel').val() || 
-        (formMemory.forms.taxonPs ? formMemory.forms.taxonPs.prevSel.val : false);
-    return id ? 
-        { val: id, text: _forms.getTaxonDisplayName(formMemory.records.taxon[id]) } :
-        { val: null, text: null };
-}
-
 /** Returns either the preivously selected object realm or the default. */
 export function getObjectRealm() {
     const txnMemory = formMemory.forms.taxonPs; 
@@ -148,13 +135,13 @@ export function getMemoryProp(prop) {
     return formMemory[prop];
 }
 export function getFormProp(prop, fLvl) {
-    return formMemory.forms[fLvl][prop];
+    return formMemory.forms[fLvl] ? formMemory.forms[fLvl][prop] : false;
 }
 export function getFormEntity(fLvl) { 
-    return formMemory.forms[fLvl].entity;
+    return formMemory.forms[fLvl] ? formMemory.forms[fLvl].entity : false;
 }
 export function getFormParentId(fLvl) {
-    return formMemory.forms[fLvl].pSelId;
+    return formMemory.forms[fLvl] ? formMemory.forms[fLvl].pSelId : false;
 }
 export function getTaxonProp(prop) {  
     return formMemory.forms.taxonPs[prop];
@@ -207,6 +194,6 @@ export function setFormFieldValueMemory(fLvl, field, val) {
 export function setFormEntityType(fLvl, type) {
     formMemory.forms[fLvl].entityType = type;
 }
-export function setOnSubmitSuccessHandler(fLvl, hndlr) {
-    formMemory.forms[fLvl].onSubmitSuccess = hndlr;
+export function setonFormCloseHandler(fLvl, hndlr) {
+    formMemory.forms[fLvl].onFormClose = hndlr;
 }

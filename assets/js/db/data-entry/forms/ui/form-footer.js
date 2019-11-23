@@ -7,10 +7,10 @@
  *     buildFormFooter       form-ui
  *     
  */
-import * as _u from '../../../util.js';
 import * as db_forms from '../../db-forms.js';
-import * as _cmbx from './combobox-util.js';
-import * as _fCnfg from '../etc/form-config.js';
+import * as _forms from '../forms-main.js';
+
+const _u = _forms._util;
 
 let fP;
 /**
@@ -19,7 +19,7 @@ let fP;
  */
 export function buildFormFooter(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
     fP = params;   
-    const cntnr = _u.buildElem("div", { class: "flex-row bttn-cntnr" });
+    const cntnr = _u('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
     const spacer = $('<div></div>').css("flex-grow", 2);
     const submitBttns = buildSubmitAndCancelBttns(level, action, entity);
@@ -33,42 +33,66 @@ export function buildFormFooter(entity, level, action, noShwFields, params) {   
  * @return {elem} Checkbox and label that will 'Show all fields'
  */
 function buildAddFieldsCheckbox(entity, level) {                                //console.log('fP = %O', fP);
-    if (_fCnfg.getFormConfg(entity).order.opt === false) { return; }
-    const cntnr = _u.buildElem('div', {class: 'all-fields-cntnr'});
-    const chckBox = _u.buildElem('input', { id: level+'-all-fields', 
-        type: 'checkbox', value: 'Show all fields' }) 
-    const lbl = _u.buildElem('label', { for: level+'-all-fields', 
-        text: 'Show all fields.' }); 
-    if (fP.forms.expanded[entity]) { chckBox.checked = true; }
-    $(chckBox).change(db_forms.toggleShowAllFields.bind(chckBox, _u.lcfirst(entity), level));
-    _u.addEnterKeypressClick(chckBox);
+    if (!ifEntityHasOptionalFields(entity)) { return; }
+    const cntnr = _u('buildElem', ['div', {class: 'all-fields-cntnr'}]);
+    const chckBox = getCheckbox(level, entity);
+    const lbl = getLabel(level);
     $(cntnr).append([chckBox, lbl]);
     return cntnr;
 }
-/** Returns the buttons with the events bound. */
-function buildSubmitAndCancelBttns(level, action, entity) { console.log('level = [%s], fP = %O', level, fP);
-    const bttn = { create: "Create", edit: "Update" };
-    const events = getBttnEvents(entity, level);                                //console.log("events = %O", events);
-    const submit = buildFormButton(
-        'submit', level, bttn[action] + " " + _u.ucfirst(entity));
-    const cancel = buildFormButton('cancel', level, 'Cancel');
-    $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
-    $(cancel).css("cursor", "pointer").click(events.cancel);
-    return [submit, cancel];
+function ifEntityHasOptionalFields(entity) {
+    return _forms.confg('getFormConfg', [entity]).order.opt === false;
 }
-/** Returns a (submit or cancel) button for the form level. */
-function buildFormButton(action, level, val) {
-    return _u.buildElem("input", { id: level +'-'+action, 
-        class: "ag-fresh tbl-bttn", type: "button", value: val});
+function getCheckbox(level, entity) {
+    const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };
+    const elem = _u('buildElem', ['input', attr]); 
+    const lcEntity = _u('lcfirst', [entity]);
+    if (fP.forms[level].expanded) { elem.checked = true; }
+    _forms.ui('setToggleFieldsEvent', [elem, lcEntity, level])
+    _u('addEnterKeypressClick', [elem]);
+    return elem;
+}
+function getLabel(level) {
+    const attr = { for: level+'-all-fields', text: 'Show all fields.' };
+    return _u('buildElem', ['label', attr]); 
+}
+/** Returns the buttons with the events bound. */
+function buildSubmitAndCancelBttns(level, action, entity) { 
+    const events = getBttnEvents(entity, level);                                //console.log("events = %O", events);
+    return [getSubmitBttn(), getCancelBttn()];
+    
+    function getSubmitBttn() {
+        const text = { create: "Create", edit: "Update" };
+        const bttn = buildFormButton(
+            'submit', level, text[action] + " " + _u('ucfirst', [entity]));
+        $(bttn).attr("disabled", true).css("opacity", ".6").click(events.submit);
+        return bttn;
+    }
+    function getCancelBttn() {
+        const bttn = buildFormButton('cancel', level, 'Cancel');
+        $(bttn).css("cursor", "pointer").click(events.cancel);
+        return bttn;
+    }
 }
 /**
  * Returns an object with 'submit' and 'cancel' events bound to the passed level's
  * form container.  
  */
 function getBttnEvents(entity, level) {                                         //console.log("getBttnEvents for [%s] @ [%s]", entity, level);
-    const cnclFunc = fP.forms[level] ? fP.forms[level].exitHandler : Function.prototype;
     return { 
         submit: db_forms.getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-        cancel: db_forms.exitForm.bind(null, '#'+level+'-form', level, true, cnclFunc) 
+        cancel: getCancelFunc()
     };
+
+    function getCancelFunc() {
+        const onExit = fP.forms[level] ? fP.forms[level].onFormClose : Function.prototype;
+        return level === 'top' ? _forms.exitFormWindow : 
+            _forms.exitFormLevel.bind(null, '#'+level+'-form', level, true, onExit);
+    }
+}
+/** Returns a (submit or cancel) button for the form level. */
+function buildFormButton(action, level, val) {
+    const attr = { id: level +'-'+action, class: "ag-fresh tbl-bttn", 
+        type: "button", value: val}
+    return _u('buildElem', ['input', attr]);
 }

@@ -37,7 +37,7 @@ function showNewTaxonForm(val, selLvl, fLvl) {                                  
         $('#'+fLvl+'-hdr')[0].innerText += ' '+ selLvl;
         $('#DisplayName_row input').focus();
         if (selLvl == 'Species') { updateSpeciesSubmitBttn(fLvl); }
-        _forms.setOnSubmitSuccessHandler('taxon', fLvl);
+        _forms.setonFormCloseHandler('taxon', fLvl);
     }
 }  /* End showTaxonForm */
 function updateSpeciesSubmitBttn(fLvl) {
@@ -54,3 +54,6 @@ function submitSpecies(fLvl) {                                                  
         return genus !== speciesParts[0];
     }
 }
+function disableSubmitButtonIfEmpty(bttnId, val) {
+        if (!val) { disableSubmitBttn(bttnId); }
+    }

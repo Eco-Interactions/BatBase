@@ -5,8 +5,7 @@
  *     initFormCombos       db-forms   
  *     initSingle           db-forms
  */
-import * as db_forms from '../../db-forms.js';
-import * as _forms from '../forms-main.js';
+import { memory as _mmry } from '../forms-main.js';
 
 /*------------------- Combobox (selectized) Methods ----------------------*/
 /**
@@ -16,7 +15,7 @@ import * as _forms from '../forms-main.js';
  * not in the list by triggering a sub-form for that entity.
  */
 export function initSingle(confg, fLvl) {                                       //console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
-    var options = {
+    const options = {
         create: confg.add,
         onChange: confg.change,
         placeholder: 'Select ' + confg.name
@@ -25,27 +24,12 @@ export function initSingle(confg, fLvl) {                                       
     $(confg.id).selectize(options);  
     /** All non-standard options are added to this 'options' prop. */ 
     function addAdditionalOptions() {
-        for (var opt in confg.options) {
+        for (let opt in confg.options) {
             options[opt] = confg.options[opt];
         }
     }
 } 
-/**
- * Inits 'selectize' for each select elem in the form's 'selElems' array
- * according to the 'selMap' config. Empties array after intializing.
- */
-export function initFormCombos(entity, fLvl, comboEvents) {                                  console.log("initFormCombos. [%s] formLvl = [%s]", entity, fLvl);
-    const elems = _forms.memory('getFormProp', ['selElems', fLvl]);
-    elems.forEach(selectizeElem);
-    _forms.memory('setFormProp', [fLvl, 'selElems', []]);
-
-    function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
-        const confg = getFieldConfg(comboEvents, fieldName);
-        confg.id = confg.id || '#'+fieldName+'-sel';
-        initSingle(confg, fLvl);
-    }
-} 
-export function enableCombobox(selId, enable) { console.log('enableCombobox. args = %O', arguments)
+export function enableCombobox(selId, enable) { 
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
 }
@@ -57,7 +41,7 @@ export function focusCombobox(selId, focus) {
     $(selId)[0].selectize.focus();
 }
 export function focusFirstCombobox(cntnrId, focus) {  
-    const selElems = $(cntnrId+' .selectized').toArray();                       console.log("[%s] first elem = %O", cntnrId, selElems[0]);
+    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
     focusCombobox('#'+ selElems[0].id, focus);
 }
 export function clearCombobox(selId) {                                          //console.log("clearCombobox [%s]", selId);
@@ -71,7 +55,7 @@ export function clearCombobox(selId) {                                          
  * placeholder options and, optionally, brings it into focus.
  */
 export function resetFormCombobox(fLvl, focus) {      
-    const selId = db_forms.getFormParams().forms[fLvl].pSelId;  
+    const selId = _mmry('getFormParentId', [fLvl]);  
     if (!selId) { return; }
     const combobox = $(selId)[0].selectize;   
     combobox.clear();
@@ -82,7 +66,7 @@ export function resetFormCombobox(fLvl, focus) {
 }
 /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
 export function updateComboboxOptions(selId, opts, focus) {
-    var selApi = $(selId)[0].selectize;
+    const selApi = $(selId)[0].selectize;
     selApi.clearOptions();
     selApi.addOption(opts);
     selApi.refreshOptions(false);
@@ -99,6 +83,21 @@ export function setSelVal(id, val, silent) {                                    
     $selApi.addItem(val, silent); 
 }
 
+/**
+ * Inits 'selectize' for each select elem in the form's 'selElems' array
+ * according to the 'selMap' config. Empties array after intializing.
+ */
+export function initFormCombos(entity, fLvl, comboEvents) {                                  console.log("initFormCombos. [%s] formLvl = [%s]", entity, fLvl);
+    const elems = _mmry('getFormProp', ['selElems', fLvl]);
+    elems.forEach(selectizeElem);
+    _mmry('setFormProp', [fLvl, 'selElems', []]);
+
+    function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
+        const confg = getFieldConfg(comboEvents, fieldName);
+        confg.id = confg.id || '#'+fieldName+'-sel';
+        initSingle(confg, fLvl);
+    }
+} 
 function getFieldConfg(comboEvents, fieldName) {
     const baseConfg = getBaseFieldConfg(fieldName) ;                            //console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
     const eventConfg = comboEvents[fieldName] || {};
