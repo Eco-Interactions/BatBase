@@ -9,6 +9,8 @@ import * as _cmbx from './combobox-util.js';
 import * as _elems from './form-elems.js';
 import * as _pnl from './detail-panel.js';
 
+const _errs = _forms.err;
+const _mmry = _forms.memory;
 const _u = _forms._util;
 
 export function elems(funcName, params) {
@@ -69,9 +71,9 @@ export function exitForm(formId, fLvl, focus, onExit, data) {                   
 export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
     hideSearchFormPopup();
     if (!skipReset) { refocusTableIfFormWasSubmitted(); }
-    $("#b-overlay").removeClass("form-ovrly");
-    $("#b-overlay-popup").removeClass("form-popup");
-    $("#b-overlay-popup").empty();
+    $('#b-overlay').removeClass('form-ovrly');
+    $('#b-overlay-popup').removeClass('form-popup');
+    $('#b-overlay-popup').empty();
     _forms.clearFormMemory();
 }
 function hideSearchFormPopup() {
@@ -84,7 +86,7 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
-    const formFocus = _forms.memory('getMemoryProp', ['submitFocus']);
+    const formFocus = _mmry('getMemoryProp', ['submitFocus']);
     if (!formFocus) { return; }
     if (formFocus == 'int') { return refocusAndShowUpdates(); }   
     _forms.loadDataTableAfterFormClose(formFocus);
@@ -94,7 +96,7 @@ function refocusAndShowUpdates() {                                              
     showTodaysUpdates(tableFocus);   
 }
 function getCurFocus() {
-    return _forms.memory('getMemoryProp', ['curFocus']);
+    return _mmry('getMemoryProp', ['curFocus']);
 }
 /*--------------------- After Sub-Entity Created -----------------------------*/
 /**
@@ -102,11 +104,11 @@ function getCurFocus() {
  * entity in the form's parent elem @addAndSelectEntity.
  */
 function exitFormAndSelectNewEntity(data) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
-    const fLvl = _forms.memory('getMemoryProp', ['ajaxFormLvl']);  
-    const formParent = _forms.memory('getFormParentId', [fLvl]);         
+    const fLvl = _mmry('getMemoryProp', ['ajaxFormLvl']);  
+    const formParent = _mmry('getFormParentId', [fLvl]);         
     exitForm('#'+fLvl+'-form', fLvl); 
     if (formParent) { addAndSelectEntity(data, formParent); 
-    } else { _forms.memory('clearMemory'); }
+    } else { _mmry('clearMemory'); }
 }
 /** Adds and option for the new entity to the form's parent elem, and selects it. */
 function addAndSelectEntity(data, formParent) {
@@ -126,13 +128,12 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
  */
 function toggleShowAllFields(entity, fLvl) {                             //console.log('--- Showing all Fields [%s] -------', this.checked);
     if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
-    _forms.memory('setFormProp', ['expanded', this.checked]);
-    _forms.memory('setFormProp', ['reqElems', []]);
+    _mmry('setFormProp', ['expanded', this.checked]);
+    _mmry('setFormProp', ['reqElems', []]);
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
     const fConfg = _fCnfg.getFormConfg(entity);                                 
     const tConfg = fP.forms[fLvl].typeConfg;
     $('#'+entity+'_Rows').empty();
-    // fP.forms[fLvl].reqElems = [];
     _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl, fP)
     .then(appendAndFinishRebuild);
 
@@ -144,15 +145,8 @@ function toggleShowAllFields(entity, fLvl) {                             //conso
     }
     function finishComplexForms() {
         if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }
-        if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType)}
-        if (entity === 'citation') { 
-            handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
-            if (!fP.citTimeout) { handleCitText(fLvl); }
-        }
-        if (entity !== 'location') {
-            updateFieldLabelsForType(entity, fLvl);
-        }
-        _forms.ui('setCoreRowStyles', ['#'+entity+'_Rows', '.'+fLvl+'-row']);
+        if (entity !== 'location') { _forms.onSrcToggleFields(entity, fVals, fLvl); }
+        setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
 function ifOpenSubForm(fLvl) {
@@ -169,8 +163,8 @@ function showOpenSubFormErr(fLvl) {
 /*--------------------------- Misc Form Helpers ------------------------------*/
 /*--------------------------- Fill Form Fields -------------------------------*/
 /** Returns an object with field names(k) and values(v) of all form fields*/
-function getCurrentFormFieldVals(fLvl) {
-    const vals = fP.forms[fLvl].fieldConfg.vals;                                //console.log('getCurrentFormFieldVals. vals = %O', JSON.parse(JSON.stringify(vals)));
+export function getCurrentFormFieldVals(fLvl) {
+    const vals = _mmry('getFormProp', [fLvl, 'fieldConfg']).vals;                               
     const valObj = {};
     for (let field in vals) {
         valObj[field] = vals[field].val;
@@ -183,9 +177,9 @@ function getCurrentFormFieldVals(fLvl) {
  * not be reset as easily as simply setting a value in the form input during 
  * reinitiation are handled here.
  */
-function fillComplexFormFields(fLvl) {
-    const vals = fP.forms[fLvl].fieldConfg.vals;                                //console.log('fillComplexFormFields. vals = %O, curFields = %O', JSON.parse(JSON.stringify(vals)),fP.forms[fLvl].fieldConfg.fields);
-    const fieldHndlrs = { 'multiSelect': selectExistingAuthors };
+export function fillComplexFormFields(fLvl) {
+    const vals = _mmry('getFormProp', [fLvl, 'fieldConfg']).vals;
+    const fieldHndlrs = { 'multiSelect': _forms.selectExistingAuthors };
 
     for (let field in vals) {                                                   //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
         if (!vals[field].val) { continue; } 

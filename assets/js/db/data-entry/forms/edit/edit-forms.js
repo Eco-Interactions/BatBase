@@ -23,7 +23,7 @@ const _mmry = _forms.memory;
 export function showEntityEditForm(id, entity, params) {                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
     fP = params;
     initEditForm(id, entity)
-    .then(() => onEditFormLoadComplete(id, entity))
+    .then(() => onEditFormFillComplete(id, entity))
     .catch(err => _u.alertErr(err));;
 }
 /** Inits the edit top-form, filled with all existing data for the record. */
@@ -202,7 +202,7 @@ function addToFormVals(fieldId, prop, rcrd) {                                   
     vals[fieldId] = {type: 'multiSelect'};
     vals[fieldId].val = rcrd[prop]; 
     if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; }
-    db_forms.selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
+    _forms.selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
 }
 function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
@@ -259,27 +259,15 @@ function addSource(fieldId, prop, rcrd) {
     _cmbx.setSelVal('#CitationTitle-sel', rcrd.source);
 }
 /* ---- On Form Fill Complete --- */
-function onEditFormLoadComplete(id, entity) {                                       //console.log('onEditFormLoadComplete. entity = ', entity);
+function onEditFormFillComplete(id, entity) {                                       //console.log('onEditFormFillComplete. entity = ', entity);
     const map = { 
-        'citation': setSrcEditRowStyle, 'location': finishLocEditForm, 
+        'citation': setSrcEditRowStyle, 'location': _forms.addMapToLocationEditForm, 
         'publication': setSrcEditRowStyle };
     if (!map[entity]) { return; }
     map[entity](id);
 }
 function setSrcEditRowStyle() {
     _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
-}
-function finishLocEditForm(id) {
-    db_forms.addMapToLocForm('#location_Rows', 'edit');
-    finishLocFormAfterMapLoad(id);
-}
-function finishLocFormAfterMapLoad(id) {
-    if ($('#loc-map').data('loaded')) {
-        _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
-        db_map.addVolatileMapPin(id, 'edit', _cmbx.getSelVal('#Country-sel'));
-    } else {
-        window.setTimeout(() => finishLocFormAfterMapLoad(id), 500);
-    }
 }
 
 /*-------- Edit Taxon Methods ----------*/
@@ -556,16 +544,3 @@ function finishCitEditFormBuild() {
     _forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
 /*-------- Edit Location Methods ----------*/
-function finishLocEditFormBuild() {  
-    _cmbx('initFormCombos', ['Location', 'top']); 
-    updateCountryChangeMethod();
-    db_forms.addListenerToGpsFields(
-        db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit', false));
-    //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
-    $('.all-fields-cntnr').hide();
-}
-function updateCountryChangeMethod() {
-    $('#Country-sel')[0].selectize.off('change');
-    $('#Country-sel')[0].selectize.on('change', 
-        db_forms.focusParentAndShowChildLocs.bind(null, 'edit'));
-}

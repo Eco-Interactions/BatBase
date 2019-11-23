@@ -85,7 +85,7 @@ function returnFinishedRows(entity, params, rows) {
  * the type-entity form config is used. 
  */
 export function getFormFieldRows(entity, fVals, fLvl, params) {
-    if (params) { fP = params; }
+    fP = params ? params : _mmry('getAllFormMemory');
     const fObj = getFieldTypeObj(_u('lcfirst', [entity]), fLvl);
     return buildRows(fObj, entity, fVals, fLvl)
         .then(orderRows.bind(null, fObj.order));
@@ -130,7 +130,7 @@ function getFieldTypes(confg) {
  * source-type, the type-entity form config is combined with the main-entity's.
  * Eg, Publication-type confgs are combined with publication's form confg.
  */
-function getFormFields(confg) {                                //console.log('getting form fields for [%s] fConfg = %O typeConfg = %O', entity, fConfg, tConfg);
+function getFormFields(confg) {                                
     const dfault = getCoreEntityFields(confg);
     const typeFields = getEntityTypeFields(confg);
     return dfault.concat(typeFields);
@@ -144,16 +144,9 @@ function getEntityTypeFields(confg) {
         confg.type.required.concat(confg.type.suggested) : [];
     return  confg.showAll ? fields.concat(typeConfg.optional) : fields;
 }
-/** Returns the order the form fields should be displayed. */
 function getFieldOrder(cfg) {
     const order = cfg.showAll ? getExpandedOrder(cfg) : getDefaultOrder(cfg); 
-    // const core = cfg.showAll && cfg.form.order.opt ? cfg.order.opt : cfg.order.sug; 
-    // const sub = typeConfg && shwAll ? 
-    //     fConfg.order.opt.concat(typeConfg.order.opt) : 
-    //     typeConfg ? 
-    //         fConfg.order.sug.concat(typeConfg.order.sug) : 
-    //         shwAll && fConfg.order.opt ? fConfg.order.opt : fConfg.order.sug; 
-    return order.map(field => field); //removes references to confg obj.
+    return order.map(field => field);
 }
 /** <type> eg: publication - book, jounrnal, thesis, record, and other 'types'. */
 function getExpandedOrder(cfg) {
@@ -208,14 +201,13 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
 function storeFieldValue(elem, fieldName, fLvl, value) {            
     const val = value || $(elem).val();                             
     if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
-    if (fieldName !== "CitationText") { _forms.handleCitText(fLvl); }
+    if (fieldName !== 'CitationText') { _forms.handleCitText(fLvl); }
     _mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
-    // db_forms.setFormFieldValueMemory(fLvl, fieldName, val);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === "create") { return; }
-    const fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
+    const fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                               
     if (!fieldObj.val) { fieldObj.val = {}; }
     fieldObj.val[cnt] = e.target.value || null;
     _mmry('setFormFieldConfg', [fLvl, field, fieldObj]);
@@ -231,10 +223,10 @@ function checkForBlanksInOrder(vals, field, fLvl) {                             
     let blank = false;
 
     for (let ord in vals) {
-        blank = vals[ord] && blank ? "found" :
-            !vals[ord] && !blank ? "maybe" : blank;  
+        blank = vals[ord] && blank ? 'found' :
+            !vals[ord] && !blank ? 'maybe' : blank;  
     } 
-    if (blank === "found") { return _errs.reportFormFieldErr(field, map[field], fLvl); }
+    if (blank === 'found') { return _errs.reportFormFieldErr(field, map[field], fLvl); }
     if ($('#'+field+'_errs.'+fLvl+'-active-errs')) { _errs.clrContribFieldErr(field, fLvl); }
 }
 function buildFieldInput(fieldType, entity, field, fLvl) {                      //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
@@ -540,11 +532,11 @@ function checkRequiredFields(e) {                                               
  */
 export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, fP.forms.top.unchanged);
     const subBttnId = '#'+fLvl+'-submit';
-    _forms.callFormFunc('interaction', 'resetIfFormWaitingOnChanges');  //After interaction form submit, the submit button is disabled until form data changes
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
         _forms.ui('toggleSubmitBttn', [subBttnId, false]); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
         if (locHasGpsData(fLvl)) { return; }
+        ifInteractionFormHandleReset(fLvl);
         _forms.ui('toggleSubmitBttn', [subBttnId, true]); 
     }
 }
@@ -589,6 +581,11 @@ function locHasGpsData(fLvl) {
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });
+}
+/** After interaction form submit, the submit button is disabled until form data changes. */
+function ifInteractionFormHandleReset(fLvl) {
+    if (_mmry.getFormEntity(fLvl) !== 'interaction') { return; }
+    _forms.callFormFunc('interaction', 'resetIfFormWaitingOnChanges');  
 }
 
 

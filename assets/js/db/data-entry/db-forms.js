@@ -7,41 +7,6 @@
  * allow editing and saving of the content within using the trumbowyg library.
  * 
  * Exports:             Imported by:
- *     addNewLocation
- *     clearForMemory          form-ui
- *     editEntity
- *     initLocForm
- *     initNewDataForm          db-ui
- *     mergeLocs
- *     selectLoc
- *     locCoordErr
- *
- *     getFormParams            f-errs, 
- *     getFormValuesAndSubmit
- *     ifParentFormValidEnableSubmit
- *     buildIntFormFields
- *     getRcrd                  edit-forms, generate-citation, form-elems
- *     getSrcTypeRows           edit-forms
- *     loadSrcTypeFields        ""
- *     fieldIsDisplayed         ""
- *     selectExistingAuthors    ""
- *     addMapToLocForm          ""
- *     buildFormDataAndSubmit
- *     addListenerToGpsFields
- *     toggleSubmitBttn         edit-forms, f-errs
- *     focusParentAndShowChildLocs      edit-forms, interaction-form
- *     enableTaxonLvls          f-confg 
- *     enablePubField           f-confg
- *     submitFormData               edit-forms
- *     handleCitText                ""
- *     getSubFormLvl                ""
- *     resetIfFormWaitingOnChanges              ""
- *     disableSubmitBttn            ""
- *     enableSubmitBttn             "", [something else, didn't doc]
- *     exitForm                save-exit-bttns
- *     getFormLevelParams           generate-citation
- *     getObjectRealm               interaction-form
- *     showSuccessMsg               interaction-form
  */
 import * as _u from '../util.js';
 // import * as _elems from './forms/ui/form-elems.js';
@@ -65,6 +30,9 @@ const _elems = _forms.uiElems;
 export function loadDataTable(focus) {
     db_page.initDataTable(focus);
 }
+export function create(entity) {
+    _forms.create(entity);
+}
 /* ================== FORM "STATE" ========================================= */
 export function clearFormMemory() {
     fP = {};
@@ -87,240 +55,10 @@ export function editEntity(id, entity) {                                        
 /*-------------- Country/Region ------------------------------------------*/
 
 /*-------------- Location ------------------------------------------------*/
-/** Inits the location form and disables the country/region combobox. */
-export function initLocForm(val) {                                              console.log("       --initLocForm [%s]", val);
-    const fLvl = getSubFormLvl("sub");
-    if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr('Location', null, fLvl); }
-    if ($('#loc-map').length !== 0) { $('#loc-map').remove(); }
-    buildLocForm(val, fLvl)
-    .then(onLocFormLoadComplete);
-}
-function buildLocForm(val, fLvl) {    
-    const vals = {
-        'DisplayName': val === 'create' ? '' : val, //clears form trigger value
-        'Country': $('#Country-Region-sel').val() }; 
-    return initEntitySubForm('location', fLvl, 'flex-row med-sub-form', vals, '#Location-sel')
-        .then(appendLocFormAndFinishBuild);
-
-    function appendLocFormAndFinishBuild(form) {
-        $('#Location_row').after(form);
-        _cmbx('initFormCombos', ['location', 'sub']);
-        _cmbx('enableCombobox', ['#Country-Region-sel', false]);
-        $('#Latitude_row input').focus();
-        $('#sub-submit').val('Create without GPS data');
-        _forms.ui('setCoreRowStyles', ['#location_Rows', '.sub-row']);
-        if (vals.DisplayName && vals.Country) { enableSubmitBttn('#sub-submit'); }
-    }
-}
-function onLocFormLoadComplete() {
-    const fLvl = getSubFormLvl("sub");
-    disableTopFormLocNote();
-    addMapToLocForm('#location_Rows', 'create');
-    addNotesToForm();
-    addListenerToGpsFields();
-    scrollToLocFormWindow();
-    _forms.setonFormCloseHandler('location', fLvl);
-}
-function disableTopFormLocNote() {
-    $('#loc-note').fadeTo(400, .3);
-}
-function scrollToLocFormWindow() {
-    $('#form-main')[0].scrollTo(0, 150); 
-}
-function addNotesToForm() {
-    $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
-    $('#DisplayName_row').before(getHowToCreateLocWithoutGpsDataNote());
-}
-function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">GPS 
-        data? Enter all data and see the added green pin's popup for name 
-        suggestions and the "Create" button.</p>`;
-}
-function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p class="loc-gps-note skipFormData">No GPS data? Fill 
-        in available data and click "Create without GPS data" at the bottom of 
-        the form.</p>`;
-}
-export function addListenerToGpsFields(func) {
-    const method = func || db_map.addVolatileMapPin;
-    $('#Latitude_row input, #Longitude_row input').change(
-        toggleNoGpsSubmitBttn.bind(null, method));
-}
-function toggleNoGpsSubmitBttn(addMapPinFunc) {
-    const lat = $('#Latitude_row input').val();  
-    const lng = $('#Longitude_row input').val();  
-    const toggleMethod = lat || lng ? disableSubmitBttn : enableSubmitBttn;
-    toggleMethod('#sub-submit');
-    addMapPinFunc(true);
-}
-/**
- * New locations with GPS data are created by clicking a "Create Location" button
- * in a the new location's green map pin's popup on the map in the form.
- */
-export function addNewLocation() {
-    const fLvl = fP.forms['location'];
-    if (_elems.ifAllRequiredFieldsFilled(fLvl)) {
-        getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'location');
-    } else { showFillAllLocFieldsError(fLvl); }
-}
-function showFillAllLocFieldsError(fLvl) {
-    _errs.reportFormFieldErr('Display Name', 'needsLocData', fLvl);
-}
-export function locCoordErr(field) {
-    const fLvl = fP.forms['location'];
-    _errs.reportFormFieldErr(field, 'invalidCoords', fLvl);
-}
-/*--------------- Map methods ---------------------------*/
-export function addMapToLocForm(elemId, type) {                                        console.log('           --addMapToLocForm');
-    const map = _u.buildElem('div', { id: 'loc-map', class: 'skipFormData' }); 
-    const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
-    $(elemId).after(map);
-    db_map.initFormMap(prntId, fP.records.location, type);
-}
-export function focusParentAndShowChildLocs(type, val) {                               
-    if (!val) { return; }                                                       console.log('           --focusParentAndShowChildLocs [%s] [%s]', type, val);
-    db_map.initFormMap(val, fP.records.location, type);
-}
 /** ----------------------- Params ------------------------------------- */
 
 /*-------------- Sub Form Helpers ----------------------------------------------------------*/
 /*-------------- Publisher -----------------------------------------------*/
-function onPublSelection(val) {
-    if (val === 'create') { return _forms.createSubEntity('Publisher'); }        
-}
-/**
- * When a user enters a new publisher into the combobox, a create-publisher
- * form is built, appended to the publisher field row and an option object is 
- * returned to be selected in the combobox. Unless there is already a sub2Form,
- * where a message will be shown telling the user to complete the open sub2 form
- * and the form init canceled.
- * Note: The publisher form inits with the submit button enabled, as display 
- *     name, aka val, is it's only required field.
- */
-function initPublisherForm (value) {                                            //console.log("Adding new publisher! val = %s", val);
-    const val = value === 'create' ? '' : value;
-    const fLvl = getSubFormLvl('sub2');
-    const prntLvl = getNextFormLevel('parent', fLvl);
-    if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr('Publisher', null, fLvl); }
-    initEntitySubForm('publisher', fLvl, 'sml-sub-form', {'DisplayName': val}, 
-        '#Publisher-sel')
-    .then(appendPublFormAndFinishBuild);
-
-    function appendPublFormAndFinishBuild(form) {
-        $('#Publisher_row').append(form);
-        disableSubmitBttn('#'+prntLvl+'-submit');
-        $('#DisplayName_row input').focus();
-    }
-}
-/*-------------- Author --------------------------------------------------*/
-/** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {       
-    if (!authObj || !$('#'+field+'-sel-cntnr').length) { return Promise.resolve(); }                                 //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
-    Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
-        const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
-        return p.then(selNextAuth);
-    }, Promise.resolve());
-}
-/** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {
-    if (!$('#'+field+'-sel'+ cnt).length) { return; }
-    _cmbx.setSelVal('#'+field+'-sel'+ cnt, authId, 'silent');
-    return buildNewAuthorSelect(++cnt, authId, fLvl, field);
-}
-/**
- * When an author is selected, a new author combobox is initialized underneath
- * the last author combobox, unless the last is empty. The total count of 
- * authors is added to the new id.
- */
-function onAuthSelection(val, ed) {                                             //console.log("Add existing author = %s", val);
-    handleAuthSelect(val);
-}
-function onEdSelection(val) {                                                   //console.log("Add existing author = %s", val);
-    handleAuthSelect(val, 'editor');
-}
-function handleAuthSelect(val, ed) {                                            
-    if (val === '' || parseInt(val) === NaN) { return; }
-    const authType = ed ? 'Editors' : 'Authors';                                
-    const fLvl = getSubFormLvl('sub');
-    let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
-    if (val === 'create') { return _forms.createSubEntity(authType, --cnt); } 
-    _forms.handleCitText(fLvl);       
-    // if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }
-    if (lastAuthComboEmpty(cnt-1, authType)) { return; }
-    buildNewAuthorSelect(cnt, val, fLvl, authType);
-}
-function citationFormNeedsCitTextUpdate(fLvl) {
-    return fP.forms[fLvl].entity === 'citation' && !fP.citTimeout;
-}
-/** Stops the form from adding multiple empty combos to the end of the field. */
-function lastAuthComboEmpty(cnt, authType) {  
-    return $('#'+authType+'-sel'+cnt).val() === '';
-}
-/** Builds a new, empty author combobox */
-function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
-    return _elems.buildMultiSelectElems(null, authType, prntLvl, cnt)
-    .then(appendNewAuthSelect);
-
-    function appendNewAuthSelect(sel) {
-        $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
-        _cmbx.initSingle(getAuthSelConfg(authType, cnt), prntLvl);
-    }
-}
-function getAuthSelConfg(authType, cnt) {
-    return { 
-        add: getAuthAddFunc(authType, cnt), change: getAuthChngFnc(authType),
-        id: '#'+authType+'-sel'+cnt,        name: authType.slice(0, -1) //removes 's' for singular type
-    };
-}
-function getAuthChngFnc(authType) {
-    return authType === 'Editors' ? onEdSelection : onAuthSelection;
-}
-function getAuthAddFunc(authType, cnt) {
-    const add = authType === 'Editors' ? initEdForm : initAuthForm;
-    return add.bind(null, cnt);
-}
-/** Removes the already selected authors from the new dropdown options. */
-// function removeAllSelectedAuths(sel, fLvl, authType) { 
-//     const auths = fP.forms[fLvl].fieldConfg.vals[authType].val;   
-//     const $selApi = $(sel).data('selectize');                          
-//     if (auths) { auths.forEach(id => $selApi.removeOption(id)); } 
-// }
-function initAuthForm(selCnt, val) {                                            //console.log("Adding new auth! val = %s, e ? ", val, arguments);      
-    handleNewAuthForm(selCnt, val, 'Authors');
-}
-function initEdForm(selCnt, val) {                                              //console.log("Adding new editor! val = %s, e ? ", val, arguments);      
-    handleNewAuthForm(selCnt, val, 'Editors');
-}
-/**
- * When a user enters a new author (or editor) into the combobox, a create 
- * form is built and appended to the field row. An option object is returned 
- * to be selected in the combobox. If there is already an open form at
- * this level , a message will be shown telling the user to complete the open 
- * form and the form init will be canceled.
- */
-function handleNewAuthForm(authCnt, value, authType) {  
-    const parentSelId = '#'+authType+'-sel'+authCnt; 
-    const fLvl = getSubFormLvl('sub2');
-    const singular = authType.slice(0, -1);
-    const val = value === 'create' ? '' : value;
-    if ($('#'+fLvl+'-form').length !== 0) { return _errs.openSubFormErr(authType, parentSelId, fLvl); }
-    initEntitySubForm( _u.lcfirst(singular), fLvl, 'sml-sub-form', {'LastName': val}, 
-        parentSelId)
-    .then(appendAuthFormAndFinishBuild);
-
-    function appendAuthFormAndFinishBuild(form) {        
-        $('#'+authType+'_row').append(form);
-        handleSubmitBttns();
-        $('#FirstName_row input').focus();
-    }
-    function handleSubmitBttns() {
-        const prntLvl = getNextFormLevel('parent', fLvl);
-        disableSubmitBttn('#'+prntLvl+'-submit');  
-        return _elems.ifAllRequiredFieldsFilled(fLvl) ? 
-            enableSubmitBttn('#'+fLvl+'-submit') : 
-            disableSubmitBttn('#'+fLvl+'-submit');
-    }
-} /* End handleNewAuthForm */
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /*--------------- Shared Form Methods -------------------------------*/
 export function getFormValuesAndSubmit(formId, fLvl, entity) {                             console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
@@ -403,4 +141,9 @@ function hasChngs(data) {
         Object.keys(data.coreEdits).length == 2 && 
         'elevUnitAbbrv' in data.coreEdits) { return false; }
     return chngs;
+}
+
+/** map-main */
+export function locCoordErr() {
+    return _forms.locCoordErr(...arguments);
 }

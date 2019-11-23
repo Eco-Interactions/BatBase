@@ -788,7 +788,7 @@ function createNewLocBttn() {
     return container;
 }
 function createNewLoc() {                                                       console.log('Create new location!')
-    db_forms.initLocForm('create');
+    db_forms.create('location');
 }
 /*--- Click To Create New Location Button ---*/
 function addClickToCreateLocBttn() {

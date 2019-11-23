@@ -699,7 +699,7 @@ function getNewLocText(loc, editing) {
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn', value: 'Create Location'});
-    $(bttn).click(db_forms.addNewLocation);
+    $(bttn).click(db_forms.create('location'));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }
