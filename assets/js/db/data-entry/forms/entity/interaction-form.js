@@ -325,6 +325,7 @@ function appendTxnFormAndInitCombos(role, fLvl, form) {
 function onTaxonSelection(role, val) {                                          //console.log("onTaxonSelection [%s] = ", role, val);
     if (val === "" || isNaN(parseInt(val))) { return; }         
     $('#'+_forms.getSubFormLvl('sub')+'-form').remove();
+    $('#'+role+'-sel').data('selTaxon', $('#'+role+'-sel').val());
     enableTaxonCombos();
     if (!fP.editing) { $('#'+role+'_pin').focus(); }
 }
@@ -372,14 +373,12 @@ export function finishTaxonSelectBuild(role) {                                  
     const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
     fP.forms.taxonPs = _mmry('getTaxonMemory');
     customizeElemsForTaxonSelectForm(role);
-    if (ifResettingTxn(role)) { resetPrevTaxonSelection($('#'+role+'-sel').val());
+    if (ifSelectingTaxonInForm(role)) { resetPrevTaxonSelection(role);
     } else { _cmbx('focusFirstCombobox', [selCntnr]); }
     _u('replaceSelOpts', ['#'+role+'-sel', []]);
 }
-function ifResettingTxn(role) {  
-    const prevSel = fP.forms.taxonPs.prevSel;
-    const resetting = prevSel ? prevSel.reset : false;
-    return $('#'+role+'-sel').val() || resetting;
+function ifSelectingTaxonInForm(role) {
+    return $('#'+role+'-sel').data('reset') || $('#'+role+'-sel').val();
 }
 export function enableTaxonLvls(disable) {
     const enable = disable == undefined ? true : false;
@@ -414,50 +413,52 @@ function customizeElemsForTaxonSelectForm(role) {
     $('#sub-submit')[0].value = "Select Taxon";        
     $('#sub-cancel')[0].value = "Reset";
     $('#sub-submit').unbind("click").click(selectTaxon);
-    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
+    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role));
 }
 function getTaxonExitButton(role) {
     const bttn = _elems('getExitButton');
     bttn.id = 'exit-sub-form';
-    $(bttn).unbind("click").click(exitTaxonSelectForm.bind(null, role));
+    $(bttn).unbind('click').click(exitTaxonSelectForm.bind(null, role));
     return bttn;
 }
 /** Exits sub form and restores any previous taxon selection. */
 function exitTaxonSelectForm(role) {
-    db_forms.exitForm('#sub-form', 'sub', false, enableTaxonCombos);
-    const prevTaxon = fPs.forms.taxonPs.prevSel; 
-    if (!prevTaxon) { return; }
-    resetTaxonCombobox(role, prevTaxon);
+    _forms.ui('exitForm', ['#sub-form', 'sub', false, enableTaxonCombos]);
+    const prevTaxonId = $('#'+role+'-sel').data('selTaxon');
+    if (!prevTaxonId) { return; }
+    resetTaxonCombobox(role, prevTaxonId);
 }
-function resetTaxonCombobox(role, prevTaxon) {
-    const opt = { value: prevTaxon.val, text: prevTaxon.text };
+function resetTaxonCombobox(role, prevTaxonId) {
+    const opt = { value: prevTaxonId, text: getTaxonym(prevTaxonId) };
     _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
     _cmbx('setSelVal', ['#'+role+'-sel', prevTaxon.val]);
 }
+function getTaxonym(id) {
+    return _forms.getTaxonDisplayName(fP.records.taxon[id]);
+}
 /** Removes and replaces the taxon form. */
-function resetTaxonSelectForm() {                                               //console.log('resetTaxonSelectForm')                                     
+function resetTaxonSelectForm(role) {                                           console.log('resetTaxonSelectForm')                                     
     const realm = fP.forms.taxonPs.realm;
     const reset =  realm == 'Bat' ? initSubjectSelect : initObjectSelect;
-    _mmry('setTaxonProp', ['reset', true]);
+    $('#'+role+'-sel').data('reset', true);
     $('#sub-form').remove();
     reset();
 }
 /** Resets the taxon to the one previously selected in the interaction form.  */
-function resetPrevTaxonSelection(selId) {                                       //console.log('seId = %s, prevSel = %O', selId, fP.forms.taxonPs.prevSel);
-    const id = selId || fP.forms.taxonPs.prevSel.val;
-    if (!id) { return; }
+function resetPrevTaxonSelection(role) {                                       
+    const id = $('#'+role+'-sel').data('selTaxon');                             
     const taxon = fP.records.taxon[id];                                         
-    if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                              console.log('           --resetPrevTaxonSelection. [%s] = %O', id, taxon);
-    selectPrevTaxon(taxon);
+    if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                         console.log('           --resetPrevTaxonSelection. [%s] = %O', id, taxon);
+    selectPrevTaxon(taxon, role);
 }
 function ifSelectedTaxonIsRealmTaxon(taxon) { 
     return fP.forms.taxonPs.curRealmLvls[0] == taxon.level.displayName;
 }
-function selectPrevTaxon(taxon) {
+function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
     if (ifTaxonInDifferentRealm(taxon.realm)) { return selectTaxonRealm(taxon); }
     _cmbx('setSelVal', ['#'+taxon.level.displayName+'-sel', taxon.id]);
-    window.setTimeout(() => { deleteResetFlag(); }, 1000);   //refactor
+    window.setTimeout(() => { deleteResetFlag(role); }, 1000);   //refactor
 }
 function addTaxonOptToTaxonMemory(taxon) {
     const displayName = _forms.getTaxonDisplayName(taxon);
@@ -469,8 +470,8 @@ function ifTaxonInDifferentRealm(realm) {
 function selectTaxonRealm(taxon) {
     _cmbx('setSelVal', ['#Realm-sel', taxon.realm.id]);
 }
-function deleteResetFlag() {
-    _mmry('setTaxonProp', ['reset', null]);
+function deleteResetFlag(role) {
+    $('#'+role+'-sel').removeData('reset');
 }
 // function preventComboboxFocus(realm) {
 //     const role = realm === 'Bat' ? 'subject' : 'object';  
@@ -485,7 +486,6 @@ function selectTaxon() {
     $('#sub-form').remove();
     _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
     _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
-    _cmbx('enableCombobox', ['#'+role+'-sel', true]);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption() {
@@ -528,7 +528,7 @@ function onLevelSelection(val) {                                                
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
     const fLvl = _forms.getSubFormLvl('sub');
     repopulateCombosWithRelatedTaxa(val);
-    db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);             
+    _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);             
 }
 function openLevelCreateForm(selElem) {
     _forms.createSubEntity(selElem.id.split('-sel')[0]);
@@ -709,10 +709,10 @@ function finishInteractionFormBuild() {                                         
     addLocationSelectionMethodsNote();
     finishComboboxInit();
     addReqElemsToConfg();    
-    _mmry('setOnSubmitSuccessHandler', ['top', resetInteractionForm]);
+    _mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
 }
 function modifyFormDisplay() {
-    $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
+    //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     $('.all-fields-cntnr').hide();
@@ -769,7 +769,7 @@ function resetInteractionForm() {
     function resetFormUi() {
         resetIntFields(vals); 
         $('#top-cancel').val(' Close ');  
-        db_forms.toggleSubmitBttn('#top-submit', false);
+        _forms.ui('toggleSubmitBttn', ['#top-submit', false]);
         _mmry('setFormProp', ['top', 'unchanged', true]);
     }
 }
@@ -796,7 +796,7 @@ function getPinnedFieldVals() {
  * persisted. All other fields will be reset. 
  */
 function resetIntFields(vals) {                                                 //console.log('resetIntFields. vals = %O', vals);
-    db_forms.toggleSubmitBttn("#top-submit", false);
+    _forms.ui('toggleSubmitBttn', ["#top-submit", false]);
     initInteractionParams();
     resetUnpinnedFields(vals);
     fillPubDetailsIfPinned(vals.Publication);
@@ -810,6 +810,11 @@ function clearField(fieldName) {
     if (fieldName === 'Note') { return $('#Note-txt').val(""); }
     _forms.uiPanel('clearFieldDetails', [fieldName]);
     _forms.uiCombos('clearCombobox', ['#'+fieldName+'-sel']);
+    ifTaxonFieldClearData(fieldName);
+}
+function ifTaxonFieldClearData(field) {
+    if (!['Subject', 'Object'].indexOf(fieldName) !== -1) { return; }
+    $('#'+field+'-sel').removeData('selTaxon');
 }
 function fillPubDetailsIfPinned(pub) {
     if (pub) { _forms.uiPanel('updateSrcDetails', ['pub']); 
@@ -834,7 +839,9 @@ function addReqElemsToConfg() {
  * removes the success message from the form.
  */
 function checkIntFieldsAndEnableSubmit() {
-    if (_elems('ifAllRequiredFieldsFilled', ['top'])) { db_forms.toggleSubmitBttn('#top-submit', true); }
+    if (_elems('ifAllRequiredFieldsFilled', ['top'])) { 
+        _forms.ui('toggleSubmitBttn', ['#top-submit', true]); 
+    }
     resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
 /**

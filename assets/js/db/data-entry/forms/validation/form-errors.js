@@ -12,9 +12,9 @@
 import * as _u from '../../../util.js';
 import * as _elems from '../ui/form-elems.js';
 import * as db_sync from '../../../db-sync.js';
-import * as form_ui from '../ui/form-ui.js';
 import * as _cmbx from '../ui/combobox-util.js';
 import * as db_forms from '../../db-forms.js';
+import * as _forms from '../forms-main.js';
 
 let fP;
 /*------------------- Form Error Handlers --------------------------------*/
@@ -28,7 +28,7 @@ export function formSubmitError(jqXHR, textStatus, errorThrown) {               
     const msg = getFormErrMsg(errTag);
     toggleWaitOverlay(false);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    db_forms.toggleSubmitBttn('#'+fLvl+'-submit', false);
+    _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 /**
  * Returns an error tag based on the server error text. Reports duplicated 
@@ -74,7 +74,7 @@ export function errUpdatingData(data) {                                      //c
         .css('disabled', 'disabled').fadeTo('400', 0.5);
 }
 function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
-    _forms.exitFormPopup(null, 'skipTableReset');
+    _forms.exitFormWindow(null, 'skipTableReset');
     db_sync.resetStoredData();
 }
 /**
@@ -251,7 +251,9 @@ function handleEdBlanks(elem, errTag, fLvl, fieldName) {
 export function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
     const elem = $('#'+field+'_errs')[0];    
     clearErrElemAndEnableSubmit(elem, fLvl);
-    if (_elems.ifAllRequiredFieldsFilled(fLvl)) { db_forms.toggleSubmitBttn('#sub-submit', true); }
+    if (_elems.ifAllRequiredFieldsFilled(fLvl)) { 
+        _forms.ui('toggleSubmitBttn', ['#sub-submit', true]); 
+    }
 }
 /* ----------- Error-Elem Methods -------------- */
 function setOnFormCloseListenerToClearErr(elem, fLvl) {
@@ -275,7 +277,7 @@ function getFormErrElem(fLvl) {
 function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
     elem.innerHTML = msg;
     $(elem).append(getErrExitBttn(errTag, elem, fLvl));
-    db_forms.toggleSubmitBttn('#'+fLvl+'-submit', false);
+    _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
@@ -295,17 +297,17 @@ function getErrExitBttn(errTag, elem, fLvl) {
     return bttn;
 }
 function clrFormLvlErr(elem, fLvl) {
-    const childFormLvl = db_forms.getNextFormLevel('child', fLvl);
+    const childFormLvl = _forms.getNextFormLevel('child', fLvl);
     $('#'+fLvl+'_errs').remove();
     if (!$('#'+childFormLvl+'-form').length && _elems.ifAllRequiredFieldsFilled(fLvl)) {
-        db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);
+        _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
     }
 }
 export function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
-    const subLvl = db_forms.getNextFormLevel('child', fLvl);
+    const subLvl = _forms.getNextFormLevel('child', fLvl);
         $(elem).fadeTo(400, 0, clearErrElem);
     if (!$('#'+subLvl+'-form').length && _elems.ifAllRequiredFieldsFilled(fLvl)) { 
-        db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);
+        _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
     }
 
     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);

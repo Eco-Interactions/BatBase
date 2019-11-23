@@ -10,8 +10,7 @@ import * as _cmbx from '../ui/combobox-util.js';
 // import * as _errs from '../validation/f-errs.js';
 import * as _forms from '../forms-main.js';
 import * as db_forms from '../../db-forms.js';
-import * as form_ui from '../ui/form-ui.js';
-import * as db_map from '../../../db-map/db-map.js';
+import * as db_map from '../../../db-map/map-main.js';
 import * as _fCnfg from '../etc/form-config.js';
 import { buildFormFooter } from '../ui/form-footer.js';
 import { fillRelationalDataInPanel } from '../ui/detail-panel.js';
@@ -69,7 +68,7 @@ function finishEditFormBuild(entity) {
     if (entity in hndlrs) { hndlrs[entity]()  
     } else {
         _cmbx('initFormCombos', [entity, 'top']); 
-        $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
+        //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
         $('.all-fields-cntnr').hide();
     }
 }
@@ -89,7 +88,9 @@ function fillInteractionData(id) {
 function fillFormWithEntityData(entity, id) {
     addDisplayNameToForm(entity, id);
     fillEntityData(entity, id); 
-    if (_elems.ifAllRequiredFieldsFilled('top')) { db_forms.toggleSubmitBttn('#top-submit', true); }
+    if (_elems.ifAllRequiredFieldsFilled('top')) { 
+        _forms.ui('toggleSubmitBttn', ['#top-submit', true]); 
+    }
 }
 function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
@@ -186,7 +187,7 @@ function fillFields(rcrd, fields, shwAll) {                                     
         'taxon': addTaxon
     };
     for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
-        if (!db_forms.fieldIsDisplayed(field, 'top') && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+        if (!_forms.ui('fieldIsDisplayed', [field, 'top']) && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
     }  
 }
@@ -236,7 +237,7 @@ function setTitleField(entity, srcRcrd) {                                       
     }
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) { 
-    if (entity !== 'publication' || !db_forms.fieldIsDisplayed('Publisher', 'top')) { return; }    
+    if (entity !== 'publication' || !_forms.ui('fieldIsDisplayed', ['Publisher', 'top'])) { return; }    
     _cmbx.setSelVal('#Publisher-sel', srcRcrd.parent);
 }
 function setCitationEdgeCaseFields(entity, citRcrd) {
@@ -296,7 +297,7 @@ export function getTaxonEditFields(entity, id) {
         .then(() => buildTaxonEditFields(taxon));
 }
 function finishTaxonEditFormBuild() {
-    $('#top-cancel').off('click').click(_forms.exitFormPopup);
+    //$('#top-cancel').off('click').click(_forms.exitFormPopup);
     $('#top-submit').off('click').click(submitTaxonEdit);
     initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
     $('.all-fields-cntnr').hide();
@@ -416,7 +417,7 @@ function finishPrntFormBuild() {                                                
     $('#sub-cancel').off('click').click(cancelPrntEdit);
     setTaxonPrntNameElem(null, null, " ");
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-    db_forms.toggleSubmitBttn('#top-submit', false);
+    _forms.ui('toggleSubmitBttn', ['#top-submit', false]);
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectParentTaxon(prntId, realmLvl) {                                  //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
@@ -448,7 +449,7 @@ function resetAfterEditParentClose(prnt) {
     $('#sub-form').remove();
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     setTaxonPrntNameElem(prnt);
-    db_forms.toggleSubmitBttn('#top-submit', true);
+    _forms.ui('toggleSubmitBttn', ['#top-submit', true]);
 }
 /**
  * Ensures that the new taxon-level is higher than its children, and that a 
@@ -514,7 +515,7 @@ function checkForParentLvlErrs(prnt) {
 } /* End checkForParentLvlErrs */
 function sendTxnErrRprt(errTag, field) {                                              
     _errs.reportFormFieldErr(field, errTag, 'top');
-    db_forms.toggleSubmitBttn('#top-submit', false);
+    _forms.ui('toggleSubmitBttn', ['#top-submit', false]);
     return false;
 }
 function clearLvlErrs(elemId, fLvl) {                                           //console.log('clearLvlErrs.')
@@ -550,7 +551,7 @@ function submitTaxonEdit() {
 /*-------- Edit Citation Methods ----------*/
 function finishCitEditFormBuild() {
     _cmbx('initFormCombos', ['citaion', 'top']); 
-    $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
+    //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('.all-fields-cntnr').hide();
     _forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
@@ -560,7 +561,7 @@ function finishLocEditFormBuild() {
     updateCountryChangeMethod();
     db_forms.addListenerToGpsFields(
         db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit', false));
-    $('#top-cancel').unbind('click').click(_forms.exitFormPopup);
+    //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('.all-fields-cntnr').hide();
 }
 function updateCountryChangeMethod() {

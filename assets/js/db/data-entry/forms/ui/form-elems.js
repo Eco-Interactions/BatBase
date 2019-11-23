@@ -97,60 +97,73 @@ export function getFormFieldRows(entity, fVals, fLvl, params) {
  *               .required Ary of required fields
  */
 function getFieldTypeObj(entity, fLvl) {                                        //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
-    const fConfg = _fCnfg.getFormConfg(entity);
-    const tConfg = getEntityTypeFormConfg(entity, fLvl);                        //console.log('f = %O, t = %O', fConfg, tConfg);
-    return buildFieldTypeObj(entity, fConfg, tConfg, fP.forms[fLvl].fieldConfg);
+    const confg = {
+        entity: entity,
+        form: _fCnfg.getFormConfg(entity), 
+        type: getEntityTypeFormConfg(entity, fLvl),
+        showAll: fP.forms[fLvl].expanded
+    };
+    return buildFieldTypeObj(confg, fP.forms[fLvl].fieldConfg);
 }   
 function getEntityTypeFormConfg(entity, fLvl) {
     const type = fP.forms[fLvl].entityType;
     return type ? _fCnfg.getFormConfg(entity).types[type] : false;
 }
-function buildFieldTypeObj(entity, fConfg, tConfg, fieldConfg) {                //console.log('fieldConfg = %O', fieldConfg);
-    fieldConfg.fields = getIncludedFields(entity, fConfg, tConfg, fieldConfg);
-    fieldConfg.order = getFieldOrder(fConfg, tConfg, entity);                     
-    fieldConfg.required = getRequiredFields(fConfg, tConfg);
+function buildFieldTypeObj(confg, fieldConfg) {                //console.log('fieldConfg = %O', fieldConfg);
+    fieldConfg.fields = getIncludedFields(confg);
+    fieldConfg.order = getFieldOrder(confg);                     
+    fieldConfg.required = getRequiredFields(confg);
     return fieldConfg;
 }
-function getIncludedFields(entity, fConfg, tConfg, fieldConfg) {
-    const fields = getFormFields(fConfg, tConfg, entity);       
+function getIncludedFields(confg) {
+    const allFields = getFieldTypes(confg);
     const included = {}
-    const allFields = Object.assign(_fCnfg.getCoreFieldDefs(entity), fConfg.add);
-    fields.forEach(field => included[field] = allFields[field]);    
+    getFormFields(confg).forEach(field => included[field] = allFields[field]);    
     return included;
+}
+function getFieldTypes(confg) {
+    const coreFields = _fCnfg.getCoreFieldDefs(confg.entity);
+    return Object.assign(coreFields, confg.form.add);
 }
 /**
  * Returns an array of fields to include in the form. If the form is a 
  * source-type, the type-entity form config is combined with the main-entity's.
  * Eg, Publication-type confgs are combined with publication's form confg.
  */
-function getFormFields(fConfg, tConfg, entity) {                                //console.log('getting form fields for [%s] fConfg = %O typeConfg = %O', entity, fConfg, tConfg);
-    const showAllFields = fP.forms.expanded[entity];
-    const dfault = getCoreFields(entity, fConfg, showAllFields);
-    const typeFields = getEntityTypeFields(entity, tConfg, showAllFields);
+function getFormFields(confg) {                                //console.log('getting form fields for [%s] fConfg = %O typeConfg = %O', entity, fConfg, tConfg);
+    const dfault = getCoreEntityFields(confg);
+    const typeFields = getEntityTypeFields(confg);
     return dfault.concat(typeFields);
 }
-function getCoreFields(entity, fConfg, showAllFields) {
-    return fP.forms.expanded[entity] ? 
-        fConfg.required.concat(fConfg.suggested).concat(fConfg.optional) :
-        fConfg.required.concat(fConfg.suggested); 
+function getCoreEntityFields(confg) {
+    const fields = confg.form.required.concat(confg.form.suggested);
+    return confg.showAll ? fields.concat(confg.form.optional) : fields;
 }
-function getEntityTypeFields(entity, typeConfg, showAllFields) {
-    return typeConfg && shwAll ? 
-        typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
-        typeConfg ? typeConfg.required.concat(typeConfg.suggested) : []; 
+function getEntityTypeFields(confg) {
+    const fields = confg.type ? 
+        confg.type.required.concat(confg.type.suggested) : [];
+    return  confg.showAll ? fields.concat(typeConfg.optional) : fields;
 }
 /** Returns the order the form fields should be displayed. */
-function getFieldOrder(fConfg, typeConfg, entity) {
-    const shwAll = fP.forms.expanded[entity];
-    const order = typeConfg && shwAll ? 
-        fConfg.order.opt.concat(typeConfg.order.opt) : 
-        typeConfg ? 
-            fConfg.order.sug.concat(typeConfg.order.sug) : 
-            shwAll && fConfg.order.opt ? fConfg.order.opt : fConfg.order.sug; 
+function getFieldOrder(cfg) {
+    const order = cfg.showAll ? getExpandedOrder(cfg) : getDefaultOrder(cfg); 
+    // const core = cfg.showAll && cfg.form.order.opt ? cfg.order.opt : cfg.order.sug; 
+    // const sub = typeConfg && shwAll ? 
+    //     fConfg.order.opt.concat(typeConfg.order.opt) : 
+    //     typeConfg ? 
+    //         fConfg.order.sug.concat(typeConfg.order.sug) : 
+    //         shwAll && fConfg.order.opt ? fConfg.order.opt : fConfg.order.sug; 
     return order.map(field => field); //removes references to confg obj.
 }
-function getRequiredFields(fConfg, tConfg) {
-    return tConfg ? tConfg.required.concat(fConfg.required) : fConfg.required;
+/** <type> eg: publication - book, jounrnal, thesis, record, and other 'types'. */
+function getExpandedOrder(cfg) {
+    return cfg.type ? cfg.form.order.opt.concat(cfg.type.order.opt) : cfg.form.order.opt;
+}
+function getDefaultOrder(cfg) {
+    return cfg.type ? cfg.form.order.sug.concat(cfg.type.order.sug) : cfg.form.order.sug;
+}
+function getRequiredFields(cfg) {
+    return cfg.type ? cfg.type.required.concat(cfg.form.required) : cfg.form.required;
 }
 /* ===================== BUILD FORM FIELD ROW =============================== */
 /** @return {ary} Rows for each field in the entity field obj. */
@@ -164,7 +177,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
 /**
  * @return {div} Form field row with required-state and value (if passed) set.  
  */
-function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     return buildFieldInput(fieldsObj.fields[field], entity, field, fLvl)
         .then(buildFieldRow);
 
@@ -224,7 +237,7 @@ function checkForBlanksInOrder(vals, field, fLvl) {                             
     if (blank === "found") { return _errs.reportFormFieldErr(field, map[field], fLvl); }
     if ($('#'+field+'_errs.'+fLvl+'-active-errs')) { _errs.clrContribFieldErr(field, fLvl); }
 }
-function buildFieldInput(fieldType, entity, field, fLvl) {                      console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
+function buildFieldInput(fieldType, entity, field, fLvl) {                      //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
     const builders = { 'text': buildTextInput, 'tags': buildTagField, 
         'select': buildSelectCombo, 'multiSelect': buildMultiSelectCntnr,  
         'textArea': buildTextArea, 'fullTextArea': buildLongTextArea };
@@ -529,10 +542,10 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
     const subBttnId = '#'+fLvl+'-submit';
     _forms.callFormFunc('interaction', 'resetIfFormWaitingOnChanges');  //After interaction form submit, the submit button is disabled until form data changes
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
-        db_forms.disableSubmitBttn(subBttnId); 
+        _forms.ui('toggleSubmitBttn', [subBttnId, false]); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
         if (locHasGpsData(fLvl)) { return; }
-        db_forms.enableSubmitBttn(subBttnId);
+        _forms.ui('toggleSubmitBttn', [subBttnId, true]); 
     }
 }
 /** Returns true if all the required elements for the current form have a value. */
@@ -637,7 +650,7 @@ function getExitButtonRow() {
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' }
     const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_forms.exitFormPopup);
+    $(bttn).click(_forms.exitFormWindow);
     return bttn;
 }
 function getFormHtml(entity, id, action) {

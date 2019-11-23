@@ -12,12 +12,13 @@
  *     handleCitText            form-elems
  *     initEntitySubForm        interaction-form
  *     initEntityFormMemory     interaction-form, edit-forms
- *     setOnSubmitSuccessHandler    interaction-form
+ *     setonFormCloseHandler    interaction-form
  *     
  */
 import * as _u from '../../util.js';
 import * as _errs from './validation/form-errors.js'
 import * as _mmry from './etc/form-memory.js';
+import * as _confg from './etc/form-config.js';
 import * as db_forms from '../db-forms.js';
 import * as form_util from './etc/form-util.js';
 import * as _int from './entity/interaction-form.js';
@@ -30,6 +31,10 @@ const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
     'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 'object': _int
 };
+
+export function loadDataTableAfterFormClose(focus) {
+    db_page.loadDataTable(focus);
+}
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
 export function _util(funcName, params = []) {
     return _u[funcName](...params);
@@ -37,6 +42,9 @@ export function _util(funcName, params = []) {
 /** ------------------------  FORM UTILITY ---------------------------------- */
 export function util(funcName, params = []) {
     return form_util[funcName](...params);
+}
+export function confg(funcName, params = []) {
+    return _confg[funcName](...params);
 }
 /** ----------------------  ERROR HANDLERS ---------------------------------- */
 export function err(funcName, params = []) {
@@ -58,6 +66,12 @@ export function uiPanel(funcName, params = []) {
 export function ui(funcName, params = []) {
     return _ui[funcName](...params);
 }
+export function exitFormWindow(e, skipReset) {
+    _ui.exitFormPopup(e, skipReset);
+}
+export function exitFormLevel(id, level, focus, onExit, data) {
+    return _ui.exitForm(...arguments);
+}
 /** ------------------------ STATE MANAGMENT -------------------------------- */
 // How to call a function with the string name passed? Including all methods seems super redundant
 export function memory(funcName, params = []) {
@@ -69,17 +83,21 @@ export function initFormMemory(action, entity, id) {
 export function initEntityFormMemory(entity, level, pSel, action) {
     return _mmry.initEntityFormMemory(entity, level, pSel, action)
 }
-export function setOnSubmitSuccessHandler(formField, fLvl) {
+export function setonFormCloseHandler(formField, fLvl) {
     const hndlrs = {
         'location': _int.enableCountryRegionField,
         // 'object': _int.enableTaxonCombos,
         // 'subject': _int.enableTaxonCombos,
         'taxon': _int.enableTaxonLvls
     };
-    _mmry.setOnSubmitSuccessHandler(fLvl, hndlrs[formField]);
+    _mmry.setonFormCloseHandler(fLvl, hndlrs[formField]);
 }
 export function getFormMemory() {
     return _mmry.getAllFormMemory();
+}
+export function clearFormMemory() {
+    require('../../db-map/map-main.js').clearMemory();
+    memory.clearMemory();
 }
 /** ------------------------ INIT FORMS ------------------------------------- */
 export function initNewDataForm() {
@@ -107,7 +125,7 @@ export function onFormInitComplete(entity) {
 // edit form default handler: form_ui.exitFormPopup
 export function onFormSubmitSuccess(entity, action) {
     const defaultHandlr = action === 'edit' ? form_ui.exitFormPopup : Function.prototype;
-    return forms[_u.lcfirst(entity)].onSubmitSuccess || defaultHandlr; 
+    return forms[_u.lcfirst(entity)].onFormClose || defaultHandlr; 
 }
 export function submitForm(formId, fLvl, entity) {
     db_forms.getFormValuesAndSubmit(formId, fLvl, entity);
@@ -149,9 +167,6 @@ export function callFormFunc(entity, funcName, params = []) {  console.log('args
 export function getSelectedTaxon() {
     return _int.getSelectedTaxon();
 }
-// export function finishIntFormBuild() {
-//     _int.finishInteractionFormBuild();
-// }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
@@ -167,38 +182,4 @@ export function getSubFormLvl(intFormLvl) {
 export function getTaxonDisplayName(taxon) { 
     return taxon.level.displayName === 'Species' ? 
         taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
-}
-/* ============================ EXIT FORM =================================== */
-/** Returns popup and overlay to their original/default state. */
-export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
-    fP = db_forms.getFormParams();
-    hideSearchFormPopup();
-    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
-    $("#b-overlay").removeClass("form-ovrly");
-    $("#b-overlay-popup").removeClass("form-popup");
-    $("#b-overlay-popup").empty();
-    db_map.clearMemory();
-    db_forms.clearFormMemory();
-    fP = null;
-}
-function hideSearchFormPopup() {
-    $('#b-overlay').css({display: 'none'});
-}
-/**
- * If the form was not submitted the table does not reload. Otherwise, if exiting 
- * the edit-forms, the table will reload with the current focus; or, after creating 
- * an interaction, the table will refocus into source-view. Exiting the interaction
- * forms also sets the 'int-updated-at' filter to 'today'.
- */
-function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
-    if (!fP.submitFocus) { return; }
-    if (fP.submitFocus == 'int') { return refocusAndShowUpdates(); }   
-    db_page.initDataTable(fP.submitFocus);
-}
-function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
-    var focus  = fP.action === 'create' ? 'srcs' : getCurFocus();
-    showTodaysUpdates(focus);   
-}
-function getCurFocus() {
-    return db_page.accessTableState().get('curFocus');
 }

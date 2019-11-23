@@ -19,7 +19,6 @@
  *   NOTE: The required and suggested fields will be the default shown in form. 
  * > optional - All remaining available fields for the entity.
  * > order - Order to display the fields in both the default and expanded forms. 
-// * > exitHandler - optional Obj with handlers for exiting create/edit forms.
  */
 export function getFormConfg(entity) {                                                 //console.log('getFormConfg [%s]', entity);
     const fieldMap = { 
