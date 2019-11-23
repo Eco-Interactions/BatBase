@@ -128,11 +128,18 @@ export function getObjectRealm() {
     return !txnMemory ? 'Plant' : (txnMemory.objectRealm || 'Plant');
 }   
 // /* ---------------------------- Getters ------------------------------------- */
+export function isEditForm() {
+    return formMemory.action === 'edit';
+}
 export function getAllFormMemory() {
     return formMemory;
 }
 export function getMemoryProp(prop) {
     return formMemory[prop];
+}
+/* source-forms */
+export function getFormMemory(fLvl) {
+    return formMemory.forms[fLvl] ? formMemory.forms[fLvl] : false;
 }
 export function getFormProp(prop, fLvl) {
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl][prop] : false;
@@ -178,6 +185,9 @@ export function addComboToMemory(fLvl, field) {
 }
 export function setMemoryProp(prop, val) {
     formMemory[prop] = val;
+}
+export function setFormMemory(fLvl, params) {
+    formMemory.forms[fLvl] = params;
 }
 export function setFormProp(fLvl, prop, val) {
     formMemory.forms[fLvl][prop] = val;

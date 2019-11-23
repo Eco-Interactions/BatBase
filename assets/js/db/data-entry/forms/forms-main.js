@@ -97,7 +97,7 @@ export function getFormMemory() {
 }
 export function clearFormMemory() {
     require('../../db-map/map-main.js').clearMemory();
-    memory.clearMemory();
+    _mmry.clearMemory();
 }
 /** ------------------------ INIT FORMS ------------------------------------- */
 export function initNewDataForm() {
@@ -110,7 +110,7 @@ export function createSubEntity(ent, cnt) {
 }
 export function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
     _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
-    return _ui.elems.initSubForm(fLvl, fClasses, fVals, pSel);
+    return _ui.elems('initSubForm', [fLvl, fClasses, fVals, pSel]);
 }
 export function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {           console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     _mmry.initEntityFormMemory(_u.lcfirst(role), fLvl, '#'+role+'-sel', 'create');
@@ -166,6 +166,25 @@ export function callFormFunc(entity, funcName, params = []) {  console.log('args
 }
 export function getSelectedTaxon() {
     return _int.getSelectedTaxon();
+}
+/* edit-form */
+export function selectExistingAuthors() {
+    return _src.selectExistingAuthors(...arguments);
+}
+export function locCoordErr() {
+    return _loc.locCoordErr(...arguments);
+}
+export function addMapToLocationEditForm() {
+    return _loc.addMapToLocationEditForm(...arguments);
+}
+export function addMapToLocForm() {
+    return _loc.addMapToLocForm(...arguments);
+}
+export function focusParentAndShowChildLocs() {
+    return _loc.focusParentAndShowChildLocs(...arguments);
+}
+export function onSrcToggleFields() {
+    _src.finishSourceToggleAllFields(...arguments);
 }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */

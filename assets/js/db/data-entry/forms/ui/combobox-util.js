@@ -14,7 +14,7 @@ import { memory as _mmry } from '../forms-main.js';
  * that allow users to search by typing and, when configured, add new options 
  * not in the list by triggering a sub-form for that entity.
  */
-export function initSingle(confg, fLvl) {                                       //console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
+export function initSingle(confg, fLvl) {                                       console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
     const options = {
         create: confg.add,
         onChange: confg.change,
@@ -75,7 +75,7 @@ export function updateComboboxOptions(selId, opts, focus) {
 export function getSelVal(id) {                                                 //console.log('getSelVal [%s]', id);
     return $(id)[0].selectize.getValue();  
 }
-export function getSelTxt(id) {                                                 //console.log('getSelTxt. id = ', id);
+export function getSelTxt(id) {                                                 console.log('getSelTxt. id = ', id);
     return $(id)[0].innerText;
 }
 export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
@@ -87,7 +87,7 @@ export function setSelVal(id, val, silent) {                                    
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, comboEvents) {                                  console.log("initFormCombos. [%s] formLvl = [%s]", entity, fLvl);
+export function initFormCombos(entity, fLvl, comboEvents) {                     console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
     const elems = _mmry('getFormProp', ['selElems', fLvl]);
     elems.forEach(selectizeElem);
     _mmry('setFormProp', [fLvl, 'selElems', []]);

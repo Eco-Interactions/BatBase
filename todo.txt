@@ -25,8 +25,7 @@ Updates:
 
 Current:
     - Refactoring forms
-        - write method that updates core fPs from modules
-
+        - add forms in containers to ensure they don't collapse horizontally
 
         - don't allow creation of anything without display name
         - store data in memory when updating data db-sync

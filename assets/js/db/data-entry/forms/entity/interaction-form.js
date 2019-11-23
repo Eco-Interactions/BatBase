@@ -10,14 +10,9 @@
  */
 // import * as _u from '../../../util.js';
 import * as _forms from '../forms-main.js';
-// import * as _elems from '../ui/form-elems.js';
-// import * as form_ui from '../ui/form-ui.js';
-// import * as _cmbx from '../ui/combobox-util.js';
-import * as db_forms from '../../db-forms.js';
 
 let fP;
 /** ====================== ALIAS HELPERS ==================================== */
-// const _ui = _forms.ui;
 const _cmbx = _forms.uiCombos;
 const _elems = _forms.uiElems;
 const _panel = _forms.uiPanel;
@@ -182,7 +177,7 @@ function onCntryRegSelection(val) {                                             
     const loc = fP.records.location[val];
     fillLocationSelect(loc);
     if (!fP.editing) { $('#Country-Region_pin').focus(); }
-    if ($('#loc-map').length) { db_forms.focusParentAndShowChildLocs('int', val); }    
+    if ($('#loc-map').length) { _forms.focusParentAndShowChildLocs('int', val); }    
 }
 /*------------------ Location ------------------------------------------------*/
 /**
@@ -739,7 +734,7 @@ function getInfoLinkTextToOpenMap(argument) {
 /** Open popup with the map interface for location selection. */
 function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
     if ($('#loc-map').length) { return; }
-    db_forms.addMapToLocForm('#Location_row', 'int');
+    _forms.addMapToLocForm('#Location_row', 'int');
     if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
     _cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }
@@ -853,4 +848,10 @@ export function resetIfFormWaitingOnChanges() {
     if (!_mmry('getFormProp', ['unchanged', 'top'])) { return; }
     _forms.ui('exitSuccessMsg');
     _mmry('setFormProp', ['top', 'unchanged', false]);
+}
+
+
+/** ================== EDIT FORM CODE ======================================= */
+export function finishCita(argument) {
+    // body...
 }
