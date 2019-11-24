@@ -18,12 +18,12 @@ const _mmry = _forms.memory;
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
-export function buildCitationText(params, fLvl) {
-    const pubData = _mmry('getFormProp', ['pub', fLvl]);
+export function buildCitationText(fLvl) {  
+    const pubData = _mmry('getFormProp', ['rcrds', fLvl]);  
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
-    return getFormValueData(params, 'citation', null, null).then(generateCitText); 
+    return getFormValueData('citation', null, null).then(generateCitText); 
 
-    function generateCitText(formVals) {                                        //console.log('generateCitText. formVals = %O', formVals);
+    function generateCitText(formVals) {                                        console.log('generateCitText. formVals = %O', formVals);
         const builder = { 'Article': articleCit, 'Book': bookCit, 
             'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
             'Other': otherCit, 'Report': otherCit, 'Museum record': otherCit, 
@@ -43,7 +43,7 @@ export function buildCitationText(params, fLvl) {
             const pub = getPublicationName();
             const vip = getVolumeIssueAndPages(); 
             let fullText = [athrs, year, title].map(addPunc).join(' ')+' '; 
-            fullText += vip ? (pub+' '+vip) : pub;
+            fullText += vip ? (pub+' '+vip) : pub;  console.log('fullText = ', fullText)
             return fullText + '.';
         }
         /**
@@ -352,7 +352,7 @@ function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {             
     function getFormattedName(i, srcId) {                                       //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
         const src = getEntityRcrd(srcRcrds, srcId, 'source');
         const athrId = src[_u.lcfirst(src.sourceType.displayName)];  
-        const athr = getEntityRcrd(authRcrds, authId, 'author');
+        const athr = getEntityRcrd(authRcrds, athrId, 'author');
         return getCitAuthName(i, athr, eds);
     }
     /**

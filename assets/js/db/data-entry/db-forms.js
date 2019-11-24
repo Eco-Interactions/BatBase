@@ -21,7 +21,6 @@ import * as _fCnfg from './forms/etc/form-config.js';
 import { showEntityEditForm } from './forms/edit/edit-forms.js';
 import { getFormValueData } from './forms/validation/get-form-data.js';
 import { formatDataForServer } from './forms/validation/validate-data.js';
-import { buildCitationText } from './forms/features/generate-citation.js';
 
 let fP = {};
 
@@ -62,7 +61,7 @@ export function editEntity(id, entity) {                                        
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /*--------------- Shared Form Methods -------------------------------*/
 export function getFormValuesAndSubmit(formId, fLvl, entity) {                             console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
-    getFormValueData(fP, entity, fLvl, true)
+    getFormValueData(entity, fLvl, true)
         .then(buildFormDataAndSubmit.bind(null, entity, fLvl))
         .catch(() => {}); //Err caught in validation process and handled elsewhere.
 }

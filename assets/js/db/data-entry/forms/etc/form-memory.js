@@ -70,7 +70,7 @@ export function initFormMemory(action, entity, id) {
  * > selElems - Contains all selElems until they are initialized with selectize.
  * > vals - Stores all values entered in the form's fields.
  * --- Misc entity specific properties
- * > Citation forms: pub - { src: pubSrc, pub: pub } (parent publication)
+ * > Citation forms: rcrds - { src: pubSrc, pub: pub } (parent publication)
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
  * > Taxon forms: taxonPs - added to formMemory.forms (see props @initTaxonParams)
  */
@@ -141,7 +141,7 @@ export function getMemoryProp(prop) {
 export function getFormMemory(fLvl) {
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl] : false;
 }
-export function getFormProp(prop, fLvl) {
+export function getFormProp(prop, fLvl) { console.log('args = %O, memory = %O', arguments, formMemory)
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl][prop] : false;
 }
 export function getFormEntity(fLvl) { 

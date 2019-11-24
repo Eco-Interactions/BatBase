@@ -35,7 +35,7 @@ const _mmry = _forms.memory;
  */
 export function initSubForm(fLvl, fClasses, fVals, selId) {                     console.log('       /initSubForm called. args = %O', arguments)
     fP = _mmry('getAllFormMemory');
-    const formEntity = _mmry('getFormEntity', [fLvl]);  console.log('formEntity = ', formEntity);  
+    const formEntity = fP.forms[fLvl].entity;  console.log('formEntity = ', formEntity);  
     return buildFormRows(formEntity, fVals, fLvl)
         .then(buildFormContainer)
 
@@ -402,12 +402,9 @@ export function getSrcOpts(prop, field, rcrds) {
         return opts;
     }
 }
-/**
- * Return the citation type options available for the parent publication type.
- * Also adds the parent publication and source records to the fP obj. 
- */
+/** Return the citation type options available for the parent-publication's type. */
 function getCitTypeOpts(prop) {  
-    const fLvl = _forms.getSubFormLvl('sub');
+    const fLvl = _forms.getSubFormLvl('sub');  
     return _u('getData', [prop]).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
@@ -419,18 +416,8 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        setPubInParams()
-        return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
-    }
-    function setPubInParams() {
-        const pubSrc = getSrcRcrd($('#Publication-sel').val());
-        const pub = _mmry('getRcrd', ['publication', pubSrc.publication]);
-        _mmry('setFormProp', [fLvl, 'pub', { pub: pub, src: pubSrc}]);
-    }
-    function getSrcRcrd(pubId) {
-        if (pubId) { return fP.records.source[pubId]; } //When not editing citation record.
-        const rcrd = _mmry('getRcrd', ['source', fP.editing.core]);
-        return fP.records.source[rcrd.parent];
+        const pubRcrd = _mmry('getFormProp', ['rcrds', fLvl]).pub; console.log('rcrds = %O', pubRcrd)
+        return opts[pubRcrd.publicationType.displayName];
     }
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
