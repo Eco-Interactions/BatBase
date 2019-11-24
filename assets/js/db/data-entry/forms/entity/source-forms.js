@@ -221,7 +221,7 @@ function handlePubData(typeId, citTypeElem, fLvl) {
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const vals = _mmry('getFormProp', ['fieldConfg']).vals;
+    const vals = _mmry('getFormProp', [fLvl, 'vals']);
     addPubTitle(addValues, fLvl, type);
     addPubYear(addValues, fLvl);
     addAuthorsToCitation(addValues, fLvl, type);
@@ -318,7 +318,7 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
 function resetOnFormTypeChange(entity, typeId, fLvl) {  
     const capsType = _u('ucfirst', [entity]);   
     const fMemory = _mmry('getFormMemory', [fLvl]);
-    fMemory.fieldConfg.vals[capsType+'Type'].val = typeId;
+    fMemory.vals[capsType+'Type'].val = typeId;
     fMemory.reqElems = [];
     _ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]); 
 }
@@ -451,26 +451,46 @@ function selectAuthor(cnt, authId, field, fLvl) {
  * the last author combobox, unless the last is empty. The total count of 
  * authors is added to the new id.
  */
-function onAuthSelection(val, ed) {                                             //console.log("Add existing author = %s", val);
+function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
     handleAuthSelect(val);
 }
 function onEdSelection(val) {                                                   //console.log("Add existing author = %s", val);
     handleAuthSelect(val, 'editor');
 }
 function handleAuthSelect(val, ed) {                                            
-    if (val === '' || parseInt(val) === NaN) { return; }
     const authType = ed ? 'Editors' : 'Authors';                                
+    let cnt = $('#'+authType+'-sel-cntnr').data('cnt');   
+    if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     const fLvl = _forms.getSubFormLvl('sub');
-    let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
-    if (val === 'create') { return _forms.createSubEntity(authType, --cnt); } 
+    if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }                       
+    if (val === 'create') { return _forms.createSubEntity(authType, cnt); } 
     _forms.handleCitText(fLvl);       
-    // if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }
-    if (lastAuthComboEmpty(cnt-1, authType)) { return; }
-    buildNewAuthorSelect(cnt, val, fLvl, authType);
+    if (lastAuthComboEmpty(cnt, authType)) { return; }
+    buildNewAuthorSelect(cnt+1, val, fLvl, authType);
 }
-function citationFormNeedsCitTextUpdate(fLvl) {
-    return _mmry('getFormProp', [fLvl, 'entity']) === 'citation' && !app.citTimeout;
+function handleFieldCleared(authType, cnt) {  console.log('handleFieldCleared')
+    syncWithOtherAuthorTypeSelect(authType);
+    if ($('#'+authType+'-sel'+(cnt-1)).val() === '') {
+        removeFinalEmptySelectField(authType, cnt);
+    }
 }
+function syncWithOtherAuthorTypeSelect(authType) {
+    if ($('#'+authType+'-sel1').val()) { return; }
+    toggleOtherAuthorTypeSelect(authType, true);
+}
+function removeFinalEmptySelectField(authType, cnt) {  console.log('removeFinalEmptySelectField = ', cnt)
+    $('#'+authType+'-sel'+cnt)[0].selectize.destroy();  console.log('elem to remove = %O', $('#'+authType+'-sel'+cnt))
+    $('#'+authType+'-sel'+cnt)[0].parentNode.remove();
+    $('#'+authType+'-sel-cntnr').data('cnt', --cnt);
+}
+function toggleOtherAuthorTypeSelect(type, enable) {
+    const entity = type === 'Authors' ? 'Editors' : 'Authors';
+    if (!$('#'+entity+'-sel-cntnr').length) { return; }
+    _cmbx('enableFirstCombobox', ['#'+entity+'-sel-cntnr', enable]);
+}
+// function citationFormNeedsCitTextUpdate(fLvl) {
+//     return _mmry('getFormProp', [fLvl, 'entity']) === 'citation' && !app.citTimeout;
+// }
 /** Stops the form from adding multiple empty combos to the end of the field. */
 function lastAuthComboEmpty(cnt, authType) {  
     return $('#'+authType+'-sel'+cnt).val() === '';

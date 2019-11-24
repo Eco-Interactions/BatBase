@@ -13,7 +13,6 @@ import * as _u from '../../../util.js';
 import * as _elems from '../ui/form-elems.js';
 import * as db_sync from '../../../db-sync.js';
 import * as _cmbx from '../ui/combobox-util.js';
-import * as db_forms from '../../db-forms.js';
 import * as _forms from '../forms-main.js';
 
 let fP;
@@ -21,7 +20,7 @@ let fP;
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */
 export function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-    fP = db_forms.getFormParams();
+    fP = _forms.memory('getAllFormMemory');
     const fLvl = fP.ajaxFormLvl;                                          
     const elem = getFormErrElem(fLvl);
     const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
@@ -55,7 +54,7 @@ function getFormErrMsg(errTag) {
 }
 /**------------- Data Storage Errors --------------*/
 export function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-    fP = db_forms.getFormParams();
+    fP = _forms.memory('getAllFormMemory');
     const errMsg = data.msg;
     const errTag = data.tag;
     const cntnr = _u.buildElem('div', { class: 'flex-col', id:'data_errs' });
@@ -102,7 +101,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * error manually with the close button, or automatically by resolving the error.
  */
 export function reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
-    fP = db_forms.getFormParams();
+    fP = _forms.memory('getAllFormMemory');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
         'fillAuthBlanks': handleAuthBlanks,

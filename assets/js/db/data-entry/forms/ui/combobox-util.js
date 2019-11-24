@@ -36,6 +36,11 @@ export function enableCombobox(selId, enable) {
 export function enableComboboxes($pElems, enable) {
     $pElems.each((i, elem) => { enableCombobox('#'+elem.id, enable)});
 }
+export function enableFirstCombobox(cntnrId, enable = true) {
+    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
+    const firstElem = $('#'+ selElems[0].id)[0].selectize;
+    return enable ? firstElem.enable() : firstElem.disable();
+}
 export function focusCombobox(selId, focus) { 
     if (!focus) { return $(selId)[0].selectize.blur(); }
     $(selId)[0].selectize.focus();

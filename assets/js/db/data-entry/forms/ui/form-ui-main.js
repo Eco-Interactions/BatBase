@@ -164,7 +164,7 @@ function showOpenSubFormErr(fLvl) {
 /*--------------------------- Fill Form Fields -------------------------------*/
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) {
-    const vals = _mmry('getFormProp', [fLvl, 'fieldConfg']).vals;                               
+    const vals = _mmry('getFormProp', [fLvl, 'vals']);                               
     const valObj = {};
     for (let field in vals) {
         valObj[field] = vals[field].val;
@@ -178,7 +178,7 @@ export function getCurrentFormFieldVals(fLvl) {
  * reinitiation are handled here.
  */
 export function fillComplexFormFields(fLvl) {
-    const vals = _mmry('getFormProp', [fLvl, 'fieldConfg']).vals;
+    const vals = _mmry('getFormProp', [fLvl, 'vals']);
     const fieldHndlrs = { 'multiSelect': _forms.selectExistingAuthors };
 
     for (let field in vals) {                                                   //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
