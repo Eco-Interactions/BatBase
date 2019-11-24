@@ -109,7 +109,7 @@ function getEntityTypeFormConfg(entity, fLvl) {
     const type = fP.forms[fLvl].entityType;
     return type ? _fCnfg.getFormConfg(entity).types[type] : false;
 }
-function buildFieldTypeObj(confg, fieldConfg) {                //console.log('fieldConfg = %O', fieldConfg);
+function buildFieldTypeObj(confg, fieldConfg) {                                 //console.log('fieldConfg = %O', fieldConfg);
     fieldConfg.fields = getIncludedFields(confg);
     fieldConfg.order = getFieldOrder(confg);                     
     fieldConfg.required = getRequiredFields(confg);
@@ -184,7 +184,7 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
     /** Adds the field, and it's type and value, to the form's field obj.  */
     function addFieldToFormFieldObj() {
         const confg = { val: fVals[field], type: fieldsObj.fields[field] };
-        _mmry('setFormFieldConfg', [fLvl, field, fieldsObj]);
+        _mmry('setFormFieldConfg', [fLvl, field, confg]);
     }
     /** Sets the value for the field if it is in the passed 'fVals' obj. */
     function fillFieldIfValuePassed(input) {                                    //console.log('filling value in [%s]', field);
@@ -205,9 +205,9 @@ function storeFieldValue(elem, fieldName, fLvl, value) {
     _mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
-function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
-    if (e.target.value === "create") { return; }
-    const fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                               
+function storeMultiSelectValue(fLvl, cnt, field, e) {                           console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
+    if (e.target.value === 'create') { return; }
+    let fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                   console.log('fieldObj = %O', fieldObj);                
     if (!fieldObj.val) { fieldObj.val = {}; }
     fieldObj.val[cnt] = e.target.value || null;
     _mmry('setFormFieldConfg', [fLvl, field, fieldObj]);
@@ -219,15 +219,29 @@ function storeMultiSelectValue(fLvl, cnt, field, e) {                           
  * an error is shown to the user, otherwise any active errors are cleared. 
  */
 function checkForBlanksInOrder(vals, field, fLvl) {                             //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
-    const map = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
-    let blank = false;
+    const errTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
+    let blank = checkForBlanks(vals);
+    if (blank === 'found') { return reportFieldErr(field, errTags[field], fLvl); }
+    clearPreviousErr(field, fLvl);
+}
+function checkForBlanks(vals) {
+    let blanks = false;
+    checkValsForBlanks();
+    return blanks;
 
-    for (let ord in vals) {
-        blank = vals[ord] && blank ? 'found' :
-            !vals[ord] && !blank ? 'maybe' : blank;  
-    } 
-    if (blank === 'found') { return _errs.reportFormFieldErr(field, map[field], fLvl); }
-    if ($('#'+field+'_errs.'+fLvl+'-active-errs')) { _errs.clrContribFieldErr(field, fLvl); }
+    function checkValsForBlanks() {
+        for (let ord in vals) {
+            blanks = vals[ord] && blanks ? 'found' :
+                !vals[ord] && !blanks ? 'maybe' : blanks;  
+        } 
+    }
+}
+function reportFieldErr(field, errTag, fLvl) {
+     _errs('reportFormFieldErr', [field, errTag, fLvl]);
+}
+function clearPreviousErr(field, fLvl) {
+    if (!$('#'+field+'_errs.'+fLvl+'-active-errs')) { return; }
+    _errs('clrContribFieldErr', [field, fLvl]);
 }
 function buildFieldInput(fieldType, entity, field, fLvl) {                      //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
     const builders = { 'text': buildTextInput, 'tags': buildTagField, 
@@ -382,7 +396,7 @@ export function getSrcOpts(prop, field, rcrds) {
     return _u('getData', [prop]).then(buildSrcOpts);
 
     function buildSrcOpts(ids) {
-        const srcs = rcrds || fP.records.source;
+        const srcs = rcrds || _mmry('getEntityRcrds', ['source']);
         const opts = getRcrdOpts(ids, srcs);
         opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
         return opts;
@@ -584,7 +598,7 @@ function locHasGpsData(fLvl) {
 }
 /** After interaction form submit, the submit button is disabled until form data changes. */
 function ifInteractionFormHandleReset(fLvl) {
-    if (_mmry.getFormEntity(fLvl) !== 'interaction') { return; }
+    if (_mmry('getFormEntity', [fLvl]) !== 'interaction') { return; }
     _forms.callFormFunc('interaction', 'resetIfFormWaitingOnChanges');  
 }
 

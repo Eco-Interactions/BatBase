@@ -79,7 +79,7 @@ export function initEntityFormMemory(entity, level, pSel, action) {
     formMemory.forms[level] = {
         action: action,
         expanded: false,
-        fieldConfg: { fields: {}, vals: {}, required: [] },
+        fieldConfg: { fields: {}, order: [], required: [] }, //refactor away from here??
         entity: entity,
         entityType: false,
         onFormClose: null,
@@ -160,7 +160,7 @@ export function getTaxonMemory() {
 //     return formMemory.forms[fLvl];
 // }
 export function getFormFieldConfg(fLvl, field) {
-    return formMemory.forms[fLvl].fieldConfg.vals[field];
+    return formMemory.forms[fLvl].vals[field];
 }
 export function getEntityRcrds(entity) {
     return typeof entity == 'string' ? formMemory.records[entity] : buildRcrdsObj(entity);
@@ -196,10 +196,10 @@ export function setTaxonProp(prop, val) {
     return formMemory.forms.taxonPs[prop] = val;
 }
 export function setFormFieldConfg(fLvl, field, confg) {
-    formMemory.forms[fLvl].fieldConfg.vals[field] = confg
+    formMemory.forms[fLvl].vals[field] = confg
 }
 export function setFormFieldValueMemory(fLvl, field, val) {
-    formMemory.forms[fLvl].fieldConfg.vals[field].val = val;
+    formMemory.forms[fLvl].vals[field].val = val;
 }
 export function setFormEntityType(fLvl, type) {
     formMemory.forms[fLvl].entityType = type;
