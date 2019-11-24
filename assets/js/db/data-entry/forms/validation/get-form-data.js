@@ -18,8 +18,8 @@ const _errs = _forms.err;
  * of the form values. Entity data not contained in an input on the form is 
  * added @handleAdditionalEntityData.
  */
-export function getFormValueData(params, entity, fLvl, submitting) {
-    fP = params;
+export function getFormValueData(entity, fLvl, submitting) {
+    fP = _forms.memory('getAllFormMemory');
     const elems = $('#'+entity+'_Rows')[0].children;                            console.log('           --getFormValueData. [%s]', entity);
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
@@ -55,8 +55,8 @@ export function getFormValueData(params, entity, fLvl, submitting) {
     function getTagVals(input, fieldName) {                                 
         return _cmbx.getSelVal('#'+_u.ucfirst(fieldName)+'-sel');
     }
-    function handleAdditionalEntityData(entity) {
-        if (!submitting) { return Promise.resolve(); }
+    function handleAdditionalEntityData(entity) {  
+        if (!submitting) { return Promise.resolve(); }  
         const dataHndlrs = {
             'author': [ getAuthFullName, getAuthDisplayName ],
             'editor': [ getAuthFullName, getAuthDisplayName ],
@@ -67,7 +67,7 @@ export function getFormValueData(params, entity, fLvl, submitting) {
             'publication': [ addContributorData ],
             'taxon': [ getTaxonData ],
         };
-        if (!dataHndlrs[entity]) { return Promise.resolve(); }
+        if (!dataHndlrs[entity]) { return Promise.resolve(); }  
         return Promise.all(dataHndlrs[entity].map(func => Promise.resolve(func())));
     }
     /** ---- Additional Author data ------ */
@@ -96,7 +96,7 @@ export function getFormValueData(params, entity, fLvl, submitting) {
     /** ---- Additional Citation data ------ */
     function getPublicationData() {
         formVals.publication = fP.editing ? 
-            fP.forms[fLvl].pub.src.id : $('#Publication-sel').val();
+            fP.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
     }
     /** Adds 'displayName', which will be added to both the form data objects. */
     function addCitDisplayName() { 
@@ -111,7 +111,7 @@ export function getFormValueData(params, entity, fLvl, submitting) {
         const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other', 
             'Ph.D. Dissertation', 'Report' ];
         if (fulls.indexOf(type) === -1) { return; }
-        const pubTitle = fP.forms[fLvl].pub.src.displayName;
+        const pubTitle = fP.forms[fLvl].rcrds.src.displayName;
         if (formVals.displayName.includes('(citation)')) { return; }
         if (pubTitle != formVals.displayName) { return; }
         formVals.displayName += '(citation)';
@@ -190,8 +190,8 @@ export function getFormValueData(params, entity, fLvl, submitting) {
         } 
         return fP.forms.taxonPs.realmTaxon.id;
     }
-    function returnFormVals() {
-        checkForErrors(entity, formVals, fLvl);
+    function returnFormVals() {  
+        checkForErrors(entity, formVals, fLvl);  
         return formVals.err ? Promise.reject() : Promise.resolve(formVals);
     }
 } /* End getFormValueData */

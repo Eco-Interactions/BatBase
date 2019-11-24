@@ -112,7 +112,7 @@ export function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
     _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
     return _ui.elems('initSubForm', [fLvl, fClasses, fVals, pSel]);
 }
-export function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {           console.log('-------------buildTaxonSelectForm. args = %O', arguments);
+export function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {           //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     _mmry.initEntityFormMemory(_u.lcfirst(role), fLvl, '#'+role+'-sel', 'create');
     return _mmry.initTaxonMemory(role, realm, realmTaxon)
         .then(() => _ui.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
@@ -185,6 +185,9 @@ export function focusParentAndShowChildLocs() {
 }
 export function onSrcToggleFields() {
     _src.finishSourceToggleAllFields(...arguments);
+}
+export function buildCitationText(fLvl) {
+    return require('./features/generate-citation.js').buildCitationText(fLvl);
 }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */
