@@ -9,8 +9,8 @@
 import * as _forms from '../forms-main.js';
 
 /** Returns the 'next' form level- either the parent or child. */
-export function getNextFormLevel(next, curLvl) {
-    const fLvls = _forms.memory('getAllFormMemory').formLevels;
+export function getNextFormLevel(next, curLvl) {  console.log('args = %O', arguments)
+    const fLvls = _forms.memory('getMemoryProp', ['formLevels']);   console.log('levels = %O', fLvls)
     const nextLvl = next === 'parent' ? 
         fLvls[fLvls.indexOf(curLvl) - 1] : 
         fLvls[fLvls.indexOf(curLvl) + 1] ;
@@ -25,4 +25,16 @@ export function getSubFormLvl(intFormLvl) {
     const fLvls = mmry.formLevels;
     return mmry.forms.top.entity === 'interaction' ? 
         intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
+}
+
+/** Returns an obj with the order (k) of the values (v) inside of the container. */
+export function getSelectedVals(cntnr, fieldName) {
+    let vals = {};
+    $.each(cntnr.children, (i, elem) => getCntnrFieldValue(i+1, elem.children));              
+    return vals;
+        
+    function getCntnrFieldValue(cnt, subElems) {                                     
+        $.each(subElems, (i, subEl) => { 
+            if (subEl.value) { vals[cnt] = subEl.value; }});  
+    }                                                                   
 }

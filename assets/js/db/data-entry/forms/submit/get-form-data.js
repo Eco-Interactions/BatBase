@@ -2,11 +2,9 @@
  * Returns an object with (k) the form field and (v) value.
  *
  * Exports:             Imported by: 
- *     getFormValueData         db-forms
- *     getSelectedVals
+ *     getValidatedFormData         db-forms
  */
 import * as _u from '../../../util.js';
-// import * as _errs from './f-errs.js';
 import * as _cmbx from '../ui/combobox-util.js';
 import * as _forms from '../forms-main.js';
 
@@ -18,9 +16,9 @@ const _errs = _forms.err;
  * of the form values. Entity data not contained in an input on the form is 
  * added @handleAdditionalEntityData.
  */
-export function getFormValueData(entity, fLvl, submitting) {
+export default function getValidatedFormData(entity, fLvl, submitting) {
     fP = _forms.memory('getAllFormMemory');
-    const elems = $('#'+entity+'_Rows')[0].children;                            console.log('           --getFormValueData. [%s]', entity);
+    const elems = $('#'+entity+'_Rows')[0].children;                            console.log('           --getValidatedFormData. [%s]', entity);
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
     return handleAdditionalEntityData(entity)
@@ -38,7 +36,7 @@ export function getFormValueData(entity, fLvl, submitting) {
          * Returns the input value from specialized parsing methods or trims the 
          * field value and returns the value, with numbers parsed as integers. 
          */
-        function parseFieldData() {
+        function parseFieldData () {
             const val = $(input).data('inputType') ? 
                 getInputVals(fieldName, input, $(input).data('inputType')) : 
                 input.value.trim() || null; 
@@ -51,7 +49,7 @@ export function getFormValueData(entity, fLvl, submitting) {
     /** Edge case input type values are processed via their type handlers. */
     function getInputVals(fieldName, input, type) {
         const typeHandlers = {
-            'multiSelect': getSelectedVals, 'tags': getTagVals
+            'tags': getTagVals, 'multiSelect': _forms.util.bind(null, 'getSelectedVals') 
         };
         return typeHandlers[type](input, fieldName);
     }
@@ -198,7 +196,7 @@ export function getFormValueData(entity, fLvl, submitting) {
         checkForErrors(entity, formVals, fLvl);  
         return formVals.err ? Promise.reject() : Promise.resolve(formVals);
     }
-} /* End getFormValueData */
+} /* End getValidatedFormData */
 function checkForErrors(entity, formVals, fLvl) {
     const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
     if (!errs[entity]) { return; }
@@ -225,15 +223,4 @@ function checkForDuplicate(opts, name) {
         let optName = opts[k].text.replace(/\./g,'').toLowerCase(); 
         return optName == newName
     });
-}
-/** Returns an obj with the order (k) of the values (v) inside of the container. */
-export function getSelectedVals(cntnr, fieldName) {
-    let vals = {};
-    $.each(cntnr.children, (i, elem) => getCntnrFieldValue(i+1, elem.children));              
-    return vals;
-        
-    function getCntnrFieldValue(cnt, subElems) {                                     
-        $.each(subElems, (i, subEl) => { 
-            if (subEl.value) { vals[cnt] = subEl.value; }});  
-    }                                                                   
 }

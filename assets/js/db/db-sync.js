@@ -21,7 +21,7 @@
  * 
  */
 import * as _u from './util.js';
-import * as _errs from './data-entry/forms/validation/form-errors.js';
+import { err as _errs } from './data-entry/forms/forms-main.js';
 import { rebuildCitationText } from './data-entry/forms/features/generate-citation.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 

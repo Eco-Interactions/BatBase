@@ -15,7 +15,7 @@
  *     
  */
 import * as _u from '../../util.js';
-import * as _errs from './validation/form-errors.js'
+import * as _submit from './submit/submit-main.js';
 import * as _mmry from './etc/form-memory.js';
 import * as _confg from './etc/form-config.js';
 import * as db_forms from '../db-forms.js';
@@ -26,20 +26,32 @@ import * as _src from './entity/source-forms.js';
 import * as _txn from './entity/taxon-form.js';
 import * as _ui from './ui/form-ui-main.js';
 import * as db_map from '../../db-map/map-main.js';
+import * as db_sync from '../../db-sync.js';
+import * as db_page from '../../db-page.js';
 
+const _errs = _submit.err;
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
     'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 'object': _int
 };
 
 export function loadDataTableAfterFormClose(focus) {
-    db_page.loadDataTable(focus);
+    db_page.initDataTable(focus);
 }
 export function map(funcName, params = []) {
     return db_map[funcName](...params);
 }
+export function updateLocalDataStorage() {
+    return db_sync.updateLocalDb(...arguments);
+}
+export function submit(funcName, params = []) {
+    return _submit[funcName](...params);
+}
+export function getData(entity, fLvl, submitting) {
+    return _submit.getFormData(entity, fLvl, submitting);
+}
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
-export function _util(funcName, params = []) {
+export function _util(funcName, params = []) {  
     return _u[funcName](...params);
 }
 /** ------------------------  FORM UTILITY ---------------------------------- */
@@ -72,12 +84,11 @@ export function ui(funcName, params = []) {
 export function exitFormWindow(e, skipReset) {
     _ui.exitFormPopup(e, skipReset);
 }
-export function exitFormLevel(id, level, focus, onExit, data) {
+export function exitFormLevel() {
     return _ui.exitForm(...arguments);
 }
 /** ------------------------ STATE MANAGMENT -------------------------------- */
-// How to call a function with the string name passed? Including all methods seems super redundant
-export function memory(funcName, params = []) {
+export function memory(funcName, params = []) {   
     return _mmry[funcName](...params);
 }
 export function initFormMemory(action, entity, id) {
@@ -127,7 +138,7 @@ export function onFormSubmitSuccess(entity, action) {
     return forms[_u.lcfirst(entity)].onFormClose || defaultHandlr; 
 }
 export function submitForm(formId, fLvl, entity) {
-    db_forms.getFormValuesAndSubmit(formId, fLvl, entity);
+    _submit.valAndSubmitFormData(formId, fLvl, entity);
 }
 /** ------------------------ FORM ELEMENTS ---------------------------------- */
 export function getFormFields(entity, params = []) {

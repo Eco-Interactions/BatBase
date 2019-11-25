@@ -1,20 +1,13 @@
 /**
- * Validates and sanitizes form data. 
- *
- * Exports:             Imported by:
- *     formatDataForServer       db-forms, edit-forms
+ * Formats data to send to server.
  */
 import { lcfirst } from '../../../util.js';
 import * as _fCnfg from '../etc/form-config.js';
 
-let fP;
-
 /**
  * Builds a form data object @buildFormData. Sends it to the server @submitFormData
  */
-export function formatDataForServer(params, fLvl, formVals) {                        
-    fP = params;
-    let entity = fP.forms[fLvl].entity;                                         //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
+export default function(entity, fLvl, formVals) {                        
     if (entity === 'editor') { entity = 'author'; }
     return buildFormData(entity, formVals, fLvl);                     //console.log("formData = %O", formData);
 }                
@@ -87,20 +80,23 @@ function buildFormData(entity, formVals, fLvl) {
      * would be overwritten. Once map editing is complete, this will be revised.
      */
     function handleGeoJson() {
-        if (!fP.editing && (!formVals.latitude || !formVals.longitude)) { return; }
+        const editing = _mmry('getMemoryProp', ['editing']);
+        if (!editing && (!formVals.latitude || !formVals.longitude)) { return; }
         const displayPoint = JSON.stringify([ formVals.longitude, formVals.latitude ]);
-        const geoJson = fP.forms.top.geoJson; 
-        const coords = !geoJson || geoJson.type === 'Point' ? 
-            displayPoint : fP.forms[fLvl].geoJson.coordinates;
         data.geoJson = {
             flat: { 
                 'displayPoint': displayPoint, 
-                'coordinates': coords, 
+                'coordinates': getCoords(displayPoint), 
                 'locationName': formVals.displayName,
                 'type': 'Point' },
             rel: {}
         };
         data.location.hasDetail = true;
+    }
+    function getCoords(displayPoint) {
+        const geoJson = _mmry('getFormProp', ['geoJson', 'top']);
+        const coords = !geoJson || geoJson.type === 'Point' ? 
+            displayPoint : geoJson.coordinates;
     }
 } /* End buildFormDataObj */
 /** Returns an array of the parent entity's field names. */

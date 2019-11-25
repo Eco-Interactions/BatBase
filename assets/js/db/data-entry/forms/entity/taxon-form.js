@@ -15,13 +15,17 @@ const _ui = _forms.ui;
 
 export function initCreateForm(level, value) {                                  console.log('           /--initTaxon[%s]Form [%s]', level, value);
     const val = value === 'create' ? '' : value;
-    const fLvl = fP.forms.taxonPs.prntSubFormLvl || _forms.getSubFormLvl('sub2'); //when editing parent taxon
+    const fLvl = getTaxonCreateLvl();
     if (level === 'Species' && !$('#Genus-sel').val()) {
         return _errs('formInitErr', [level, 'noGenus', fLvl]);
     }
     enableTaxonLvls(false);
     showNewTaxonForm(val, level, fLvl);
 } 
+function getTaxonCreateLvl() {
+    const editFormLvl = _mmry('getTaxonProp', ['prntSubFormLvl']);
+    return editFormLvl || _forms.getSubFormLvl('sub2'); //when editing parent taxon
+}
 function showNewTaxonForm(val, level, fLvl) {                                  
     _mmry('setTaxonProp', ['formTaxonLvl', level]);  //used for data validation/submit
     buildTaxonForm()

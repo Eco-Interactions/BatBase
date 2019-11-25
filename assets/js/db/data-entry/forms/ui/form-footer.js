@@ -80,15 +80,18 @@ function buildSubmitAndCancelBttns(level, action, entity) {
  */
 function getBttnEvents(entity, level) {                                         //console.log("getBttnEvents for [%s] @ [%s]", entity, level);
     return { 
-        submit: db_forms.getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-        cancel: getCancelFunc()
+        submit: getSubmitEvent(entity, level), 
+        cancel: getCancelFunc(entity, level)
     };
 
-    function getCancelFunc() {
-        const onExit = fP.forms[level] ? fP.forms[level].onFormClose : Function.prototype;
-        return level === 'top' ? _forms.exitFormWindow : 
-            _forms.exitFormLevel.bind(null, '#'+level+'-form', level, true, onExit);
-    }
+}
+function getSubmitEvent(entity, level) {
+    return _forms.submitForm.bind(null, '#'+level+'-form', level, entity);
+}
+function getCancelFunc(entity, level) {
+    const onExit = fP.forms[level] ? fP.forms[level].onFormClose : Function.prototype;
+    return level === 'top' ? _forms.exitFormWindow : 
+        _forms.exitFormLevel.bind(null, level, true, onExit);
 }
 /** Returns a (submit or cancel) button for the form level. */
 function buildFormButton(action, level, val) {

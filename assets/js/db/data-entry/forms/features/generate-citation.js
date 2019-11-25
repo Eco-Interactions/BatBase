@@ -8,8 +8,6 @@
  *     rebuildCitationText          db_sync
  */
 import * as _u from '../../../util.js';
-import { getFormValueData, getSelectedVals } from '../validation/get-form-data.js';
-import { getFormLevelParams } from '../../db-forms.js';
 import * as _forms from '../forms-main.js';
 
 const _mmry = _forms.memory;
@@ -21,7 +19,8 @@ const _mmry = _forms.memory;
 export function buildCitationText(fLvl) {  
     const pubData = _mmry('getFormProp', ['rcrds', fLvl]);  
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
-    return getFormValueData('citation', null, null).then(generateCitText); 
+    return _forms.getData('citation', null, null)
+        .then(generateCitText); 
 
     function generateCitText(formVals) {                                        console.log('generateCitText. formVals = %O', formVals);
         const builder = { 'Article': articleCit, 'Book': bookCit, 
@@ -119,7 +118,7 @@ export function buildCitationText(fLvl) {
             return 'pp. ' + _u.stripString(formVals.pages);
         }
         function getFormAuthors(eds) { 
-            const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
+            const auths = _forms.util('getSelectedVals', [$('#Authors-sel-cntnr')[0]]);          //console.log('auths = %O', auths);
             if (!Object.keys(auths).length) { return false; }
             return getFormattedAuthorNames(auths, eds);
         }

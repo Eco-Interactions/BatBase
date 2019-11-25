@@ -33,7 +33,7 @@ const _mmry = _forms.memory;
  * select elem 'parent' of the sub-form. 
  * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
  */
-export function initSubForm(fLvl, fClasses, fVals, selId) {                     console.log('       /initSubForm called. args = %O', arguments)
+export function initSubForm(fLvl, fClasses, fVals, selId) {                     //console.log('       /initSubForm called. args = %O', arguments)
     fP = _mmry('getAllFormMemory');
     const formEntity = fP.forms[fLvl].entity;  
     return buildFormRows(formEntity, fVals, fLvl)
@@ -159,7 +159,7 @@ function getRequiredFields(cfg) {
 }
 /* ===================== BUILD FORM FIELD ROW =============================== */
 /** @return {ary} Rows for each field in the entity field obj. */
-function buildRows(fieldObj, entity, fVals, fLvl) {                             console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
+function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
     return Promise.all(fieldObj.order.map(field => {
         return Array.isArray(field) ? 
             buildMultiFieldRow(field) : buildSingleFieldRow(field);
@@ -182,7 +182,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
 /**
  * @return {div} Form field row with required-state and value (if passed) set.  
  */
-function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     return buildFieldInput(fieldsObj.fields[field], entity, field, fLvl)
         .then(buildFieldRow);
 
@@ -217,9 +217,9 @@ function storeFieldValue(elem, fieldName, fLvl, value) {
     _mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
-function storeMultiSelectValue(fLvl, cnt, field, e) {                           console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
+function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === 'create') { return; }
-    let fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                   console.log('fieldObj = %O', fieldObj);                
+    let fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                   //console.log('fieldObj = %O', fieldObj);                
     if (!fieldObj.val) { fieldObj.val = {}; }
     fieldObj.val[cnt] = e.target.value || null;
     _mmry('setFormFieldConfg', [fLvl, field, fieldObj]);
@@ -288,7 +288,7 @@ export function buildLongTextArea(entity, field, fLvl) {
  * the select's fieldName to the subForm config's 'selElem' array to later 
  * init the 'selectize' combobox. 
  */
-function buildSelectCombo(entity, field, fLvl, cnt) {                           console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
+function buildSelectCombo(entity, field, fLvl, cnt) {                           //console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
     return getSelectOpts(field)
         .then(finishSelectBuild);
 
@@ -354,7 +354,7 @@ export function buildTagField(entity, field, fLvl) {
 }
 /* ---------- Option Builders --------------------------------------------*/
 /** Returns and array of options for the passed field type. */
-function getSelectOpts(field) {                                                 console.log("getSelectOpts. for [%s]", field);
+function getSelectOpts(field) {                                                 //console.log("getSelectOpts. for [%s]", field);
     const optMap = {
         'Authors': [ getSrcOpts, 'authSrcs'],
         'CitationType': [ getCitTypeOpts, 'citTypeNames'],
@@ -426,7 +426,7 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        const pubRcrd = _mmry('getFormProp', ['rcrds', fLvl]).pub; console.log('rcrds = %O', pubRcrd)
+        const pubRcrd = _mmry('getFormProp', ['rcrds', fLvl]).pub; 
         return opts[pubRcrd.publicationType.displayName];
     }
 } /* End getCitTypeOpts */
@@ -465,7 +465,7 @@ export function getLocationOpts() {
  * Each element is built, nested, and returned as a completed row. 
  * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
  */
-export function buildFormRow(field, input, fLvl, isReq, rowClss) {                     //console.log('building form row for [%s], req? [%s]', field, isReq);
+export function buildFormRow(field, input, fLvl, isReq, rowClss) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
     const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]); 
     const fieldCntnr = buildFieldContainer(input, field, fLvl, isReq);   
@@ -569,7 +569,7 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)
-    const reqElems = _mmry('getFormProp', ['reqElems', fLvl]);          console.log('reqElems = %O', reqElems);
+    const reqElems = _mmry('getFormProp', ['reqElems', fLvl]);          
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */

@@ -60,9 +60,9 @@ export function exitSuccessMsg() {
  * and contextually enables to parent form's submit button. Calls the exit 
  * handler stored in the form's params object.
  */
-export function exitForm(formId, fLvl, focus, onExit, data) {                   //console.log("               --exitForm id = %s, fLvl = %s, onFormClose = %O", formId, fLvl, fP.forms[fLvl].onFormClose);      
-    const exitFunc = onExit || _mmry('getFormProp', ['onFormClose']);
-    $(formId).remove();  
+export function exitForm(fLvl, focus, onExit, data) {                           //console.log("               --exitForm fLvl = %s, onFormClose = %O", fLvl, fP.forms[fLvl].onFormClose);      
+    const exitFunc = onExit || _mmry('getFormProp', ['onFormClose', fLvl]);
+    $('#'+fLvl+'-form').remove();  
     _cmbx.resetFormCombobox(fLvl, focus);
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
     if (exitFunc) { exitFunc(data); }
@@ -98,26 +98,7 @@ function refocusAndShowUpdates() {                                              
 function getCurFocus() {
     return _mmry('getMemoryProp', ['curFocus']);
 }
-/*--------------------- After Sub-Entity Created -----------------------------*/
-/**
- * Exits the successfully submitted form @exitForm. Adds and selects the new 
- * entity in the form's parent elem @addAndSelectEntity.
- */
-function exitFormAndSelectNewEntity(data) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
-    const fLvl = _mmry('getMemoryProp', ['ajaxFormLvl']);  
-    const formParent = _mmry('getFormParentId', [fLvl]);         
-    exitForm('#'+fLvl+'-form', fLvl); 
-    if (formParent) { addAndSelectEntity(data, formParent); 
-    } else { _mmry('clearMemory'); }
-}
-/** Adds and option for the new entity to the form's parent elem, and selects it. */
-function addAndSelectEntity(data, formParent) {
-    const selApi = $(formParent)[0].selectize;        
-    selApi.addOption({ 
-        'value': data.coreEntity.id, 'text': data.coreEntity.displayName 
-    });
-    selApi.addItem(data.coreEntity.id);
-}
+
 /** -------------- sort! --------------- */
 export function setToggleFieldsEvent(elem, entity, fLvl) {
     $(elem).click(toggleShowAllFields.bind(elem, entity, fLvl));
@@ -197,7 +178,7 @@ export function fieldIsDisplayed(field, fLvl) {
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
-    const parentLvl = _forms.getNextFormLevel('parent', fLvl);
+    const parentLvl = _forms.getNextFormLevel('parent', fLvl);  console.log('parentLvl = ', parentLvl);
     if (_elems.ifAllRequiredFieldsFilled(parentLvl)) {
         toggleSubmitBttn('#'+parentLvl+'-submit', true);
     }
@@ -213,7 +194,8 @@ export function enableSubmitBttn(bttnId) {
 export function disableSubmitBttn(bttnId) {                                            //console.log('disabling bttn = ', bttnId)
     $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
 }  
-function toggleWaitOverlay(waiting) {                                           //console.log("toggling wait overlay")
+/* used by form-errors & submit-main */
+export function toggleWaitOverlay(waiting) {                                           //console.log("toggling wait overlay")
     if (waiting) { appendWaitingOverlay();
     } else { $('#c-overlay').remove(); }  
 }
