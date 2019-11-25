@@ -106,14 +106,10 @@ export function clearFormMemory() {
 export function initNewDataForm() {
     forms.interaction.initCreateForm();
 }
-export function createSubEntity(ent, cnt) {
+export function createSubEntity(ent, cnt) {  
     const entity = ent == 'Citation' ? 'CitationTitle' : ent;
     const selId = cnt ? '#'+entity+'-sel'+cnt : '#'+entity+'-sel';
      $(selId)[0].selectize.createItem('create'); 
-}
-export function initEntitySubForm(entity, fLvl, fClasses, fVals, pSel) {
-    _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
-    return _ui.elems('initSubForm', [fLvl, fClasses, fVals, pSel]);
 }
 export function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {           //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     _mmry.initEntityFormMemory(_u.lcfirst(role), fLvl, '#'+role+'-sel', 'create');
@@ -200,6 +196,9 @@ export function enableCountryRegionField() {
 }
 export function submitNewLocation() {
     return _loc.addNewLocation();
+}
+export function initNewTaxonForm(level, val) {
+    return _txn.initCreateForm(level, val);
 }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */

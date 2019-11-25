@@ -41,12 +41,13 @@ export function initCreateForm(entity) {
     };
     funcs[entity]();
 }
-function setOnFormCloseHandler(entity, fLvl) {
-    const hndlrs =  {
-        'publication' : _forms.enablePubField
-    };
-    _mmry('setonFormCloseHandler', [fLvl, hndlrs[entity]]);
-}
+// function setOnFormCloseHandler(entity, fLvl) {
+//     const hndlrs =  {
+//         'publication' : _forms.enablePubField,
+//         'citation'
+//     };
+//     _mmry('setonFormCloseHandler', [fLvl, hndlrs[entity]]);
+// }
 /* ========================== PUBLICATION =================================== */
 /**
  * When a user enters a new publication into the combobox, a create-publication
@@ -64,7 +65,7 @@ function initPubForm(value) {                                                   
 }
 function initPubMemory(fLvl) {
     _mmry('initEntityFormMemory', ['publication', 'sub', '#Publication-sel', 'create']);
-    setOnFormCloseHandler('publication', fLvl);
+    _mmry('setonFormCloseHandler', [fLvl, _forms.enablePubField]);
 }
 function buildAndAppendPubForm(val, fLvl) {
     _elems('initSubForm', 
@@ -72,7 +73,7 @@ function buildAndAppendPubForm(val, fLvl) {
     .then(appendPubFormAndFinishBuild);
 }
 function appendPubFormAndFinishBuild(form) {  console.log('form = %O', form)
-    $('#CitationTitle_row').after(form); 
+    $('#CitationTitle_row')[0].parentNode.after(form); 
     _cmbx('initFormCombos', ['publication', 'sub', getPubComboEvents()]);
     $('#Title_row input').focus();
     _ui('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
@@ -123,6 +124,7 @@ function initCitForm(v) {                                                       
 function initCitFormMemory(data, fLvl) {
     addSourceDataToMemory(data, fLvl);
     _forms.initEntityFormMemory('citation', fLvl, '#CitationTitle-sel', 'create');
+    _mmry('setonFormCloseHandler', [fLvl, _forms.enablePubField]);
     addPubRcrdsToMemory(data.publication, fLvl);
     return Promise.resolve();
 }
@@ -150,7 +152,7 @@ function initCitSubForm(val, fLvl) {
         [fLvl, 'med-sub-form', {'Title': val}, '#CitationTitle-sel']); 
 }
 function appendCitFormAndFinishBuild(form, fLvl) {                              //console.log('           --appendCitFormAndFinishBuild');
-    $('#CitationTitle_row').after(form);
+    $('#CitationTitle_row')[0].parentNode.after(form);
     _cmbx('initFormCombos', ['citation', 'sub', getCitComboEvents()]);
     selectDefaultCitType(fLvl)
     .then(() => finishCitFormUiLoad(fLvl));
@@ -473,8 +475,7 @@ function initPublisherForm (value) {                                            
     if ($('#'+fLvl+'-form').length !== 0) { 
         return _errs('openSubFormErr', ['Publisher', null, fLvl]); 
     }
-    _forms.initEntitySubForm('publisher', fLvl, 'sml-sub-form', {'DisplayName': val}, 
-        '#Publisher-sel')
+    initEntitySubForm('publisher', fLvl, {'DisplayName': val}, '#Publisher-sel')
     .then(appendPublFormAndFinishBuild);
 
     function appendPublFormAndFinishBuild(form) {
@@ -589,15 +590,14 @@ function initEdForm(selCnt, val) {                                              
  * form and the form init will be canceled.
  */
 function handleNewAuthForm(authCnt, value, authType) {  
-    const parentSelId = '#'+authType+'-sel'+authCnt; 
+    const pId = '#'+authType+'-sel'+authCnt; 
     const fLvl = 'sub2';
     if ($('#'+fLvl+'-form').length !== 0) { 
-        return _errs('openSubFormErr', [authType, parentSelId, fLvl]); 
+        return _errs('openSubFormErr', [authType, pId, fLvl]); 
     }
     const val = value === 'create' ? '' : value;
-    const singular = authType.slice(0, -1);
-    _forms.initEntitySubForm( 
-        _u('lcfirst', [singular]), fLvl, 'sml-sub-form', {'LastName': val}, parentSelId)
+    const singular = _u('lcfirst', [authType.slice(0, -1)]);
+    initEntitySubForm(singular, fLvl, {'LastName': val}, pId)
     .then(appendAuthFormAndFinishBuild);
 
     function appendAuthFormAndFinishBuild(form) {        
@@ -612,7 +612,10 @@ function handleNewAuthForm(authCnt, value, authType) {
             ['#'+fLvl+'-submit', _elems('ifAllRequiredFieldsFilled', [fLvl])]);
     }
 }
-
+function initEntitySubForm(entity, fLvl, fVals, pSel) {
+    _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
+    return _ui.elems('initSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
+}
 /** ======================== UI HELPERS ===================================== */
 export function finishSourceToggleAllFields(entity, fVals, fLvl) {
     if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType) 
