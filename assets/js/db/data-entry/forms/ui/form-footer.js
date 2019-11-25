@@ -41,7 +41,7 @@ function buildAddFieldsCheckbox(entity, level) {                                
     return cntnr;
 }
 function ifEntityHasOptionalFields(entity) {
-    return _forms.confg('getFormConfg', [entity]).order.opt === false;
+    return _forms.confg('getFormConfg', [entity]).order.opt !== false;
 }
 function getCheckbox(level, entity) {
     const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };

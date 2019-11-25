@@ -49,16 +49,19 @@ function getInteractionEvents() {
 }
 function getTaxonEvents() {
     return {
-        'Species': { change: onLevelSelection, add: create('Species') },
-        'Genus': { change: onLevelSelection, add: create('Genus') },
-        'Family': { change: onLevelSelection, add: create('Family') },
-        'Order': { change: onLevelSelection, add: create('Order') },
-        'Class': { change: onLevelSelection, add: create('Class') },
+        'Species': { change: onLevelSelection, add: createTaxon('Species') },
+        'Genus': { change: onLevelSelection, add: createTaxon('Genus') },
+        'Family': { change: onLevelSelection, add: createTaxon('Family') },
+        'Order': { change: onLevelSelection, add: createTaxon('Order') },
+        'Class': { change: onLevelSelection, add: createTaxon('Class') },
         'Realm': { change: onRealmSelection }
     };
 }
 function create(entity) {
     return _forms.createSubEntity.bind(null, entity);
+}
+function createTaxon(level) {
+    return _forms.initNewTaxonForm.bind(null, level);
 }
 /** ==================== INIT FORM FIELDS =================================== */
 /** Builds and returns all interaction-form elements. */
@@ -298,10 +301,6 @@ export function finishTaxonSelectBuild(role) {                                  
 function ifSelectingTaxonInForm(role) {
     return $('#'+role+'-sel').data('reset') || $('#'+role+'-sel').val();
 }
-export function enableTaxonLvls(disable) {
-    const enable = disable == undefined ? true : false;
-    $.each($('#sub-form select'), (i, sel) => _cmbx('enableCombobox', ['#'+sel.id, enable]));
-}
 
 function setTaxonParams(role, realmName, id) {                                  //console.log('setTaxonParams. args = %O', arguments)
     const tPs = fP.forms.taxonPs;
@@ -420,10 +419,10 @@ function isSelectedTaxon(resetLvl, elem) {
     if (resetLvl && ifLevelChildOfResetLevel(resetLvl, elem)) { return; }
     return $(elem).val(); 
 }  
-function ifLevelChildOfResetLevel() {
+function ifLevelChildOfResetLevel(resetLvl, elem) {
     const allLevels = fP.forms.taxonPs.lvls;
     const level = elem.id.split('-sel')[0];
-    return allLevels.indexOf(level) > allLevels.indexOf(level);
+    return allLevels.indexOf(level) > allLevels.indexOf(resetLvl);
 }
 function ifIsLevelComboElem(elem) {
     return elem.id.includes('-sel') && !elem.id.includes('Realm');
@@ -441,7 +440,7 @@ function onLevelSelection(val) {                                                
     repopulateCombosWithRelatedTaxa(val);
     _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);             
 }
-function openLevelCreateForm(selElem) {
+function openLevelCreateForm(selElem) { console.log('openLevelCreateForm')
     _forms.createSubEntity(selElem.id.split('-sel')[0]);
 }
 function syncTaxonCombos(elem) {                                                
