@@ -63,16 +63,25 @@ function create(entity) {
 /** Builds and returns all interaction-form elements. */
 export function getInteractionFormFields(params) {                                      
     fP = params;                                                                console.log('       --buildIntFormFields. fP = %O', fP);
-    const builders = [ buildPubFieldRow, buildCitFieldRow, buildCntryRegFieldRow,
-        buildLocFieldRow, initSubjField, initObjField, buildIntTypeField,
-        buildIntTagField, buildIntNoteField ];
-    return Promise.all([...builders.map(buildField)]);
+    return buildFormRows('interaction', {}, 'top');
+    // const builders = [ 
+    //     [ buildPubFieldRow, buildCitFieldRow ], 
+    //     [ buildCntryRegFieldRow, buildLocFieldRow ], 
+    //     [ initSubjField, initObjField ], 
+    //     [ buildIntTypeField, buildIntTagField ], 
+    //     buildIntNoteField ];
+    // return Promise.all([...builders.map(buildField)]);
 }
 function buildField(builder) { 
-    return Promise.resolve(builder()).then(field => {
+    return Promise.resolve(buildIntFieldRow);
+
+        builder()).then(field => {
         ifSelectElemAddToComboboxInitAry(field); 
         return field;
     });                                                
+}
+function buildIntFieldRow(builder) {
+    // body...
 }
 function ifSelectElemAddToComboboxInitAry(field) {
     const fieldType = field.children[1].children[1].nodeName; 
@@ -115,7 +124,7 @@ function onPubClear() {
     _panel('clearDetailPanel', ['pub']);
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
-function enablePubField() {
+export function enablePubField() {
     _cmbx('enableCombobox', ['#Publication-sel']);
     fillCitationField($('#Publication-sel').val());
 }
@@ -489,7 +498,6 @@ function getSelectedTaxonOption() {
 }
 /** Finds the most specific level with a selection and returns that taxon record. */
 export function getSelectedTaxon(aboveLvl) {
-    // fP = fP || _mmry('getAllFormMemory');
     const selElems = $('#sub-form .selectized').toArray();  
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
     const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
@@ -707,7 +715,6 @@ function finishInteractionFormBuild() {                                         
     _mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
 }
 function modifyFormDisplay() {
-    //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     $('.all-fields-cntnr').hide();

@@ -29,6 +29,7 @@ export function getFormValueData(entity, fLvl, submitting) {
     /** Get's the value from the form elem and set it into formVals. */
     function getInputData(elem) {                                           
         if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
+        if (elem.className.includes('cntnr-row')) { return getMultiFieldRowData(elem); }
         const fieldName = _u.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
         const input = elem.children[1].children[1];                             //console.log("---------[%s] = %O", fieldName, input);
         formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
@@ -43,6 +44,9 @@ export function getFormValueData(entity, fLvl, submitting) {
                 input.value.trim() || null; 
             return Number.isInteger(val) ? parseInt(val) : val;                                         
         }
+    }
+    function getMultiFieldRowData(cntnr) {
+        cntnr.children.forEach(fieldElem => getInputData(fieldElem));
     }
     /** Edge case input type values are processed via their type handlers. */
     function getInputVals(fieldName, input, type) {
