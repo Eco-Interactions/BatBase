@@ -189,6 +189,9 @@ export function onSrcToggleFields() {
 export function buildCitationText(fLvl) {
     return require('./features/generate-citation.js').buildCitationText(fLvl);
 }
+export function enablePubField() {
+    return _int.enablePubField();
+}
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {

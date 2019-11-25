@@ -35,7 +35,7 @@ const _mmry = _forms.memory;
  */
 export function initSubForm(fLvl, fClasses, fVals, selId) {                     console.log('       /initSubForm called. args = %O', arguments)
     fP = _mmry('getAllFormMemory');
-    const formEntity = fP.forms[fLvl].entity;  console.log('formEntity = ', formEntity);  
+    const formEntity = fP.forms[fLvl].entity;  
     return buildFormRows(formEntity, fVals, fLvl)
         .then(buildFormContainer)
 
@@ -49,7 +49,7 @@ export function initSubForm(fLvl, fClasses, fVals, selId) {                     
         return subFormContainer;
     }
     function buildSubFormCntnr() {
-        const attr = {id: fLvl+'-form', class: fClasses + ' flex-wrap'};
+        const attr = {id: fLvl+'-form', class: fClasses };        
         return _u('buildElem', ['div', attr]);
     }
     function buildFormHdr() {
@@ -73,7 +73,7 @@ function setFormParams(params) {
     }
 }
 function returnFinishedRows(entity, params, rows) {
-    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap'};
+    const attr = { id: entity+'_Rows', class: 'flex-row'};
     const rowCntnr = _u('buildElem', ['div', attr]);
     $(rowCntnr).append(rows);
     if (params) { fP = null; }
@@ -87,8 +87,7 @@ function returnFinishedRows(entity, params, rows) {
 export function getFormFieldRows(entity, fVals, fLvl, params) {
     fP = params ? params : _mmry('getAllFormMemory');
     const fObj = getFieldTypeObj(_u('lcfirst', [entity]), fLvl);
-    return buildRows(fObj, entity, fVals, fLvl)
-        .then(orderRows.bind(null, fObj.order));
+    return buildRows(fObj, entity, fVals, fLvl);
 }
 /* ------------ BUILD FORM FIELDS' TYPE OBJ ------------- */
 /**
@@ -161,11 +160,24 @@ function getRequiredFields(cfg) {
 /* ===================== BUILD FORM FIELD ROW =============================== */
 /** @return {ary} Rows for each field in the entity field obj. */
 function buildRows(fieldObj, entity, fVals, fLvl) {                             console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
-    const rows = [];
-    for (let field in fieldObj.fields) {                                        //console.log("  field = ", field);
-        rows.push(buildRow(field, fieldObj, entity, fVals, fLvl));
-    }  
-    return Promise.all(rows);
+    return Promise.all(fieldObj.order.map(field => {
+        return Array.isArray(field) ? 
+            buildMultiFieldRow(field) : buildSingleFieldRow(field);
+    }));
+    
+    function buildMultiFieldRow(fields) {                                       //console.log('buildMultiFieldRow = %O', fields);
+        const cntnr = _u('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
+        const rows = fields.map(buildAndAppendField);
+        return Promise.all(rows).then(() => cntnr);
+
+        function buildAndAppendField(field) {
+            return buildSingleFieldRow(field)
+                .then(row => $(cntnr).append(row));
+        }
+    }
+    function buildSingleFieldRow(field) {                                       //console.log('buildSingleFieldRow [%s]', field);  
+        return buildRow(field, fieldObj, entity, fVals, fLvl);
+    }
 }
 /**
  * @return {div} Form field row with required-state and value (if passed) set.  
@@ -258,16 +270,6 @@ function getFieldClass(fLvl, fieldType) {
 function isFieldRequried(field, fLvl, reqFields) {                              //console.log('isFieldRequried. fLvl = [%s], fP = %O', fLvl, fP);
     return reqFields.indexOf(field) !== -1;
 }
-/** Reorders the rows into the order set in the form config obj. */
-function orderRows(order, rows) {                                               //console.log("    ordering rows = %O, order = %O", rows, order);
-    rows.sort((a, b) => {
-        let x = order.indexOf(a.id.split("_row")[0]);  
-        let y = order.indexOf(b.id.split("_row")[0]); 
-        return x < y ? -1 : x > y ? 1 : 0;
-    });
-    return rows;
-}
-
 /*----------------------- Form Input Builders ----------------------------*/
 function buildTextInput(entity, field, fLvl) { 
     const attr = { 'type': 'text', class: getFieldClass(fLvl) };
@@ -286,10 +288,11 @@ export function buildLongTextArea(entity, field, fLvl) {
  * the select's fieldName to the subForm config's 'selElem' array to later 
  * init the 'selectize' combobox. 
  */
-function buildSelectCombo(entity, field, fLvl, cnt) {                           //console.log("buildSelectCombo [%s] field %s, fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
-    return getSelectOpts(field).then(finishComboBuild);
+function buildSelectCombo(entity, field, fLvl, cnt) {                           console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
+    return getSelectOpts(field)
+        .then(finishSelectBuild);
 
-    function finishComboBuild(opts) {
+    function finishSelectBuild(opts) {  
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const attr = { id: fieldId , class: getFieldClass(fLvl)};
         _mmry('addComboToMemory', [fLvl, field]);
@@ -350,28 +353,32 @@ export function buildTagField(entity, field, fLvl) {
 }
 /* ---------- Option Builders --------------------------------------------*/
 /** Returns and array of options for the passed field type. */
-function getSelectOpts(field) {                                                 //console.log("getSelectOpts. for %s", field);
+function getSelectOpts(field) {                                                 console.log("getSelectOpts. for [%s]", field);
     const optMap = {
-        "Authors": [ getSrcOpts, 'authSrcs'],
-        "CitationType": [ getCitTypeOpts, 'citTypeNames'],
-        "Class": [ getTaxonOpts, 'Class' ],
-        "Country": [ getStoredOpts, 'countryNames' ],
-        "Editors": [ getSrcOpts, 'authSrcs'],
-        "Family": [ getTaxonOpts, 'Family' ],
-        "Genus": [ getTaxonOpts, 'Genus' ],
-        "HabitatType": [ getStoredOpts, 'habTypeNames'],
-        "InteractionTags": [ getTagOpts, 'interaction' ],
-        "InteractionType": [ getStoredOpts, 'intTypeNames' ],
-        "Order": [ getTaxonOpts, 'Order' ],
-        "PublicationType": [ getStoredOpts, 'pubTypeNames'],
-        "Publisher": [ getSrcOpts, 'publSrcs'],
-        "Realm": [ getRealmOpts, null ],
-        "Species": [ getTaxonOpts, 'Species' ],
+        'Authors': [ getSrcOpts, 'authSrcs'],
+        'CitationType': [ getCitTypeOpts, 'citTypeNames'],
+        'Class': [ getTaxonOpts, 'Class' ],
+        'Country': [ getStoredOpts, 'countryNames' ],
+        'Country-Region': [ getCntryRegOpts, null ],
+        'Citation': [() => []]
+        'Editors': [ getSrcOpts, 'authSrcs'],
+        'Family': [ getTaxonOpts, 'Family' ],
+        'Genus': [ getTaxonOpts, 'Genus' ],
+        'HabitatType': [ getStoredOpts, 'habTypeNames'],
+        'InteractionTags': [ getTagOpts, 'interaction' ],
+        'InteractionType': [ getStoredOpts, 'intTypeNames' ],
+        'Location': [ getLocationOpts, null ]
+        'Order': [ getTaxonOpts, 'Order' ],
+        'Publication': [ getSrcOpts, 'pubSrcs'],
+        'PublicationType': [ getStoredOpts, 'pubTypeNames'],
+        'Publisher': [ getSrcOpts, 'publSrcs'],
+        'Realm': [ getRealmOpts, null ],
+        'Species': [ getTaxonOpts, 'Species' ],
         // "Tags": [ getTagOpts, 'source' ],
     };
     const getOpts = optMap[field][0];
     const fieldKey = optMap[field][1];
-    return getOpts(fieldKey, field);
+    return Promise.resolve(getOpts(fieldKey, field));
 }
 function getStoredOpts(prop) {
     return _u('getOptsFromStoredData', [prop]);
@@ -434,6 +441,26 @@ export function getTaxonOpts(level, field, r) {
 function getRealmOpts() {
     return _u('getOptsFromStoredData', ['objectRealmNames']);  
 }
+/** Returns options for each country and region. */ 
+function getCntryRegOpts() {
+    const proms = ['countryNames', 'regionNames'].map(k => _u('getOptsFromStoredData', [k]));
+    return Promise.all(proms).then(data => data[0].concat(data[1]));
+}
+/** Returns an array of option objects with all unique locations.  */
+export function getLocationOpts() {
+    const rcrds = fP.records.location;
+    let opts = Object.keys(rcrds).map(buildLocOpt);
+    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    opts.unshift({ value: 'create', text: 'Add a new Location...'});
+    return opts;
+    
+    function buildLocOpt(id) {
+        return { value: id, text: rcrds[id].displayName };
+    }
+}
+
+
+
 /**
  * Each element is built, nested, and returned as a completed row. 
  * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
@@ -514,7 +541,6 @@ function handleRequiredField(label, input, fLvl) {
     $(input).change(checkRequiredFields);
     $(input).data('fLvl', fLvl);
     _mmry('addRequiredFieldInput', [fLvl, input]);
-    // db_forms.addRequiredFieldInputToMemory(fLvl, input);
 }
 /**
  * On a required field's change event, the submit button for the element's form 
@@ -609,7 +635,7 @@ function buildFormElem() {
     return form;
 }
 function buildEntityFieldContainer(entity, fields) {
-    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
+    const attr = { id: entity+'_Rows', class: 'flex-row' };
     const div = _u('buildElem', ['div', attr]);
     $(div).append(fields); 
     return div;

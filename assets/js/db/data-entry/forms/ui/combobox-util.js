@@ -93,7 +93,7 @@ export function setSelVal(id, val, silent) {                                    
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, comboEvents) {                     console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
-    const elems = _mmry('getFormProp', ['selElems', fLvl]);
+    const elems = _mmry('getFormProp', ['selElems', fLvl]);  
     elems.forEach(selectizeElem);
     _mmry('setFormProp', [fLvl, 'selElems', []]);
 
