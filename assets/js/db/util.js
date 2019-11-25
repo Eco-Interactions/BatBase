@@ -245,7 +245,8 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     }
 }
 function logAjaxData(dataPkg, args) {
-    if (['dev', 'test'].indexOf($('body').data('env') != -1)) { console.log("           --Sending Ajax data =%O arguments = %O", dataPkg, args);
+    if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
+        console.log("           --Sending Ajax data =%O arguments = %O", dataPkg, args);
     } else { console.log("          --Sending Ajax data =%O", dataPkg); }
 }
 export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();

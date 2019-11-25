@@ -340,7 +340,7 @@ function getTaxonExitButton(role) {
 }
 /** Exits sub form and restores any previous taxon selection. */
 function exitTaxonSelectForm(role) {
-    _forms.ui('exitForm', ['#sub-form', 'sub', false, enableTaxonCombos]);
+    _forms.ui('exitForm', ['sub', false, enableTaxonCombos]);
     const prevTaxonId = $('#'+role+'-sel').data('selTaxon');
     if (!prevTaxonId) { return; }
     resetTaxonCombobox(role, prevTaxonId);
@@ -348,7 +348,7 @@ function exitTaxonSelectForm(role) {
 function resetTaxonCombobox(role, prevTaxonId) {
     const opt = { value: prevTaxonId, text: getTaxonym(prevTaxonId) };
     _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
-    _cmbx('setSelVal', ['#'+role+'-sel', prevTaxon.val]);
+    _cmbx('setSelVal', ['#'+role+'-sel', prevTaxonId]);
 }
 function getTaxonym(id) {
     return _forms.getTaxonDisplayName(fP.records.taxon[id]);

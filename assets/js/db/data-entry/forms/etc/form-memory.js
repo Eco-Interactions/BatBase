@@ -144,7 +144,7 @@ export function getMemoryProp(prop) {
 export function getFormMemory(fLvl) {
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl] : false;
 }
-export function getFormProp(prop, fLvl) { //console.log('args = %O, memory = %O', arguments, formMemory); console.trace();
+export function getFormProp(prop, fLvl) {                                       //console.log('args = %O, memory = %O', arguments, formMemory); 
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl][prop] : false;
 }
 export function getFormEntity(fLvl) { 
@@ -180,6 +180,12 @@ export function getRcrd(entity, id) {
     return _forms._util('snapshot', [formMemory.records[entity][id]]); 
 }
 /* ---------------------------- Setters ------------------------------------- */
+export function addEntityRecords(entity, rcrds) {
+    formMemory.records[entity] = rcrds;
+}
+export function addFormSubmitProps(propObj) {
+    formMemory.submit = propObj;
+}
 export function addRequiredFieldInput(fLvl, input) {  
     formMemory.forms[fLvl].reqElems.push(input);
 }
@@ -207,6 +213,6 @@ export function setFormFieldValueMemory(fLvl, field, val) {
 export function setFormEntityType(fLvl, type) {
     formMemory.forms[fLvl].entityType = type;
 }
-export function setonFormCloseHandler(fLvl, hndlr) {
+export function setonFormCloseHandler(fLvl, hndlr) { //fix capitalization
     formMemory.forms[fLvl].onFormClose = hndlr;
 }

@@ -68,7 +68,6 @@ function finishEditFormBuild(entity) {
     if (entity in hndlrs) { hndlrs[entity]()  
     } else {
         _cmbx('initFormCombos', [entity, 'top']); 
-        //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
         $('.all-fields-cntnr').hide();
     }
 }
@@ -285,7 +284,6 @@ export function getTaxonEditFields(entity, id) {
         .then(() => buildTaxonEditFields(taxon));
 }
 function finishTaxonEditFormBuild() {
-    //$('#top-cancel').off('click').click(_forms.exitFormPopup);
     $('#top-submit').off('click').click(submitTaxonEdit);
     initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
     $('.all-fields-cntnr').hide();
@@ -534,12 +532,11 @@ function submitTaxonEdit() {
         level:       $('#Taxon_row select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                                          //console.log("taxon vals = %O", vals);
-    db_forms.buildFormDataAndSubmit('taxon', 'top', vals);
+    _forms.submit('buildFormDataAndSubmit', ['taxon', 'top', vals]);
 }
 /*-------- Edit Citation Methods ----------*/
 function finishCitEditFormBuild() {
     _cmbx('initFormCombos', ['citaion', 'top']); 
-    //$('#top-cancel').unbind('click').click(_forms.exitFormPopup);
     $('.all-fields-cntnr').hide();
     _forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
