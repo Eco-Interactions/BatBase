@@ -141,7 +141,7 @@ export function getMemoryProp(prop) {
 export function getFormMemory(fLvl) {
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl] : false;
 }
-export function getFormProp(prop, fLvl) { //gitconsole.log('args = %O, memory = %O', arguments, formMemory); console.trace();
+export function getFormProp(prop, fLvl) { //console.log('args = %O, memory = %O', arguments, formMemory); console.trace();
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl][prop] : false;
 }
 export function getFormEntity(fLvl) { 

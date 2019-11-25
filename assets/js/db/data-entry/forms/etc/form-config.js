@@ -155,11 +155,12 @@ export function getFormConfg(entity) {                                          
         },                                  
         'interaction': {
             'add': {},  
-            'required': ['InteractionType'],
+            'required': ['Publication', 'CitationTitle', 'Country-Region', 'Location',
+                'Subject', 'Object', 'InteractionType'],
             'suggested': ['InteractionTags', 'Note'],
             'optional': [],
             'order': {
-                'sug': [['Publication', 'Citation'], ['Country-Region', 'Location'],
+                'sug': [['Publication', 'CitationTitle'], ['Country-Region', 'Location'],
                     ['Subject', 'Object'], ['InteractionType','InteractionTags'], 
                     'Note'],
                 'opt': false },
@@ -296,7 +297,7 @@ export function getCoreFieldDefs(entity) {
             'Elevation': 'text', 'ElevationMax': 'text', 'Longitude': 'text', 
             'Latitude': 'text', 'HabitatType': 'select', 'Country': 'select', 
         }, 
-        'interaction': { 'Publication': 'select', 'Citation': 'select', 
+        'interaction': { 'Publication': 'select', 'CitationTitle': 'select', 
             'Country-Region': 'select', 'Location': 'select',
             'Subject': 'select', 'Object': 'select', 'InteractionType': 'select', 
             'InteractionTags': 'tags', 'Note': 'fullTextArea'

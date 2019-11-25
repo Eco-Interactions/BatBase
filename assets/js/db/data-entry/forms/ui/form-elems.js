@@ -73,7 +73,7 @@ function setFormParams(params) {
     }
 }
 function returnFinishedRows(entity, params, rows) {
-    const attr = { id: entity+'_Rows', class: 'flex-row'};
+    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap'};
     const rowCntnr = _u('buildElem', ['div', attr]);
     $(rowCntnr).append(rows);
     if (params) { fP = null; }
@@ -167,12 +167,12 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
     
     function buildMultiFieldRow(fields) {                                       //console.log('buildMultiFieldRow = %O', fields);
         const cntnr = _u('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
-        const rows = fields.map(buildAndAppendField);
-        return Promise.all(rows).then(() => cntnr);
+        const rows = fields.reduce(buildAndAppendField, Promise.resolve());
+        return rows.then(() => cntnr);
 
-        function buildAndAppendField(field) {
-            return buildSingleFieldRow(field)
-                .then(row => $(cntnr).append(row));
+        function buildAndAppendField(p, field) {
+            return p.then(() => buildSingleFieldRow(field)
+                .then(row => $(cntnr).append(row)));
         }
     }
     function buildSingleFieldRow(field) {                                       //console.log('buildSingleFieldRow [%s]', field);  
@@ -348,6 +348,7 @@ export function buildTagField(entity, field, fLvl) {
         const attr = { id: field + '-sel', class: getFieldClass(fLvl)};
         const tagSel = _u('buildSelectElem', [opts, attr]);
         $(tagSel).data('inputType', 'tags');
+        _mmry('addComboToMemory', [fLvl, field]);
         return tagSel;
     }
 }
@@ -360,20 +361,22 @@ function getSelectOpts(field) {                                                 
         'Class': [ getTaxonOpts, 'Class' ],
         'Country': [ getStoredOpts, 'countryNames' ],
         'Country-Region': [ getCntryRegOpts, null ],
-        'Citation': [() => []]
+        'CitationTitle': [() => []],
         'Editors': [ getSrcOpts, 'authSrcs'],
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
         'InteractionTags': [ getTagOpts, 'interaction' ],
         'InteractionType': [ getStoredOpts, 'intTypeNames' ],
-        'Location': [ getLocationOpts, null ]
+        'Location': [ getLocationOpts, null ],
         'Order': [ getTaxonOpts, 'Order' ],
+        'Object': [() => []],
         'Publication': [ getSrcOpts, 'pubSrcs'],
         'PublicationType': [ getStoredOpts, 'pubTypeNames'],
         'Publisher': [ getSrcOpts, 'publSrcs'],
         'Realm': [ getRealmOpts, null ],
         'Species': [ getTaxonOpts, 'Species' ],
+        'Subject': [() => []]
         // "Tags": [ getTagOpts, 'source' ],
     };
     const getOpts = optMap[field][0];
@@ -458,9 +461,6 @@ export function getLocationOpts() {
         return { value: id, text: rcrds[id].displayName };
     }
 }
-
-
-
 /**
  * Each element is built, nested, and returned as a completed row. 
  * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
