@@ -12,7 +12,6 @@
  *     handleCitText            form-elems
  *     initEntitySubForm        interaction-form
  *     initEntityFormMemory     interaction-form, edit-forms
- *     setonFormCloseHandler    interaction-form
  *     
  */
 import * as _u from '../../util.js';
@@ -26,6 +25,7 @@ import * as _loc from './entity/location-form.js';
 import * as _src from './entity/source-forms.js';
 import * as _txn from './entity/taxon-form.js';
 import * as _ui from './ui/form-ui-main.js';
+import * as db_map from '../../db-map/map-main.js';
 
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
@@ -34,6 +34,9 @@ const forms = {
 
 export function loadDataTableAfterFormClose(focus) {
     db_page.loadDataTable(focus);
+}
+export function map(funcName, params = []) {
+    return db_map[funcName](...params);
 }
 /** -------------------  DATABASE PAGE UTILITY ------------------------------ */
 export function _util(funcName, params = []) {
@@ -83,15 +86,15 @@ export function initFormMemory(action, entity, id) {
 export function initEntityFormMemory(entity, level, pSel, action) {
     return _mmry.initEntityFormMemory(entity, level, pSel, action)
 }
-export function setonFormCloseHandler(formField, fLvl) {
-    const hndlrs = {
-        'location': _int.enableCountryRegionField,
-        // 'object': _int.enableTaxonCombos,
-        // 'subject': _int.enableTaxonCombos,
-        'taxon': _int.enableTaxonLvls
-    };
-    _mmry.setonFormCloseHandler(fLvl, hndlrs[formField]);
-}
+// export function setonFormCloseHandler(formField, fLvl) {
+//     const hndlrs = {
+//         'location': _int.enableCountryRegionField,
+//         // 'object': _int.enableTaxonCombos,
+//         // 'subject': _int.enableTaxonCombos,
+//         'taxon': _int.enableTaxonLvls
+//     };
+//     _mmry.setonFormCloseHandler(fLvl, hndlrs[formField]);
+// }
 export function getFormMemory() {
     return _mmry.getAllFormMemory();
 }
@@ -191,6 +194,12 @@ export function buildCitationText(fLvl) {
 }
 export function enablePubField() {
     return _int.enablePubField();
+}
+export function enableCountryRegionField() {
+    return _int.enableCountryRegionField();
+}
+export function submitNewLocation() {
+    return _loc.addNewLocation();
 }
 /** --------------------------- HELPERS ------------------------------------- */
 /** Returns the 'next' form level- either the parent or child. */
