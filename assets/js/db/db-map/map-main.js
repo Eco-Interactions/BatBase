@@ -531,9 +531,9 @@ function loadCountryAndSubLocs(cntryId) {
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
-export function addVolatileMapPin(val, type, cntryId) {                         //console.log('addVolatileMapPin')
+export function addVolatileMapPin(val, type, cntryId) {                         console.log('addVolatileMapPin')
     if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
-    const latLng = getMapPinCoords();
+    const latLng = getMapPinCoords();  console.log('latLng = %O', latLng);
     if (!latLng) { return; }                                                    
     if (type === 'edit') { addEditFormMapData(latLng, val, cntryId); 
     } else { addNewLocPinAndFillCoordFields(latLng); }
@@ -557,7 +557,7 @@ function fillCoordFields(latLng) {                                              
 }
 /* ---- Get GPS Field Values or Report Field Err ---- */
 function gpsFieldsFilled() {
-    return ['Latitude', 'Longitude'].every(field => {
+    return ['Latitude', 'Longitude'].every(field => {  console.log('val = ', $(`#${field}_row input`).val())
         return $(`#${field}_row input`).val();
     });
 }
@@ -613,7 +613,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     }
     addPinToMap(latLng, marker.layer, zoomFlag);   
 }
-function removePreviousMapPin(loc) { 
+function removePreviousMapPin(loc) { console.log('removePreviousMapPin')
     if (!app.volatile.pin) { return app.volatile.loc = loc; }  
     app.map.removeLayer(app.volatile.pin);
     resetPinLoc(loc);

@@ -1,6 +1,6 @@
 import * as _u from '../util.js';
 import { showLocInDataTable } from '../db-page.js';
-import * as db_forms from '../data-entry/db-forms.js';
+import * as _forms from '../data-entry/forms/forms-main.js';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -699,7 +699,7 @@ function getNewLocText(loc, editing) {
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn', value: 'Create Location'});
-    $(bttn).click(db_forms.create('location'));
+    $(bttn).click(_forms.submitNewLocation);
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }

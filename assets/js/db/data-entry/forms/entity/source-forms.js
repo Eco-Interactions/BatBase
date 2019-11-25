@@ -59,10 +59,16 @@ function initPubForm(value) {                                                   
         return _errs('openSubFormErr', ['Publication', null, fLvl]); 
     }
     const val = value === 'create' ? '' : value;
+    initPubMemory(fLvl);
+    buildAndAppendPubForm(val, fLvl);
+}
+function initPubMemory(fLvl) {
     _mmry('initEntityFormMemory', ['publication', 'sub', '#Publication-sel', 'create']);
     setOnFormCloseHandler('publication', fLvl);
+}
+function buildAndAppendPubForm(val, fLvl) {
     _elems('initSubForm', 
-        ['sub', 'med-sub-form', {'Title': val}, '#Publication-sel']) 
+        [fLvl, 'med-sub-form', {'Title': val}, '#Publication-sel']) 
     .then(appendPubFormAndFinishBuild);
 }
 function appendPubFormAndFinishBuild(form) {  console.log('form = %O', form)
@@ -112,13 +118,12 @@ function initCitForm(v) {                                                       
     const val = v === 'create' ? '' : v;
     _u('getData', [['author', 'publication']])
     .then(data => initCitFormMemory(data, fLvl))
-    .then(() => initCitSubForm(val, fLvl))
-    .then(form => appendCitFormAndFinishBuild(form, fLvl));
+    .then(() => buildAndAppendCitForm(val, fLvl));
 }
 function initCitFormMemory(data, fLvl) {
     addSourceDataToMemory(data, fLvl);
     _forms.initEntityFormMemory('citation', fLvl, '#CitationTitle-sel', 'create');
-    addPubRcrdsToMemory(fLvl);
+    addPubRcrdsToMemory(data.publication, fLvl);
     return Promise.resolve();
 }
 function addSourceDataToMemory(data, fLvl) {
@@ -126,15 +131,19 @@ function addSourceDataToMemory(data, fLvl) {
     Object.keys(data).forEach(k => records[k] = data[k]);
     _mmry('setMemoryProp', ['records', records]);
 }
-function addPubRcrdsToMemory(fLvl) {
+function addPubRcrdsToMemory(pubRcrds, fLvl) {
     const pubSrc = getSrcRcrd($('#Publication-sel').val()); 
-    const pub = _mmry('getRcrd', ['publication', pubSrc.publication]);
+    const pub = pubRcrds[pubSrc.publication];
     _mmry('setFormProp', [fLvl, 'rcrds', { pub: pub, src: pubSrc}]);
 }
 function getSrcRcrd(pubId) {
     if (pubId) { return _mmry('getRcrd', ['source', pubId]); } //When not editing citation record.
     const rcrd = _mmry('getRcrd', ['source', fP.editing.core]);
     return _mmry('getRcrd', ['source', rcrd.parent]);
+}
+function buildAndAppendCitForm(val, fLvl) {
+    initCitSubForm(val, fLvl)
+    .then(form => appendCitFormAndFinishBuild(form, fLvl));
 }
 function initCitSubForm(val, fLvl) {
     return _elems('initSubForm', 

@@ -131,6 +131,9 @@ export function getObjectRealm() {
 export function isEditForm() {
     return formMemory.action === 'edit';
 }
+export function getEditEntityId(type) {
+    return formMemory.editing[type];
+}
 export function getAllFormMemory() {
     return formMemory;
 }
