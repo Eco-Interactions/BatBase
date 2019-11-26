@@ -1,25 +1,23 @@
 /**
- * Formats data to send to server.
+ * Formats the form data to send to server.
+ *
+ * Export default only.
  */
-import { lcfirst } from '../../../util.js';
-import * as _fCnfg from '../etc/form-config.js';
+import * as _i from '../forms-main.js';
 
-/**
- * Builds a form data object @buildFormData. Sends it to the server @submitFormData
- */
 export default function(entity, fLvl, formVals) {                        
     if (entity === 'editor') { entity = 'author'; }
-    return buildFormData(entity, formVals, fLvl);                     //console.log("formData = %O", formData);
+    return buildFormData(entity, formVals, fLvl);                               //console.log("formData = %O", formData);
 }                
 /**
  * Returns an object with the entity names' as keys for their field-val objects, 
  * which are grouped into flat data and related-entity data objects. 
  */
 function buildFormData(entity, formVals, fLvl) { 
-    var pEntity = _fCnfg.getParentEntity(entity);                                  
-    var parentFields = !pEntity || getParentFields(entity);                     //console.log("buildFormDataObj. pEntity = %s, formVals = %O, parentFields = %O", pEntity, formVals, parentFields);
-    var fieldTrans = _fCnfg.getFieldTranslations(entity); 
-    var rels = _fCnfg.getRelationshipFields(entity);
+    var pEntity = _i.confg('getParentEntity', [entity]);                                  
+    var parentFields = !pEntity || getParentFields(entity);                     //console.log("buildFormDataObj. [%s] pEntity = %s, formVals = %O, parentFields = %O", entity, pEntity, formVals, parentFields);
+    var fieldTrans = _i.confg('getFieldTranslations', [entity]); 
+    var rels = _i.confg('getRelationshipFields', [entity]);
     var data = buildFormDataObj();
 
     for (var field in formVals) { getFormFieldData(field, formVals[field]); }
@@ -101,8 +99,8 @@ function buildFormData(entity, formVals, fLvl) {
 } /* End buildFormDataObj */
 /** Returns an array of the parent entity's field names. */
 function getParentFields(entity) {
-    var parentFields = Object.keys(_fCnfg.getCoreFieldDefs(entity));
+    var parentFields = Object.keys(_i.confg('getCoreFieldDefs', [entity]));
     return  parentFields.map(function(field) {
-        return lcfirst(field.split(' ').join(''));
+        return _i.util('lcfirst', [field.split(' ').join('')]);
     });
 }

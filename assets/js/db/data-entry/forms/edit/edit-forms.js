@@ -4,19 +4,21 @@
  * Exports:             Imported by:
  *     showEntityEditForm       forms-main
  */
+import * as _i from '../forms-main.js';
+
+
 import * as _u from '../../../util.js';
 import * as _elems from '../ui/form-elems.js';
 import * as _cmbx from '../ui/combobox-util.js';
 // import * as _errs from '../validation/f-errs.js';
-import * as _forms from '../forms-main.js';
 import * as db_map from '../../../db-map/map-main.js';
 import * as _fCnfg from '../etc/form-config.js';
 import { buildFormFooter } from '../ui/form-footer.js';
 import { fillRelationalDataInPanel } from '../ui/detail-panel.js';
 
 let fP;
-const _errs = _forms.err;
-const _mmry = _forms.memory;
+const _errs = _i.err;
+const _mmry = _i.memory;
 
 /** Shows the entity's edit form in a pop-up window on the search page. */
 export function editEntity(id, entity, params) {                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
@@ -46,13 +48,13 @@ function getEditFormFields(id, entity) {
     return fieldBldr(entity, id);
 }   
 function getIntFormFields(entity, id) {
-    return _forms.getFormFields('interaction', fP);
+    return _i.getFormFields('interaction', fP);
 }
 function getSrcTypeFields(entity, id) {
     const srcRcrd = _mmry('getRcrd', ['source', id]);
     const type = _mmry('getRcrd', [entity, srcRcrd[entity]]);
     const typeId = type[entity+'Type'].id;
-    return _forms.getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
+    return _i.getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
 }
 /** Returns the passed entity's form fields. */
 function buildEditFormFields(entity, id) {
@@ -61,7 +63,7 @@ function buildEditFormFields(entity, id) {
 }
 function finishEditFormBuild(entity) {
     const hndlrs = {
-        'citation': finishCitEditFormBuild, 'interaction': _forms.callFormFunc('interaction', 'finishIntFormBuild'), 
+        'citation': finishCitEditFormBuild, 'interaction': _i.callFormFunc('interaction', 'finishIntFormBuild'), 
         'location': finishLocEditFormBuild, 'taxon': finishTaxonEditFormBuild,
     };
     if (entity in hndlrs) { hndlrs[entity]()  
@@ -87,7 +89,7 @@ function fillFormWithEntityData(entity, id) {
     addDisplayNameToForm(entity, id);
     fillEntityData(entity, id); 
     if (_elems.ifAllRequiredFieldsFilled('top')) { 
-        _forms.ui('toggleSubmitBttn', ['#top-submit', true]); 
+        _i.ui('toggleSubmitBttn', ['#top-submit', true]); 
     }
 }
 function addDisplayNameToForm(ent, id) {
@@ -147,7 +149,7 @@ function fillSrcData(entity, id, rcrd) {
         if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
         const type = getDetailTypeDataObj();
         const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
-        return _forms.loadSrcTypeFields(entity, type.id, typeElem, type.name);
+        return _i.loadSrcTypeFields(entity, type.id, typeElem, type.name);
     }
     function getDetailTypeDataObj() {
         const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
@@ -185,7 +187,7 @@ function fillFields(rcrd, fields, shwAll) {                                     
         'taxon': addTaxon
     };
     for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
-        if (!_forms.ui('fieldIsDisplayed', [field, 'top']) && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+        if (!_i.ui('fieldIsDisplayed', [field, 'top']) && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
     }  
 }
@@ -200,7 +202,7 @@ function addToFormVals(fieldId, prop, rcrd) {                                   
     vals[fieldId] = {type: 'multiSelect'};
     vals[fieldId].val = rcrd[prop]; 
     if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; }
-    _forms.selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
+    _i.selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
 }
 function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
@@ -235,7 +237,7 @@ function setTitleField(entity, srcRcrd) {                                       
     }
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) { 
-    if (entity !== 'publication' || !_forms.ui('fieldIsDisplayed', ['Publisher', 'top'])) { return; }    
+    if (entity !== 'publication' || !_i.ui('fieldIsDisplayed', ['Publisher', 'top'])) { return; }    
     _cmbx.setSelVal('#Publisher-sel', srcRcrd.parent);
 }
 function setCitationEdgeCaseFields(entity, citRcrd) {
@@ -248,7 +250,7 @@ function setCitationEdgeCaseFields(entity, citRcrd) {
 function addTaxon(fieldId, prop, rcrd) {                                        //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
     var selApi = $('#'+ fieldId + '-sel')[0].selectize;
     var taxon = fP.records.taxon[rcrd[prop]];                          
-    selApi.addOption({ value: taxon.id, text: _forms.getTaxonDisplayName(taxon) });
+    selApi.addOption({ value: taxon.id, text: _i.getTaxonDisplayName(taxon) });
     selApi.addItem(taxon.id);
 }
 function addSource(fieldId, prop, rcrd) {
@@ -259,13 +261,13 @@ function addSource(fieldId, prop, rcrd) {
 /* ---- On Form Fill Complete --- */
 function onEditFormFillComplete(id, entity) {                                       //console.log('onEditFormFillComplete. entity = ', entity);
     const map = { 
-        'citation': setSrcEditRowStyle, 'location': _forms.addMapToLocationEditForm, 
+        'citation': setSrcEditRowStyle, 'location': _i.addMapToLocationEditForm, 
         'publication': setSrcEditRowStyle };
     if (!map[entity]) { return; }
     map[entity](id);
 }
 function setSrcEditRowStyle() {
-    _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
+    _i.ui('setCoreRowStyles', ['#form-main', '.top-row']);
 }
 
 /*-------- Edit Taxon Methods ----------*/
@@ -305,7 +307,7 @@ function buildNameElem(prnt) {
 }
 function setTaxonPrntNameElem(prnt, elem, pText) {
     var div = elem || $('#txn-prnt')[0];
-    var text = pText || _forms.getTaxonDisplayName(prnt);
+    var text = pText || _i.getTaxonDisplayName(prnt);
     div.innerHTML = '<b>Taxon Parent</b>: &nbsp ' + text;
     if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
 }
@@ -402,7 +404,7 @@ function finishPrntFormBuild() {                                                
     $('#sub-cancel').off('click').click(cancelPrntEdit);
     setTaxonPrntNameElem(null, null, " ");
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-    _forms.ui('toggleSubmitBttn', ['#top-submit', false]);
+    _i.ui('toggleSubmitBttn', ['#top-submit', false]);
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectParentTaxon(prntId, realmLvl) {                                  //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
@@ -417,7 +419,7 @@ function clearAllOtherLvls() {
     });
 }
 function closePrntEdit() {                                                  
-    var prnt =  _forms.entity('getSelectedTaxon') || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
+    var prnt =  _i.entity('getSelectedTaxon') || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
     exitPrntEdit(prnt);
 }
 function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
@@ -434,7 +436,7 @@ function resetAfterEditParentClose(prnt) {
     $('#sub-form').remove();
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     setTaxonPrntNameElem(prnt);
-    _forms.ui('toggleSubmitBttn', ['#top-submit', true]);
+    _i.ui('toggleSubmitBttn', ['#top-submit', true]);
 }
 /**
  * Ensures that the new taxon-level is higher than its children, and that a 
@@ -500,7 +502,7 @@ function checkForParentLvlErrs(prnt) {
 } /* End checkForParentLvlErrs */
 function sendTxnErrRprt(errTag, field) {                                              
     _errs.reportFormFieldErr(field, errTag, 'top');
-    _forms.ui('toggleSubmitBttn', ['#top-submit', false]);
+    _i.ui('toggleSubmitBttn', ['#top-submit', false]);
     return false;
 }
 function clearLvlErrs(elemId, fLvl) {                                           //console.log('clearLvlErrs.')
@@ -531,12 +533,12 @@ function submitTaxonEdit() {
         level:       $('#Taxon_row select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                                          //console.log("taxon vals = %O", vals);
-    _forms.formatAndSubmitData('taxon', 'top', vals);
+    _i.formatAndSubmitData('taxon', 'top', vals);
 }
 /*-------- Edit Citation Methods ----------*/
 function finishCitEditFormBuild() {
     _cmbx('initFormCombos', ['citaion', 'top']); 
     $('.all-fields-cntnr').hide();
-    _forms.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
+    _i.handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
 /*-------- Edit Location Methods ----------*/

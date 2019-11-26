@@ -4,15 +4,10 @@
  *
  * 
  */
-import * as _forms from '../forms-main.js';
+import * as _i from '../forms-main.js';
 import * as _cmbx from './combobox-util.js';
 import * as _elems from './form-elems.js';
 import * as _pnl from './detail-panel.js';
-
-const _errs = _forms.err;
-const _entity = _forms.entity;
-const _mmry = _forms.memory;
-const _u = _forms._util;
 
 export function elems(funcName, params) {
     return _elems[funcName](...params);
@@ -30,7 +25,7 @@ export function setCoreRowStyles(formId, rowClass) {
 }
 /** Shows a form-submit success message at the top of the interaction form. */
 export function showSuccessMsg(msg, color) {
-    const cntnr = _u('buildElem', ['div', { id: 'success' }]);
+    const cntnr = _i.util('buildElem', ['div', { id: 'success' }]);
     const msgHtml = getSuccessMsgHtml(msg);
     cntnr.append(div);
     $(cntnr).css('border-color', (color ? color : 'greem'));
@@ -38,8 +33,8 @@ export function showSuccessMsg(msg, color) {
     $(cntnr).fadeTo('400', .8);
 }
 function getSuccessMsgHtml(msg) {
-    const div = _u('buildElem', ['div', { class: 'flex-row' }]);
-    const p = _u('buildElem', ['p', { text: msg }]);
+    const div = _i.util('buildElem', ['div', { class: 'flex-row' }]);
+    const p = _i.util('buildElem', ['p', { text: msg }]);
     const bttn = getSuccessMsgExitBttn();
     div.append(p, bttn);
     return div;
@@ -47,7 +42,7 @@ function getSuccessMsgHtml(msg) {
 function getSuccessMsgExitBttn() {
     const attr = { 'id': 'sucess-exit', 'class': 'tbl-bttn exit-bttn', 
         'type': 'button', 'value': 'X' }
-    const bttn = _u('buildElem', ['input', attr]);
+    const bttn = _i.util('buildElem', ['input', attr]);
     $(bttn).click(exitSuccessMsg);
     return bttn;
 }
@@ -61,7 +56,7 @@ export function exitSuccessMsg() {
  * handler stored in the form's params object.
  */
 export function exitForm(fLvl, focus, onExit, data) {                           //console.log("               --exitForm fLvl = %s, onFormClose = %O", fLvl, fP.forms[fLvl].onFormClose);      
-    const exitFunc = onExit || _mmry('getFormProp', ['onFormClose', fLvl]);
+    const exitFunc = onExit || _i.mmry('getFormProp', ['onFormClose', fLvl]);
     $('#'+fLvl+'-form').remove();  
     _cmbx.resetFormCombobox(fLvl, focus);
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
@@ -74,7 +69,7 @@ export function exitFormPopup(e, skipReset) {                                   
     $('#b-overlay').removeClass('form-ovrly');
     $('#b-overlay-popup').removeClass('form-popup');
     $('#b-overlay-popup').empty();
-    _forms.clearFormMemory();
+    _i.clearFormMemory();
 }
 function hideSearchFormPopup() {
     $('#b-overlay').css({display: 'none'});
@@ -86,17 +81,18 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
-    const formFocus = _mmry('getMemoryProp', ['submitFocus']);
+    const formFocus = _i.mmry('getMemoryProp', ['submit']).focus;
     if (!formFocus) { return; }
     if (formFocus == 'int') { return refocusAndShowUpdates(); }   
-    _forms.loadDataTableAfterFormClose(formFocus);
+    _i.loadDataTableAfterFormClose(formFocus);
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
-    const tableFocus  = fP.action === 'create' ? 'srcs' : getCurFocus();
+    const formAction = _i.mmry('getMemoryProp', ['action']);
+    const tableFocus  = formAction === 'create' ? 'srcs' : getCurFocus();
     showTodaysUpdates(tableFocus);   
 }
 function getCurFocus() {
-    return _mmry('getMemoryProp', ['curFocus']);
+    return _i.mmry('getMemoryProp', ['curFocus']);
 }
 
 /** -------------- sort! --------------- */
@@ -107,45 +103,46 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
  * Toggles between displaying all fields for the entity and only showing the 
  * default (required and suggested) fields.
  */
-function toggleShowAllFields(entity, fLvl) {                             //console.log('--- Showing all Fields [%s] -------', this.checked);
+function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
     if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
-    _mmry('setFormProp', ['expanded', this.checked]);
-    _mmry('setFormProp', ['reqElems', []]);
+    updateFormMemoryOnFieldToggle(this.checked, fLvl);
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
-    const fConfg = _fCnfg.getFormConfg(entity);                                 
-    const tConfg = fP.forms[fLvl].typeConfg;
     $('#'+entity+'_Rows').empty();
-    _elems.getFormFieldRows(entity, fConfg, tConfg, fVals, fLvl, fP)
+    _elems.getFormFieldRows(entity, fVals, fLvl)
     .then(appendAndFinishRebuild);
 
     function appendAndFinishRebuild(rows) {
         $('#'+entity+'_Rows').append(rows);
-        _cmbx('initFormCombos', [entity, fLvl]);
+        _i.entity('initFormCombos', [_i.util('lcfirst', [entity]), fLvl]);
         fillComplexFormFields(fLvl);
         finishComplexForms();
     }
     function finishComplexForms() {
         if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }
-        if (entity !== 'location') { _entity('onSrcToggleFields', [entity, fVals, fLvl]); }
+        if (entity !== 'location') { _i.entity('onSrcToggleFields', [entity, fVals, fLvl]); }
         setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
+function updateFormMemoryOnFieldToggle(isChecked, fLvl) {
+    _i.mmry('setFormProp', [fLvl, 'expanded', isChecked]);
+    _i.mmry('setFormProp', [fLvl, 'reqElems', []]);
+}
 function ifOpenSubForm(fLvl) {
-    const subLvl = _forms.getNextFormLevel('child', fLvl);
+    const subLvl = _i.getNextFormLevel('child', fLvl);
     return $('#'+subLvl+'-form').length !== 0;
 }
 function showOpenSubFormErr(fLvl) {
-    const subLvl = _forms.getNextFormLevel('child', fLvl);
-    let entity = _u('ucfirst', [fP.forms[subLvl].entity]);
+    const subLvl = _i.getNextFormLevel('child', fLvl);
+    let entity = _i.util('ucfirst', [fP.forms[subLvl].entity]);
     if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
-    _forms.err('openSubFormErr', [entity, null, subLvl, true]);   
+    _i.err('openSubFormErr', [entity, null, subLvl, true]);   
     $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
 }
 /*--------------------------- Misc Form Helpers ------------------------------*/
 /*--------------------------- Fill Form Fields -------------------------------*/
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) {
-    const vals = _mmry('getFormProp', [fLvl, 'vals']);                               
+    const vals = _i.mmry('getFormProp', [fLvl, 'vals']);                               
     const valObj = {};
     for (let field in vals) {
         valObj[field] = vals[field].val;
@@ -159,7 +156,7 @@ export function getCurrentFormFieldVals(fLvl) {
  * reinitiation are handled here.
  */
 export function fillComplexFormFields(fLvl) {
-    const vals = _mmry('getFormProp', [fLvl, 'vals']);
+    const vals = _i.mmry('getFormProp', [fLvl, 'vals']);
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
 
     for (let field in vals) {                                                   //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
@@ -173,7 +170,7 @@ export function fillComplexFormFields(fLvl) {
     }
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
-    return  _entity.bind(null, 'selectExistingAuthors');
+    return  _i.entity.bind(null, 'selectExistingAuthors');
 }
 export function fieldIsDisplayed(field, fLvl) {
     const curFields = fP.forms[fLvl].fieldConfg.fields;                         //console.log('field [%s] is displayed? ', field, Object.keys(curFields).indexOf(field) !== -1);
@@ -181,7 +178,7 @@ export function fieldIsDisplayed(field, fLvl) {
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
-    const parentLvl = _forms.getNextFormLevel('parent', fLvl);  
+    const parentLvl = _i.getNextFormLevel('parent', fLvl);  
     if (_elems.ifAllRequiredFieldsFilled(parentLvl)) {
         toggleSubmitBttn('#'+parentLvl+'-submit', true);
     }
@@ -204,6 +201,6 @@ export function toggleWaitOverlay(waiting) {                                    
 }
 function appendWaitingOverlay() {
     const attr = { class: 'overlay waiting', id: 'c-overlay'}
-    $('#b-overlay').append(_u('buildElem', ['div', attr]));
+    $('#b-overlay').append(_i.util('buildElem', ['div', attr]));
     $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
 }

@@ -9,25 +9,21 @@
  *     clrNeedsHigherLvl        edit-forms
  *     clrContribFieldErr       db-forms
  */
-import * as _u from '../../../util.js';
-import * as _elems from '../ui/form-elems.js';
-import * as db_sync from '../../../db-sync.js';
-import * as _cmbx from '../ui/combobox-util.js';
-import * as _forms from '../forms-main.js';
+import * as _i from '../forms-main.js';
 
-let fP;
+let mmry;
 /*------------------- Form Error Handlers --------------------------------*/
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */
 export function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-    fP = _forms.memory('getAllFormMemory');
-    const fLvl = fP.ajaxFormLvl;                                          
+    mmry = _i.mmry('getAllFormMemory');
+    const fLvl = mmry.ajaxFormLvl;                                          
     const elem = getFormErrElem(fLvl);
     const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
     const msg = getFormErrMsg(errTag);
     toggleWaitOverlay(false);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
+    _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 /**
  * Returns an error tag based on the server error text. Reports duplicated 
@@ -54,17 +50,17 @@ function getFormErrMsg(errTag) {
 }
 /**------------- Data Storage Errors --------------*/
 export function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-    fP = _forms.memory('getAllFormMemory');
+    mmry = _i.mmry('getAllFormMemory');
     const errMsg = data.msg;
     const errTag = data.tag;
-    const cntnr = _u.buildElem('div', { class: 'flex-col', id:'data_errs' });
+    const cntnr = _i.util('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
     const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
         ${errTag}</b><br><br>This form will close and all stored data will be 
         redownloaded.</span>`;
-    const confirm = _u.buildElem('span', { class: 'flex-row', 
-            'text': `Please click "OK" to continue.` });
-    const bttn = _u.buildElem('input', { type: 'button', value: 'OK', 
-            class: 'tbl-bttn exit-bttn' });
+    const confirm = _i.util('buildElem', ['span', { class: 'flex-row', 
+            'text': `Please click "OK" to continue.` }]);
+    const bttn = _i.util('buildElem', ['input', { type: 'button', value: 'OK', 
+            class: 'tbl-bttn exit-bttn' }]);
     $(confirm).append(bttn);
     $(cntnr).append([msg, confirm]);
     $('#top-hdr').after(cntnr);
@@ -72,16 +68,16 @@ export function errUpdatingData(data) {                                      //c
     $('#top-submit, #top-cancel, #exit-form').off('click')
         .css('disabled', 'disabled').fadeTo('400', 0.5);
 }
-function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
-    _forms.exitFormWindow(null, 'skipTableReset');
-    db_sync.resetStoredData();
+function reloadAndRedownloadData() {                                            
+    _i.exitFormWindow(null, 'skipTableReset');
+    _i.resetStoredData();
 }
 /**
  * When the user attempts to create an entity that uses the sub-form and there 
  * is already an instance using that form, show the user an error message and 
  * reset the select elem. 
  */
-export function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, fP = %O ", selId, fP)
+export function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, mmry = %O ", selId, mmry)
     var selId = id || '#'+field+'-sel';
     return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
 }
@@ -93,7 +89,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
     const selId = id || '#'+field+'-sel';
     reportFormFieldErr(field, errTag, fLvl);
     if (skipClear) { return; }
-    window.setTimeout(function() {_cmbx.clearCombobox(selId)}, 10);
+    window.setTimeout(function() {_i.cmbx.clearCombobox(selId)}, 10);
     return { 'value': '', 'text': 'Select ' + field };
 }
 /**
@@ -101,7 +97,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * error manually with the close button, or automatically by resolving the error.
  */
 export function reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
-    fP = _forms.memory('getAllFormMemory');
+    mmry = _i.mmry('getAllFormMemory');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
         'fillAuthBlanks': handleAuthBlanks,
@@ -135,7 +131,7 @@ function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrIsGenusPrnt(elem, fLvl, e) { 
-    _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /** Note: error used for the location form. */
@@ -151,7 +147,7 @@ function clrInvalidCoords(elem, fLvl, e, fieldName) {
     if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
 }
 function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
-    const genus = _cmbx.getSelTxt('#Genus-sel');
+    const genus = _i.cmbx.getSelTxt('#Genus-sel');
     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
@@ -166,7 +162,7 @@ function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrNeedsGenusPrntErr(elem, fLvl, e) {            
-    _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /** Note: error for the create-taxon form. */
@@ -188,17 +184,17 @@ function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) {
 }
 /** Clears the cause, either the parent-selection process or the taxon's level. */
 function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
-    _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, fLvl);
     if ($('#sub-form').length) { return selectParentTaxon(
-        $('#txn-prnt').data('txn'), fP.forms.taxonPs.curRealmLvls[0]); 
+        $('#txn-prnt').data('txn'), mmry.forms.taxonPs.curRealmLvls[0]); 
     }
     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
 }
 /** Note: error for the edit-taxon form. */
 function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
     var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
-    var lvlName = fP.forms.taxonPs.lvls[childLvl-1];
+    var lvlName = mmry.forms.taxonPs.lvls[childLvl-1];
     var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
         'Please select a level higher than '+lvlName+'</div>';
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
@@ -206,7 +202,7 @@ function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {
 }
 export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
-    _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
+    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
     $('#txn-lvl').data('lvl', txnLvl);
     clearErrElemAndEnableSubmit($('#Taxon_errs')[0], fLvl);
     enableChngPrntBtttn();
@@ -228,30 +224,30 @@ function clrNeedsLocData(elem, fLvl, e) {
 }
 /** Note: error used for the publication form. */
 function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
-    var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-    var msg = '<p>Please finish the open '+ _u.ucfirst(subEntity) + ' form.</p>';
+    var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
+    var msg = '<p>Please finish the open '+ _i.util('ucfirst', [subEntity]) + ' form.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication/citation form. */
 function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
-    var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
+    var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of authors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication form. */
 function handleEdBlanks(elem, errTag, fLvl, fieldName) {  
-    var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
+    var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of editors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
-export function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
+export function clrContribFieldErr(field, fLvl) {                               //console.log('clrContribFieldErr.')
     const elem = $('#'+field+'_errs')[0];    
     clearErrElemAndEnableSubmit(elem, fLvl);
-    if (_elems.ifAllRequiredFieldsFilled(fLvl)) { 
-        _forms.ui('toggleSubmitBttn', ['#sub-submit', true]); 
+    if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
+        _i.ui('toggleSubmitBttn', ['#sub-submit', true]); 
     }
 }
 /* ----------- Error-Elem Methods -------------- */
@@ -269,14 +265,14 @@ function getFieldErrElem(fieldName, fLvl) {                                     
     return elem;
 }   
 function getFormErrElem(fLvl) {
-    const elem = _u.buildElem('div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }); 
+    const elem = _i.util('buildElem', ['div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }]); 
     $('#'+fLvl+'-hdr').after(elem);
     return elem;
 }
 function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
     elem.innerHTML = msg;
     $(elem).append(getErrExitBttn(errTag, elem, fLvl));
-    _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
+    _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
@@ -290,23 +286,23 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'fillAuthBlanks': false, 'fillEdBlanks': false
     };
     if (!exitHdnlrs[errTag]) { return []; }
-    const bttn = _elems.getExitButton();
+    const bttn = _i.elems('getExitButton');
     bttn.className += ' err-exit';
     $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
     return bttn;
 }
 function clrFormLvlErr(elem, fLvl) {
-    const childFormLvl = _forms.getNextFormLevel('child', fLvl);
+    const childFormLvl = _i.getNextFormLevel('child', fLvl);
     $('#'+fLvl+'_errs').remove();
-    if (!$('#'+childFormLvl+'-form').length && _elems.ifAllRequiredFieldsFilled(fLvl)) {
-        _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
+    if (!$('#'+childFormLvl+'-form').length && _i.elems('ifAllRequiredFieldsFilled', [fLvl])) {
+        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
     }
 }
 export function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
-    const subLvl = _forms.getNextFormLevel('child', fLvl);
+    const subLvl = _i.getNextFormLevel('child', fLvl);
         $(elem).fadeTo(400, 0, clearErrElem);
-    if (!$('#'+subLvl+'-form').length && _elems.ifAllRequiredFieldsFilled(fLvl)) { 
-        _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
+    if (!$('#'+subLvl+'-form').length && _i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
+        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
     }
 
     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);

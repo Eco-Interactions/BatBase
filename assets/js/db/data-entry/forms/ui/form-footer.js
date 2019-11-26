@@ -7,18 +7,16 @@
  *     buildFormFooter       form-ui
  *     
  */
-import * as _forms from '../forms-main.js';
+import * as _i from '../forms-main.js';
 
-const _u = _forms._util;
-
-let fP;
+let mmry;
 /**
  * Returns row with a checkbox that will toggle optional form fields on the left 
  * and the submit/cancel buttons on the right.
  */
 export function buildFormFooter(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
-    fP = params;   
-    const cntnr = _u('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
+    mmry = params;   
+    const cntnr = _i.util('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
     const spacer = $('<div></div>').css("flex-grow", 2);
     const submitBttns = buildSubmitAndCancelBttns(level, action, entity);
@@ -31,29 +29,29 @@ export function buildFormFooter(entity, level, action, noShwFields, params) {   
  * If there are no additional fields for the form, no checkbox is returned. 
  * @return {elem} Checkbox and label that will 'Show all fields'
  */
-function buildAddFieldsCheckbox(entity, level) {                                //console.log('fP = %O', fP);
+function buildAddFieldsCheckbox(entity, level) {                                //console.log('mmry = %O', mmry);
     if (!ifEntityHasOptionalFields(entity)) { return; }
-    const cntnr = _u('buildElem', ['div', {class: 'all-fields-cntnr'}]);
+    const cntnr = _i.util('buildElem', ['div', {class: 'all-fields-cntnr'}]);
     const chckBox = getCheckbox(level, entity);
     const lbl = getLabel(level);
     $(cntnr).append([chckBox, lbl]);
     return cntnr;
 }
 function ifEntityHasOptionalFields(entity) {
-    return _forms.confg('getFormConfg', [entity]).order.opt !== false;
+    return _i.confg('getFormConfg', [entity]).order.opt !== false;
 }
 function getCheckbox(level, entity) {
     const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };
-    const elem = _u('buildElem', ['input', attr]); 
-    const lcEntity = _u('lcfirst', [entity]);
-    if (fP.forms[level].expanded) { elem.checked = true; }
-    _forms.ui('setToggleFieldsEvent', [elem, lcEntity, level])
-    _u('addEnterKeypressClick', [elem]);
+    const elem = _i.util('buildElem', ['input', attr]); 
+    const lcEntity = _i.util('lcfirst', [entity]);
+    if (mmry.forms[level].expanded) { elem.checked = true; }
+    _i.ui('setToggleFieldsEvent', [elem, lcEntity, level])
+    _i.util('addEnterKeypressClick', [elem]);
     return elem;
 }
 function getLabel(level) {
     const attr = { for: level+'-all-fields', text: 'Show all fields.' };
-    return _u('buildElem', ['label', attr]); 
+    return _i.util('buildElem', ['label', attr]); 
 }
 /** Returns the buttons with the events bound. */
 function buildSubmitAndCancelBttns(level, action, entity) { 
@@ -63,7 +61,7 @@ function buildSubmitAndCancelBttns(level, action, entity) {
     function getSubmitBttn() {
         const text = { create: "Create", edit: "Update" };
         const bttn = buildFormButton(
-            'submit', level, text[action] + " " + _u('ucfirst', [entity]));
+            'submit', level, text[action] + " " + _i.util('ucfirst', [entity]));
         $(bttn).attr("disabled", true).css("opacity", ".6").click(events.submit);
         return bttn;
     }
@@ -85,16 +83,16 @@ function getBttnEvents(entity, level) {                                         
 
 }
 function getSubmitEvent(entity, level) {
-    return _forms.submitForm.bind(null, '#'+level+'-form', level, entity);
+    return _i.submitForm.bind(null, '#'+level+'-form', level, entity);
 }
 function getCancelFunc(entity, level) {
-    const onExit = fP.forms[level] ? fP.forms[level].onFormClose : Function.prototype;
-    return level === 'top' ? _forms.exitFormWindow : 
-        _forms.exitFormLevel.bind(null, level, true, onExit);
+    const onExit = mmry.forms[level] ? mmry.forms[level].onFormClose : Function.prototype;
+    return level === 'top' ? _i.exitFormWindow : 
+        _i.exitFormLevel.bind(null, level, true, onExit);
 }
 /** Returns a (submit or cancel) button for the form level. */
 function buildFormButton(action, level, val) {
     const attr = { id: level +'-'+action, class: "ag-fresh tbl-bttn", 
         type: "button", value: val}
-    return _u('buildElem', ['input', attr]);
+    return _i.util('buildElem', ['input', attr]);
 }

@@ -4,12 +4,9 @@
  * Exports:             Imported by: 
  *     getValidatedFormData         db-forms
  */
-import * as _u from '../../../util.js';
-import * as _cmbx from '../ui/combobox-util.js';
-import * as _forms from '../forms-main.js';
+import * as _i from '../forms-main.js';
 
-let fP;
-const _errs = _forms.err;
+let mmry;
 
 /**
  * Loops through all rows in the form with the passed id and returns an object 
@@ -17,7 +14,7 @@ const _errs = _forms.err;
  * added @handleAdditionalEntityData.
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
-    fP = _forms.memory('getAllFormMemory');
+    mmry = _i.mmry('getAllFormMemory');
     const elems = $('#'+entity+'_Rows')[0].children;                            console.log('           --getValidatedFormData. [%s]', entity);
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
@@ -28,7 +25,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     function getInputData(elem) {                                           
         if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
         if (elem.className.includes('cntnr-row')) { return getMultiFieldRowData(elem); }
-        const fieldName = _u.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
+        const fieldName = getInputFieldNameFromCntnr(elem.children[1]);
         const input = elem.children[1].children[1];                             //console.log("---------[%s] = %O", fieldName, input);
         formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
         
@@ -43,19 +40,23 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
             return Number.isInteger(val) ? parseInt(val) : val;                                         
         }
     }
+    function getInputFieldNameFromCntnr(cntnr) {
+        const field = cntnr.children[0];
+        return _i.util('lcfirst', [field.innerText.trim().split(" ").join("")]); 
+    }
     function getMultiFieldRowData(cntnr) {
         cntnr.children.forEach(fieldElem => getInputData(fieldElem));
     }
     /** Edge case input type values are processed via their type handlers. */
     function getInputVals(fieldName, input, type) {
         const typeHandlers = {
-            'multiSelect': _forms.getSelectedVals, 'tags': getTagVals
+            'multiSelect': _i.getSelectedVals, 'tags': getTagVals
         };
         return typeHandlers[type](input, fieldName);
     }
     /** Adds an array of tag values. */
     function getTagVals(input, fieldName) {                                 
-        return _cmbx.getSelVal('#'+_u.ucfirst(fieldName)+'-sel');
+        return _i.cmbx.getSelVal('#'+_i.util('ucfirst', [fieldName])+'-sel');
     }
     function handleAdditionalEntityData(entity) {  
         if (!submitting) { return Promise.resolve(); }  
@@ -97,8 +98,8 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     } /* End getAuthDisplayName */
     /** ---- Additional Citation data ------ */
     function getPublicationData() {
-        formVals.publication = fP.editing ? 
-            fP.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
+        formVals.publication = mmry.editing ? 
+            mmry.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
     }
     /** Adds 'displayName', which will be added to both the form data objects. */
     function addCitDisplayName() { 
@@ -113,7 +114,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other', 
             'Ph.D. Dissertation', 'Report' ];
         if (fulls.indexOf(type) === -1) { return; }
-        const pubTitle = fP.forms[fLvl].rcrds.src.displayName;
+        const pubTitle = mmry.forms[fLvl].rcrds.src.displayName;
         if (formVals.displayName.includes('(citation)')) { return; }
         if (pubTitle != formVals.displayName) { return; }
         formVals.displayName += '(citation)';
@@ -137,7 +138,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
      * "Point": if there is lat/long data. "Area" otherwise.
      */
     function getLocType() {
-        return _u.getData('locTypeNames').then(locTypes => {
+        return _i.util('getData', ['locTypeNames']).then(locTypes => {
             const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
             formVals.locationType = locTypes[type];  
         });
@@ -154,7 +155,8 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     }
     /** Returns the id of the Unspecified region. */
     function getUnspecifiedLocId() {
-        return _u.getData('topRegionNames').then(regions => regions['Unspecified']);
+        return _i.util('getData', ['topRegionNames'])
+            .then(regions => regions['Unspecified']);
     }
     /** ---- Additional Publication data ------ */
     /**
@@ -175,7 +177,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     } /* End addContributorData */
     /** ---- Additional Taxon data ------ */
     function getTaxonData() {
-        const formTaxonLvl = fP.forms.taxonPs.formTaxonLvl;
+        const formTaxonLvl = mmry.forms.taxonPs.formTaxonLvl;
         formVals.parentTaxon = getParentTaxon(formTaxonLvl);
         formVals.level = formTaxonLvl;
     }
@@ -185,12 +187,12 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(lvl) {
-        var lvls = fP.forms.taxonPs.lvls;
+        var lvls = mmry.forms.taxonPs.lvls;
         var parentLvl = lvls[lvls.indexOf(lvl)-1];
         if ($('#'+parentLvl+'-sel').length) { 
             return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
         } 
-        return fP.forms.taxonPs.realmTaxon.id;
+        return mmry.forms.taxonPs.realmTaxon.id;
     }
     function returnFormVals() {  
         checkForErrors(entity, formVals, fLvl);  
@@ -208,12 +210,12 @@ function checkForErrors(entity, formVals, fLvl) {
  * creating a duplicate, and to add initials if they are sure this is a new author. 
  */
 function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
-    if (fP.action === 'edit') { return; }
-    const cntnr = $('#'+_u.ucfirst(entity)+'s-sel1')[0];
+    if (mmry.action === 'edit') { return; }
+    const cntnr = $('#'+_i.util('ucfirst', [entity])+'s-sel1')[0];
     const opts = cntnr.selectize.options;  
     const dup = checkForDuplicate(opts, vals.displayName);  
     if (!dup) { return; }
-    _errs.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
+    _i.err.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
     vals.err = true;
 }
 function checkForDuplicate(opts, name) {  

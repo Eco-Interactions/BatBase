@@ -9,7 +9,7 @@
  *         HELPERS
  */
 import * as _confg from './etc/form-config.js';
-import * as _forms from './entity/entity-main.js';
+import * as _entity from './entity/entity-main.js';
 import * as _mmry from './etc/form-memory.js';
 import * as _submit from './submit/submit-main.js';
 import * as _ui from './ui/form-ui-main.js';
@@ -20,7 +20,7 @@ import * as _sync from '../../db-sync.js';
 import * as _u from '../../util.js';
 
 /** =================== DATABASE PAGE FACADE ================================ */
-export function _util(funcName, params = []) {  
+export function util(funcName, params = []) {  
     return _u[funcName](...params);
 }
 export function map(funcName, params = []) {
@@ -30,24 +30,27 @@ export function loadDataTableAfterFormClose(focus) {
     _page.initDataTable(focus);
 }
 export function initNewDataForm() {
-    _forms.createEntity('interaction');
+    _entity.createEntity('interaction');
 }
 export function updateLocalDataStorage() {
     return _sync.updateLocalDb(...arguments);
 }
+export function resetStoredData() {
+    _sync.resetStoredData();
+}
 /** ====================== FORMS FACADE ===================================== */
+export function entity(funcName, params = []) {  console.log('args = %O', arguments);  //entity form interface
+    return _entity[funcName](...params);
+}
 export function create(entity) {
-    _forms.createEntity(entity);
+    _entity.createEntity(entity);
 }
 export function edit(id, entity) {                                        
     _mmry.initFormMemory("edit", entity, id)
     .then(() => _edit.editEntity(id, entity, fP));
 }   
-export function entity(funcName, params = []) {
-    return _forms[funcName](...params);
-}
-export function err(funcName, params = []) {
-    return _submit.err[funcName](...params);
+export function err(funcName, params = []) {  
+    return _submit.err(funcName, params);
 }
 export function submitForm(formId, fLvl, entity) {
     _submit.valAndSubmitFormData(formId, fLvl, entity);
@@ -60,7 +63,7 @@ export function formatAndSubmitData(entity, fLvl, formVals) {
 export function confg(funcName, params = []) {
     return _confg[funcName](...params);
 }
-export function memory(funcName, params = []) {   
+export function mmry(funcName, params = []) {   
     return _mmry[funcName](...params);
 }
 export function clearFormMemory() {
@@ -68,17 +71,17 @@ export function clearFormMemory() {
     _mmry.clearMemory();
 }
 /** --------------------------- FORM UI ------------------------------------- */
-export function uiElems(funcName, params = []) {
+export function ui(funcName, params = []) {  //ui interface
+    return _ui[funcName](...params);
+}
+export function elems(funcName, params = []) {
     return _ui.elems(funcName, params);
 }
-export function uiCombos(funcName, params = []) {
+export function cmbx(funcName, params = []) {
     return _ui.combos(funcName, params);
 }
-export function uiPanel(funcName, params = []) {
+export function panel(funcName, params = []) {
     return _ui.panel(funcName, params);
-}
-export function ui(funcName, params = []) {
-    return _ui[funcName](...params);
 }
 export function exitFormWindow(e, skipReset) {
     _ui.exitFormPopup(e, skipReset);
@@ -103,13 +106,11 @@ export function getNextFormLevel(next, curLvl) {
  * Returns the sub form's lvl. If the top form is not the interaction form,
  * the passed form lvl is reduced by one and returned. 
  */
-export function getSubFormLvl(intFormLvl) { 
-    const mmry = _mmry.getMemoryProp('getAllFormMemory') 
+export function getSubFormLvl(lvl) { 
+    const topEntity = _mmry.getFormProp('entity', 'top');
     const fLvls = mmry.formLevels;
-    return mmry.forms.top.entity === 'interaction' ? 
-        intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
+    return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }
-
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
 export function getSelectedVals(cntnr, fieldName) {
     let vals = {};

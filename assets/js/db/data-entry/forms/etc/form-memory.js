@@ -1,14 +1,12 @@
 /**
+ * Central memory for all form-related code.
  *
- *
- *
- * Exports:             Imported by:
- *     getFormEntity            forms-main
- *     initFormMemory           forms-main
+ * Exports:             
+ *     getFormEntity    
+ *     initFormMemory   
  *     initEntityFormMemory     
  */
-import { getData, snapshot } from '../../../util.js';
-import * as _forms from '../forms-main.js';
+import * as _i from '../forms-main.js';
 
 let formMemory = {};
 
@@ -32,11 +30,10 @@ export function clearMemory() {
 export function initFormMemory(action, entity, id) {  
     const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
         'author', 'publisher'];
-    const prevSubmitFocus = formMemory.submitFocus;
-    // const xpandedForms = formMemory.forms ? formMemory.forms.expanded : {};
-    return getData(entities).then(data => {
+
+    return _i.util('getData', [entities]).then(data => {
         initMainMemory(data);
-        initEntityFormMemory(entity, 'top', null, action);                      console.log("#### Init formMemory = %O, curFormMemory = %O", snapshot(formMemory), formMemory);
+        initEntityFormMemory(entity, 'top', null, action);                      console.log("#### Init formMemory = %O, curFormMemory = %O", _i.util('snapshot', [formMemory]), formMemory);
         return formMemory;
     });
 
@@ -48,7 +45,6 @@ export function initFormMemory(action, entity, id) {
             forms: {},  // expanded: xpandedForms 
             formLevels: ['top', 'sub', 'sub2'],
             records: data,
-            submitFocus: prevSubmitFocus || false
         };
     }
 }
@@ -79,11 +75,10 @@ export function initEntityFormMemory(entity, level, pSel, action) {
     formMemory.forms[level] = {
         action: action,
         expanded: false,
-        fieldConfg: { fields: {}, order: [], required: [] }, //refactor away from here??
+        fieldConfg: { fields: {}, order: [], required: [] }, 
         entity: entity,
         entityType: false,
         onFormClose: null,
-        misc: {},
         pSelId: pSel,
         reqElems: [],
         selElems: [], 
@@ -134,7 +129,7 @@ export function isEditForm() {
 export function getEditEntityId(type) {
     return formMemory.editing[type];
 }
-export function getAllFormMemory() {
+export function getAllFormMemory() {  
     return formMemory;
 }
 export function getMemoryProp(prop) {
@@ -177,7 +172,7 @@ export function getRcrd(entity, id) {
     if (!formMemory.records[entity]) { return; }
     const rcrd = formMemory.records[entity][id];
     if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, formMemory.records); console.trace() }
-    return _forms._util('snapshot', [formMemory.records[entity][id]]); 
+    return _i.util('snapshot', [formMemory.records[entity][id]]); 
 }
 /* ---------------------------- Setters ------------------------------------- */
 export function addEntityRecords(entity, rcrds) {
