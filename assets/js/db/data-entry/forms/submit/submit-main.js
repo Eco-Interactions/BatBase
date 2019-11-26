@@ -6,14 +6,10 @@
  *     buildFormDataAndSubmit
  * 
  */
-import * as _forms from '../forms-main.js';
-import getValidatedFormData from './get-form-data.js';
-import formatDataForServer from './format-data.js';
+import * as _i from '../forms-main.js';
 import * as _errs from './form-errors.js';
-
-const _mmry = _forms.memory;
-const _u = _forms._util;
-const _ui = _forms.ui;
+import formatDataForServer from './format-data.js';
+import getValidatedFormData from './get-form-data.js';
 
 export function err(funcName, params = []) {
     return _errs[funcName](...params);
@@ -22,31 +18,31 @@ export function err(funcName, params = []) {
 export function getFormData() {
     return getValidatedFormData();
 }
-export function valAndSubmitFormData(formId, fLvl, entity) {                             console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
+export function valAndSubmitFormData(formId, fLvl, entity) {                    console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
     getValidatedFormData(entity, fLvl, true)
-        .then(buildFormDataAndSubmit.bind(null, entity, fLvl))
+        .then(vals => buildFormDataAndSubmit(entity, fLvl, vals));
 }
 /* used by edit-form */
-export function buildFormDataAndSubmit(entity, fLvl, formVals) {
+export function buildFormDataAndSubmit(entity, fLvl, formVals) {  console.log('---- ent = ', entity)
     const data = formatDataForServer(entity, fLvl, formVals)
     submitFormData(data, fLvl, entity);
 }
 /*---------------------- Form Submit Methods ---------------------------------*/
-function submitFormData(data, fLvl, entity) {                                   console.log("   --submitFormData [ %s ]= %O", fLvl, data);
-    const coreEntity = _forms.confg('getCoreFormEntity', [entity]);        
+function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
+    const coreEntity = _i.confg('getCoreFormEntity', [entity]);        
     const url = getEntityAjaxUrl(fLvl);   
     addEntityDataToFormData(data, coreEntity);
     storeParamsData(coreEntity, fLvl);
-    _ui('toggleWaitOverlay', [true]); 
-    _u('sendAjaxQuery', [data, url, onSuccess, _errs.formSubmitError]);
+    _i.ui('toggleWaitOverlay', [true]); 
+    _i.util('sendAjaxQuery', [data, url, onSuccess, _errs.formSubmitError]);
 }
 function getEntityAjaxUrl(fLvl) { 
     const path = $('body').data('ajax-target-url');  
-    const action = _mmry('getFormProp', ['action', fLvl]);  
+    const action = _i.mmry('getFormProp', ['action', fLvl]);  
     return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity) {  
-    const editingId = _mmry('getMemoryProp', ['editing']);  
+    const editingId = _i.mmry('getMemoryProp', ['editing']);  
     if (editingId) { data.ids = editingId; } 
     data.coreEntity = coreEntity;  
 }
@@ -54,24 +50,24 @@ function addEntityDataToFormData(data, coreEntity) {
 function storeParamsData(entity, fLvl) {                                  
     const foci = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
         'interaction': 'int' };
-    const props = { ajaxFormLvl: fLvl, submitFocus: foci[entity] };
-    _mmry('addFormSubmitProps', [props]);
+    const props = { ajaxFormLvl: fLvl, focus: foci[entity] };
+    _i.mmry('addFormSubmitProps', [props]);
 }
 /* ----------------- Form Submit Success Methods ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                            console.log("       --Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);                   
-    _forms.updateLocalDataStorage(data.results)
+    _i.updateLocalDataStorage(data.results)
     .then(onDataSynced);
 }
 function onDataSynced(data) {                                                   console.log('       --Data update complete. data = %O', data);
-    _ui('toggleWaitOverlay', [false]);
+    _i.ui('toggleWaitOverlay', [false]);
     if (data.errors) { return _errs('errUpdatingData', [data.errors]); }
     if (noDataChanges()) { return showNoChangesMessage(); }  
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
 
     function noDataChanges() {
-        const fLvl = _mmry('getMemoryProp', ['submit']).ajaxFormLvl;
-        const action = _mmry('getFormProp', ['action', fLvl])
+        const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;
+        const action = _i.mmry('getFormProp', ['action', fLvl])
         return action === 'edit'  && !hasChngs(data);
     }
 }
@@ -92,22 +88,23 @@ function hasChngs(data) {
     }
 }
 function showNoChangesMessage() {
-    _ui('showSuccessMsg', ['No changes detected.', 'red']); 
+    _i.ui('showSuccessMsg', ['No changes detected.', 'red']); 
 }
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
-    return _u('getData', [entity]).then(addDataToMemory);
+    return _i.util('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
-        const rcrds = _mmry('addEntityRecords', [entity, data]);
+        const rcrds = _i.mmry('addEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }
 /*------------------ Top-Form Success Methods --------------------*/
 function handleFormComplete(data) {   
-    const fLvl = _mmry('getMemoryProp', ['submit']).ajaxFormLvl;                //console.log('handleFormComplete fLvl = ', fLvl);
+    const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    _mmry('getFormProp', ['onFormClose', 'top'])(data);
+    _i.mmry('getFormProp', ['onFormClose', 'top'])(data);
+    _i.clearFormMemory();
 }
 /*--------------------- After Sub-Entity Created -----------------------------*/
 /**
@@ -115,10 +112,10 @@ function handleFormComplete(data) {
  * entity in the form's parent elem @addAndSelectEntity.
  */
 function exitFormAndSelectNewEntity(data, fLvl) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
-    const formParent = _mmry('getFormParentId', [fLvl]);         
-    _forms.exitFormLevel(fLvl); 
+    const formParent = _i.mmry('getFormParentId', [fLvl]);         
+    _i.exitFormLevel(fLvl); 
     if (formParent) { addAndSelectEntity(data, formParent); 
-    } else { _mmry('clearMemory'); }
+    } else { _i.clearFormMemory(); }
 }
 /** Adds and option for the new entity to the form's parent elem, and selects it. */
 function addAndSelectEntity(data, formParent) {

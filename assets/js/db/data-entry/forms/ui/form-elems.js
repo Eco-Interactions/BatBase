@@ -15,50 +15,42 @@
  *     getTaxonOpts             db-forms
  *     buildMultiSelectElems    db-forms
  */
-
-// import * as _u from '../../../util.js';
-import * as _forms from '../forms-main.js';
-// import * as _errs from '../validation/f-errs.js';
+import * as _i from '../forms-main.js';
 import { buildFormFooter } from './form-footer.js';
-import * as _fCnfg from '../etc/form-config.js';
 
-
-let fP;
-const _errs = _forms.err;
-const _u = _forms._util;
-const _mmry = _forms.memory;
+let mmry;
 /**
  * Builds and returns the subForm according to the passed params. Disables the 
  * select elem 'parent' of the sub-form. 
  * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
  */
 export function initSubForm(fLvl, fClasses, fVals, selId) {                     //console.log('       /initSubForm called. args = %O', arguments)
-    fP = _mmry('getAllFormMemory');
-    const formEntity = fP.forms[fLvl].entity;  
+    mmry = _i.mmry('getAllFormMemory');
+    const formEntity = mmry.forms[fLvl].entity;  
     return buildFormRows(formEntity, fVals, fLvl)
         .then(buildFormContainer)
 
     function buildFormContainer(rows) {
         const subFormContainer = buildSubFormCntnr(); 
-        const bttns = buildFormFooter(formEntity, fLvl, 'create', null, fP);
+        const bttns = buildFormFooter(formEntity, fLvl, 'create', null, mmry);
         $(subFormContainer).append([buildFormHdr(), rows, bttns]);
-        _mmry('setFormProp', [fLvl, 'pSelId', selId]);
-        _forms.uiCombos('enableCombobox', [selId, false]);
-        fP = null;
+        _i.mmry('setFormProp', [fLvl, 'pSelId', selId]);
+        _i.cmbx('enableCombobox', [selId, false]);
+        mmry = null;
         return subFormContainer;
     }
     function buildSubFormCntnr() {
         const attr = {id: fLvl+'-form', class: fClasses };        
-        return _u('buildElem', ['div', attr]);
+        return _i.util('buildElem', ['div', attr]);
     }
     function buildFormHdr() {
-        const attr = { text: 'New '+_u('ucfirst', [formEntity]), id: fLvl+'-hdr' };
-        return _u('buildElem', ['p', attr]);
+        const attr = { text: 'New '+_i.util('ucfirst', [formEntity]), id: fLvl+'-hdr' };
+        return _i.util('buildElem', ['p', attr]);
     }
 }
 /** 
  * Builds and returns the default fields for entity sub-form and returns the 
- * row elems. Inits the params for the sub-form in the global fP obj.
+ * row elems. Inits the params for the sub-form in the global mmry obj.
  */
 export function buildFormRows(entity, fVals, fLvl, params) {                    //console.log('buildFormRows. args = %O', arguments)
     setFormParams(params);
@@ -66,16 +58,16 @@ export function buildFormRows(entity, fVals, fLvl, params) {                    
         .then(returnFinishedRows.bind(null, entity, params));
 }
 function setFormParams(params) {
-    if (params) { fP = params; 
-    } else if (!fP) { 
-        fP = _mmry('getAllFormMemory'); 
+    if (params) { mmry = params; 
+    } else if (!mmry) { 
+        mmry = _i.mmry('getAllFormMemory'); 
     }
 }
 function returnFinishedRows(entity, params, rows) {
     const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap'};
-    const rowCntnr = _u('buildElem', ['div', attr]);
+    const rowCntnr = _i.util('buildElem', ['div', attr]);
     $(rowCntnr).append(rows);
-    if (params) { fP = null; }
+    if (params) { mmry = null; }
     return rowCntnr;
 }
 /** -------------------- Form Row Builders ------------------------------ */
@@ -84,8 +76,8 @@ function returnFinishedRows(entity, params, rows) {
  * the type-entity form config is used. 
  */
 export function getFormFieldRows(entity, fVals, fLvl, params) {
-    fP = params ? params : _mmry('getAllFormMemory');
-    const fObj = getFieldTypeObj(_u('lcfirst', [entity]), fLvl);
+    mmry = params ? params : _i.mmry('getAllFormMemory');
+    const fObj = getFieldTypeObj(_i.util('lcfirst', [entity]), fLvl);
     return buildRows(fObj, entity, fVals, fLvl);
 }
 /* ------------ BUILD FORM FIELDS' TYPE OBJ ------------- */
@@ -94,18 +86,18 @@ export function getFormFieldRows(entity, fVals, fLvl, params) {
  * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
  *               .required Ary of required fields
  */
-function getFieldTypeObj(entity, fLvl) {                                        //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
+function getFieldTypeObj(entity, fLvl) {                                        
     const confg = {
         entity: entity,
-        form: _fCnfg.getFormConfg(entity), 
+        form: _i.confg('getFormConfg', [entity]), 
         type: getEntityTypeFormConfg(entity, fLvl),
-        showAll: fP.forms[fLvl].expanded
+        showAll: mmry.forms[fLvl].expanded
     };
-    return buildFieldTypeObj(confg, fP.forms[fLvl].fieldConfg);
+    return buildFieldTypeObj(confg, mmry.forms[fLvl].fieldConfg);
 }   
 function getEntityTypeFormConfg(entity, fLvl) {
-    const type = fP.forms[fLvl].entityType;
-    return type ? _fCnfg.getFormConfg(entity).types[type] : false;
+    const type = mmry.forms[fLvl].entityType;
+    return type ? _i.confg('getFormConfg', [entity]).types[type] : false;
 }
 function buildFieldTypeObj(confg, fieldConfg) {                                 //console.log('fieldConfg = %O', fieldConfg);
     fieldConfg.fields = getIncludedFields(confg);
@@ -120,7 +112,7 @@ function getIncludedFields(confg) {
     return included;
 }
 function getFieldTypes(confg) {
-    const coreFields = _fCnfg.getCoreFieldDefs(confg.entity);
+    const coreFields = _i.confg('getCoreFieldDefs', [confg.entity]);
     return Object.assign(coreFields, confg.form.add);
 }
 /**
@@ -140,7 +132,7 @@ function getCoreEntityFields(confg) {
 function getEntityTypeFields(confg) {
     const fields = confg.type ? 
         confg.type.required.concat(confg.type.suggested) : [];
-    return  confg.showAll ? fields.concat(typeConfg.optional) : fields;
+    return  confg.showAll ? fields.concat(confg.type.optional) : fields;
 }
 function getFieldOrder(cfg) {
     const order = cfg.showAll ? getExpandedOrder(cfg) : getDefaultOrder(cfg); 
@@ -165,7 +157,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
     }));
     
     function buildMultiFieldRow(fields) {                                       //console.log('buildMultiFieldRow = %O', fields);
-        const cntnr = _u('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
+        const cntnr = _i.util('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
         const rows = fields.reduce(buildAndAppendField, Promise.resolve());
         return rows.then(() => cntnr);
 
@@ -190,12 +182,12 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
         addFieldToFormFieldObj();
         fillFieldIfValuePassed(input);
         $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));
-        return buildFormRow(_u('ucfirst', [field]), input, fLvl, isReq, "");
+        return buildFormRow(_i.util('ucfirst', [field]), input, fLvl, isReq, "");
     }
     /** Adds the field, and it's type and value, to the form's field obj.  */
     function addFieldToFormFieldObj() {
         const confg = { val: fVals[field], type: fieldsObj.fields[field] };
-        _mmry('setFormFieldConfg', [fLvl, field, confg]);
+        _i.mmry('setFormFieldConfg', [fLvl, field, confg]);
     }
     /** Sets the value for the field if it is in the passed 'fVals' obj. */
     function fillFieldIfValuePassed(input) {                                    //console.log('filling value in [%s]', field);
@@ -212,16 +204,16 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
 function storeFieldValue(elem, fieldName, fLvl, value) {            
     const val = value || $(elem).val();                             
     if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
-    if (fieldName !== 'CitationText') { _forms.entity('handleCitText', [fLvl]); }
-    _mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
+    if (fieldName !== 'CitationText') { _i.entity('handleCitText', [fLvl]); }
+    _i.mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === 'create') { return; }
-    let fieldObj = _mmry('getFormFieldConfg', [fLvl, field]);                   //console.log('fieldObj = %O', fieldObj);                
+    let fieldObj = _i.mmry('getFormFieldConfg', [fLvl, field]);                   //console.log('fieldObj = %O', fieldObj);                
     if (!fieldObj.val) { fieldObj.val = {}; }
     fieldObj.val[cnt] = e.target.value || null;
-    _mmry('setFormFieldConfg', [fLvl, field, fieldObj]);
+    _i.mmry('setFormFieldConfg', [fLvl, field, fieldObj]);
     checkForBlanksInOrder(fieldObj.val, field, fLvl);    
 }
 /**
@@ -248,11 +240,11 @@ function checkForBlanks(vals) {
     }
 }
 function reportFieldErr(field, errTag, fLvl) {
-     _errs('reportFormFieldErr', [field, errTag, fLvl]);
+     _i.err('reportFormFieldErr', [field, errTag, fLvl]);
 }
 function clearPreviousErr(field, fLvl) {
-    if (!$('#'+field+'_errs.'+fLvl+'-active-errs')) { return; }
-    _errs('clrContribFieldErr', [field, fLvl]);
+    if (!$('#'+field+'_i.err.'+fLvl+'-active-errs')) { return; }
+    _i.err('clrContribFieldErr', [field, fLvl]);
 }
 function buildFieldInput(fieldType, entity, field, fLvl) {                      //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
     const builders = { 'text': buildTextInput, 'tags': buildTagField, 
@@ -266,20 +258,20 @@ function getFieldClass(fLvl, fieldType) {
         'xlrg-field') : classes[fLvl];
 }
 /** Returns true if field is in the required fields array. */
-function isFieldRequried(field, fLvl, reqFields) {                              //console.log('isFieldRequried. fLvl = [%s], fP = %O', fLvl, fP);
+function isFieldRequried(field, fLvl, reqFields) {                              //console.log('isFieldRequried. fLvl = [%s], mmry = %O', fLvl, mmry);
     return reqFields.indexOf(field) !== -1;
 }
 /*----------------------- Form Input Builders ----------------------------*/
 function buildTextInput(entity, field, fLvl) { 
     const attr = { 'type': 'text', class: getFieldClass(fLvl) };
-    return _u('buildElem', ['input', attr]);
+    return _i.util('buildElem', ['input', attr]);
 }
 function buildTextArea(entity, field, fLvl) {                                     
-    return _u('buildElem', ['textarea', {class: getFieldClass(fLvl) }]);
+    return _i.util('buildElem', ['textarea', {class: getFieldClass(fLvl) }]);
 }
 export function buildLongTextArea(entity, field, fLvl) {
     const attr = { class: getFieldClass(fLvl, 'long'), id:field+'-txt' };
-    return _u('buildElem', ['textarea', attr]);
+    return _i.util('buildElem', ['textarea', attr]);
 }
 /**
  * Creates and returns a select dropdown for the passed field. If it is one of 
@@ -294,8 +286,8 @@ function buildSelectCombo(entity, field, fLvl, cnt) {                           
     function finishSelectBuild(opts) {  
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const attr = { id: fieldId , class: getFieldClass(fLvl)};
-        _mmry('addComboToMemory', [fLvl, field]);
-        return _u('buildSelectElem', [opts, attr]);
+        _i.mmry('addComboToMemory', [fLvl, field]);
+        return _i.util('buildSelectElem', [opts, attr]);
     }
 }
 /**
@@ -304,7 +296,7 @@ function buildSelectCombo(entity, field, fLvl, cnt) {                           
  * or the Author create form when the user enters a new Author's name. 
  */
 function buildMultiSelectCntnr(entity, field, fLvl) {                           //console.log("entity = %s. field = ", entity, field);
-    const cntnr = _u('buildElem', ['div', { id: field+'-sel-cntnr'}]);
+    const cntnr = _i.util('buildElem', ['div', { id: field+'-sel-cntnr'}]);
     return buildMultiSelectElems(entity, field, fLvl, 1)
         .then(returnFinishedMultiSelectFields);
 
@@ -319,7 +311,7 @@ export function buildMultiSelectElems(entity, field, fLvl, cnt) {
         .then(returnFinishedMultiSelectField);
 
     function returnFinishedMultiSelectField(fieldElem) {
-        const wrapper = _u('buildElem', ['div', {class: 'flex-row'}]);
+        const wrapper = _i.util('buildElem', ['div', {class: 'flex-row'}]);
         const lbl = buildMultiSelectLbl(cnt)
         $(fieldElem).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
         $(wrapper).append([lbl, fieldElem]);
@@ -329,7 +321,7 @@ export function buildMultiSelectElems(entity, field, fLvl, cnt) {
 } /* End buildMultiSelectElems */
 function buildMultiSelectLbl(cnt) {
     const attr = {text: getCntLabel(cnt), class:'multi-span'};
-    const lbl = _u('buildElem', ['span', attr]);
+    const lbl = _i.util('buildElem', ['span', attr]);
     $(lbl).css({padding: '.2em .5em 0 0', width: '2.2em'});
 }
 function getCntLabel(cnt) {
@@ -345,9 +337,9 @@ export function buildTagField(entity, field, fLvl) {
 
     function buildTagElem(opts) {
         const attr = { id: field + '-sel', class: getFieldClass(fLvl)};
-        const tagSel = _u('buildSelectElem', [opts, attr]);
+        const tagSel = _i.util('buildSelectElem', [opts, attr]);
         $(tagSel).data('inputType', 'tags');
-        _mmry('addComboToMemory', [fLvl, field]);
+        _i.mmry('addComboToMemory', [fLvl, field]);
         return tagSel;
     }
 }
@@ -383,7 +375,7 @@ function getSelectOpts(field) {                                                 
     return Promise.resolve(getOpts(fieldKey, field));
 }
 function getStoredOpts(prop) {
-    return _u('getOptsFromStoredData', [prop]);
+    return _i.util('getOptsFromStoredData', [prop]);
 }
 /** Builds options out of the passed ids and their entity records. */
 export function getRcrdOpts(ids, rcrds) {
@@ -396,16 +388,16 @@ export function getRcrdOpts(ids, rcrds) {
 }
 /** Returns an array of options objects for tags of the passed entity. */
 function getTagOpts(entity) {
-    return _u('getOptsFromStoredData', [entity+"Tags"]);
+    return _i.util('getOptsFromStoredData', [entity+"Tags"]);
 }
 /** Returns an array of source-type (prop) options objects. */
 export function getSrcOpts(prop, field, rcrds) {
     const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
         'authSrcs': field ? field.slice(0, -1) : 'Author' };
-    return _u('getData', [prop]).then(buildSrcOpts);
+    return _i.util('getData', [prop]).then(buildSrcOpts);
 
     function buildSrcOpts(ids) {
-        const srcs = rcrds || _mmry('getEntityRcrds', ['source']);
+        const srcs = rcrds || _i.mmry('getEntityRcrds', ['source']);
         const opts = getRcrdOpts(ids, srcs);
         opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
         return opts;
@@ -413,11 +405,11 @@ export function getSrcOpts(prop, field, rcrds) {
 }
 /** Return the citation type options available for the parent-publication's type. */
 function getCitTypeOpts(prop) {  
-    const fLvl = _forms.getSubFormLvl('sub');  
-    return _u('getData', [prop]).then(buildCitTypeOpts);
+    const fLvl = _i.getSubFormLvl('sub');  
+    return _i.util('getData', [prop]).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
-        return _u('buildOptsObj', [types, getCitTypeNames().sort()]);
+        return _i.util('buildOptsObj', [types, getCitTypeNames().sort()]);
     }
     function getCitTypeNames() {
         const opts = {
@@ -425,34 +417,34 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        const pubRcrd = _mmry('getFormProp', ['rcrds', fLvl]).pub; 
+        const pubRcrd = _i.mmry('getFormProp', ['rcrds', fLvl]).pub; 
         return opts[pubRcrd.publicationType.displayName];
     }
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
 export function getTaxonOpts(level, field, r) {
-    let realm = r ? r : _mmry('getTaxonProp', ['realm']);
-    return _u('getOptsFromStoredData', [realm+level+'Names'])
+    let realm = r ? r : _i.mmry('getTaxonProp', ['realm']);
+    return _i.util('getOptsFromStoredData', [realm+level+'Names'])
         .then(buildTaxonOpts);
 
-        function buildTaxonOpts(opts) {                                         //console.log("taxon opts for [%s] = %O", fP.forms.taxonPs.realm+level+"Names", opts)        
+        function buildTaxonOpts(opts) {                                         //console.log("taxon opts for [%s] = %O", mmry.forms.taxonPs.realm+level+"Names", opts)        
             opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
             return opts;
         }
 }
 function getRealmOpts() {
-    return _u('getOptsFromStoredData', ['objectRealmNames']);  
+    return _i.util('getOptsFromStoredData', ['objectRealmNames']);  
 }
 /** Returns options for each country and region. */ 
 function getCntryRegOpts() {
-    const proms = ['countryNames', 'regionNames'].map(k => _u('getOptsFromStoredData', [k]));
+    const proms = ['countryNames', 'regionNames'].map(k => _i.util('getOptsFromStoredData', [k]));
     return Promise.all(proms).then(data => data[0].concat(data[1]));
 }
 /** Returns an array of option objects with all unique locations.  */
 export function getLocationOpts() {
-    const rcrds = fP.records.location;
+    const rcrds = mmry.records.location;
     let opts = Object.keys(rcrds).map(buildLocOpt);
-    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    opts = opts.sort((a, b) => _i.util('alphaOptionObjs', [a, b]));
     opts.unshift({ value: 'create', text: 'Add a new Location...'});
     return opts;
     
@@ -466,14 +458,14 @@ export function getLocationOpts() {
  */
 export function buildFormRow(field, input, fLvl, isReq, rowClss) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
-    const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]); 
+    const errorDiv = _i.util('buildElem', ['div', { id: field+'_i.err'}]); 
     const fieldCntnr = buildFieldContainer(input, field, fLvl, isReq);   
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
 } 
 function buildRowContainer(field, input, fLvl, rowClss) {
     const attr = { class: getRowClasses(), id: field + '_row'}
-    return _u('buildElem', ['div', attr]);
+    return _i.util('buildElem', ['div', attr]);
     /** Returns the style classes for the row. */
     function getRowClasses() { 
         const rowClass = input.className.includes('xlrg-field') ? 
@@ -482,7 +474,7 @@ function buildRowContainer(field, input, fLvl, rowClss) {
     }
 }
 function buildFieldContainer(input, field, fLvl, isReq) {
-    const cntnr = _u('buildElem', ['div', { class: 'field-row flex-row'}]);
+    const cntnr = _i.util('buildElem', ['div', { class: 'field-row flex-row'}]);
     const label = buildFieldLabel(field);
     const pin = fLvl === 'top' ? getPinElem(field) : null;  
     $(cntnr).append([label, input, pin]);
@@ -491,8 +483,8 @@ function buildFieldContainer(input, field, fLvl, isReq) {
 }
 function buildFieldLabel(field) {
     const fieldName = field.replace(/([A-Z])/g, ' $1'); //Adds space between pascal-cased words
-    const attr = {text: _u('ucfirst', [fieldName]).trim(), id:field+'-lbl'};
-    return _u('buildElem', ['label', attr]);
+    const attr = {text: _i.util('ucfirst', [fieldName]).trim(), id:field+'-lbl'};
+    return _i.util('buildElem', ['label', attr]);
 }
 function getPinElem(field) {
     const pin = buildPinElem(field);
@@ -501,8 +493,8 @@ function getPinElem(field) {
 }
 function buildPinElem(field) {
     const attr = {type: 'checkbox', id: field+'_pin', class: 'top-pin'};
-    const pin = _u('buildElem', ['input', attr]);
-    _u('addEnterKeypressClick', [pin]);
+    const pin = _i.util('buildElem', ['input', attr]);
+    _i.util('addEnterKeypressClick', [pin]);
     return pin;
 }
 function handledRelatedFieldPins(pin, field) {
@@ -539,7 +531,7 @@ function handleRequiredField(label, input, fLvl) {
     $(label).addClass('required');  
     $(input).change(checkRequiredFields);
     $(input).data('fLvl', fLvl);
-    _mmry('addRequiredFieldInput', [fLvl, input]);
+    _i.mmry('addRequiredFieldInput', [fLvl, input]);
 }
 /**
  * On a required field's change event, the submit button for the element's form 
@@ -550,24 +542,24 @@ function checkRequiredFields(e) {                                               
     const input = e.currentTarget;
     const fLvl = $(input).data('fLvl');  
     checkReqFieldsAndToggleSubmitBttn(input, fLvl);
-    _forms.entity('handleCitText', [fLvl]);
+    _i.entity('handleCitText', [fLvl]);
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
  * has been submitted and before any changes have been made.
  */
-export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, fP.forms.top.unchanged);
+export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, mmry.forms.top.unchanged);
     const subBttnId = '#'+fLvl+'-submit';
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
-        _forms.ui('toggleSubmitBttn', [subBttnId, false]); 
+        _i.ui('toggleSubmitBttn', [subBttnId, false]); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
         if (locHasGpsData(fLvl)) { return; }
-        _forms.ui('toggleSubmitBttn', [subBttnId, true]); 
+        _i.ui('toggleSubmitBttn', [subBttnId, true]); 
     }
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)
-    const reqElems = _mmry('getFormProp', ['reqElems', fLvl]);          
+    const reqElems = _i.mmry('getFormProp', ['reqElems', fLvl]);          
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
@@ -597,12 +589,12 @@ function isAFieldSelected(entity) {                                             
 }
 /** Returns true if the next sub-level form exists in the dom. */
 function hasOpenSubForm(fLvl) {
-    const childFormLvl = _forms.getNextFormLevel('child', fLvl);
+    const childFormLvl = _i.getNextFormLevel('child', fLvl);
     return $('#'+childFormLvl+'-form').length > 0;
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {
-    if (_mmry('getFormProp', ['entity', fLvl]) !== 'location') { return false; }
+    if (_i.mmry('getFormProp', ['entity', fLvl]) !== 'location') { return false; }
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });
@@ -611,11 +603,11 @@ function locHasGpsData(fLvl) {
 
 /* -------------------- APPEND FIELDS AND FORM ------------------------------ */
 export function buildAndAppendForm(fLvl, fields, id) { 
-    fP = _mmry('getAllFormMemory');
-    showFormPopup(fP.action, fP.entity, id);
+    mmry = _i.mmry('getAllFormMemory');
+    showFormPopup(mmry.action, mmry.entity, id);
     const form = buildFormElem();  
-    const fieldContainer = buildEntityFieldContainer(fP.entity, fields);
-    $(form).append([fieldContainer, buildFormFooter(fP.entity, fLvl, fP.action, null, fP)]);
+    const fieldContainer = buildEntityFieldContainer(mmry.entity, fields);
+    $(form).append([fieldContainer, buildFormFooter(mmry.entity, fLvl, mmry.action, null, mmry)]);
     $('#form-main').append(form);  
     return Promise.resolve();
 }
@@ -629,7 +621,7 @@ function buildFormElem() {
 }
 function buildEntityFieldContainer(entity, fields) {
     const attr = { id: entity+'_Rows', class: 'flex-row' };
-    const div = _u('buildElem', ['div', attr]);
+    const div = _i.util('buildElem', ['div', attr]);
     $(div).append(fields); 
     return div;
 }
@@ -660,28 +652,28 @@ function getFormWindowElems(entity, id, action) {
     return [getExitButtonRow(), getFormHtml(entity, id, action)];
 }
 function getExitButtonRow() {
-    const  row = _u('buildElem', ['div', { class: 'exit-row' }]);
+    const  row = _i.util('buildElem', ['div', { class: 'exit-row' }]);
     $(row).append(getExitButton());
     return row;        
 }
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' }
-    const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_forms.exitFormWindow);
+    const bttn = _i.util('buildElem', ['input', attr]);
+    $(bttn).click(_i.exitFormWindow);
     return bttn;
 }
 function getFormHtml(entity, id, action) {
-    const cntnr = _u('buildElem', ['div', { class: 'flex-row' }]);
-    const detailPanelHtml = _forms.uiPanel('getDetailPanelElems', [entity, id, fP]);
+    const cntnr = _i.util('buildElem', ['div', { class: 'flex-row' }]);
+    const detailPanelHtml = _i.panel('getDetailPanelElems', [entity, id, mmry]);
     $(cntnr).append([getMainFormHtml(entity, action), detailPanelHtml]);
     return cntnr;
 }
 function getMainFormHtml(entity, action) { 
-    const formWin = _u('buildElem', ['div', { id: 'form-main', class: fP.action }]);
+    const formWin = _i.util('buildElem', ['div', { id: 'form-main', class: mmry.action }]);
     $(formWin).append(getHeaderHtml(entity, action));
     return formWin;
 }
 function getHeaderHtml(entity, action) {
-    const title = (action == 'New' ? 'New ' : 'Editing ') + _u('ucfirst', [entity]);    
-    return _u('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
+    const title = (action == 'New' ? 'New ' : 'Editing ') + _i.util('ucfirst', [entity]);    
+    return _i.util('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }

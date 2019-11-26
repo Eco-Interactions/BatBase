@@ -321,7 +321,7 @@ export function getCoreFormEntity(entity) {
         'author': 'source',         'citation': 'source', 
         'publication': 'source',    'publisher': 'source', 
         'location': 'location',     'taxon': 'taxon', 
-        'interaction': 'interaction'
+        'interaction': 'interaction', 'editor': 'source'
     };
     return coreEntities[entity];
 }
