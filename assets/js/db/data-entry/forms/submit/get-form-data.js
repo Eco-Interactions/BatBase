@@ -49,7 +49,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     /** Edge case input type values are processed via their type handlers. */
     function getInputVals(fieldName, input, type) {
         const typeHandlers = {
-            'tags': getTagVals, 'multiSelect': _forms.util.bind(null, 'getSelectedVals') 
+            'multiSelect': _forms.getSelectedVals, 'tags': getTagVals
         };
         return typeHandlers[type](input, fieldName);
     }

@@ -7,7 +7,6 @@
  */
 import * as _forms from '../forms-main.js';
 
-
 const _errs = _forms.err;
 const _ui = _forms.ui;
 const _cmbx = _forms.uiCombos;
@@ -37,7 +36,7 @@ function buildLocForm(val, fLvl) {
         'Country': $('#Country-Region-sel').val() 
     }; 
     _mmry('initEntityFormMemory', ['location', fLvl, '#Location-sel', 'create']);
-    _mmry('setonFormCloseHandler', [fLvl, _forms.enableCountryRegionField]);
+    _mmry('setonFormCloseHandler', [fLvl, enableCountryRegionField]);
     return _elems('initSubForm', [fLvl, 'med-sub-form', vals, '#Location-sel'])
         .then(appendLocFormAndFinishBuild);
 
@@ -93,10 +92,24 @@ export function addListenerToGpsFields(params = [true]) {
     $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
     
     function toggleNoGpsSubmitBttn() {
-        const hasGps = ['Lat', 'Long'].find(l => $('#'+l+'itude_row input').val());  
-        _ui('toggleSubmitBttn', ['#sub-submit', !hasGps]);
-        _map('addVolatileMapPin', params);
+        const coords = getCoordVals();
+        _ui('toggleSubmitBttn', ['#sub-submit', coords.length]);
+        if (coords.length === 2) { _map('addVolatileMapPin', params); }
     }
+}
+function getCoordVals() {
+    return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);  
+}
+function lintCoord(prefix) {
+    const field = prefix+'itude';
+    const val = $('#'+field+'_row input').val();
+    if (ifCoordFieldHasErr(field, val)) { return locCoordErr(field); }
+    return val;
+}
+function ifCoordFieldHasErr(field) {
+    const coord = $(`#${field}_row input`).val();
+    const max = field === 'Latitude' ? 90 : 180;
+    return isNaN(coord) ? true : coord > max ? true : false;    
 }
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
@@ -152,10 +165,24 @@ export function addMapToLocationEditForm(id) {
     finishLocFormAfterMapLoad(id);
 }
 function finishLocFormAfterMapLoad(id) {
-    if ($('#loc-map').data('loaded')) {
-        _ui('setCoreRowStyles', ['#form-main', '.top-row']);
-        db_map('addVolatileMapPin', [id, 'edit', _cmbx.getSelVal('#Country-sel')]);
-    } else {
-        window.setTimeout(() => finishLocFormAfterMapLoad(id), 500);
-    }
+    if ($('#loc-map').data('loaded')) { finishEditForm(id)
+    } else { window.setTimeout(() => finishLocFormAfterMapLoad(id), 500); }
+}
+function finishEditForm(id) {
+    $('input.leaflet-control-create-icon').click(initCreateForm);
+    $('#loc-select-bttn').click(selectLoc.bind(null, id));
+    _ui('setCoreRowStyles', ['#form-main', '.top-row']);
+    db_map('addVolatileMapPin', [id, 'edit', _cmbx.getSelVal('#Country-sel')]);
+    $('#loc-map').removeData('loaded')
+}
+function selectLoc(id) {
+    $('#sub-form').remove();
+    _cmbx('setSelVal', ['#Location-sel', id]);
+    enableCountryRegionField();
+    _cmbx('enableCombobox', ['#Location-sel']);
+}
+/** When the Location sub-form is exited, the Country/Region combo is reenabled. */
+function enableCountryRegionField() {  
+    _cmbx('enableCombobox', ['#Country-Region-sel']);
+    $('#loc-note').fadeTo(400, 1);
 }

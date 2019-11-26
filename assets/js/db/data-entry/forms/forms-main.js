@@ -1,74 +1,73 @@
 /**
- * Entry point for all entity specific form methods.
+ * Handles all data-entry form entry points. 
  *
- *
- * Exports:             Imported by: 
- *     createSubEntity          interaction-form, db-forms
- *     finishTaxonSelectUi      interaction-form
- *     getFormFields            interaction-form
- *     getSrcTypeRows           edit-forms
- *     getSubFormLvl            interaction-form
- *     handleSpecialCaseTypeUpdates         edit-forms
- *     handleCitText            form-elems
- *     initEntitySubForm        interaction-form
- *     initEntityFormMemory     interaction-form, edit-forms
- *     
+ * CODE SECTIONS
+ *     DATABASE PAGE FACADE
+ *     FORMS FACADE
+ *         FORM STATE / MEMORY
+ *         FORM UI
+ *         HELPERS
  */
-import * as _u from '../../util.js';
-import * as _submit from './submit/submit-main.js';
-import * as _mmry from './etc/form-memory.js';
 import * as _confg from './etc/form-config.js';
-import * as db_forms from '../db-forms.js';
-import * as form_util from './etc/form-util.js';
-import * as _int from './entity/interaction-form.js';
-import * as _loc from './entity/location-form.js';
-import * as _src from './entity/source-forms.js';
-import * as _txn from './entity/taxon-form.js';
+import * as _forms from './entity/entity-main.js';
+import * as _mmry from './etc/form-memory.js';
+import * as _submit from './submit/submit-main.js';
 import * as _ui from './ui/form-ui-main.js';
-import * as db_map from '../../db-map/map-main.js';
-import * as db_sync from '../../db-sync.js';
-import * as db_page from '../../db-page.js';
+// REFACTOR
+import * as _map from '../../db-map/map-main.js';
+import * as _page from '../../db-page.js';
+import * as _sync from '../../db-sync.js';
+import * as _u from '../../util.js';
 
-const _errs = _submit.err;
-const forms = {
-    'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 'object': _int
-};
-
-export function loadDataTableAfterFormClose(focus) {
-    db_page.initDataTable(focus);
-}
-export function map(funcName, params = []) {
-    return db_map[funcName](...params);
-}
-export function updateLocalDataStorage() {
-    return db_sync.updateLocalDb(...arguments);
-}
-export function submit(funcName, params = []) {
-    return _submit[funcName](...params);
-}
-export function getData(entity, fLvl, submitting) {
-    return _submit.getFormData(entity, fLvl, submitting);
-}
-/** -------------------  DATABASE PAGE UTILITY ------------------------------ */
+/** =================== DATABASE PAGE FACADE ================================ */
 export function _util(funcName, params = []) {  
     return _u[funcName](...params);
 }
-/** ------------------------  FORM UTILITY ---------------------------------- */
-export function util(funcName, params = []) {
-    return form_util[funcName](...params);
+export function map(funcName, params = []) {
+    return _map[funcName](...params);
 }
+export function loadDataTableAfterFormClose(focus) {
+    _page.initDataTable(focus);
+}
+export function initNewDataForm() {
+    _forms.createEntity('interaction');
+}
+export function updateLocalDataStorage() {
+    return _sync.updateLocalDb(...arguments);
+}
+/** ====================== FORMS FACADE ===================================== */
+export function create(entity) {
+    _forms.createEntity(entity);
+}
+export function edit(id, entity) {                                        
+    _mmry.initFormMemory("edit", entity, id)
+    .then(() => _edit.editEntity(id, entity, fP));
+}   
+export function entity(funcName, params = []) {
+    return _forms[funcName](...params);
+}
+export function err(funcName, params = []) {
+    return _submit.err[funcName](...params);
+}
+export function submitForm(formId, fLvl, entity) {
+    _submit.valAndSubmitFormData(formId, fLvl, entity);
+}
+/** edit-forms */
+export function formatAndSubmitData(entity, fLvl, formVals) {
+    return _submit.buildFormDataAndSubmit(entity, fLvl, formVals);
+}
+/** ------------------- FORM STATE / MEMORY --------------------------------- */
 export function confg(funcName, params = []) {
     return _confg[funcName](...params);
 }
-/** ----------------------  ERROR HANDLERS ---------------------------------- */
-export function err(funcName, params = []) {
-    return _errs[funcName](...params);
+export function memory(funcName, params = []) {   
+    return _mmry[funcName](...params);
 }
-/** --------------------------- FORM UI ---------------------------------- */
-// export function ui(funcName, params) {
-//     return _ui[funcName](...params);
-// }
+export function clearFormMemory() {
+    require('../../db-map/map-main.js').clearMemory();
+    _mmry.clearMemory();
+}
+/** --------------------------- FORM UI ------------------------------------- */
 export function uiElems(funcName, params = []) {
     return _ui.elems(funcName, params);
 }
@@ -87,142 +86,41 @@ export function exitFormWindow(e, skipReset) {
 export function exitFormLevel() {
     return _ui.exitForm(...arguments);
 }
-/** ------------------------ STATE MANAGMENT -------------------------------- */
-export function memory(funcName, params = []) {   
-    return _mmry[funcName](...params);
-}
-export function initFormMemory(action, entity, id) {
-    return _mmry.initFormMemory(action, entity, id);
-}
-export function initEntityFormMemory(entity, level, pSel, action) {
-    return _mmry.initEntityFormMemory(entity, level, pSel, action)
-}
-// export function setonFormCloseHandler(formField, fLvl) {
-//     const hndlrs = {
-//         'location': _int.enableCountryRegionField,
-//         // 'object': _int.enableTaxonCombos,
-//         // 'subject': _int.enableTaxonCombos,
-//         'taxon': _int.enableTaxonLvls
-//     };
-//     _mmry.setonFormCloseHandler(fLvl, hndlrs[formField]);
-// }
-export function getFormMemory() {
-    return _mmry.getAllFormMemory();
-}
-export function clearFormMemory() {
-    require('../../db-map/map-main.js').clearMemory();
-    _mmry.clearMemory();
-}
-/** ------------------------ INIT FORMS ------------------------------------- */
-export function initNewDataForm() {
-    forms.interaction.initCreateForm();
-}
-export function createSubEntity(ent, cnt) {  
-    const entity = ent == 'Citation' ? 'CitationTitle' : ent;
-    const selId = cnt ? '#'+entity+'-sel'+cnt : '#'+entity+'-sel';
-     $(selId)[0].selectize.createItem('create'); 
-}
-export function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {           //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
-    _mmry.initEntityFormMemory(_u.lcfirst(role), fLvl, '#'+role+'-sel', 'create');
-    return _mmry.initTaxonMemory(role, realm, realmTaxon)
-        .then(() => _ui.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
-}
-/** --------- ON FORM INIT COMPLETE ------------- */
-export function onFormInitComplete(entity) {
-    forms[_u.lcfirst(entity)].onInitComplete();
-}
-/** --------- EXIT HANDLERS ------------- */
-// edit form default handler: form_ui.exitFormPopup
-export function onFormSubmitSuccess(entity, action) {
-    const defaultHandlr = action === 'edit' ? form_ui.exitFormPopup : Function.prototype;
-    return forms[_u.lcfirst(entity)].onFormClose || defaultHandlr; 
-}
-export function submitForm(formId, fLvl, entity) {
-    _submit.valAndSubmitFormData(formId, fLvl, entity);
-}
-/** ------------------------ FORM ELEMENTS ---------------------------------- */
-export function getFormFields(entity, params = []) {
-    const map = {
-        'interaction': _int.getInteractionFormFields
-    };
-    return map[entity](params);
-}
-/** ------------------------ CREATE FORMS ----------------------------------- */
-export function create(entity) {
-    forms[_u.lcfirst(entity)].initCreateForm(entity);
-}
-/** ------------------------ FORM SPECIFIC ---------------------------------- */
-export function getSrcTypeRows(entity, typeId, fLvl, type) {
-    return _src.getSrcTypeRows(entity, typeId, fLvl, type)
-}
-export function handleCitText(formLvl) {
-    if (_mmry.getFormProp('entity', formLvl) !== 'citation') { return; }
-    _src.handleCitText(formLvl);
-}
-export function handleSpecialCaseTypeUpdates(elem, fLvl) {
-    _src.handleSpecialCaseTypeUpdates(elem, fLvl);
-}
-export function loadSrcTypeFields(subEntity, typeId, elem, typeName) {
-    return _src.loadSrcTypeFields(subEntity, typeId, elem, typeName);
-}
-export function selectInteractionLocation(id) {
-    _int.selectLoc(id);
-}
-export function getFormFunc(entity, funcName) {
-    return forms[entity][funcName];
-}
-export function callFormFunc(entity, funcName, params = []) {  console.log('args = %O, forms = %O', arguments, forms);
-    return forms[entity][funcName](...params);
-}
-export function getSelectedTaxon() {
-    return _int.getSelectedTaxon();
-}
-/* edit-form */
-export function selectExistingAuthors() {
-    return _src.selectExistingAuthors(...arguments);
-}
-export function locCoordErr() {
-    return _loc.locCoordErr(...arguments);
-}
-export function addMapToLocationEditForm() {
-    return _loc.addMapToLocationEditForm(...arguments);
-}
-export function addMapToLocForm() {
-    return _loc.addMapToLocForm(...arguments);
-}
-export function focusParentAndShowChildLocs() {
-    return _loc.focusParentAndShowChildLocs(...arguments);
-}
-export function onSrcToggleFields() {
-    _src.finishSourceToggleAllFields(...arguments);
-}
-export function buildCitationText(fLvl) {
-    return require('./features/generate-citation.js').buildCitationText(fLvl);
-}
-export function enablePubField() {
-    return _int.enablePubField();
-}
-export function enableCountryRegionField() {
-    return _int.enableCountryRegionField();
-}
-export function submitNewLocation() {
-    return _loc.addNewLocation();
-}
-export function initNewTaxonForm(level, val) {
-    return _txn.initCreateForm(level, val);
-}
 /** --------------------------- HELPERS ------------------------------------- */
+/* generate-citation */
+export function getFormFieldData(entity, fLvl, submitting) {
+    return _submit.getFormData(entity, fLvl, submitting);
+}
 /** Returns the 'next' form level- either the parent or child. */
-export function getNextFormLevel(next, curLvl) {
-    return util('getNextFormLevel', [next, curLvl]);
+export function getNextFormLevel(next, curLvl) {  
+    const fLvls = _mmry.getMemoryProp('formLevels');   
+    const nextLvl = next === 'parent' ? 
+        fLvls[fLvls.indexOf(curLvl) - 1] : 
+        fLvls[fLvls.indexOf(curLvl) + 1] ;
+    return nextLvl;
 }
-export function getSubFormLvl(intFormLvl) {  
-    return util('getSubFormLvl', [intFormLvl]);
+/** 
+ * Returns the sub form's lvl. If the top form is not the interaction form,
+ * the passed form lvl is reduced by one and returned. 
+ */
+export function getSubFormLvl(intFormLvl) { 
+    const mmry = _mmry.getMemoryProp('getAllFormMemory') 
+    const fLvls = mmry.formLevels;
+    return mmry.forms.top.entity === 'interaction' ? 
+        intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
 }
-// export function getComboboxEvents(entity) {                                     console.log('entity = ', entity)
-//     return forms[entity].getComboEvents(entity);
-// }
-/* ------- sort --------- */
+
+/** Returns an obj with the order (k) of the values (v) inside of the container. */
+export function getSelectedVals(cntnr, fieldName) {
+    let vals = {};
+    $.each(cntnr.children, (i, elem) => getCntnrFieldValue(i+1, elem.children));              
+    return vals;
+        
+    function getCntnrFieldValue(cnt, subElems) {                                     
+        $.each(subElems, (i, subEl) => { 
+            if (subEl.value) { vals[cnt] = subEl.value; }});  
+    }                                                                   
+}
 export function getTaxonDisplayName(taxon) { 
     return taxon.level.displayName === 'Species' ? 
         taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;

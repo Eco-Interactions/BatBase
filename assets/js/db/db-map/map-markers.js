@@ -444,10 +444,9 @@ function getCoordsHtml(loc) {
 }
 function getSelectLocationBttn(loc, editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
-    const clickFunc = editing ? Function.prototype : _forms.selectInteractionLocation; 
-    const bttn = _u.buildElem('input', {type: 'button',
+    const bttn = _u.buildElem('input', {type: 'button', id: 'loc-select-bttn',
         class:'ag-fresh tbl-bttn popup-bttn', value: text});
-    $(bttn).click(clickFunc.bind(null, loc.id));
+    // $(bttn).click(clickFunc.bind(null, loc.id));
     $(bttn).css({'margin-top': '.5em'});
     if (editing) { $(bttn).attr('disabled', 'disabled').css('opacity', '.666'); }
     return bttn;
@@ -699,7 +698,7 @@ function getNewLocText(loc, editing) {
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn', value: 'Create Location'});
-    $(bttn).click(_forms.submitNewLocation);
+    $(bttn).click(_forms.create.bind('location'));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }

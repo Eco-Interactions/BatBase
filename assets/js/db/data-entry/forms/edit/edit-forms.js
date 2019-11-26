@@ -2,14 +2,13 @@
  * Handles individual Entity edit forms. 
  *
  * Exports:             Imported by:
- *     showEntityEditForm       db-forms
+ *     showEntityEditForm       forms-main
  */
 import * as _u from '../../../util.js';
 import * as _elems from '../ui/form-elems.js';
 import * as _cmbx from '../ui/combobox-util.js';
 // import * as _errs from '../validation/f-errs.js';
 import * as _forms from '../forms-main.js';
-import * as db_forms from '../../db-forms.js';
 import * as db_map from '../../../db-map/map-main.js';
 import * as _fCnfg from '../etc/form-config.js';
 import { buildFormFooter } from '../ui/form-footer.js';
@@ -20,7 +19,7 @@ const _errs = _forms.err;
 const _mmry = _forms.memory;
 
 /** Shows the entity's edit form in a pop-up window on the search page. */
-export function showEntityEditForm(id, entity, params) {                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
+export function editEntity(id, entity, params) {                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
     fP = params;
     initEditForm(id, entity)
     .then(() => onEditFormFillComplete(id, entity))
@@ -40,8 +39,8 @@ function hideFieldCheckboxes() {
 }
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
-    const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
-        'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
+    const edgeCase = { 'citation': getSrcTypeFields,  
+        'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };  //'interaction': getIntFormFields,
     const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
     fP.forms.expanded[entity] = true;
     return fieldBldr(entity, id);
@@ -370,7 +369,7 @@ function buildEditParentHdr() {
 }
 function getParentEditFields(prnt) {  
     const realm = _u.lcfirst(prnt.realm.displayName);      
-    return _forms.initEntityFormMemory(realm, 'sub', null, 'edit')
+    return _mmry('initEntityFormMemory', [realm, 'sub', null, 'edit'])
         .then(fP => _elems.buildFormRows(realm, {}, 'sub', null, fP))
         .then(modifyAndReturnPrntRows);
     
@@ -418,7 +417,7 @@ function clearAllOtherLvls() {
     });
 }
 function closePrntEdit() {                                                  
-    var prnt =  _forms.getSelectedTaxon() || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
+    var prnt =  _forms.entity('getSelectedTaxon') || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
     exitPrntEdit(prnt);
 }
 function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
@@ -532,7 +531,7 @@ function submitTaxonEdit() {
         level:       $('#Taxon_row select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                                          //console.log("taxon vals = %O", vals);
-    _forms.submit('buildFormDataAndSubmit', ['taxon', 'top', vals]);
+    _forms.formatAndSubmitData('taxon', 'top', vals);
 }
 /*-------- Edit Citation Methods ----------*/
 function finishCitEditFormBuild() {

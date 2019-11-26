@@ -19,10 +19,10 @@ const _mmry = _forms.memory;
 export function buildCitationText(fLvl) {  
     const pubData = _mmry('getFormProp', ['rcrds', fLvl]);  
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
-    return _forms.getData('citation', null, null)
+    return _forms.getFormFieldData('citation', null, null)
         .then(generateCitText); 
 
-    function generateCitText(formVals) {                                        console.log('generateCitText. formVals = %O', formVals);
+    function generateCitText(formVals) {                                        //console.log('generateCitText. formVals = %O', formVals);
         const builder = { 'Article': articleCit, 'Book': bookCit, 
             'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
             'Other': otherCit, 'Report': otherCit, 'Museum record': otherCit, 
@@ -118,7 +118,7 @@ export function buildCitationText(fLvl) {
             return 'pp. ' + _u.stripString(formVals.pages);
         }
         function getFormAuthors(eds) { 
-            const auths = _forms.util('getSelectedVals', [$('#Authors-sel-cntnr')[0]]);          //console.log('auths = %O', auths);
+            const auths = _forms.getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
             if (!Object.keys(auths).length) { return false; }
             return getFormattedAuthorNames(auths, eds);
         }
@@ -172,7 +172,7 @@ export function buildCitationText(fLvl) {
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
-export function rebuildCitationText(citSrc, cit, pubSrc, rcrds, sRcrds) {                      console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
+export function rebuildCitationText(citSrc, cit, pubSrc, rcrds, sRcrds) {       console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
     const aRcrds = rcrds[0]; //authors
     const cRcrds = rcrds[1]; //citations
     const pRcrds = rcrds[2]; //publishers
