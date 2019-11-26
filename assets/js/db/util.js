@@ -244,7 +244,7 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
-function logAjaxData(dataPkg, args) {
+export function logAjaxData(dataPkg, args) {
     if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
         console.log("           --Sending Ajax data =%O arguments = %O", dataPkg, args);
     } else { console.log("          --Sending Ajax data =%O", dataPkg); }

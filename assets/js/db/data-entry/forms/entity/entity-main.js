@@ -49,7 +49,7 @@ export function getSrcTypeRows(entity, typeId, fLvl, type) {
     return _src.getSrcTypeRows(entity, typeId, fLvl, type)
 }
 export function handleCitText(formLvl) {
-    if (_i.mmry('getFormProp', ['entity', formLvl]) !== 'citation') { return; }
+    if (_i.mmry('getFormProp', [formLvl, 'entity']) !== 'citation') { return; }
     _src.handleCitText(formLvl);
 }
 export function handleSpecialCaseTypeUpdates(elem, fLvl) {

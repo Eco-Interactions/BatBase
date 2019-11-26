@@ -93,18 +93,26 @@ function getFieldTypeObj(entity, fLvl) {
         type: getEntityTypeFormConfg(entity, fLvl),
         showAll: mmry.forms[fLvl].expanded
     };
-    return buildFieldTypeObj(confg, mmry.forms[fLvl].fieldConfg);
+    return {
+        fields: getIncludedFields(confg),
+        order: getFieldOrder(confg),
+        required: getRequiredFields(confg)
+    }
+    // return buildFieldTypeObj(confg); //, mmry.forms[fLvl].fieldConfg
 }   
 function getEntityTypeFormConfg(entity, fLvl) {
     const type = mmry.forms[fLvl].entityType;
     return type ? _i.confg('getFormConfg', [entity]).types[type] : false;
 }
-function buildFieldTypeObj(confg, fieldConfg) {                                 //console.log('fieldConfg = %O', fieldConfg);
-    fieldConfg.fields = getIncludedFields(confg);
-    fieldConfg.order = getFieldOrder(confg);                     
-    fieldConfg.required = getRequiredFields(confg);
-    return fieldConfg;
-}
+// function buildFieldTypeObj(confg) {
+//     return 
+// }
+// function buildFieldTypeObj(confg, fieldConfg) {                                 //console.log('fieldConfg = %O', fieldConfg);
+//     fieldConfg.fields = getIncludedFields(confg);
+//     fieldConfg.order = getFieldOrder(confg);                     
+//     fieldConfg.required = getRequiredFields(confg);
+//     return fieldConfg;
+// }
 function getIncludedFields(confg) {
     const allFields = getFieldTypes(confg);
     const included = {}
@@ -173,21 +181,22 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
 /**
  * @return {div} Form field row with required-state and value (if passed) set.  
  */
-function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     return buildFieldInput(fieldsObj.fields[field], entity, field, fLvl)
         .then(buildFieldRow);
 
     function buildFieldRow(input) {                                             //console.log('input = %O', input);
         const isReq = isFieldRequried(field, fLvl, fieldsObj.required);    
-        addFieldToFormFieldObj();
+        addFieldToFormMemory();
         fillFieldIfValuePassed(input);
-        $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));
+        addFieldOnChangeHandler(entity, input, field, fLvl);
         return buildFormRow(_i.util('ucfirst', [field]), input, fLvl, isReq, "");
     }
     /** Adds the field, and it's type and value, to the form's field obj.  */
-    function addFieldToFormFieldObj() {
-        const confg = { val: fVals[field], type: fieldsObj.fields[field] };
-        _i.mmry('setFormFieldConfg', [fLvl, field, confg]);
+    function addFieldToFormMemory() {
+        const type = fieldsObj.fields[field]; 
+        const val = fVals[field] ? fVals[field] : (type == 'multiSelect' ? {} : null);
+        _i.mmry('setFormFieldData', [fLvl, field, val, type]);
     }
     /** Sets the value for the field if it is in the passed 'fVals' obj. */
     function fillFieldIfValuePassed(input) {                                    //console.log('filling value in [%s]', field);
@@ -197,24 +206,27 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
         }
     }
 } /* End buildRow */ 
-/**
- * Adds field value to the form's confg object. Calls @handleCitText to check 
- * citation fields for any changes to the generated and displayed citation text.
- */
-function storeFieldValue(elem, fieldName, fLvl, value) {            
+function addFieldOnChangeHandler(entity, input, field, fLvl) {
+    ifCitationFormAutoGenerateCitationOnChange(entity, input); 
+    if (input.id.includes('-sel-cntnr')) { return; } //change event added @buildFieldInput
+    $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));   
+}
+function ifCitationFormAutoGenerateCitationOnChange(entity, input) {
+    if (entity === 'citation'){ 
+        $(input).change(_i.entity.bind(null, 'handleCitText')); 
+    }
+}
+function storeFieldValue(elem, fieldName, fLvl, value, e) {            
     const val = value || $(elem).val();                             
-    if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
-    if (fieldName !== 'CitationText') { _i.entity('handleCitText', [fLvl]); }
-    _i.mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
+    _i.mmry('setFormFieldData', [fLvl, fieldName, val]);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === 'create') { return; }
-    let fieldObj = _i.mmry('getFormFieldConfg', [fLvl, field]);                   //console.log('fieldObj = %O', fieldObj);                
-    if (!fieldObj.val) { fieldObj.val = {}; }
-    fieldObj.val[cnt] = e.target.value || null;
-    _i.mmry('setFormFieldConfg', [fLvl, field, fieldObj]);
-    checkForBlanksInOrder(fieldObj.val, field, fLvl);    
+    const fieldValues = _i.mmry('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);                
+    fieldValues[cnt] = e.target.value || null;
+    _i.mmry('setFormFieldData', [fLvl, field, fieldValues, 'multiSelect']);
+    checkForBlanksInOrder(fieldValues, field, fLvl);    
 }
 /**
  * Author/editor fields must have all fields filled continuously. There can 
@@ -417,7 +429,7 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        const pubRcrd = _i.mmry('getFormProp', ['rcrds', fLvl]).pub; 
+        const pubRcrd = _i.mmry('getFormProp', [fLvl, 'rcrds']).pub; 
         return opts[pubRcrd.publicationType.displayName];
     }
 } /* End getCitTypeOpts */
@@ -458,7 +470,7 @@ export function getLocationOpts() {
  */
 export function buildFormRow(field, input, fLvl, isReq, rowClss) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
-    const errorDiv = _i.util('buildElem', ['div', { id: field+'_i.err'}]); 
+    const errorDiv = _i.util('buildElem', ['div', { id: field+'_errs'}]); 
     const fieldCntnr = buildFieldContainer(input, field, fLvl, isReq);   
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
@@ -542,7 +554,7 @@ function checkRequiredFields(e) {                                               
     const input = e.currentTarget;
     const fLvl = $(input).data('fLvl');  
     checkReqFieldsAndToggleSubmitBttn(input, fLvl);
-    _i.entity('handleCitText', [fLvl]);
+    // _i.entity('handleCitText', [fLvl]);
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
@@ -559,7 +571,7 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)
-    const reqElems = _i.mmry('getFormProp', ['reqElems', fLvl]);          
+    const reqElems = _i.mmry('getFormProp', [fLvl, 'reqElems']);          
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
@@ -594,7 +606,7 @@ function hasOpenSubForm(fLvl) {
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {
-    if (_i.mmry('getFormProp', ['entity', fLvl]) !== 'location') { return false; }
+    if (_i.mmry('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });

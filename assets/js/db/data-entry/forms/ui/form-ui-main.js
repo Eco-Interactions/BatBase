@@ -55,8 +55,8 @@ export function exitSuccessMsg() {
  * and contextually enables to parent form's submit button. Calls the exit 
  * handler stored in the form's params object.
  */
-export function exitForm(fLvl, focus, onExit, data) {                           //console.log("               --exitForm fLvl = %s, onFormClose = %O", fLvl, fP.forms[fLvl].onFormClose);      
-    const exitFunc = onExit || _i.mmry('getFormProp', ['onFormClose', fLvl]);
+export function exitForm(fLvl, focus, onExit, data) {                           
+    const exitFunc = onExit || _i.mmry('getFormProp', [fLvl, 'onFormClose']);   console.log("               --exitForm fLvl = %s, onExit = %O", fLvl, exitFunc);      
     $('#'+fLvl+'-form').remove();  
     _cmbx.resetFormCombobox(fLvl, focus);
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
@@ -80,8 +80,8 @@ function hideSearchFormPopup() {
  * an interaction, the table will refocus into source-view. Exiting the interaction
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
-function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
-    const formFocus = _i.mmry('getMemoryProp', ['submit']).focus;
+function refocusTableIfFormWasSubmitted() {                                     
+    const formFocus = _i.mmry('getMemoryProp', ['submit']).focus;               //console.log('refocusTableIfFormWasSubmitted. focus = [%s]', formFocus);
     if (!formFocus) { return; }
     if (formFocus == 'int') { return refocusAndShowUpdates(); }   
     _i.loadDataTableAfterFormClose(formFocus);
@@ -106,7 +106,7 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
 function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
     if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
     updateFormMemoryOnFieldToggle(this.checked, fLvl);
-    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
+    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', _i.util('snapshot', [fVals]));
     $('#'+entity+'_Rows').empty();
     _elems.getFormFieldRows(entity, fVals, fLvl)
     .then(appendAndFinishRebuild);
@@ -133,7 +133,7 @@ function ifOpenSubForm(fLvl) {
 }
 function showOpenSubFormErr(fLvl) {
     const subLvl = _i.getNextFormLevel('child', fLvl);
-    let entity = _i.util('ucfirst', [fP.forms[subLvl].entity]);
+    let entity = _i.util('ucfirst', [_i.mmry('getFormProp', [fLvl, entity])]);
     if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
     _i.err('openSubFormErr', [entity, null, subLvl, true]);   
     $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
@@ -141,13 +141,13 @@ function showOpenSubFormErr(fLvl) {
 /*--------------------------- Misc Form Helpers ------------------------------*/
 /*--------------------------- Fill Form Fields -------------------------------*/
 /** Returns an object with field names(k) and values(v) of all form fields*/
-export function getCurrentFormFieldVals(fLvl) {
-    const vals = _i.mmry('getFormProp', [fLvl, 'vals']);                               
-    const valObj = {};
-    for (let field in vals) {
-        valObj[field] = vals[field].val;
+export function getCurrentFormFieldVals(fLvl) { 
+    const fieldData = _i.mmry('getFormProp', [fLvl, 'fieldData']);       
+    const vals = {};
+    for (let field in fieldData) {
+        vals[field] = fieldData[field].val;
     }
-    return valObj;
+    return vals;
 }
 /**
  * When either source-type fields are regenerated or the form fields are toggled 
@@ -156,25 +156,21 @@ export function getCurrentFormFieldVals(fLvl) {
  * reinitiation are handled here.
  */
 export function fillComplexFormFields(fLvl) {
-    const vals = _i.mmry('getFormProp', [fLvl, 'vals']);
+    const fieldData = _i.mmry('getFormProp', [fLvl, 'fieldData']);                       
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
+    const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs); 
 
-    for (let field in vals) {                                                   //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
-        if (!vals[field].val) { continue; } 
-        if (Object.keys(fieldHndlrs).indexOf(vals[field].type) == -1) {continue;}
-        addValueIfFieldShown(field, vals[field].val, fLvl);
-    }
-    function addValueIfFieldShown(field, val, fLvl) {                           //console.log('addValueIfFieldShown [%s] field, val = %O', field, val);
-        if (!fieldIsDisplayed(field, fLvl)) { return; }
-        fieldHndlrs[vals[field].type](field, val, fLvl);        
-    }
+    fields.forEach(field => {
+        const type = fieldData[field].type;
+        const val = fieldData[field].val;
+        fieldHndlrs[type]([field, val, fLvl]);        
+    };
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
-    return  _i.entity.bind(null, 'selectExistingAuthors');
+    return _i.entity.bind(null, 'selectExistingAuthors');
 }
-export function fieldIsDisplayed(field, fLvl) {
-    const curFields = fP.forms[fLvl].fieldConfg.fields;                         //console.log('field [%s] is displayed? ', field, Object.keys(curFields).indexOf(field) !== -1);
-    return Object.keys(curFields).indexOf(field) !== -1;
+export function ifFieldIsDisplayed(field, fLvl) {
+    return !!_i.mmry('getFormFieldData', [fLvl, field]);
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {

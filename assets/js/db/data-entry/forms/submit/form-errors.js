@@ -96,7 +96,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * Shows the user an error message above the field row. The user can clear the 
  * error manually with the close button, or automatically by resolving the error.
  */
-export function reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
+export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
     mmry = _i.mmry('getAllFormMemory');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
@@ -258,7 +258,7 @@ function clrOpenSubForm(elem, fLvl) {
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Returns the error div for the passed field. */
-function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
+function getFieldErrElem(fieldName, fLvl) {                                     console.log("getFieldErrElem for %s", fieldName);
     var field = fieldName.split(' ').join('');
     var elem = $('#'+field+'_errs')[0];    
     $(elem).addClass(fLvl+'-active-errs');

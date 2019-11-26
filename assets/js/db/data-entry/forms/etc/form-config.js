@@ -20,36 +20,36 @@
  * > optional - All remaining available fields for the entity.
  * > order - Order to display the fields in both the default and expanded forms. 
  */
-export function getFormConfg(entity) {                                                 //console.log('getFormConfg [%s]', entity);
+export function getFormConfg(entity) {                                          //console.log('getFormConfg [%s]', entity);
     const fieldMap = { 
-        "arthropod": {
-            "add": {},  
-            "required": [],
-            "suggested": ["Class", "Order", "Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Species", "Genus", "Family", "Order", "Class"],
-                "opt": false },
+        'arthropod': {
+            'add': {},  
+            'required': [],
+            'suggested': ['Class', 'Order', 'Family', 'Genus', 'Species'],
+            'optional': [],
+            'order': {
+                'sug': ['Species', 'Genus', 'Family', 'Order', 'Class'],
+                'opt': false },
         },
-        "author": { 
-            "add": { "FirstName": "text", "MiddleName": "text", 
-                "LastName": "text", "Suffix": "text"}, 
-            "required": ["LastName"], 
-            "suggested": ["FirstName", "MiddleName"],
-            "optional": ["Suffix", "LinkUrl", "LinkDisplay"],
-            "order": {
-                "sug": ["FirstName", "MiddleName", "LastName"],
-                "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
-                    "LinkUrl", "LinkDisplay"]},
+        'author': { 
+            'add': { 'FirstName': 'text', 'MiddleName': 'text', 
+                'LastName': 'text', 'Suffix': 'text'}, 
+            'required': ['LastName'], 
+            'suggested': ['FirstName', 'MiddleName'],
+            'optional': ['Suffix', 'LinkUrl', 'LinkDisplay'],
+            'order': {
+                'sug': ['FirstName', 'MiddleName', 'LastName'],
+                'opt': ['FirstName', 'MiddleName', 'LastName', 'Suffix', 
+                    'LinkUrl', 'LinkDisplay']},
         },
-        "bat": {
-            "add": {},  
-            "required": [],
-            "suggested": ["Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Family", "Genus", "Species"],
-                "opt": false }, 
+        'bat': {
+            'add': {},  
+            'required': [],
+            'suggested': ['Family', 'Genus', 'Species'],
+            'optional': [],
+            'order': {
+                'sug': ['Family', 'Genus', 'Species'],
+                'opt': false }, 
         },
         'citation': {
             'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
@@ -177,103 +177,103 @@ export function getFormConfg(entity) {                                          
                 'opt': false },
         },
         'object': {
-            "add": {"Realm": "select"},  
-            "required": [],
-            "suggested": ["Realm"],
-            "optional": [],
-            "order": {
-                "sug": ["Realm"],
-                "opt": false }, 
+            'add': {'Realm': 'select'},  
+            'required': [],
+            'suggested': ['Realm'],
+            'optional': [],
+            'order': {
+                'sug': ['Realm'],
+                'opt': false }, 
         },
         'plant': {
-            "add": {},  
-            "required": [],
-            "suggested": ["Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Species", "Genus", "Family"],
-                "opt": false},
+            'add': {},  
+            'required': [],
+            'suggested': ['Family', 'Genus', 'Species'],
+            'optional': [],
+            'order': {
+                'sug': ['Species', 'Genus', 'Family'],
+                'opt': false},
         },
         'publication': {
-            "add": { "Title" : "text", "PublicationType": "select", 
-                "Publisher": "select"},  
-            "required": ["PublicationType", "Title"],
-            "suggested": [],
-            "optional": [],
-            "order": {
-                "sug": [["Title", "PublicationType"]],
-                "opt": [["Title", "PublicationType"]] },
-            "types": {
-                "Book": {
-                    "name": 'Book',
-                    "required": ["Authors", 'Editors', "Publisher", "Year"],
-                    "suggested": [],
-                    "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
-                    "order": {
-                        "sug": [["Year", "Publisher"], ["Authors", 'Editors']],
-                        "opt": [["Year", "Doi"], ["LinkDisplay", "LinkUrl"], 
-                            ["Description", "Publisher"], ["Authors", 'Editors']]},
+            'add': { 'Title' : 'text', 'PublicationType': 'select', 
+                'Publisher': 'select'},  
+            'required': ['PublicationType', 'Title'],
+            'suggested': [],
+            'optional': [],
+            'order': {
+                'sug': [['Title', 'PublicationType']],
+                'opt': [['Title', 'PublicationType']] },
+            'types': {
+                'Book': {
+                    'name': 'Book',
+                    'required': ['Authors', 'Editors', 'Publisher', 'Year'],
+                    'suggested': [],
+                    'optional': ['Description', 'LinkDisplay', 'LinkUrl', 'Doi'],
+                    'order': {
+                        'sug': [['Year', 'Publisher'], ['Authors', 'Editors']],
+                        'opt': [['Year', 'Doi'], ['LinkDisplay', 'LinkUrl'], 
+                            ['Description', 'Publisher'], ['Authors', 'Editors']]},
                 },
-                "Journal": {
-                    "name": 'Journal',
-                    "required": [],
-                    "suggested": [],
-                    "optional": ["Year", "Description", "LinkDisplay", "LinkUrl", 
-                        "Doi", "Publisher", "Authors" ],
-                    "order": {
-                        "sug": [],
-                        "opt": [["Year", "Doi"], ["LinkDisplay", "LinkUrl"],
-                        ["Description", "Publisher"], "Authors" ]},
+                'Journal': {
+                    'name': 'Journal',
+                    'required': [],
+                    'suggested': [],
+                    'optional': ['Year', 'Description', 'LinkDisplay', 'LinkUrl', 
+                        'Doi', 'Publisher', 'Authors' ],
+                    'order': {
+                        'sug': [],
+                        'opt': [['Year', 'Doi'], ['LinkDisplay', 'LinkUrl'],
+                        ['Description', 'Publisher'], 'Authors' ]},
                 },
-                "Other": {
-                    "name": 'Other',
-                    "required": ["Authors", 'Year'],
-                    "suggested": ["Publisher"],
-                    "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
-                    "order":  {
-                        "sug": [["Year", "Publisher"], "Authors"],
-                        "opt": [["Year", "Doi"], ["LinkDisplay", "LinkUrl"], 
-                            ["Description", "Publisher"], "Authors"]},
+                'Other': {
+                    'name': 'Other',
+                    'required': ['Authors', 'Year'],
+                    'suggested': ['Publisher'],
+                    'optional': ['Description', 'LinkDisplay', 'LinkUrl', 'Doi'],
+                    'order':  {
+                        'sug': [['Year', 'Publisher'], 'Authors'],
+                        'opt': [['Year', 'Doi'], ['LinkDisplay', 'LinkUrl'], 
+                            ['Description', 'Publisher'], 'Authors']},
                 },
-                "Thesis/Dissertation": {
-                    "name": 'Thesis/Dissertation',
-                    "required": ["Authors", "Publisher", "Year"],
-                    "suggested": [],
-                    "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
-                    "order":  {
-                        "sug": [["Year", "Publisher"], "Authors"],
-                        "opt": [["Year", "Doi"], ["LinkDisplay", "LinkUrl"], 
-                        ["Description", "Publisher"], "Authors"]},
+                'Thesis/Dissertation': {
+                    'name': 'Thesis/Dissertation',
+                    'required': ['Authors', 'Publisher', 'Year'],
+                    'suggested': [],
+                    'optional': ['Description', 'LinkDisplay', 'LinkUrl', 'Doi'],
+                    'order':  {
+                        'sug': [['Year', 'Publisher'], 'Authors'],
+                        'opt': [['Year', 'Doi'], ['LinkDisplay', 'LinkUrl'], 
+                        ['Description', 'Publisher'], 'Authors']},
                 },
             }
         },
         'publisher': { 
-            "add": { "City": "text", "Country": "text"}, 
-            "required": ["DisplayName", "City", "Country"],
-            "suggested": [],
-            "optional": ["Description", "LinkUrl", "LinkDisplay"],
-            "order": {
-                "sug": ["DisplayName", "City", "Country"],
-                "opt": ["DisplayName", "City", "Country", "Description", 
-                    "LinkUrl", "LinkDisplay"]},
+            'add': { 'City': 'text', 'Country': 'text'}, 
+            'required': ['DisplayName', 'City', 'Country'],
+            'suggested': [],
+            'optional': ['Description', 'LinkUrl', 'LinkDisplay'],
+            'order': {
+                'sug': ['DisplayName', 'City', 'Country'],
+                'opt': ['DisplayName', 'City', 'Country', 'Description', 
+                    'LinkUrl', 'LinkDisplay']},
         },
         'subject': {
-            "add": {},  
-            "required": [],
-            "suggested": ["Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Species", "Genus", "Family"],
-                "opt": false },
+            'add': {},  
+            'required': [],
+            'suggested': ['Family', 'Genus', 'Species'],
+            'optional': [],
+            'order': {
+                'sug': ['Species', 'Genus', 'Family'],
+                'opt': false },
         },
         'taxon': {
-            "add": {},  
-            "required": ["DisplayName"],
-            "suggested": [],
-            "optional": [],
-            "order": {
-                "sug": ["DisplayName"],
-                "opt": false },
+            'add': {},  
+            'required': ['DisplayName'],
+            'suggested': [],
+            'optional': [],
+            'order': {
+                'sug': ['DisplayName'],
+                'opt': false },
         },
     };
     return fieldMap[entity];
@@ -311,7 +311,7 @@ export function getCoreFieldDefs(entity) {
             'Genus': 'select', 'Species': 'select'
         },
         'taxon': { 'DisplayName': 'text' }
-    };                                                                          console.log('getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
+    };                                                                          //console.log('getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
     return fields[coreEntityMap[entity]];
 }    
 
@@ -326,15 +326,15 @@ export function getCoreFormEntity(entity) {
     return coreEntities[entity];
 }
 export function getParentEntity(entity) {                                          
-    const details = ['author', 'citation', 'publication', 'publisher'];         //console.log("hasParentEntity? [%s]. Entity = %s", details.indexOf(entity) !== -1, entity);
+    const details = ['author', 'citation', 'publication', 'publisher'];         //console.log('hasParentEntity? [%s]. Entity = %s', details.indexOf(entity) !== -1, entity);
     return details.indexOf(entity) !== -1 ? 'source' : false;
 }
 /**
  * Returns the fields that need to be renamed and the entity they belong to. 
- * A "false" field will not be added to the final form data. An array of 
+ * A 'false' field will not be added to the final form data. An array of 
  * fields will add the form value to each field for the specified entity.
  */
-export function getFieldTranslations(entity) {                                         //console.log("entity = ", entity)
+export function getFieldTranslations(entity) {                                  //console.log('entity = ', entity)
     var fieldTrans = {
         'author': {
             'displayName': { 'source': 'displayName', 'author': 'displayName' }
@@ -352,7 +352,7 @@ export function getFieldTranslations(entity) {                                  
             'issue': { 'citation': 'publicationIssue' },
             'pages': { 'citation': 'publicationPages' },
             'reportType': { 'citation': 'subType' }
-            // "tags": { "source": "tags" }
+            // 'tags': { 'source': 'tags' }
         },
         'interaction': {
             'citationTitle': { 'interaction': 'source' },
@@ -365,8 +365,8 @@ export function getFieldTranslations(entity) {                                  
             'country': { 'location': 'parentLoc' }
         },
         'publication': { 
-            'authors': { "source": false },
-            'editors': { "source": false }, 
+            'authors': { 'source': false },
+            'editors': { 'source': false }, 
             'contributor': { 'source': 'contributor' },
             'publisher': { 'source': 'parentSource' }, 
             'description': { 'source': 'description', 'publication': 'description' },

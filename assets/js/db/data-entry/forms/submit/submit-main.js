@@ -23,7 +23,7 @@ export function valAndSubmitFormData(formId, fLvl, entity) {                    
         .then(vals => buildFormDataAndSubmit(entity, fLvl, vals));
 }
 /* used by edit-form */
-export function buildFormDataAndSubmit(entity, fLvl, formVals) {  console.log('---- ent = ', entity)
+export function buildFormDataAndSubmit(entity, fLvl, formVals) {  
     const data = formatDataForServer(entity, fLvl, formVals)
     submitFormData(data, fLvl, entity);
 }
@@ -38,7 +38,7 @@ function submitFormData(data, fLvl, entity) {                                   
 }
 function getEntityAjaxUrl(fLvl) { 
     const path = $('body').data('ajax-target-url');  
-    const action = _i.mmry('getFormProp', ['action', fLvl]);  
+    const action = _i.mmry('getFormProp', [fLvl, 'action']);  
     return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity) {  
@@ -54,7 +54,7 @@ function storeParamsData(entity, fLvl) {
     _i.mmry('addFormSubmitProps', [props]);
 }
 /* ----------------- Form Submit Success Methods ---------------------------- */
-function onSuccess(data, textStatus, jqXHR) {                            console.log("       --Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);                   
+function onSuccess(data, textStatus, jqXHR) {                                   _i.util('logAjaxData', [data, arguments]);
     _i.updateLocalDataStorage(data.results)
     .then(onDataSynced);
 }
@@ -67,7 +67,7 @@ function onDataSynced(data) {                                                   
 
     function noDataChanges() {
         const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;
-        const action = _i.mmry('getFormProp', ['action', fLvl])
+        const action = _i.mmry('getFormProp', [fLvl, 'action'])
         return action === 'edit'  && !hasChngs(data);
     }
 }
@@ -103,7 +103,7 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
 function handleFormComplete(data) {   
     const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    _i.mmry('getFormProp', ['onFormClose', 'top'])(data);
+    _i.mmry('getFormProp', ['top', 'onFormClose'])(data);
     _i.clearFormMemory();
 }
 /*--------------------- After Sub-Entity Created -----------------------------*/

@@ -92,15 +92,15 @@ export function setSelVal(id, val, silent) {                                    
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, comboEvents) {                     console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
-    const elems = _mmry('getFormProp', ['selElems', fLvl]);  
+export function initFormCombos(entity, fLvl, comboEvents) {                     //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
+    const elems = _mmry('getFormProp', [fLvl, 'selElems']);  
     elems.forEach(selectizeElem);
     _mmry('setFormProp', [fLvl, 'selElems', []]);
 
     function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
         const confg = getFieldConfg(comboEvents, fieldName);
         confg.id = confg.id || '#'+fieldName+'-sel';
-        $(confg.id).off('change');
+        // $(confg.id).off('change');
         initSingle(confg, fLvl);
     }
 } 

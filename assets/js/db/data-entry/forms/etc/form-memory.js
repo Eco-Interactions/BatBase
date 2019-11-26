@@ -75,14 +75,15 @@ export function initEntityFormMemory(entity, level, pSel, action) {
     formMemory.forms[level] = {
         action: action,
         expanded: false,
-        fieldConfg: { fields: {}, order: [], required: [] }, 
+        // fieldConfg: { fields: {}, order: [], required: [] }, 
+        fieldData: {/* field: { value, fieldType }} */},
         entity: entity,
         entityType: false,
         onFormClose: null,
         pSelId: pSel,
         reqElems: [],
         selElems: [], 
-        vals: {}
+        // vals: {}/* field: { value, fieldType }} */
     };                                                                          console.log("initEntityFormMemory. formMemory = %O, arguments = %O", formMemory, arguments)
     return formMemory;                                                                       
 }
@@ -139,7 +140,7 @@ export function getMemoryProp(prop) {
 export function getFormMemory(fLvl) {
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl] : false;
 }
-export function getFormProp(prop, fLvl) {                                       //console.log('args = %O, memory = %O', arguments, formMemory); 
+export function getFormProp(fLvl, prop) {                                       //console.log('args = %O, memory = %O', arguments, formMemory); 
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl][prop] : false;
 }
 export function getFormEntity(fLvl) { 
@@ -157,8 +158,8 @@ export function getTaxonMemory() {
 // export function getFormLevelParams(fLvl) {
 //     return formMemory.forms[fLvl];
 // }
-export function getFormFieldConfg(fLvl, field) {
-    return formMemory.forms[fLvl].vals[field];
+export function getFormFieldData(fLvl, field) {
+    return formMemory.forms[fLvl].fieldData[field];
 }
 export function getEntityRcrds(entity) {
     return typeof entity == 'string' ? formMemory.records[entity] : buildRcrdsObj(entity);
@@ -199,11 +200,14 @@ export function setFormProp(fLvl, prop, val) {
 export function setTaxonProp(prop, val) {  
     return formMemory.forms.taxonPs[prop] = val;
 }
-export function setFormFieldConfg(fLvl, field, confg) {
-    formMemory.forms[fLvl].vals[field] = confg
-}
-export function setFormFieldValueMemory(fLvl, field, val) {
-    formMemory.forms[fLvl].vals[field].val = val;
+// export function setFormFieldConfg(fLvl, field, confg) {
+//     formMemory.forms[fLvl].vals[field] = confg
+// }
+export function setFormFieldData(fLvl, field, val, type) {
+    const fieldData = formMemory.forms[fLvl].fieldData;
+    if (!fieldData[field]) { fieldData[field] = {} }
+    if (type) { fieldData[field].type = type; }
+    fieldData[field].val = val;             console.log('--------setting field [%s] val = [%O], type ? [%s]', field, val, type);
 }
 export function setFormEntityType(fLvl, type) {
     formMemory.forms[fLvl].entityType = type;

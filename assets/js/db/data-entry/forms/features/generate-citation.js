@@ -13,7 +13,7 @@ import * as _i from '../forms-main.js';
  * are filled.
  */
 export function buildCitationText(fLvl) {  
-    const pubData = _i.mmry('getFormProp', ['rcrds', fLvl]);  
+    const pubData = _i.mmry('getFormProp', [fLvl, 'rcrds']);  
     const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
     return _i.getFormFieldData('citation', null, null)
         .then(generateCitText); 

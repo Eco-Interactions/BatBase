@@ -299,7 +299,7 @@ function onRealmSelection(val) {                                                
         const realmElems = _i.util('buildElem', ['div', { id: 'realm-lvls' }]);
         $(realmElems).append(rows);
         $('#Realm_row').append(realmElems);
-        _i.mmry('setFormFieldConfg', [fLvl, 'Realm', { val: null, type: 'select' }]);
+        _i.mmry('setFormFieldData', [fLvl, 'Realm', null, 'select']);
         initFormCombos(realm, fLvl);
         finishTaxonSelectBuild('Object');          
     }
@@ -668,7 +668,7 @@ function checkIntFieldsAndEnableSubmit() {
  * flag tracking the state of the new interaction form.  
  */
 function resetIfFormWaitingOnChanges() {  
-    if (!_i.mmry('getFormProp', ['unchanged', 'top'])) { return; }
+    if (!_i.mmry('getFormProp', ['top', 'unchanged'])) { return; }
     _i.ui('exitSuccessMsg');
     _i.mmry('setFormProp', ['top', 'unchanged', false]);
 }
