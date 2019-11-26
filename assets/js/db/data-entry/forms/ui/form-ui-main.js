@@ -10,6 +10,7 @@ import * as _elems from './form-elems.js';
 import * as _pnl from './detail-panel.js';
 
 const _errs = _forms.err;
+const _entity = _forms.entity;
 const _mmry = _forms.memory;
 const _u = _forms._util;
 
@@ -22,7 +23,6 @@ export function combos(funcName, params) {
 export function panel(funcName, params) {
     return _pnl[funcName](...params);
 }
-
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {
     const w = $(formId).innerWidth() / 2 - 3;  
@@ -126,7 +126,7 @@ function toggleShowAllFields(entity, fLvl) {                             //conso
     }
     function finishComplexForms() {
         if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }
-        if (entity !== 'location') { _forms.onSrcToggleFields(entity, fVals, fLvl); }
+        if (entity !== 'location') { _entity('onSrcToggleFields', [entity, fVals, fLvl]); }
         setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
@@ -160,7 +160,7 @@ export function getCurrentFormFieldVals(fLvl) {
  */
 export function fillComplexFormFields(fLvl) {
     const vals = _mmry('getFormProp', [fLvl, 'vals']);
-    const fieldHndlrs = { 'multiSelect': _forms.selectExistingAuthors };
+    const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
 
     for (let field in vals) {                                                   //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
         if (!vals[field].val) { continue; } 
@@ -172,13 +172,16 @@ export function fillComplexFormFields(fLvl) {
         fieldHndlrs[vals[field].type](field, val, fLvl);        
     }
 } /* End fillComplexFormFields */
+function getMultiSelectHandler() {
+    return  _entity.bind(null, 'selectExistingAuthors');
+}
 export function fieldIsDisplayed(field, fLvl) {
     const curFields = fP.forms[fLvl].fieldConfg.fields;                         //console.log('field [%s] is displayed? ', field, Object.keys(curFields).indexOf(field) !== -1);
     return Object.keys(curFields).indexOf(field) !== -1;
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
-    const parentLvl = _forms.getNextFormLevel('parent', fLvl);  console.log('parentLvl = ', parentLvl);
+    const parentLvl = _forms.getNextFormLevel('parent', fLvl);  
     if (_elems.ifAllRequiredFieldsFilled(parentLvl)) {
         toggleSubmitBttn('#'+parentLvl+'-submit', true);
     }

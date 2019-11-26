@@ -41,13 +41,6 @@ export function initCreateForm(entity) {
     };
     funcs[entity]();
 }
-// function setOnFormCloseHandler(entity, fLvl) {
-//     const hndlrs =  {
-//         'publication' : _forms.enablePubField,
-//         'citation'
-//     };
-//     _mmry('setonFormCloseHandler', [fLvl, hndlrs[entity]]);
-// }
 /* ========================== PUBLICATION =================================== */
 /**
  * When a user enters a new publication into the combobox, a create-publication
@@ -65,7 +58,7 @@ function initPubForm(value) {                                                   
 }
 function initPubMemory(fLvl) {
     _mmry('initEntityFormMemory', ['publication', 'sub', '#Publication-sel', 'create']);
-    _mmry('setonFormCloseHandler', [fLvl, _forms.enablePubField]);
+    _mmry('setonFormCloseHandler', [fLvl, enablePubField]);
 }
 function buildAndAppendPubForm(val, fLvl) {
     _elems('initSubForm', 
@@ -123,8 +116,8 @@ function initCitForm(v) {                                                       
 }
 function initCitFormMemory(data, fLvl) {
     addSourceDataToMemory(data, fLvl);
-    _forms.initEntityFormMemory('citation', fLvl, '#CitationTitle-sel', 'create');
-    _mmry('setonFormCloseHandler', [fLvl, _forms.enablePubField]);
+    _mmry('initEntityFormMemory', ['citation', fLvl, '#CitationTitle-sel', 'create']);
+    _mmry('setonFormCloseHandler', [fLvl, enablePubField]);
     addPubRcrdsToMemory(data.publication, fLvl);
     return Promise.resolve();
 }
@@ -338,7 +331,7 @@ function getCitationFieldText($elem, fLvl) {
 
     function getCitationText() { 
         return ifNoChildFormOpen(fLvl) && _elems('ifAllRequiredFieldsFilled', [fLvl]) ? 
-           _forms.buildCitationText(fLvl) : 
+           buildCitationText(fLvl) : 
            ($elem.val() === dfault ? false : dfault);
     }
 }
@@ -457,7 +450,7 @@ function focusFieldInput(type) {
 }
 /* ========================== PUBLISHER ===================================== */
 function onPublSelection(val) {
-    if (val === 'create') { return _forms.createSubEntity('Publisher'); }        
+    if (val === 'create') { return _forms.entity('createSub', ['Publisher']); }        
 }
 /**
  * When a user enters a new publisher into the combobox, a create-publisher
@@ -517,8 +510,8 @@ function handleAuthSelect(val, ed) {
     if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     const fLvl = _forms.getSubFormLvl('sub');
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }                       
-    if (val === 'create') { return _forms.createSubEntity(authType, cnt); } 
-    _forms.handleCitText(fLvl);       
+    if (val === 'create') { return _forms.entity('createSub', [authType, cnt]); } 
+    handleCitText(fLvl);       
     if (lastAuthComboEmpty(cnt, authType)) { return; }
     buildNewAuthorSelect(cnt+1, val, fLvl, authType);
 }
@@ -612,11 +605,7 @@ function handleNewAuthForm(authCnt, value, authType) {
             ['#'+fLvl+'-submit', _elems('ifAllRequiredFieldsFilled', [fLvl])]);
     }
 }
-function initEntitySubForm(entity, fLvl, fVals, pSel) {
-    _mmry.initEntityFormMemory(entity, fLvl, pSel, 'create');       
-    return _ui.elems('initSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
-}
-/** ======================== UI HELPERS ===================================== */
+/** ======================== HELPERS ======================================== */
 export function finishSourceToggleAllFields(entity, fVals, fLvl) {
     if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType) 
     } else  { // 'citation'
@@ -624,4 +613,13 @@ export function finishSourceToggleAllFields(entity, fVals, fLvl) {
         if (!timeout) { handleCitText(fLvl); }
     }
     updateFieldLabelsForType(entity, fLvl);
+}
+/** When the Citation sub-form is exited, the Publication combo is reenabled. */
+function enablePubField() {
+    _cmbx('enableCombobox', ['#Publication-sel']);
+    fillCitationField($('#Publication-sel').val());
+}
+function initEntitySubForm(entity, fLvl, fVals, pSel) {
+    _mmry('initEntityFormMemory', [entity, fLvl, pSel, 'create']);       
+    return _elems('initSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
 }

@@ -4,15 +4,14 @@
  */
 /**
  * Exports:                 Imported by:
- *   addVolatileMapPin          db_forms
- *   clearMemory                db_forms
- *   initFormMap                db_forms
+ *   addVolatileMapPin          forms
+ *   clearMemory                forms
+ *   initFormMap                forms
  *   initMap                    db_page
  *   showInts                   db_page, db_ui
  *   showLoc                    db_page
  */
 import * as _u from '../util.js';
-import * as db_forms from '../data-entry/db-forms.js';
 import * as MM from './map-markers.js'; 
 import buildMapDataObj from './map-data.js';
 import { accessTableState as tState } from '../db-page.js';
@@ -532,12 +531,14 @@ function loadCountryAndSubLocs(cntryId) {
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
 export function addVolatileMapPin(val, type, cntryId) {                         console.log('addVolatileMapPin')
-    if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
-    const latLng = getMapPinCoords();  console.log('latLng = %O', latLng);
-    if (!latLng) { return; }                                                    
+    if (!val) { return removePreviousMapPin(); }
+    const latLng = getMapPinCoords();  
     if (type === 'edit') { addEditFormMapData(latLng, val, cntryId); 
     } else { addNewLocPinAndFillCoordFields(latLng); }
     clearLocCountLegend();
+}
+function getMapPinCoords() {
+    return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
 }
 function addEditFormMapData(latLng, locId, cntryId) {
     app.geoCoder.reverse(
@@ -554,28 +555,6 @@ function addNewLocPinAndFillCoordFields(latLng) {
 function fillCoordFields(latLng) {                                              //console.log('fillCoordFields latLng = %O', latLng);
     $('#Latitude_row input').val(latLng.lat.toFixed(5));
     $('#Longitude_row input').val(latLng.lng.toFixed(5));
-}
-/* ---- Get GPS Field Values or Report Field Err ---- */
-function gpsFieldsFilled() {
-    return ['Latitude', 'Longitude'].every(field => {  console.log('val = ', $(`#${field}_row input`).val())
-        return $(`#${field}_row input`).val();
-    });
-}
-function getMapPinCoords() {
-    if (ifCoordFieldHasErr()) { return false; }
-    return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
-}
-function ifCoordFieldHasErr() {  
-    const errField = coordHasErr('Latitude') ? 'Latitude' : 
-        coordHasErr('Longitude') ? 'Longitude' : false;
-    if (!errField) { return false; }
-    db_forms.locCoordErr(errField);
-    return true;
-}
-function coordHasErr(field) {
-    const coord = $(`#${field}_row input`).val();
-    const max = field === 'Latitude' ? 90 : 180;
-    return isNaN(coord) ? true : coord > max ? true : false;    
 }
 /* ---- Update Form UI After Reverse Geocode Success ---- */
 /** 
@@ -770,14 +749,10 @@ function addNewLocBttn() {
 }
 function addNewLocControl() {
     L.Control.Create = L.Control.extend({
-        onAdd: function(map) {
-            const bttn = createNewLocBttn();
-            L.DomEvent.on(bttn, 'click', createNewLoc);
-            return bttn;
-        },
-        onRemove: function(map) {}
+        onAdd: map => createNewLocBttn(),
+        onRemove: map => {}
     });
-    L.control.create = function(opts) {return new L.Control.Create(opts);}
+    L.control.create = opts => new L.Control.Create(opts);
 }
 function createNewLocBttn() {
     const className = 'custom-icon leaflet-control-create',
@@ -786,9 +761,6 @@ function createNewLocBttn() {
     button.type = 'button';
     $(container).attr('title', "Create New Location").append(button);
     return container;
-}
-function createNewLoc() {                                                       console.log('Create new location!')
-    db_forms.create('location');
 }
 /*--- Click To Create New Location Button ---*/
 function addClickToCreateLocBttn() {

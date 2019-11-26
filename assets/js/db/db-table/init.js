@@ -5,7 +5,7 @@
  *     init            db_page, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
-import * as db_forms from '../data-entry/db-forms.js';
+import * as _forms from '../data-entry/forms/forms-main.js';
 import { updateFilterStatusMsg } from './db-filters.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';
@@ -222,7 +222,7 @@ function isNotEditor() {
 /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
 function addEditPencil(params) {   
     if (uneditableEntityRow(params)) { return "<span>"; }                     
-    return getPencilHtml(params.data.id, params.data.entity, db_forms.editEntity);
+    return getPencilHtml(params.data.id, params.data.entity, _forms.edit);
 }
 function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tblState.curFocus, params);
     const uneditables = [
@@ -239,7 +239,7 @@ function getPencilHtml(id, entity, editFunc) {
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
     $('#search-tbl').on(
-        'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, lcfirst(entity)));
+        'click', '#edit'+entity+id, _forms.edit.bind(null, id, lcfirst(entity)));
     return editPencil;
 }
 function hideEditor() {

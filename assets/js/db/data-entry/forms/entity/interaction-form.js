@@ -2,38 +2,105 @@
  * Contains code used to specifically build the interaction form. 
  *
  * CODE SECTIONS
+ *     INIT INTERACTION FORM
+ *     ON FORM INIT COMPLETE
+ *     FIELD HANDLERS
+ *         PUBLICATION
+ *         CITATION
+ *         COUNTRY/REGION
+ *         LOCATION
+ *         TAXON ROLES
+ *             SUBJECT
+ *             OBJECT
+ *             ROLE SHARED HELPERS
+ *                 initTaxonSelectForm
+ *                 resetTaxonSelectForm
+ *                 onLevelSelection
+ *                 selectRoleTaxon
+ *         FIELD HELPERS
+ *     RESET FORM AFTER SUBMIT
  *
- *
- * Exports:             Imported by:
- *     getIntFormFields         forms-main
- *     selectLoc                forms-main
+ * EXPORTS: 
+ *     initCreateForm   
+ *     getSelectedTaxon
  */
-// import * as _u from '../../../util.js';
-import * as _forms from '../forms-main.js';
+import * as _main from '../forms-main.js';
 
+const _cmbx = _main.uiCombos;
+const _elems = _main.uiElems;
+const _panel = _main.uiPanel;
+const _mmry = _main.memory;
+const _u = _main._util;
 let fP;
-/** ====================== ALIAS HELPERS ==================================== */
-const _cmbx = _forms.uiCombos;
-const _elems = _forms.uiElems;
-const _panel = _forms.uiPanel;
-const _mmry = _forms.memory;
-const _u = _forms._util;
-/** ================ INIT INTERACTION FORM ================================== *//**
- * Fills the global fP obj with the basic form params @_forms.initFormMemory. 
+
+/** ================ INIT INTERACTION FORM ================================== */
+/**
+ * Fills the global fP obj with the basic form params @_main.initFormMemory. 
  * Inits the interaction form with all fields displayed and the first field, 
  * publication, in focus. From within many of the fields the user can create 
  * new entities of the field-type by selecting the 'add...' option from the 
  * field's combobox and completing the appended sub-form.
  */
-export function initCreateForm(entity) {                                        console.log('   //Building New Interaction Form');
+export function initCreateForm(entity) {                                console.log('   //Building New Interaction Form');
     _mmry('initFormMemory', ['create', 'interaction'])
     .then(fP => getInteractionFormFields(fP))
     .then(fields => _elems('buildAndAppendForm', ['top', fields]))
     .then(() => finishInteractionFormBuild())
     .catch(err => _u('alertErr', [err]));
 }
-export function getComboEvents(entity) {
-    return entity === 'interaction' ? getInteractionEvents() : getTaxonEvents();
+/** Builds and returns all interaction-form elements. */
+function getInteractionFormFields(params) {                                      
+    fP = params;                                                                
+    return _elems('buildFormRows', ['Interaction', {}, 'top']);  
+}
+/** =================== ON FORM INIT COMPLETE =============================== */
+/**
+ * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
+ * required field elems to the form's config object.  
+ */
+function finishInteractionFormBuild() {                                         console.log('           --finishIntFormBuild');
+    $('#Note-txt').change(focusPinAndEnableSubmitIfFormValid);
+    modifyFormDisplay();
+    addLocationSelectionMethodsNote();
+    finishComboboxInit();
+    _mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
+}
+function modifyFormDisplay() {
+    $('#Note_row label')[0].innerText += 's';
+    $('#Country-Region_row label')[0].innerText = 'Country/Region';
+    $('.all-fields-cntnr').hide();
+    _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
+}
+/** Adds a message above the location fields in interaction forms. */
+function addLocationSelectionMethodsNote() {
+    const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
+    const mapInfo = getMapInfoText();
+    $(cntnr).append(mapInfo);
+    $('#Country-Region_row')[0].parentNode.before(cntnr);
+}
+function getMapInfoText() {
+    const text = `<span>Select or create a location using the fields below or </span>`;
+    const link = getInfoLinkTextToOpenMap();
+    return [ text, link ];
+}
+function getInfoLinkTextToOpenMap(argument) {
+    const attr = {class:'map-link', text: 'click here to use the map interface.'};
+    const span = _u('buildElem', ['span', attr]);
+    $(span).click(showInteractionFormMap);
+    return span;
+}
+/** Open popup with the map interface for location selection. */
+function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
+    if ($('#loc-map').length) { return; }
+    _forms.addMapToLocForm('#Location_row', 'int');
+    if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
+    _cmbx('focusCombobox', ['#Country-Region-sel', true]);
+}
+function finishComboboxInit() {
+    _cmbx('initFormCombos', ['interaction', 'top', getInteractionEvents()]);
+    _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
+    _cmbx('focusCombobox', ['#Publication-sel', true]);
+    ['Subject', 'Object'].forEach(addTaxonFocusListener);
 }
 function getInteractionEvents() {
     return {
@@ -43,42 +110,30 @@ function getInteractionEvents() {
         'InteractionTags': { change: checkIntFieldsAndEnableSubmit },
         'Location': { change: onLocSelection, add: create('Location')},
         'Publication': { change: onPubSelection, add: create('Publication')},
-        'Subject': { change: onTaxonSelection.bind(null, 'Subject') },
-        'Object': { change: onTaxonSelection.bind(null, 'Object') },
-    };
-}
-function getTaxonEvents() {
-    return {
-        'Species': { change: onLevelSelection, add: createTaxon('Species') },
-        'Genus': { change: onLevelSelection, add: createTaxon('Genus') },
-        'Family': { change: onLevelSelection, add: createTaxon('Family') },
-        'Order': { change: onLevelSelection, add: createTaxon('Order') },
-        'Class': { change: onLevelSelection, add: createTaxon('Class') },
-        'Realm': { change: onRealmSelection }
+        'Subject': { change: onTaxonRoleSelection.bind(null, 'Subject') },
+        'Object': { change: onTaxonRoleSelection.bind(null, 'Object') },
     };
 }
 function create(entity) {
-    return _forms.createSubEntity.bind(null, entity);
-}
-function createTaxon(level) {
-    return _forms.initNewTaxonForm.bind(null, level);
-}
-/** ==================== INIT FORM FIELDS =================================== */
-/** Builds and returns all interaction-form elements. */
-export function getInteractionFormFields(params) {                                      
-    fP = params;                                                                console.log('       --buildIntFormFields. fP = %O', fP);
-    return _elems('buildFormRows', ['Interaction', {}, 'top']);  
+    return _forms.entity.bind(null, 'createSub', [entity]);
 }
 function focusIntTypePin() {
-    if (!fP.editing) { $('#InteractionType_pin').focus(); }
+    focusPinAndEnableSubmitIfFormValid('InteractionType');
 }
-/*------------------ Publication ---------------------------------------------*/
+/** Displays the [Role] Taxon select form when the field gains focus. */ 
+function addTaxonFocusListener(role) {
+    const elem = '#'+role+'-sel + div div.selectize-input';
+    const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
+    $('#form-main').on('focus', elem, showSelectForm);
+}
+/** ========================== FIELD HANDLERS =============================== */
+/*------------------ PUBLICATION ---------------------------------------------*/
 /** 
  * When an existing publication is selected, the citation field is filled with 
  * all current citations for the publciation. When a publication is created, 
  * the citation form is automatically opened. 
  */
-function onPubSelection(val) {                                                  console.log('   --onPubSelection'); 
+function onPubSelection(val) {                                                  console.log('       --onPubSelection'); 
     if (val === 'create') { return _forms.create('publication'); }        
     if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
     fillCitationField(val);
@@ -94,14 +149,9 @@ function onPubClear() {
     _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     _panel('clearDetailPanel', ['pub']);
 }
-/** When the Citation sub-form is exited, the Publication combo is reenabled. */
-export function enablePubField() {
-    _cmbx('enableCombobox', ['#Publication-sel']);
-    fillCitationField($('#Publication-sel').val());
-}
-/*------------------ Citation ------------------------------------------------*/
+/*------------------ CITATION ------------------------------------------------*/
 /** Fills the citation combobox with all citations for the selected publication. */
-function fillCitationField(pubId) {                                             //console.log("initCitSelect for publication = ", pubId);
+function fillCitationField(pubId) {                                            
     _cmbx('enableCombobox', ['#CitationTitle-sel']);
     _cmbx('updateComboboxOptions', ['#CitationTitle-sel', getPubCitationOpts(pubId)]);
 }
@@ -117,14 +167,14 @@ function getPubCitationOpts(pubId) {
  * When a Citation is selected, both 'top' location fields are initialized
  * and the publication combobox is reenabled. 
  */    
-function onCitSelection(val) {                                                  console.log('       --onCitSelection [%s]', val);
+function onCitSelection(val) {                                                  console.log('           --onCitSelection [%s]', val);
     if (val === 'create') { return _forms.create('citation'); }
-    if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['cit']); }                     //console.log("cit selection = ", parseInt(val));                          
+    if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['cit']); }          
     _panel('updateSrcDetails', ['cit']);
     _cmbx('enableCombobox', ['#Publication-sel']);
-    if (!fP.editing) { $('#CitationTitle_pin').focus(); }
+    focusPinAndEnableSubmitIfFormValid('CitationTitle')
 }    
-/*-------------- Country/Region ------------------------------------------*/
+/*-------------- COUNTRY/REGION ------------------------------------------*/
 /** 
  * When a country or region is selected, the location dropdown is repopulated 
  * with it's child-locations and, for regions, all habitat types. When cleared, 
@@ -132,20 +182,20 @@ function onCitSelection(val) {                                                  
  * If the map is open, the country is outlined and all existing locations within
  * are displayed @focusParentAndShowChildLocs
  */
-function onCntryRegSelection(val) {                                             console.log("       --onCntryRegSelection [%s]", val);
+function onCntryRegSelection(val) {                                             console.log("           --onCntryRegSelection [%s]", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
     const loc = fP.records.location[val];
     fillLocationSelect(loc);
     if (!fP.editing) { $('#Country-Region_pin').focus(); }
     if ($('#loc-map').length) { _forms.focusParentAndShowChildLocs('int', val); }    
 }
-/*------------------ Location ------------------------------------------------*/
+/*------------------ LOCATION ------------------------------------------------*/
 /**
  * When a country/region is selected, the location combobox is repopulated with its 
  * child-locations and all habitat types. When cleared, the combobox is 
  * repopulated with all locations. 
  */ 
-function fillLocationSelect(loc) {                                              //console.log("fillLocationSelect for parent Loc = %O", loc);
+function fillLocationSelect(loc) {                                              
     const opts = loc ? getOptsForLoc(loc) : _elems('getLocationOpts');    
     _cmbx('updateComboboxOptions', ['#Location-sel', opts]);
 }          
@@ -171,41 +221,30 @@ function onLocSelection(val) {                                                  
     if (val === 'create') { return _forms.create('Location'); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['loc']); }   
     if ($('#loc-map').length) { removeLocMap(); }
-    const locRcrd = fP.records.location[val];                                   //console.log("location = %O", locRcrd);
+    const locRcrd = fP.records.location[val];                                   
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
     _panel('fillLocDataInDetailPanel', [locRcrd]);
-    if (!fP.editing) { $('#Location_pin').focus(); }
-    checkIntFieldsAndEnableSubmit();
+    focusPinAndEnableSubmitIfFormValid('Location');
 }
 function removeLocMap() {
     $('#loc-map').fadeTo(400, 0, () => $('#loc-map').remove());
 }
-export function selectLoc(id) {
-    $('#sub-form').remove();
-    _cmbx('setSelVal', ['#Location-sel', id]);
-    enableCountryRegionField();
-    _cmbx('enableCombobox', ['#Location-sel']);
-    removeLocMap();
-}
-/** When the Location sub-form is exited, the Country/Region combo is reenabled. */
-export function enableCountryRegionField() {  
-    _cmbx('enableCombobox', ['#Country-Region-sel']);
-    $('#loc-note').fadeTo(400, 1);
-}
-/*--------------------- Taxon ------------------------------------------------*/
+/*--------------------- TAXON ROLES ------------------------------------------*/
+/* -------------- SUBJECT ---------------------- */
 /**
  * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
  * each level present in the realm, (eg: Bat - Family, Genus, and Species), filled 
  * with the taxa at that level. When one is selected, the remaining boxes
  * are repopulated with related taxa and the 'select' button is enabled.
  */
-export function initSubjectSelect() {                                           console.log('       --initSubjectSelect [%s]?', $('#Subject-sel').val());
+function initSubjectSelect() {                                                  console.log('           --initSubjectSelect [%s]?', $('#Subject-sel').val());
     return initTaxonSelectForm('Subject', 'Bat')
         .then(() => finishTaxonSelectBuild('Subject'));
 }
+/* -------------- OBJECT ---------------------- */
 /** Note: The selected realm's level combos are built @onRealmSelection. */
-export function initObjectSelect() {                                            console.log('       --initObjectSelect [%s]?', $('#Object-sel').val());
+function initObjectSelect() {                                                   console.log('           --initObjectSelect [%s]?', $('#Object-sel').val());
     const realm = getSelectedObjectRealm($('#Object-sel').val()); 
     return initTaxonSelectForm('Object', realm)
         .then(buildRealmFields);
@@ -221,45 +260,12 @@ function getSelectedObjectRealm(id) {
     if (!id) { return _mmry('getObjectRealm'); }
     return fP.records.taxon[id].realm.displayName;
 }
-/* -------- SHARED TAXON SELECT FORM INIT METHODS --------- */
-function initTaxonSelectForm(role, realm) {
-    const fLvl = _forms.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen(role, fLvl); }
-    return getRealmTaxon(realm)
-        .then(rTaxon => _forms.buildTaxonSelectForm(role, realm, rTaxon, fLvl))
-        .then(form => appendTxnFormAndInitCombos(role, fLvl, form))
-}
-/** Note: Taxon fields often fire their focus event twice. */
-function errIfSubFormOpen(role, fLvl) {
-    if (fP.forms.taxonPs.entity === _u('lcfirst', [role])) { return; }
-    _forms.err('openSubFormErr', [role, null, fLvl]);
-}
-function appendTxnFormAndInitCombos(role, fLvl, form) {
-    const lcRole = _u('lcfirst', [role]);
-    $('#'+role+'_row').append(form);
-    _cmbx('initFormCombos', [lcRole, fLvl, getTaxonEvents()]);           
-}
-/**
- * When complete, the select form is removed and the most specific taxon is displayed 
- * in the interaction-form <role> combobox. 
- */
-function onTaxonSelection(role, val) {                                          //console.log("onTaxonSelection [%s] = ", role, val);
-    if (val === "" || isNaN(parseInt(val))) { return; }         
-    $('#'+_forms.getSubFormLvl('sub')+'-form').remove();
-    $('#'+role+'-sel').data('selTaxon', $('#'+role+'-sel').val());
-    enableTaxonCombos();
-    if (!fP.editing) { $('#'+role+'_pin').focus(); }
-}
-export function enableTaxonCombos() {
-    _cmbx('enableCombobox', ['#Subject-sel']);
-    _cmbx('enableCombobox', ['#Object-sel']);
-}
 /**
  * Removes any previous realm comboboxes. Shows a combobox for each level present 
  * in the selected Taxon realm, plant (default) or arthropod, filled with the 
  * taxa at that level. 
  */
-function onRealmSelection(val) {                                                console.log("               --onRealmSelection. val = ", val)
+function onRealmSelection(val) {                                                //console.log("               --onRealmSelection. val = ", val)
     if (val === '' || isNaN(parseInt(val))) { return Promise.resolve(); }          
     if ($('#realm-lvls').length) { $('#realm-lvls').remove(); } 
     const fLvl = _forms.getSubFormLvl('sub');
@@ -285,11 +291,43 @@ function onRealmSelection(val) {                                                
         finishTaxonSelectBuild('Object');          
     }
 }
+/* ------------------- ROLE SHARED HELPERS --------------- */
+/* ------- initTaxonSelectForm --------- */
+function initTaxonSelectForm(role, realm) {
+    const fLvl = _forms.getSubFormLvl('sub');
+    if ($('#'+fLvl+'-form').length !== 0) { return errIfSubFormOpen(role, fLvl); }
+    return getRealmTaxon(realm)
+        .then(rTaxon => _forms.buildTaxonSelectForm(role, realm, rTaxon, fLvl))
+        .then(form => appendTxnFormAndInitCombos(role, fLvl, form))
+}
+/** Note: Taxon fields often fire their focus event twice. */
+function errIfSubFormOpen(role, fLvl) {
+    if (fP.forms.taxonPs.entity === _u('lcfirst', [role])) { return; }
+    _forms.err('openSubFormErr', [role, null, fLvl]);
+}
+function appendTxnFormAndInitCombos(role, fLvl, form) {
+    const lcRole = _u('lcfirst', [role]);
+    $('#'+role+'_row').append(form);
+    _cmbx('initFormCombos', [lcRole, fLvl, getTaxonEvents()]);           
+}
+function getTaxonEvents() {
+    return {
+        'Species': { change: onLevelSelection, add: createTaxon('Species') },
+        'Genus': { change: onLevelSelection, add: createTaxon('Genus') },
+        'Family': { change: onLevelSelection, add: createTaxon('Family') },
+        'Order': { change: onLevelSelection, add: createTaxon('Order') },
+        'Class': { change: onLevelSelection, add: createTaxon('Class') },
+        'Realm': { change: onRealmSelection }
+    };
+}
+function createTaxon(level) {
+    return _forms.initNewTaxonForm.bind(null, level);
+}
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
  */
-export function finishTaxonSelectBuild(role) {                                     //console.log('finishTaxonSelectBuild')
+function finishTaxonSelectBuild(role) {                                     
     const fLvl = _forms.getSubFormLvl('sub');
     const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
     fP.forms.taxonPs = _mmry('getTaxonMemory');
@@ -302,7 +340,7 @@ function ifSelectingTaxonInForm(role) {
     return $('#'+role+'-sel').data('reset') || $('#'+role+'-sel').val();
 }
 
-function setTaxonParams(role, realmName, id) {                                  //console.log('setTaxonParams. args = %O', arguments)
+function setTaxonParams(role, realmName, id) {                                 
     const tPs = fP.forms.taxonPs;
     tPs.realm = realmName;
     return getRealmTaxon(realmName).then(updateTaxonParams);
@@ -319,7 +357,7 @@ function getRealmTaxon(realm) {
     const dataProp = realmName + lvls[realmName] + 'Names'; 
     return _u('getData', [dataProp]).then(returnRealmTaxon);
 }
-function returnRealmTaxon(realmRcrds) {                                         //console.log('---realmTaxonRcrds = %O', realmRcrds);
+function returnRealmTaxon(realmRcrds) {                                        
     const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
     return fP.records.taxon[realmId];  
 }
@@ -329,7 +367,7 @@ function customizeElemsForTaxonSelectForm(role) {
     $('#sub-hdr').append(getTaxonExitButton(role));
     $('#sub-submit')[0].value = "Select Taxon";        
     $('#sub-cancel')[0].value = "Reset";
-    $('#sub-submit').unbind("click").click(selectTaxon);
+    $('#sub-submit').unbind("click").click(selectRoleTaxon);
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role));
 }
 function getTaxonExitButton(role) {
@@ -353,8 +391,9 @@ function resetTaxonCombobox(role, prevTaxonId) {
 function getTaxonym(id) {
     return _forms.getTaxonDisplayName(fP.records.taxon[id]);
 }
+/* ------- resetTaxonSelectForm --------- */
 /** Removes and replaces the taxon form. */
-function resetTaxonSelectForm(role) {                                           console.log('resetTaxonSelectForm')                                     
+function resetTaxonSelectForm(role) {                                           
     const realm = fP.forms.taxonPs.realm;
     const reset =  realm == 'Bat' ? initSubjectSelect : initObjectSelect;
     $('#'+role+'-sel').data('reset', true);
@@ -365,7 +404,7 @@ function resetTaxonSelectForm(role) {                                           
 function resetPrevTaxonSelection(role) {                                       
     const id = $('#'+role+'-sel').data('selTaxon');                             
     const taxon = fP.records.taxon[id];                                         
-    if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                         console.log('           --resetPrevTaxonSelection. [%s] = %O', id, taxon);
+    if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                         //console.log('           --resetPrevTaxonSelection. [%s] = %O', id, taxon);
     selectPrevTaxon(taxon, role);
 }
 function ifSelectedTaxonIsRealmTaxon(taxon) { 
@@ -375,7 +414,7 @@ function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
     if (ifTaxonInDifferentRealm(taxon.realm)) { return selectTaxonRealm(taxon); }
     _cmbx('setSelVal', ['#'+taxon.level.displayName+'-sel', taxon.id]);
-    window.setTimeout(() => { deleteResetFlag(role); }, 1000);   //refactor
+    window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
     const displayName = _forms.getTaxonDisplayName(taxon);
@@ -390,63 +429,28 @@ function selectTaxonRealm(taxon) {
 function deleteResetFlag(role) {
     $('#'+role+'-sel').removeData('reset');
 }
-/** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
-function selectTaxon() {
-    const role = fP.forms.taxonPs.realm === 'Bat' ? 'Subject' : 'Object';
-    const opt = getSelectedTaxonOption();
-    $('#sub-form').remove();
-    _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
-    _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
-}
-/** Returns an option object for the most specific taxon selected. */
-function getSelectedTaxonOption() {
-    const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
-    return { value: taxon.id, text: _forms.getTaxonDisplayName(taxon) };
-}
-/** Finds the most specific level with a selection and returns that taxon record. */
-export function getSelectedTaxon(aboveLvl) {
-    const selElems = $('#sub-form .selectized').toArray();  
-    if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
-    const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
-    return !selected ? false : fP.records.taxon[$(selected).val()];
-    
-    function ifEditingTaxon() {
-        return fP.action == 'edit' && fP.forms.top.entity == 'taxon';
-    }
-}
-function isSelectedTaxon(resetLvl, elem) { 
-    if (!ifIsLevelComboElem(elem)) { return; }
-    if (resetLvl && ifLevelChildOfResetLevel(resetLvl, elem)) { return; }
-    return $(elem).val(); 
-}  
-function ifLevelChildOfResetLevel(resetLvl, elem) {
-    const allLevels = fP.forms.taxonPs.lvls;
-    const level = elem.id.split('-sel')[0];
-    return allLevels.indexOf(level) > allLevels.indexOf(resetLvl);
-}
-function ifIsLevelComboElem(elem) {
-    return elem.id.includes('-sel') && !elem.id.includes('Realm');
- } 
+ /* ------- OnLevelSelection --------- */
 /**
  * When a taxon at a level is selected, all child level comboboxes are
  * repopulated with related taxa and the 'select' button is enabled. If the
  * combo was cleared, ensure the remaining dropdowns are in sync or, if they
  * are all empty, disable the 'select' button.
  */
-function onLevelSelection(val) {                                                console.log("           --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
-    if (val === 'create') { return openLevelCreateForm(this.$input[0]); }
+function onLevelSelection(val) {                                                console.log("               --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
+    if (val === 'create') { return openTaxonCreateForm(this.$input[0]); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
     const fLvl = _forms.getSubFormLvl('sub');
     repopulateCombosWithRelatedTaxa(val);
     _forms.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);             
 }
-function openLevelCreateForm(selElem) { console.log('openLevelCreateForm')
-    _forms.createSubEntity(selElem.id.split('-sel')[0]);
+function openTaxonCreateForm(selElem) { 
+    const levelName = selElem.id.split('-sel')[0];
+    _forms.entity('createSub', [levelName]); 
 }
 function syncTaxonCombos(elem) {                                                
     resetChildLevelCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
 }
-function resetChildLevelCombos(selTxn) {                                        //console.log("resetChildLevelCombos. selTxn = %O", selTxn)
+function resetChildLevelCombos(selTxn) {                                        
     const lvlName = selTxn ? selTxn.level.displayName : getRealmTopLevel();
     if (lvlName == 'Species') { return; }
     getChildlevelOpts(lvlName)
@@ -582,60 +586,86 @@ function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   
 function resetPlaceholer(lvlName) {
     _u('updatePlaceholderText', ['#'+lvlName+'-sel', null, 0]); 
 }
-/** =================== ON FORM INIT COMPLETE =============================== */
+/* ------- selectRoleTaxon --------- */
+/** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
+function selectRoleTaxon() {
+    const role = fP.forms.taxonPs.realm === 'Bat' ? 'Subject' : 'Object';
+    const opt = getSelectedTaxonOption();
+    $('#sub-form').remove();
+    _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
+    _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
+}
+/** Returns an option object for the most specific taxon selected. */
+function getSelectedTaxonOption() {
+    const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
+    return { value: taxon.id, text: _forms.getTaxonDisplayName(taxon) };
+}
+/** Finds the most specific level with a selection and returns that taxon record. */
+export function getSelectedTaxon(aboveLvl) {
+    const selElems = $('#sub-form .selectized').toArray();  
+    if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
+    const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
+    return !selected ? false : fP.records.taxon[$(selected).val()];
+    
+    function ifEditingTaxon() {
+        return fP.action == 'edit' && fP.forms.top.entity == 'taxon';
+    }
+}
+function isSelectedTaxon(resetLvl, elem) { 
+    if (!ifIsLevelComboElem(elem)) { return; }
+    if (resetLvl && ifLevelChildOfResetLevel(resetLvl, elem)) { return; }
+    return $(elem).val(); 
+}  
+function ifLevelChildOfResetLevel(resetLvl, elem) {
+    const allLevels = fP.forms.taxonPs.lvls;
+    const level = elem.id.split('-sel')[0];
+    return allLevels.indexOf(level) > allLevels.indexOf(resetLvl);
+}
+function ifIsLevelComboElem(elem) {
+    return elem.id.includes('-sel') && !elem.id.includes('Realm');
+ } 
 /**
- * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
- * required field elems to the form's config object.  
+ * When complete, the select form is removed and the most specific taxon is displayed 
+ * in the interaction-form <role> combobox. 
  */
-function finishInteractionFormBuild() {                                         console.log('           --finishIntFormBuild');
-    $('#Note-txt').change(checkIntFieldsAndEnableSubmit);
-    modifyFormDisplay();
-    addLocationSelectionMethodsNote();
-    finishComboboxInit();
-    _mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
+function onTaxonRoleSelection(role, val) {                                      //console.log("onTaxonRoleSelection [%s] = ", role, val);
+    if (val === "" || isNaN(parseInt(val))) { return; }         
+    $('#'+_forms.getSubFormLvl('sub')+'-form').remove();
+    $('#'+role+'-sel').data('selTaxon', $('#'+role+'-sel').val());
+    enableTaxonCombos();
+    focusPinAndEnableSubmitIfFormValid('#'+role+'_pin');
 }
-function modifyFormDisplay() {
-    $('#Note_row label')[0].innerText += 's';
-    $('#Country-Region_row label')[0].innerText = 'Country/Region';
-    $('.all-fields-cntnr').hide();
-    _forms.ui('setCoreRowStyles', ['#form-main', '.top-row']);
+function enableTaxonCombos() {
+    _cmbx('enableCombobox', ['#Subject-sel']);
+    _cmbx('enableCombobox', ['#Object-sel']);
 }
-/** Adds a message above the location fields in interaction forms. */
-function addLocationSelectionMethodsNote() {
-    const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
-    const mapInfo = getMapInfoText();
-    $(cntnr).append(mapInfo);
-    $('#Country-Region_row')[0].parentNode.before(cntnr);
+/*--------------------- FIELD HELPERS ----------------------------------------*/
+function focusPinAndEnableSubmitIfFormValid(field) {
+    if (!fP.editing) { $('#'+field+'_pin').focus(); }
+    checkIntFieldsAndEnableSubmit();
 }
-function getMapInfoText() {
-    const text = `<span>Select or create a location using the fields below or </span>`;
-    const link = getInfoLinkTextToOpenMap();
-    return [ text, link ];
+/**
+ * After the interaction form is submitted, the submit button is disabled to 
+ * eliminate accidently creating duplicate interactions. This change event is
+ * added to the non-required fields of the form to enable to submit as soon as 
+ * any change happens in the form, if the required fields are filled. Also 
+ * removes the success message from the form.
+ */
+function checkIntFieldsAndEnableSubmit() {
+    if (_elems('ifAllRequiredFieldsFilled', ['top'])) { 
+        _forms.ui('toggleSubmitBttn', ['#top-submit', true]); 
+    }
+    resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
-function getInfoLinkTextToOpenMap(argument) {
-    const attr = {class:'map-link', text: 'click here to use the map interface.'};
-    const span = _u('buildElem', ['span', attr]);
-    $(span).click(showInteractionFormMap);
-    return span;
-}
-/** Open popup with the map interface for location selection. */
-function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
-    if ($('#loc-map').length) { return; }
-    _forms.addMapToLocForm('#Location_row', 'int');
-    if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
-    _cmbx('focusCombobox', ['#Country-Region-sel', true]);
-}
-function finishComboboxInit() {
-    _cmbx('initFormCombos', ['interaction', 'top', getInteractionEvents()]);
-    _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
-    _cmbx('focusCombobox', ['#Publication-sel', true]);
-    ['Subject', 'Object'].forEach(addTaxonFocusListener);
-}
-/** Displays the [Role] Taxon select form when the field gains focus. */ 
-function addTaxonFocusListener(role) {
-    const elem = '#'+role+'-sel + div div.selectize-input';
-    const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
-    $('#form-main').on('focus', elem, showSelectForm);
+/**
+ * After an interaction is created, the form can not be submitted until changes
+ * are made. This removes the change listeners from non-required elems and the 
+ * flag tracking the state of the new interaction form.  
+ */
+function resetIfFormWaitingOnChanges() {  
+    if (!_mmry('getFormProp', ['unchanged', 'top'])) { return; }
+    _forms.ui('exitSuccessMsg');
+    _mmry('setFormProp', ['top', 'unchanged', false]);
 }
 /** ============= RESET FORM AFTER SUBMIT =================================== */
 /** 
@@ -702,28 +732,3 @@ function fillPubDetailsIfPinned(pub) {
     if (pub) { _forms.uiPanel('updateSrcDetails', ['pub']); 
     } else { _forms.uiCombos('enableCombobox', ['#CitationTitle-sel', false]); }
 }
-/** ================== SHARED HELPERS ======================================= */
-/**
- * After the interaction form is submitted, the submit button is disabled to 
- * eliminate accidently creating duplicate interactions. This change event is
- * added to the non-required fields of the form to enable to submit as soon as 
- * any change happens in the form, if the required fields are filled. Also 
- * removes the success message from the form.
- */
-function checkIntFieldsAndEnableSubmit() {
-    if (_elems('ifAllRequiredFieldsFilled', ['top'])) { 
-        _forms.ui('toggleSubmitBttn', ['#top-submit', true]); 
-    }
-    resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
-}
-/**
- * After an interaction is created, the form can not be submitted until changes
- * are made. This removes the change listeners from non-required elems and the 
- * flag tracking the state of the new interaction form.  
- */
-export function resetIfFormWaitingOnChanges() {  
-    if (!_mmry('getFormProp', ['unchanged', 'top'])) { return; }
-    _forms.ui('exitSuccessMsg');
-    _mmry('setFormProp', ['top', 'unchanged', false]);
-}
-/** ================== EDIT FORM CODE ======================================= */

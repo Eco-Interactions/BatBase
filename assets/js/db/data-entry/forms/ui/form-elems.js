@@ -18,7 +18,6 @@
 
 // import * as _u from '../../../util.js';
 import * as _forms from '../forms-main.js';
-import * as db_forms from '../../db-forms.js';
 // import * as _errs from '../validation/f-errs.js';
 import { buildFormFooter } from './form-footer.js';
 import * as _fCnfg from '../etc/form-config.js';
@@ -213,7 +212,7 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
 function storeFieldValue(elem, fieldName, fLvl, value) {            
     const val = value || $(elem).val();                             
     if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
-    if (fieldName !== 'CitationText') { _forms.handleCitText(fLvl); }
+    if (fieldName !== 'CitationText') { _forms.entity('handleCitText', [fLvl]); }
     _mmry('setFormFieldValueMemory', [fLvl, fieldName, val]);
 }
 /** Stores value at index of the order on form, ie the cnt position. */
@@ -551,7 +550,7 @@ function checkRequiredFields(e) {                                               
     const input = e.currentTarget;
     const fLvl = $(input).data('fLvl');  
     checkReqFieldsAndToggleSubmitBttn(input, fLvl);
-    _forms.handleCitText(fLvl);
+    _forms.entity('handleCitText', [fLvl]);
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
@@ -563,7 +562,6 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
         _forms.ui('toggleSubmitBttn', [subBttnId, false]); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
         if (locHasGpsData(fLvl)) { return; }
-        ifInteractionFormHandleReset(fLvl);
         _forms.ui('toggleSubmitBttn', [subBttnId, true]); 
     }
 }
@@ -609,16 +607,11 @@ function locHasGpsData(fLvl) {
         return $(`#${field}_row input`).val();
     });
 }
-/** After interaction form submit, the submit button is disabled until form data changes. */
-function ifInteractionFormHandleReset(fLvl) {
-    if (_mmry('getFormEntity', [fLvl]) !== 'interaction') { return; }
-    _forms.callFormFunc('interaction', 'resetIfFormWaitingOnChanges');  
-}
 
 
 /* -------------------- APPEND FIELDS AND FORM ------------------------------ */
 export function buildAndAppendForm(fLvl, fields, id) { 
-    fP = _forms.getFormMemory();
+    fP = _mmry('getAllFormMemory');
     showFormPopup(fP.action, fP.entity, id);
     const form = buildFormElem();  
     const fieldContainer = buildEntityFieldContainer(fP.entity, fields);
