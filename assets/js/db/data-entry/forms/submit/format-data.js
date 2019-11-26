@@ -92,7 +92,7 @@ function buildFormData(entity, formVals, fLvl) {
         data.location.hasDetail = true;
     }
     function getCoords(displayPoint) {
-        const geoJson = _mmry('getFormProp', ['geoJson', 'top']);
+        const geoJson = _mmry('getFormProp', ['top', 'geoJson']);
         const coords = !geoJson || geoJson.type === 'Point' ? 
             displayPoint : geoJson.coordinates;
     }

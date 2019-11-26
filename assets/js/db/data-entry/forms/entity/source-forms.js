@@ -173,7 +173,7 @@ function selectDefaultCitType(fLvl) {
         .then(types => setCitType(fLvl, types));
 }
 function setCitType(fLvl, citTypes) {
-    const rcrds = _i.mmry('getFormProp', ['rcrds', fLvl]);
+    const rcrds = _i.mmry('getFormProp', [fLvl, 'rcrds']);
     const pubType = rcrds.pub.publicationType.displayName;                      
     const defaultType = {
         'Book': getBookDefault(pubType, rcrds, fLvl), 'Journal': 'Article', 
@@ -229,12 +229,14 @@ export function handleSpecialCaseTypeUpdates(elem, fLvl) {
             if (!rmvdAuthField.authRow) { return; } //Field was never removed
             $('#citation_Rows').append(rmvdAuthField.authRow);
             _i.mmry('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
+            _i.mmry('setFormFieldData', [fLvl, 'Authors', {}, 'multiSelect']);
             delete rmvdAuthField.authRow;
             delete rmvdAuthField.authElem;
         }
         function removeAuthorField() {
             rmvdAuthField.authRow = $('#Authors_row').detach();
             _i.mmry('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
+            removeFromFieldData();
 
             function removeAuthorElem() {
                 return mmry.reqElems.filter(elem => {
@@ -242,6 +244,11 @@ export function handleSpecialCaseTypeUpdates(elem, fLvl) {
                     rmvdAuthField.authElem = elem;                                
                     return false;
                 });
+            }
+            function removeFromFieldData() {
+                const data = _i.mmry('getFormProp', [fLvl, 'fieldData']);
+                delete data.Authors;
+                _i.mmry('setFormProp', [fLvl, 'fieldData', data]);
             }
         } 
     } /* End updateBookFields */
@@ -270,8 +277,8 @@ function handlePubData(typeId, citTypeElem, fLvl) {
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const vals = _i.mmry('getFormProp', ['vals', fLvl]);  
-    const rcrds = _i.mmry('getFormProp', ['rcrds', fLvl]);
+    const vals = _i.mmry('getFormProp', [fLvl, 'vals']);  
+    const rcrds = _i.mmry('getFormProp', [fLvl, 'rcrds']);
     addPubTitle(addValues, fLvl, type);
     addPubYear(addValues, fLvl);
     addAuthorsToCitation(addValues, fLvl, type);
@@ -309,7 +316,7 @@ function addPubValues(fLvl, addValues, type) {
  * displayed. If not, the default text is displayed in the disabled textarea.
  * Note: to prevent multiple rebuilds, a timeout is used.
  */
-export function handleCitText(formLvl) {                                        //console.log('   --handleCitText')
+export function handleCitText(formLvl) {                                        console.log('   --handleCitText'); console.trace();
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 500);
 
@@ -351,13 +358,13 @@ function ifNoChildFormOpen(fLvl) {
  * any type-specific labels for fields.  
  * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
  */
-export function loadSrcTypeFields(entity, typeId, elem, typeName) {             console.log('           /--loadSrcTypeFields [%s][%s]', entity, typeName);
+export function loadSrcTypeFields(entity, typeId, elem, typeName) {             //console.log('           /--loadSrcTypeFields [%s][%s]', entity, typeName);
     const fLvl = _i.getSubFormLvl('sub');
     resetOnFormTypeChange(entity, typeId, fLvl);
     return getSrcTypeRows(entity, typeId, fLvl, typeName)
         .then(finishSrcTypeFormBuild);
         
-    function finishSrcTypeFormBuild(rows) {  console.log('rows = %O', rows)
+    function finishSrcTypeFormBuild(rows) {                                     //console.log('rows = %O', rows)
         $('#'+entity+'_Rows').append(rows);
         initFormCombos(entity, fLvl);
         _i.ui('fillComplexFormFields', [fLvl]);
@@ -368,9 +375,8 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {  
     const capsType = _i.util('ucfirst', [entity]);   
-    const fMemory = _i.mmry('getFormMemory', [fLvl]);
-    fMemory.vals[capsType+'Type'].val = typeId;
-    fMemory.reqElems = [];
+    _i.mmry('setFormFieldData', [fLvl, capsType+'Type', typeId]);
+    _i.mmry('setFormProp', [fLvl, 'reqElems', []]);
     _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]); 
 }
 /**
@@ -481,16 +487,19 @@ function initPublisherForm (value) {                                            
 /* ========================== AUTHOR ======================================== */
 /* ----------------------------- AUTHOR SELECTION --------------------------- */
 /** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {       
-    if (!authObj || !$('#'+field+'-sel-cntnr').length) { return Promise.resolve(); }                                 
-    Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
+export function selectExistingAuthors(field, authObj, fLvl) {    console.log('selectExistingAuthors. args = %O', arguments)   
+    if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }                                 
+    return Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
         const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
         return p.then(selNextAuth);
-    }, Promise.resolve());
+    }, Promise.resolve()).then(() => syncWithOtherAuthorTypeSelect(field));
+}
+function ifFieldNotShownOrNoValToSelect(field, valObj) {
+    return !Object.keys(valObj).length || !$('#'+field+'-sel-cntnr').length;
 }
 /** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {
-    if (!$('#'+field+'-sel'+ cnt).length) { return; }
+function selectAuthor(cnt, authId, field, fLvl) {  console.log('selectAuthor. args = %O', arguments)
+    // if (!$('#'+field+'-sel'+ cnt).length) { return; }
     _i.cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
@@ -512,7 +521,7 @@ function handleAuthSelect(val, ed) {
     const fLvl = _i.getSubFormLvl('sub');
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }                       
     if (val === 'create') { return _i.entity('createSubEntity', [authType, cnt]); } 
-    handleCitText(fLvl);       
+    // handleCitText(fLvl);       
     if (lastAuthComboEmpty(cnt, authType)) { return; }
     buildNewAuthorSelect(cnt+1, val, fLvl, authType);
 }
@@ -522,7 +531,7 @@ function handleFieldCleared(authType, cnt) {
         removeFinalEmptySelectField(authType, cnt);
     }
 }
-function syncWithOtherAuthorTypeSelect(authType) {
+function syncWithOtherAuthorTypeSelect(authType) {  console.log('syncWithOtherAuthorTypeSelect [%s]', authType)
     if ($('#'+authType+'-sel1').val()) { return; }
     toggleOtherAuthorTypeSelect(authType, true);
 }
@@ -531,7 +540,7 @@ function removeFinalEmptySelectField(authType, cnt) {
     $('#'+authType+'-sel'+cnt)[0].parentNode.remove();
     $('#'+authType+'-sel-cntnr').data('cnt', --cnt);
 }
-function toggleOtherAuthorTypeSelect(type, enable) {
+function toggleOtherAuthorTypeSelect(type, enable) {  console.log('toggle. type = %s, enable = %s', type, enable)
     const entity = type === 'Authors' ? 'Editors' : 'Authors';
     if (!$('#'+entity+'-sel-cntnr').length) { return; }
     _i.cmbx('enableFirstCombobox', ['#'+entity+'-sel-cntnr', enable]);
@@ -563,12 +572,6 @@ function getAuthAddFunc(authType, cnt) {
     const add = authType === 'Editors' ? initEdForm : initAuthForm;
     return add.bind(null, cnt);
 }
-/** Removes the already selected authors from the new dropdown options. */
-// function removeAllSelectedAuths(sel, fLvl, authType) { 
-//     const auths = fP.forms[fLvl].fieldConfg.vals[authType].val;   
-//     const $selApi = $(sel).data('selectize');                          
-//     if (auths) { auths.forEach(id => $selApi.removeOption(id)); } 
-// }
 /* ------------------------ AUTHOR CREATE ----------------------------------- */
 function initAuthForm(selCnt, val) {                                            //console.log("Adding new auth! val = %s, e ? ", val, arguments);      
     handleNewAuthForm(selCnt, val, 'Authors');

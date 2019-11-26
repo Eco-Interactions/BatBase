@@ -182,7 +182,7 @@ function getSourceFields(entity) {
 function fillFields(rcrd, fields, shwAll) {                                     //console.log('rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
         'text': setText, 'textArea': setTextArea, 'select': setSelect, 
-        'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
+        'fullTextArea': setTextArea, 'multiSelect': setMultiSelect,
         'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
         'taxon': addTaxon
     };
@@ -197,11 +197,9 @@ function addDataToField(field, fieldHndlr, rcrd) {                              
     fieldHndlr(elemId, prop, rcrd);
 }
 /** Adds multiSelect values to the form's val object. */
-function addToFormVals(fieldId, prop, rcrd) {                                   //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-    const vals = fP.forms.top.fieldConfg.vals;
-    vals[fieldId] = {type: 'multiSelect'};
-    vals[fieldId].val = rcrd[prop]; 
-    if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; }
+function setMultiSelect(fieldId, prop, rcrd) {                                   //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+    _i.mmry('setFormFieldData', ['top', _u.ucfirst(prop), rcrd[prop]);
+    if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; } //can this be the first line here?
     _i.selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
 }
 function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);

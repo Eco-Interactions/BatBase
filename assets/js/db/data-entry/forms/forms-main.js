@@ -107,7 +107,7 @@ export function getNextFormLevel(next, curLvl) {
  * the passed form lvl is reduced by one and returned. 
  */
 export function getSubFormLvl(lvl) { 
-    const topEntity = _mmry.getFormProp('entity', 'top');
+    const topEntity = _mmry.getFormProp('top', 'entity');
     const fLvls = mmry.formLevels;
     return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }
