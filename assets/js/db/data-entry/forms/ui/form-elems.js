@@ -158,7 +158,7 @@ function getRequiredFields(cfg) {
 }
 /* ===================== BUILD FORM FIELD ROW =============================== */
 /** @return {ary} Rows for each field in the entity field obj. */
-function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
+function buildRows(fieldObj, entity, fVals, fLvl) {                             console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
     return Promise.all(fieldObj.order.map(field => {
         return Array.isArray(field) ? 
             buildMultiFieldRow(field) : buildSingleFieldRow(field);
@@ -290,7 +290,7 @@ export function buildLongTextArea(entity, field, fLvl) {
  * the select's fieldName to the subForm config's 'selElem' array to later 
  * init the 'selectize' combobox. 
  */
-function buildSelectCombo(entity, field, fLvl, cnt) {                           //console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
+function buildSelectCombo(entity, field, fLvl, cnt) {                           console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
     return getSelectOpts(field)
         .then(finishSelectBuild);
 
@@ -313,7 +313,7 @@ function buildMultiSelectCntnr(entity, field, fLvl) {                           
 
     function returnFinishedMultiSelectFields(fields) {
         $(cntnr).data('inputType', 'multiSelect').data('cnt', 1);
-        $(cntnr).append(fields);
+        $(cntnr).append(fields);  console.log('fields = %O, cntnr = %O', fields, cntnr);
         return cntnr;
     }
 }
@@ -321,7 +321,7 @@ export function buildMultiSelectElems(entity, field, fLvl, cnt) {
     return buildSelectCombo(entity, field, fLvl, cnt)
         .then(returnFinishedMultiSelectField);
 
-    function returnFinishedMultiSelectField(fieldElem) {
+    function returnFinishedMultiSelectField(fieldElem) {  console.log('mutli elem = %O', fieldElem);
         const wrapper = _i.util('buildElem', ['div', {class: 'flex-row'}]);
         const lbl = buildMultiSelectLbl(cnt)
         $(fieldElem).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
@@ -402,16 +402,20 @@ function getTagOpts(entity) {
     return _i.util('getOptsFromStoredData', [entity+"Tags"]);
 }
 /** Returns an array of source-type (prop) options objects. */
-export function getSrcOpts(prop, field, rcrds) {
-    const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
-        'authSrcs': field ? field.slice(0, -1) : 'Author' };
+export function getSrcOpts(prop, field, rcrds) {  
     return _i.util('getData', [prop]).then(buildSrcOpts);
 
-    function buildSrcOpts(ids) {
+    function buildSrcOpts(ids) {   
         const srcs = rcrds || _i.mmry('getEntityRcrds', ['source']);
         const opts = getRcrdOpts(ids, srcs);
-        opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
+        opts.unshift({ value: 'create', text: 'Add a new '+getFieldName()+'...'});
         return opts;
+    }
+    function getFieldName() {
+        return { 
+            'pubSrcs': 'Publication',   'publSrcs': 'Publisher', 
+            'authSrcs': field ? field.slice(0, -1) : 'Author' 
+        }[prop];
     }
 }
 /** Return the citation type options available for the parent-publication's type. */
