@@ -49,7 +49,7 @@ function getEntityComboEvents(entity) {
 }
 /* ************************* ENTITY FORMS *********************************** */
 
-export function initCreateForm(entity) {  console.log('entity = ', entity)
+export function initCreateForm(entity, name) {  console.log('entity [%s], name [%s]', entity, name)
     const funcs = {
         'author': initAuthForm, 
         'editor': initEdForm,
@@ -57,7 +57,7 @@ export function initCreateForm(entity) {  console.log('entity = ', entity)
         'publication': initPubForm,
         'publisher': initPublisherForm
     };
-    funcs[entity]();
+    funcs[entity](name);
 }
 /* ========================== PUBLICATION =================================== */
 /**
@@ -194,7 +194,7 @@ function getBookDefault(pubType, rcrds, fLvl) {
 function loadCitTypeFields(typeId) {                                            console.log('       /--loadCitTypeFields');
     const fLvl = _i.getSubFormLvl('sub');
     const elem = this.$input[0];
-    if (!_i.mmry('isEditForm')) { handlePubData(typeId, elem, fLvl); }
+    if (!_i.mmry('isEditForm')) { addPubData(typeId, elem, fLvl); }
     return loadSrcTypeFields('citation', typeId, elem)
         .then(finishCitTypeFields);
 
@@ -269,7 +269,7 @@ export function handleSpecialCaseTypeUpdates(elem, fLvl) {
     }
 } /* End handleSpecialCaseTypeUpdates */
 /** Adds or removes publication data from the form's values, depending on type. */
-function handlePubData(typeId, citTypeElem, fLvl) {
+function addPubData(typeId, citTypeElem, fLvl) {
     const type = citTypeElem.innerText;                                         
     const copy = ['Book', "Master's Thesis", 'Museum record', 'Other', 
         'Ph.D. Dissertation', 'Report', 'Chapter' ];
@@ -277,24 +277,25 @@ function handlePubData(typeId, citTypeElem, fLvl) {
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const vals = _i.mmry('getFormProp', [fLvl, 'vals']);  
+    const fieldData = _i.mmry('getFormProp', [fLvl, 'fieldData']);  
     const rcrds = _i.mmry('getFormProp', [fLvl, 'rcrds']);
     addPubTitle(addValues, fLvl, type);
     addPubYear(addValues, fLvl);
     addAuthorsToCitation(addValues, fLvl, type);
+    _i.mmry('setFormProp', [fLvl, 'fieldData', fieldData]);
     /** 
      * Adds the pub title to the citations form vals, unless the type should 
      * be skipped, ie. have it's own title. (may not actually be needed. REFACTOR and check in later)
      */
     function addPubTitle(addTitle, fLvl, type) {     
         const skip = ['Chapter']; 
-        vals.Title = {};
-        vals.Title.val = addTitle && skip.indexOf(type) === -1 ? 
+        fieldData.Title = {};
+        fieldData.Title.val = addTitle && skip.indexOf(type) === -1 ? 
             rcrds.src.displayName : '';  
     }
     function addPubYear(addYear, fLvl) {  
-        vals.Year = {};
-        vals.Year.val = addYear ? rcrds.src.year : '';
+        fieldData.Year = {};
+        fieldData.Year.val = addYear ? rcrds.src.year : '';
     }
     function addAuthorsToCitation(addAuths, fLvl, type) { 
         const pubAuths = rcrds.src.authors;  
@@ -306,7 +307,7 @@ function addPubValues(fLvl, addValues, type) {
      */
     function addExistingPubContribs(fLvl, auths) {  
         vals.Authors = { type: "multiSelect" };
-        vals.Authors.val = auths ? auths : (vals.length > 0 ? vals : null);
+        vals.Authors.val = auths ? auths : (vals.length > 0 ? vals : null); //what is going on here?
     }
 }
 /* ----------------------- AUTO-GENERATE CITATION --------------------------- */
@@ -316,7 +317,7 @@ function addPubValues(fLvl, addValues, type) {
  * displayed. If not, the default text is displayed in the disabled textarea.
  * Note: to prevent multiple rebuilds, a timeout is used.
  */
-export function handleCitText(formLvl) {                                        console.log('   --handleCitText'); console.trace();
+export function handleCitText(formLvl) {                                        console.log('   --handleCitText'); 
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 500);
 
@@ -344,7 +345,7 @@ function getCitationFieldText($elem, fLvl) {
 
     function getCitationText() { 
         return ifNoChildFormOpen(fLvl) && _i.elems('ifAllRequiredFieldsFilled', [fLvl]) ? 
-           buildCitationText(fLvl) : 
+           _i.entity('getCitationText', [fLvl]) : 
            ($elem.val() === dfault ? false : dfault);
     }
 }
@@ -457,7 +458,7 @@ function focusFieldInput(type) {
 }
 /* ========================== PUBLISHER ===================================== */
 function onPublSelection(val) {
-    if (val === 'create') { return _i.entity('createSubEntity', ['Publisher']); }        
+    if (val === 'create') { return initPublisherForm(value); }        
 }
 /**
  * When a user enters a new publisher into the combobox, a create-publisher
@@ -468,7 +469,7 @@ function onPublSelection(val) {
  * Note: The publisher form inits with the submit button enabled, as display 
  *     name, aka val, is it's only required field.
  */
-function initPublisherForm (value) {                                            console.log('       /--initPublisherForm [%s]', value); 
+function initPublisherForm(value) {                                             console.log('       /--initPublisherForm [%s]', value); 
     const val = value === 'create' ? '' : value;
     const fLvl = _i.getSubFormLvl('sub2');
     const prntLvl = _i.getNextFormLevel('parent', fLvl);
@@ -487,18 +488,19 @@ function initPublisherForm (value) {                                            
 /* ========================== AUTHOR ======================================== */
 /* ----------------------------- AUTHOR SELECTION --------------------------- */
 /** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {    console.log('selectExistingAuthors. args = %O', arguments)   
-    if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }                                 
+export function selectExistingAuthors(field, authObj, fLvl) {                   //console.log('selectExistingAuthors. args = %O', arguments)   
+    if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }
+    toggleOtherAuthorTypeSelect(field, false);
     return Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
         const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
         return p.then(selNextAuth);
-    }, Promise.resolve()).then(() => syncWithOtherAuthorTypeSelect(field));
+    }, Promise.resolve());
 }
 function ifFieldNotShownOrNoValToSelect(field, valObj) {
     return !Object.keys(valObj).length || !$('#'+field+'-sel-cntnr').length;
 }
 /** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {  console.log('selectAuthor. args = %O', arguments)
+function selectAuthor(cnt, authId, field, fLvl) {                               //console.log('selectAuthor. args = %O', arguments)
     // if (!$('#'+field+'-sel'+ cnt).length) { return; }
     _i.cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
@@ -520,7 +522,7 @@ function handleAuthSelect(val, ed) {
     if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     const fLvl = _i.getSubFormLvl('sub');
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }                       
-    if (val === 'create') { return _i.entity('createSubEntity', [authType, cnt]); } 
+    if (val === 'create') { return handleNewAuthForm(cnt, val, authType); } 
     // handleCitText(fLvl);       
     if (lastAuthComboEmpty(cnt, authType)) { return; }
     buildNewAuthorSelect(cnt+1, val, fLvl, authType);
@@ -531,8 +533,8 @@ function handleFieldCleared(authType, cnt) {
         removeFinalEmptySelectField(authType, cnt);
     }
 }
-function syncWithOtherAuthorTypeSelect(authType) {  console.log('syncWithOtherAuthorTypeSelect [%s]', authType)
-    if ($('#'+authType+'-sel1').val()) { return; }
+function syncWithOtherAuthorTypeSelect(authType) { 
+    if ($('#'+authType+'-sel1').val()) { return; } //There are no selections in this type.
     toggleOtherAuthorTypeSelect(authType, true);
 }
 function removeFinalEmptySelectField(authType, cnt) {  
@@ -540,7 +542,7 @@ function removeFinalEmptySelectField(authType, cnt) {
     $('#'+authType+'-sel'+cnt)[0].parentNode.remove();
     $('#'+authType+'-sel-cntnr').data('cnt', --cnt);
 }
-function toggleOtherAuthorTypeSelect(type, enable) {  console.log('toggle. type = %s, enable = %s', type, enable)
+function toggleOtherAuthorTypeSelect(type, enable) {  
     const entity = type === 'Authors' ? 'Editors' : 'Authors';
     if (!$('#'+entity+'-sel-cntnr').length) { return; }
     _i.cmbx('enableFirstCombobox', ['#'+entity+'-sel-cntnr', enable]);
@@ -586,7 +588,7 @@ function initEdForm(selCnt, val) {                                              
  * this level , a message will be shown telling the user to complete the open 
  * form and the form init will be canceled.
  */
-function handleNewAuthForm(authCnt, value, authType) {  
+function handleNewAuthForm(authCnt, value, authType) {                          console.log('           /--handleNewAuthForm [%s][%s] - [%s]', authType, authCnt, value); 
     const pId = '#'+authType+'-sel'+authCnt; 
     const fLvl = 'sub2';
     if ($('#'+fLvl+'-form').length !== 0) { 
@@ -621,7 +623,7 @@ export function finishSourceToggleAllFields(entity, fVals, fLvl) {
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
     _i.cmbx('enableCombobox', ['#Publication-sel']);
-    fillCitationField($('#Publication-sel').val());
+    _i.entity('fillCitationField', [$('#Publication-sel').val()]);
 }
 function initEntitySubForm(entity, fLvl, fVals, pSel) {
     _i.mmry('initEntityFormMemory', [entity, fLvl, pSel, 'create']);       

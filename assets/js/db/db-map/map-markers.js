@@ -1,6 +1,6 @@
 import * as _u from '../util.js';
+import { entity as _entity } from '../data-entry/forms/forms-main.js';
 import { showLocInDataTable } from '../db-page.js';
-import * as _forms from '../data-entry/forms/forms-main.js';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -444,9 +444,10 @@ function getCoordsHtml(loc) {
 }
 function getSelectLocationBttn(loc, editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
-    const bttn = _u.buildElem('input', {type: 'button', id: 'loc-select-bttn',
+    const onClick = editing ? Function.prototype : _entity.bind(null, 'selectIntLoc');
+    const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn popup-bttn', value: text});
-    // $(bttn).click(clickFunc.bind(null, loc.id));
+    $(bttn).click(onClick.bind(null, [loc.id]));
     $(bttn).css({'margin-top': '.5em'});
     if (editing) { $(bttn).attr('disabled', 'disabled').css('opacity', '.666'); }
     return bttn;
@@ -695,10 +696,11 @@ function getNewLocText(loc, editing) {
     return editing ? html : `${html}After confirming that this location is unique, 
         please fill in all available data and click "Create Location" to submit.`;
 }
+/** Click event added in location-form. */
 function getCreateLocBttn() {
-    const bttn = _u.buildElem('input', {type: 'button',
+    const bttn = _u.buildElem('input', {type: 'button', id: 'new-gps-loc',
         class:'ag-fresh tbl-bttn', value: 'Create Location'});
-    $(bttn).click(_forms.create.bind('location'));
+    $(bttn).click(_entity.bind(null, 'addNewLocationWithGps', []));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }

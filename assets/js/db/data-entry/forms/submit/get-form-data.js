@@ -14,8 +14,8 @@ let mmry;
  * added @handleAdditionalEntityData.
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
-    mmry = _i.mmry('getAllFormMemory');
-    const elems = $('#'+entity+'_Rows')[0].children;                            console.log('           --getValidatedFormData. [%s]', entity);
+    mmry = _i.mmry('getAllFormMemory');                                         console.log('           --getValidatedFormData. [%s]', entity);
+    const elems = $('#'+entity+'_Rows')[0].children;                            
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
     return handleAdditionalEntityData(entity)

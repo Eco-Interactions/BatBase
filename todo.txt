@@ -25,7 +25,7 @@ Updates:
 
 Current:
     - Refactoring forms
-        - add forms in containers to ensure they don't collapse horizontally
+        - is there any reason to keep the field type in fieldData?
 
         - don't allow creation of anything without display name
         - store data in memory when updating data db-sync

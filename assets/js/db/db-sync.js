@@ -21,8 +21,7 @@
  * 
  */
 import * as _u from './util.js';
-import { err as _errs } from './data-entry/forms/forms-main.js';
-import { rebuildCitationText } from './data-entry/forms/features/generate-citation.js';
+import { err as _errs, entity as _entity } from './data-entry/forms/forms-main.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 
 let failed = { errors: [], updates: {}};
@@ -492,7 +491,7 @@ function updateRelatedCitations(data) {                                         
         srcType == 'Publisher' ? getChildCites(srcData.children) : false;
     if (!cites) { return; }
     return Promise.all(['author', 'citation', 'publisher'].map(e => getStoredData(e)))
-        .then(rcrds => updateCitations(rcrds));  
+        .then(rcrds => updateCitations(rcrds, cites));  
 
     function getChildCites(srcs) {  
         const cites = [];
@@ -503,20 +502,26 @@ function updateRelatedCitations(data) {                                         
         });
         return cites;
     }
-    function updateCitations(rcrds) {                                           //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
-        const proms = [];
-        cites.forEach(id => proms.push(updateCitText(id)));
-        return Promise.all(proms).then(onUpdateSuccess)
-        
-        function updateCitText(id) {
-            const citSrc = mmryData['source'][id];
-            const pub = mmryData['source'][citSrc.parent];
-            const cit = rcrds[1][citSrc.citation];                              
-            const citText = rebuildCitationText(citSrc, cit, pub, rcrds, mmryData['source']);       
-            return updateCitationData(citSrc, citText);
-        }
-    }
 } /* End updateRelatedCitations */
+function updateCitations(rcrds, cites) {                                        //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
+    const proms = [];
+    cites.forEach(id => proms.push(updateCitText(id)));
+    return Promise.all(proms).then(onUpdateSuccess)
+    
+    function updateCitText(id) {
+        const citSrc = mmryData['source'][id];
+        const params = {
+            authRcrds: rcrds[0],
+            cit: rcrds[1][citSrc.citation],
+            citRcrds: rcrds[1],
+            citSrc: citSrc,
+            pub: mmryData['source'][citSrc.parent],
+            publisherRcrds: rcrds[2]
+        };
+        const citText = _entity('rebuildCitationText', [params]);       
+        return updateCitationData(citSrc, citText);
+    }
+}
 /** Sends ajax data to update citation and source entities. */
 function updateCitationData(citSrc, text) { 
     const data = { srcId: citSrc.id, text: text };

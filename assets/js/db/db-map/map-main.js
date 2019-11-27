@@ -15,6 +15,7 @@ import * as _u from '../util.js';
 import * as MM from './map-markers.js'; 
 import buildMapDataObj from './map-data.js';
 import { accessTableState as tState } from '../db-page.js';
+import { create as _create } from '../data-entry/forms/forms-main.js';
 
 let app;
 
@@ -84,7 +85,7 @@ function buildAndShowMap(loadFunc, mapId, type) {                               
     addMapTiles(mapId);
     addGeoCoderToMap(mapId);
     addTipsLegend();
-    if (mapId !== 'loc-map') { buildSrchPgMap(); }
+    if (mapId !== 'form-map') { buildSrchPgMap(); }
     L.control.scale({position: 'bottomright'}).addTo(app.map);
     app.map.setView([22,22], 2);                                                console.log('map built.')
 }
@@ -124,7 +125,7 @@ function getMapBounds() {
 function addMapTiles(mapId) {
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        minZoom: mapId === 'loc-map' ? 1 : 3, //Don't zoom out passed 
+        minZoom: mapId === 'form-map' ? 1 : 3, //Don't zoom out passed 
         maxZoom: 16,
         id: 'mapbox.run-bike-hike',
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
@@ -176,7 +177,7 @@ function getGeocoderOptions() {
 }
 function drawPolygonAndUpdateUi(mapId, e) {                                     console.log("geocoding results = %O", e);
     drawPolygon(e.geocode.bbox, e.geocode.properties.address);
-    if (mapId == 'loc-map') {
+    if (mapId == 'form-map') {
         showNearbyLocationsAndUpdateForm(e.geocode.properties);
     }
 }
@@ -569,9 +570,9 @@ function updateMapPin(latLng, results, zoomFlag) {                              
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
     _u.getData('countryCodes').then(cntrys => {
         const loc = results ? buildLocData(results, cntrys) : null;
-        // const loc = results ? buildLocData(results.properties, results.name) : null;
         replaceMapPin(latLng, loc, zoomFlag);  
         $('#'+app.map._container.id).css('cursor', 'default');
+        if (zoomFlag === 'edit') { $('#'+app.map._container.id).data('loaded'); }
     });
 }
 function buildLocData(results, cntrys) {                                        //console.log('buildLocData. data = %O', data);
@@ -586,13 +587,13 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const markerType = zoomFlag === 'edit' ? 'edite-loc' : 'new-loc';
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
-    if (loc && zoomFlag !== 'edit') {                                           console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
+    if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
         addParentLocDataToMap(loc.cntryId, true);
     }
     addPinToMap(latLng, marker.layer, zoomFlag);   
 }
-function removePreviousMapPin(loc) { console.log('removePreviousMapPin')
+function removePreviousMapPin(loc) { 
     if (!app.volatile.pin) { return app.volatile.loc = loc; }  
     app.map.removeLayer(app.volatile.pin);
     resetPinLoc(loc);
@@ -612,8 +613,8 @@ function addPinToMap(latLng, pin, zoomFlag) {
  */
 export function initFormMap(parent, rcrds, type) {                              console.log('attempting to initMap. type = ', type);
     app.data.locs = app.data.locs || rcrds;  
-    if (!type && app.volatile.prnt && parent == app.volatile.prnt) { return; }
-    downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'loc-map', type);
+    // if (!type && app.volatile.prnt && parent == app.volatile.prnt) { return; }
+    downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);
 } 
 function finishFormMap(parentId, type) {                                        console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
     addLocCountLegend();
@@ -627,7 +628,7 @@ function finishFormMap(parentId, type) {                                        
     }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);
-    $('#loc-map').data('loaded', true);
+    $('#form-map').data('loaded', true);
 }
 /** 
  * Draws containing country polygon on map and displays all locations within. 
@@ -749,7 +750,11 @@ function addNewLocBttn() {
 }
 function addNewLocControl() {
     L.Control.Create = L.Control.extend({
-        onAdd: map => createNewLocBttn(),
+        onAdd: map => {
+            const bttn = createNewLocBttn();
+            $(bttn).click(_create.bind(null, 'location', null));
+            return bttn;
+        },
         onRemove: map => {}
     });
     L.control.create = opts => new L.Control.Create(opts);
@@ -802,7 +807,7 @@ function createNewLocHere(e) {                                                  
  * existing sub locations within the country.
  */ 
 function dropNewMapPinAndUpdateForm(type, e) {
-    $('#loc-map').css('cursor', 'progress');
+    $('#form-map').css('cursor', 'progress');
     app.geoCoder.reverse(
         e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null); 
     fillCoordFields(e.latlng);
