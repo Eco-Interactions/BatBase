@@ -159,12 +159,13 @@ export function fillComplexFormFields(fLvl) {
     const fieldData = _i.mmry('getFormProp', [fLvl, 'fieldData']);                       
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
     const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs); 
+    return fields.reduce(fillAllComplexFieldsWithData, Promise.resolve());
 
-    fields.forEach(field => {
+    function fillAllComplexFieldsWithData(p, field) { 
         const type = fieldData[field].type;
         const val = fieldData[field].val;
-        fieldHndlrs[type]([field, val, fLvl]);        
-    });
+        return p.then(() => fieldHndlrs[type]([field, val, fLvl]));
+    }
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
     return _i.entity.bind(null, 'selectExistingAuthors');

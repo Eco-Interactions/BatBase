@@ -209,7 +209,7 @@ function loadCitTypeFields(typeId) {                                            
  * Shows/hides the author field depending on whether the publication has authors 
  * already. Disables title field for citations that don't allow sub-titles.
  */
-export function handleSpecialCaseTypeUpdates(elem, fLvl) {
+export function handleSpecialCaseTypeUpdates(elem, fLvl) {                      //console.log('handleSpecialCaseTypeUpdates')
     const type = elem.innerText;    
     const hndlrs = { 
         'Book': updateBookFields, 'Chapter': updateBookFields,
@@ -305,9 +305,10 @@ function addPubValues(fLvl, addValues, type) {
      * If the parent publication has existing authors, they are added to the new 
      * citation form's author field(s). 
      */
-    function addExistingPubContribs(fLvl, auths) {  
-        vals.Authors = { type: "multiSelect" };
-        vals.Authors.val = auths ? auths : (vals.length > 0 ? vals : null); //what is going on here?
+    function addExistingPubContribs(fLvl, auths) {  //console.log('auths = %O', auths);
+        fieldData.Authors = { type: "multiSelect" };
+        fieldData.Authors.val = auths ? auths : null;
+        // fieldData.Authors.val = auths ? auths : (vals.length > 0 ? vals : null); //what is going on here?
     }
 }
 /* ----------------------- AUTO-GENERATE CITATION --------------------------- */
@@ -317,7 +318,7 @@ function addPubValues(fLvl, addValues, type) {
  * displayed. If not, the default text is displayed in the disabled textarea.
  * Note: to prevent multiple rebuilds, a timeout is used.
  */
-export function handleCitText(formLvl) {                                        console.log('   --handleCitText'); 
+export function handleCitText(formLvl) {                                        //console.log('   --handleCitText'); 
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 500);
 
@@ -368,10 +369,10 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
     function finishSrcTypeFormBuild(rows) {                                     //console.log('rows = %O', rows)
         $('#'+entity+'_Rows').append(rows);
         initFormCombos(entity, fLvl);
-        _i.ui('fillComplexFormFields', [fLvl]);
         _i.elems('checkReqFieldsAndToggleSubmitBttn', [elem, fLvl]);
         updateFieldLabelsForType(entity, fLvl);
         focusFieldInput(entity);
+        return _i.ui('fillComplexFormFields', [fLvl]);
     }
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {  
@@ -458,7 +459,7 @@ function focusFieldInput(type) {
 }
 /* ========================== PUBLISHER ===================================== */
 function onPublSelection(val) {
-    if (val === 'create') { return initPublisherForm(value); }        
+    if (val === 'create') { return initPublisherForm(val); }        
 }
 /**
  * When a user enters a new publisher into the combobox, a create-publisher
@@ -488,7 +489,7 @@ function initPublisherForm(value) {                                             
 /* ========================== AUTHOR ======================================== */
 /* ----------------------------- AUTHOR SELECTION --------------------------- */
 /** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {                   //console.log('selectExistingAuthors. args = %O', arguments)   
+export function selectExistingAuthors(field, authObj, fLvl) {                   console.log('selectExistingAuthors. args = %O', arguments); console.trace();
     if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }
     toggleOtherAuthorTypeSelect(field, false);
     return Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
@@ -496,11 +497,11 @@ export function selectExistingAuthors(field, authObj, fLvl) {                   
         return p.then(selNextAuth);
     }, Promise.resolve());
 }
-function ifFieldNotShownOrNoValToSelect(field, valObj) {
-    return !Object.keys(valObj).length || !$('#'+field+'-sel-cntnr').length;
+function ifFieldNotShownOrNoValToSelect(field, authObj) {
+    return !Object.keys(authObj).length || !$('#'+field+'-sel-cntnr').length;
 }
 /** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {                               //console.log('selectAuthor. args = %O', arguments)
+function selectAuthor(cnt, authId, field, fLvl) {                               console.log('selectAuthor. args = %O', arguments)
     // if (!$('#'+field+'-sel'+ cnt).length) { return; }
     _i.cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
@@ -529,7 +530,7 @@ function handleAuthSelect(val, ed) {
 }
 function handleFieldCleared(authType, cnt) {  
     syncWithOtherAuthorTypeSelect(authType);
-    if ($('#'+authType+'-sel'+(cnt-1)).val() === '') {
+    if ($('#'+authType+'-sel'+(cnt-1)).val() === '') {  
         removeFinalEmptySelectField(authType, cnt);
     }
 }
@@ -537,7 +538,7 @@ function syncWithOtherAuthorTypeSelect(authType) {
     if ($('#'+authType+'-sel1').val()) { return; } //There are no selections in this type.
     toggleOtherAuthorTypeSelect(authType, true);
 }
-function removeFinalEmptySelectField(authType, cnt) {  
+function removeFinalEmptySelectField(authType, cnt) {  console.log('removing empty author field')
     $('#'+authType+'-sel'+cnt)[0].selectize.destroy();  
     $('#'+authType+'-sel'+cnt)[0].parentNode.remove();
     $('#'+authType+'-sel-cntnr').data('cnt', --cnt);
@@ -552,11 +553,11 @@ function lastAuthComboEmpty(cnt, authType) {
     return $('#'+authType+'-sel'+cnt).val() === '';
 }
 /** Builds a new, empty author combobox */
-function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    
+function buildNewAuthorSelect(cnt, val, prntLvl, authType) {        console.log('buildNewAuthorSelect')            
     return _i.elems('buildMultiSelectElems', [null, authType, prntLvl, cnt])
         .then(appendNewAuthSelect);
 
-    function appendNewAuthSelect(sel) {
+    function appendNewAuthSelect(sel) { console.log('---append sel')
         $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
         _i.cmbx('initSingle', [getAuthSelConfg(authType, cnt), prntLvl]);
     }
