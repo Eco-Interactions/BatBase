@@ -22,7 +22,7 @@ export function initCreateForm(val) {                                           
     if ($('#'+fLvl+'-form').length !== 0) { 
         return _i.err('openSubFormErr', ['Location', null, fLvl]); 
     }
-    if ($('#loc-map').length !== 0) { $('#loc-map').remove(); }
+    if ($('#form-map').length !== 0) { $('#form-map').remove(); }
     buildLocForm(val, fLvl)
     .then(onLocFormLoadComplete);
 }
@@ -31,13 +31,13 @@ function buildLocForm(val, fLvl) {
         'Country': $('#Country-Region-sel').val() 
     }; 
     _i.mmry('initEntityFormMemory', ['location', fLvl, '#Location-sel', 'create']);
-    _i.mmry('setonFormCloseHandler', [fLvl, enableCountryRegionField]);
+    _i.mmry('setonFormCloseHandler', [fLvl, _i.entity.bind(null, 'enableCountryRegionField')]);
     return _i.elems('initSubForm', [fLvl, 'med-sub-form', vals, '#Location-sel'])
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row')[0].parentNode.after(form);
-        initFormCombobos(null, fLvl);
+        initFormCombos(null, fLvl);
         _i.cmbx('enableCombobox', ['#Country-Region-sel', false]);
         $('#Latitude_row input').focus();
         $('#sub-submit').val('Create without GPS data');
@@ -52,7 +52,7 @@ function buildLocForm(val, fLvl) {
 function onLocFormLoadComplete() {
     const fLvl = _i.getSubFormLvl("sub");
     disableTopFormLocNote();
-    addMapToLocForm('#location_Rows', 'create');
+    addMapToLocForm($('#location_Rows'), 'create');
     addNotesToForm();
     addListenerToGpsFields();
     scrollToLocFormWindow();
@@ -89,7 +89,8 @@ export function addListenerToGpsFields(params = [true]) {
     function toggleNoGpsSubmitBttn() {
         const coords = getCoordVals();
         _i.ui('toggleSubmitBttn', ['#sub-submit', coords.length]);
-        if (coords.length === 2) { _i.map('addVolatileMapPin', params); }
+        if (coords.length !== 2) { return; }
+        _i.map('addVolatileMapPin', params);
     }
 }
 function getCoordVals() {
@@ -106,11 +107,14 @@ function ifCoordFieldHasErr(field) {
     const max = field === 'Latitude' ? 90 : 180;
     return isNaN(coord) ? true : coord > max ? true : false;    
 }
+function addCreateEventToNewMarkerPopup() {
+    $('#new-gps-loc').click(addNewLocationWithGps);
+}
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
  * in a the new location's green map pin's popup on the map in the form.
  */
-export function addNewLocation() {
+export function addNewLocationWithGps() {
     const fLvl = _i.getSubFormLvl('sub');
     if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) {
         _i.submitForm('#'+fLvl+'-form',  fLvl, 'location');
@@ -124,9 +128,9 @@ export function locCoordErr(field) {
     _i.err('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
 }
 /*--------------- Map methods ---------------------------*/
-export function addMapToLocForm(elemId, type) {                                        console.log('           --addMapToLocForm');
-    const map = _i.util('buildElem', ['div', { id: 'loc-map', class: 'skipFormData' }]); 
-    $(elemId).after(map);
+export function addMapToLocForm($elem, type) {                                  console.log('           --addMapToLocForm. $elem = %O', $elem);
+    const map = _i.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]); 
+    $elem.after(map);
     initLocFormMap(type);
 }
 function initLocFormMap(type) {
@@ -139,7 +143,6 @@ export function focusParentAndShowChildLocs(type, val) {
     const locRcrds = _i.mmry('getEntityRcrds', ['location'])
     _i.map('initFormMap', [val, locRcrds, type]);
 }
-
 /** ================== EDIT FORM CODE ======================================= */
 export function finishLocEditFormBuild() {  
     _i.cmbx('initFormCombos', ['Location', 'top']); 
@@ -156,28 +159,20 @@ function addGpsListenerToEditForm(id) {
     addListenerToGpsFields([id, 'edit', false]);
 }
 export function addMapToLocationEditForm(id) {
-    addMapToLocForm('#location_Rows', 'edit');
-    finishLocFormAfterMapLoad(id);
-}
-function finishLocFormAfterMapLoad(id) {
-    if ($('#loc-map').data('loaded')) { finishEditForm(id)
-    } else { window.setTimeout(() => finishLocFormAfterMapLoad(id), 500); }
+    addMapToLocForm($('#location_Rows'), 'edit');
+    afterMapLoads(finishEditForm, id);
 }
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
-    $('#loc-select-bttn').click(selectLoc.bind(null, id));
     _i.ui('setCoreRowStyles', ['#form-main', '.top-row']);
     db_i.map('addVolatileMapPin', [id, 'edit', _i.cmbx.getSelVal('#Country-sel')]);
-    $('#loc-map').removeData('loaded')
 }
-function selectLoc(id) {
-    $('#sub-form').remove();
-    _i.cmbx('setSelVal', ['#Location-sel', id]);
-    enableCountryRegionField();
-    _i.cmbx('enableCombobox', ['#Location-sel']);
-}
-/** When the Location sub-form is exited, the Country/Region combo is reenabled. */
-function enableCountryRegionField() {  
-    _i.cmbx('enableCombobox', ['#Country-Region-sel']);
-    $('#loc-note').fadeTo(400, 1);
+/** ================== SHARED HELPERS ======================================= */
+function afterMapLoads(onLoadFunc, id) {  console.log('map loaded? ', $('#form-map').data('loaded'))
+    if ($('#form-map').data('loaded')) { 
+        onLoadFunc(id);
+        $('#form-map').removeData('loaded');
+    } else { 
+        window.setTimeout(() => afterMapLoads(onLoadFunc, id), 500); 
+    }
 }

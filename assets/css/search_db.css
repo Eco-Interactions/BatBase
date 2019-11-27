@@ -820,7 +820,7 @@ select[id$="txn-lvl"] + div {
     text-decoration: underline;
     cursor: pointer;
 }
-#loc-map {
+#form-map {
     border: 1px grey solid;
     height: 366px;
     width: 92%;

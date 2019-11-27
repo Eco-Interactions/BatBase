@@ -181,7 +181,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
 /**
  * @return {div} Form field row with required-state and value (if passed) set.  
  */
-function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     return buildFieldInput(fieldsObj.fields[field], entity, field, fLvl)
         .then(buildFieldRow);
 
@@ -213,31 +213,29 @@ function addFieldOnChangeHandler(entity, input, field, fLvl) {
 }
 function ifCitationFormAutoGenerateCitationOnChange(entity, input) {
     if (entity === 'citation'){ 
-        $(input).change(_i.entity.bind(null, 'handleCitText')); 
+        $(input).change(_i.entity.bind(null, 'handleCitText', [])); 
     }
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {            
     const val = value || $(elem).val();                             
     _i.mmry('setFormFieldData', [fLvl, fieldName, val]);
 }
-/** Stores value at index of the order on form, ie the cnt position. */
+/** Stores value (v) at (k) the order, or cnt position.  */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === 'create') { return; }
-    const fieldValues = _i.mmry('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);                
-    fieldValues[cnt] = e.target.value || null;
-    _i.mmry('setFormFieldData', [fLvl, field, fieldValues, 'multiSelect']);
-    checkForBlanksInOrder(fieldValues, field, fLvl);    
+    const valueObj = _i.mmry('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);                
+    valueObj[cnt] = e.target.value || null;
+    _i.mmry('setFormFieldData', [fLvl, field, valueObj, 'multiSelect']);
+    checkForBlanksInOrder(valueObj, field, fLvl);    
 }
 /**
  * Author/editor fields must have all fields filled continuously. There can 
- * be extra blanks on the end, but none at the beginning. If blanks are found,
- * an error is shown to the user, otherwise any active errors are cleared. 
+ * be no blanks in the selected order. If found, an error is shown to the user.
  */
 function checkForBlanksInOrder(vals, field, fLvl) {                             //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
-    const errTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
     let blank = checkForBlanks(vals);
-    if (blank === 'found') { return reportFieldErr(field, errTags[field], fLvl); }
-    clearPreviousErr(field, fLvl);
+    if (blank === 'found') { return reportFieldErr(field, fLvl); }
+    ifPreviousErrClearIt(field, fLvl);
 }
 function checkForBlanks(vals) {
     let blanks = false;
@@ -251,10 +249,11 @@ function checkForBlanks(vals) {
         } 
     }
 }
-function reportFieldErr(field, errTag, fLvl) {
-     _i.err('reportFormFieldErr', [field, errTag, fLvl]);
+function reportFieldErr(field, fLvl) {
+    const errTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
+     _i.err('reportFormFieldErr', [field, errTags[field], fLvl]);
 }
-function clearPreviousErr(field, fLvl) {
+function ifPreviousErrClearIt(field, fLvl) {
     if (!$('#'+field+'_i.err.'+fLvl+'-active-errs')) { return; }
     _i.err('clrContribFieldErr', [field, fLvl]);
 }

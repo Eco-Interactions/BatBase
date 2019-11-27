@@ -78,7 +78,7 @@ function buildFormData(entity, formVals, fLvl) {
      * would be overwritten. Once map editing is complete, this will be revised.
      */
     function handleGeoJson() {
-        const editing = _mmry('getMemoryProp', ['editing']);
+        const editing = _i.mmry('getMemoryProp', ['editing']);
         if (!editing && (!formVals.latitude || !formVals.longitude)) { return; }
         const displayPoint = JSON.stringify([ formVals.longitude, formVals.latitude ]);
         data.geoJson = {
@@ -92,7 +92,7 @@ function buildFormData(entity, formVals, fLvl) {
         data.location.hasDetail = true;
     }
     function getCoords(displayPoint) {
-        const geoJson = _mmry('getFormProp', ['top', 'geoJson']);
+        const geoJson = _i.mmry('getFormProp', ['top', 'geoJson']);
         const coords = !geoJson || geoJson.type === 'Point' ? 
             displayPoint : geoJson.coordinates;
     }

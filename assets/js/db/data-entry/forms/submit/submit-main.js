@@ -15,8 +15,8 @@ export function err(funcName, params = []) {
     return _errs[funcName](...params);
 }
 /** ----------- Data manipulation --------------------- */
-export function getFormData() {
-    return getValidatedFormData();
+export function getFormValData(entity, fLvl, submitting) {
+    return getValidatedFormData(entity, fLvl, submitting);
 }
 export function valAndSubmitFormData(formId, fLvl, entity) {                    console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
     getValidatedFormData(entity, fLvl, true)

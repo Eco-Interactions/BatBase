@@ -36,31 +36,28 @@ export function initFormCombos(entity, fLvl) {
 function getEntityComboEvents(entity) {
     const events = {
         'interaction': {
-            'CitationTitle': { change: onCitSelection, add: create('Citation') },
+            'CitationTitle': { change: onCitSelection, add: create('citation') },
             'Country-Region': { change: onCntryRegSelection },
             'InteractionType': { change: focusIntTypePin },
             'InteractionTags': { change: checkIntFieldsAndEnableSubmit },
-            'Location': { change: onLocSelection, add: create('Location')},
-            'Publication': { change: onPubSelection, add: create('Publication')},
-            'Subject': { change: onTaxonRoleSelection.bind(null, 'Subject') },
-            'Object': { change: onTaxonRoleSelection.bind(null, 'Object') },
+            'Location': { change: onLocSelection, add: create('location')},
+            'Publication': { change: onPubSelection, add: create('publication')},
+            'Subject': { change: onTaxonRoleSelection.bind(null, 'subject') },
+            'Object': { change: onTaxonRoleSelection.bind(null, 'object') },
         },
         'taxon': {
-            'Species': { change: onLevelSelection, add: createTaxon('Species') },
-            'Genus': { change: onLevelSelection, add: createTaxon('Genus') },
-            'Family': { change: onLevelSelection, add: createTaxon('Family') },
-            'Order': { change: onLevelSelection, add: createTaxon('Order') },
-            'Class': { change: onLevelSelection, add: createTaxon('Class') },
+            'Species': { change: onLevelSelection, add: create('Species') },
+            'Genus': { change: onLevelSelection, add: create('Genus') },
+            'Family': { change: onLevelSelection, add: create('Family') },
+            'Order': { change: onLevelSelection, add: create('Order') },
+            'Class': { change: onLevelSelection, add: create('Class') },
             'Realm': { change: onRealmSelection }
         }
     };
     return events[entity] || events.taxon;
 }
 function create(entity) {
-    return _i.entity.bind(null, 'createSubEntity', [entity]);
-}
-function createTaxon(level) {
-    return _i.entity.bind(null, 'initNewTaxonForm', [level]);
+    return _i.create.bind(null, entity);
 }
 /** ================ INIT INTERACTION FORM ================================== */
 /**
@@ -119,8 +116,9 @@ function getInfoLinkTextToOpenMap(argument) {
 }
 /** Open popup with the map interface for location selection. */
 function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
-    if ($('#loc-map').length) { return; }
-    _i.entity.addMapToLocForm('#Location_row', 'int');
+    if ($('#form-map').length) { return; }
+    const pElem = $('#Location_row')[0].parentNode;
+    _i.entity('addMapToLocForm', [$(pElem), 'int']);
     if (_i.cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
     _i.cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }
@@ -164,7 +162,7 @@ function onPubClear() {
 }
 /*------------------ CITATION ------------------------------------------------*/
 /** Fills the citation combobox with all citations for the selected publication. */
-function fillCitationField(pubId) {                                            
+export function fillCitationField(pubId) {                                            
     _i.cmbx('enableCombobox', ['#CitationTitle-sel']);
     _i.cmbx('updateComboboxOptions', ['#CitationTitle-sel', getPubCitationOpts(pubId)]);
 }
@@ -200,7 +198,10 @@ function onCntryRegSelection(val) {                                             
     const loc = mmry.records.location[val];
     fillLocationSelect(loc);
     if (!mmry.editing) { $('#Country-Region_pin').focus(); }
-    if ($('#loc-map').length) { _i.entity.focusParentAndShowChildLocs('int', val); }    
+    if ($('#form-map').length) { showCountryDataOnMap(val); }    
+}
+function showCountryDataOnMap(val) {
+    _i.entity('focusParentAndShowChildLocs', ['int', val]);
 }
 /*------------------ LOCATION ------------------------------------------------*/
 /**
@@ -225,15 +226,26 @@ function getChildLocOpts(children) {
         value: id, text: mmry.records.location[id].displayName 
     }));
 }
+export function selectLoc(id) {
+    $('#sub-form').remove();
+    _i.cmbx('setSelVal', ['#Location-sel', id]);
+    enableCountryRegionField();
+    _i.cmbx('enableCombobox', ['#Location-sel']);
+}
+/** When the Location sub-form is exited, the Country/Region combo is reenabled. */
+export function enableCountryRegionField() {  
+    _i.cmbx('enableCombobox', ['#Country-Region-sel']);
+    $('#loc-note').fadeTo(400, 1);
+}
 /** 
  * When a location is selected, its country/region is selected in the top-form
  * combobox and the location record's data is added to the detail panel. If 
  * the location was cleared, the detail panel is cleared. 
  */     
-function onLocSelection(val) {                                                  console.log('           --onLocSelection [%s]', val);
-    if (val === 'create') { return _i.create('Location'); }
+function onLocSelection(val) {                                           console.log('           --onLocSelection [%s]', val);
+    if (val === 'create') { return _i.create('location'); }
     if (val === '' || isNaN(parseInt(val))) { return _i.panel('clearDetailPanel', ['loc']); }   
-    if ($('#loc-map').length) { removeLocMap(); }
+    if ($('#form-map').length) { removeLocMap(); }
     const locRcrd = mmry.records.location[val];                                   
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _i.cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
@@ -241,7 +253,7 @@ function onLocSelection(val) {                                                  
     focusPinAndEnableSubmitIfFormValid('Location');
 }
 function removeLocMap() {
-    $('#loc-map').fadeTo(400, 0, () => $('#loc-map').remove());
+    $('#form-map').fadeTo(400, 0, () => $('#form-map').remove());
 }
 /*--------------------- TAXON ROLES ------------------------------------------*/
 /* -------------- SUBJECT ---------------------- */

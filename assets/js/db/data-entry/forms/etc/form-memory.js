@@ -55,16 +55,14 @@ export function initFormMemory(action, entity, id) {
  * > action - create || edit
  * > confg - The form config object used during form building.
  * > expanded - show all fields (true) or show default.
- * > fieldConfg - Form fields and types, values entered, and the required fields.
  * > entity - Name of this form's entity.
  * > entityType - Sub-entity type. Eg, publication-types: Book, Journal, etc.
  * > onFormClose - Handles form exit/reset.
- * > fieldConfg - Form fields and types, values entered, and the required fields.
+ * > fieldData - Obj with each form field (k) and it's (v) { value, fieldType }}
  * > misc - object to hold the various special-case props
  * > pSelId - The id of the parent select of the form.
  * > reqElems - All required elements in the form.
  * > selElems - Contains all selElems until they are initialized with selectize.
- * > vals - Stores all values entered in the form's fields.
  * --- Misc entity specific properties
  * > Citation forms: rcrds - { src: pubSrc, pub: pub } (parent publication)
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
@@ -75,15 +73,13 @@ export function initEntityFormMemory(entity, level, pSel, action) {
     formMemory.forms[level] = {
         action: action,
         expanded: false,
-        // fieldConfg: { fields: {}, order: [], required: [] }, 
-        fieldData: {/* field: { value, fieldType }} */},
+        fieldData: {},
         entity: entity,
         entityType: false,
         onFormClose: null,
         pSelId: pSel,
         reqElems: [],
         selElems: [], 
-        // vals: {}/* field: { value, fieldType }} */
     };                                                                          console.log("initEntityFormMemory. formMemory = %O, arguments = %O", formMemory, arguments)
     return formMemory;                                                                       
 }
@@ -200,14 +196,11 @@ export function setFormProp(fLvl, prop, val) {
 export function setTaxonProp(prop, val) {  
     return formMemory.forms.taxonPs[prop] = val;
 }
-// export function setFormFieldConfg(fLvl, field, confg) {
-//     formMemory.forms[fLvl].vals[field] = confg
-// }
 export function setFormFieldData(fLvl, field, val, type) {
     const fieldData = formMemory.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }
-    fieldData[field].val = val;             console.log('--------setting field [%s] val = [%O], type ? [%s]', field, val, type);
+    fieldData[field].val = val;             
 }
 export function setFormEntityType(fLvl, type) {
     formMemory.forms[fLvl].entityType = type;

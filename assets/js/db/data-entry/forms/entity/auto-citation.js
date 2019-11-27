@@ -3,19 +3,17 @@
  * when any changes are made to related citation data (ie: author, publication, etc). 
  *
  * Exports:                Imported by:
- *     buildCitationText            db-forms
+ *     getCitationText            db-forms
  *     rebuildCitationText          db_sync
  */
 import * as _i from '../forms-main.js';
 
-/**
- * Generates and displays the full citation text after all required fields 
- * are filled.
- */
-export function buildCitationText(fLvl) {  
-    const pubData = _i.mmry('getFormProp', [fLvl, 'rcrds']);  
-    const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
-    return _i.getFormFieldData('citation', null, null)
+/** Generates full citation text after all required fields are filled. */
+export function getCitationText(fLvl) {    
+    const pubData = _i.mmry('getFormProp', [fLvl, 'rcrds']);                    console.log('getCitationText [%s]. rcrds = %O', fLvl, pubData);
+    
+    const type = $('#CitationType-sel option:selected').text();                 //console.log("getCitationText for [%s]", type);
+    return _i.getFormValData('citation', null, null)
         .then(generateCitText); 
 
     function generateCitText(formVals) {                                        //console.log('generateCitText. formVals = %O', formVals);
@@ -38,7 +36,7 @@ export function buildCitationText(fLvl) {
             const pub = getPublicationName();
             const vip = getVolumeIssueAndPages(); 
             let fullText = [athrs, year, title].map(addPunc).join(' ')+' '; 
-            fullText += vip ? (pub+' '+vip) : pub;  console.log('fullText = ', fullText)
+            fullText += vip ? (pub+' '+vip) : pub;  
             return fullText + '.';
         }
         /**
@@ -162,16 +160,19 @@ export function buildCitationText(fLvl) {
                         pgs ? (pgs) : (null);
         }
     } 
-}/* End buildCitationText */
+}/* End getCitationText */
 
 /**
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
-export function rebuildCitationText(citSrc, cit, pubSrc, rcrds, sRcrds) {       console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
-    const aRcrds = rcrds[0]; //authors
-    const cRcrds = rcrds[1]; //citations
-    const pRcrds = rcrds[2]; //publishers
+export function rebuildCitationText(params) {                                   console.log('rebuildCitationText. params = %O', params);
+    const aRcrds = params.authRcrds;
+    const cit = params.cit;
+    const cRcrds = params.citRcrds;
+    const citSrc = params.citSrc;
+    const pub = params.pub;
+    const pRcrds = params.publisherRcrds;
     const type = cit.citationType.displayName;                                  //console.log("type = ", type);
     const getFullText = { 'Article': rbldArticleCit, 'Book': rbldBookCit, 
         'Chapter': rbldChapterCit, 'Ph.D. Dissertation': rbldDissertThesisCit, 
@@ -305,22 +306,23 @@ export function rebuildCitationText(citSrc, cit, pubSrc, rcrds, sRcrds) {       
                     pgs ? (pgs) : (null);
     }
 } /* End rebuildCitationText */
-
-
 /** ======================== HELPERS ======================================== */
 /** Formats publisher data and returns the Name, City, Country. */
-function buildPublString(pub, srcRcrds, publRcrds) {
-    const publ = getPublRcrd(pub);
+function buildPublString(pub, srcRcrds, publRcrds) {  
+    const publ = getPublisher(pub);
     if (!publ) { return false; }
     const name = publ.displayName;
     const city = publ.city ? publ.city : '[ADD CITY]';
     const cntry = publ.country ? publ.country : '[ADD COUNTRY]';
     return [name, city, cntry].join(', ');
 
-    function getPublRcrd(pub) {
+    function getPublisher(pub) {
         if (!pub.parent) { return false; }
-        const publSrc = getPublRcrd(srcRcrds, pub.parent, 'source');
-        return getPublRcrd(publRcrds, publSrc.publisher, 'publisher');
+        const publSrc = getPublRcrd(srcRcrds, 'source', pub.parent);
+        return getPublRcrd(publRcrds, 'publisher', publSrc.publisher);
+    }
+    function getPublRcrd(rcrds, entity, id) {
+        return rcrds ? rcrds[id] : _i.mmry('getRcrd', [entity, id]);
     }
 } /* End buildPublString */
 /** 

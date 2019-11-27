@@ -81,10 +81,10 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {                                     
-    const formFocus = _i.mmry('getMemoryProp', ['submit']).focus;               //console.log('refocusTableIfFormWasSubmitted. focus = [%s]', formFocus);
-    if (!formFocus) { return; }
-    if (formFocus == 'int') { return refocusAndShowUpdates(); }   
-    _i.loadDataTableAfterFormClose(formFocus);
+    const submitData = _i.mmry('getMemoryProp', ['submit']);                    //console.log('refocusTableIfFormWasSubmitted. focus = [%s]', formFocus);
+    if (!submitData) { return; }
+    if (submitData.focus == 'int') { return refocusAndShowUpdates(); }   
+    _i.loadDataTableAfterFormClose(submitData.focus);
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
     const formAction = _i.mmry('getMemoryProp', ['action']);
@@ -164,7 +164,7 @@ export function fillComplexFormFields(fLvl) {
         const type = fieldData[field].type;
         const val = fieldData[field].val;
         fieldHndlrs[type]([field, val, fLvl]);        
-    };
+    });
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
     return _i.entity.bind(null, 'selectExistingAuthors');

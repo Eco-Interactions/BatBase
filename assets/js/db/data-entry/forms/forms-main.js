@@ -19,6 +19,9 @@ import * as _page from '../../db-page.js';
 import * as _sync from '../../db-sync.js';
 import * as _u from '../../util.js';
 
+function getParams(params) {
+    return Array.isArray(params) ? params : [params];
+}
 /** =================== DATABASE PAGE FACADE ================================ */
 export function util(funcName, params = []) {  
     return _u[funcName](...params);
@@ -39,11 +42,11 @@ export function resetStoredData() {
     _sync.resetStoredData();
 }
 /** ====================== FORMS FACADE ===================================== */
-export function entity(funcName, params = []) {  console.log('args = %O', arguments);  //entity form interface
-    return _entity[funcName](...params);
+export function entity(funcName, params = []) { //entity form interface
+    return _entity[funcName](...getParams(params));
 }
-export function create(entity) {
-    _entity.createEntity(entity);
+export function create(entity, name) {
+    _entity.createEntity(entity, name);
 }
 export function edit(id, entity) {                                        
     _mmry.initFormMemory("edit", entity, id)
@@ -91,8 +94,8 @@ export function exitFormLevel() {
 }
 /** --------------------------- HELPERS ------------------------------------- */
 /* generate-citation */
-export function getFormFieldData(entity, fLvl, submitting) {
-    return _submit.getFormData(entity, fLvl, submitting);
+export function getFormValData(entity, fLvl, submitting) {
+    return _submit.getFormValData(entity, fLvl, submitting);
 }
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {  
