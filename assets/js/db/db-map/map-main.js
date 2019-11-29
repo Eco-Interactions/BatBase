@@ -77,7 +77,7 @@ function downloadDataAndBuildMap(loadFunc, mapId, type) {
     });                                   
 }
 /** Initializes the map using leaflet and mapbox. */
-function buildAndShowMap(loadFunc, mapId, type) {                               console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
+function buildAndShowMap(loadFunc, mapId, type) {                               //console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     app.map = getMapInstance(mapId);
     app.map.setMaxBounds(getMapBounds());
     app.map.on('click', onMapClick.bind(null, type));
@@ -87,7 +87,7 @@ function buildAndShowMap(loadFunc, mapId, type) {                               
     addTipsLegend();
     if (mapId !== 'form-map') { buildSrchPgMap(); }
     L.control.scale({position: 'bottomright'}).addTo(app.map);
-    app.map.setView([22,22], 2);                                                console.log('map built.')
+    app.map.setView([22,22], 2);                                                //console.log('map built.')
 }
 function getMapInstance(mapId) {
     if (app.map) { app.map.remove(); }
@@ -531,7 +531,7 @@ function loadCountryAndSubLocs(cntryId) {
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
-export function addVolatileMapPin(val, type, cntryId) {                         console.log('addVolatileMapPin')
+export function addVolatileMapPin(val, type, cntryId) {                         console.log('           --addVolatileMapPin')
     if (!val) { return removePreviousMapPin(); }
     const latLng = getMapPinCoords();  
     if (type === 'edit') { addEditFormMapData(latLng, val, cntryId); 
@@ -562,7 +562,7 @@ function fillCoordFields(latLng) {                                              
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates. 
  */
-function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  //console.log('updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
     updateMapPin(latLng, results[0], zoomFlag); 
 }
@@ -611,12 +611,12 @@ function addPinToMap(latLng, pin, zoomFlag) {
 /**
  * what is the case caught in this if??
  */
-export function initFormMap(parent, rcrds, type) {                              console.log('attempting to initMap. type = ', type);
+export function initFormMap(parent, rcrds, type) {                              console.log('       /--initFormMap type = [%s]', type);
     app.data.locs = app.data.locs || rcrds;  
     // if (!type && app.volatile.prnt && parent == app.volatile.prnt) { return; }
     downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);
 } 
-function finishFormMap(parentId, type) {                                        console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
+function finishFormMap(parentId, type) {                                        //console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
     addLocCountLegend();
     if (type === 'int') {
         addNewLocBttn();

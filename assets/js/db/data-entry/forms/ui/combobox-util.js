@@ -29,7 +29,7 @@ export function initSingle(confg, fLvl) {                                       
         }
     }
 } 
-export function enableCombobox(selId, enable) { 
+export function enableCombobox(selId, enable = true) {                          //*console.log('enableCombobox [%s] ? ', selId, enable);
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
 }

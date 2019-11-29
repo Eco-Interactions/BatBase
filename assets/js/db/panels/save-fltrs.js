@@ -15,7 +15,7 @@ import * as data_tree from '../db-table/build-data-tree.js';
 import * as db_filters from '../db-table/db-filters.js';
 import * as frmt_data from '../db-table/format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, selectSearchFocus, resetDataTable } from '../db-page.js';
+import { accessTableState as tState, selectSearchFocus, resetViewDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { savedIntListLoaded } from './save-ints.js';
 import { exitModal, showHelpModal, showSaveModal } from '../../misc/intro-core.js';

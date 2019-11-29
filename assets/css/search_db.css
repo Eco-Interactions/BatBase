@@ -713,9 +713,6 @@ button[name="show-hide-col"] {
     left: 24%;
     font-size: .75em !important;
 }
-div[id$="_Rows"] {
-    min-width: 100%;
-}
 [id$="_row"] {
     padding: .2em .75em .3em  .75em;    
     width: 100%;

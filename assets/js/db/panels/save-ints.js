@@ -29,7 +29,7 @@
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, resetDataTable } from '../db-page.js';
+import { accessTableState as tState, resetViewDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../db-table/db-filters.js';
 import { showHelpModal } from '../../misc/intro-core.js';
@@ -216,7 +216,7 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*debg-log*/console.log('----Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    resetDataTable()
+    resetViewDataTable()
     .then(updateRelatedListUi);
 }
 function prepareMemoryForTableLoad() {
@@ -422,7 +422,7 @@ function resetPrevListUiState() {
 function resetTable() {                     
     tState().set({'intSet': false});                                            
     delete app.listLoaded;
-    resetDataTable()
+    resetViewDataTable()
     .then(updateUiAfterTableReset);
 }
 function updateUiAfterTableReset() {

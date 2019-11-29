@@ -24,11 +24,10 @@ export function setCoreRowStyles(formId, rowClass) {
     $(rowClass).css({'flex': '0 1 '+w+'px', 'max-width': w});
 }
 /** Shows a form-submit success message at the top of the interaction form. */
-export function showSuccessMsg(msg, color) {
+export function showSuccessMsg(msg, color = 'green') {
     const cntnr = _i.util('buildElem', ['div', { id: 'success' }]);
-    const msgHtml = getSuccessMsgHtml(msg);
-    cntnr.append(div);
-    $(cntnr).css('border-color', (color ? color : 'greem'));
+    cntnr.append(getSuccessMsgHtml(msg));
+    $(cntnr).css('border-color', (color));
     $('#top-hdr').after(cntnr); 
     $(cntnr).fadeTo('400', .8);
 }
@@ -81,20 +80,18 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {                                     
-    const submitData = _i.mmry('getMemoryProp', ['submit']);                    //console.log('refocusTableIfFormWasSubmitted. focus = [%s]', formFocus);
+    const submitData = _i.mmry('getMemoryProp', ['submit']);                    console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
     if (!submitData) { return; }
-    if (submitData.focus == 'int') { return refocusAndShowUpdates(); }   
+    if (submitData.focus == 'int') { return refocusAndShowUpdates(submitData); }   
     _i.loadDataTableAfterFormClose(submitData.focus);
 }
-function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
-    const formAction = _i.mmry('getMemoryProp', ['action']);
-    const tableFocus  = formAction === 'create' ? 'srcs' : getCurFocus();
-    showTodaysUpdates(tableFocus);   
+function refocusAndShowUpdates(submitData) {                                              console.log('refocusAndShowUpdates.')
+    if (submitData.action === 'create') {
+        _i.showTodaysUpdates('srcs');   
+    } else {
+        _i.loadDataTableAfterFormClose(_i.mmry('getMemoryProp', ['curFocus']));
+    }
 }
-function getCurFocus() {
-    return _i.mmry('getMemoryProp', ['curFocus']);
-}
-
 /** -------------- sort! --------------- */
 export function setToggleFieldsEvent(elem, entity, fLvl) {
     $(elem).click(toggleShowAllFields.bind(elem, entity, fLvl));

@@ -46,7 +46,7 @@ function addDomEventListeners() {
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-    $('button[name="reset-tbl"]').click(db_page.resetDataTable.bind(null, false));
+    $('button[name="reset-tbl"]').click(db_page.resetViewDataTable.bind(null, false));
     addPanelEvents(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */

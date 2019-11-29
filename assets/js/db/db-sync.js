@@ -22,7 +22,7 @@
  */
 import * as _u from './util.js';
 import { err as _errs, entity as _entity } from './data-entry/forms/forms-main.js';
-import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
+import { resetDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 
 let failed = { errors: [], updates: {}};
 /** Stores entity data while updating to reduce async db calls. */
@@ -147,11 +147,11 @@ function clearMemoryAndLoadTable() {                                            
 }
 /**
  * Updates the stored data's updatedAt flag, and initializes the search-page 
- * table with the updated data @initDataTable. 
+ * table with the updated data @resetDataTable. 
  */
 function loadDataTable() {    
     storeLocalDataState();
-    initDataTable();                                                            //console.log('Finished updating! Loading search table.')
+    resetDataTable();                                                            //console.log('Finished updating! Loading search table.')
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -248,7 +248,7 @@ function updateDataProps(entity, rcrd, updateFuncs) {                           
     });
 }
 /** Updates stored-data props related to a detail-entity record with new data. */
-function addDetailEntityData(entity, rcrd) {                                    console.log("Updating Detail entity. %s. %O", entity, rcrd);
+function addDetailEntityData(entity, rcrd) {                                    console.log("       --Updating Detail: [%s] %O", entity, rcrd);
     return updateDetailData(entity, rcrd)
 }
 function updateDetailData(entity, rcrd) {
@@ -882,7 +882,7 @@ function addToFailedUpdates(updateFunc, prop, params, edits) {                  
     };
 }
 /** Retries any updates that failed in the first pass. */
-function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates. failed = %O', failed);
+function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates. failed = %O', _u.snapshot(failed));
     if (!Object.keys(failed.updates).length) { return Promise.resolve(); }
     failed.twice = true;   
     Object.keys(failed.updates).forEach(retryEntityUpdates);

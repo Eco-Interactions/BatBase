@@ -8,13 +8,13 @@
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
  *     initSearchState          db_sync, util
- *     initDataTable            db_sync, db-forms, db-filters, db-tutorial
+ *     resetDataTable            db_sync, db-forms, db-filters, db-tutorial
  *     onLocViewChange          db_ui
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
  *     rebuildLocTable          db-filters, save-ints
  *     rebuildTxnTable          db-filters, save-ints
- *     resetDataTable           db-ui, save-fltrs, save-ints    
+ *     resetViewDataTable           db-ui, save-fltrs, save-ints    
  *     selectSearchFocus        db-ui, save-fltrs
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
@@ -142,7 +142,7 @@ function resetTblParams(focus) {
     if (intSet) { tblState.intSet = intSet; }
 }
 /** Resets table state to top focus options for the selected view. */
-export function resetDataTable(view, e) {                           /*Perm-log*/console.log('   //resetting search table. View ? [%s]', view);
+export function resetViewDataTable(view, e) {                           /*Perm-log*/console.log('   //resetting search table. View ? [%s]', view);
     const changeView = view && view !== tblState.curView;
     const resetMap = { 
         taxa: changeView ? onTxnViewChange : buildTxnTable, 
@@ -169,8 +169,8 @@ function resetCurTreeStorageProps() {
     tblState.selectedOpts = {};
     db_filters.resetTableStateParams();
 }
-/**  Table-rebuild entry point after local database updates.  */
-export function initDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
+/** Table-rebuild entry point after local database updates and after edit-form close.  */
+export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetTblFilters();
     resetStoredFiltersUi();
@@ -208,6 +208,9 @@ function clearOnFocusChange(focus) {
     $('#focus-filters').empty();  
     db_filters.updateTaxonFilterViewMsg(null);
     return resetTableParams(focus);
+}
+export function showTodaysUpdates(focus) {
+    db_filters.showTodaysUpdates(focus);
 }
 /* ==================== TABLE LOAD ========================================== */
 function loadTbl(tblName, rowData) {

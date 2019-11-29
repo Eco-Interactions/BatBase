@@ -49,7 +49,7 @@ function getEntityComboEvents(entity) {
 }
 /* ************************* ENTITY FORMS *********************************** */
 
-export function initCreateForm(entity, name) {  console.log('entity [%s], name [%s]', entity, name)
+export function initCreateForm(entity, name) {                                  //console.log('entity [%s], name [%s]', entity, name)
     const funcs = {
         'author': initAuthForm, 
         'editor': initEdForm,
@@ -67,9 +67,6 @@ export function initCreateForm(entity, name) {  console.log('entity [%s], name [
  */
 function initPubForm(value) {                                                   console.log('       /--initPubForm [%s]', value); 
     const fLvl = _i.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { 
-        return _i.err('openSubFormErr', ['Publication', null, fLvl]); 
-    }
     const val = value === 'create' ? '' : value;
     initPubMemory(fLvl);
     buildAndAppendPubForm(val, fLvl);
@@ -116,9 +113,6 @@ function ifBookAddAuthEdNote() {
 /** Shows the Citation sub-form and disables the publication combobox. */
 function initCitForm(v) {                                                       console.log("       /--initCitForm [%s]", v);
     const fLvl = _i.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { 
-        return _i.err('openSubFormErr', ['CitationTitle', '#CitationTitle-sel', fLvl]); 
-    }
     const val = v === 'create' ? '' : v;
     _i.util('getData', [['author', 'publication']])
     .then(data => initCitFormMemory(data, fLvl))
@@ -191,7 +185,7 @@ function getBookDefault(pubType, rcrds, fLvl) {
  * loading the default fields for the selected Citation Type. If this is an 
  * edit form, skip loading pub data... 
  */
-function loadCitTypeFields(typeId) {                                            console.log('       /--loadCitTypeFields');
+function loadCitTypeFields(typeId) {                                            console.log('           /--loadCitTypeFields');
     const fLvl = _i.getSubFormLvl('sub');
     const elem = this.$input[0];
     if (!_i.mmry('isEditForm')) { addPubData(typeId, elem, fLvl); }
@@ -322,7 +316,7 @@ export function handleCitText(formLvl) {                                        
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 500);
 
-    function buildCitTextAndUpdateField() {                                     console.log('           /--buildCitTextAndUpdateField')
+    function buildCitTextAndUpdateField() {                                     //console.log('           /--buildCitTextAndUpdateField')
         const fLvl = formLvl || _i.getSubFormLvl('sub');
         const $elem = $('#CitationText_row textarea');
         if (!$elem.val()) { initializeCitField($elem); } 
@@ -398,7 +392,7 @@ function getFilledSrcVals(entity, typeId, fLvl) {
 }
 /** Sets the type confg for the selected source type in form mmry. */
 function setSourceType(entity, fLvl, tName) {
-    const type = tName || getSourceTypeFromCombo(entity); 
+    const type = tName || getSourceTypeFromCombo(entity);                       console.log('               --type = [%s]', type);
     _i.mmry('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
@@ -489,7 +483,7 @@ function initPublisherForm(value) {                                             
 /* ========================== AUTHOR ======================================== */
 /* ----------------------------- AUTHOR SELECTION --------------------------- */
 /** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {                   console.log('selectExistingAuthors. args = %O', arguments); console.trace();
+export function selectExistingAuthors(field, authObj, fLvl) {                   //console.log('selectExistingAuthors. args = %O', arguments); console.trace();
     if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }
     toggleOtherAuthorTypeSelect(field, false);
     return Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
@@ -501,7 +495,7 @@ function ifFieldNotShownOrNoValToSelect(field, authObj) {
     return !Object.keys(authObj).length || !$('#'+field+'-sel-cntnr').length;
 }
 /** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {                               console.log('selectAuthor. args = %O', arguments)
+function selectAuthor(cnt, authId, field, fLvl) {                               //console.log('selectAuthor. args = %O', arguments)
     // if (!$('#'+field+'-sel'+ cnt).length) { return; }
     _i.cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
@@ -538,7 +532,7 @@ function syncWithOtherAuthorTypeSelect(authType) {
     if ($('#'+authType+'-sel1').val()) { return; } //There are no selections in this type.
     toggleOtherAuthorTypeSelect(authType, true);
 }
-function removeFinalEmptySelectField(authType, cnt) {  console.log('removing empty author field')
+function removeFinalEmptySelectField(authType, cnt) {  
     $('#'+authType+'-sel'+cnt)[0].selectize.destroy();  
     $('#'+authType+'-sel'+cnt)[0].parentNode.remove();
     $('#'+authType+'-sel-cntnr').data('cnt', --cnt);
@@ -553,11 +547,11 @@ function lastAuthComboEmpty(cnt, authType) {
     return $('#'+authType+'-sel'+cnt).val() === '';
 }
 /** Builds a new, empty author combobox */
-function buildNewAuthorSelect(cnt, val, prntLvl, authType) {        console.log('buildNewAuthorSelect')            
+function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log('buildNewAuthorSelect')            
     return _i.elems('buildMultiSelectElems', [null, authType, prntLvl, cnt])
         .then(appendNewAuthSelect);
 
-    function appendNewAuthSelect(sel) { console.log('---append sel')
+    function appendNewAuthSelect(sel) { 
         $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
         _i.cmbx('initSingle', [getAuthSelConfg(authType, cnt), prntLvl]);
     }
