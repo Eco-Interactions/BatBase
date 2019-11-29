@@ -30,7 +30,10 @@ export function map(funcName, params = []) {
     return _map[funcName](...params);
 }
 export function loadDataTableAfterFormClose(focus) {
-    _page.initDataTable(focus);
+    _page.resetDataTable(focus);
+}
+export function showTodaysUpdates(focus) {
+    _page.showTodaysUpdates(focus);
 }
 export function initNewDataForm() {
     _entity.createEntity('interaction');

@@ -98,21 +98,11 @@ function getFieldTypeObj(entity, fLvl) {
         order: getFieldOrder(confg),
         required: getRequiredFields(confg)
     }
-    // return buildFieldTypeObj(confg); //, mmry.forms[fLvl].fieldConfg
 }   
 function getEntityTypeFormConfg(entity, fLvl) {
     const type = mmry.forms[fLvl].entityType;
     return type ? _i.confg('getFormConfg', [entity]).types[type] : false;
 }
-// function buildFieldTypeObj(confg) {
-//     return 
-// }
-// function buildFieldTypeObj(confg, fieldConfg) {                                 //console.log('fieldConfg = %O', fieldConfg);
-//     fieldConfg.fields = getIncludedFields(confg);
-//     fieldConfg.order = getFieldOrder(confg);                     
-//     fieldConfg.required = getRequiredFields(confg);
-//     return fieldConfg;
-// }
 function getIncludedFields(confg) {
     const allFields = getFieldTypes(confg);
     const included = {}
@@ -158,7 +148,7 @@ function getRequiredFields(cfg) {
 }
 /* ===================== BUILD FORM FIELD ROW =============================== */
 /** @return {ary} Rows for each field in the entity field obj. */
-function buildRows(fieldObj, entity, fVals, fLvl) {                             console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
+function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
     return Promise.all(fieldObj.order.map(field => {
         return Array.isArray(field) ? 
             buildMultiFieldRow(field) : buildSingleFieldRow(field);
@@ -290,7 +280,7 @@ export function buildLongTextArea(entity, field, fLvl) {
  * the select's fieldName to the subForm config's 'selElem' array to later 
  * init the 'selectize' combobox. 
  */
-function buildSelectCombo(entity, field, fLvl, cnt) {                           console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
+function buildSelectCombo(entity, field, fLvl, cnt) {                           //console.log("buildSelectCombo [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
     return getSelectOpts(field)
         .then(finishSelectBuild);
 
@@ -313,7 +303,7 @@ function buildMultiSelectCntnr(entity, field, fLvl) {                           
 
     function returnFinishedMultiSelectFields(fields) {
         $(cntnr).data('inputType', 'multiSelect').data('cnt', 1);
-        $(cntnr).append(fields);  console.log('fields = %O, cntnr = %O', fields, cntnr);
+        $(cntnr).append(fields); 
         return cntnr;
     }
 }
@@ -321,7 +311,7 @@ export function buildMultiSelectElems(entity, field, fLvl, cnt) {
     return buildSelectCombo(entity, field, fLvl, cnt)
         .then(returnFinishedMultiSelectField);
 
-    function returnFinishedMultiSelectField(fieldElem) {  console.log('mutli elem = %O', fieldElem);
+    function returnFinishedMultiSelectField(fieldElem) { 
         const wrapper = _i.util('buildElem', ['div', {class: 'flex-row'}]);
         const lbl = buildMultiSelectLbl(cnt)
         $(fieldElem).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
@@ -574,7 +564,7 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)
-    const reqElems = _i.mmry('getFormProp', [fLvl, 'reqElems']);          
+    const reqElems = _i.mmry('getFormProp', [fLvl, 'reqElems']);   
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
@@ -614,15 +604,14 @@ function locHasGpsData(fLvl) {
         return $(`#${field}_row input`).val();
     });
 }
-
-
 /* -------------------- APPEND FIELDS AND FORM ------------------------------ */
-export function buildAndAppendForm(fLvl, fields, id) { 
+export function buildAndAppendTopForm(fields, id) { 
     mmry = _i.mmry('getAllFormMemory');
     showFormPopup(mmry.action, mmry.entity, id);
     const form = buildFormElem();  
-    const fieldContainer = buildEntityFieldContainer(mmry.entity, fields);
-    $(form).append([fieldContainer, buildFormFooter(mmry.entity, fLvl, mmry.action, null, mmry)]);
+    $(form).append([
+        buildEntityFieldContainer(mmry.entity, fields), 
+        buildFormFooter(mmry.entity, 'top', mmry.action, null, mmry)]);
     $('#form-main').append(form);  
     return Promise.resolve();
 }
@@ -635,7 +624,7 @@ function buildFormElem() {
     return form;
 }
 function buildEntityFieldContainer(entity, fields) {
-    const attr = { id: entity+'_Rows', class: 'flex-row' };
+    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
     const div = _i.util('buildElem', ['div', attr]);
     $(div).append(fields); 
     return div;

@@ -18,7 +18,7 @@
  *     updateTaxonSearch                util
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, initDataTable, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
+import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from '../db-ui.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from '../panels/save-fltrs.js';
 import { savedIntListLoaded } from '../panels/save-ints.js';
@@ -202,7 +202,7 @@ export function selTimeFilter(val) {                                            
  */
 export function showTodaysUpdates(focus) {                                      console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
     _u.setSelVal('Focus', focus, 'silent');
-    initDataTable(focus)
+    resetDataTable(focus)
     .then(showUpdatesAfterTableLoad);
 }
 function showUpdatesAfterTableLoad() {

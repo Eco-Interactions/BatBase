@@ -30,7 +30,7 @@ export function editEntity(id, entity, params) {                        console.
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
     return getEditFormFields(id, entity)
-        .then(fields => _elems.buildAndAppendForm('top', fields, id))
+        .then(fields => _elems.buildAndAppendTopForm(fields, id))
         .then(hideFieldCheckboxes)
         .then(() => finishEditFormBuild(entity))
         .then(() => fillExistingData(entity, id));

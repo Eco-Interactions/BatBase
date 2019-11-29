@@ -17,11 +17,8 @@ export function initFormCombos(entity, fLvl) {
     _i.cmbx('initFormCombos', ['location', fLvl, events]);
 }
 /** Inits the location form and disables the country/region combobox. */
-export function initCreateForm(val) {                                              console.log("       --initLocForm [%s]", val);
+export function initCreateForm(entity, val) {                                   console.log("       --initLocForm [%s]", val);
     const fLvl = _i.getSubFormLvl('sub');
-    if ($('#'+fLvl+'-form').length !== 0) { 
-        return _i.err('openSubFormErr', ['Location', null, fLvl]); 
-    }
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
     buildLocForm(val, fLvl)
     .then(onLocFormLoadComplete);
@@ -128,7 +125,7 @@ export function locCoordErr(field) {
     _i.err('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
 }
 /*--------------- Map methods ---------------------------*/
-export function addMapToLocForm($elem, type) {                                  console.log('           --addMapToLocForm. $elem = %O', $elem);
+export function addMapToLocForm($elem, type) {                                  //console.log('           --addMapToLocForm. $elem = %O', $elem);
     const map = _i.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]); 
     $elem.after(map);
     initLocFormMap(type);
@@ -139,7 +136,7 @@ function initLocFormMap(type) {
     _i.map('initFormMap', [prntId, locRcrds, type]);
 }
 export function focusParentAndShowChildLocs(type, val) {                               
-    if (!val) { return; }                                                       console.log('           --focusParentAndShowChildLocs [%s] [%s]', type, val);
+    if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
     const locRcrds = _i.mmry('getEntityRcrds', ['location'])
     _i.map('initFormMap', [val, locRcrds, type]);
 }

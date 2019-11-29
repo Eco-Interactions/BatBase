@@ -59,7 +59,7 @@ function initStickyHeader() {
 };
 /* ========================== PAGE SPECIFIC ================================= */
 function handlePageSpecificUiInit() {
-    initDataTable();
+    initPageTable();
     clearFieldForPdfSubmissions();
     showOverlayOnMobile();
 }
@@ -67,7 +67,7 @@ function handlePageSpecificUiInit() {
  * Initiates tables and rearranges related UI. 
  * Used on the feedback, pdf submission, and bilio pages.
  */ 
-function initDataTable() { 
+function initPageTable() { 
     const tableName = $('#pg-container').data("dt"); 
     if (tableName === false) { return; } 
     require('../misc/oi-tables.js').init(tableName);  

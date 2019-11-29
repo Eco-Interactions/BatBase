@@ -22,7 +22,7 @@
  */
 import * as _u from './util.js';
 import { err as _errs, entity as _entity } from './data-entry/forms/forms-main.js';
-import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
+import { resetDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 
 let failed = { errors: [], updates: {}};
 /** Stores entity data while updating to reduce async db calls. */
@@ -145,11 +145,11 @@ function retryFailedUpdatesAndLoadTable() {                                     
 }
 /**
  * Updates the stored data's updatedAt flag, and initializes the search-page 
- * table with the updated data @initDataTable. 
+ * table with the updated data @resetDataTable. 
  */
 function loadDataTable() {    
     storeLocalDataState();
-    initDataTable();                                                            //console.log('Finished updating! Loading search table.')
+    resetDataTable();                                                            //console.log('Finished updating! Loading search table.')
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -240,7 +240,7 @@ function updateDataProps(entity, rcrd, updateFuncs) {                           
     }, Promise.resolve());
 }
 /** Updates stored-data props related to a detail-entity record with new data. */
-function addDetailEntityData(entity, rcrd) {                                    console.log("Updating Detail entity. %s. %O", entity, rcrd);
+function addDetailEntityData(entity, rcrd) {                                    console.log("       --Updating Detail: [%s] %O", entity, rcrd);
     return updateDetailData(entity, rcrd)
     .then(trackTimeUpdated.bind(null, entity, rcrd));
 }
@@ -613,7 +613,7 @@ function ajaxAndStoreAllEntityData(reset) {                                     
         $.each([a1, a2, a3, a4, a5, a6], (idx, a) => storeServerData(a[0]));
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
-        if (reset) { initDataTable(); 
+        if (reset) { resetDataTable(); 
         } else { initSearchState(); }
         storeLocalDataState();
     });
@@ -903,7 +903,7 @@ function addToFailedUpdates(updateFunc, prop, params, edits) {                  
     };
 }
 /** Retries any updates that failed in the first pass. */
-function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates. failed = %O', failed);
+function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates. failed = %O', _u.snapshot(failed));
     if (!Object.keys(failed.updates).length) { return Promise.resolve(); }
     failed.twice = true;   
     return Promise.all(Object.keys(failed.updates).reduce(retryEntityUpdates));

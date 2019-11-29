@@ -228,23 +228,18 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     return $.ajax({
         method: "POST",
         url: url,
-        success: successCb || dataSubmitSucess,
+        success: successCb || logAjaxData,
         error: errCb || ajaxError,
         data: JSON.stringify(dataPkg)
     });
-    
-    function dataSubmitSucess(data, textStatus, jqXHR) { 
-        if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
-            console.log("               Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR); }
-    }
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
 export function logAjaxData(dataPkg, args) {
     if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
-        console.log("           --Sending Ajax data =%O arguments = %O", dataPkg, args);
-    } else { console.log("          --Sending Ajax data =%O", dataPkg); }
+        console.log("           --Ajax data =%O arguments = %O", dataPkg, args);
+    } else { console.log("          --Ajax data =%O", dataPkg); }
 }
 export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
     if ($('body').data('env') === 'test') { return; }

@@ -8,12 +8,10 @@ import * as _i from '../forms-main.js';
 
 export function initFormCombos(entity, fLvl) {} //No combos in this form.
 
-export function initCreateForm(level, value) {                                  console.log('           /--initTaxon[%s]Form [%s]', level, value);
+export function initCreateForm(lvl, value) {                                    console.log('           /--initTaxon[%s]Form [%s]', lvl, value);
     const val = value === 'create' ? '' : value;
+    const level = _i.util('ucfirst', [lvl]);
     const fLvl = getTaxonCreateLvl();
-    if (level === 'Species' && !$('#Genus-sel').val()) {
-        return _i.err('formInitErr', [level, 'noGenus', fLvl]);
-    }
     enableTaxonLvls(false);
     showNewTaxonForm(val, level, fLvl);
 } 

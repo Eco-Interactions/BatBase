@@ -18,7 +18,7 @@ export function err(funcName, params = []) {
 export function getFormValData(entity, fLvl, submitting) {
     return getValidatedFormData(entity, fLvl, submitting);
 }
-export function valAndSubmitFormData(formId, fLvl, entity) {                    console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
+export function valAndSubmitFormData(formId, fLvl, entity) {                    //console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
     getValidatedFormData(entity, fLvl, true)
         .then(vals => buildFormDataAndSubmit(entity, fLvl, vals));
 }
@@ -29,16 +29,16 @@ export function buildFormDataAndSubmit(entity, fLvl, formVals) {
 }
 /*---------------------- Form Submit Methods ---------------------------------*/
 function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
+    const action = _i.mmry('getFormProp', [fLvl, 'action']);  
     const coreEntity = _i.confg('getCoreFormEntity', [entity]);        
-    const url = getEntityAjaxUrl(fLvl);   
+    const url = getEntityAjaxUrl(action);   
     addEntityDataToFormData(data, coreEntity);
-    storeParamsData(coreEntity, fLvl);
+    storeParamsData(coreEntity, action, fLvl);
     _i.ui('toggleWaitOverlay', [true]); 
     _i.util('sendAjaxQuery', [data, url, onSuccess, _errs.formSubmitError]);
 }
-function getEntityAjaxUrl(fLvl) { 
+function getEntityAjaxUrl(action) { 
     const path = $('body').data('ajax-target-url');  
-    const action = _i.mmry('getFormProp', [fLvl, 'action']);  
     return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity) {  
@@ -47,18 +47,18 @@ function addEntityDataToFormData(data, coreEntity) {
     data.coreEntity = coreEntity;  
 }
 /** Stores data relevant to the form submission that will be used later. */
-function storeParamsData(entity, fLvl) {                                  
+function storeParamsData(entity, action, fLvl) {                                  
     const foci = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
         'interaction': 'int' };
-    const props = { ajaxFormLvl: fLvl, focus: foci[entity] };
-    _i.mmry('addFormSubmitProps', [props]);
+    const props = { action: action, ajaxFormLvl: fLvl, focus: foci[entity] };
+    _i.mmry('setMemoryProp', ['submit', props]);
 }
 /* ----------------- Form Submit Success Methods ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                                   _i.util('logAjaxData', [data, arguments]);
     _i.updateLocalDataStorage(data.results)
     .then(onDataSynced);
 }
-function onDataSynced(data) {                                                   console.log('       --Data update complete. data = %O', data);
+function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
     _i.ui('toggleWaitOverlay', [false]);
     if (data.errors) { return _errs('errUpdatingData', [data.errors]); }
     if (noDataChanges()) { return showNoChangesMessage(); }  
@@ -101,17 +101,18 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
 }
 /*------------------ Top-Form Success Methods --------------------*/
 function handleFormComplete(data) {   
-    const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
+    const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    _i.mmry('getFormProp', ['top', 'onFormClose'])(data);
-    _i.clearFormMemory();
+    const onClose = _i.mmry('getFormProp', ['top', 'onFormClose']);  console.log('onClose = %O', onClose);
+    if (onClose) { onClose(data); }
+    // _i.clearFormMemory();
 }
 /*--------------------- After Sub-Entity Created -----------------------------*/
 /**
  * Exits the successfully submitted form @exitForm. Adds and selects the new 
  * entity in the form's parent elem @addAndSelectEntity.
  */
-function exitFormAndSelectNewEntity(data, fLvl) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
+function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
     const formParent = _i.mmry('getFormParentId', [fLvl]);         
     _i.exitFormLevel(fLvl); 
     if (formParent) { addAndSelectEntity(data, formParent); 

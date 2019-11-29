@@ -10,7 +10,7 @@
  *     startWalkthrough         db-page
  */
 import * as _u from './util.js';
-import { initDataTable } from './db-page.js';
+import { resetDataTable } from './db-page.js';
 import { showTips } from './db-ui.js';
 
 let intro, focus;
@@ -313,7 +313,7 @@ function resetUiAndReloadTable() {                                              
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    initDataTable(focus);
+    resetDataTable(focus);
 }
 /* ---------- Set Up Functions --------------------*/
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);

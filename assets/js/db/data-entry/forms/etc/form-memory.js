@@ -10,7 +10,7 @@ import * as _i from '../forms-main.js';
 
 let formMemory = {};
 
-export function clearMemory() {
+export function clearMemory() {  
     formMemory = {};
 }
 /*--------------------- INIT FORM MEMORY -------------------------------------*/
@@ -33,7 +33,7 @@ export function initFormMemory(action, entity, id) {
 
     return _i.util('getData', [entities]).then(data => {
         initMainMemory(data);
-        initEntityFormMemory(entity, 'top', null, action);                      console.log("#### Init formMemory = %O, curFormMemory = %O", _i.util('snapshot', [formMemory]), formMemory);
+        initEntityFormMemory(entity, 'top', null, action);                      console.log("       #### Init formMemory = %O, curFormMemory = %O", _i.util('snapshot', [formMemory]), formMemory);
         return formMemory;
     });
 
@@ -80,7 +80,7 @@ export function initEntityFormMemory(entity, level, pSel, action) {
         pSelId: pSel,
         reqElems: [],
         selElems: [], 
-    };                                                                          console.log("initEntityFormMemory. formMemory = %O, arguments = %O", formMemory, arguments)
+    };                                                                          //console.log("   /initEntityFormMemory. formMemory = %O, arguments = %O", formMemory, arguments)
     return formMemory;                                                                       
 }
 /*------------- Taxon --------------------*/
@@ -111,7 +111,7 @@ export function initTaxonMemory(role, realmName, realmTaxon, reset) {           
             realmTaxon: realmTaxon,
         };           
         if (role === 'Object') { formMemory.forms.taxonPs.objectRealm = realmName; }  
-        console.log('       --taxon params = %O', formMemory.forms.taxonPs)
+                                                                                console.log('           --taxon params = %O', formMemory.forms.taxonPs)
     }
 }
 /** Returns either the preivously selected object realm or the default. */
@@ -129,7 +129,7 @@ export function getEditEntityId(type) {
 export function getAllFormMemory() {  
     return formMemory;
 }
-export function getMemoryProp(prop) {
+export function getMemoryProp(prop) {                                           //console.log('args = %O, memory = %O', arguments, formMemory); 
     return formMemory[prop];
 }
 /* source-forms */
@@ -174,9 +174,6 @@ export function getRcrd(entity, id) {
 /* ---------------------------- Setters ------------------------------------- */
 export function addEntityRecords(entity, rcrds) {
     formMemory.records[entity] = rcrds;
-}
-export function addFormSubmitProps(propObj) {
-    formMemory.submit = propObj;
 }
 export function addRequiredFieldInput(fLvl, input) {  
     formMemory.forms[fLvl].reqElems.push(input);

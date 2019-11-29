@@ -78,7 +78,7 @@ function reloadAndRedownloadData() {
  * reset the select elem. 
  */
 export function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, mmry = %O ", selId, mmry)
-    var selId = id || '#'+field+'-sel';
+    const selId = id || '#'+field+'-sel';
     return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
 }
 /** 
@@ -89,14 +89,14 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
     const selId = id || '#'+field+'-sel';
     reportFormFieldErr(field, errTag, fLvl);
     if (skipClear) { return; }
-    window.setTimeout(function() {_i.cmbx.clearCombobox(selId)}, 10);
+    window.setTimeout(function() {_i.cmbx('clearCombobox', [selId])}, 10);
     return { 'value': '', 'text': 'Select ' + field };
 }
 /**
  * Shows the user an error message above the field row. The user can clear the 
  * error manually with the close button, or automatically by resolving the error.
  */
-export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
+export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       ###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
     mmry = _i.mmry('getAllFormMemory');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
@@ -131,7 +131,7 @@ function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrIsGenusPrnt(elem, fLvl, e) { 
-    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    _i.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /** Note: error used for the location form. */
@@ -147,13 +147,13 @@ function clrInvalidCoords(elem, fLvl, e, fieldName) {
     if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
 }
 function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
-    const genus = _i.cmbx.getSelTxt('#Genus-sel');
+    const genus = _i.cmbx('getSelTxt', ['#Genus-sel']);
     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
 }
 function clrNeedsGenusName(elem, fLvl, e) {
-    $('#DisplayName_row input')[0].value = '';
+    // $('#DisplayName_row input')[0].value = '';
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Note: error for the edit-taxon form. */
@@ -162,19 +162,21 @@ function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrNeedsGenusPrntErr(elem, fLvl, e) {            
-    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    _i.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /** Note: error for the create-taxon form. */
 function handleNoGenus(elem, errTag, fLvl, fieldName) {  
     const msg = '<span>Please select a genus before creating a species.</span>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    $('#Genus-sel').change(function(e){
-        if (e.target.value) { clrNoGenusErr(elem, fLvl); }
-    });
+    // $('#'+fieldName+'-sel')[0].selectize.refreshItems();
+    $('#Genus-sel').change(onChangeClearNoGenusErr.bind(null, elem, fLvl));
+}
+function onChangeClearNoGenusErr(elem, fLvl, e){
+    if (e.target.value) { clrNoGenusErr(elem, fLvl); }
 }
 function clrNoGenusErr(elem, fLvl, e) {                                            
-    $('#Genus-sel').off('change');
+    $('#Genus-sel').off('change', onChangeClearNoGenusErr);
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Note: error for the edit-taxon form. */
@@ -184,7 +186,7 @@ function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) {
 }
 /** Clears the cause, either the parent-selection process or the taxon's level. */
 function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
-    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    _i.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, fLvl);
     if ($('#sub-form').length) { return selectParentTaxon(
         $('#txn-prnt').data('txn'), mmry.forms.taxonPs.curRealmLvls[0]); 
@@ -202,7 +204,7 @@ function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {
 }
 export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
-    _i.cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
+    _i.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl'), 'silent']);
     $('#txn-lvl').data('lvl', txnLvl);
     clearErrElemAndEnableSubmit($('#Taxon_errs')[0], fLvl);
     enableChngPrntBtttn();
@@ -258,7 +260,7 @@ function clrOpenSubForm(elem, fLvl) {
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Returns the error div for the passed field. */
-function getFieldErrElem(fieldName, fLvl) {                                     console.log("getFieldErrElem for %s", fieldName);
+function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
     var field = fieldName.split(' ').join('');
     var elem = $('#'+field+'_errs')[0];    
     $(elem).addClass(fLvl+'-active-errs');
@@ -298,16 +300,23 @@ function clrFormLvlErr(elem, fLvl) {
         _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
     }
 }
-export function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+export function clearErrElemAndEnableSubmit(elem, fLvl) {                       //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
     const subLvl = _i.getNextFormLevel('child', fLvl);
-        $(elem).fadeTo(400, 0, clearErrElem);
-    if (!$('#'+subLvl+'-form').length && _i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
-        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
-    }
+    $(elem).fadeTo(200, 0, clearAndEnable);
 
+    function clearAndEnable() {
+        clearErrElem();
+        enableSubmitIfFormReady();
+    }
     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);
         $(elem).removeClass(fLvl+'-active-errs');
         if (elem.innerHTML) { elem.innerHTML = ''; }
         $(elem).fadeTo(0, 1);
+    }
+    function enableSubmitIfFormReady() {
+        if (!$('#'+fLvl+'-form').length || $('#'+subLvl+'-form').length) { return; }
+        if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
+            _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
+        }
     }
 } 

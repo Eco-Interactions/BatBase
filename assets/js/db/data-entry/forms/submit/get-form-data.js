@@ -14,7 +14,7 @@ let mmry;
  * added @handleAdditionalEntityData.
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
-    mmry = _i.mmry('getAllFormMemory');                                         console.log('           --getValidatedFormData. [%s]', entity);
+    mmry = _i.mmry('getAllFormMemory');                                         //console.log('           --getValidatedFormData. [%s]', entity);
     const elems = $('#'+entity+'_Rows')[0].children;                            
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
@@ -26,7 +26,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
         if (elem.className.includes('cntnr-row')) { return getMultiFieldRowData(elem); }
         const fieldName = getInputFieldNameFromCntnr(elem.children[1]);
-        const input = elem.children[1].children[1];                             //console.log("---------[%s] = %O", fieldName, input);
+        const input = elem.children[1].children[1];                             //console.log("           --get[%s]InputData = %O", fieldName, input);
         formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
         
         /** 
@@ -56,7 +56,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     }
     /** Adds an array of tag values. */
     function getTagVals(input, fieldName) {                                 
-        return _i.cmbx.getSelVal('#'+_i.util('ucfirst', [fieldName])+'-sel');
+        return _i.cmbx('getSelVal', ['#'+_i.util('ucfirst', [fieldName])+'-sel']);
     }
     function handleAdditionalEntityData(entity) {  
         if (!submitting) { return Promise.resolve(); }  

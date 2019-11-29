@@ -21,12 +21,13 @@ import * as _autoCite from './auto-citation.js';
 
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 'object': _int
+    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 
+    'object': _int, 'species': _txn, 'genus': _txn, 'family': _txn, 'order': _txn, 
+    'class': _txn
 };
 
 export function createEntity(entity, name) {                                    //console.log('createEntity. args = %O', arguments)
-    return forms[entity] === _src ? 
-        _src.initCreateForm(entity, name) : forms[entity].initCreateForm(name);    
+    return forms[entity].initCreateForm(entity, name);    
 }
 export function initFormCombos(entity, fLvl) {
     forms[entity].initFormCombos(entity, fLvl);
@@ -68,7 +69,7 @@ export function addNewLocationWithGps() {
     _loc.addNewLocationWithGps();
 }
 /** ------------------------ TAXON ------------------------------------------ */
-export function initNewTaxonForm(level, val) {
+export function createTaxon(level, val) {
     return _txn.initCreateForm(level, val);
 }
 export function getSelectedTaxon() {
