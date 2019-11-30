@@ -2,9 +2,10 @@
  * Contains code used to specifically build the interaction form. 
  *
  * CODE SECTIONS
- *     INIT INTERACTION FORM
+ *     CREATE FORM
+ *         RESET CREATE FORM AFTER SUBMIT
  *     ON FORM INIT COMPLETE
- *     FIELD HANDLERS
+ *     FORM FIELD HANDLERS
  *         PUBLICATION
  *         CITATION
  *         COUNTRY/REGION
@@ -18,7 +19,8 @@
  *                 onLevelSelection
  *                 selectRoleTaxon
  *         FIELD HELPERS
- *     RESET FORM AFTER SUBMIT
+ *     EDIT FORM
+ *         FILL INTERACTION DATA
  *
  * EXPORTS: 
  *     initCreateForm   
@@ -76,7 +78,7 @@ function throwAndCatchSubFormErr(entity, fLvl) {
     openSubFormErr(entity, fLvl)
     .catch(() => {});
 }
-/** ================ INIT INTERACTION FORM ================================== */
+/** ********************** CREATE FORM ************************************** */
 /**
  * Inits the interaction form with all fields displayed and the first field, 
  * publication, in focus. From within many of the fields the user can create 
@@ -88,6 +90,7 @@ export function initCreateForm(entity) {                                        
     .then(mmry => getInteractionFormFields(mmry))
     .then(fields => _i.elems('buildAndAppendTopForm', [fields]))
     .then(() => finishInteractionFormBuild())
+    .then(() => _i.mmry('setonFormCloseHandler', ['top', resetInteractionForm]))
     .catch(err => _i.util('alertErr', [err]));
 }
 /** Builds and returns all interaction-form elements. */
@@ -96,7 +99,85 @@ function getInteractionFormFields(params) {
     return _i.elems('getFormFieldRows', ['Interaction', {}, 'top', params]);                                          
     // return _i.elems('buildFormRows', ['Interaction', {}, 'top']);  
 }
-/** =================== ON FORM INIT COMPLETE =============================== */
+/** ------------- RESET CREATE FORM AFTER SUBMIT ---------------------------- */
+/** 
+ * Resets the interactions form leaving only the pinned values. Displays a 
+ * success message. Disables submit button until any field is changed. 
+ */
+function resetInteractionForm() {
+    const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
+    _i.ui('showSuccessMsg', ['New Interaction successfully created.']);
+    resetIntFields(vals); 
+    resetFormUi();
+    // initEntityFormMemory('Interaction', 'top', null, 'create');
+    _i.mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
+
+    // _i.mmry('initFormMemory', ['create', 'interaction'])
+    // .then(resetFormUi);
+
+}
+function resetFormUi() {
+    $('#top-cancel').val(' Close ');  
+    _i.ui('toggleSubmitBttn', ['#top-submit', false]);
+    _i.mmry('setFormProp', ['top', 'unchanged', true]);
+}
+/** Returns an obj with the form fields and either their pinned values or false. */
+function getPinnedFieldVals() {
+    const pins = $('form[name="top"] [id$="_pin"]').toArray();                  //console.log("pins = %O", pins);
+    const vals = {};
+    pins.forEach(pin => {  
+        if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]); 
+        } else { addFalseValue(pin.id.split("_pin")[0]); }
+    });
+    return vals;
+
+    function getFieldVal(fieldName) {                                           //console.log("fieldName = [%s]", fieldName)
+        const suffx = fieldName === 'Note' ? '-txt' : '-sel';
+        vals[fieldName] = $('#'+fieldName+suffx).val();
+    }
+    function addFalseValue(fieldName) {
+        vals[fieldName] = false;
+    }
+} /* End getPinnedValsObj */
+/**
+ * Resets the top-form in preparation for another entry. Pinned field values are 
+ * persisted. All other fields will be reset. 
+ */
+function resetIntFields(vals) {                                                 console.log('resetIntFields. vals = %O', vals);
+    _i.ui('toggleSubmitBttn', ["#top-submit", false]);
+    _i.mmry('initEntityFormMemory', ['interaction', 'top', null, 'create']);
+    resetUnpinnedFields(vals);
+    fillPubDetailsIfPinned(vals.Publication);
+}
+function resetUnpinnedFields(vals) {
+    for (let field in vals) {                                                   //console.log("field %s val %s", field, vals[field]);
+        if (!vals[field]) { clearField(field, vals); }
+        if (field === 'Publication') { fillPubDetailsIfPinned(vals[field]); }
+    }
+}
+function clearField(field, vals) {
+    clearFieldMemory(field);
+    if (field === 'Note') { return $('#Note-txt').val(""); }
+    _i.panel('clearFieldDetails', [field]);
+    _i.cmbx('clearCombobox', ['#'+field+'-sel']);
+    if (field === 'Location') { syncWithCountryField(vals['Country-Region']); }
+}
+function clearFieldMemory(field) {
+    _i.mmry('setFormFieldData', ['top', field, null]);
+    ifTaxonFieldClearData(field);
+}
+function ifTaxonFieldClearData(field) {  
+    if (['Subject', 'Object'].indexOf(field) === -1) { return; }  
+    $('#'+field+'-sel').data('selTaxon', false);
+}
+function syncWithCountryField(cntryId) { 
+    fillLocationSelect(mmry.records.location[cntryId]);
+}
+function fillPubDetailsIfPinned(pub) {
+    if (pub) { _i.panel('updateSrcDetails', ['pub']); 
+    } else { _i.cmbx('enableCombobox', ['#CitationTitle-sel', false]); }
+}
+/** ------------------- ON FORM INIT COMPLETE ------------------------------- */
 /**
  * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
  * required field elems to the form's config object.  
@@ -106,7 +187,6 @@ function finishInteractionFormBuild() {                                         
     modifyFormDisplay();
     addLocationSelectionMethodsNote();
     finishComboboxInit();
-    _i.mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
 }
 function modifyFormDisplay() {
     $('#Note_row label')[0].innerText += 's';
@@ -155,7 +235,7 @@ function addTaxonFocusListener(role) {
     const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
     $('#form-main').on('focus', elem, showSelectForm);
 }
-/** ========================== FIELD HANDLERS =============================== */
+/** ********************** FORM FIELD HANDLERS ****************************** */
 /*------------------ PUBLICATION ---------------------------------------------*/
 /** 
  * When an existing publication is selected, the citation field is filled with 
@@ -364,7 +444,12 @@ function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {                  
     const lcRole = _i.util('lcfirst', [role]);
     _i.mmry('initEntityFormMemory', [lcRole, fLvl, '#'+role+'-sel', 'create']);
     return _i.mmry('initTaxonMemory', [role, realm, realmTaxon])
+        .then(setScopeTaxonMemory)
         .then(() => _i.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
+}
+function setScopeTaxonMemory(txnMmry) {
+    mmry.forms.taxonPs = txnMmry;
+    return Promise.resolve();
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -373,7 +458,6 @@ function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {                  
 function finishTaxonSelectBuild(role) {                                     
     const fLvl = _i.getSubFormLvl('sub');
     const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
-    mmry.forms.taxonPs = _i.mmry('getTaxonMemory');
     customizeElemsForTaxonSelectForm(role);
     if (ifSelectingInitialTaxon(role)) { resetPrevTaxonSelection(role);
     } else { _i.cmbx('focusFirstCombobox', [selCntnr]); }
@@ -707,81 +791,7 @@ function resetIfFormWaitingOnChanges() {
     _i.ui('exitSuccessMsg');
     _i.mmry('setFormProp', ['top', 'unchanged', false]);
 }
-/** ============= RESET FORM AFTER SUBMIT =================================== */
-/** 
- * Resets the interactions form leaving only the pinned values. Displays a 
- * success message. Disables submit button until any field is changed. 
- */
-function resetInteractionForm() {
-    const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
-    _i.ui('showSuccessMsg', ['New Interaction successfully created.']);
-    resetIntFields(vals); 
-    resetFormUi();
-    // initEntityFormMemory('Interaction', 'top', null, 'create');
-    _i.mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
-
-    // _i.mmry('initFormMemory', ['create', 'interaction'])
-    // .then(resetFormUi);
-
-}
-function resetFormUi() {
-    $('#top-cancel').val(' Close ');  
-    _i.ui('toggleSubmitBttn', ['#top-submit', false]);
-    _i.mmry('setFormProp', ['top', 'unchanged', true]);
-}
-/** Returns an obj with the form fields and either their pinned values or false. */
-function getPinnedFieldVals() {
-    const pins = $('form[name="top"] [id$="_pin"]').toArray();                  //console.log("pins = %O", pins);
-    const vals = {};
-    pins.forEach(pin => {  
-        if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]); 
-        } else { addFalseValue(pin.id.split("_pin")[0]); }
-    });
-    return vals;
-
-    function getFieldVal(fieldName) {                                           //console.log("fieldName = [%s]", fieldName)
-        const suffx = fieldName === 'Note' ? '-txt' : '-sel';
-        vals[fieldName] = $('#'+fieldName+suffx).val();
-    }
-    function addFalseValue(fieldName) {
-        vals[fieldName] = false;
-    }
-} /* End getPinnedValsObj */
-/**
- * Resets the top-form in preparation for another entry. Pinned field values are 
- * persisted. All other fields will be reset. 
- */
-function resetIntFields(vals) {                                                 console.log('resetIntFields. vals = %O', vals);
-    _i.ui('toggleSubmitBttn', ["#top-submit", false]);
-    _i.mmry('initEntityFormMemory', ['interaction', 'top', null, 'create']);
-    resetUnpinnedFields(vals);
-    fillPubDetailsIfPinned(vals.Publication);
-}
-function resetUnpinnedFields(vals) {
-    for (let field in vals) {                                                   //console.log("field %s val %s", field, vals[field]);
-        if (!vals[field]) { clearField(field, vals); }
-        if (field === 'Publication') { fillPubDetailsIfPinned(vals[field]); }
-    }
-}
-function clearField(field, vals) {
-    clearFieldMemory(field);
-    if (field === 'Note') { return $('#Note-txt').val(""); }
-    _i.panel('clearFieldDetails', [field]);
-    _i.cmbx('clearCombobox', ['#'+field+'-sel']);
-    if (field === 'Location') { syncWithCountryField(vals['Country-Region']); }
-}
-function clearFieldMemory(field) {
-    _i.mmry('setFormFieldData', ['top', field, null]);
-    ifTaxonFieldClearData(field);
-}
-function ifTaxonFieldClearData(field) {  
-    if (['Subject', 'Object'].indexOf(field) === -1) { return; }  
-    $('#'+field+'-sel').data('selTaxon', false);
-}
-function syncWithCountryField(cntryId) { 
-    fillLocationSelect(mmry.records.location[cntryId]);
-}
-function fillPubDetailsIfPinned(pub) {
-    if (pub) { _i.panel('updateSrcDetails', ['pub']); 
-    } else { _i.cmbx('enableCombobox', ['#CitationTitle-sel', false]); }
+/** ************************ EDIT FORM ************************************** */
+export function finishEditFormBuild(entity) {
+    finishInteractionFormBuild();
 }

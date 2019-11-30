@@ -171,8 +171,9 @@ export function rebuildCitationText(params) {                                   
     const cit = params.cit;
     const cRcrds = params.citRcrds;
     const citSrc = params.citSrc;
-    const pub = params.pub;
+    const pubSrc = params.pub;
     const pRcrds = params.publisherRcrds;
+    const sRcrds = params.srcRcrds;
     const type = cit.citationType.displayName;                                  //console.log("type = ", type);
     const getFullText = { 'Article': rbldArticleCit, 'Book': rbldBookCit, 
         'Chapter': rbldChapterCit, 'Ph.D. Dissertation': rbldDissertThesisCit, 
@@ -332,7 +333,7 @@ function buildPublString(pub, srcRcrds, publRcrds) {
  * with '&'. If the names are of editors, they are returned [Initials. Last].
  * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
  */
-function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {                                  //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
+function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {             //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
     if (Object.keys(auths).length > 3) { return getFirstEtAl(auths[1]); }
     let athrs = '';
     for (let ord in auths) {  
@@ -369,6 +370,6 @@ function addPunc(data) {
     return /[.!?,;:]$/.test(data) ? data : data+'.';
 }
 
-function getEntityRcrd(rcrds, id, entity) {
-    return  rcrds ? rcrds[id] : _i.mmry('getRcrd', [entity, id]);
+function getEntityRcrd(rcrds, id, entity) {  console.log('getEntityRcrd. args = %O', arguments);
+    return rcrds ? rcrds[id] : _i.mmry('getRcrd', [entity, id]);
 }

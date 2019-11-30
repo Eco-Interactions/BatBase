@@ -9,6 +9,7 @@
  *         HELPERS
  */
 import * as _confg from './etc/form-config.js';
+import * as _edit from './edit/edit-forms.js';
 import * as _entity from './entity/entity-main.js';
 import * as _mmry from './etc/form-memory.js';
 import * as _submit from './submit/submit-main.js';
@@ -45,15 +46,15 @@ export function resetStoredData() {
     _sync.resetStoredData();
 }
 /** ====================== FORMS FACADE ===================================== */
-export function entity(funcName, params = []) { //entity form interface
+export function entity(funcName, params = []) { console.log('entity func = %O', arguments);//entity form interface
     return _entity[funcName](...getParams(params));
 }
 export function create(entity, name) {
     _entity.createEntity(entity, name);
 }
 export function edit(id, entity) {                                        
-    _mmry.initFormMemory("edit", entity, id)
-    .then(() => _edit.editEntity(id, entity, fP));
+    _mmry.initFormMemory('edit', entity, id)
+    .then(() => _edit.editEntity(id, entity));
 }   
 export function err(funcName, params = []) {  
     return _submit.err(funcName, params);
@@ -77,7 +78,7 @@ export function clearFormMemory() {
     _mmry.clearMemory();
 }
 /** --------------------------- FORM UI ------------------------------------- */
-export function ui(funcName, params = []) {  //ui interface
+export function ui(funcName, params = []) {console.log('ui func = %O', arguments);  //ui interface
     return _ui[funcName](...params);
 }
 export function elems(funcName, params = []) {
@@ -95,6 +96,9 @@ export function exitFormWindow(e, skipReset) {
 export function exitFormLevel() {
     return _ui.exitForm(...arguments);
 }
+// export function fillRelationalDataInPanel(entity, rcrd) {
+//     _ui.fillRelationalDataInPanel(entity, rcrd);
+// }
 /** --------------------------- HELPERS ------------------------------------- */
 /* generate-citation */
 export function getFormValData(entity, fLvl, submitting) {
@@ -114,7 +118,7 @@ export function getNextFormLevel(next, curLvl) {
  */
 export function getSubFormLvl(lvl) { 
     const topEntity = _mmry.getFormProp('top', 'entity');
-    const fLvls = mmry.formLevels;
+    const fLvls = _mmry.getMemoryProp('formLevels');   
     return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
