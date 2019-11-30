@@ -516,7 +516,8 @@ function updateCitations(rcrds, cites) {                                        
             citRcrds: rcrds[1],
             citSrc: citSrc,
             pub: mmryData['source'][citSrc.parent],
-            publisherRcrds: rcrds[2]
+            publisherRcrds: rcrds[2],
+            srcRcrds: mmryData['source']
         };
         const citText = _entity('rebuildCitationText', [params]);       
         return updateCitationData(citSrc, citText);

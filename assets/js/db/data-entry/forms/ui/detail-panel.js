@@ -180,13 +180,13 @@ function addCntToEditFormDetailPanel(refObj) {
     }
 }
 function getTtlIntCnt(rcrd, intProp, entityRcrds) {                             //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
-    const ints = rcrd[intProp].length;
+    let ints = rcrd[intProp].length;
     if (rcrd.children.length) { ints += getChildIntCnt(rcrd.children);}
     if (rcrd.contributions) { ints += getChildIntCnt(rcrd.contributions);}        
     return ints;
     
     function getChildIntCnt(children) {
-        const cnt = 0;
+        let cnt = 0;
         children.forEach(function(child){ 
             child = entityRcrds[child];
             cnt += getTtlIntCnt(child, intProp, entityRcrds); 

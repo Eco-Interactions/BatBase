@@ -32,6 +32,26 @@ export function createEntity(entity, name) {                                    
 export function initFormCombos(entity, fLvl) {
     forms[entity].initFormCombos(entity, fLvl);
 }
+/* ---- EDIT FORMS --- */
+export function finishEntityEditFormBuild(entity) {
+    return Promise.resolve(
+        forms[entity].finishEditFormBuild(entity));
+}
+// export function fillEditFormData(entity, coreRcrd, detRcrd) {
+//     const cmplxFills = {
+//         'citation': _src.fillCmplxCitationFields,
+//         'publication': _src.fillCmplxPublicationFields
+//     };
+//     return Promise.resolve(cmplxFills[entity](coreRcrd, detRcrd));
+// }
+export function finishEditFormInit(entity, id) {
+    const cmplxFnshrs = {
+        'citation': _src.setSrcEditRowStyle, 
+        'publication': _src.setSrcEditRowStyle, 
+        'location': addMapToLocationEditForm, 
+    };
+    return Promise.resolve(cmplxFnshrs[entity](id));
+}
 /** --------------------------- AUTHOR -------------------------------------- */
 /* edit-form, form-ui */
 export function selectExistingAuthors() {
@@ -44,6 +64,9 @@ export function handleCitText(formLvl) {
 }
 export function getCitationText(fLvl) {
     return _autoCite.getCitationText(fLvl);
+}
+export function rebuildCitationText(params) {
+    return _autoCite.rebuildCitationText(params);
 }
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationField() {
@@ -75,16 +98,16 @@ export function createTaxon(level, val) {
 export function getSelectedTaxon() {
     return _int.getSelectedTaxon();
 }
+export function getTaxonEditFields(entity, id) {
+    return _txn.getTaxonEditFields(id);
+}
 /** ------------------------ SOURCE TYPES ----------------------------------- */
-export function getSrcTypeRows(entity, typeId, fLvl, type) {
-    return _src.getSrcTypeRows(entity, typeId, fLvl, type)
-}
-export function handleSpecialCaseTypeUpdates(elem, fLvl) {
-    _src.handleSpecialCaseTypeUpdates(elem, fLvl);
-}
 export function loadSrcTypeFields(subEntity, typeId, elem, typeName) {
     return _src.loadSrcTypeFields(subEntity, typeId, elem, typeName);
 }
 export function onSrcToggleFields() {
     _src.finishSourceToggleAllFields(...arguments);
+}
+export function getSrcTypeFields(subEntity, typeId) {
+    return _src.getSrcTypeFields(subEntity, typeId);
 }

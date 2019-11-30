@@ -141,7 +141,7 @@ export function focusParentAndShowChildLocs(type, val) {
     _i.map('initFormMap', [val, locRcrds, type]);
 }
 /** ================== EDIT FORM CODE ======================================= */
-export function finishLocEditFormBuild() {  
+export function finishEditFormBuild(entity) {  
     _i.cmbx('initFormCombos', ['Location', 'top']); 
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_i.mmry('getEditEntityId', ['core']))

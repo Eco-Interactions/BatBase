@@ -110,8 +110,8 @@ export function initTaxonMemory(role, realmName, realmTaxon, reset) {           
             curRealmLvls: realmLvls[realmName],
             realmTaxon: realmTaxon,
         };           
-        if (role === 'Object') { formMemory.forms.taxonPs.objectRealm = realmName; }  
-                                                                                console.log('           --taxon params = %O', formMemory.forms.taxonPs)
+        if (role === 'Object') { formMemory.forms.taxonPs.objectRealm = realmName; } console.log('           --taxon params = %O', formMemory.forms.taxonPs)
+        return formMemory.forms.taxonPs;
     }
 }
 /** Returns either the preivously selected object realm or the default. */
