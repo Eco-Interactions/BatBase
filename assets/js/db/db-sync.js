@@ -540,8 +540,8 @@ function ajaxAndStoreAllEntityData(reset) {                                     
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
         addUpdatedDataToLocalDb()
-        .then(loadDatabaseTable)
         .then(storeLocalDataState)
+        .then(loadDatabaseTable)
     });
 
     function loadDatabaseTable() {
