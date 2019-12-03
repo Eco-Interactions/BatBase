@@ -59,6 +59,9 @@ export function getData(props, returnUndefined) {
 export function setData(k, v) {
     return _db.setData(k, v);
 }
+export function getAllStoredData() {
+    return _db.getAllStoredData();
+}
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {
     $(elem).keypress(function(e){ //Enter

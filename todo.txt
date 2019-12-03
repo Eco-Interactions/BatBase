@@ -2,9 +2,10 @@
 Tasks for others? 
     - Expand tests
         - filter sets: test going from each focus into each of the different ones/views
-Thoughts:
+NOTES:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
+    - added getAll to idb-keyval. don't update until the feature gets merged in! https://github.com/jakearchibald/idb-keyval/compare/master...zubair-io:get-all
 
 After next server update:
     - Update where to upload pdfs to registration page, future dev, db about
