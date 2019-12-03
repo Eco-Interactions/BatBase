@@ -11,7 +11,7 @@
  *     getData              util 
  *     setData              util
  */
-import * as idb from 'idb-keyval'; //set, get, del, clear
+import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 import * as _u from './util.js';
 import * as db_page from './db-page.js';
 
@@ -19,7 +19,7 @@ import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-syn
 
 const _db = {
     geoJson: null, 
-    v: .013
+    v: .023
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */
@@ -47,6 +47,7 @@ export function downloadFullDb(reset) {                                         
  */
 function checkForServerUpdates() {
     _u.getData('lclDataUpdtdAt').then(syncLocalDbWithServer);
+    // debugUpdate();
 }
 /**
  * Updates user specific data in local storage. Useful when the user changes on the
@@ -58,6 +59,21 @@ function checkUserData(dbUser) {
         replaceUserData.bind(null, $('body').data('user-name')));
 }
 /** ----------------------- GETTERS ----------------------------------------- */
+export function getAllStoredData() {  //console.log('idb = %O', idb);
+    const data = {};
+    return Promise.all([idb.getAll(), idb.keys()])
+        .then(dbData => {
+            const vals = dbData[0]; 
+            const keys = dbData[1];   //console.log('data = %O, vals = %O, keys = %O', dbData, vals, keys)
+            $(keys).each((i, k) => {
+                data[k] = { value: vals[i], changed: false }
+            });
+            return data;
+        });
+    // return idb.Store()._withIDBStore('readonly', store => {
+    //     req = store.getAll(query, count);
+    // }).then(() => req.result);
+}
 /**
  * Gets data from Indexed DB for each key passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 
@@ -99,3 +115,35 @@ export function setData(k, v) {                                                 
 // function removeData(k) {
 //     idb.del(k);
 // }
+// 
+function debugUpdate() {
+    const testDataState = {
+        Author: "2019-11-11 22:53:58",
+        Authority: "2017-02-04 11:24:08",
+        Citation: "2019-11-11 22:07:52",
+        CitationType: "2017-05-18 14:27:27",
+        ContentBlock: "2017-02-04 11:24:08",
+        Contribution: "2017-02-04 11:24:08",
+        Domain: "2017-02-04 11:24:08",
+        Feedback: "2017-02-04 11:24:08",
+        GeoJson: "2019-09-26 08:33:17",
+        HabitatType: "2017-02-04 11:24:08",
+        ImageUpload: "2017-02-04 11:24:08",
+        Interaction: "2019-11-11 00:40:46",
+        InteractionType: "2017-02-04 11:24:08",
+        Level: "2017-02-04 11:24:08",
+        Location: "2019-11-11 22:59:09",
+        LocationType: "2017-05-18 14:27:27",
+        Naming: "2017-02-04 11:24:08",
+        NamingType: "2017-02-04 11:24:08",
+        Publication: "2019-11-11 22:07:15",
+        PublicationType: "2017-02-04 11:24:08",
+        Source: "2019-11-11 22:07:52",
+        SourceType: "2017-02-04 11:24:08",
+        System: "2019-11-11 22:07:52",
+        Tag: "2017-02-04 11:24:08",
+        Taxon: "2019-11-11 21:56:27",
+        Taxonym: "2017-02-04 11:24:08"
+    };
+    syncLocalDbWithServer(testDataState);
+}

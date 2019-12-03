@@ -3334,7 +3334,7 @@ function getSelectOpts(field) {                                                 
     return getOpts(fieldKey, field);
 }
 /** Builds options out of the passed ids and their entity records. */
-function getRcrdOpts(ids, rcrds) {
+function getRcrdOpts(ids, rcrds) {          
     var idAry = ids || Object.keys(rcrds);
     return idAry.map(function(id) {
         let text = rcrds[id].displayName.includes('(citation)') ? 
@@ -3347,7 +3347,7 @@ function getTagOpts(entity) {
     return _u.getOptsFromStoredData(entity+"Tags");
 }
 /** Returns an array of source-type (prop) options objects. */
-function getSrcOpts(prop, field) {
+function getSrcOpts(prop, field) {   console.log('getSrcOpts [%s]', prop);
     const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
         'authSrcs': field ? field.slice(0, -1) : 'Author' };
     return _u.getData(prop).then(buildSrcOpts);
@@ -4155,7 +4155,7 @@ function onDataSynced(data) {                                                   
     }
 } /* End afterStoredDataUpdated */
 /** Updates the core records in the global form params object. */
-function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
+function addDataToStoredRcrds(entity, detailEntity) {                           console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
     return _u.getData(entity).then(newData => {
         fP.records[entity] = newData;
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
