@@ -15,7 +15,7 @@ let mmry;
  * and the submit/cancel buttons on the right.
  */
 export function buildFormFooter(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
-    mmry = params;   
+    mmry = params ? params : _i.mmry('getAllFormMemory');   
     const cntnr = _i.util('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
     const spacer = $('<div></div>').css("flex-grow", 2);

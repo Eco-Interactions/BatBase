@@ -142,7 +142,7 @@ export function focusParentAndShowChildLocs(type, val) {
 }
 /** ================== EDIT FORM CODE ======================================= */
 export function finishEditFormBuild(entity) {  
-    _i.cmbx('initFormCombos', ['Location', 'top']); 
+    initFormCombos('Location', 'top'); 
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_i.mmry('getEditEntityId', ['core']))
     $('.all-fields-cntnr').hide();
@@ -162,10 +162,10 @@ export function addMapToLocationEditForm(id) {
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
     _i.ui('setCoreRowStyles', ['#form-main', '.top-row']);
-    db_i.map('addVolatileMapPin', [id, 'edit', _i.cmbx.getSelVal('#Country-sel')]);
+    _i.map('addVolatileMapPin', [id, 'edit', _i.cmbx('getSelVal', ['#Country-sel'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
-function afterMapLoads(onLoadFunc, id) {  console.log('map loaded? ', $('#form-map').data('loaded'))
+function afterMapLoads(onLoadFunc, id) {  
     if ($('#form-map').data('loaded')) { 
         onLoadFunc(id);
         $('#form-map').removeData('loaded');

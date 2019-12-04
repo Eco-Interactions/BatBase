@@ -61,6 +61,13 @@ function getEntityComboEvents(entity) {
 function create(entity, fLvl) {
     return createSubEntity.bind(null, entity, fLvl);
 }
+function createTaxon(lvl) {
+    return (val) => {
+        createSubEntity(null, lvl, 'sub2')
+        .then(() => _i.mmry('setonFormCloseHandler', ['sub2', enableTaxonLvls]))
+        .then(() => enableTaxonLvls(false));
+    }
+}
 function createSubEntity(entity, fLvl) {  
     if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormErr(entity, fLvl); }
     _i.create(entity);
@@ -512,6 +519,11 @@ function resetTaxonCombobox(role, prevTaxonId) {
 function getTaxonym(id) {
     return _i.getTaxonDisplayName(mmry.records.taxon[id]);
 }
+function enableTaxonLvls(enable = true) {
+    $.each($('#sub-form select'), (i, sel) => {  console.log('id = [%s], enable = ', sel.id, enable);
+        _i.cmbx('enableCombobox', ['#'+sel.id, enable])
+    });
+}
 /* ------- resetTaxonSelectForm --------- */
 /** Removes and replaces the taxon form. */
 function resetTaxonSelectForm(role) {                                           
@@ -729,10 +741,12 @@ export function getSelectedTaxon(aboveLvl) {
     const selElems = $('#sub-form .selectized').toArray();  
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
     const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
-    return !selected ? false : mmry.records.taxon[$(selected).val()];
+    return !selected ? false : _i.mmry('getRcrd', ['taxon', $(selected).val()]);
     
     function ifEditingTaxon() {
-        return mmry.action == 'edit' && mmry.forms.top.entity == 'taxon';
+        const action = mmry ? mmry.action : _i.mmry('getMemoryProp', ['action']);
+        const entity = mmry ? mmry.forms.top.entity : _i.mmry('getFormProp', ['top', 'entity']);
+        return action == 'edit' && entity == 'taxon';
     }
 }
 function isSelectedTaxon(resetLvl, elem) { 

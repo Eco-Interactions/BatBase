@@ -60,7 +60,7 @@ function onSuccess(data, textStatus, jqXHR) {                                   
 }
 function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
     _i.ui('toggleWaitOverlay', [false]);
-    if (data.errors) { return _errs('errUpdatingData', [data.errors]); }
+    if (data.errors) { return _errs.errUpdatingData(data.errors); }
     if (noDataChanges()) { return showNoChangesMessage(); }  
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
@@ -104,7 +104,8 @@ function handleFormComplete(data) {
     const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
     const onClose = _i.mmry('getFormProp', ['top', 'onFormClose']);  console.log('onClose = %O', onClose);
-    if (onClose) { onClose(data); }
+    if (onClose) { onClose(data); 
+    } else { _i.exitFormWindow() }
     // _i.clearFormMemory();
 }
 /*--------------------- After Sub-Entity Created -----------------------------*/

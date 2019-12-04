@@ -94,7 +94,7 @@ export function exitFormWindow(e, skipReset) {
     _ui.exitFormPopup(e, skipReset);
 }
 export function exitFormLevel() {
-    return _ui.exitForm(...arguments);
+    return _ui.exitSubForm(...arguments);
 }
 // export function fillRelationalDataInPanel(entity, rcrd) {
 //     _ui.fillRelationalDataInPanel(entity, rcrd);

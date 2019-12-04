@@ -50,6 +50,7 @@ export function finishEditFormInit(entity, id) {
         'publication': _src.setSrcEditRowStyle, 
         'location': addMapToLocationEditForm, 
     };
+    if (!cmplxFnshrs[entity]) { return Promise.resolve(); }
     return Promise.resolve(cmplxFnshrs[entity](id));
 }
 /** --------------------------- AUTHOR -------------------------------------- */

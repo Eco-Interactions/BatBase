@@ -165,6 +165,7 @@ export function updateLocalDb(data) {                                           
 
     function storeMmryAndUpdate(mmry) {
         mmryData = mmry;
+        parseEntityData(data);
         updateEntityData(data);
         return addUpdatedDataToLocalDb()
             .then(() => {
@@ -174,6 +175,12 @@ export function updateLocalDb(data) {                                           
                 return data;
             });
     }
+}
+function parseEntityData(data) {
+    data.coreEntity = JSON.parse(data.coreEntity);
+    // data.coreEdits = JSON.parse(data.coreEdits);
+    // data.detailEntity = JSON.parse(data.detailEntity);
+    // data.detailEdits = JSON.parse(data.detailEdits);
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */
 function updateEntityData(data) {
@@ -236,9 +243,9 @@ function getRelDataHndlrs(entity, rcrd) {
     return type ? update[entity][type] : update[entity];
 }
 /** Returns the records source-type. */
-function getSourceType(entity, rcrd) {
+function getSourceType(entity, rcrd) {                                          console.log('getSourceType. [%s] = %O', entity, rcrd);
     var type = _u.lcfirst(entity)+"Type";
-    return _u.lcfirst(rcrd[type].displayName);
+    return _u.lcfirst(rcrd[type].displayName); 
 }
 /** Sends entity-record data to each storage property-type handler. */
 function updateDataProps(entity, rcrd, updateFuncs) {                           //console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
@@ -534,7 +541,7 @@ function onUpdateSuccess(ajaxData) {
 }
 function handledUpdatedSrcData(data) {                                          
     if (data.errors) { return Promise.resolve(_errs.errUpdatingData(data.errors)); }
-    parseEntityData(data.results);
+    // parseEntityData(data.results);
     return updateEntityData(data.results);
 }
 /*---------------- Update User Named Lists -----------------------------------*/
@@ -629,8 +636,8 @@ function storeServerData(data) {                                                
  * because the data comes back from the server having been double JSON-encoded,
  * due to the 'serialize' library and the JSONResponse object. 
  */
-function parseData(data) {
-    for (var id in data) { data[id] = JSON.parse(data[id]); }
+function parseData(data) {  
+    for (var k in data) { data[k] = JSON.parse(data[k]); }
     return data;
 }
 /** Adds the data derived from the serialized entity data to data storage. */

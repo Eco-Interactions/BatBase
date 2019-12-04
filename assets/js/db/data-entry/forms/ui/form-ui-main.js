@@ -8,6 +8,8 @@ import * as _i from '../forms-main.js';
 import * as _cmbx from './combobox-util.js';
 import * as _elems from './form-elems.js';
 import * as _pnl from './detail-panel.js';
+import { buildFormFooter } from './form-footer.js';
+
 
 export function elems(funcName, params) {
     return _elems[funcName](...params);
@@ -17,6 +19,9 @@ export function combos(funcName, params) {
 }
 export function panel(funcName, params) {
     return _pnl[funcName](...params);
+}
+export function getFormFooter() {
+    return buildFormFooter(...arguments);
 }
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {
@@ -54,11 +59,12 @@ export function exitSuccessMsg() {
  * and contextually enables to parent form's submit button. Calls the exit 
  * handler stored in the form's params object.
  */
-export function exitForm(fLvl, focus, onExit, data) {                           
+export function exitSubForm(fLvl, focus, onExit, data) {                           
     const exitFunc = onExit || _i.mmry('getFormProp', [fLvl, 'onFormClose']);   console.log("               --exitForm fLvl = %s, onExit = %O", fLvl, exitFunc);      
     $('#'+fLvl+'-form').remove();  
     _cmbx.resetFormCombobox(fLvl, focus);
-    if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
+    ifParentFormValidEnableSubmit(fLvl);
+    // if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
     if (exitFunc) { exitFunc(data); }
 }
 /** Returns popup and overlay to their original/default state. */

@@ -45,7 +45,7 @@ function buildEditFields(entity, id) {
 /** Returns the passed entity's form fields. */
 function getEditFields(entity, id) {
     const formConfg = _i.confg('getFormConfg', [entity]);
-    return _i.elems('getFormFieldRows', [entity, formConfg, null, {}, 'top']);
+    return _i.elems('getFormFieldRows', [entity, {}, 'top']);
 }
 function finishEditFormBuild(entity) {
     const cmplx = ['citation', 'interaction', 'location', 'taxon'];

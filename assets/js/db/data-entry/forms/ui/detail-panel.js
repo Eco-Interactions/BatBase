@@ -154,8 +154,9 @@ function fillTxnDetailData(entity, rcrd) {
     }
     function getLevelKey(taxon) {
         const lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
+        const lvlK = lvlKeys[taxon.level.displayName];
         if (!refs[lvlK]) { refs[lvlK] = 0; }
-        return lvlKeys[taxon.level.displayName];
+        return lvlK;
     }
 } 
 function adjustDetailPanelElems() {  

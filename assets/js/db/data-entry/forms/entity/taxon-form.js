@@ -22,8 +22,7 @@ export function initCreateForm(lvl, value) {                                    
     const val = value === 'create' ? '' : value;
     const level = _i.util('ucfirst', [lvl]);
     // const fLvl = getTaxonCreateLvl();  why was this here? 
-    enableTaxonLvls(false);
-    showNewTaxonForm(val, level, 'sub2');
+    return showNewTaxonForm(val, level, 'sub2');
 } 
 // function getTaxonCreateLvl() {
 //     return _i.mmry('getMemoryProp', ['action']) === 'edit' 
@@ -32,14 +31,13 @@ export function initCreateForm(lvl, value) {                                    
 // }
 function showNewTaxonForm(val, level, fLvl) {                                  
     _i.mmry('setTaxonProp', ['formTaxonLvl', level]);  //used for data validation/submit
-    buildTaxonForm()
+    return buildTaxonForm()
     .then(() => _i.ui('toggleSubmitBttn', ['#sub2-submit', !!val]));
 
     function buildTaxonForm() {
         const pId = '#'+level+'-sel'
         const vals = {'DisplayName': val};
         _i.mmry('initEntityFormMemory', ['taxon', fLvl, pId, 'create']);
-        _i.mmry('setonFormCloseHandler', [fLvl, enableTaxonLvls]);
         return _i.elems('initSubForm', [fLvl, 'sml-sub-form', vals, pId])
             .then(appendTxnFormAndFinishBuild);
     }
@@ -67,11 +65,6 @@ function submitSpecies(fLvl) {
         return genus === speciesParts[0];
     }
 }
-function enableTaxonLvls(enable = true) {
-    $.each($('#sub-form select'), (i, sel) => {
-        _i.cmbx('enableCombobox', ['#'+sel.id, enable])
-    });
-}
 /** ********************** EDIT FORM **************************************** */
 /** ================= TAXON MAIN FORM ======================================= */
 /**
@@ -84,7 +77,7 @@ export function getTaxonEditFields(id) {
     const taxa = _i.mmry('getEntityRcrds', ['taxon']);
     const realm = taxa[id].realm.displayName;
     const role = realm === 'Bat' ? 'Subject' : 'Object';
-    return _mmry('initTaxonMemory', [role, realm])
+    return _i.mmry('initTaxonMemory', [role, realm])
         .then(txnMmry => buildTaxonEditFields(taxa[id], taxa, txnMmry));
 }
 function buildTaxonEditFields(taxon, taxaRcrds, txnMmry) {
@@ -245,7 +238,7 @@ function showParentTaxonSelectForm() {
 function buildParentTaxonEditElems(prntId) {
     const prnt = mmry.rcrds[prntId];
     const hdr = [ buildEditParentHdr()];
-    const bttns = [ buildFormFooter('parent', 'sub', 'edit', true, fP)];
+    const bttns = [ _i.ui('getFormFooter', ['parent', 'sub', 'edit', true])];
     return getParentEditFields(prnt)
         .then(fields => hdr.concat(fields, bttns));
 }
@@ -255,8 +248,8 @@ function buildEditParentHdr() {
 }
 function getParentEditFields(prnt) {  
     const realm = _i.util('lcfirst', [prnt.realm.displayName]);      
-    return _mmry('initEntityFormMemory', [realm, 'sub', null, 'edit'])
-        .then(fP => _i.elems('buildFormRows', [realm, {}, 'sub', null]))
+    _i.mmry('initEntityFormMemory', [realm, 'sub', null, 'edit']);
+    return _i.elems('buildFormRows', [realm, {}, 'sub', null])
         .then(modifyAndReturnPrntRows);
     
     function modifyAndReturnPrntRows(rows) {
@@ -288,27 +281,28 @@ function appendPrntFormElems(elems) {
 function finishSelectPrntFormBuild() {                                                //console.log("fP = %O", fP);    
     initSelectParentCombos();
     selectParentTaxon($('#txn-prnt').data('txn'));
+    // _i.mmry('setonFormCloseHandler', [fLvl, enableTaxonLvls]);
     // const realmLvl = mmry.curRealmLvls[0];
     finishParentSelectFormUi();
 }
 function initSelectParentCombos() {
-    _cmbx('initFormCombos', [null, 'sub', getSelectParentComboEvents()]);
+    _i.cmbx('initFormCombos', [null, 'sub', getSelectParentComboEvents()]);
 }
 function getSelectParentComboEvents() {
     return {
-        'Class': { change: ifParentSelectErrs, add: initCreateForm('class') },
-        'Family': { change: ifParentSelectErrs, add: initCreateForm('family') },
-        'Genus': { change: ifParentSelectErrs, add: initCreateForm('genus') },
-        'Order': { change: ifParentSelectErrs, add: initCreateForm('order') },
+        'Class': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'class') },
+        'Family': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'family') },
+        'Genus': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'genus') },
+        'Order': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'order') },
         'Realm': { change: ifParentSelectErrs },
-        'Species': { change: ifParentSelectErrs, add: initCreateForm('species') },
+        'Species': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'species') },
     }
 }
-function selectParentTaxon(prntId) {                                  //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
+function selectParentTaxon(prntId) {                         console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, mmry.rcrds);                          
     const parentLvl = mmry.rcrds[prntId].level.displayName;  
+    const realmLvl = mmry.curRealmLvls[0];
+    if (parentLvl == realmLvl) { return; }
     _i.cmbx('setSelVal', ['#'+parentLvl+'-sel', prntId]);
-    // const realmLvl = mmry.curRealmLvls[0];
-    // if (parentLvl == realmLvl) { return clearAllOtherLvls(); }
     // clearAllOtherLvls();
 }
 // function clearAllOtherLvls() {

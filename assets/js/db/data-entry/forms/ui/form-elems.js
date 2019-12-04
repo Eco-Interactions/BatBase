@@ -16,7 +16,6 @@
  *     buildMultiSelectElems    db-forms
  */
 import * as _i from '../forms-main.js';
-import { buildFormFooter } from './form-footer.js';
 
 let mmry;
 /**
@@ -32,7 +31,7 @@ export function initSubForm(fLvl, fClasses, fVals, selId) {                     
 
     function buildFormContainer(rows) {
         const subFormContainer = buildSubFormCntnr(); 
-        const bttns = buildFormFooter(formEntity, fLvl, 'create', null, mmry);
+        const bttns = _i.ui('getFormFooter', [formEntity, fLvl, 'create', null, mmry]);
         $(subFormContainer).append([buildFormHdr(), rows, bttns]);
         _i.mmry('setFormProp', [fLvl, 'pSelId', selId]);
         _i.cmbx('enableCombobox', [selId, false]);
@@ -138,7 +137,8 @@ function getFieldOrder(cfg) {
 }
 /** <type> eg: publication - book, jounrnal, thesis, record, and other 'types'. */
 function getExpandedOrder(cfg) {
-    return cfg.type ? cfg.form.order.opt.concat(cfg.type.order.opt) : cfg.form.order.opt;
+    return cfg.type ? cfg.form.order.opt.concat(cfg.type.order.opt) : 
+        cfg.form.order.opt ? cfg.form.order.opt : cfg.form.order.sug;
 }
 function getDefaultOrder(cfg) {
     return cfg.type ? cfg.form.order.sug.concat(cfg.type.order.sug) : cfg.form.order.sug;
@@ -611,7 +611,7 @@ export function buildAndAppendTopForm(fields, id) {
     const form = buildFormElem();  
     $(form).append([
         buildEntityFieldContainer(mmry.entity, fields), 
-        buildFormFooter(mmry.entity, 'top', mmry.action, null, mmry)]);
+        _i.ui('getFormFooter', [mmry.entity, 'top', mmry.action, null, mmry])]);
     $('#form-main').append(form);  
     return Promise.resolve();
 }
