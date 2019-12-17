@@ -219,11 +219,11 @@ export function getFormConfg(entity) {                                          
                     'required': [],
                     'suggested': [],
                     'optional': ['Year', 'Description', 'LinkDisplay', 'LinkUrl', 
-                        'Doi', 'Publisher', 'Authors' ],
+                        'Doi', 'Publisher'],
                     'order': {
                         'sug': [],
                         'opt': [['Year', 'Doi'], ['LinkDisplay', 'LinkUrl'],
-                        ['Description', 'Publisher'], 'Authors' ]},
+                        ['Description', 'Publisher']]},
                 },
                 'Other': {
                     'name': 'Other',

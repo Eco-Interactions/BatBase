@@ -177,10 +177,11 @@ export function updateLocalDb(data) {                                           
     }
 }
 function parseEntityData(data) {
-    data.coreEntity = JSON.parse(data.coreEntity);
-    // data.coreEdits = JSON.parse(data.coreEdits);
-    // data.detailEntity = JSON.parse(data.detailEntity);
-    // data.detailEdits = JSON.parse(data.detailEdits);
+    for (let prop in data) {
+        try {
+            data[prop] = JSON.parse(data[prop]);
+        } catch (e) {}
+    }
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */
 function updateEntityData(data) {

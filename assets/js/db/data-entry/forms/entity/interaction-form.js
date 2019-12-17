@@ -68,9 +68,9 @@ function createTaxon(lvl) {
         .then(() => enableTaxonLvls(false));
     }
 }
-function createSubEntity(entity, fLvl) {  
+function createSubEntity(entity, fLvl, val) {  
     if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormErr(entity, fLvl); }
-    _i.create(entity);
+    _i.create(entity, val);
 }
 function ifFormAlreadyOpenAtLevel(fLvl) {  
     return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
@@ -104,7 +104,6 @@ export function initCreateForm(entity) {                                        
 function getInteractionFormFields(params) {                                      
     mmry = params;          
     return _i.elems('getFormFieldRows', ['Interaction', {}, 'top', params]);                                          
-    // return _i.elems('buildFormRows', ['Interaction', {}, 'top']);  
 }
 /** ------------- RESET CREATE FORM AFTER SUBMIT ---------------------------- */
 /** 
@@ -116,12 +115,7 @@ function resetInteractionForm() {
     _i.ui('showSuccessMsg', ['New Interaction successfully created.']);
     resetIntFields(vals); 
     resetFormUi();
-    // initEntityFormMemory('Interaction', 'top', null, 'create');
     _i.mmry('setonFormCloseHandler', ['top', resetInteractionForm]);
-
-    // _i.mmry('initFormMemory', ['create', 'interaction'])
-    // .then(resetFormUi);
-
 }
 function resetFormUi() {
     $('#top-cancel').val(' Close ');  
@@ -178,7 +172,7 @@ function ifTaxonFieldClearData(field) {
     $('#'+field+'-sel').data('selTaxon', false);
 }
 function syncWithCountryField(cntryId) { 
-    fillLocationSelect(mmry.records.location[cntryId]);
+    fillLocationSelect(getRcrd('location', cntryId));
 }
 function fillPubDetailsIfPinned(pub) {
     if (pub) { _i.panel('updateSrcDetails', ['pub']); 
@@ -228,9 +222,9 @@ function showInteractionFormMap() {                                             
     _i.cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }
 function finishComboboxInit() {
-    initFormCombos('interaction', 'top');
+    initFormCombos('interaction', 'top');  
     _i.cmbx('enableCombobox', ['#CitationTitle-sel', false]);
-    _i.cmbx('focusCombobox', ['#Publication-sel', true]);
+    _i.cmbx('focusCombobox', ['#Publication-sel', !mmry.editing]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
 }
 function focusIntTypePin() {
@@ -258,7 +252,7 @@ function onPubSelection(val) {                                                  
     if (!mmry.editing) { $('#Publication_pin').focus(); }
 }
 function hasCitation(val) {
-    return mmry.records.source[val].children.length;
+    return getRcrd('source', val).children.length;
 }
 function onPubClear() {
     _i.cmbx('clearCombobox', ['#CitationTitle-sel']);
@@ -273,9 +267,9 @@ export function fillCitationField(pubId) {
 }
 /** Returns an array of option objects with citations for this publication.  */
 function getPubCitationOpts(pubId) {
-    const pubRcrd = mmry.records.source[pubId];  
+    const pubRcrd = getRcrd('source', pubId);  
     if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
-    const opts = _i.elems('getRcrdOpts', [pubRcrd.children, mmry.records.source]);
+    const opts = _i.elems('getRcrdOpts', [pubRcrd.children, getRcrds('source')]);
     opts.unshift({ value: 'create', text: 'Add a new Citation...'});
     return opts;
 }
@@ -300,7 +294,7 @@ function onCitSelection(val) {                                                  
  */
 function onCntryRegSelection(val) {                                             console.log("       --onCntryRegSelection [%s]", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
-    const loc = mmry.records.location[val];
+    const loc = getRcrd('location', val);
     fillLocationSelect(loc);
     if (!mmry.editing) { $('#Country-Region_pin').focus(); }
     if ($('#form-map').length) { showCountryDataOnMap(val); }    
@@ -328,7 +322,7 @@ function getOptsForLoc(loc) {
 }
 function getChildLocOpts(children) {
     return children.map(id => ({
-        value: id, text: mmry.records.location[id].displayName 
+        value: id, text: getRcrd('location', id).displayName 
     }));
 }
 export function selectLoc(id) {
@@ -351,7 +345,7 @@ function onLocSelection(val) {                                                  
     if (val === 'create') { return createSubEntity('location', 'sub'); }
     if (val === '' || isNaN(parseInt(val))) { return _i.panel('clearDetailPanel', ['loc']); }   
     if ($('#form-map').length) { removeLocMap(); }
-    const locRcrd = mmry.records.location[val];                                   
+    const locRcrd = getRcrd('location', val);
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _i.cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
     _i.panel('fillLocDataInDetailPanel', [locRcrd]);
@@ -382,7 +376,7 @@ function initObjectSelect() {                                                   
         .catch(err => console.log('         --Error caught. %O', err));
 
     function buildRealmFields() {    
-        const realmId = mmry.forms.taxonPs.realmTaxon.realm.id;       
+        const realmId = getTxnMmry('realmTaxon').realm.id;       
         _i.cmbx('setSelVal', ['#Realm-sel', realmId, 'silent']);
         return onRealmSelection(realmId);
     }
@@ -390,7 +384,7 @@ function initObjectSelect() {                                                   
 /** Returns the realm taxon's lower-case name for a selected object taxon. */
 function getSelectedObjectRealm(id) {                                       
     if (!id) { return _i.mmry('getObjectRealm'); }
-    return mmry.records.taxon[id].realm.displayName;
+    return getRcrd('taxon', id).realm.displayName;
 }
 /**
  * Removes any previous realm comboboxes. Shows a combobox for each level present 
@@ -425,18 +419,13 @@ function onRealmSelection(val) {                                                
 }
 /* ------------------- ROLE SHARED HELPERS --------------- */
 /* ------- initTaxonSelectForm --------- */
-function initTaxonSelectForm(role, realm) {   console.log('data selTaxon = [%s]', $('#'+role+'-sel').data('selTaxon'));
+function initTaxonSelectForm(role, realm) {                                     
     const fLvl = _i.getSubFormLvl('sub');
     if (ifFormAlreadyOpenAtLevel(fLvl)) { return openSubFormErr(role, fLvl); }
     return getRealmTaxon(realm)
         .then(rTaxon => buildTaxonSelectForm(role, realm, rTaxon, fLvl))
         .then(form => appendTxnFormAndInitCombos(role, fLvl, form))
 }
-/** Note: Taxon fields often fire their focus event twice. */
-// function errIfSubFormOpen(role, fLvl) {
-//     // if (mmry.forms.taxonPs.entity === _i.util('lcfirst', [role])) { return; }
-//     _i.err('openSubFormErr', [role, null, fLvl]);
-// }
 function getRealmTaxon(realm) {
     const lvls = { 'Arthropod': 'Phylum', 'Bat': 'Order', 'Plant': 'Kingdom' };
     const realmName = realm || _i.mmry.getObjectRealm();
@@ -445,7 +434,7 @@ function getRealmTaxon(realm) {
 }
 function returnRealmTaxon(realmRcrds) {                                        
     const realmId = realmRcrds[Object.keys(realmRcrds)[0]]
-    return mmry.records.taxon[realmId];  
+    return getRcrd('taxon', realmId);  
 }
 function buildTaxonSelectForm(role, realm, realmTaxon, fLvl) {                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     const lcRole = _i.util('lcfirst', [role]);
@@ -474,7 +463,7 @@ function ifSelectingInitialTaxon(role) {
     return $('#'+role+'-sel').data('reset') || $('#'+role+'-sel').val();
 }
 function setTaxonParams(role, realmName, id) {                                 
-    const tPs = mmry.forms.taxonPs;
+    const tPs = getTxnMmry();
     tPs.realm = realmName;
     return getRealmTaxon(realmName).then(updateTaxonParams);
 
@@ -506,7 +495,7 @@ function getTaxonExitButton(role) {
 }
 /** Exits sub form and restores any previous taxon selection. */
 function exitTaxonSelectForm(role) {  
-    _i.ui('exitForm', ['sub', false, enableTaxonCombos]);
+    _i.ui('exitSubForm', ['sub', false, enableTaxonCombos]);
     const prevTaxonId = $('#'+role+'-sel').data('selTaxon');
     if (!prevTaxonId) { return; }
     resetTaxonCombobox(role, prevTaxonId);
@@ -517,17 +506,17 @@ function resetTaxonCombobox(role, prevTaxonId) {
     _i.cmbx('setSelVal', ['#'+role+'-sel', prevTaxonId]);
 }
 function getTaxonym(id) {
-    return _i.getTaxonDisplayName(mmry.records.taxon[id]);
+    return _i.getTaxonDisplayName(getRcrd('taxon', id));
 }
 function enableTaxonLvls(enable = true) {
-    $.each($('#sub-form select'), (i, sel) => {  console.log('id = [%s], enable = ', sel.id, enable);
+    $.each($('#sub-form select'), (i, sel) => {  
         _i.cmbx('enableCombobox', ['#'+sel.id, enable])
     });
 }
 /* ------- resetTaxonSelectForm --------- */
 /** Removes and replaces the taxon form. */
 function resetTaxonSelectForm(role) {                                           
-    const realm = mmry.forms.taxonPs.realm;
+    const realm = getTxnMmry('realm');
     const reset =  realm == 'Bat' ? initSubjectSelect : initObjectSelect;
     $('#'+role+'-sel').data('reset', true);
     $('#sub-form').remove();
@@ -536,12 +525,12 @@ function resetTaxonSelectForm(role) {
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(role) {                                       
     const id = $('#'+role+'-sel').data('selTaxon');                             
-    const taxon = mmry.records.taxon[id];                                         
+    const taxon = getRcrd('taxon', id);                                         
     if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                         console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
     selectPrevTaxon(taxon, role);
 }
 function ifSelectedTaxonIsRealmTaxon(taxon) { 
-    return mmry.forms.taxonPs.curRealmLvls[0] == taxon.level.displayName;
+    return getTxnMmry('curRealmLvls')[0] == taxon.level.displayName;
 }
 function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
@@ -593,15 +582,15 @@ function resetChildLevelCombos(selTxn) {
     .then(opts => repopulateLevelCombos(opts, {}));
 }
 function getRealmTopLevel() {
-    return mmry.forms.taxonPs.curRealmLvls[1];
+    return getTxnMmry('curRealmLvls')[1];
 }
 function getChildlevelOpts(lvlName) { 
     const opts = {};
-    const realm = mmry.forms.taxonPs.realm;
+    const realm = getTxnMmry('realm');
     return buildChildLvlOpts().then(() => opts);
 
     function buildChildLvlOpts() {
-        const lvls = mmry.forms.taxonPs.lvls;
+        const lvls = getTxnMmry('lvls');
         const lvlIdx = lvls.indexOf(lvlName)+2; //Skips selected level
         const optProms = [];
         return getAllChildTaxonOpts();
@@ -630,16 +619,16 @@ function getChildlevelOpts(lvlName) {
  */
 function repopulateCombosWithRelatedTaxa(selId) {
     const opts = {}, selected = {};                                               
-    const lvls = mmry.forms.taxonPs.lvls;  
-    const taxon = mmry.records.taxon[selId];                                    //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
-    const realm = mmry.forms.taxonPs.realm;
+    const lvls = getTxnMmry('lvls');  
+    const taxon = getRcrd('taxon', selId);                                    //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
+    const realm = getTxnMmry('realm');
 
     taxon.children.forEach(addRelatedChild); 
     return buildUpdatedTaxonOpts()
         .then(repopulateLevelCombos.bind(null, opts, selected));
 
     function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
-        const childTxn = mmry.records.taxon[id];  
+        const childTxn = getRcrd('taxon', id);  
         const level = childTxn.level.id;
         addOptToLevelAry(childTxn, level);
         childTxn.children.forEach(addRelatedChild);
@@ -663,8 +652,11 @@ function repopulateCombosWithRelatedTaxa(selId) {
     function getAncestorOpts(prntId) {                                          //console.log('getAncestorOpts. prntId = [%s]', prntId);
         const realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda
         if (realmTaxa.indexOf(prntId) !== -1 ) { return Promise.resolve(); }
-        const prntTaxon = _i.mmry('getRcrd', ['taxon', prntId]);
+        const prntTaxon = getRcrd('taxon', prntId);
         selected[prntTaxon.level.id] = prntTaxon.id;                            
+        return buildAncestorOpts(prntTaxon);
+    }
+    function buildAncestorOpts(prntTaxon) {
         return _i.elems('getTaxonOpts', [prntTaxon.level.displayName, null, realm])
             .then(o => {                                                        //console.log("--getAncestorOpts - setting lvl = ", prntTaxon.level)
                 opts[prntTaxon.level.id] = o;
@@ -677,7 +669,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
      * the 'none' value selected.
      */
     function buildOptsForEmptyLevels() {                                        
-        const topLvl = mmry.forms.taxonPs.realm === "Arthropod" ? 3 : 5;  
+        const topLvl = getTxnMmry('realm') === "Arthropod" ? 3 : 5;  
         const proms = [];
         fillOptsForEmptyLevels();  
         return Promise.all(proms);
@@ -703,7 +695,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
     }
 } /* End fillAncestorTaxa */    
 function repopulateLevelCombos(optsObj, selected) {                             //console.log('repopulateLevelCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
-    const lvls = mmry.forms.taxonPs.lvls;
+    const lvls = getTxnMmry('lvls');
     Object.keys(optsObj).forEach(l => {                                         //console.log("lvl = %s, name = ", l, lvls[l-1]); 
         repopulateLevelCombo(optsObj[l], lvls[l-1], l, selected)
     });
@@ -725,7 +717,7 @@ function resetPlaceholer(lvlName) {
 /* ------- selectRoleTaxon --------- */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 function selectRoleTaxon() {
-    const role = mmry.forms.taxonPs.realm === 'Bat' ? 'Subject' : 'Object';
+    const role = getTxnMmry('realm') === 'Bat' ? 'Subject' : 'Object';
     const opt = getSelectedTaxonOption();
     $('#sub-form').remove();
     _i.cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
@@ -736,7 +728,10 @@ function getSelectedTaxonOption() {
     const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
     return { value: taxon.id, text: _i.getTaxonDisplayName(taxon) };
 }
-/** Finds the most specific level with a selection and returns that taxon record. */
+/** 
+ * Finds the most specific level with a selection and returns that taxon record.
+ * Note: Called from other modules, so mmry is not always present here.
+ */
 export function getSelectedTaxon(aboveLvl) {
     const selElems = $('#sub-form .selectized').toArray();  
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
@@ -755,7 +750,7 @@ function isSelectedTaxon(resetLvl, elem) {
     return $(elem).val(); 
 }  
 function ifLevelChildOfResetLevel(resetLvl, elem) {
-    const allLevels = mmry.forms.taxonPs.lvls;
+    const allLevels = getTxnMmry('lvls');
     const level = elem.id.split('-sel')[0];
     return allLevels.indexOf(level) > allLevels.indexOf(resetLvl);
 }
@@ -770,12 +765,15 @@ function onTaxonRoleSelection(role, val) {                                      
     if (val === "" || isNaN(parseInt(val))) { return; }         
     $('#'+_i.getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);
-    enableTaxonCombos();
+    enableTaxonCombos(); 
     focusPinAndEnableSubmitIfFormValid(role);
 }
 function enableTaxonCombos() {
     _i.cmbx('enableCombobox', ['#Subject-sel']);
     _i.cmbx('enableCombobox', ['#Object-sel']);
+}
+function getTxnMmry(prop) {
+    return prop ? mmry.forms.taxonPs[prop] : mmry.forms.taxonPs;
 }
 /*--------------------- FIELD HELPERS ----------------------------------------*/
 function focusPinAndEnableSubmitIfFormValid(field) {
@@ -805,7 +803,15 @@ function resetIfFormWaitingOnChanges() {
     _i.ui('exitSuccessMsg');
     _i.mmry('setFormProp', ['top', 'unchanged', false]);
 }
+function getRcrd(entity, id) {
+    return mmry.records[entity][id];
+}
+function getRcrds(entity) {
+    return mmry.records[entity];
+}
 /** ************************ EDIT FORM ************************************** */
 export function finishEditFormBuild(entity) {
+    mmry = _i.mmry('getAllFormMemory');
     finishInteractionFormBuild();
+    // $('#Publication-sel')[0].seletize.blur();
 }

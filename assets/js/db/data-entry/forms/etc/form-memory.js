@@ -30,6 +30,7 @@ export function clearMemory() {
 export function initFormMemory(action, entity, id) {  
     const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
         'author', 'publisher'];
+    if (ifEditingInteraction(action, entity)) { entities.push('interaction'); }
 
     return _i.util('getData', [entities]).then(data => {
         initMainMemory(data);
@@ -47,6 +48,9 @@ export function initFormMemory(action, entity, id) {
             records: data,
         };
     }
+}
+function ifEditingInteraction(action, entity) {
+    return action === 'edit' && entity === 'interaction';
 }
 /**
  * Adds the properties and confg that will be used throughout the code for 

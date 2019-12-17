@@ -563,8 +563,8 @@ export function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                
     }
 }
 /** Returns true if all the required elements for the current form have a value. */
-export function ifAllRequiredFieldsFilled(fLvl) {                               //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s", fLvl)
-    const reqElems = _i.mmry('getFormProp', [fLvl, 'reqElems']);   
+export function ifAllRequiredFieldsFilled(fLvl) {                               
+    const reqElems = _i.mmry('getFormProp', [fLvl, 'reqElems']);                //console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */

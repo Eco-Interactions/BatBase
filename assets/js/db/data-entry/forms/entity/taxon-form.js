@@ -22,41 +22,46 @@ export function initCreateForm(lvl, value) {                                    
     const val = value === 'create' ? '' : value;
     const level = _i.util('ucfirst', [lvl]);
     // const fLvl = getTaxonCreateLvl();  why was this here? 
-    return showNewTaxonForm(val, level, 'sub2');
+    return showNewTaxonForm(val, level);
 } 
 // function getTaxonCreateLvl() {
 //     return _i.mmry('getMemoryProp', ['action']) === 'edit' 
 //     // const editFormLvl = _i.mmry('getTaxonProp', ['prntSubFormLvl']);
 //     // return editFormLvl || _i.getSubFormLvl('sub2'); //when editing parent taxon
 // }
-function showNewTaxonForm(val, level, fLvl) {                                  
+function showNewTaxonForm(val, level) {                                  
     _i.mmry('setTaxonProp', ['formTaxonLvl', level]);  //used for data validation/submit
     return buildTaxonForm()
-    .then(() => _i.ui('toggleSubmitBttn', ['#sub2-submit', !!val]));
+    .then(() => _i.ui('toggleSubmitBttn', ['#sub2-submit', true]));
 
     function buildTaxonForm() {
         const pId = '#'+level+'-sel'
         const vals = {'DisplayName': val};
-        _i.mmry('initEntityFormMemory', ['taxon', fLvl, pId, 'create']);
-        return _i.elems('initSubForm', [fLvl, 'sml-sub-form', vals, pId])
+        _i.mmry('initEntityFormMemory', ['taxon', 'sub2', pId, 'create']);
+        return _i.elems('initSubForm', ['sub2', 'sml-sub-form', vals, pId])
             .then(appendTxnFormAndFinishBuild);
     }
     function appendTxnFormAndFinishBuild(form) {
         $('#'+level+'_row').append(form);
-        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit'])
-        $('#'+fLvl+'-hdr')[0].innerText += ' '+ level;
+        _i.ui('toggleSubmitBttn', ['#sub2-submit'])
+        $('#sub2-hdr')[0].innerText += ' '+ level;
         $('#DisplayName_row input').focus();
-        if (level == 'Species') { updateSpeciesSubmitBttn(fLvl); }
+        updateTaxonSubmitBttn(level);
     }
 } 
-function updateSpeciesSubmitBttn(fLvl) {
-    $('#'+fLvl+'-submit').off('click').click(submitSpecies.bind(null, fLvl));
+function updateTaxonSubmitBttn(level) {
+    $('#sub2-submit').off('click').click(checkTaxonymErrsAndSubmit.bind(null, level));
 }
-function submitSpecies(fLvl) {                                                  
-    if (!hasCorrectBinomialNomenclature()) { 
-        return _i.err('reportFormFieldErr', ['Species', 'needsGenusName', fLvl]); 
-    }
-    _i.submitForm('#'+fLvl+'-form',  fLvl, 'taxon');
+function checkTaxonymErrsAndSubmit(level) {
+    if (ifEmptyNameField()) { return fieldErr(level, 'needsName'); }
+    if (ifSpeciesErr(level)) { return fieldErr(level, 'needsGenusName'); }
+    _i.submitForm('#sub2-form',  'sub2', 'taxon');
+}
+function ifEmptyNameField() {
+    return !$('#DisplayName_row input').val();
+}
+function ifSpeciesErr(level) { 
+    return level === 'Species' && !hasCorrectBinomialNomenclature();
     
     function hasCorrectBinomialNomenclature() {
         const species = $('#DisplayName_row input')[0].value;
@@ -64,6 +69,9 @@ function submitSpecies(fLvl) {
         const speciesParts = species.split(' ');
         return genus === speciesParts[0];
     }
+}
+function fieldErr(level, tag) {
+    _i.err('reportFormFieldErr', [level, tag, 'sub2'])
 }
 /** ********************** EDIT FORM **************************************** */
 /** ================= TAXON MAIN FORM ======================================= */

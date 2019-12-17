@@ -101,9 +101,9 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
 }
 /*------------------ Top-Form Success Methods --------------------*/
 function handleFormComplete(data) {   
-    const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              console.log('handleFormComplete fLvl = ', fLvl);
+    const fLvl = _i.mmry('getMemoryProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    const onClose = _i.mmry('getFormProp', ['top', 'onFormClose']);  console.log('onClose = %O', onClose);
+    const onClose = _i.mmry('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
     if (onClose) { onClose(data); 
     } else { _i.exitFormWindow() }
     // _i.clearFormMemory();
@@ -115,7 +115,7 @@ function handleFormComplete(data) {
  */
 function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
     const formParent = _i.mmry('getFormParentId', [fLvl]);         
-    _i.exitFormLevel(fLvl); 
+    _i.ui('exitSubForm', [fLvl]); 
     if (formParent) { addAndSelectEntity(data, formParent); 
     } else { _i.clearFormMemory(); }
 }

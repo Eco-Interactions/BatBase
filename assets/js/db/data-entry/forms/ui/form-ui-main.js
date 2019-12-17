@@ -180,10 +180,10 @@ export function ifFieldIsDisplayed(field, fLvl) {
 export function ifParentFormValidEnableSubmit(fLvl) {
     const parentLvl = _i.getNextFormLevel('parent', fLvl);  
     if (_elems.ifAllRequiredFieldsFilled(parentLvl)) {
-        toggleSubmitBttn('#'+parentLvl+'-submit', true);
+        toggleSubmitBttn('#'+parentLvl+'-submit');
     }
 }
-export function toggleSubmitBttn(bttnId, enable) {
+export function toggleSubmitBttn(bttnId, enable = true) {
     return enable ? enableSubmitBttn(bttnId) : disableSubmitBttn(bttnId);
 }
 /** Enables passed submit button */

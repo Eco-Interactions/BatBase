@@ -46,11 +46,11 @@ export function resetStoredData() {
     _sync.resetStoredData();
 }
 /** ====================== FORMS FACADE ===================================== */
-export function entity(funcName, params = []) { console.log('entity func = %O', arguments);//entity form interface
+export function entity(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface
     return _entity[funcName](...getParams(params));
 }
 export function create(entity, name) {
-    _entity.createEntity(entity, name);
+    return _entity.createEntity(entity, name);
 }
 export function edit(id, entity) {                                        
     _mmry.initFormMemory('edit', entity, id)
@@ -78,7 +78,7 @@ export function clearFormMemory() {
     _mmry.clearMemory();
 }
 /** --------------------------- FORM UI ------------------------------------- */
-export function ui(funcName, params = []) {console.log('ui func = %O', arguments);  //ui interface
+export function ui(funcName, params = []) {                                     //console.log('ui func = %O', arguments);  //ui interface
     return _ui[funcName](...params);
 }
 export function elems(funcName, params = []) {
@@ -93,12 +93,10 @@ export function panel(funcName, params = []) {
 export function exitFormWindow(e, skipReset) {
     _ui.exitFormPopup(e, skipReset);
 }
+/** form-footer */
 export function exitFormLevel() {
     return _ui.exitSubForm(...arguments);
 }
-// export function fillRelationalDataInPanel(entity, rcrd) {
-//     _ui.fillRelationalDataInPanel(entity, rcrd);
-// }
 /** --------------------------- HELPERS ------------------------------------- */
 /* generate-citation */
 export function getFormValData(entity, fLvl, submitting) {

@@ -117,8 +117,15 @@ function updateEditDetailMemory(detailId) {
     _i.mmry('setMemoryProp', ['editing', editObj]);
 }
 function fillIntData(entity, id, rcrd) {  
-    const fields = _i.confg('getCoreFieldDefs', [entity]);  
+    const fields = getInteractionFieldFillTypes();  
     fillFields(rcrd, fields, true);
+}
+function getInteractionFieldFillTypes() {
+    const fieldTypes = _i.confg('getCoreFieldDefs', ['interaction']);
+    ['Publication', 'CitationTitle'].forEach(f => delete fieldTypes[f]);
+    ['Subject', 'Object'].forEach(f => fieldTypes[f] = 'taxon');
+    fieldTypes.Source = 'source';
+    return fieldTypes;
 }
 function fillLocData(entity, id, rcrd) {
     const fields = _i.confg('getCoreFieldDefs', [entity]);  
@@ -224,7 +231,7 @@ function checkFieldsAndToggleSubmit() {
         _i.ui('toggleSubmitBttn', ['#top-submit', true]); 
     }
 }
-function fillFields(rcrd, fields) {                                 console.log('fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
+function fillFields(rcrd, fields) {                                             console.log('       --fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
         'text': setText, 'textArea': setTextArea, 'select': setSelect, 
         'fullTextArea': setTextArea, 'multiSelect': setMultiSelect,
@@ -232,21 +239,20 @@ function fillFields(rcrd, fields) {                                 console.log(
         'taxon': addTaxon
     };
     for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
-        if (!ifFieldInForm(field)) { continue; }                                //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
     }  
 }
 function ifFieldInForm(field) {
     return _i.ui('ifFieldIsDisplayed', [field, 'top']);
 }
-function addDataToField(field, fieldHndlr, rcrd) {                              console.log("addDataToField [%s] [%O] rcrd = %O", field, fieldHndlr, rcrd);
+function addDataToField(field, fieldHndlr, rcrd) {                              //console.log("addDataToField [%s] [%O] rcrd = %O", field, fieldHndlr, rcrd);
     const elemId = field.split(' ').join('');
     const prop = _i.util('lcfirst', [elemId]);
     fieldHndlr(elemId, prop, rcrd);
 }
 /** Adds multiSelect values to the form's val object. */
-function setMultiSelect(fieldId, prop, rcrd) {                                  console.log("setMultiSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-    if (!rcrd[prop]) { return; }
+function setMultiSelect(fieldId, prop, rcrd) {                                  //console.log("setMultiSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+    if (!rcrd[prop] || !ifFieldInForm(fieldId)) { return; }
     const ucProp = _i.util('ucfirst', [prop]);
     _i.mmry('setFormFieldData', ['top', ucProp, rcrd[prop]]);
     if (!$('#'+ucProp+'-sel-cntnr').length) { return; } //can this be the first line here?

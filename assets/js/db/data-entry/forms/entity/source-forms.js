@@ -115,6 +115,7 @@ function ifBookAddAuthEdNote() {
 /** Shows the Citation  sub-form and disables the publication combobox. */
 function initCitForm(v) {                                                       console.log("       /--initCitForm [%s]", v);
     const val = v === 'create' ? '' : v;
+    timeout = null;
     _i.util('getData', [['author', 'publication']])
     .then(data => initCitFormMemory(data))
     .then(() => buildAndAppendCitForm(val));
@@ -123,7 +124,7 @@ function initCitFormMemory(data) {
     addSourceDataToMemory(data);
     _i.mmry('initEntityFormMemory', ['citation', 'sub', '#CitationTitle-sel', 'create']);
     _i.mmry('setonFormCloseHandler', ['sub', enablePubField]);
-    addPubRcrdsToMemory(data.publication, 'sub');
+    addPubRcrdsToMemory(data.publication);
     return Promise.resolve();
 }
 function addSourceDataToMemory(data) {
@@ -134,7 +135,7 @@ function addSourceDataToMemory(data) {
 function addPubRcrdsToMemory(pubRcrds) {  
     const pubSrc = _i.mmry('getRcrd', ['source', $('#Publication-sel').val()]); 
     const pub = pubRcrds[pubSrc.publication];
-    setPubInMemory(pubSrc, pub, fLvl);
+    setPubInMemory(pubSrc, pub, 'sub');
 }
 function buildAndAppendCitForm(val) {
     initCitSubForm(val)
@@ -154,9 +155,6 @@ function finishCitFormUiLoad() {
     _i.cmbx('enableCombobox', ['#Publication-sel', false]);
     $('#Abstract_row textarea').focus();
     _i.ui('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
-    if (_i.elems('ifAllRequiredFieldsFilled', ['sub'])) { 
-        _i.ui('toggleSubmitBttn', ['#sub-submit']); 
-    }
 }
 function selectDefaultCitType() {
     return _i.util('getData', ['citTypeNames'])
@@ -194,8 +192,18 @@ function loadCitTypeFields(typeId) {                                            
 
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(elem, fLvl);
-        if (!timeout) { handleCitText(fLvl); }
-        _i.ui('setCoreRowStyles', ['#citation_Rows', '.'+fLvl+'-row']);
+        handleCitText(fLvl);
+        setCitationFormRowStyles(fLvl);
+        enableSubmitButtonIfRequiredFieldsFilled(fLvl);
+        // if (!timeout) { handleCitText(fLvl); }
+    }
+}
+function setCitationFormRowStyles(fLvl) {
+    _i.ui('setCoreRowStyles', ['#citation_Rows', '.'+fLvl+'-row']);
+}
+function enableSubmitButtonIfRequiredFieldsFilled(fLvl) {
+    if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
+        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit']); 
     }
 }
 /* ------------------------ TYPE-SPECIFIC UPDATES --------------------------- */
@@ -312,7 +320,7 @@ function addPubValues(fLvl, addValues, type) {
  * displayed. If not, the default text is displayed in the disabled textarea.
  * Note: to prevent multiple rebuilds, a timeout is used.
  */
-export function handleCitText(formLvl) {                                        console.log('   --handleCitText'); console.trace();
+export function handleCitText(formLvl) {                                        console.log('   --handleCitText. timeout? ', !!timeout); 
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 750);
 
@@ -364,10 +372,10 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
     function finishSrcTypeFormBuild(rows) {                                     //console.log('rows = %O', rows)
         $('#'+entity+'_Rows').append(rows);
         initFormCombos(entity, fLvl);
+        _i.ui('fillComplexFormFields', [fLvl]);
         _i.elems('checkReqFieldsAndToggleSubmitBttn', [elem, fLvl]);
         updateFieldLabelsForType(entity, fLvl);
         focusFieldInput(entity);
-        return _i.ui('fillComplexFormFields', [fLvl]);
     }
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {  
@@ -397,7 +405,7 @@ function setSourceType(entity, fLvl, tName) {
     _i.mmry('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
-    const typeElemId = '#'+_i.util('ucfirst', [entity])+'Type-sel'; console.log('typeElemId = ', typeElemId)
+    const typeElemId = '#'+_i.util('ucfirst', [entity])+'Type-sel'; 
     return _i.cmbx('getSelTxt', [typeElemId]);
 }
 /**
@@ -484,7 +492,7 @@ function initPublisherForm(value) {                                             
 /* ========================== AUTHOR ======================================== */
 /* ----------------------------- AUTHOR SELECTION --------------------------- */
 /** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {                   console.log('selectExistingAuthors. args = %O', arguments); console.trace();
+export function selectExistingAuthors(field, authObj, fLvl) {                   //console.log('selectExistingAuthors. args = %O', arguments); 
     if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }
     toggleOtherAuthorTypeSelect(field, false);
     return Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
@@ -496,8 +504,8 @@ function ifFieldNotShownOrNoValToSelect(field, authObj) {
     return !Object.keys(authObj).length || !$('#'+field+'-sel-cntnr').length;
 }
 /** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {                               console.log('selectAuthor. args = %O', arguments)
-    // if (!$('#'+field+'-sel'+ cnt).length) { return; }
+function selectAuthor(cnt, authId, field, fLvl) {                               //console.log('selectAuthor. args = %O', arguments)
+    if (!$('#'+field+'-sel'+ cnt).length) { return; } //field hidden for certain citation types
     _i.cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
@@ -664,10 +672,11 @@ export function setSrcEditRowStyle() {
 
 /** ======================== HELPERS ======================================== */
 export function finishSourceToggleAllFields(entity, fVals, fLvl) {
-    if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType) 
+    if (entity === 'publication') { 
+        ifBookAddAuthEdNote(fVals.PublicationType); 
     } else  { // 'citation'
         handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
-        if (!timeout) { handleCitText(fLvl); }
+        handleCitText(fLvl);
     }
     updateFieldLabelsForType(entity, fLvl);
 }

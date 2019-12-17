@@ -18,6 +18,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     const elems = $('#'+entity+'_Rows')[0].children;                            
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
+    if (formVals.displayName) { formVals.displayName = _i.util('ucfirst', [formVals.displayName]) }
     return handleAdditionalEntityData(entity)
         .then(returnFormVals);
 

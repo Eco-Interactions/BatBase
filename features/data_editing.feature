@@ -167,8 +167,8 @@ Feature: Edit data in the database
         And I click on the edit pencil for the "Journal of Mammalogy" row
         And I see "Editing Publication"
         When I change the "Title" field "input" to "Book of Mammalogy"
-        And I change the "Description" field "textarea" to "Description..."
         And I change the "Publication Type" form dropdown to "Book"
+        And I change the "Description" field "textarea" to "Description..."
         And I change the "Year" field "input" to "1993"
         And I change the "Link Url" field "input" to "www.link.com"
         And I change the "Link Display" field "input" to "Book Website"

@@ -21,7 +21,7 @@ export function formSubmitError(jqXHR, textStatus, errorThrown) {               
     const elem = getFormErrElem(fLvl);
     const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
     const msg = getFormErrMsg(errTag);
-    toggleWaitOverlay(false);
+    _i.ui('toggleWaitOverlay', [false]);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
@@ -109,6 +109,7 @@ export function reportFormFieldErr(fieldName, errTag, fLvl) {                   
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
         'needsHigherLvl': handleNeedsHigherLvl,
         'needsLocData': handleNeedsLocData,
+        'needsName': handleNeedsName,
         'noGenus': handleNoGenus,
         'openSubForm': handleOpenSubForm,
     };
@@ -224,6 +225,13 @@ function clrNeedsLocData(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, fLvl);
     $('.new-loc-popup #err').remove();
 }
+function handleNeedsName(elem, errTag, fLvl, fieldName) {
+    const msg = `<span>Please fill required fields and submit again.</span>`;
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function clrNeedsName(elem, fLvl, e) {
+    clearErrElemAndEnableSubmit(elem, fLvl, 'enable');
+}
 /** Note: error used for the publication form. */
 function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
     var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
@@ -279,7 +287,7 @@ function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
         'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
-        'needsGenusName': clrNeedsGenusName, 
+        'needsGenusName': clrNeedsGenusName,    'needsName': clrNeedsName,
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
         'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm, 
@@ -300,7 +308,7 @@ function clrFormLvlErr(elem, fLvl) {
         _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
     }
 }
-export function clearErrElemAndEnableSubmit(elem, fLvl) {                       //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+export function clearErrElemAndEnableSubmit(elem, fLvl, enable = false) {                       //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
     const subLvl = _i.getNextFormLevel('child', fLvl);
     $(elem).fadeTo(200, 0, clearAndEnable);
 
@@ -315,7 +323,7 @@ export function clearErrElemAndEnableSubmit(elem, fLvl) {                       
     }
     function enableSubmitIfFormReady() {
         if (!$('#'+fLvl+'-form').length || $('#'+subLvl+'-form').length) { return; }
-        if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
+        if (enable || _i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
             _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
         }
     }
