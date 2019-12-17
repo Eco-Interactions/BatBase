@@ -1,5 +1,9 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 
+>WARNINGS
+    - added getAll to idb-keyval. don't update until the feature gets merged in! https://github.com/jakearchibald/idb-keyval/compare/master...zubair-io:get-all
+
+
 >Test Users
     - TestUser: testuser123
     - testeditor: testeditor123
@@ -105,6 +109,9 @@ Writing tests:
     Transfer:
         - Cron jobs
         - Email forwards
+
+>Changes to live site
+    - Copy to sub-domain for testing when bugs arise.
 # 
 ##------------------- Bugs ------------------------------------------------##
 >::Known BUGS::
