@@ -79,6 +79,15 @@ class Taxon
     private $linkUrl;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_realm", type="boolean")
+     * @JMS\Expose
+     * @JMS\SerializedName("isRealm")
+     */
+    private $isRealm = false;
+
+    /**
      * @var \AppBundle\Entity\Realm
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Realm", mappedBy="taxon")
@@ -89,7 +98,7 @@ class Taxon
      * @var \AppBundle\Entity\Level
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="level_id", referencedColumnName="id", nullable=false)
      */
     private $level;
     
@@ -344,6 +353,30 @@ class Taxon
     public function getLinkUrl()
     {
         return $this->linkUrl;
+    }
+
+    /**
+     * Set isRealm.
+     *
+     * @param bool $isRealm
+     *
+     * @return Taxon
+     */
+    public function setIsRealm($isRealm)
+    {
+        $this->isRealm = $isRealm;
+
+        return $this;
+    }
+
+    /**
+     * Get isRealm.
+     *
+     * @return bool
+     */
+    public function getIsRealm()
+    {
+        return $this->isRealm;
     }
 
     /**
@@ -733,9 +766,11 @@ class Taxon
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
@@ -784,6 +819,8 @@ class Taxon
     public function setDeletedAt($deletedAt)
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
     }
 
     /**

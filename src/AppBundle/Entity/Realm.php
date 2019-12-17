@@ -51,6 +51,16 @@ class Realm
     private $pluralName;
 
     /**
+     * @var string
+     * JSON array with the level IDs for each level to display for the realm.
+     *
+     * @ORM\Column(name="ui_levels", type="string", length=255, nullable=false)
+     * @JMS\Expose
+     * @JMS\SerializedName("uiLevelsShown")     
+     */
+    private $uiLevelsShown;
+
+    /**
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="realm")
@@ -175,6 +185,30 @@ class Realm
     }
 
     /**
+     * Set uiLevelsShown.
+     *
+     * @param string $uiLevelsShown
+     *
+     * @return Realm
+     */
+    public function setUiLevelsShown($uiLevelsShown)
+    {
+        $this->uiLevelsShown = $uiLevelsShown;
+
+        return $this;
+    }
+
+    /**
+     * Get uiLevelsShown.
+     *
+     * @return string
+     */
+    public function getUiLevelsShown()
+    {
+        return $this->uiLevelsShown;
+    }
+
+    /**
      * Set taxon.
      *
      * @param \AppBundle\Entity\Taxon $taxon
@@ -243,9 +277,11 @@ class Realm
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**

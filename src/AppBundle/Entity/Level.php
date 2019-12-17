@@ -256,6 +256,8 @@ class Level
     public function setUpdatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
