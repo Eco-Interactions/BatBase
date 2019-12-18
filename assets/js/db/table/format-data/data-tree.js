@@ -6,8 +6,8 @@
  *     buildSrcTree     db-page, save-ints
  *     buildTxnTree     db-page, save-ints
  */
-import { accessTableState as tState } from '../db-page.js';
-import * as _u from '../util.js';
+import { accessTableState as tState } from '../../db-page.js';
+import * as _u from '../../util.js';
 
 let focusRcrds; //Refreshed with each new entry into the module.
 let tblState;
@@ -399,12 +399,15 @@ function fillHiddenTaxonColumns(curTaxonTree, lvls) {                           
     }
     function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', _u.snapshot(curTaxonHeirarchy));
         $(['subjectRoles', 'objectRoles']).each(function(i, role) {             
-            if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
+            if (taxon[role].length > 0) { 
+                taxon[role].forEach(addTaxonTreeFields.bind(null, role)) 
+            }
         });
     } 
-    function addTaxonTreeFields(intRcrdObj) {     
+    function addTaxonTreeFields(roleProp, intRcrdObj) {     
+        const role = _u.ucfirst(roleProp.split('Roles')[0]);
         for (var lvl in curTaxonHeirarchy) {
-            var colName = 'tree' + lvl; 
+            var colName = role + ' ' + lvl; 
             intRcrdObj[colName] = lvl === 'Species' ? 
                 getSpeciesName(curTaxonHeirarchy[lvl]) : curTaxonHeirarchy[lvl];
         }                                                                       //console.log('intRcrd after taxon fill = %O', intRcrdObj);
