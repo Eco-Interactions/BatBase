@@ -32,13 +32,13 @@
  *     TAXON SEARCH
  */
 import * as _u from './util.js';
-import * as data_tree from './db-table/build-data-tree.js';
-import * as db_filters from './db-table/db-filters.js';
-import * as db_map from './db-map/map-main.js';
-import * as db_ui from './db-ui.js';
-import * as frmt_data from './db-table/format-data.js'; 
-import { startWalkthrough } from './db-tutorial.js';
-import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-fltrs.js';
+import * as data_tree from './table/format-data/data-tree.js';
+import * as db_filters from './table/filters/filters-main.js';
+import * as db_map from './map/map-main.js';
+import * as db_ui from './ui/ui-main.js';
+import * as frmt_data from './table/format-data/aggrid-format.js'; 
+import { startWalkthrough } from './ui/tutorial/db-tutorial.js';
+import { resetStoredFiltersUi, updateFilterPanelHeader } from './ui/panels/save-fltrs.js';
 /** ==================== TABLE STATE OBJ ==================================== */
 /**
  * Stores table state params needed across multiple modules. 
@@ -214,7 +214,7 @@ export function showTodaysUpdates(focus) {
 }
 /* ==================== TABLE LOAD ========================================== */
 function loadTbl(tblName, rowData) {
-    require('./db-table/init.js').init(tblName, rowData, tblState);
+    require('./table/init.js').init(tblName, rowData, tblState);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(v) {                                    /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);

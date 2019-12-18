@@ -17,11 +17,11 @@
  *     updatePubSearch                  util
  *     updateTaxonSearch                util
  */
-import * as _u from '../util.js';
-import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
-import * as db_ui from '../db-ui.js';
-import { resetStoredFiltersUi, savedFilterSetActive } from '../panels/save-fltrs.js';
-import { savedIntListLoaded } from '../panels/save-ints.js';
+import * as _u from '../../util.js';
+import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-page.js';
+import * as db_ui from '../../ui/ui-main.js';
+import { resetStoredFiltersUi, savedFilterSetActive } from '../../ui/panels/save-fltrs.js';
+import { savedIntListLoaded } from '../../ui/panels/save-ints.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -234,7 +234,7 @@ function ifFilteringByUpdates() {
     return fPs.pnlFltrs.time && fPs.pnlFltrs.time.type === 'updated'; 
 }
 function getCalPlugins() {
-    const confirmDatePlugin = require('../../libs/confirmDate.js'); 
+    const confirmDatePlugin = require('../../../libs/confirmDate.js'); 
     return [confirmDatePlugin({showAlways: true})];
 }
 function getCalOnReadyMethod() {

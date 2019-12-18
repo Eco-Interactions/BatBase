@@ -6,10 +6,10 @@
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as _forms from '../data-entry/forms/forms-main.js';
-import { updateFilterStatusMsg } from './db-filters.js';
-import unqVals from './ag-grid-unique-filter.js';
+import { updateFilterStatusMsg } from './filters/filters-main.js';
+import unqVals from './filters/ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';
-import { enableTableButtons, resetToggleTreeBttn } from '../db-ui.js';
+import { enableTableButtons, resetToggleTreeBttn } from '../ui/ui-main.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
 let tblState;

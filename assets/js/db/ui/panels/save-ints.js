@@ -26,13 +26,13 @@
  *             Table Methods
  *             
  */
-import * as _u from '../util.js';
+import * as _u from '../../util.js';
 import * as _uPnl from './panel-util.js';
-import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, resetViewDataTable } from '../db-page.js';
-import { resetToggleTreeBttn } from '../db-ui.js';
-import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../db-table/db-filters.js';
-import { showHelpModal } from '../../misc/intro-core.js';
+import { updateUserNamedList } from '../../local-data/db-sync.js';
+import { accessTableState as tState, resetViewDataTable } from '../../db-page.js';
+import { resetToggleTreeBttn } from '../../ui/ui-main.js';
+import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../../table/filters/filters-main.js';
+import { showHelpModal } from '../../../misc/intro-core.js';
 /**
  * list - List open in panel
  * listLoaded - List loaded in table

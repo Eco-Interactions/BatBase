@@ -11,7 +11,7 @@
  *     togglePanel          save-fltrs, save-ints
  *     updateSubmitEvent    save-fltrs, save-ints
  */
-import * as _u from '../util.js';
+import * as _u from '../../util.js';
 import { initFilterPanel, toggleFilterPanelOrientation } from './save-fltrs.js';
 import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
 import { addDataReviewEvents } from './data-review.js';

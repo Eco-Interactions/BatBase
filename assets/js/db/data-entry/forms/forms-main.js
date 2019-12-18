@@ -15,9 +15,9 @@ import * as _mmry from './etc/form-memory.js';
 import * as _submit from './submit/submit-main.js';
 import * as _ui from './ui/form-ui-main.js';
 // REFACTOR
-import * as _map from '../../db-map/map-main.js';
+import * as _map from '../../map/map-main.js';
 import * as _page from '../../db-page.js';
-import * as _sync from '../../db-sync.js';
+import * as _sync from '../../local-data/db-sync.js';
 import * as _u from '../../util.js';
 
 function getParams(params) {
@@ -74,7 +74,7 @@ export function mmry(funcName, params = []) {
     return _mmry[funcName](...params);
 }
 export function clearFormMemory() {
-    require('../../db-map/map-main.js').clearMemory();
+    require('../../map/map-main.js').clearMemory();
     _mmry.clearMemory();
 }
 /** --------------------------- FORM UI ------------------------------------- */

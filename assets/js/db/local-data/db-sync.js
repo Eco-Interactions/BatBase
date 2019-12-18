@@ -20,9 +20,9 @@
  *         ERRS
  * 
  */
-import * as _u from './util.js';
-import { err as _errs, entity as _entity } from './data-entry/forms/forms-main.js';
-import { resetDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
+import * as _u from '../util.js';
+import { err as _errs, entity as _entity } from '../data-entry/forms/forms-main.js';
+import { resetDataTable, initSearchState, showIntroAndLoadingMsg } from '../db-page.js';
 
 let failed = { errors: [], updates: {}};
 /** Stores entity data while updating to reduce async db calls. */

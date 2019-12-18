@@ -1,11 +1,11 @@
 
-import * as _db from './idb-util';
-import * as db_filters from './db-table/db-filters.js';
+import * as _db from './local-data/idb-util';
+import * as db_filters from './table/filters/filters-main.js';
 import * as db_page from './db-page.js';
-import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
-import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
-import { newIntList, selIntList } from './panels/save-ints.js';
-import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
+import { addNewDataToStorage, initStoredData, replaceUserData } from './local-data/db-sync.js';
+import { showLoadingDataPopUp, showPopUpMsg } from './ui/ui-main.js';
+import { newIntList, selIntList } from './ui/panels/save-ints.js';
+import { newFilterSet, selFilterSet } from './ui/panels/save-fltrs.js';
 import { exitModal, showSaveModal } from '../misc/intro-core.js';
 /* 
  * Exports:                     Imported by:

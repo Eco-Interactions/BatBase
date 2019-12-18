@@ -9,9 +9,9 @@
  * Exports:             Imported by:
  *     startWalkthrough         db-page
  */
-import * as _u from './util.js';
-import { resetDataTable } from './db-page.js';
-import { showTips } from './db-ui.js';
+import * as _u from '../../util.js';
+import { resetDataTable } from '../../db-page.js';
+import { showTips } from '../ui-main.js';
 
 let intro, focus;
 
@@ -32,7 +32,7 @@ export function startWalkthrough(curFocus){
     intro.start();
 } 
 function buildIntro() {                                                         
-    intro = require('../libs/intro.js').introJs();
+    intro = require('../../../libs/intro.js').introJs();
     intro.onexit(resetTableState);
     intro.oncomplete(resetTableState);
     intro.onafterchange(onAfterStepChange.bind(null));

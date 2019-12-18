@@ -414,6 +414,7 @@ class Taxon
     {
         return $this->findRealmAndReturnObj($this);
     }
+    
     private function findRealmAndReturnObj($taxon)
     {
         if ($taxon->getSlug() === 'animalia') { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
@@ -434,7 +435,7 @@ class Taxon
      *
      * @return Taxon
      */
-    public function setLevel(\AppBundle\Entity\Level $level = null)
+    public function setLevel(\AppBundle\Entity\Level $levell)
     {
         $this->level = $level;
 
