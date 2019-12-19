@@ -676,23 +676,24 @@ function storeTaxaByLvl(realm, taxonObj) {
 }
 /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
 function separateTaxaByLevelAndRealm(taxa) {  
-    const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-    Object.keys(taxa).forEach(id => {
-        if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { return; }
-        addTaxonData(taxa[id]);
-    })
+    const data = {};
+    Object.keys(taxa).forEach(id => addTaxonData(taxa[id]));
     return data;
     /** Adds the taxon's name (k) and id to it's level's obj. */
     function addTaxonData(taxon) {
+        if (taxon.slug === 'animalia') { return; }
         const realmObj = getRealmObj(taxon);
         const level = taxon.level.displayName;  
+        addToRealmLevel(taxon, realmObj, level);
+    }
+    function addToRealmLevel(taxon, realmObj, level) {
         if (!realmObj[level]) { realmObj[level] = {}; }; 
         realmObj[level][taxon.displayName] = taxon.id;
     }
     function getRealmObj(taxon) {
         const realm = taxon.realm.displayName
-        const key = realm === 'Animalia' ? 'Bat' : realm;
-        return data[key];
+        if (!data[realm]) { data[realm] = {}; }
+        return data[realm];
     }
 } /* End separateTaxaByLevelAndRealm */
 /** 
