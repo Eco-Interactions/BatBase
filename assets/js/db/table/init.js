@@ -18,7 +18,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+export function init(viewTitle, rowData, state) {                               //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
     initTable(viewTitle, rowData);
@@ -102,13 +102,18 @@ function getColumnDefs(mainCol) {
     return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                 cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
                 cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
-            {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
-            {headerName: taxonLvlPrefix + " Phylum", field: "treePhylum", width: 150, hide: true },
-            {headerName: taxonLvlPrefix + " Class", field: "treeClass", width: 150, hide: true },
-            {headerName: taxonLvlPrefix + " Order", field: "treeOrder", width: 150, hide: true },
-            {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
-            {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
-            {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
+            {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
+            {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
+            {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
+            {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },            {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
+            {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
+            {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
+            {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
+            {headerName: "Object Class", field: "objClass", width: 10, hide: true },
+            {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
+            {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
+            {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
+            {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
             {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
             {headerName: "Editor", field: "updatedBy", width: 80, hide: hideEditor(), headerTooltip: "Last Editied By", filter: unqVals },
             {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
@@ -122,7 +127,7 @@ function getColumnDefs(mainCol) {
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-            // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
+            {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
             {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
