@@ -293,7 +293,7 @@ export function initComboboxes(fieldAry) {
 function getSelConfgObj(field) {  
     const confgs = { 
         // Search Page Filter/Focus Comboboxes that Affect UI & Table Directly
-        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus, blur: true },
+        'Focus' : { name: field, id: '#search-focus', change: db_page.buildTable, blur: true },
         'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },

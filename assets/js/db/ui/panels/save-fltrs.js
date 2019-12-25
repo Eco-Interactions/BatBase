@@ -15,7 +15,7 @@ import * as data_tree from '../../table/format-data/data-tree.js';
 import * as db_filters from '../../table/filters/filters-main.js';
 import * as frmt_data from '../../table/format-data/aggrid-format.js'; 
 import { updateUserNamedList } from '../../local-data/db-sync.js';
-import { accessTableState as tState, selectSearchFocus, resetViewDataTable } from '../../db-page.js';
+import { accessTableState as tState, buildTable } from '../../db-page.js';
 import { resetToggleTreeBttn } from '../../ui/ui-main.js';
 import { savedIntListLoaded } from './save-ints.js';
 import { exitModal, showHelpModal, showSaveModal } from '../../../misc/intro-core.js';
@@ -289,7 +289,7 @@ function applyFilterSet() {
 function reloadTableThenApplyFilters(filters, id) { 
     _u.setSelVal('Focus', filters.focus, 'silent'); 
     setView(filters);
-    selectSearchFocus(filters.focus, filters.view)
+    buildTable(filters.focus, filters.view)
     .then(onTableReloadComplete.bind(null, filters, id));     
 }
 function setView(filters) {

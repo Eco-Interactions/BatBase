@@ -5,8 +5,8 @@
  *     buildTreeSearchHtml              db-ui
  *     enableClearFiltersButton         db-ui
  *     getFilterState                   save-fltrs
- *     resetTblFilters                  db-page, save-ints
- *     resetTableStateParams            db-page, db-ui, save-ints
+ *     clearFilters                  db-page, save-ints
+ *     resetFilterParams            db-page, db-ui, save-ints
  *     selTimeFilter                    save-fltrs
  *     showTodaysUpdates                db_forms
  *     syncViewFiltersAndUi             save-ints
@@ -44,7 +44,7 @@ let fPs = {
  */
 let tblState = {};
 
-export function resetTableStateParams() {
+export function resetFilterParams() {
     const props = ['timeRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
     fPs.pnlFltrs = {};
@@ -69,23 +69,25 @@ function filtersActive() {
     const pnl = Object.keys(fPs.pnlFltrs).length > 0;
     return tbl || pnl;
 }
-export function resetTblFilters() {
+export function clearFilters() {
     resetFilterUi();
-    resetTableStateParams();
+    resetStoredFiltersUi();
+    resetFilterParams();
 }
-function resetFilterUi() {
+function resetFilterUi(focus) {
     $('#filter-status').text('No Active Filters.');
     $('#focus-filters input').val('');
-    if ($('#shw-chngd').prop('checked')) { 
-        $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
-    }
+    updateTaxonFilterViewMsg('');
+    if ($('#shw-chngd').prop('checked')) { resetDataTimeFilter(); }
+}
+function resetDataTimeFilter() {
+    $('#shw-chngd').prop('checked', false);
+    toggleTimeFilter('disable', null, 'skipSync');
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /** Used in taxon views to indicate the filtering happening at the view level. */
-export function updateTaxonFilterViewMsg(view) {                                                     
-    const map = {2: 'Bats', 3: 'Plants', 4: 'Bugs'};
-    const msg = view ? `[${map[view]}]` : '';
-    $('#view-fltr').text(msg);
+export function updateTaxonFilterViewMsg(view) {
+    $('#view-fltr').text(view);
 }
 /**
  * Either displays all filters currently applied, or applies the previous filter 
@@ -394,7 +396,7 @@ function getTableEntityName() {
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
-    if (_u.getSelVal('Publication Type') === "all") { return; }
+    if (_u.getSelVal('Publication Type') === 'all') { return; }
     updatePubSearch();
 }
 /**
@@ -414,7 +416,7 @@ function updateTaxonComboboxes() {                                              
 function seperateTaxonTreeByLvl(lvls, rowData) {                                
     const separated = {};
     rowData.forEach(data => separate(data));
-    return sortObjByLevelRank(separated);
+    return sortObjByLevelRank();
 
     function separate(row) {                                                    //console.log('taxon = %O', taxon)
         if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
@@ -424,10 +426,10 @@ function seperateTaxonTreeByLvl(lvls, rowData) {
             row.children.forEach(child => separate(child)); 
         }
     }
-    function sortObjByLevelRank(taxonObj) {
+    function sortObjByLevelRank() {
         const obj = {};
         Object.keys(lvls).forEach(lvl => { 
-            if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
+            if (lvl in separated) { obj[lvl] = separated[lvl]; }
         });
         return obj;
     }

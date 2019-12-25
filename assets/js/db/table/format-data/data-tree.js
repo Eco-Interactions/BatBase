@@ -1,5 +1,16 @@
 /**
  * Builds a data tree out of the records for the selected data view. 
+ *
+ * Code Sections:
+ *     LOCATION TREE
+ *     SOURCE TREE
+ *         PUBLICATION SOURCE TREE
+ *         PUBLISHER SOURCE TREE
+ *         AUTHOR SOURCE TREE
+ *     TAXON TREE
+ *     INTERACTION FILL METHODS
+ *     FILTER BY TEXT
+ *     FILTER BY INTERACTION SET
  * 
  * Exports:         Imported by:
  *     buildLocTree     db-page, save-ints
@@ -215,9 +226,9 @@ function buildTxnDataTree(topTaxon) {
     }
 } /* End buildTaxonTree */
 function storeTaxonLevelData(topTaxon, filtering) {                             //console.log('storeTaxonLevelData. filtering?', filtering);
-    _u.getData('levelNames').then(levels => { 
-        if (!filtering) { storeLevelData(topTaxon, levels); 
-        } else { updateTaxaByLvl(topTaxon, levels); }
+    _u.getData(['levelNames', 'realm']).then(data => { 
+        if (!filtering) { storeLevelData(topTaxon, data); 
+        } else { updateTaxaByLvl(topTaxon, data.levelNames); }
     });
 }
 /**
@@ -226,9 +237,9 @@ function storeTaxonLevelData(topTaxon, filtering) {                             
  *   level and keyed under their display name.
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
-function storeLevelData(topTaxon, levels) {                                     //console.log('topTaxon = %O', topTaxon)
-    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                         
-    const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', _u.snapshot(taxaByLvl), _u.snapshot(allRealmLvls));
+function storeLevelData(topTaxon, data) {                                       //console.log('storeLevelData. topTaxon = %O', topTaxon)
+    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, data.levelNames);                         
+    const allRealmLvls = data.realm[topTaxon.realm.id].uiLevelsShown;           //console.log('taxaByLvl = %O, allRealmLvls = %O', _u.snapshot(taxaByLvl), _u.snapshot(allRealmLvls));
     tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
 }
 function updateTaxaByLvl(topTaxon, levels) {
@@ -252,32 +263,23 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {
     }
     function sortObjByLevelRank(taxonObj) {
         const obj = {};
-        Object.keys(levels).forEach(lvl => {
+        Object.keys(levels).forEach(lvl => {  
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
     }
 } /* End seperateTaxonTreeByLvl */
-function getRealmLvls(realm) {  
-    const map = {
-        'Bat': ['Family', 'Genus', 'Species'],
-        'Plant': ['Family', 'Genus', 'Species'],
-        'Arthropod': ['Class', 'Order', 'Family', 'Genus', 'Species']
-    };
-    return map[realm];
-}
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
-    const fill = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
-    const entities = ['interaction', 'taxon', 'location', 'source', 'levelNames'];
+    const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
+    const entities = ['interaction', 'taxon', 'location', 'source'];
     const data = await _u.getData(entities);
-    fill[focus](dataTree, data);
+    fillInts[focus](dataTree, data);
     return dataTree;
 } 
 function fillTaxonTree(dataTree, entityData) {                                  //console.log("fillingTaxonTree. dataTree = %O", dataTree);
     fillTaxaInteractions(dataTree);  
-    fillHiddenTaxonColumns(dataTree, Object.keys(entityData.levelNames));
 
     function fillTaxaInteractions(treeLvl) {                                    //console.log("fillTaxonInteractions called. taxonTree = %O", dataTree) 
         for (let taxon in treeLvl) {   
@@ -356,67 +358,7 @@ function getIntTags(tagAry) {
     const tags = tagAry.map(function(tag){ return tag.displayName; });
     return tags.join(", ");
 }
-/**
- * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
- */
-function fillHiddenTaxonColumns(curTaxonTree, lvls) {                           //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
-    var curTaxonHeirarchy = {};
-    getTaxonDataAtTreeLvl(curTaxonTree);
-
-    function getTaxonDataAtTreeLvl(treeLvl) {
-        for (var topTaxon in treeLvl) {                                         //console.log('curTaxon = %O', treeLvl[topTaxon])
-            syncTaxonHeir( treeLvl[topTaxon] ); 
-            fillInteractionRcrdsWithTaxonTreeData( treeLvl[topTaxon] );
-            if (treeLvl[topTaxon].children) { 
-                getTaxonDataAtTreeLvl( treeLvl[topTaxon].children ); }             
-        }
-    }
-    /**
-     * This method keeps the curTaxonChain obj in sync with the taxon being processed.  
-     * For each taxon, all level more specific that the parent lvl are cleared.
-     * Note: The top taxon for the realm inits the taxon chain obj. 
-     */
-    function syncTaxonHeir(taxon) {                        
-        var lvl = taxon.level.displayName;
-        var prntId = taxon.parent;                                              //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
-        if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
-        } else { clearLowerLvls(focusRcrds[prntId].level.displayName); }
-        curTaxonHeirarchy[lvl] = taxon.displayName;
-    }
-    /**
-     * Inits the taxonomic-rank object that will be used to track the parent
-     * chain of each taxon being processed. 
-     */
-    function fillInAvailableLevels(topLvl) { 
-        var topIdx = lvls.indexOf(topLvl);
-        for (var i = topIdx; i < lvls.length; i++) { 
-            curTaxonHeirarchy[lvls[i]] = null;
-        }  
-    }
-    function clearLowerLvls(parentLvl) {
-        var topIdx = lvls.indexOf(parentLvl);
-        for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
-    }
-    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', _u.snapshot(curTaxonHeirarchy));
-        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             
-            if (taxon[role].length > 0) { 
-                taxon[role].forEach(addTaxonTreeFields.bind(null, role)) 
-            }
-        });
-    } 
-    function addTaxonTreeFields(roleProp, intRcrdObj) {     
-        const role = _u.ucfirst(roleProp.split('Roles')[0]);
-        for (var lvl in curTaxonHeirarchy) {
-            var colName = role + ' ' + lvl; 
-            intRcrdObj[colName] = lvl === 'Species' ? 
-                getSpeciesName(curTaxonHeirarchy[lvl]) : curTaxonHeirarchy[lvl];
-        }                                                                       //console.log('intRcrd after taxon fill = %O', intRcrdObj);
-    }
-    function getSpeciesName(speciesName) {
-        return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
-    }
-} /* End fillHiddenColumns */
-/* =================== LOAD ONLY ROWS THAT PASS TEXT FILTER ================= */
+/* ======================== FILTER BY TEXT ================================== */
 function filterTreeByText(text, tree) {
     if (!text) { return tree; }
     const fltrd = {};
@@ -435,7 +377,7 @@ function getRowsWithText(branch, text) {
     branch.failedFltr = !hasText;
     return hasText || branch.children.length > 0;
 }
-/* =================== LOAD ONLY ENTITIES IN INTERACTION SET ================ */
+/* =================== FILTER BY INTERACTION SET ============================ */
 function filterTreeToInteractionSet(dataTree, focus) {                          //console.log('filter[%s]TreeToInteractionSet. tree = %O  set = %O', focus, dataTree, tblState.intSet);
     const intSet = tblState.intSet;
     if (!intSet == null || !intSet) { return dataTree; }

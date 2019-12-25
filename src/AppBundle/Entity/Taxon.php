@@ -434,7 +434,7 @@ class Taxon
      *
      * @return Taxon
      */
-    public function setLevel(\AppBundle\Entity\Level $levell)
+    public function setLevel(\AppBundle\Entity\Level $level)
     {
         $this->level = $level;
 

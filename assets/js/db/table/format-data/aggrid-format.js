@@ -167,7 +167,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*/
     const intCount = getIntCount(taxon); 
     return {
         id: taxon.id,
-        children: getTaxonChildRowData(taxon, treeLvl, tblState),
+        children: getTaxonAndChildTaxaRowData(taxon, treeLvl, tblState),
         displayName: taxon.displayName,
         entity: "Taxon",
         interactions: intCount !== null,          
@@ -175,7 +175,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*/
         isParent: true,                     
         name: name,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1, 
-        parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
+        parentTaxon: taxon.parent > 1 ? taxon.parent : false, // 1 = Animalia (not shown)
         taxonLvl: lvl,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
@@ -192,26 +192,29 @@ function getIntCount(taxon) {
     return intCnt > 0 ? intCnt : null;
 } 
 /**
- * Returns both interactions for the curTaxon and rowData for any children.
+ * Returns both interactions for the taxon and rowData for any children.
  * The interactions for non-species Taxa are grouped as the first child row 
  * under "Unspecified [taxonName] Interactions", for species the interactions 
  * are added as rows directly beneath the taxon.
  */
-function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {                 
-    let childRows = [];
-    if (curTaxon.level.id !== 7){ //Species
-        getUnspecifiedInts(curTreeLvl);
-        if (curTaxon.children && curTaxon.children.length) { 
-            getTaxonChildRows(curTaxon.children); 
-        }
-    } else { childRows = getTaxonIntRows(curTaxon, curTreeLvl, tblState); }
-    return childRows;
+function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {                 
+    let rows = [];
+    if (taxon.level.id !== 7){ //Species
+        handleTaxonWithPotentialChildren();
+    } else { rows = getTaxonIntRows(taxon, curTreeLvl, tblState); }
+    return rows;
 
-    function getUnspecifiedInts(curTreeLvl) {
-        var realmMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
-        var name = curTaxon.id in realmMap ?  
-            realmMap[curTaxon.id] : curTaxon.displayName;
-        getUnspecifiedTaxonInts(curTaxon, name, curTreeLvl);
+    function handleTaxonWithPotentialChildren() {
+        handleUnspecifiedInts(curTreeLvl);
+        if (taxon.children && taxon.children.length) { 
+            getTaxonChildRows(taxon.children); 
+        }
+    }
+
+    function handleUnspecifiedInts(curTreeLvl) {
+        if (taxon.failedFltr || getIntCount(taxon) === null) { return; }
+        const name = taxon.isRealm ? taxon.realm.displayName : taxon.displayName;
+        addUnspecifiedTaxonIntsRow(name, curTreeLvl);
     }
     /**
      * Groups interactions attributed directly to a taxon with child-taxa
@@ -219,36 +222,31 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
      * Note: Realm interactions are built closed, otherwise they would be expanded
      * by default
      */
-    function getUnspecifiedTaxonInts(rcrd, taxonName, treeLvl) { 
-        if (rcrd.failedFltr) {  return; }
-        const realmIds = ['2', '3', '4'];  
-        if (getIntCount(curTaxon) !== null) { 
-            childRows.push({
-                id: curTaxon.id,
-                children: getTaxonIntRows(curTaxon, treeLvl, tblState),
-                displayName: taxonName,
-                entity: 'Taxon',
-                groupedInts: true,
-                interactions: true,
-                isParent: true,
-                name: `Unspecified ${taxonName} Interactions`,
-                open: realmIds.indexOf(curTaxon.id) === -1 ? false : 
-                    tblState.openRows.indexOf(curTaxon.id.toString()) !== -1,
-                taxonLvl: curTaxon.level.displayName,
-                treeLvl: treeLvl,
-            });
-        }
-    }
-    function getTaxonChildRows(children) {
-        children.forEach(function(childTaxon){
-            childRows.push( getTaxonRowData(childTaxon, curTreeLvl + 1, tblState));
+    function addUnspecifiedTaxonIntsRow(taxonName, treeLvl) { 
+        rows.push({
+            id: taxon.id,
+            children: getTaxonIntRows(taxon, treeLvl, tblState),
+            displayName: taxonName,
+            entity: 'Taxon',
+            groupedInts: true,
+            interactions: true,
+            isParent: true,
+            name: `Unspecified ${taxonName} Interactions`,
+            open: !taxon.isRealm && tblState.openRows.indexOf(taxon.id.toString()) !== -1,
+            taxonLvl: taxon.level.displayName,
+            treeLvl: treeLvl,
         });
     }
-} /* End getTaxonChildRowData */
+    function getTaxonChildRows(children) {
+        children.forEach(childTaxon => {
+            rows.push(getTaxonRowData(childTaxon, curTreeLvl + 1, tblState));
+        });
+    }
+} /* End getTaxonAndChildTaxaRowData */
 function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
     const ints = [];
-    ['subjectRoles', 'objectRoles'].forEach(function(role) {
-        taxon[role].forEach(function(intRcrd){
+    ['subjectRoles', 'objectRoles'].forEach(role => {
+        taxon[role].forEach(intRcrd => {
             ints.push(buildTaxonIntRowData(intRcrd, treeLvl, tblState));
         });
     });
@@ -257,7 +255,7 @@ function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*/
 /** Adds the taxon heirarchical data to the interactions row data. */ 
 function buildTaxonIntRowData(intRcrd, treeLvl, tblState) {
     const rowData = buildIntRowData(intRcrd, treeLvl);
-    getCurTaxonLvlCols(tblState).forEach(function(colName){
+    getCurTaxonLvlCols(tblState).forEach(colName => {
         rowData[colName] = intRcrd[colName];
     });
     return rowData;                
@@ -281,20 +279,20 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
 }
 /** Returns an interaction rowData object with flat data in table-ready format. */
 function buildIntRowData(intRcrd, treeLvl, idx){              
-    var rowData = {
+    const rowData = {
         citation: intRcrd.source.description,   //Table data
-        entity: "Interaction",       //Not sure what this is all used for...
+        entity: 'Interaction',       //Not sure what this is all used for...
         id: intRcrd.id,
         interactionType: intRcrd.interactionType.displayName,   //Table data
         isParent: false,  //Tell grid and various code not to expect sub-nodes
-        name: "",           // Blank tree field
+        name: '',           // Blank tree field
         note: intRcrd.note,    //Table data
         object: getTaxonName(intRcrd.object),   //Table data
         rowColorIdx: idx,       //Not sure what this is all used for...
         subject: getTaxonName(intRcrd.subject),   //Table data
         tags: intRcrd.tags,   //Table data
         treeLvl: treeLvl,       //Not sure what this is all used for...
-        type: "intRcrd",        //Not sure what this is all used for...
+        type: 'intRcrd',        //Not sure what this is all used for...
         updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
         updatedBy: intRcrd.updatedBy,  
         year: intRcrd.source.year       //When filtering interactions by publication date
@@ -307,7 +305,7 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         getOtherLocData();
         /** Add any present scalar location data. */
         function getSimpleLocData() {
-            var props = {
+            const props = {
                 location: 'displayName',    gps: 'gpsData',
                 elev: 'elevation',          elevMax: 'elevationMax',
                 lat: 'latitude',            lng: 'longitude',
@@ -318,19 +316,20 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         }
         /** Adds relational location data. Skips 'unspecified' regions. */
         function getOtherLocData() {
-            var props = {
-                country: "country",         region: "region",
-                habitat: "habitatType"          
+            const props = { 
+                country: 'country', region: 'region', habitat: 'habitatType'          
             };
-            for (var p in props) {
-                if (locObj[props[p]]) { 
-                    if (p === "region" && locObj[props[p]].displayName === "Unspecified") { continue; }
-                    rowData[p] = locObj[props[p]].displayName; } 
+            for (let p in props) {
+                if (!locObj[props[p]] || ifUnspecifiedRegion(p)) { continue; }
+                rowData[p] = locObj[props[p]].displayName;
             }                
+            function ifUnspecifiedRegion(p) {
+                return p === 'region' && locObj[props[p]].displayName === 'Unspecified';
+            }
         }
     } /* End getLocationData */
 } /* End buildIntRowData */
 function getTaxonName(taxon) {                                           
     var lvl = taxon.level.displayName;  
-    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
+    return lvl === 'Species' ? taxon.displayName : lvl+' '+taxon.displayName;
 }   

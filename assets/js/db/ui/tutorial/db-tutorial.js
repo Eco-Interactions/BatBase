@@ -302,8 +302,8 @@ function setDbLoadDependentState() {
     $('#sel-view')[0].selectize.addItem('3');
 }
 function resetTableState() {   
-    _u.getData('taxon', true).then(txnData => {
-        if (!txnData) { return window.setTimeout(resetTableState, 300); }
+    _u.getData('user', true).then(txnData => {
+        if (!txnData) { return window.setTimeout(resetTableState, 500); }
         resetUiAndReloadTable();
     });
 }

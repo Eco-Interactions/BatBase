@@ -3,7 +3,8 @@
  *
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
- *     collapseTree                     csv-data
+ *     collapseTree                     csv-export
+ *     expandTreeByOne                  csv-export
  *     fadeTable                        db-page
  *     init                             db_page
  *     initLocSearchUi                  db_page
@@ -46,7 +47,7 @@ function addDomEventListeners() {
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-    $('button[name="reset-tbl"]').click(db_page.resetViewDataTable.bind(null, false));
+    $('button[name="reset-tbl"]').click(db_page.buildTable.bind(null, false, false));
     addPanelEvents(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */
@@ -99,12 +100,13 @@ function enableAdminFeatures() {                                                
     app.enabledSelectors = '.map-dsbl';
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-export function selectInitialSearchFocus(f) {                                   console.log('--------------selectInitialSearchFocus [%s]', f);
+export function selectInitialSearchFocus(f, resettingData = false) {                            console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
-    db_page.selectSearchFocus()
+    if (resettingData) { return; }
+    db_page.buildTable()
     .then(updateFilterPanelHeader.bind(null, focus));
 }
 function getFocusOpts() {
@@ -139,7 +141,7 @@ export function collapseTree(tblApi) {
     $('#xpand-all').html("Expand All");
 }
 /** Events fired when clicking the + or - tree buttons.  */
-function expandTreeByOne() {    
+export function expandTreeByOne() {    
     toggleTreeByOneLvl(true);
 }
 function collapseTreeByOne() {
@@ -220,7 +222,7 @@ function getViewOpts(realms) {
 /** Restores stored realm from previous session or sets the default 'Bats'. */
 function setTaxonView(curView) {
     if (!_u.getSelVal('View')) { 
-        const realmVal = curView ? curView : "2";  
+        const realmVal = curView ? curView : '2';  
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
@@ -243,9 +245,8 @@ function loadTxnNameSearchElem(tblState) {
 function loadTaxonComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
-    const loadFunc = $('#focus-filters label').length ? updateTaxonSelOptions : loadLevelSelects;
     if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
-    loadFunc(lvlOptsObj, levels, tblState);
+    updateTaxonComboboxes(lvlOptsObj, levels, tblState);
 }
 /**
  * Builds select options for each level with taxon data in the current realm.
@@ -255,7 +256,6 @@ function loadTaxonComboboxes(tblState) {
 function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts levels = %O", tblState.taxaByLvl);
     const optsObj = {};
     const taxaByLvl = tblState.taxaByLvl;       
-    // const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
     tblState.allRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
@@ -291,6 +291,13 @@ function buildTaxonSelectOpts(tblState) {                                       
         } else { optsObj[lvl] = []; }
     }
 } /* End buildTaxonSelectOpts */
+function updateTaxonComboboxes(lvlOptsObj, levels, tblState) {
+    if ($('#focus-filters label').length) {
+        updateTaxonSelOptions(lvlOptsObj, levels, tblState);    
+    } else {
+        loadLevelSelects(lvlOptsObj, levels, tblState);
+    }
+}
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
     $('#focus-filters').append(elems);
@@ -317,7 +324,7 @@ function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  
 }
 function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    tblState.allRealmLvls.forEach(function(lvl) {                               
+    tblState.allRealmLvls.forEach(lvl => {                               
         if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
         _u.setSelVal(lvl, selected[lvl], 'silent');
     });
@@ -701,6 +708,9 @@ export function disableTableButtons() {
 }
 export function fadeTable() {  
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
+}
+export function showTable() {
+    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 }
 export function showPopUpMsg(msg) {                                             //console.log("showPopUpMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';

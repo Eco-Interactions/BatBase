@@ -29,9 +29,9 @@
 import * as _u from '../../util.js';
 import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../../local-data/db-sync.js';
-import { accessTableState as tState, resetViewDataTable } from '../../db-page.js';
+import { accessTableState as tState, resetDataTable } from '../../db-page.js';
 import { resetToggleTreeBttn } from '../../ui/ui-main.js';
-import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../../table/filters/filters-main.js';
+import { updateFilterStatusMsg, syncViewFiltersAndUi, resetFilterParams } from '../../table/filters/filters-main.js';
 import { showHelpModal } from '../../../misc/intro-core.js';
 /**
  * list - List open in panel
@@ -216,7 +216,7 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*debg-log*/console.log('----Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    resetViewDataTable()
+    resetDataTable()
     .then(updateRelatedListUi);
 }
 function prepareMemoryForTableLoad() {
@@ -422,7 +422,7 @@ function resetPrevListUiState() {
 function resetTable() {                     
     tState().set({'intSet': false});                                            
     delete app.listLoaded;
-    resetViewDataTable()
+    resetDataTable()
     .then(updateUiAfterTableReset);
 }
 function updateUiAfterTableReset() {
