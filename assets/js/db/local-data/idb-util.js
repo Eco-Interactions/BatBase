@@ -19,7 +19,7 @@ import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-syn
 
 const _db = {
     geoJson: null, 
-    v: .025
+    v: .028
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */
@@ -35,7 +35,14 @@ function initDb() {
 function resetDbIfNeeded(noResetNeeded) {                                       console.log('Download DB? ', !noResetNeeded);
     return noResetNeeded ? checkForServerUpdates() : downloadFullDb();
 }
-export function downloadFullDb(reset) {                                         console.log('   --DOWNLOADING FULL DB');
+export function downloadFullDb(reset) {                                         //console.log('   --DOWNLOADING FULL DB');
+    if (reset) { return clearAndDownload(true); }
+    getAllStoredData().then(data => {
+        reset = Object.keys(data).length;
+        clearAndDownload(reset);
+    });
+}
+function clearAndDownload(reset) {
     idb.clear();     
     initStoredData(reset).then(() => idb.set(_db.v, true));
 }
