@@ -43,7 +43,6 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
         $this->addDomainLevel();
         $this->updateCurrentRealms();
         $this->createNewRealms();
-        $this->setRealmsForAllTaxa();
         $this->em->flush();
     }
 
@@ -157,13 +156,13 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
     {
         return [
             'Bat' => [
-                'UiLevelsShown' => '[5, 6, 7]'
+                'UiLevelsShown' => '[7, 6, 5]'
             ],
             'Arthropod' => [
-                'UiLevelsShown' => '[3, 4, 5, 6, 7]'
+                'UiLevelsShown' => '[7, 6, 5, 4, 3]'
             ],
             'Plant' => [
-                'UiLevelsShown' => '[5, 6, 7]'
+                'UiLevelsShown' => '[7, 6, 5]'
             ],
         ];
     }
@@ -174,7 +173,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
             'Bacteria' => [
                 'Realm' => [
                     'PluralName' => 'Bacteria',
-                    'UiLevelsShown' => '[3, 4, 5, 6, 7]'
+                    'UiLevelsShown' => '[7, 6, 5, 4, 3]'
                 ],
                 'Taxon' => [
                     'Level' => 'Domain'
@@ -183,7 +182,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
             'Fungi' => [
                 'Realm' => [
                     'PluralName' => 'Fungi',
-                    'UiLevelsShown' => '[5, 6, 7]'
+                    'UiLevelsShown' => '[7, 6, 5]'
                 ],
                 'Taxon' => [
                     'Level' => 'Kingdom'
@@ -194,7 +193,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
             'Virus' => [
                 'Realm' => [
                     'PluralName' => 'Viruses',
-                    'UiLevelsShown' => '[5, 6, 7]'
+                    'UiLevelsShown' => '[7, 6, 5]'
                 ],
                 'Taxon' => [
                     'Level' => 'Domain'
@@ -204,7 +203,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
             'Bird' => [
                 'Realm' => [
                     'PluralName' => 'Birds',
-                    'UiLevelsShown' => '[5, 6, 7]'
+                    'UiLevelsShown' => '[7, 6, 5]'
                 ],
                 'Taxon' => [
                     'Level' => 'Class',
@@ -216,7 +215,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
             'Reptile' => [
                 'Realm' => [
                     'PluralName' => 'Reptiles',
-                    'UiLevelsShown' => '[5, 6, 7]'
+                    'UiLevelsShown' => '[7, 6, 5]'
                 ],
                 'Taxon' => [
                     'Level' => 'Class',
@@ -228,7 +227,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
             'Amphibian' => [
                 'Realm' => [
                     'PluralName' => 'Amphibians',
-                    'UiLevelsShown' => '[5, 6, 7]'
+                    'UiLevelsShown' => '[7, 6, 5]'
                 ],
                 'Taxon' => [
                     'Level' => 'Class',
