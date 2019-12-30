@@ -87,43 +87,24 @@ export function initEntityFormMemory(entity, level, pSel, action) {
     };                                                                          //console.log("   /initEntityFormMemory. formMemory = %O, arguments = %O", formMemory, arguments)
     return formMemory;                                                                       
 }
-/*------------- Taxon --------------------*/
-/**
- * Inits the taxon params object.
- * > lvls - All taxon levels
- * > realm - realm taxon display name
- * > realmLvls - All levels for the selected realm
- * > curRealmLvls - Levels present in selected realm.
- * > realmTaxon - realm taxon record
- * > prevSel - Taxon already selected when form opened, or null.
- * > objectRealm - Object realm display name. (Added elsewhere.)
- */
-export function initTaxonMemory(role, realmName, realmTaxon, reset) {           //console.log('###### INIT ######### role [%s], realm [%s]', role, realmName);
-    const realmLvls = {                                             //realm-refact
-        'Bat': ['Order', 'Family', 'Genus', 'Species'],
-        'Arthropod': ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],
-        'Plant': ['Kingdom', 'Family', 'Genus', 'Species']
-    };
-    return Promise.resolve(buildBaseTaxonParams());
+/*------------- Taxon Params --------------------*/
+export function initTaxonMemory(role, realmId) {                                //console.log('###### INIT ######### [%s] = id [%s]', role, realmId);
+    return _i.util('getData', [['realm', 'levelNames']])
+        .then(data => setTxnMmry(data.realm[realmId], data.levelNames));
 
-    function buildBaseTaxonParams() {                                           
+    function setTxnMmry(realm, levels) {   
+        const taxon = formMemory.records.taxon[realm.taxon];
         formMemory.forms.taxonPs = { 
-            lvls: ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],  //realm-refact
-            realm: realmName, 
-            allRealmLvls: realmLvls, 
-            curRealmLvls: realmLvls[realmName],
-            realmTaxon: realmTaxon,
-        };           
-        if (role === 'Object') { formMemory.forms.taxonPs.objectRealm = realmName; } console.log('           --taxon params = %O', formMemory.forms.taxonPs)
+            lvls: levels, //Object with each (k) level name and it's (v) id and order
+            realmLvls: realm.uiLevelsShown,  
+            realmName: realm.displayName, 
+            realmTaxon: taxon,
+            rootLvl: taxon.realm.displayName,
+        };                                                                      console.log('           /--taxon params = %O', formMemory.forms.taxonPs)
         return formMemory.forms.taxonPs;
     }
-}
-/** Returns either the preivously selected object realm or the default. */
-export function getObjectRealm() {
-    const txnMemory = formMemory.forms.taxonPs; 
-    return !txnMemory ? 'Plant' : (txnMemory.objectRealm || 'Plant');
-}   
-// /* ---------------------------- Getters ------------------------------------- */
+} 
+/* ---------------------------- Getters ------------------------------------- */
 export function isEditForm() {
     return formMemory.action === 'edit';
 }

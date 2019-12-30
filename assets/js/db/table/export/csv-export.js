@@ -15,7 +15,6 @@
  */
 import * as _u from '../../util.js';
 import { accessTableState as tState } from '../../db-page.js';
-import fillExportOnlyData from '../export/export-data.js';
 import { collapseTree, expandTreeByOne, fadeTable, showTable } from '../../ui/ui-main.js';
 import { buildLocTree, buildSrcTree, buildTxnTree } from '../format-data/data-tree.js';
 

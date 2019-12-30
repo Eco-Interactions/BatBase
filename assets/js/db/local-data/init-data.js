@@ -63,7 +63,7 @@ function storeServerData(data) {                                                
  * because the data comes back from the server having been double JSON-encoded,
  * due to the 'serialize' library and the JSONResponse object. 
  */
-function parseData(data) {  
+function parseData(data) {  //shared. refact
     for (let k in data) { data[k] = JSON.parse(data[k]); }
     return data;
 }

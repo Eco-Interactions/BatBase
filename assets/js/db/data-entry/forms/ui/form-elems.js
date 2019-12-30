@@ -428,7 +428,7 @@ function getCitTypeOpts(prop) {
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
 export function getTaxonOpts(level, field, r) {
-    let realm = r ? r : _i.mmry('getTaxonProp', ['realm']);
+    let realm = r ? r : _i.mmry('getTaxonProp', ['realmName']);
     return _i.util('getOptsFromStoredData', [realm+level+'Names'])
         .then(buildTaxonOpts);
 

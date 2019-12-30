@@ -189,19 +189,23 @@ function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) {
 function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
     _i.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, fLvl);
-    if ($('#sub-form').length) { return selectParentTaxon(
-        $('#txn-prnt').data('txn'), mmry.forms.taxonPs.curRealmLvls[0]); 
+    if ($('#sub-form').length) { 
+        return _i.entity('selectParentTaxon', [ $('#txn-prnt').data('txn') ]); 
     }
     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
 }
 /** Note: error for the edit-taxon form. */
 function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
-    var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
-    var lvlName = mmry.forms.taxonPs.lvls[childLvl-1];
-    var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
+    const lvlName = getChildLvlName($('#txn-lvl').data('txn'));
+    const msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
         'Please select a level higher than '+lvlName+'</div>';
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function getChildLvlName(txnId) {
+    const childLvl = getHighestChildLvl(txnId);
+    const lvls = mmry.forms.taxonPs.lvls;
+    return Object.keys(lvls).find(lvl => lvls[lvl].ord === childLvl);
 }
 export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 

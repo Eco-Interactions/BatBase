@@ -126,6 +126,15 @@ function processUpdatedEntityData(data) {
     const entity = Object.keys(data)[0];                                        console.log("       --processUpdatedEntityData [%s] = %O", entity, data[entity]); 
     return storeUpdatedData(parseData(data[entity]), entity); 
 }
+/**
+ * Loops through the passed data object to parse the nested objects. This is 
+ * because the data comes back from the server having been double JSON-encoded,
+ * due to the 'serialize' library and the JSONResponse object. 
+ */
+function parseData(data) {  //shared with init-data. refact
+    for (let k in data) { data[k] = JSON.parse(data[k]); }
+    return data;
+}
 /** Sends the each updated record to the update handler for the entity. */ 
 function storeUpdatedData(rcrds, entity) {  
     const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 

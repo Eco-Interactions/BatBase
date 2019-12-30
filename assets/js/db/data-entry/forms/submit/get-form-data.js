@@ -188,12 +188,15 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(lvl) {
-        var lvls = mmry.forms.taxonPs.lvls;
-        var parentLvl = lvls[lvls.indexOf(lvl)-1];
-        if ($('#'+parentLvl+'-sel').length) { 
-            return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
-        } 
-        return mmry.forms.taxonPs.realmTaxon.id;
+        const lvls = mmry.forms.taxonPs.realmLvls;
+        const parentLvl = lvls[lvls.indexOf(lvl)+1]; 
+        if (ifParentIsRealmTaxon(lvl, parentLvl)) { 
+            return mmry.forms.taxonPs.realmTaxon.id; 
+        }
+        return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
+        function ifParentIsRealmTaxon(lvl, parentLvl) {
+            return lvl === mmry.forms.taxonPs.rootLvl || !parentLvl;
+        }
     }
     function returnFormVals() {  
         checkForErrors(entity, formVals, fLvl);  

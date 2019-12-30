@@ -100,7 +100,7 @@ function enableAdminFeatures() {                                                
     app.enabledSelectors = '.map-dsbl';
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-export function selectInitialSearchFocus(f, resettingData = false) {                            console.log('--------------selectInitialSearchFocus [%s]', f);
+export function selectInitialSearchFocus(f, resettingData = false) {            //console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())

@@ -102,6 +102,9 @@ export function getSelectedTaxon() {
 export function getTaxonEditFields(entity, id) {
     return _txn.getTaxonEditFields(id);
 }
+export function selectParentTaxon(id) {
+    return _txn.selectParentTaxon(id);
+}
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function loadSrcTypeFields(subEntity, typeId, elem, typeName) {
     return _src.loadSrcTypeFields(subEntity, typeId, elem, typeName);
