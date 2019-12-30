@@ -20,13 +20,15 @@
  *         ERRS
  * 
  */
-import * as _u from './util.js';
-import { err as _errs, entity as _entity } from './data-entry/forms/forms-main.js';
-import { resetDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
+import * as _u from '../util.js';
+import { err as _errs, entity as _entity } from '../data-entry/forms/forms-main.js';
+import { initSearchState, showIntroAndLoadingMsg } from '../db-page.js';
+import initLocalData from './init-data.js';
 
 let failed = { errors: [], updates: {}};
 /** Stores entity data while updating to reduce async db calls. */
 let mmryData;
+
 /* ========================= DATABASE SYNC ================================== */
 /**
  * On search page load, the system updatedAt flag is compared against the page's. 
@@ -38,14 +40,14 @@ let mmryData;
 export function syncLocalDbWithServer(lclUpdtdAt) {                             console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt);
     _u.sendAjaxQuery({}, "ajax/data-state", checkAgainstLocalDataState);
     
-    function checkAgainstLocalDataState(srvrUpdtdAt) {  //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
+    function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
         if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _u.downloadFullDb(); }
         const entities = checkEachEntityForUpdates(srvrUpdtdAt.state);
-        return entities.length ? syncDb(entities) : initSearchPage();
+        return entities.length ? syncDb(entities, srvrUpdtdAt.state) : initSearchPage();
     }
     function checkEachEntityForUpdates(srvrUpdtdAt) {                           //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt.state, lclUpdtdAt);
-        delete srvrUpdtdAt.System;
         return Object.keys(srvrUpdtdAt).map(entity => {                         //console.log('   --[%s] updates ? ', entity, entityHasUpdates(srvrUpdtdAt[entity], lclUpdtdAt[entity]));
+            if (entity === 'System') { return false; }
             return entityHasUpdates(srvrUpdtdAt[entity], lclUpdtdAt[entity]) ? 
                 { name: entity, updated: lclUpdtdAt[entity] } : false;
         }).filter(e => e);
@@ -68,16 +70,11 @@ function initSearchPage() {
     if (mmryData && mmryData.curFocus) { return initSearchState(mmryData.curFocus); }
     _u.getData('curFocus', true).then(f => initSearchState(f));
 }
-function syncDb(entities) {
-    _u.getAllStoredData().then(data => { mmryData = data; console.log('-----mmryData = %O', mmryData)})
+function syncDb(entities, dataUpdatedAt) {
+    _u.getAllStoredData().then(data => { mmryData = data; })
     .then(() => downloadAndStoreNewData(entities))
     .then(addUpdatedDataToLocalDb)
-    .then(clearMemoryAndLoadTable);
-}
-function storeLocalDataState() {
-    _u.sendAjaxQuery({}, "ajax/data-state").then(srvrState => {
-        _u.setData('lclDataUpdtdAt', srvrState.state);  
-    }); 
+    .then(() => clearMemoryAndLoadTable(dataUpdatedAt));
 }
 function trackTimeUpdated(entity, rcrd) {
     _u.getData('lclDataUpdtdAt').then(stateObj => {
@@ -129,6 +126,15 @@ function processUpdatedEntityData(data) {
     const entity = Object.keys(data)[0];                                        console.log("       --processUpdatedEntityData [%s] = %O", entity, data[entity]); 
     return storeUpdatedData(parseData(data[entity]), entity); 
 }
+/**
+ * Loops through the passed data object to parse the nested objects. This is 
+ * because the data comes back from the server having been double JSON-encoded,
+ * due to the 'serialize' library and the JSONResponse object. 
+ */
+function parseData(data) {  //shared with init-data. refact
+    for (let k in data) { data[k] = JSON.parse(data[k]); }
+    return data;
+}
 /** Sends the each updated record to the update handler for the entity. */ 
 function storeUpdatedData(rcrds, entity) {  
     const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
@@ -139,19 +145,11 @@ function storeUpdatedData(rcrds, entity) {
     });
     return Promise.resolve();
 } 
-function clearMemoryAndLoadTable() {                                              //console.log('clearMemoryAndLoadTable')
+function clearMemoryAndLoadTable(dataUpdatedAt) {                                              //console.log('clearMemoryAndLoadTable')
     const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
     clearMemory();
-    storeLocalDataState()
+    _u.setData('lclDataUpdtdAt', dataUpdatedAt);  
     initSearchPage(); //TODO: send errors during init update to search page and show error message to user.
-}
-/**
- * Updates the stored data's updatedAt flag, and initializes the search-page 
- * table with the updated data @resetDataTable. 
- */
-function loadDataTable() {    
-    storeLocalDataState();
-    resetDataTable();                                                            //console.log('Finished updating! Loading search table.')
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -171,7 +169,6 @@ export function updateLocalDb(data) {                                           
             .then(() => {
                 addErrsToReturnData(data);
                 clearMemory();
-                storeLocalDataState();
                 return data;
             });
     }
@@ -244,7 +241,7 @@ function getRelDataHndlrs(entity, rcrd) {
     return type ? update[entity][type] : update[entity];
 }
 /** Returns the records source-type. */
-function getSourceType(entity, rcrd) {                                          console.log('getSourceType. [%s] = %O', entity, rcrd);
+function getSourceType(entity, rcrd) {                                          //console.log('getSourceType. [%s] = %O', entity, rcrd);
     var type = _u.lcfirst(entity)+"Type";
     return _u.lcfirst(rcrd[type].displayName); 
 }
@@ -277,7 +274,7 @@ function addToRcrdProp(prop, rcrd, entity) {
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdAryProp(prop, rcrd, entity) {  
-    const rcrds = mmryData[prop].value;                                         console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    const rcrds = mmryData[prop].value;                                         //console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
     if (!ifNewRcrd(rcrds, rcrd.id)) { return; }
     rcrds.push(rcrd.id);
     storeData(prop, rcrds);
@@ -418,14 +415,14 @@ function rmvFromParent(prop, rcrd, entity, edits) {
 }
 /** Removes the Interaction from the stored entity's collection. */
 function rmvIntFromEntity(prop, rcrd, entity, edits) {   
-    const rcrds = mmryData[prop].value;                                       console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
-    const storedEntity = rcrds[edits[prop].old];  console.log('storedEntity = %O', storedEntity)
+    const rcrds = mmryData[prop].value;                                         //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const storedEntity = rcrds[edits[prop].old]; 
     rmvIdFromAry(storedEntity.interactions, rcrd.id);
     storeData(prop, rcrds);
 }
 /** Removes the Interaction and updates parent location total counts.  */
 function rmvIntAndAdjustTotalCnts(prop, rcrd, entity, edits) {
-    const rcrds = mmryData[prop].value;                              //console.log("               --rmvIntFromLocation. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const rcrds = mmryData[prop].value;                                         //console.log("               --rmvIntFromLocation. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
     const oldLoc = rcrds[edits[prop].old];
     const newLoc = rcrds[edits[prop].new];
     rmvIdFromAry(oldLoc.interactions, rcrd.id);
@@ -443,7 +440,7 @@ function adjustLocCnts(oldLoc, newLoc, rcrds) {
 }
 /** Removes the Interaction from the taxon's subject/objectRole collection. */
 function rmvIntFromTaxon(prop, rcrd, entity, edits) {  
-    const taxa = mmryData.taxon.value;                                   //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+    const taxa = mmryData.taxon.value;                                          //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
     const taxon = taxa[edits[prop].old];      
     rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
     storeData("taxon", taxa);   
@@ -473,14 +470,22 @@ function rmvContrib(prop, rcrd, entity, edits) {                                
     storeData('source', srcObj);
 }
 function rmvFromNameProp(prop, rcrd, entity, edits) { 
-    const lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
-    const realm = rcrd.realm.displayName;
-    const level = edits.level ? lvls[edits.level.old-1] : rcrd.level.displayName;
-    const taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
-    const nameProp = realm+level+'Names';
-    const nameObj = mmryData[entity].value;
+    const taxonName = getTaxonName(edits.displayName, rcrd); 
+    const nameProp = getNameProp(edits, rcrd);
+    const nameObj = mmryData[nameProp].value;
     delete nameObj[taxonName];
     storeData(nameProp, nameObj);  
+}
+function getTaxonName(nameEdits, rcrd) {
+    return nameEdits ? nameEdits.old : rcrd.displayName;
+}
+function getNameProp(edits, rcrd) {
+    const level = getLevel(edits.level, rcrd);
+    return rcrd.realm.displayName + level + 'Names';
+}
+function getLevel(lvlEdits, rcrd) {  
+    return !lvlEdits ? 
+        rcrd.level.displayName : mmryData.level.value[lvlEdits.old].displayName;
 }
 /** ---------------------- UPDATE RELATED DATA ------------------------------ */
 function ifEditedSourceDataUpdatedCitations(data) {
@@ -585,258 +590,12 @@ export function resetStoredData() {
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @ajaxAndStoreAllEntityData. A data-loading 
- * popup message and intro-walkthrough are shown on the Search page.
+ * from the server and stored locally @initLocalData. A data-loading popup message 
+ * and intro-walkthrough are shown on the Search page.
  */
 export function initStoredData(reset) {
     showIntroAndLoadingMsg(reset);
-    return ajaxAndStoreAllEntityData(reset);
-}
-/**
- * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @storeEntityData. Database search page 
- * table build begins @initSearchState.
- * Entities downloaded with each ajax call:
- *   /taxon - Taxon, Realm, Level 
- *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
- *   /source - Author, Citation, CitationType, Publication, PublicationType, 
- *       Source, SourceType, Tag
- *   /interaction - Interaction, InteractionType  
- */
-function ajaxAndStoreAllEntityData(reset) {                                     console.log("   --ajaxAndStoreAllEntityData");
-    return $.when(
-        $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
-        $.ajax("ajax/source"), $.ajax("ajax/interaction"),
-        $.ajax("ajax/lists"),  $.ajax("ajax/geojson")
-    ).then(function(a1, a2, a3, a4, a5, a6) {                                   console.log("       --Ajax success: args = %O", arguments); 
-        $.each([a1, a2, a3, a4, a5, a6], (idx, a) => storeServerData(a[0]));
-        deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
-        storeData('user', $('body').data('user-name'));
-        addUpdatedDataToLocalDb()
-        .then(storeLocalDataState)
-        .then(loadDatabaseTable)
-    });
-
-    function loadDatabaseTable() {
-        if (reset) { initDataTable(); 
-        } else { initSearchState(); }
-        return Promise.resolve();
-    }
-}
-/**
- * Loops through the data object returned from the server, parsing and storing
- * the entity data.
- */
-function storeServerData(data) {                                                //console.log("data received = %O", data);
-    for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, rcrdData);
-        storeData(entity, parseData(data[entity]));
-    }
-}
-/**
- * Loops through the passed data object to parse the nested objects. This is 
- * because the data comes back from the server having been double JSON-encoded,
- * due to the 'serialize' library and the JSONResponse object. 
- */
-function parseData(data) {  
-    for (var k in data) { data[k] = JSON.parse(data[k]); }
-    return data;
-}
-/** Adds the data derived from the serialized entity data to data storage. */
-function deriveAndStoreData(data) {
-    deriveAndStoreTaxonData(data[0]);
-    deriveAndStoreLocationData(data[1]);
-    deriveAndStoreSourceData(data[2]);
-    deriveInteractionData(data[3]);
-    deriveUserNamedListData(data[4]);
-}
-/** Stores an object of taxon names and ids for each level in each realm. */
-function deriveAndStoreTaxonData(data) {                                        //console.log("deriveAndStoreTaxonData called. data = %O", data);
-    storeData('levelNames', getNameDataObj(Object.keys(data.level), data.level));
-    storeData('objectRealmNames', getObjectRealmNames(data.realm));
-    storeTaxaByLevelAndRealm(data.taxon);
-}
-function getObjectRealmNames(realms) {                                          //console.log('getObjectRealmNames. [%s] realms = %O',Object.keys(realms).length, realms);
-    let data = {};
-    Object.keys(realms).forEach(i => {
-        if (realms[i].displayName === 'Bat') { return; }  
-        data[realms[i].displayName] = realms[i].id;
-    });
-    return data;
-}
-function storeTaxaByLevelAndRealm(taxa) {
-    var realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym realmData = %O", realmData);
-    for (var realm in realmData) {  
-        storeTaxaByLvl(realm, realmData[realm]);
-    }
-}
-function storeTaxaByLvl(realm, taxonObj) {
-    for (var level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
-        storeData(realm+level+'Names', taxonObj[level]);
-    }
-}
-/** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
-function separateTaxaByLevelAndRealm(taxa) {  
-    const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-    Object.keys(taxa).forEach(id => {
-        if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { return; }
-        addTaxonData(taxa[id]);
-    })
-    return data;
-    /** Adds the taxon's name (k) and id to it's level's obj. */
-    function addTaxonData(taxon) {
-        const realmObj = getRealmObj(taxon);
-        const level = taxon.level.displayName;  
-        if (!realmObj[level]) { realmObj[level] = {}; }; 
-        realmObj[level][taxon.displayName] = taxon.id;
-    }
-    function getRealmObj(taxon) {
-        const realm = taxon.realm.displayName
-        const key = realm === 'Animalia' ? 'Bat' : realm;
-        return data[key];
-    }
-} /* End separateTaxaByLevelAndRealm */
-/** 
- * [entity]Names - an object with each entity's displayName(k) and id.
- * location - resaved locations with an additional data point for countries. 
- */
-function deriveAndStoreLocationData(data) {                                     //console.log('loc data to store = %O', data);
-    const regns = getTypeObj(data.locationType, 'region', 'locations');
-    const cntries = getTypeObj(data.locationType, 'country', 'locations');       //console.log('reg = %O, cntry = %O', regns, cntries);
-    storeData('countryNames', getNameDataObj(cntries, data.location));
-    storeData('countryCodes', getCodeNameDataObj(cntries, data.location));
-    storeData('regionNames', getNameDataObj(regns, data.location));
-    storeData('topRegionNames', getTopRegionNameData(data, regns));
-    storeData('habTypeNames', getTypeNameData(data.habitatType));
-    storeData('locTypeNames', getTypeNameData(data.locationType));
-    storeData('location', addInteractionTotalsToLocs(data.location));
-}
-/** Return an obj with the 2-letter ISO-country-code (k) and the country id (v).*/
-function getCodeNameDataObj(ids, rcrds) { 
-    const data = {};
-    ids.forEach(id => data[rcrds[id].isoCode] = id);                            //console.log("codeNameDataObj = %O", data);
-    return data;
-}
-function getTopRegionNameData(locData, regns) {  
-    const data = {};
-    const rcrds = getEntityRcrds(regns, locData.location);
-    for (const id in rcrds) { 
-        if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
-    }
-    return data;
-}
-/** Adds the total interaction count of the location and it's children. */
-function addInteractionTotalsToLocs(locs) {  
-    for (let id in locs) {  
-        locs[id].totalInts = getTotalInteractionCount(locs[id]);                //console.log('[%s] total = [%s]', locs[id].displayName, locs[id].totalInts);
-    }
-    return locs;
-
-    function getTotalInteractionCount(loc) {    
-        let ttl = loc.interactions.length;
-        if (!loc.children.length) { return ttl; }
-        loc.children.forEach(function(id) {
-            let child = locs[id];
-            ttl += getTotalInteractionCount(child);
-        });
-        return ttl;
-    }
-} /* End addInteractionTotalsToLocs */
-/** Note: Top regions are the trunk of the location data tree. */
-/**
- * [entity]Names - an object with each entity's displayName(k) and id.
- * [entity]Sources - an array with of all source records for the entity type.
- */
-function deriveAndStoreSourceData(data) {                                       //console.log("source data = %O", data);
-    const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
-    const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
-    const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources'); 
-    storeData('authSrcs', authSrcs);         
-    storeData('pubSrcs', pubSrcs);              
-    storeData('publSrcs', publSrcs);
-    storeData('citTypeNames', getTypeNameData(data.citationType));        
-    storeData('pubTypeNames', getTypeNameData(data.publicationType));        
-}
-function getTypeObj(types, type, collection) { 
-    for (const t in types) {
-        if (types[t].slug === type) { return types[t][collection]; }
-    }
-}
-/**
- * [entity]Names - an object with each entity's displayName(k) and id.
- * [entity]Tags - an object with each entity tag's displayName and id.
- */
-function deriveInteractionData(data) {
-    storeData('intTypeNames', getTypeNameData(data.interactionType));
-    storeData('interactionTags', getTagData(data.tag, "Interaction"));        
-}   
-/** Returns an object with a record (value) for each id (key) in passed array.*/
-function getEntityRcrds(ids, rcrds) {
-    var data = {};
-    ids.forEach(function(id) { data[id] = rcrds[id]; });        
-    return data;
-}
-/** Returns an object with each entity record's displayName (key) and id. */
-function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
-    var data = {};
-    ids.forEach(function(id) { data[rcrds[id].displayName] = id; });            //console.log("nameDataObj = %O", data);
-    return data;
-}
-/** Returns an object with each entity types's displayName (key) and id. */
-function getTypeNameData(typeObj) {
-    var data = {};
-    for (var id in typeObj) {
-        data[typeObj[id].displayName] = id;
-    }  
-    return data;
-}
-/** Returns an object with each entity tag's displayName (key) and id. */
-function getTagData(tags, entity) {
-    var data = {};
-    for (var id in tags) {
-        if ( tags[id].constrainedToEntity === entity ) {
-            data[tags[id].displayName] = id;
-        }
-    }  
-    return data;
-}
-/** 
- * [type] - array of user created interaction and filter sets.
- * [type]Names - an object with each set item's displayName(k) and id.
- */
-function deriveUserNamedListData(data) {                                        //console.log('list data = %O', data)
-    const filters = {};
-    const filterIds = [];
-    const int_sets = {};
-    const int_setIds = [];
-
-    data.lists.forEach(l => { 
-        let entities = l.type == 'filter' ? filters : int_sets;
-        let idAry = l.type == 'filter' ? filterIds : int_setIds;
-        entities[l.id] = l;
-        idAry.push(l.id);
-    });
-
-    storeData('savedFilters', filters);
-    storeData('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
-    storeData('dataLists', int_sets);
-    storeData('dataListNames', getNameDataObj(int_setIds, int_sets));
-}
-function getFilterOptionGroupObj(ids, filters) {                                //console.log('getFilterOptionGroupObj ids = %O, filters = %O', ids, filters);
-    const data = {};
-    ids.forEach(function(id) { 
-        data[filters[id].displayName] = { 
-            value: id, group: getFocusAndViewOptionGroupString(filters[id]) }
-    });                                                                         //console.log("nameDataObj = %O", data);
-    return data;
-}
-function getFocusAndViewOptionGroupString(list) {
-    list.details = JSON.parse(list.details);                                    //console.log('getFocusAndViewOptionGroupString. list = %O', list)
-    const map = {
-        'srcs': 'Source', 'auths': 'Author', 'pubs': 'Publication', 'publ': 'Publisher',
-        'taxa': 'Taxon', '2': 'Bats', '3': 'Plants', '4': 'Arthropod'
-    };
-    return list.details.focus === 'locs' ? 'Location' : 
-        map[list.details.focus] + ' - ' + map[list.details.view];
+    return initLocalData(reset);
 }
 export function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));

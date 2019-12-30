@@ -247,7 +247,7 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(data, fltrd) {                                          console.log('initMap. data = %O', data);
+export function initMap(data, fltrd) {                                          console.log('               //initMap. data = %O', data);
     app.data.locs = data;
     const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
     downloadDataAndBuildMap(dispFunc, 'map');                                               
@@ -259,7 +259,7 @@ export function showLoc(id, zoom, data) {
     downloadDataAndBuildMap(showLocInMap, 'map');
     
     function showLocInMap() {
-        const loc = app.data.locs[id];                                          console.log('show loc = %O, zoom = %s', loc, zoom)
+        const loc = app.data.locs[id];                                          console.log('               show loc = %O, zoom = %s', loc, zoom)
         const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId); 
         if (!latLng) { return noGeoDataErr(); }
         zoomToLocAndShowPopup(loc, latLng, zoom);

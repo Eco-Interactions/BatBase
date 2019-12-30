@@ -414,16 +414,16 @@ class Taxon
     {
         return $this->findRealmAndReturnObj($this);
     }
+    
     private function findRealmAndReturnObj($taxon)
     {
-        if ($taxon->getSlug() === 'animalia') { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
+        if ($taxon->getSlug() === 'animalia') { return []; } 
         $realm = $taxon->getRealm();
         if ($realm) {
             return [ 
                 "id" => $realm->getId(), 
                 "displayName" => $realm->getDisplayName() ];
         }
-        if (!$taxon->getParentTaxon()) { print($taxon->getId()."\n");  }
         return $this->findRealmAndReturnObj($taxon->getParentTaxon());
     }
 
@@ -434,7 +434,7 @@ class Taxon
      *
      * @return Taxon
      */
-    public function setLevel(\AppBundle\Entity\Level $level = null)
+    public function setLevel(\AppBundle\Entity\Level $level)
     {
         $this->level = $level;
 

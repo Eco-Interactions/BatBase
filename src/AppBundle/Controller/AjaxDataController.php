@@ -29,7 +29,6 @@ class AjaxDataController extends Controller
      * each entity.
      *
      * @Route("/data-state", name="app_ajax_data_state")
-     * @Method("POST")
      */
     public function getDataLastUpdatedState(Request $request)
     {
@@ -138,6 +137,7 @@ class AjaxDataController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
+        $geoJson = $this->serializeEntity('GeoJson', $serializer, $em);
         $habitatType = $this->serializeEntity('HabitatType', $serializer, $em);
         $location = $this->serializeEntity('Location', $serializer, $em);
         $locType = $this->serializeEntity('LocationType', $serializer, $em);
@@ -145,31 +145,11 @@ class AjaxDataController extends Controller
         $response = new JsonResponse();
         $response->setData(array( 
             'location' => $location,    'habitatType' => $habitatType,   
-            'locationType' => $locType
+            'locationType' => $locType, 'geoJson' => $geoJson
         )); 
         return $response;
     }
     /**
-     * Returns an object keyed with location ids with their geoJson as values. 
-     *
-     * @Route("/geojson", name="app_serialize_geojson")
-     */
-    public function serializeGeoJsonData(Request $request) 
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }  
-
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
-        $geoJson = $this->serializeEntity('GeoJson', $serializer, $em);
-
-        $response = new JsonResponse();
-        $response->setData(array( 
-            'geoJson' => $geoJson
-        )); 
-        return $response;
-    }
     /**
      * Returns serialized data objects for all entities related to Source. 
      *

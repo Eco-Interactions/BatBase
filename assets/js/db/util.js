@@ -1,11 +1,11 @@
 
-import * as _db from './idb-util';
-import * as db_filters from './db-table/db-filters.js';
+import * as _db from './local-data/idb-util';
+import * as db_filters from './table/filters/filters-main.js';
 import * as db_page from './db-page.js';
-import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
-import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
-import { newIntList, selIntList } from './panels/save-ints.js';
-import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
+import { addNewDataToStorage, initStoredData, replaceUserData } from './local-data/db-sync.js';
+import { showLoadingDataPopUp, showPopUpMsg } from './ui/ui-main.js';
+import { newIntList, selIntList } from './ui/panels/save-ints.js';
+import { newFilterSet, selFilterSet } from './ui/panels/save-fltrs.js';
 import { exitModal, showSaveModal } from '../misc/intro-core.js';
 /* 
  * Exports:                     Imported by:
@@ -293,7 +293,7 @@ export function initComboboxes(fieldAry) {
 function getSelConfgObj(field) {  
     const confgs = { 
         // Search Page Filter/Focus Comboboxes that Affect UI & Table Directly
-        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus, blur: true },
+        'Focus' : { name: field, id: '#search-focus', change: db_page.buildTable, blur: true },
         'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },

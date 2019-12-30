@@ -6,22 +6,35 @@
 #   CHANGES SINCE LAST USER UPDATE
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
+>==== CURRENT ====
+QUESTIONS:
+    -
+    
+TASKS:
+    - CSV rewrite
 
->==== TASKS ====
-CURRENT:
+    - when clicking reset local data button on menu bar, figure out how to get 
+        a diff between the old and new stored data to better track down errors/bugs
+
+
     - Adding realms
         - replace checks for null parents to indicate relams with isRealm flag
+        - replace form confg for taxon realms
+            - once a realm has an interaction, add it to the 'view' options
+
+        - remove levels from the realm obj in each taxon record?
     
     - Data Cleanup
         - remove location name from geosjon database    
             - add it on the local storage side
             - or just add the geojson data to locations?
+
 NEXT:
     - Create model of local storage
         - of entity relations
 
 Change Log:
-    -
+    - 
 
 
 
@@ -30,6 +43,8 @@ Prep:
     Changes:
     Questions:
     Notes:
+            Virus people having meeting by end of march
+                - goal to have virus data in.
 Feedback:
 Next/future rounds:
     Possible:
@@ -81,10 +96,13 @@ TODOs:
     - {high}[med] Ensure coordinates are within selected country
     - {high}[easy] Ensure all entities have a display name before submitting
     - {med}[easy] Add warning to new Taxon form when no parent is selected
+    - {med}[easy] Add error preventing taxa being moved to their parent's level or above
 
 (DATA)
     - {med}[med] Add flag to db that will indicate all local data storage needs reset.
     - {med}[easy] Double check all center points for multi-polygons
+    - {low}[med] Combine geojson into location data in local storage
+    - {med}[med] Map all local data properties and reduce redundency where possible
 
 (SEARCH PAGE)
     - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point
