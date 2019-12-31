@@ -7,8 +7,17 @@
  *     getParentEntity          db-forms, edit-forms
  *     getFieldTranslations     validate-data
  *     getCoreFormEntity        validate-data
+ *
+ * CODE SECTIONS:
+ *     FORM CONFG
+ *         TAXON SELECT FORM CONFG
+ *         CREATE/EDIT FORM CONFG
+ *             CORE-ENTITY CONFG
+ *     SERVER FIELD CONFG
  */
+import * as _i from '../forms-main.js';
 
+/* *************************** FORM CONFG *********************************** */
 /**
  * Returns a form-config object for the passed entity. 
  * -- Property descriptions:  
@@ -21,16 +30,33 @@
  * > order - Order to display the fields in both the default and expanded forms. 
  */
 export function getFormConfg(entity) {                                          //console.log('getFormConfg [%s]', entity);
+    if (['subject', 'object'].indexOf(entity) >= 0) { return getRoleConfg(entity); }
+    return getEntityConfg(entity);
+}
+/* ------------------ TAXON SELECT FORM CONFG ------------------------------- */
+function getRoleConfg(role) {
+    const addField = ifObjectFormAddRealmSelect(role);
+    const fields = getTaxonSelectFields(addField);
+    return {
+        'add': addField,  
+        'required': [],
+        'suggested': fields,
+        'optional': [],
+        'order': {
+            'sug': fields,
+            'opt': false },
+    };
+}
+function ifObjectFormAddRealmSelect(role) {
+    return role === 'subject' || $('#Realm_row').length ? {} : {'Realm': 'select'};
+}
+function getTaxonSelectFields(addField) {
+    const lvls = _i.mmry('getTaxonProp', ['realmLvls']);
+    return Object.keys(addField).length  ? ['Realm', ...lvls] : lvls;
+}
+/* ------------------ CREATE/EDIT FORM CONFG ------------------------------- */
+function getEntityConfg(entity) {
     const fieldMap = { 
-        'arthropod': {
-            'add': {},  
-            'required': [],
-            'suggested': ['Class', 'Order', 'Family', 'Genus', 'Species'],
-            'optional': [],
-            'order': {
-                'sug': ['Species', 'Genus', 'Family', 'Order', 'Class'],
-                'opt': false },
-        },
         'author': { 
             'add': { 'FirstName': 'text', 'MiddleName': 'text', 
                 'LastName': 'text', 'Suffix': 'text'}, 
@@ -41,15 +67,6 @@ export function getFormConfg(entity) {                                          
                 'sug': ['FirstName', 'MiddleName', 'LastName'],
                 'opt': ['FirstName', 'MiddleName', 'LastName', 'Suffix', 
                     'LinkUrl', 'LinkDisplay']},
-        },
-        'bat': {
-            'add': {},  
-            'required': [],
-            'suggested': ['Family', 'Genus', 'Species'],
-            'optional': [],
-            'order': {
-                'sug': ['Family', 'Genus', 'Species'],
-                'opt': false }, 
         },
         'citation': {
             'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
@@ -176,24 +193,6 @@ export function getFormConfg(entity) {                                          
                     ['Country', 'HabitatType'], ['Elevation', 'ElevationMax'] ],
                 'opt': false },
         },
-        'object': {
-            'add': {'Realm': 'select'},  
-            'required': [],
-            'suggested': ['Realm'],
-            'optional': [],
-            'order': {
-                'sug': ['Realm'],
-                'opt': false }, 
-        },
-        'plant': {
-            'add': {},  
-            'required': [],
-            'suggested': ['Family', 'Genus', 'Species'],
-            'optional': [],
-            'order': {
-                'sug': ['Species', 'Genus', 'Family'],
-                'opt': false},
-        },
         'publication': {
             'add': { 'Title' : 'text', 'PublicationType': 'select', 
                 'Publisher': 'select'},  
@@ -257,15 +256,6 @@ export function getFormConfg(entity) {                                          
                 'opt': ['DisplayName', 'City', 'Country', 'Description', 
                     'LinkUrl', 'LinkDisplay']},
         },
-        'subject': {
-            'add': {},  
-            'required': [],
-            'suggested': ['Family', 'Genus', 'Species'],
-            'optional': [],
-            'order': {
-                'sug': ['Species', 'Genus', 'Family'],
-                'opt': false },
-        },
         'taxon': {
             'add': {},  
             'required': ['DisplayName'],
@@ -278,6 +268,7 @@ export function getFormConfg(entity) {                                          
     };
     return fieldMap[entity];
 }
+/* --------------- CORE-ENTITY CONFG ----------------- */
 /**
  * Returns an object of fields and field types for the passed entity.
  * Note: Source's have sub-entities that will return the core source fields.
@@ -329,13 +320,14 @@ export function getParentEntity(entity) {
     const details = ['author', 'citation', 'publication', 'publisher'];         //console.log('hasParentEntity? [%s]. Entity = %s', details.indexOf(entity) !== -1, entity);
     return details.indexOf(entity) !== -1 ? 'source' : false;
 }
+/* *********************** SERVER FIELD CONFG ******************************* */
 /**
  * Returns the fields that need to be renamed and the entity they belong to. 
  * A 'false' field will not be added to the final form data. An array of 
  * fields will add the form value to each field for the specified entity.
  */
 export function getFieldTranslations(entity) {                                  //console.log('entity = ', entity)
-    var fieldTrans = {
+    const fieldTrans = {
         'author': {
             'displayName': { 'source': 'displayName', 'author': 'displayName' }
         },
@@ -384,7 +376,7 @@ export function getFieldTranslations(entity) {                                  
  * Note: use field names before field translations/renamings.
  */
 export function getRelationshipFields(entity) {
-    var relationships = {
+    const relationships = {
         'author': ['sourceType'], 
         'citation': ['citationType', 'contributor', 'publication'], 
         'location': ['locationType', 'habitatType', 'country'],

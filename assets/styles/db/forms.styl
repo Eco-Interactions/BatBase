@@ -5,6 +5,7 @@
 //      Sub-forms
 //      Fields
 //      Row Containers
+// Form Specific
 /*-------------------------- Database CRUD Popup -----------------------------*/
 /* ============= Core Form =================== */
 .form-ovrly
@@ -67,19 +68,19 @@ div[id$="_Rows"] //Form field container
     flex 0 0 455px
 /* --- Sub-forms --- */
 $sub-form-styles 
-    border: 1px solid grey;
-    border-radius: 5px;
-    padding: 5px;
+    border: 1px solid grey
+    border-radius: 5px
+    padding: 5px
     
 .med-sub-form
     @extends $sub-form-styles
     flex: 1 1 808px
-    margin: 11px 25px;
+    margin: 11px 25px
     
 .sml-sub-form
     @extends $sub-form-styles
     flex: 1 1 385px
-    margin-top: .5em;
+    margin-top: .5em
     
 /* --------- Row Containers -------- */
 .top-row 
@@ -108,9 +109,15 @@ $sub-form-styles
 .lrg-field 
     flex: 1 1 302px
     
-.med-field { 
+.med-field 
     flex: 1 1 240px
-}
-.sml-field {
+
+.sml-field 
     flex: 0 1 200px
-}
+/* ======================= FORM SPECIFIC ==================================== */
+#Realm_row .med-field //realm combobox class
+    width: webkit-fill-available
+    margin-left: -2em
+    
+#Realm_row .selectize-dropdown
+    margin-left 0

@@ -16,7 +16,7 @@
  *    STORE DATA
  */
 import * as _u from '../util.js';
-import { resetDataTable } from '../db-page.js';
+import { resetDataTable, initSearchState } from '../db-page.js';
 
 const localData = {};
 /* ======================= DOWNLOAD DATA ==================================== */
@@ -79,25 +79,22 @@ function deriveAndStoreAdditionalData(data) {
 }
 /* -------------------------- TAXON DATA ------------------------------------ */
 /** 
- * objectRealmNames - an object with each object realm (k) and id.
- * levelNames - an object with each level name (k) and it's id and ordinal (v).
+ * *levelNames - an object with each level name (k) and it's id and ordinal (v). *Replaces the server data in local storage.)
+ * realmNames - an object with each realm name (k) and it's id, role, and levels (v).
  * [realm][level]Names - object with all taxa in realm at the level: name (k) id (v)
  * *realm - resaved with 'uiLevelsShown' filled with the level display names. 
  */ 
 /** Stores an object of taxon names and ids for each level in each realm. */
 function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
-    storeData('objectRealmNames', getObjectRealmNames(data.realm));
-    storeLevelNames(data.level);
+    storeData('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
     storeTaxaByLevelAndRealm(data.taxon);
-    storeRealmLevelData(data.realm);
+    modifyRealmData(data.realm);
+    storeLevelData(data.level);
 }
-function getObjectRealmNames(realms) {                                          //console.log('getObjectRealmNames. [%s] realms = %O',Object.keys(realms).length, realms);
-    const data = {};
-    Object.keys(realms).forEach(i => {
-        if (realms[i].displayName === 'Bat') { return; }  
-        data[realms[i].displayName] = realms[i].id;
-    });
-    return data;
+/* --------------- Levels ------------------ */
+function storeLevelData(levels) {
+    storeLevelNames(levels);
+    delete localData.level;
 }
 function storeLevelNames(levelData) {
     const levels = {};
@@ -114,6 +111,7 @@ function storeLevelNames(levelData) {
         return levels[levelData[id].displayName] = {id: id, ord: i+1};
     }
 }
+/* --------- Taxa by Realm & Level ------------- */
 function storeTaxaByLevelAndRealm(taxa) {
     const realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym realmData = %O", realmData);
     for (let realm in realmData) {  
@@ -147,19 +145,19 @@ function separateTaxaByLevelAndRealm(taxa) {
         return data[realm];
     }
 } /* End separateTaxaByLevelAndRealm */
-function storeRealmLevelData(realms) {                                          //console.log('realms = %O', realms);
-    addRealmLevelData(Object.keys(realms));
+/* ---------- Modify Realm Data -------------- */
+function modifyRealmData(realms) {                                              //console.log('realms = %O', realms);
+    modifyRealms(Object.keys(realms));
     storeData('realm', realms);  
     
-    function addRealmLevelData(realmIds) {
-        for (let i = 0; i < realmIds.length; i++) {
-            const realm = realms[realmIds[i]];
-            const lvlIdAry = JSON.parse(realm.uiLevelsShown);
-            realm.uiLevelsShown = lvlIdAry.map(getLevelDisplayName);
-        }
+    function modifyRealms(ids) {
+        ids.forEach(id => {
+            let realm = realms[id]
+            realm.uiLevelsShown = fillLevelNames(JSON.parse(realm.uiLevelsShown));
+        });
     }
-    function getLevelDisplayName(id) {
-        return localData.level[id].displayName;
+    function fillLevelNames(lvlAry) {
+        return lvlAry.map(id => localData.level[id].displayName);
     }
 }
 /* ----------------------- LOCATION DATA ------------------------------------ */

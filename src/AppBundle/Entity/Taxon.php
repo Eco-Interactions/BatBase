@@ -421,8 +421,10 @@ class Taxon
         $realm = $taxon->getRealm();
         if ($realm) {
             return [ 
-                "id" => $realm->getId(), 
-                "displayName" => $realm->getDisplayName() ];
+                'id' => $realm->getId(), 
+                'displayName' => $realm->getDisplayName(),
+                'pluralName' => $realm->getPluralName() 
+            ];
         }
         return $this->findRealmAndReturnObj($taxon->getParentTaxon());
     }

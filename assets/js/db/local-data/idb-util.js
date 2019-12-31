@@ -19,7 +19,7 @@ import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-syn
 
 const _db = {
     geoJson: null, 
-    v: .029
+    v: .033
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */
@@ -66,20 +66,17 @@ function checkUserData(dbUser) {
         replaceUserData.bind(null, $('body').data('user-name')));
 }
 /** ----------------------- GETTERS ----------------------------------------- */
-export function getAllStoredData() {  //console.log('idb = %O', idb);
+export function getAllStoredData() { 
     const data = {};
     return Promise.all([idb.getAll(), idb.keys()])
         .then(dbData => {
             const vals = dbData[0]; 
-            const keys = dbData[1];   //console.log('data = %O, vals = %O, keys = %O', dbData, vals, keys)
+            const keys = dbData[1];  
             $(keys).each((i, k) => {
                 data[k] = { value: vals[i], changed: false }
             });
             return data;
         });
-    // return idb.Store()._withIDBStore('readonly', store => {
-    //     req = store.getAll(query, count);
-    // }).then(() => req.result);
 }
 /**
  * Gets data from Indexed DB for each key passed. If an array

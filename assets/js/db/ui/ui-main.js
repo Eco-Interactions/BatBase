@@ -105,9 +105,6 @@ export function selectInitialSearchFocus(f, resettingData = false) {            
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
-    if (resettingData) { return; }
-    db_page.buildTable()
-    .then(updateFilterPanelHeader.bind(null, focus));
 }
 function getFocusOpts() {
     return [
@@ -212,12 +209,20 @@ function buildAndLoadTxnOpts(realms) {
     _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
     $('#sel-view').data('focus', 'taxa');
 }
-function getViewOpts(realms) {  
+function getViewOpts(realms) { 
+    const taxa = tState().get('rcrdsById');
     const optsAry = [];
-    for (let id in realms) {                                                
-        optsAry.push({ value: realms[id].taxon, text: realms[id].displayName });
+    for (let id in realms) {
+        if (!taxonHasInteractions(realms[id].taxon)) { continue; }
+        optsAry.push({ value: realms[id].taxon, text: realms[id].pluralName });
     }
     return optsAry;
+    
+    function taxonHasInteractions(id) {
+        const taxon = taxa[id];  
+        const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
+        return hasInts || taxon.children.find(taxonHasInteractions);
+    }
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */
 function setTaxonView(curView) {

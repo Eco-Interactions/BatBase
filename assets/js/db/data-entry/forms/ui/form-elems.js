@@ -76,16 +76,16 @@ function returnFinishedRows(entity, params, rows) {
  */
 export function getFormFieldRows(entity, fVals, fLvl, params) {
     mmry = params ? params : _i.mmry('getAllFormMemory');
-    const fObj = getFieldTypeObj(_i.util('lcfirst', [entity]), fLvl);
+    const fObj = getFieldConfgs(_i.util('lcfirst', [entity]), fLvl);
     return buildRows(fObj, entity, fVals, fLvl);
 }
-/* ------------ BUILD FORM FIELDS' TYPE OBJ ------------- */
+/* ------------ BUILD FORM FIELD CONFG OBJ ------------- */
 /**
  * Returns an obj with the entity's field defs and all required fields.
  * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
  *               .required Ary of required fields
  */
-function getFieldTypeObj(entity, fLvl) {                                        
+function getFieldConfgs(entity, fLvl) {                                        
     const confg = {
         entity: entity,
         form: _i.confg('getFormConfg', [entity]), 
@@ -438,7 +438,14 @@ export function getTaxonOpts(level, field, r) {
         }
 }
 function getRealmOpts() {
-    return _i.util('getOptsFromStoredData', ['objectRealmNames']);  
+    const realms = _i.mmry('getTaxonProp', ['realms']);
+    const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);  
+    return opts;
+
+    function getRealmOpt(name) {  
+        if (name === 'Bat') { return null; }
+        return { value: realms[name], text: name };
+    }
 }
 /** Returns options for each country and region. */ 
 function getCntryRegOpts() {
@@ -447,7 +454,7 @@ function getCntryRegOpts() {
 }
 /** Returns an array of option objects with all unique locations.  */
 export function getLocationOpts() {
-    const rcrds = mmry.records.location;
+    const rcrds = _i.mmry('getEntityRcrds', ['location']);
     let opts = Object.keys(rcrds).map(buildLocOpt);
     opts = opts.sort((a, b) => _i.util('alphaOptionObjs', [a, b]));
     opts.unshift({ value: 'create', text: 'Add a new Location...'});

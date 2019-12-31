@@ -9,7 +9,7 @@
 >==== CURRENT ====
 QUESTIONS:
     -
-    
+
 TASKS:
     - CSV rewrite
 
@@ -23,6 +23,9 @@ TASKS:
             - once a realm has an interaction, add it to the 'view' options
 
         - remove levels from the realm obj in each taxon record?
+
+    - testing
+        - check all errors trigger and clear 
     
     - Data Cleanup
         - remove location name from geosjon database    

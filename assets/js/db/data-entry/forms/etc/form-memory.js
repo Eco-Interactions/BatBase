@@ -89,16 +89,20 @@ export function initEntityFormMemory(entity, level, pSel, action) {
 }
 /*------------- Taxon Params --------------------*/
 export function initTaxonMemory(role, realmId) {                                //console.log('###### INIT ######### [%s] = id [%s]', role, realmId);
-    return _i.util('getData', [['realm', 'levelNames']])
-        .then(data => setTxnMmry(data.realm[realmId], data.levelNames));
+    return _i.util('getData', [['realm', 'realmNames', 'levelNames']])
+        .then(data => setTxnMmry(data.realm, data.realmNames, data.levelNames));
 
-    function setTxnMmry(realm, levels) {   
+    function setTxnMmry(realms, realmNames, levels) {   
+        const realm = realms[realmId];
         const taxon = formMemory.records.taxon[realm.taxon];
+
         formMemory.forms.taxonPs = { 
             lvls: levels, //Object with each (k) level name and it's (v) id and order
             realmLvls: realm.uiLevelsShown,  
             realmName: realm.displayName, 
+            realms: realmNames,
             realmTaxon: taxon,
+            role: role,
             rootLvl: taxon.realm.displayName,
         };                                                                      console.log('           /--taxon params = %O', formMemory.forms.taxonPs)
         return formMemory.forms.taxonPs;
@@ -131,7 +135,7 @@ export function getFormParentId(fLvl) {
     return formMemory.forms[fLvl] ? formMemory.forms[fLvl].pSelId : false;
 }
 export function getTaxonProp(prop) {  
-    return formMemory.forms.taxonPs[prop];
+    return formMemory.forms.taxonPs ? formMemory.forms.taxonPs[prop] : false;
 }
 export function getTaxonMemory() {
     return formMemory.forms.taxonPs;

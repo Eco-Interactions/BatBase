@@ -64,7 +64,7 @@ function initDbPage () {
     requireCss();
     requireJs();
     db_ui.init();
-    //The idb-util.initDb will call @initSearchState once local database is ready.
+//The idb-util.initDb will call @initSearchState once local database is ready.
 }
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
@@ -85,9 +85,10 @@ function requireJs() {
     require('../libs/flatpickr.min.js');
 }
 /**
- * The first time a browser visits the search page, all data is downloaded
- * from the server and stored in dataStorage. The intro-walkthrough is shown.
- */
+ * The first time a browser visits the search page, or when local data is reset,
+ * all data is downloaded and stored from the server. The intro-walkthrough is 
+ * shown on first visit.
+ */ 
 export function showIntroAndLoadingMsg(resettingData) {
     db_ui.showLoadingDataPopUp();
     db_ui.selectInitialSearchFocus('taxa', resettingData);
@@ -98,6 +99,8 @@ export function showIntroAndLoadingMsg(resettingData) {
 export function initSearchState(focus) {                                        //console.log('initSearchState. focus = ', focus);
     setTableInitState();      
     db_ui.selectInitialSearchFocus(focus);
+    buildTable()
+    .then(updateFilterPanelHeader.bind(null, focus));
 } 
 function setTableInitState() {
     resetTableParams('taxa');
@@ -160,7 +163,7 @@ function loadTbl(tblName, rowData) {
 export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     resetTableState();
     return buildTable(focus)
-    .then(db_ui.updateUiForTableView);
+        .then(db_ui.updateUiForTableView);
 }
 export function buildTable(f, view = false) {                                          
     if (f == '') { return; } //Combobox cleared by user
@@ -383,7 +386,6 @@ function storeAndReturnRealmRcrd(val) {
     return realmTaxonRcrd;
 }
 function updateRealmTableState(realmId, realmTaxonRcrd) {
-    db_filters.updateTaxonFilterViewMsg(realmTaxonRcrd.realm.displayName);
     _u.setData('curView', realmId);
     tblState.realmLvl = realmTaxonRcrd.level;  
     tblState.curView = realmId; 
@@ -412,6 +414,7 @@ function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     return data_tree.buildTxnTree(topTaxon, filtering, textFltr).then(tree => {
         const rowData = frmt_data.buildTxnRowData(tree, tblState)
         loadTbl('Taxon Tree', rowData, tblState);
-        return db_ui.loadTxnFilterPanelElems(tblState);
+        db_ui.loadTxnFilterPanelElems(tblState);
+        db_filters.updateTaxonFilterViewMsg(topTaxon.realm.pluralName);
     }).catch(err => _u.alertErr(err));
 }

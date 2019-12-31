@@ -363,20 +363,12 @@ function removeLocMap() {
  * are repopulated with related taxa and the 'select' button is enabled.
  */
 function initSubjectSelect() {                                                  console.log('       --initSubjectSelect (selected ? [%s])', $('#Subject-sel').val());
-    return initTaxonSelectForm('Subject', 1)
-        .then(() => finishTaxonSelectBuild('Subject'));
+    return initTaxonSelectForm('Subject', 1);
 }
 /* -------------- OBJECT ---------------------- */
 /** Note: The selected realm's level combos are built @onRealmSelection. */
 function initObjectSelect() {                                                   console.log('       --initObjectSelect (selected ? [%s])', $('#Object-sel').val());
-    return initTaxonSelectForm('Object', getObjectRealm())
-        .then(buildRealmFields)
-
-    function buildRealmFields() {    
-        const realmId = getTxnMmry('realmTaxon').realm.id;       
-        _i.cmbx('setSelVal', ['#Realm-sel', realmId, 'silent']);
-        return onRealmSelection(realmId);
-    }
+    return initTaxonSelectForm('Object', getObjectRealm());
 } 
 function getObjectRealm() { 
     const prevSelectedId = $('#Object-sel').data('selTaxon');
@@ -388,54 +380,45 @@ function getObjectRealm() {
  * in the selected Taxon realm filled with the taxa at that level. 
  */
 function onRealmSelection(val) {                                                //console.log("               --onRealmSelection. val = ", val)
-    if (val === '' || isNaN(parseInt(val))) { return Promise.resolve(); }          
-    if ($('#realm-lvls').length) { $('#realm-lvls').remove(); } 
-    const fLvl = _i.getSubFormLvl('sub');
-    return _i.util('getData', ['realm'])
-        .then(updateParamsThenBuildAndAppendRealmRows);
-
-    function updateParamsThenBuildAndAppendRealmRows(realms) {
-        const realm = realms[val];
-        setTaxonParams('Object', realms[val]);
-        buildAndAppendRealmRows(realm.displayName);
-    }
+    if (val === '' || isNaN(parseInt(val))) { return; }
+    clearPreviousRealmLevelCombos();
+    _i.mmry('initTaxonMemory', ['Object', val])
+    .then(buildAndAppendRealmRows);
     /** A row for each level present in the realm filled with the taxa at that level.  */
-    function buildAndAppendRealmRows(realmName) {  
-        _i.elems('buildFormRows', [realmName, {}, fLvl])
-        .then(rows => appendRealmRowsAndFinishBuild(realmName, rows, fLvl));
+    function buildAndAppendRealmRows() {  
+        _i.elems('buildFormRows', ['object', {}, 'sub'])
+        .then(appendRealmRowsAndFinishBuild);
     }
-    function appendRealmRowsAndFinishBuild(realmName, rows, fLvl) {  
-        const realmElems = _i.util('buildElem', ['div', { id: 'realm-lvls' }]);
-        $(realmElems).append(rows);
-        $('#Realm_row').append(realmElems);
-        _i.mmry('setFormFieldData', [fLvl, 'Realm', null, 'select']);
-        initFormCombos(realmName, fLvl);
-        finishTaxonSelectBuild('Object');          
+    function appendRealmRowsAndFinishBuild(rows) {  
+        $('#Realm_row').after(rows);
+        _i.mmry('setFormFieldData', ['sub', 'Realm', null, 'select']);
+        initFormCombos('taxon', 'sub');
     }
 }
-function setTaxonParams(role, realm) {                                 
-    const params = mmry.forms.taxonPs;
-    params.realmLvls = realm.uiLevelsShown;
-    params.realmName = realm.displayName;
-    params.realmTaxon = getRcrd('taxon', realm.taxon);
+function clearPreviousRealmLevelCombos() {
+    $('#object_Rows>div').each(ifLevelComboRemoveCombo);
+}
+function ifLevelComboRemoveCombo(i, elem) {
+    if (i !== 0) { elem.remove(); }
 }
 /* ------------------- ROLE SHARED HELPERS --------------- */
 /* ------- initTaxonSelectForm --------- */
 function initTaxonSelectForm(role, realmId) {                                     
-    const fLvl = _i.getSubFormLvl('sub');
-    if (ifFormAlreadyOpenAtLevel(fLvl)) { return openSubFormErr(role, fLvl); }
-    return buildTaxonSelectForm(role, realmId, fLvl)
-        .then(form => appendTxnFormAndInitCombos(role, fLvl, form));
+    if (ifFormAlreadyOpenAtLevel('sub')) { return openSubFormErr(role, 'sub'); }
+    return buildTaxonSelectForm(role, realmId)
+        .then(form => appendTxnFormAndInitCombos(role, form))
+        .then(() => finishTaxonSelectBuild(role));
 }
-function buildTaxonSelectForm(role, realmId, fLvl) {                            //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
-    initFormLvlMmry(role, fLvl);
+function buildTaxonSelectForm(role, realmId) {                                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
+    initFormLvlMmry(role);
     return _i.mmry('initTaxonMemory', [role, realmId])
         .then(setScopeTaxonMemory)
-        .then(() => _i.elems('initSubForm', [fLvl, 'sml-sub-form', {}, '#'+role+'-sel']));
+        .then(() => _i.elems('initSubForm', 
+            ['sub', 'sml-sub-form', {Realm: realmId}, '#'+role+'-sel']));
 }
-function initFormLvlMmry(role, fLvl) {
+function initFormLvlMmry(role) {
     const lcRole = _i.util('lcfirst', [role]);
-    _i.mmry('initEntityFormMemory', [lcRole, fLvl, '#'+role+'-sel', 'create']);
+    _i.mmry('initEntityFormMemory', [lcRole, 'sub', '#'+role+'-sel', 'create']);
 }
 function setScopeTaxonMemory(txnMmry) {
     mmry.forms.taxonPs = txnMmry;
@@ -445,11 +428,9 @@ function setScopeTaxonMemory(txnMmry) {
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
  */
-function finishTaxonSelectBuild(role) {                                     
-    const fLvl = _i.getSubFormLvl('sub');
-    const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
+function finishTaxonSelectBuild(role) {
     customizeElemsForTaxonSelectForm(role);
-    selectInitTaxonOrFocusFirstCombo(role, selCntnr);
+    selectInitTaxonOrFocusFirstCombo(role);
     _i.util('replaceSelOpts', ['#'+role+'-sel', []]);
 }
 /**
@@ -457,19 +438,22 @@ function finishTaxonSelectBuild(role) {
  * form. When the select form loads without a previous selection or when the realm 
  * is changed by the user, the first combobox of the realm is brought into focus.
  */
-function selectInitTaxonOrFocusFirstCombo(role, selCntnr) {
-    const selId = getPrevSelId(role); console.log('selId = ', selId)
+function selectInitTaxonOrFocusFirstCombo(role) {
+    const selId = getPrevSelId(role); 
     if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { _i.cmbx('focusFirstCombobox', [selCntnr]); }
+    } else { focusFirstLevelCombobox(_i.util('lcfirst', [role])); }
 }
 function getPrevSelId(role) {
     return $('#'+role+'-sel').val() || $('#'+role+'-sel').data('reset') ? 
         $('#'+role+'-sel').data('selTaxon') : null;
 }
-function appendTxnFormAndInitCombos(role, fLvl, form) {
+function focusFirstLevelCombobox(lcRole) {
+    _i.cmbx('focusFirstCombobox', ['#'+lcRole+'_Rows']);
+}
+function appendTxnFormAndInitCombos(role, form) {
     const lcRole = _i.util('lcfirst', [role]);
     $('#'+role+'_row').append(form);
-    initFormCombos(lcRole, fLvl);
+    initFormCombos('taxon', 'sub');
 }
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
 function customizeElemsForTaxonSelectForm(role) {
