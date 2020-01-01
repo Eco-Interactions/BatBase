@@ -103,7 +103,7 @@ export function initTaxonMemory(role, realmId) {                                
             realms: realmNames,
             realmTaxon: taxon,
             role: role,
-            rootLvl: taxon.realm.displayName,
+            rootLvl: taxon.level.displayName,
         };                                                                      console.log('           /--taxon params = %O', formMemory.forms.taxonPs)
         return formMemory.forms.taxonPs;
     }

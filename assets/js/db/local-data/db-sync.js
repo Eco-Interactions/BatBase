@@ -582,6 +582,15 @@ export function updateUserNamedList(data, action) {                             
         if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
     }
 } /* End updateUserNamedList */
+function getFocusAndViewOptionGroupString(list) {  //copy. refact away
+    list.details = JSON.parse(list.details);                                    //console.log('getFocusAndViewOptionGroupString. list = %O', list)
+    const map = {
+        'srcs': 'Source', 'auths': 'Author', 'pubs': 'Publication', 'publ': 'Publisher',
+        'taxa': 'Taxon', '2': 'Bats', '3': 'Plants', '4': 'Arthropod'
+    };
+    return list.details.focus === 'locs' ? 'Location' : 
+        map[list.details.focus] + ' - ' + map[list.details.view];
+}
 /* ====================== INIT DATABASE ===================================== */
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {

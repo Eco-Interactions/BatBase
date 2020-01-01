@@ -159,14 +159,17 @@ function resetCurTreeStorageProps() {
 function loadTbl(tblName, rowData) {
     require('./table/init.js').init(tblName, rowData, tblState);
 }
-/** Table-rebuild entry point after local database updates and after edit-form close.  */
+/** 
+ * Table-rebuild entry point after local database updates, filter clears, and 
+ * after edit-form close.
+ */
 export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     resetTableState();
     return buildTable(focus)
         .then(db_ui.updateUiForTableView);
 }
-export function buildTable(f, view = false) {                                          
-    if (f == '') { return; } //Combobox cleared by user
+export function buildTable(f, view = false) {              
+    if (f === '') { return; } //Combobox cleared by user
     const focus = f ? f : _u.getSelVal('Focus');                    /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view); 
     resetTableState();
     return updateFocusAndBuildTable(focus, view);

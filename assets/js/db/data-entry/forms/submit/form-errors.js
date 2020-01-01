@@ -96,7 +96,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * Shows the user an error message above the field row. The user can clear the 
  * error manually with the close button, or automatically by resolving the error.
  */
-export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       ###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
+export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       ###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);  
     mmry = _i.mmry('getAllFormMemory');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
@@ -196,16 +196,9 @@ function clrNeedsHigherLvlPrnt(elem, fLvl, e) {
 }
 /** Note: error for the edit-taxon form. */
 function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
-    const lvlName = getChildLvlName($('#txn-lvl').data('txn'));
-    const msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
-        'Please select a level higher than '+lvlName+'</div>';
+    const msg = '<div>Taxon level must be higher than that of child taxa.</div>';
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-}
-function getChildLvlName(txnId) {
-    const childLvl = getHighestChildLvl(txnId);
-    const lvls = mmry.forms.taxonPs.lvls;
-    return Object.keys(lvls).find(lvl => lvls[lvl].ord === childLvl);
 }
 export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 

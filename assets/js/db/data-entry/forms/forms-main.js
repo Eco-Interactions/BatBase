@@ -134,3 +134,6 @@ export function getTaxonDisplayName(taxon) {
     return taxon.level.displayName === 'Species' ? 
         taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
 }
+export function onLevelSelection(val) {
+    _entity.onLevelSelection.bind(this)(val);
+}

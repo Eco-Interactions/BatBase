@@ -370,6 +370,6 @@ function addPunc(data) {
     return /[.!?,;:]$/.test(data) ? data : data+'.';
 }
 
-function getEntityRcrd(rcrds, id, entity) {  console.log('getEntityRcrd. args = %O', arguments);
+function getEntityRcrd(rcrds, id, entity) {  
     return rcrds ? rcrds[id] : _i.mmry('getRcrd', [entity, id]);
 }

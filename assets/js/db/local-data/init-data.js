@@ -79,7 +79,7 @@ function deriveAndStoreAdditionalData(data) {
 }
 /* -------------------------- TAXON DATA ------------------------------------ */
 /** 
- * *levelNames - an object with each level name (k) and it's id and ordinal (v). *Replaces the server data in local storage.)
+ * levelNames - an object with each level name (k) and it's id and ordinal (v).
  * realmNames - an object with each realm name (k) and it's id, role, and levels (v).
  * [realm][level]Names - object with all taxa in realm at the level: name (k) id (v)
  * *realm - resaved with 'uiLevelsShown' filled with the level display names. 
@@ -92,11 +92,7 @@ function deriveTaxonData(data) {                                                
     storeLevelData(data.level);
 }
 /* --------------- Levels ------------------ */
-function storeLevelData(levels) {
-    storeLevelNames(levels);
-    delete localData.level;
-}
-function storeLevelNames(levelData) {
+function storeLevelData(levelData) {
     const levels = {};
     const order = Object.keys(levelData).sort(orderLevels);                     
     $(order).each(addLevelData);   
@@ -297,7 +293,7 @@ function getFilterOptionGroupObj(ids, filters) {                                
         }
     }
 }
-function getFocusAndViewOptionGroupString(list) {
+function getFocusAndViewOptionGroupString(list) {  //copy. refact away
     list.details = JSON.parse(list.details);                                    //console.log('getFocusAndViewOptionGroupString. list = %O', list)
     const map = {
         'srcs': 'Source', 'auths': 'Author', 'pubs': 'Publication', 'publ': 'Publisher',

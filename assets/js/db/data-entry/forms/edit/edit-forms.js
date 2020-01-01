@@ -15,14 +15,12 @@ export function editEntity(id, entity) {                                        
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
     return getEditFormFields(id, entity)
-        .then(fields => _i.elems('buildAndAppendTopForm', [fields, id]))
-        .then(hideFieldCheckboxes)
-        .then(() => finishEditFormBuild(entity))
+        .then(fields => buildAndAppendEditForm(fields, id, entity))
         .then(() => fillFormWithEntityData(entity, id));
 }   
-function hideFieldCheckboxes() {
-    $('.top-pin').addClass('invis');
-    return Promise.resolve();
+function buildAndAppendEditForm(fields, id, entity) {
+    return _i.elems('buildAndAppendTopForm', [fields, id])
+        .then(() => finishEditFormBuild(entity))
 }
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
@@ -48,6 +46,7 @@ function getEditFields(entity, id) {
     return _i.elems('getFormFieldRows', [entity, {}, 'top']);
 }
 function finishEditFormBuild(entity) {
+    $('.top-pin').addClass('invis'); //hides field checkboxes used in create forms
     const cmplx = ['citation', 'interaction', 'location', 'taxon'];
     return cmplx.indexOf(entity) > -1 ? finishCmplxForm() : finishEditForm(entity);
 

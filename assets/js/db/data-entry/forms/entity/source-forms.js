@@ -6,6 +6,8 @@
  *     ENTITY FORMS
  *         PUBLICATION
  *         CITATION
+ *             CREATE FORM
+ *             SHARED EDIT & CREATE FUNCS
  *             TYPE-SPECIFIC UPDATES
  *             AUTO-GENERATE CITATION
  *          SHARED PUBLICATION AND CITATION HELPERS
@@ -401,7 +403,7 @@ function getFilledSrcVals(entity, typeId, fLvl) {
 }
 /** Sets the type confg for the selected source type in form mmry. */
 function setSourceType(entity, fLvl, tName) {
-    const type = tName || getSourceTypeFromCombo(entity);                       console.log('               --type = [%s]', type);
+    const type = tName || getSourceTypeFromCombo(entity);                       //console.log('               --type = [%s]', type);
     _i.mmry('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
@@ -620,7 +622,7 @@ export function getSrcTypeFields(entity, id) {
     const srcRcrd = _i.mmry('getRcrd', ['source', id]);
     const type = _i.mmry('getRcrd', [entity, srcRcrd[entity]]);
     const typeId = type[entity+'Type'].id;
-    const typeName = type[entity+'Type'].displayName;
+    const typeName = type[entity+'Type'].displayName; 
     return ifCitationAddPubToMemory(entity, srcRcrd, id)
         .then(() => getSrcTypeRows(entity, typeId, 'top', typeName));
 }
@@ -639,11 +641,12 @@ function getSrcRcrd(pubId) {
     const rcrd = _i.mmry('getRcrd', ['source', _i.mmry('getMemoryProp', '[editing]').core]);
     return _i.mmry('getRcrd', ['source', rcrd.parent]);
 }
-export function finishEditFormBuild(entity) {
-    if (entity !== 'citation') { return console.log('No finishEditFormBuild for [%s]', entity); }
+/** Note: Only citation forms use this. */
+export function finishEditFormBuild(entity) {                                   //console.log('---finishEditFormBuild')
     initFormCombos(entity, 'top');
     $('.all-fields-cntnr').hide();
     handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
+    finishSourceToggleAllFields('citation', {}, 'top');
 }
 // export function fillCmplxCitationFields(srcRcrd, citRcrd) {
 //     setTitleField(citRcrd.displayName);
@@ -671,7 +674,7 @@ export function setSrcEditRowStyle() {
 }
 
 /** ======================== HELPERS ======================================== */
-export function finishSourceToggleAllFields(entity, fVals, fLvl) {
+export function finishSourceToggleAllFields(entity, fVals, fLvl) {   
     if (entity === 'publication') { 
         ifBookAddAuthEdNote(fVals.PublicationType); 
     } else  { // 'citation'

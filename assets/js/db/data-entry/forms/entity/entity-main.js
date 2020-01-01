@@ -79,6 +79,9 @@ export function selectIntLoc(id) {
 export function enableCountryRegionField() {
     _int.enableCountryRegionField();
 }
+export function onLevelSelection(val) {
+    _int.onLevelSelection.bind(this)(val);
+}
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {
     return _loc.addMapToLocationEditForm(...arguments);

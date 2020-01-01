@@ -1,9 +1,5 @@
 /**
- * Taxon create form code.
- *
- * CODE SECTIONS
- *     CREATE FORM
- *     EDIT FORM
+ * Taxon form code.
  *
  * Exports:                 
  *     finishEditFormBuild
@@ -11,6 +7,20 @@
  *     initCreateForm
  *     initFormCombos
  *     selectParentTaxon        form-errors
+ *     
+ * CODE SECTIONS
+ *     CREATE FORM
+ *     EDIT FORM
+ *         FIELDS
+ *             NAME FIELD AND LEVEL COMBOBOX
+ *             PARENT TAXON ELEMS
+ *                 TAXON PARENT SELECT FORM
+ *                     LEVEL COMBO ELEMS
+ *                     FINISH SELECT FORM BUILD
+ *                     ERROR HANDLING
+ *         ROW BUILDERS
+ *         FINISH EDIT FORM BUILD
+ *         ERROR HANDLING
  */
 import * as _i from '../forms-main.js';
 
@@ -69,7 +79,7 @@ function fieldErr(level, tag) {
     _i.err('reportFormFieldErr', [level, tag, 'sub2'])
 }
 /** ********************** EDIT FORM **************************************** */
-/** ================= TAXON MAIN FORM ======================================= */
+/** ======================== BASE FIELDS ==================================== */
 /**
  * Returns the elements of the edit-taxon form. 
  * <div>Parent Taxon: [Level][Display-name]</> <bttnInput>"Edit Parent"</>
@@ -78,25 +88,27 @@ function fieldErr(level, tag) {
  */
 export function getTaxonEditFields(id) {
     const taxa = _i.mmry('getEntityRcrds', ['taxon']);
-    const realm = taxa[id].realm.displayName;
-    const role = realm === 'Bat' ? 'Subject' : 'Object';
-    return _i.mmry('initTaxonMemory', [role, realm])
-        .then(txnMmry => buildTaxonEditFields(taxa[id], taxa, txnMmry));
-}
-function buildTaxonEditFields(taxon, taxaRcrds, txnMmry) {
-    setScopeTaxonMemory(taxaRcrds, txnMmry);
-    const txnElems = getEditTaxonFields(taxon)
-    const prntElems = getPrntTaxonElems(taxon);
-    return prntElems.concat(txnElems);
+    const realm = taxa[id].realm;
+    const role = realm.displayName === 'Bat' ? 'Subject' : 'Object';
+    return _i.mmry('initTaxonMemory', [role, realm.id])
+        .then(txnMmry => {
+            setScopeTaxonMemory(taxa, txnMmry);
+            return buildTaxonEditFields(taxa[id], taxa, txnMmry)
+        });
 }
 function setScopeTaxonMemory(taxaRcrds, txnMmry) {
     mmry = txnMmry;
     mmry.rcrds = taxaRcrds;
 }
-/** ----------------- TAXON NAME AND LEVEL ELEMS ---------------------------- */
+function buildTaxonEditFields(taxon) {
+    const txnElems = getEditTaxonFields(taxon);
+    const prntElems = getPrntTaxonElems(taxon);  console.log('')
+    return prntElems.concat(txnElems);
+}
+/** ----------------- NAME FIELD AND LEVEL COMBOBOX ------------------------- */
 function getEditTaxonFields(taxon) {                                            //console.log("getEditTaxonFields for [%s]", taxon.displayName);
     const input = buildNameInput(taxon.displayName);
-    const lvlSel = getlvlSel(taxon);
+    const lvlSel = buildLvlSel(taxon);
     return [ buildTaxonEditFormRow('Taxon', [lvlSel, input], 'top')];
 }
 /** ----------- NAME INPUT --------------- */
@@ -105,21 +117,20 @@ function buildNameInput(displayName) {
     return _i.util('buildElem', ['input', attr]);
 }
 /** ------- LEVEL COMBOBOX --------------- */
-function getlvlSel(taxon) {
-    const opts = getTaxonLvlOpts(taxon); 
+function buildLvlSel(taxon) {
+    const opts = getTaxonLvlOpts(); 
     const sel = _i.util('buildSelectElem', [opts, { id: 'txn-lvl' }]);
-    $(sel).data({ 'txn': taxon.id, 'lvl': taxon.level.ord });
+    $(sel).data({ 'txn': taxon.id, 'lvl': getLvlVal(taxon.level.displayName) });
     return sel;
 }
-/** Returns an array of options for the levels in the taxon's realm. */
-function getTaxonLvlOpts(taxon) {
-    const opts = {};
-    const lvls = mmry.realmLvls.map(l => l); 
-    lvls.forEach(lvl => opts[getLvlOrd(lvl)] = lvl);  
-    return _i.util('buildOptsObj', [opts, Object.keys(opts)]);
-}
-function getLvlOrd(lvl) {
+function getLvlVal(lvl) {
     return mmry.lvls[lvl].ord;
+}
+/** Returns an array of options for the levels in the taxon's realm. */
+function getTaxonLvlOpts() {
+    return mmry.realmLvls.reverse().map(lvl => { 
+        return { value: mmry.lvls[lvl].ord, text: lvl };
+    });  
 }
 /** ----------------- PARENT TAXON ELEMS ------------------------------------ */
 /**
@@ -138,11 +149,11 @@ function buildNameElem(prnt) {
     $(div).css({'padding-top': '4px'});
     return div;
 }
-function setTaxonPrntNameElem(prnt, elem, pText) {
+function setTaxonPrntNameElem(prnt, elem, pText) {    
     const div = elem || $('#txn-prnt')[0];
     const text = pText || _i.getTaxonDisplayName(prnt);
     div.innerHTML = '<b>Taxon Parent</b>: <span>&nbsp ' + text + '</span>';
-    if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
+    $(div).data('txn', prnt.id).data('lvl', getLvlVal(prnt.level.displayName));
 }
 /** ----------- CHANGE PARENT BUTTON --------------- */
 function buildEditPrntBttn(prnt) {
@@ -151,73 +162,6 @@ function buildEditPrntBttn(prnt) {
     const bttn = _i.util('buildElem', ['input', attr]);
     $(bttn).click(showParentTaxonSelectForm);
     return bttn;
-}
-/** ------------------ FINISH FORM BUILD ------------------------------------ */
-export function finishEditFormBuild(entity) {
-    $('#top-submit').off('click').click(submitTaxonEdit);
-    initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
-    $('.all-fields-cntnr').hide();
-}
-function submitTaxonEdit() {
-    const vals = {
-        displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
-        level:       $('#Taxon_row select').text(),
-        parentTaxon: $('#txn-prnt').data('txn')
-    };                                                                          //console.log("taxon vals = %O", vals);
-    _i.formatAndSubmitData('taxon', 'top', vals);
-}
-/** Inits a taxon select-elem with the selectize library. */
-function initTaxonEditCombo(selId, chngFunc, createFunc) {                      //console.log("initTaxonEditCombo. selId = ", selId);
-    const chng = chngFunc || Function.prototype;
-    const options = { create: false, onChange: chng, placeholder: null }; 
-    $('#'+selId).selectize(options);
-    _i.cmbx('setSelVal', ['#'+selId, $('#'+selId).data('lvl'), 'silent']);
-}
-/** ----------------------- ERROR HANDLING ---------------------------------- */
-/**
- * Ensures that the new taxon-level is higher than its children, and that a 
- * species taxon being edited has a genus parent selected.
- */
-function checkForTaxonLvlErrs(txnLvl) {
-    const prntLvl = $('#txn-prnt').data('lvl');                                 //console.log("checkForTaxonLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
-    const hasErrs = {
-        'isGenusPrnt': isGenusPrnt(),
-        'needsHigherLvl': lvlIsLowerThanKidLvls(txnLvl)
-    };
-    for (let err in hasErrs) {  
-        if (hasErrs[err]) { return sendTxnErrRprt(err, 'Taxon'); }
-    }
-    clearPreviousErr('clrNeedsHigherLvl');
-    // ifParentSelectErrs(prntLvl);
-}
-/** Returns true if the taxon's original level is Genus and it has children. */
-function isGenusPrnt() {
-    const orgTxnLvl = $('#txn-lvl').data('lvl');
-    const txnId = $('#txn-lvl').data('txn');
-    return orgTxnLvl == 6 && getHighestChildLvl(txnId) < 8;
-}
-/** 
- * Returns true if the passed level is lower or equal to the highest level of 
- * the taxon-being-edited's children.  
- */
-function lvlIsLowerThanKidLvls(txnLvl) {                                    
-    const highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));                //console.log('lvlIsLowerThanKidLvls. txnLvl = %s, childHigh = %s', txnLvl, highLvl)                  
-    return txnLvl >= highLvl;
-}
-function getHighestChildLvl(taxonId) {
-    let high = 8; //species
-    mmry.rcrds[taxonId].children.forEach(checkChildLvl);
-    return high;
-
-    function checkChildLvl(id) {
-        const child = mmry.rcrds[id]
-        if (child.level.ord < high) { high = child.level.ord; }
-    }
-} /* End getHighestChildLvl */
-function clearPreviousErr(errTag) {
-    if ($('.top-active-errs').length) { 
-        _i.err(errTag, [null, null, null, txnLvl]); 
-    }
 }
 /** ============= TAXON PARENT SELECT FORM ================================== */
 /**
@@ -231,7 +175,7 @@ function showParentTaxonSelectForm() {
     .then(appendPrntFormElems)
     .then(finishSelectPrntFormBuild);
 }
-/** ----------------------- BUILD FIELDS ------------------------------------ */
+/** ------------------ LEVEL COMBO ELEMS ------------------------------------ */
 function buildParentTaxonEditElems(prntId) {
     const prnt = mmry.rcrds[prntId];
     const hdr = [ buildEditParentHdr()];
@@ -243,25 +187,27 @@ function buildEditParentHdr() {
     const attr = { text: 'Select New Taxon Parent', id:'sub-hdr' };
     return _i.util('buildElem', ['h3', attr]);
 }
-function getParentEditFields(prnt) {  
+function getParentEditFields(prnt) {    
     const realm = _i.util('lcfirst', [prnt.realm.displayName]);      
     _i.mmry('initEntityFormMemory', [realm, 'sub', null, 'edit']);
-    return _i.elems('buildFormRows', [realm, {}, 'sub', null])
+    return _i.elems('buildFormRows', ['subject', {}, 'sub', null])
         .then(modifyAndReturnPrntRows);
     
-    function modifyAndReturnPrntRows(rows) {
+    function modifyAndReturnPrntRows(rows) {  
         const realmSelRow = getRealmLvlRow(prnt);
-        $(rows).css({ 'padding-left': '.7em' });
-        // mmry.prntSubFormLvl = 'sub2';
         return [realmSelRow, rows];
     }
 }
 /** ------- REALM DISPLAY NAME ------ */
 function getRealmLvlRow(taxon) { 
     const lbl = _i.util('buildElem', ['label', { text: mmry.rootLvl }]);
-    const taxonym = _i.util('buildElem', ['span', { text: taxon.realm.displayName }]);
-    $(taxonym).css({ 'padding-top': '.55em' });
-    return buildTaxonEditFormRow(mmry.rootLvl, [lbl, taxonym], 'sub');
+    const span = buildRealmNameSpan(taxon.realm.displayName);
+    return buildTaxonEditFormRow(mmry.rootLvl, [lbl, span], 'sub');
+}
+function buildRealmNameSpan(realmName) {
+    const span = _i.util('buildElem', ['span', { text: realmName }]);
+    $(span).css({ 'padding-top': '.55em' });
+    return span;
 }
 function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };
@@ -269,12 +215,12 @@ function appendPrntFormElems(elems) {
     $(cntnr).append(elems);
     $('#Parent_row').after(cntnr);
 }
-/** ------------------------ FINISH BUILD ----------------------------------- */
+/** ------------------ FINISH SELECT FORM BUILD ----------------------------- */
 /**
  * Initializes the edit-parent form's comboboxes and selects the current parent.
  * Hides the species row. Adds styles and modifies event listeners. 
  */
-function finishSelectPrntFormBuild() {                                                //console.log("fP = %O", fP);    
+function finishSelectPrntFormBuild() {                                          //console.log("fP = %O", fP);    
     initSelectParentCombos();
     selectParentTaxon($('#txn-prnt').data('txn'));
     finishParentSelectFormUi();
@@ -284,18 +230,22 @@ function initSelectParentCombos() {
 }
 function getSelectParentComboEvents() {
     return {
-        'Class': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'class') },
-        'Family': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'family') },
-        'Genus': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'genus') },
-        'Order': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'order') },
-        'Realm': { change: ifParentSelectErrs },
-        'Species': { change: ifParentSelectErrs, add: initCreateForm.bind(null, 'species') },
+        'Class': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'class') },
+        'Family': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'family') },
+        'Genus': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'genus') },
+        'Order': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'order') },
+        'Realm': { change: onParentLevelSelection },
+        'Species': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'species') },
     }
 }
+function onParentLevelSelection(val) {
+    _i.onLevelSelection.bind(this)(val);
+}
 export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, mmry.rcrds);                          
-    const parentLvl = mmry.rcrds[prntId].level.displayName;  
-    if (parentLvl == mmry.rootLvl) { return; }
-    _i.cmbx('setSelVal', ['#'+parentLvl+'-sel', prntId]);
+    const prntTxn = mmry.rcrds[prntId];
+    if (prntTxn.isRealm) { return; }
+    const prntLvl = prntTxn.level.displayName;
+    _i.cmbx('setSelVal', ['#'+prntLvl+'-sel', prntId]);
 }
 function finishParentSelectFormUi() {
     alignRealmLevelText();
@@ -317,8 +267,9 @@ function updateSubmitBttns() {
     _i.ui('toggleSubmitBttn', ['#top-submit', false]);
     $('#sub-submit')[0].value = 'Select Taxon';
 }
-function selectTaxonParent() {                                                  
-    const prnt =  _i.entity('getSelectedTaxon') || mmry.realmTaxon;              //console.log("selectTaxonParent called. prnt = %O", prnt);
+function selectTaxonParent() {    
+    const prnt =  _i.entity('getSelectedTaxon') || mmry.realmTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
+    if (ifParentSelectErrs(getLvlVal(prnt.level.displayName))) { return; }
     exitPrntEdit(prnt);
 }
 function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
@@ -326,12 +277,10 @@ function cancelPrntEdit() {                                                     
     exitPrntEdit(prnt);
 }
 function exitPrntEdit(prnt) {
-    if (ifParentSelectErrs(prnt.level.id)) { return; }
     resetAfterEditParentClose(prnt);
 }
 function resetAfterEditParentClose(prnt) {
     clearLvlErrs('#Parent_errs', 'sub');
-    // mmry.prntSubFormLvl = null;
     $('#sub-form').remove();
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     setTaxonPrntNameElem(prnt);
@@ -342,28 +291,27 @@ function resetAfterEditParentClose(prnt) {
  * Ensures that the parent taxon has a higher taxon-level and that a species 
  * taxon being edited has a genus parent selected.
  */
-function ifParentSelectErrs(prnt) {
-    const hasErrs = checkEachPossibleParentErr(prnt);
+function ifParentSelectErrs(prntLvl) {
+    const hasErrs = checkEachPossibleParentErr(prntLvl);
     if (!hasErrs) { clearLvlErrs('#Parent_errs', 'sub'); }
     return hasErrs;
 
 } /* End ifParentSelectErrs */
-function checkEachPossibleParentErr(prnt) {
-    const prntLvl = prnt || $('#txn-prnt').data('lvl'); 
-    const txnLvl = $('#txn-lvl').val();                                           //console.log("ifParentSelectErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
+function checkEachPossibleParentErr(prntLvl) { 
+    const txnLvl = $('#txn-lvl').val();                                         console.log("ifParentSelectErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
     const errs = [
         { 'needsHigherLvlPrnt': txnLvl <= prntLvl },
-        { 'needsGenusPrnt': txnLvl == 7 && prntLvl != 6 }
+        { 'needsGenusPrnt': txnLvl == 8 && prntLvl != 7 }
     ];
     return !errs.every(checkForErr);                                            //console.log('hasErrs? ', hasErrs)
     
     function checkForErr(errObj) {                                         
         for (let err in errObj) { 
-            return errObj[err] ? sendTxnErrRprt(err, 'Parent') : true;
+            return errObj[err] ? sendTxnErrRprt(err, 'Parent', 'sub') : true;
         }                                                                   
     }
 }
-/** -------------------- SHARED HELPERS ------------------------------------- */
+/** ======================= ROW BUILDERS ==================================== */
 /**
  * Each element is built, nested, and returned as a completed row. 
  * rowDiv>(errorDiv, fieldDiv>inputElems)
@@ -384,8 +332,75 @@ function buildFieldCntnr(fields) {
     $(cntnr).append(fields);
     return cntnr;
 }
-function sendTxnErrRprt(errTag, field) {                                              
-    _i.err('reportFormFieldErr', [field, errTag, 'top']);
+/** =============== FINISH MAIN FORM BUILD ================================== */
+export function finishEditFormBuild(entity) {
+    $('#top-submit').off('click').click(submitTaxonEdit);
+    initTaxonEditLevelCombo(); 
+    $('.all-fields-cntnr').hide();
+}
+function submitTaxonEdit() {
+    const vals = {
+        displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
+        level:       $('#Taxon_row select').text(),
+        parentTaxon: $('#txn-prnt').data('txn')
+    };                                                                          //console.log("taxon vals = %O", vals);
+    _i.formatAndSubmitData('taxon', 'top', vals);
+}
+function initTaxonEditLevelCombo() {                                       
+    const options = { create: false, onChange: checkForTaxonLvlErrs, placeholder: null }; 
+    $('#txn-lvl').selectize(options);                                           
+    _i.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl'), 'silent']);
+}
+/** ======================= ERROR HANDLING ================================== */
+/**
+ * Ensures that the new taxon-level is higher than its children, and that a 
+ * species taxon being edited has a genus parent selected.
+ */
+function checkForTaxonLvlErrs(txnLvl) {
+    const prntLvl = $('#txn-prnt').data('lvl');                                 //console.log("checkForTaxonLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
+    const hasErrs = {
+        'isGenusPrnt': isGenusPrnt(),
+        'needsHigherLvl': lvlIsLowerThanKidLvls(txnLvl)
+    };
+    for (let err in hasErrs) {  
+        if (hasErrs[err]) { return sendTxnErrRprt(err, 'Taxon', 'top'); }
+    }
+    clearPreviousErr('clrNeedsHigherLvl', txnLvl);
+}
+/** Returns true if the taxon's original level is Genus and it has children. */
+function isGenusPrnt() {
+    const orgTxnLvl = $('#txn-lvl').data('lvl');
+    const txnId = $('#txn-lvl').data('txn');
+    return orgTxnLvl == 6 && getHighestChildLvl(txnId) < 8;
+}
+/** 
+ * Returns true if the passed level is lower or equal to the highest level of 
+ * the taxon-being-edited's children.  
+ */
+function lvlIsLowerThanKidLvls(txnLvl) {                                    
+    const highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));                
+    return txnLvl >= highLvl;
+}
+function getHighestChildLvl(taxonId) {
+    let high = mmry.lvls.Species.ord;
+    mmry.rcrds[taxonId].children.forEach(checkChildLvl);
+    return high;
+
+    function checkChildLvl(id) {
+        const child = mmry.rcrds[id]
+        if (child.level.ord < high) { high = child.level.ord; }
+    }
+} /* End getHighestChildLvl */
+function getSpeciesLvl() {
+    
+}
+function clearPreviousErr(errTag, txnLvl) {
+    if ($('.top-active-errs').length) { 
+        _i.err(errTag, [null, null, null, txnLvl]); 
+    }
+}
+function sendTxnErrRprt(errTag, field, fLvl) {                                              
+    _i.err('reportFormFieldErr', [field, errTag, fLvl]);
     _i.ui('toggleSubmitBttn', ['#top-submit', false]);
     return false;
 }

@@ -31,6 +31,9 @@ TASKS:
         - remove location name from geosjon database    
             - add it on the local storage side
             - or just add the geojson data to locations?
+        - Add animalia parent to arthropod
+
+        - remove all unused properties from serialization (eg, slug)
 
 NEXT:
     - Create model of local storage

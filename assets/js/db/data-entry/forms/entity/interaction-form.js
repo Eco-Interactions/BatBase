@@ -25,6 +25,7 @@
  * EXPORTS: 
  *     initCreateForm   
  *     getSelectedTaxon
+ *     onLevelSelection
  */
 import * as _i from '../forms-main.js';
 
@@ -534,7 +535,7 @@ function deleteResetFlag(role) {
  * combo was cleared, ensure the remaining dropdowns are in sync or, if they
  * are all empty, disable the 'select' button.
  */
-function onLevelSelection(val) {                                                console.log("           --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
+export function onLevelSelection(val) {                                         console.log("           --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
     const fLvl = _i.getSubFormLvl('sub');
     if (val === 'create') { return openTaxonCreateForm(this.$input[0], fLvl); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
@@ -744,7 +745,9 @@ function enableTaxonCombos() {
     _i.cmbx('enableCombobox', ['#Object-sel']);
 }
 function getTxnMmry(prop) {
-    return prop ? mmry.forms.taxonPs[prop] : mmry.forms.taxonPs;
+    return mmry && prop ? mmry.forms.taxonPs[prop] : 
+        mmry ? mmry.forms.taxonPs : 
+            prop ? _i.mmry('getTaxonProp', [prop]) : _i.mmry('getTaxonMemory');
 }
 /*--------------------- FIELD HELPERS ----------------------------------------*/
 function focusPinAndEnableSubmitIfFormValid(field) {
@@ -775,7 +778,7 @@ function resetIfFormWaitingOnChanges() {
     _i.mmry('setFormProp', ['top', 'unchanged', false]);
 }
 function getRcrd(entity, id) {
-    return mmry.records[entity][id];
+    return mmry ? mmry.records[entity][id] : _i.mmry('getRcrd', [entity, id]);
 }
 function getRcrds(entity) {
     return mmry.records[entity];

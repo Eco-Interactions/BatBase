@@ -441,6 +441,7 @@ AppBundle\Entity\Realm:
         slug: bat
         displayName: Bat
         pluralName: Bats
+        uiLevelsShown: '[7, 6, 5]'
         taxon: '@Taxon-2' #7
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -450,6 +451,7 @@ AppBundle\Entity\Realm:
         slug: plant
         displayName: Plant
         pluralName: Plants
+        uiLevelsShown: '[7, 6, 5]'
         taxon: '@Taxon-3' #20
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -459,6 +461,7 @@ AppBundle\Entity\Realm:
         slug: arthropod
         displayName: Arthropod
         pluralName: Arthropods
+        uiLevelsShown: '[7, 6, 5, 4, 3]'
         taxon: '@Taxon-4'  #11
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1904,6 +1907,7 @@ AppBundle\Entity\Taxon:
         slug: chiroptera
         displayName: Chiroptera
         realm: '@Realm-1' #
+        isRealm: true
         level: '@Level-4' #
         parentTaxon: '@Taxon-1' #21
         childTaxa: ['@Taxon-5']
@@ -1915,6 +1919,7 @@ AppBundle\Entity\Taxon:
         slug: plantae
         displayName: Plantae
         realm: '@Realm-2' #3
+        isRealm: true
         level: '@Level-1' #7
         childTaxa: ['@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1925,6 +1930,7 @@ AppBundle\Entity\Taxon:
         slug: arthropoda
         displayName: Arthropoda
         realm: '@Realm-3' #2
+        isRealm: true
         level: '@Level-2' #6
         childTaxa: ['@Taxon-8']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
