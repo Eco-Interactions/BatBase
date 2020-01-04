@@ -20,13 +20,13 @@
  *     getDetailPanelElems          
  *     updateSrcDetails             
  */
-import * as _i from '../forms-main.js';
+import * as _i from '../../forms-main.js';
 
 /* ===================== INIT DETAIL PANEL ================================== */
-export function getDetailPanelElems(entity, id, fP) {                           //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
+export function getDetailPanelElems(entity, id, action) {                       //console.log("getDetailPanelElems. action = %s, entity = %s", action, entity)
     const cntnr = _i.util('buildElem', ['div', { 'id': 'form-details' }]);
     $(cntnr).append(buildPanelHeader(entity));
-    $(cntnr).append(getDetailElems(entity, fP));
+    $(cntnr).append(getDetailElems(entity, action));
     $(cntnr).append(getEntityIdFooter(id));
     return cntnr;
 }
@@ -38,8 +38,8 @@ function getEntityIdFooter(id) {
     const intIdStr = id ? 'Id:  ' + id : '';
     return _i.util('buildElem', ['p', { id: 'ent-id',  'text': intIdStr }]);
 }
-function getDetailElems(entity, fP) {
-    const builder = fP.action === 'edit' && fP.entity !== 'interaction' ?
+function getDetailElems(entity, action) {
+    const builder = action === 'edit' && entity !== 'interaction' ?
         getSubEntityEditDetailElems : getInteractionDetailElems;
     return builder(entity);
 }

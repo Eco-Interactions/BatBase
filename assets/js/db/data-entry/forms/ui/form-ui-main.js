@@ -6,9 +6,8 @@
  */
 import * as _i from '../forms-main.js';
 import * as _cmbx from './combobox-util.js';
-import * as _elems from './form-elems.js';
-import * as _pnl from './detail-panel.js';
-import { buildFormFooter } from './form-footer.js';
+import * as _elems from './elems/elems-main.js';
+import * as _pnl from './elems/detail-panel.js';
 
 
 export function elems(funcName, params) {
@@ -21,7 +20,7 @@ export function panel(funcName, params) {
     return _pnl[funcName](...params);
 }
 export function getFormFooter() {
-    return buildFormFooter(...arguments);
+    return _elems.buildFormFooter(...arguments);
 }
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {

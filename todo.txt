@@ -107,6 +107,7 @@ Sort:
     - when clicking reset local data button on menu bar, figure out how to get 
         a diff between the old and new stored data to better track down errors/bugs
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
+    - REFACTOR - from 'top' to 'main' form
 
 
 TODOs:

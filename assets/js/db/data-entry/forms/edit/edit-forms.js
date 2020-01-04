@@ -30,7 +30,7 @@ function initEditForm(id, entity) {
         .then(() => fillFormWithEntityData(entity, id));
 }   
 function buildAndAppendEditForm(fields, id, entity) {
-    return _i.elems('buildAndAppendTopForm', [fields, id])
+    return _i.elems('buildAndAppendForm', [fields, id])
         .then(() => finishEditFormBuild(entity))
 }
 /* --------------------------- FORM FIELDS ---------------------------------- */

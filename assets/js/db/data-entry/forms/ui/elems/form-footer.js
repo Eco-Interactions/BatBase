@@ -2,20 +2,16 @@
  * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
  * specific to their form container @getBttnEvents, and a left spacer that 
  * pushes the buttons to the bottom right of their form container.
- *
- * Exports:             Imported by:
- *     buildFormFooter       form-ui
- *     
  */
-import * as _i from '../forms-main.js';
+import * as _i from '../../forms-main.js';
 
 let mmry;
 /**
  * Returns row with a checkbox that will toggle optional form fields on the left 
  * and the submit/cancel buttons on the right.
  */
-export function buildFormFooter(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
-    mmry = params ? params : _i.mmry('getAllFormMemory');   
+export default function (entity, level, action, noShwFields) {                  //console.log('buildFormBttns. args = %O', arguments); 
+    mmry = _i.mmry('getAllFormMemory');   
     const cntnr = _i.util('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
     const spacer = $('<div></div>').css("flex-grow", 2);

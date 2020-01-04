@@ -15,9 +15,20 @@
  *     getTaxonOpts             db-forms
  *     buildMultiSelectElems    db-forms
  */
-import * as _i from '../forms-main.js';
+import * as _i from '../../forms-main.js';
+
+import * as _base from './base-form.js';
 
 let mmry;
+
+export function buildAndAppendForm(fields, id) {
+    return _base.buildAndAppendRootForm(fields, id);
+}
+
+export function buildFormFooter() {
+    return require('./form-footer.js').default(...arguments);
+}
+
 /**
  * Builds and returns the subForm according to the passed params. Disables the 
  * select elem 'parent' of the sub-form. 
@@ -31,7 +42,7 @@ export function initSubForm(fLvl, fClasses, fVals, selId) {                     
 
     function buildFormContainer(rows) {
         const subFormContainer = buildSubFormCntnr(); 
-        const bttns = _i.ui('getFormFooter', [formEntity, fLvl, 'create', null, mmry]);
+        const bttns = _i.ui('getFormFooter', [formEntity, fLvl, 'create', null]);
         $(subFormContainer).append([buildFormHdr(), rows, bttns]);
         _i.mmry('setFormProp', [fLvl, 'pSelId', selId]);
         _i.cmbx('enableCombobox', [selId, false]);
@@ -610,81 +621,4 @@ function locHasGpsData(fLvl) {
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });
-}
-/* -------------------- APPEND FIELDS AND FORM ------------------------------ */
-export function buildAndAppendTopForm(fields, id) { 
-    mmry = _i.mmry('getAllFormMemory');
-    showFormPopup(mmry.action, mmry.entity, id);
-    const form = buildFormElem();  
-    $(form).append([
-        buildEntityFieldContainer(mmry.entity, fields), 
-        _i.ui('getFormFooter', [mmry.entity, 'top', mmry.action, null, mmry])]);
-    $('#form-main').append(form);  
-    return Promise.resolve();
-}
-/** Builds the form elem container. */
-function buildFormElem() {
-    const form = document.createElement('form');
-    $(form).attr({'action': '', 'method': 'POST', 'name': 'top'});
-    form.className = 'flex-row';
-    form.id = 'top-form';
-    return form;
-}
-function buildEntityFieldContainer(entity, fields) {
-    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
-    const div = _i.util('buildElem', ['div', attr]);
-    $(div).append(fields); 
-    return div;
-}
-/* ======================== INIT FORM HTML ================================== */
-/** Builds and shows the popup form's structural elements. */
-function showFormPopup(action, entity, id) {
-    $('#b-overlay').addClass('form-ovrly');
-    $('#b-overlay-popup').addClass('form-popup');
-    $('#b-overlay-popup').append(getFormWindowElems(entity, id, action));
-    addFormStyleClass(entity);
-}
-/** Adds the width to both the popup window and the form element for each entity. */
-function addFormStyleClass(entity, remove) {
-    const map = {
-        'interaction': 'lrg-form',  'publication': 'med-form',
-        'publisher': 'sml-form',    'citation': 'med-form',
-        'author': 'sml-form',       'location': 'med-form',
-        'taxon': 'sml-form'
-    };
-    $('#form-main, .form-popup').removeClass(['lrg-form', 'med-form', 'sml-form']);
-    $('#form-main, .form-popup').addClass(map[entity]);
-}
-/**
- * Returns the form window elements - the form and the detail panel.
- * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
- */
-function getFormWindowElems(entity, id, action) {
-    return [getExitButtonRow(), getFormHtml(entity, id, action)];
-}
-function getExitButtonRow() {
-    const  row = _i.util('buildElem', ['div', { class: 'exit-row' }]);
-    $(row).append(getExitButton());
-    return row;        
-}
-export function getExitButton() {
-    const attr = { 'id': 'exit-form', 'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' }
-    const bttn = _i.util('buildElem', ['input', attr]);
-    $(bttn).click(_i.exitFormWindow);
-    return bttn;
-}
-function getFormHtml(entity, id, action) {
-    const cntnr = _i.util('buildElem', ['div', { class: 'flex-row' }]);
-    const detailPanelHtml = _i.panel('getDetailPanelElems', [entity, id, mmry]);
-    $(cntnr).append([getMainFormHtml(entity, action), detailPanelHtml]);
-    return cntnr;
-}
-function getMainFormHtml(entity, action) { 
-    const formWin = _i.util('buildElem', ['div', { id: 'form-main', class: mmry.action }]);
-    $(formWin).append(getHeaderHtml(entity, action));
-    return formWin;
-}
-function getHeaderHtml(entity, action) {
-    const title = (action == 'New' ? 'New ' : 'Editing ') + _i.util('ucfirst', [entity]);    
-    return _i.util('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }

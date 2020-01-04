@@ -40,7 +40,7 @@ let mmry;
 export function initCreateForm(entity) {                                        console.log('   //Building New Interaction Form');
     _i.mmry('initFormMemory', ['create', 'interaction'])
     .then(mmry => getInteractionFormFields(mmry))
-    .then(fields => _i.elems('buildAndAppendTopForm', [fields]))
+    .then(fields => _i.elems('buildAndAppendForm', [fields]))
     .then(() => finishInteractionFormBuild())
     .then(() => _i.mmry('setonFormCloseHandler', ['top', resetInteractionForm]))
     .catch(err => _i.util('alertErr', [err]));
