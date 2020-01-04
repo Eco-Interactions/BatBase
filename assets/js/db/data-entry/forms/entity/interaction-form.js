@@ -751,9 +751,7 @@ function enableTaxonCombos() {
     _i.cmbx('enableCombobox', ['#Object-sel']);
 }
 function getTxnMmry(prop) {
-    return mmry && prop ? mmry.forms.taxonPs[prop] : 
-        mmry ? mmry.forms.taxonPs : 
-            prop ? _i.mmry('getTaxonProp', [prop]) : _i.mmry('getTaxonMemory');
+    return prop ? _i.mmry('getTaxonProp', [prop]) : _i.mmry('getTaxonMemory');
 }
 /* ========================== HELPERS ======================================= */
 function focusPinAndEnableSubmitIfFormValid(field) {

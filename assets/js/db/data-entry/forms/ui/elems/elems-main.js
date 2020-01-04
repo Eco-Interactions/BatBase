@@ -24,8 +24,10 @@ let mmry;
 export function buildAndAppendForm(fields, id) {
     return _base.buildAndAppendRootForm(fields, id);
 }
-
-export function buildFormFooter() {
+export function getExitButton() {
+    return _base.getExitButton();
+}
+export function getFormFooter() {
     return require('./form-footer.js').default(...arguments);
 }
 
@@ -42,7 +44,7 @@ export function initSubForm(fLvl, fClasses, fVals, selId) {                     
 
     function buildFormContainer(rows) {
         const subFormContainer = buildSubFormCntnr(); 
-        const bttns = _i.ui('getFormFooter', [formEntity, fLvl, 'create', null]);
+        const bttns = _i.elems('getFormFooter', [formEntity, fLvl, 'create']);
         $(subFormContainer).append([buildFormHdr(), rows, bttns]);
         _i.mmry('setFormProp', [fLvl, 'pSelId', selId]);
         _i.cmbx('enableCombobox', [selId, false]);

@@ -71,7 +71,7 @@ function getForm(fields) {
     const form = buildFormElem();  
     $(form).append([
         buildEntityFieldContainer(fields), 
-        _i.ui('getFormFooter', [entity, 'top', action, null])
+        _i.elems('getFormFooter', [entity, 'top', action])
     ]);
     return form;
 }

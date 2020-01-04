@@ -19,9 +19,6 @@ export function combos(funcName, params) {
 export function panel(funcName, params) {
     return _pnl[funcName](...params);
 }
-export function getFormFooter() {
-    return _elems.buildFormFooter(...arguments);
-}
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {
     const w = $(formId).innerWidth() / 2 - 3;  

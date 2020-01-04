@@ -102,7 +102,7 @@ function setScopeTaxonMemory(taxaRcrds, txnMmry) {
 /** ======================== FIELDS ========================================= */
 function buildTaxonEditFields(taxon) {
     const txnElems = getEditTaxonFields(taxon);
-    const prntElems = getPrntTaxonElems(taxon);  console.log('')
+    const prntElems = getPrntTaxonElems(taxon);  
     return prntElems.concat(txnElems);
 }
 /** ----------------- NAME FIELD AND LEVEL COMBOBOX ------------------------- */
@@ -179,7 +179,7 @@ function showParentTaxonSelectForm() {
 function buildParentTaxonEditElems(prntId) {
     const prnt = mmry.rcrds[prntId];
     const hdr = [ buildEditParentHdr()];
-    const bttns = [ _i.ui('getFormFooter', ['parent', 'sub', 'edit', true])];
+    const bttns = [ _i.elems('getFormFooter', ['parent', 'sub', 'edit'])];
     return getParentEditFields(prnt)
         .then(fields => hdr.concat(fields, bttns));
 }
