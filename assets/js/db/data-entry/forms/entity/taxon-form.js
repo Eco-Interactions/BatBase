@@ -79,7 +79,6 @@ function fieldErr(level, tag) {
     _i.err('reportFormFieldErr', [level, tag, 'sub2'])
 }
 /** ********************** EDIT FORM **************************************** */
-/** ======================== BASE FIELDS ==================================== */
 /**
  * Returns the elements of the edit-taxon form. 
  * <div>Parent Taxon: [Level][Display-name]</> <bttnInput>"Edit Parent"</>
@@ -100,6 +99,7 @@ function setScopeTaxonMemory(taxaRcrds, txnMmry) {
     mmry = txnMmry;
     mmry.rcrds = taxaRcrds;
 }
+/** ======================== FIELDS ========================================= */
 function buildTaxonEditFields(taxon) {
     const txnElems = getEditTaxonFields(taxon);
     const prntElems = getPrntTaxonElems(taxon);  console.log('')

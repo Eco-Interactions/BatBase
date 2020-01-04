@@ -2,17 +2,28 @@
  * Handles individual Entity edit forms. 
  *
  * Exports:             Imported by:
- *     editEntity       forms-main
+ *     editEntity           forms-main
+ *
+ * CODE SECTIONS
+ *     FORM INIT
+ *         FORM FIELDS
+ *         FINISH FORM INIT
+ *     FILL CURRENT ENTITY DATA
+ *         INTERACTION
+ *         LOCATION
+ *         SOURCE
+ *         TAXON
+ *         FILL FORM-FIELD HELPERS
  */
 import * as _i from '../forms-main.js';
 
 /** Shows the entity's edit form in a pop-up window on the search page. */
-export function editEntity(id, entity) {                                        console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
+export default function editEntity(id, entity) {                                console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
     initEditForm(id, entity)
     .then(() => _i.entity('finishEditFormInit', [entity, id]))
     .catch(err => _i.util('alertErr', [err]));;
 }
-/** Inits the edit top-form, filled with all existing data for the record. */
+/* ============================== FORM INIT ================================= */
 function initEditForm(id, entity) {  
     return getEditFormFields(id, entity)
         .then(fields => buildAndAppendEditForm(fields, id, entity))
@@ -22,12 +33,11 @@ function buildAndAppendEditForm(fields, id, entity) {
     return _i.elems('buildAndAppendTopForm', [fields, id])
         .then(() => finishEditFormBuild(entity))
 }
+/* --------------------------- FORM FIELDS ---------------------------------- */
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
     _i.mmry('setFormProp', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
     return buildEditFields(entity, id);
-    // const fieldBldr = getEditFormFieldBuilder(entity);
-    // return fieldBldr(entity, id);
 }   
 function buildEditFields(entity, id) {
     const complxBldrs = { 
@@ -45,6 +55,7 @@ function getEditFields(entity, id) {
     const formConfg = _i.confg('getFormConfg', [entity]);
     return _i.elems('getFormFieldRows', [entity, {}, 'top']);
 }
+/* ----------------------- FINISH FORM INIT --------------------------------- */
 function finishEditFormBuild(entity) {
     $('.top-pin').addClass('invis'); //hides field checkboxes used in create forms
     const cmplx = ['citation', 'interaction', 'location', 'taxon'];
@@ -59,28 +70,11 @@ function finishEditForm(entity) {
     $('.all-fields-cntnr').hide();  //Hide the "Show all fields" checkbox
     return Promise.resolve();
 }
-/*------------------- Fills Edit Form Fields -----------------------------*/
-/** Fills form with existing data for the entity being edited. */
-// function fillFormWithCurrentEntityData(entity, id) {
-//     if (entity == 'interaction') { return fillInteractionData(id); }
-//     fillFormWithEntityData(entity, id);
-// }
-// function fillInteractionData(id) {
-//     _i.util('getData', ['interaction'])
-//     .then(ints => {
-//         fP.records.interaction = ints;
-//         fillFormWithEntityData('interaction', id)
-//     });
-// }
+/* =================== FILL CURRENT ENTITY DATA ============================= */
 function fillFormWithEntityData(entity, id) {
     addDisplayNameToForm(entity, id);
     fillEntityData(entity, id)
-    // _i.entity('fillEditFormData', [entity, id])
     .then(checkFieldsAndToggleSubmit);
-    // fillEntityData(entity, id); 
-    // if (_elems.ifAllRequiredFieldsFilled('top')) { 
-    //     _i.ui('toggleSubmitBttn', ['#top-submit', true]); 
-    // }
 }
 function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
@@ -90,31 +84,21 @@ function addDisplayNameToForm(ent, id) {
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
-
-
 /** Note: Source types will get their record data at fillSrcData. */
 function fillEntityData(ent, id) {  
     const hndlrs = { 'author': fillSrcData, 'citation': fillSrcData,
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
         'interaction': fillIntData };
-    const rcrd = _i.mmry('getRcrd', [ent, id]);                                              console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    const rcrd = _i.mmry('getRcrd', [ent, id]);                                 console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     return Promise.resolve(hndlrs[ent](ent, id, rcrd));
-    // return complxFills[entity] ? fillCmplxEditFields() : fillEditFields(entity, id);  
-
-    // function getCmplxEditFields() {
-    //     return _i.entity(complxBldr[entity], [entity, id]);
-    // }
 }
-// function ifHasDetailEntity(entity) {
-//     const wDetail = ['author', 'citation', 'location', 'publication', 'publisher'];
-//     return wDetail.indexOf(entity) !== -1;
-// }
 function updateEditDetailMemory(detailId) {
     const editObj = _i.mmry('getMemoryProp', ['editing']);
     editObj.detail = detailId;
     _i.mmry('setMemoryProp', ['editing', editObj]);
 }
+/* ------------- INTERACTION ----------------- */
 function fillIntData(entity, id, rcrd) {  
     const fields = getInteractionFieldFillTypes();  
     fillFields(rcrd, fields, true);
@@ -126,16 +110,24 @@ function getInteractionFieldFillTypes() {
     fieldTypes.Source = 'source';
     return fieldTypes;
 }
+function addTaxon(fieldId, prop, rcrd) {       
+    const selApi = $('#'+ fieldId + '-sel')[0].selectize;
+    const taxon = _i.mmry('getRcrd', ['taxon', rcrd[prop]]);                          
+    selApi.addOption({ value: taxon.id, text: _i.getTaxonDisplayName(taxon) });
+    selApi.addItem(taxon.id);
+}
+function addSource(fieldId, prop, rcrd) {
+    const citSrc = _i.mmry('getRcrd', ['source', rcrd.source]) 
+    _i.cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
+    _i.cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
+}
+/* ------------- LOCATION ----------------- */
 function fillLocData(entity, id, rcrd) {
     const fields = _i.confg('getCoreFieldDefs', [entity]);  
     handleLatLongFields();
     fillFields(rcrd, fields);
     _i.panel('fillRelationalDataInPanel', [entity, rcrd]);
-    // fP.editing.detail = rcrd.geoJsonId || null;
-    if (rcrd.geoJsonId) { 
-        updateEditDetailMemory(rcrd.geoJsonId);
-        storeLocGeoJson(rcrd.geoJsonId); 
-    }
+    if (rcrd.geoJsonId) { handleGeoJsonFill(rcrd.geoJsonId); }
     
     /* Sets values without triggering each field's change method. */
     function handleLatLongFields() {
@@ -146,14 +138,16 @@ function fillLocData(entity, id, rcrd) {
         $('#Longitude_row input').val(rcrd.longitude);
         _i.cmbx('setSelVal', ['#Country-sel', rcrd.country.id, 'silent']);
     }
+    function handleGeoJsonFill(geoId) {
+        updateEditDetailMemory(geoId);
+        storeLocGeoJson(geoId); 
+    }
     function storeLocGeoJson(id) {
         return _i.util('getData', ['geoJson'])
             .then(data => _i.mmry('setFormProp', ['top', data[id]]));
     }
 } /* End fillLocData */
-function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
-    _i.panel('fillRelationalDataInPanel', [entity, rcrd]);
-}
+/* ------------- SOURCE ----------------- */
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, rcrd) { 
     const src = _i.mmry('getRcrd', ['source', id]);
@@ -171,26 +165,7 @@ function fillSrcData(entity, id, rcrd) {
         setAdditionalFields(entity, src, detail);
         updateEditDetailMemory(detail.id);
     }
-    // fillAllSrcData()
-    // loadSourceTypeFields()
-    // .then(fillAllSrcData);
-
-    // function loadSourceTypeFields() {
-    //     if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
-    //     const type = getDetailTypeDataObj();
-    //     const typeElem = $('#'+_i.util('ucfirst'[entity])+'Type-sel')[0];
-    //     return _i.loadSrcTypeFields(entity, type.id, typeElem, type.name);
-    // }
-    // function getDetailTypeDataObj() {
-    //     const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
-    //     return {
-    //         typeId: detail[typeProp].id,
-    //         typeName: detail[typeProp].displayName
-    //     };
-    // }
-    // function fillAllSrcData() {
-    // }
-} /* End fillSrcData */
+} 
 function getSourceFields(entity) {
     return { 
         core: _i.confg('getCoreFieldDefs', [entity]), 
@@ -224,7 +199,11 @@ function setCitationEdgeCaseFields(entity, citRcrd) {
     $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
     $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
 }
-/** ----------- Shared ---------------------------- */
+/* ------------- TAXON ----------------- */
+function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
+    _i.panel('fillRelationalDataInPanel', [entity, rcrd]);
+}
+/** -------------------- FILL FORM-FIELD HELPERS ---------------------------- */
 function checkFieldsAndToggleSubmit() {
     if (_i.elems('ifAllRequiredFieldsFilled', ['top'])) { 
         _i.ui('toggleSubmitBttn', ['#top-submit', true]); 
@@ -274,36 +253,3 @@ function setTagField(fieldId, prop, rcrd) {                                     
 function setCntry(fieldId, prop, rcrd) { 
     _i.cmbx('setSelVal', ['#Country-sel', rcrd.country.id]);
 }
-
-
-
-
-
-
-
-
-
-
-function addTaxon(fieldId, prop, rcrd) {       
-    const selApi = $('#'+ fieldId + '-sel')[0].selectize;
-    const taxon = _i.mmry('getRcrd', ['taxon', rcrd[prop]]);                          
-    selApi.addOption({ value: taxon.id, text: _i.getTaxonDisplayName(taxon) });
-    selApi.addItem(taxon.id);
-}
-function addSource(fieldId, prop, rcrd) {
-    const citSrc = _i.mmry('getRcrd', ['source', rcrd.source]) 
-    _i.cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
-    _i.cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
-}
-/* ---- On Form Fill Complete --- */
-// function onEditFormFillComplete(id, entity) {                                       //console.log('onEditFormFillComplete. entity = ', entity);
-//     const map = { 
-//         'citation': setSrcEditRowStyle, 'location': _i.addMapToLocationEditForm, 
-//         'publication': setSrcEditRowStyle };
-//     if (!map[entity]) { return; }
-//     map[entity](id);
-// }
-
-/*-------- Edit Taxon Methods ----------*/
-/*-------- Edit Citation Methods ----------*/
-/*-------- Edit Location Methods ----------*/

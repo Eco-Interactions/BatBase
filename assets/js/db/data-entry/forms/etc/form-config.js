@@ -29,7 +29,7 @@ import * as _i from '../forms-main.js';
  * > optional - All remaining available fields for the entity.
  * > order - Order to display the fields in both the default and expanded forms. 
  */
-export function getFormConfg(entity) {                                          //console.log('getFormConfg [%s]', entity);
+export function getFormConfg(entity) {                                          
     if (['subject', 'object'].indexOf(entity) >= 0) { return getRoleConfg(entity); }
     return getEntityConfg(entity);
 }

@@ -4,7 +4,7 @@
  *
  * Exports:                Imported by:
  *     getCitationText            db-forms
- *     rebuildCitationText          db_sync
+ *     rebuildCitationText        db_sync
  */
 import * as _i from '../forms-main.js';
 

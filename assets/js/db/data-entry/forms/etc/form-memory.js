@@ -140,9 +140,6 @@ export function getTaxonProp(prop) {
 export function getTaxonMemory() {
     return formMemory.forms.taxonPs;
 }
-// export function getFormLevelParams(fLvl) {
-//     return formMemory.forms[fLvl];
-// }
 export function getFormFieldData(fLvl, field) {
     return formMemory.forms[fLvl].fieldData[field];
 }

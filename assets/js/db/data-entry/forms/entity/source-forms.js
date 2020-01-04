@@ -1,6 +1,15 @@
 /**
  * Source form code: Authors, Citations, Publication, and Publisher
  *
+ * Exports:             
+ *     finishSourceToggleAllFields
+ *     getSrcTypeRows                   
+ *     handleCitText                    
+ *     handleSpecialCaseTypeUpdates     
+ *     initCreateForm
+ *     loadSrcTypeFields                
+ *     selectExistingAuthors
+ *     
  * Code Sections:
  *     COMBOBOX INIT
  *     ENTITY FORMS
@@ -15,16 +24,7 @@
  *              AUTHOR SELECTION
  *              AUTHOR CREATE
  *     EDIT FORMS
- *     UI HELPERS
- *
- * Exports:             
- *     finishSourceToggleAllFields
- *     getSrcTypeRows                   
- *     handleCitText                    
- *     handleSpecialCaseTypeUpdates     
- *     initCreateForm
- *     loadSrcTypeFields                
- *     selectExistingAuthors
+ *     HELPERS
  */
 import * as _i from '../forms-main.js'; 
 
@@ -51,7 +51,6 @@ function getEntityComboEvents(entity) {
     }[entity];
 }
 /* ************************* ENTITY FORMS *********************************** */
-
 export function initCreateForm(entity, name) {                                  //console.log('entity [%s], name [%s]', entity, name)
     const funcs = {
         'author': initAuthForm, 
@@ -197,7 +196,6 @@ function loadCitTypeFields(typeId) {                                            
         handleCitText(fLvl);
         setCitationFormRowStyles(fLvl);
         enableSubmitButtonIfRequiredFieldsFilled(fLvl);
-        // if (!timeout) { handleCitText(fLvl); }
     }
 }
 function setCitationFormRowStyles(fLvl) {
@@ -309,10 +307,9 @@ function addPubValues(fLvl, addValues, type) {
      * If the parent publication has existing authors, they are added to the new 
      * citation form's author field(s). 
      */
-    function addExistingPubContribs(fLvl, auths) {  //console.log('auths = %O', auths);
+    function addExistingPubContribs(fLvl, auths) {  
         fieldData.Authors = { type: "multiSelect" };
         fieldData.Authors.val = auths ? auths : null;
-        // fieldData.Authors.val = auths ? auths : (vals.length > 0 ? vals : null); //what is going on here?
     }
 }
 /* ----------------------- AUTO-GENERATE CITATION --------------------------- */
@@ -322,7 +319,7 @@ function addPubValues(fLvl, addValues, type) {
  * displayed. If not, the default text is displayed in the disabled textarea.
  * Note: to prevent multiple rebuilds, a timeout is used.
  */
-export function handleCitText(formLvl) {                                        console.log('   --handleCitText. timeout? ', !!timeout); 
+export function handleCitText(formLvl) {                                        //console.log('   --handleCitText. timeout? ', !!timeout); 
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 750);
 
@@ -330,7 +327,7 @@ export function handleCitText(formLvl) {                                        
         const fLvl = formLvl || _i.getSubFormLvl('sub');
         const $elem = $('#CitationText_row textarea');
         if (!$elem.val()) { initializeCitField($elem); } 
-        // timeout = null;
+        
         return getCitationFieldText($elem, fLvl)
             .then(citText => updateCitField(citText, $elem))
             .then(() => {timeout = null;});
@@ -529,7 +526,6 @@ function handleAuthSelect(val, ed) {
     const fLvl = _i.getSubFormLvl('sub');
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }                       
     if (val === 'create') { return handleNewAuthForm(cnt, val, authType); } 
-    // handleCitText(fLvl);       
     if (lastAuthComboEmpty(cnt, authType)) { return; }
     buildNewAuthorSelect(cnt+1, val, fLvl, authType);
 }
@@ -648,27 +644,6 @@ export function finishEditFormBuild(entity) {                                   
     handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
     finishSourceToggleAllFields('citation', {}, 'top');
 }
-// export function fillCmplxCitationFields(srcRcrd, citRcrd) {
-//     setTitleField(citRcrd.displayName);
-//     setCitationEdgeCaseFields(entity, detail);
-// }
-// function setCitationEdgeCaseFields(citRcrd) {
-//     $('#CitationText_row textarea').val(citRcrd.fullText);
-//     $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
-//     $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
-//     $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
-// }
-// export function fillCmplxPublicationFields() {
-//     setTitleField(srcRcrd.displayName);
-//     setPublisherField(entity, srcRcrd);
-// }
-// function setPublisherField(srcRcrd) { 
-//     if (!_i.ui('fieldIsDisplayed', ['Publisher', 'top'])) { return; }    
-//     _i.cmbx('setSelVal', ['#Publisher-sel', srcRcrd.parent]);
-// }
-// function setTitleField(displayName) {
-//     $('#Title_row input[type="text"]').val(displayName).change();
-// }
 export function setSrcEditRowStyle() {
     _i.ui('setCoreRowStyles', ['#form-main', '.top-row']);
 }

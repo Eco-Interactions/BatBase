@@ -1,10 +1,17 @@
 /**
- * Contains code used to specifically build the interaction form. 
+ * Contains code specific to the interaction form.
+ *
+ * EXPORTS: 
+ *     initCreateForm   
+ *     getSelectedTaxon
+ *     onLevelSelection
  *
  * CODE SECTIONS
  *     CREATE FORM
  *         RESET CREATE FORM AFTER SUBMIT
+ *     EDIT FORM
  *     ON FORM INIT COMPLETE
+ *         FORM COMBOBOXES
  *     FORM FIELD HANDLERS
  *         PUBLICATION
  *         CITATION
@@ -18,75 +25,12 @@
  *                 resetTaxonSelectForm
  *                 onLevelSelection
  *                 selectRoleTaxon
- *         FIELD HELPERS
- *     EDIT FORM
- *         FILL INTERACTION DATA
- *
- * EXPORTS: 
- *     initCreateForm   
- *     getSelectedTaxon
- *     onLevelSelection
+ *     HELPERS
  */
 import * as _i from '../forms-main.js';
 
 let mmry;
-/** Inits comboboxes for the interaction form and the Subject/Object select forms. */
-export function initFormCombos(entity, fLvl) {
-    const events = getEntityComboEvents(entity);
-    _i.cmbx('initFormCombos', [entity, fLvl, events]);
-}
-/** Note: 'subject', 'object', and 'realm' are passed for taxon. */
-function getEntityComboEvents(entity) {
-    const events = {
-        'interaction': {
-            'CitationTitle': { change: onCitSelection, add: create('citation', 'sub') },
-            'Country-Region': { change: onCntryRegSelection },
-            'InteractionType': { change: focusIntTypePin },
-            'InteractionTags': { change: checkIntFieldsAndEnableSubmit },
-            'Location': { change: onLocSelection, add: create('location', 'sub')},
-            'Publication': { change: onPubSelection, add: create('publication', 'sub')},
-            'Subject': { change: onTaxonRoleSelection.bind(null, 'Subject') },
-            'Object': { change: onTaxonRoleSelection.bind(null, 'Object') },
-        },
-        'taxon': {
-            'Class': { change: onLevelSelection, add: create('class') },
-            'Family': { change: onLevelSelection, add: create('family') },
-            'Genus': { change: onLevelSelection, add: create('genus') },
-            'Order': { change: onLevelSelection, add: create('order') },
-            'Realm': { change: onRealmSelection },
-            'Species': { change: onLevelSelection, add: create('species') },
-        }
-    };
-    return events[entity] || events.taxon;
-}
-function create(entity, fLvl) {
-    return createSubEntity.bind(null, entity, fLvl);
-}
-function createTaxon(lvl) {
-    return (val) => {
-        createSubEntity(null, lvl, 'sub2')
-        .then(() => _i.mmry('setonFormCloseHandler', ['sub2', enableTaxonLvls]))
-        .then(() => enableTaxonLvls(false));
-    }
-}
-function createSubEntity(entity, fLvl, val) {  
-    if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormErr(entity, fLvl); }
-    _i.create(entity, val);
-}
-function ifFormAlreadyOpenAtLevel(fLvl) {  
-    return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
-}
-function openSubFormErr(ent, fLvl) {
-    const entity = ent === 'citation' ? 'citationTitle' : ent;
-    const ucEntity = _i.util('ucfirst', [entity]); 
-    _i.err('openSubFormErr', [ucEntity, null, fLvl]); 
-    return Promise.reject();
-}
-function throwAndCatchSubFormErr(entity, fLvl) {
-    openSubFormErr(entity, fLvl)
-    .catch(() => {});
-}
-/** ********************** CREATE FORM ************************************** */
+/** ====================== CREATE FORM ====================================== */
 /**
  * Inits the interaction form with all fields displayed and the first field, 
  * publication, in focus. From within many of the fields the user can create 
@@ -179,7 +123,12 @@ function fillPubDetailsIfPinned(pub) {
     if (pub) { _i.panel('updateSrcDetails', ['pub']); 
     } else { _i.cmbx('enableCombobox', ['#CitationTitle-sel', false]); }
 }
-/** ------------------- ON FORM INIT COMPLETE ------------------------------- */
+/** ======================== EDIT FORM ====================================== */
+export function finishEditFormBuild(entity) {
+    mmry = _i.mmry('getAllFormMemory');
+    finishInteractionFormBuild();
+}
+/** =================== ON FORM INIT COMPLETE =============================== */
 /**
  * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
  * required field elems to the form's config object.  
@@ -222,11 +171,68 @@ function showInteractionFormMap() {                                             
     if (_i.cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
     _i.cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }
+/* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
     initFormCombos('interaction', 'top');  
     _i.cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     _i.cmbx('focusCombobox', ['#Publication-sel', !mmry.editing]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
+}
+/** Inits comboboxes for the interaction form and the Subject/Object select forms. */
+export function initFormCombos(entity, fLvl) {
+    const events = getEntityComboEvents(entity);
+    _i.cmbx('initFormCombos', [entity, fLvl, events]);
+}
+/** Note: 'subject', 'object', and 'realm' are passed for taxon. */
+function getEntityComboEvents(entity) {
+    const events = {
+        'interaction': {
+            'CitationTitle': { change: onCitSelection, add: create('citation', 'sub') },
+            'Country-Region': { change: onCntryRegSelection },
+            'InteractionType': { change: focusIntTypePin },
+            'InteractionTags': { change: checkIntFieldsAndEnableSubmit },
+            'Location': { change: onLocSelection, add: create('location', 'sub')},
+            'Publication': { change: onPubSelection, add: create('publication', 'sub')},
+            'Subject': { change: onTaxonRoleSelection.bind(null, 'Subject') },
+            'Object': { change: onTaxonRoleSelection.bind(null, 'Object') },
+        },
+        'taxon': {
+            'Class': { change: onLevelSelection, add: create('class') },
+            'Family': { change: onLevelSelection, add: create('family') },
+            'Genus': { change: onLevelSelection, add: create('genus') },
+            'Order': { change: onLevelSelection, add: create('order') },
+            'Realm': { change: onRealmSelection },
+            'Species': { change: onLevelSelection, add: create('species') },
+        }
+    };
+    return events[entity] || events.taxon;
+}
+function create(entity, fLvl) {
+    return createSubEntity.bind(null, entity, fLvl);
+}
+function createTaxon(lvl) {
+    return (val) => {
+        createSubEntity(null, lvl, 'sub2')
+        .then(() => _i.mmry('setonFormCloseHandler', ['sub2', enableTaxonLvls]))
+        .then(() => enableTaxonLvls(false));
+    }
+}
+function createSubEntity(entity, fLvl, val) {  
+    if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormErr(entity, fLvl); }
+    _i.create(entity, val);
+}
+function ifFormAlreadyOpenAtLevel(fLvl) {  
+    return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
+}
+function openSubFormErr(ent, fLvl) {
+    const entity = ent === 'citation' ? 'citationTitle' : ent;
+    const ucEntity = _i.util('ucfirst', [entity]); 
+    _i.err('openSubFormErr', [ucEntity, null, fLvl]); 
+    return Promise.reject();
+}
+function throwAndCatchSubFormErr(entity, fLvl) {
+    openSubFormErr(entity, fLvl)
+    .catch(() => {});
 }
 function focusIntTypePin() {
     focusPinAndEnableSubmitIfFormValid('InteractionType');
@@ -237,7 +243,7 @@ function addTaxonFocusListener(role) {
     const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
     $('#form-main').on('focus', elem, showSelectForm);
 }
-/** ********************** FORM FIELD HANDLERS ****************************** */
+/** ====================== FORM FIELD HANDLERS ============================== */
 /*------------------ PUBLICATION ---------------------------------------------*/
 /** 
  * When an existing publication is selected, the citation field is filled with 
@@ -749,7 +755,7 @@ function getTxnMmry(prop) {
         mmry ? mmry.forms.taxonPs : 
             prop ? _i.mmry('getTaxonProp', [prop]) : _i.mmry('getTaxonMemory');
 }
-/*--------------------- FIELD HELPERS ----------------------------------------*/
+/* ========================== HELPERS ======================================= */
 function focusPinAndEnableSubmitIfFormValid(field) {
     if (!mmry.editing) { $('#'+field+'_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
@@ -782,10 +788,4 @@ function getRcrd(entity, id) {
 }
 function getRcrds(entity) {
     return mmry.records[entity];
-}
-/** ************************ EDIT FORM ************************************** */
-export function finishEditFormBuild(entity) {
-    mmry = _i.mmry('getAllFormMemory');
-    finishInteractionFormBuild();
-    // $('#Publication-sel')[0].seletize.blur();
 }

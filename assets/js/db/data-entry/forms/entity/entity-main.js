@@ -5,12 +5,13 @@
  *
  * CODE SECTIONS
  *     CREATE ENTITY
- *     AUTHOR
- *     CITATION
+ *     EDIT FORMS
+ *     INTERACTION
  *     LOCATION
- *     PUBLICATION
- *     PUBLISHER
  *     TAXON
+ *     SOURCE TYPES
+ *         AUTHOR
+ *         CITATION
  */
 import * as _i from '../forms-main.js'; 
 import * as _int from './interaction-form.js';
@@ -32,18 +33,12 @@ export function createEntity(entity, name) {                                    
 export function initFormCombos(entity, fLvl) {
     forms[entity].initFormCombos(entity, fLvl);
 }
-/* ---- EDIT FORMS --- */
+/* -------------------------- EDIT FORMS ------------------------------------ */
+/** Used by complex forms: citation, interaction, location, taxon. */
 export function finishEntityEditFormBuild(entity) {
     return Promise.resolve(
         forms[entity].finishEditFormBuild(entity));
 }
-// export function fillEditFormData(entity, coreRcrd, detRcrd) {
-//     const cmplxFills = {
-//         'citation': _src.fillCmplxCitationFields,
-//         'publication': _src.fillCmplxPublicationFields
-//     };
-//     return Promise.resolve(cmplxFills[entity](coreRcrd, detRcrd));
-// }
 export function finishEditFormInit(entity, id) {
     const cmplxFnshrs = {
         'citation': _src.setSrcEditRowStyle, 
@@ -52,22 +47,6 @@ export function finishEditFormInit(entity, id) {
     };
     if (!cmplxFnshrs[entity]) { return Promise.resolve(); }
     return Promise.resolve(cmplxFnshrs[entity](id));
-}
-/** --------------------------- AUTHOR -------------------------------------- */
-/* edit-form, form-ui */
-export function selectExistingAuthors() {
-    return _src.selectExistingAuthors(...arguments);
-}
-/** --------------------------- CITATION ------------------------------------ */
-export function handleCitText(formLvl) {
-    // if (_i.mmry('getFormProp', [formLvl, 'entity']) !== 'citation') { return; }
-    _src.handleCitText(formLvl);
-}
-export function getCitationText(fLvl) {
-    return _autoCite.getCitationText(fLvl);
-}
-export function rebuildCitationText(params) {
-    return _autoCite.rebuildCitationText(params);
 }
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationField() {
@@ -117,4 +96,19 @@ export function onSrcToggleFields() {
 }
 export function getSrcTypeFields(subEntity, typeId) {
     return _src.getSrcTypeFields(subEntity, typeId);
+}
+/** ---------------- AUTHOR ------------------- */
+/* edit-form, form-ui */
+export function selectExistingAuthors() {
+    return _src.selectExistingAuthors(...arguments);
+}
+/** ---------- CITATION ------------------------- */
+export function handleCitText(formLvl) {
+    _src.handleCitText(formLvl);
+}
+export function getCitationText(fLvl) {
+    return _autoCite.getCitationText(fLvl);
+}
+export function rebuildCitationText(params) {
+    return _autoCite.rebuildCitationText(params);
 }

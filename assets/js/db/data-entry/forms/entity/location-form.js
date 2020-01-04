@@ -1,21 +1,20 @@
 /**
+ * Contains code specific to the location form.
  *
+ * Exports:                     Clients:
+ *     addNewLocationWithGps        map-main
+ *     initCreateForm               forms-main
  *
- * Exports:
- *     initCreateForm
- * 
+ * CODE SECTIONS
+ *     CREATE FORM
+ *     EDIT FORM
+ *     SHARED HELPERS
+ *         FORM COMBOBOXES
+ *         MAP METHODS
  */
 import * as _i from '../forms-main.js';
 
-/**
- * 
- */
-export function initFormCombos(entity, fLvl) {
-    const events = {
-        'Country': { change: focusParentAndShowChildLocs.bind(null, 'create') }
-    };
-    _i.cmbx('initFormCombos', ['location', fLvl, events]);
-}
+/** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
 export function initCreateForm(entity, val) {                                   console.log("       --initLocForm [%s]", val);
     const fLvl = _i.getSubFormLvl('sub');
@@ -80,33 +79,6 @@ function getHowToCreateLocWithoutGpsDataNote() {
         in available data and click "Create without GPS data" at the bottom of 
         the form.</p>`;
 }
-export function addListenerToGpsFields(params = [true]) {
-    $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
-    
-    function toggleNoGpsSubmitBttn() {
-        const coords = getCoordVals();
-        _i.ui('toggleSubmitBttn', ['#sub-submit', coords.length]);
-        if (coords.length !== 2) { return; }
-        _i.map('addVolatileMapPin', params);
-    }
-}
-function getCoordVals() {
-    return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);  
-}
-function lintCoord(prefix) {
-    const field = prefix+'itude';
-    const val = $('#'+field+'_row input').val();
-    if (ifCoordFieldHasErr(field, val)) { return locCoordErr(field); }
-    return val;
-}
-function ifCoordFieldHasErr(field) {
-    const coord = $(`#${field}_row input`).val();
-    const max = field === 'Latitude' ? 90 : 180;
-    return isNaN(coord) ? true : coord > max ? true : false;    
-}
-function addCreateEventToNewMarkerPopup() {
-    $('#new-gps-loc').click(addNewLocationWithGps);
-}
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
  * in a the new location's green map pin's popup on the map in the form.
@@ -120,27 +92,11 @@ export function addNewLocationWithGps() {
 function showFillAllLocFieldsError(fLvl) {
     _i.err('reportFormFieldErr', ['Display Name', 'needsLocData', fLvl]);
 }
-export function locCoordErr(field) {
+function locCoordErr(field) {
     const fLvl = _i.getSubFormLvl('sub');
     _i.err('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
 }
-/*--------------- Map methods ---------------------------*/
-export function addMapToLocForm($elem, type) {                                  //console.log('           --addMapToLocForm. $elem = %O', $elem);
-    const map = _i.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]); 
-    $elem.after(map);
-    initLocFormMap(type);
-}
-function initLocFormMap(type) {
-    const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
-    const locRcrds = _i.mmry('getEntityRcrds', ['location'])
-    _i.map('initFormMap', [prntId, locRcrds, type]);
-}
-export function focusParentAndShowChildLocs(type, val) {                               
-    if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
-    const locRcrds = _i.mmry('getEntityRcrds', ['location'])
-    _i.map('initFormMap', [val, locRcrds, type]);
-}
-/** ================== EDIT FORM CODE ======================================= */
+/** ======================= EDIT FORM ======================================= */
 export function finishEditFormBuild(entity) {  
     initFormCombos('Location', 'top'); 
     updateCountryChangeMethod();
@@ -172,4 +128,51 @@ function afterMapLoads(onLoadFunc, id) {
     } else { 
         window.setTimeout(() => afterMapLoads(onLoadFunc, id), 500); 
     }
+}
+/* -------------------------- FORM COMBOBOXES ------------------------------- */
+export function initFormCombos(entity, fLvl) {
+    const events = {
+        'Country': { change: focusParentAndShowChildLocs.bind(null, 'create') }
+    };
+    _i.cmbx('initFormCombos', ['location', fLvl, events]);
+}
+/* ------------------------ MAP METHODS ------------------------------------- */
+export function addMapToLocForm($elem, type) {                                  //console.log('           --addMapToLocForm. $elem = %O', $elem);
+    const map = _i.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]); 
+    $elem.after(map);
+    initLocFormMap(type);
+}
+function initLocFormMap(type) {
+    const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
+    const locRcrds = _i.mmry('getEntityRcrds', ['location'])
+    _i.map('initFormMap', [prntId, locRcrds, type]);
+}
+export function focusParentAndShowChildLocs(type, val) {                               
+    if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
+    const locRcrds = _i.mmry('getEntityRcrds', ['location'])
+    _i.map('initFormMap', [val, locRcrds, type]);
+}
+export function addListenerToGpsFields(params = [true]) {
+    $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
+    
+    function toggleNoGpsSubmitBttn() {
+        const coords = getCoordVals();
+        _i.ui('toggleSubmitBttn', ['#sub-submit', coords.length]);
+        if (coords.length !== 2) { return; }
+        _i.map('addVolatileMapPin', params);
+    }
+}
+function getCoordVals() {
+    return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);  
+}
+function lintCoord(prefix) {
+    const field = prefix+'itude';
+    const val = $('#'+field+'_row input').val();
+    if (ifCoordFieldHasErr(field, val)) { return locCoordErr(field); }
+    return val;
+}
+function ifCoordFieldHasErr(field) {
+    const coord = $(`#${field}_row input`).val();
+    const max = field === 'Latitude' ? 90 : 180;
+    return isNaN(coord) ? true : coord > max ? true : false;    
 }

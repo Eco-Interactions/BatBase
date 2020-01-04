@@ -11,21 +11,34 @@ QUESTIONS:
     -
 
 TASKS:
-    - CSV rewrite
-
-    - when clicking reset local data button on menu bar, figure out how to get 
-        a diff between the old and new stored data to better track down errors/bugs
-
-
-    - Adding realms
-        - replace checks for null parents to indicate relams with isRealm flag
-        - replace form confg for taxon realms
-            - once a realm has an interaction, add it to the 'view' options
-
-        - remove levels from the realm obj in each taxon record?
+    interaction types:
+        Seed Dispersal - 
+            Plant (no tags)
+        Consumption - 
+            Plant - Flower, leaf, seed, fruit
+            Arthropod
+        Pollination - 
+            Plant - Flower (autotag?)
+        Visitation - 
+            Plant - Flower (autotag?)
+        Roost - 
+            Plant - Leaf, wood (add wood tag?)
+        Host
+            Arthropod 
+            Virus
+            Fungi
+            Bacteria
+        Transport - 
+            Plant - (bryophyte fragment)?
+            Arthropod
+        Cohabitation - (new type)
+            Bird
+    
+    Should predation, prey, and hematophagy be added as interaction types?
 
     - testing
         - check all errors trigger and clear 
+        - tags are restricted by interaction type.
     
     - Data Cleanup
         - remove location name from geosjon database    
@@ -33,7 +46,6 @@ TASKS:
             - or just add the geojson data to locations?
         - Add animalia parent to arthropod
 
-        - remove all unused properties from serialization (eg, slug)
 
 NEXT:
     - Create model of local storage
@@ -91,6 +103,11 @@ Next/future rounds:
 >================ DEV Internal Task List ===================
 
 Sort:
+    - remove all unused properties from serialization (eg, slug)
+    - when clicking reset local data button on menu bar, figure out how to get 
+        a diff between the old and new stored data to better track down errors/bugs
+    - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
+
 
 TODOs:
 ##(Category){priority}[difficulty]##

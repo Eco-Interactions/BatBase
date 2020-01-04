@@ -9,7 +9,7 @@
  *         HELPERS
  */
 import * as _confg from './etc/form-config.js';
-import * as _edit from './edit/edit-forms.js';
+import editEntity from './edit/edit-forms.js';
 import * as _entity from './entity/entity-main.js';
 import * as _mmry from './etc/form-memory.js';
 import * as _submit from './submit/submit-main.js';
@@ -54,7 +54,7 @@ export function create(entity, name) {
 }
 export function edit(id, entity) {                                        
     _mmry.initFormMemory('edit', entity, id)
-    .then(() => _edit.editEntity(id, entity));
+    .then(() => editEntity(id, entity));
 }   
 export function err(funcName, params = []) {  
     return _submit.err(funcName, params);
