@@ -11,31 +11,47 @@ QUESTIONS:
     -
 
 TASKS:
-    interaction types:
-        Seed Dispersal - 
+    Interaction types
+        Seed Dispersal -
             Plant (no tags)
-        Consumption - 
+        Consumption -
             Plant - Flower, leaf, seed, fruit
+        Predation (new type) -
             Arthropod
-        Pollination - 
-            Plant - Flower (autotag?)
-        Visitation - 
-            Plant - Flower (autotag?)
-        Roost - 
-            Plant - Leaf, wood (add wood tag?)
-        Host
-            Arthropod 
+            Bird
+            Reptile
+            Amphibian
+            Fish
+            Mammal
+        Flower Pollination - New interaction type instead of “Pollination” with flower tag
+            Plant
+        Flower Visitation – New interaction type instead of “Visitation” with flower tag
+            Plant
+        Roost -
+            Plant - Leaf, wood (add wood tag? Yes)
+        Host -
+            Arthropod
             Virus
             Fungi
             Bacteria
-        Transport - 
-            Plant - (bryophyte fragment)?
+        Transport -
             Arthropod
+        Bryophyte Fragment Transport - New interaction type instead of “Transport” with tag
+            Plant
         Cohabitation - (new type)
             Bird
-    
-    Should predation, prey, and hematophagy be added as interaction types?
-
+            Arthropod
+            Mammal (bats and non-bats)
+        Prey (new type) -
+            Arthropod
+            Bird
+            Reptile
+            Amphibian
+            Fish
+            Mammal
+       Hematophagy (new type) -
+            Bird
+            Mammal
     - testing
         - check all errors trigger and clear 
         - tags are restricted by interaction type.

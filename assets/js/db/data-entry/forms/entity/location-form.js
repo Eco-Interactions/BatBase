@@ -17,40 +17,34 @@ import * as _i from '../forms-main.js';
 /** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
 export function initCreateForm(entity, val) {                                   console.log("       --initLocForm [%s]", val);
-    const fLvl = _i.getSubFormLvl('sub');
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
-    buildLocForm(val, fLvl)
+    buildLocForm(val)
     .then(onLocFormLoadComplete);
 }
-function buildLocForm(val, fLvl) {    
+function buildLocForm(val) {
     const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#Country-Region-sel').val() 
     }; 
-    _i.mmry('initEntityFormMemory', ['location', fLvl, '#Location-sel', 'create']);
-    _i.mmry('setonFormCloseHandler', [fLvl, _i.entity.bind(null, 'enableCountryRegionField')]);
-    return _i.elems('initSubForm', [fLvl, 'med-sub-form', vals, '#Location-sel'])
+    _i.mmry('initEntityFormMemory', ['location', 'sub', '#Location-sel', 'create']);
+    _i.mmry('setonFormCloseHandler', ['sub', _i.entity.bind(null, 'enableCountryRegionField')]);
+    return _i.elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row')[0].parentNode.after(form);
-        initFormCombos(null, fLvl);
+        initFormCombos(null, 'sub');
         _i.cmbx('enableCombobox', ['#Country-Region-sel', false]);
-        $('#Latitude_row input').focus();
         $('#sub-submit').val('Create without GPS data');
         _i.ui('setCoreRowStyles', ['#location_Rows', '.sub-row']);
-        enableSubmitBttnIfRequiredFieldsFilled(vals);
-    }
-    function enableSubmitBttnIfRequiredFieldsFilled(vals) {
-        if (!vals.DisplayName || !vals.Country) { return; }
-        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit']); 
+        _i.elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
+        $('#Latitude_row input').focus();
     }
 }
 function onLocFormLoadComplete() {
-    const fLvl = _i.getSubFormLvl("sub");
     disableTopFormLocNote();
     addMapToLocForm($('#location_Rows'), 'create');
     addNotesToForm();
-    addListenerToGpsFields();
+    addListenerToGpsFields('sub');
     scrollToLocFormWindow();
 }
 function disableTopFormLocNote() {
@@ -109,7 +103,7 @@ function updateCountryChangeMethod() {
         focusParentAndShowChildLocs.bind(null, 'edit'));
 }
 function addGpsListenerToEditForm(id) {
-    addListenerToGpsFields([id, 'edit', false]);
+    addListenerToGpsFields('top', [id, 'edit', false]);
 }
 export function addMapToLocationEditForm(id) {
     addMapToLocForm($('#location_Rows'), 'edit');
@@ -152,13 +146,12 @@ export function focusParentAndShowChildLocs(type, val) {
     const locRcrds = _i.mmry('getEntityRcrds', ['location'])
     _i.map('initFormMap', [val, locRcrds, type]);
 }
-export function addListenerToGpsFields(params = [true]) {
+export function addListenerToGpsFields(fLvl, params = [true]) {
     $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
     
     function toggleNoGpsSubmitBttn() {
-        const coords = getCoordVals();
-        _i.ui('toggleSubmitBttn', ['#sub-submit', coords.length]);
-        if (coords.length !== 2) { return; }
+        _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+        if (getCoordVals().length !== 2) { return; }
         _i.map('addVolatileMapPin', params);
     }
 }

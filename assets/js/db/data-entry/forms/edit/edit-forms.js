@@ -205,9 +205,7 @@ function fillTaxonData(entity, id, rcrd) {                                      
 }
 /** -------------------- FILL FORM-FIELD HELPERS ---------------------------- */
 function checkFieldsAndToggleSubmit() {
-    if (_i.elems('ifAllRequiredFieldsFilled', ['top'])) { 
-        _i.ui('toggleSubmitBttn', ['#top-submit', true]); 
-    }
+    _i.elems('checkReqFieldsAndToggleSubmitBttn', ['top']);
 }
 function fillFields(rcrd, fields) {                                             console.log('       --fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {

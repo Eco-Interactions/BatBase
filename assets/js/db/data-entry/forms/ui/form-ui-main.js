@@ -175,9 +175,7 @@ export function ifFieldIsDisplayed(field, fLvl) {
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
     const parentLvl = _i.getNextFormLevel('parent', fLvl);  
-    if (_elems.ifAllRequiredFieldsFilled(parentLvl)) {
-        toggleSubmitBttn('#'+parentLvl+'-submit');
-    }
+    _i.elems('checkReqFieldsAndToggleSubmitBttn', [parentLvl]);
 }
 export function toggleSubmitBttn(bttnId, enable = true) {
     return enable ? enableSubmitBttn(bttnId) : disableSubmitBttn(bttnId);

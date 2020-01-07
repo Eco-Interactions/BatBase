@@ -13,7 +13,7 @@
  *             FORM
  *    APPEND AND STYLE
  */
-import * as _i from '../../forms-main.js';
+import * as _i from '../../../forms-main.js';
 
 let entity;
 let action;

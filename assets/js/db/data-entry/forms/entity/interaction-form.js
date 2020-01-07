@@ -766,9 +766,7 @@ function focusPinAndEnableSubmitIfFormValid(field) {
  * removes the success message from the form.
  */
 function checkIntFieldsAndEnableSubmit() {
-    if (_i.elems('ifAllRequiredFieldsFilled', ['top'])) { 
-        _i.ui('toggleSubmitBttn', ['#top-submit', true]); 
-    }
+    _i.elems('checkReqFieldsAndToggleSubmitBttn', ['top']);
     resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
 /**

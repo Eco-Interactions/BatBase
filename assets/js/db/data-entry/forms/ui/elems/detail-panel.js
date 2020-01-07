@@ -1,5 +1,16 @@
 /**
+ * The form detail-panel is used to display additional data about the entity
+ * being edited, showing all related entities, or shows the contained data within
+ * the interaction create/edit form (source and location details).
  *
+ * Exports:                 
+ *     clearDetailPanel             
+ *     clearFieldDetails            
+ *     fillRelationalDataInPanel    
+ *     fillLocDataInDetailPanel     
+ *     getDetailPanelElems          
+ *     updateSrcDetails  
+ *     
  * Code Contents:
  *     INIT DETAIL PANEL
  *     EDIT FORM RELATIONAL DETAILS
@@ -10,15 +21,7 @@
  *     INTERACTION FORM SUB-ENTITY DETAIL PANEL
  *         LOCATION DETAILS
  *         SOURCE DETAILS
- *     CLEAR PANELS
- *
- * Exports:                 
- *     clearDetailPanel             
- *     clearFieldDetails            
- *     fillRelationalDataInPanel    
- *     fillLocDataInDetailPanel     
- *     getDetailPanelElems          
- *     updateSrcDetails             
+ *     CLEAR PANELS           
  */
 import * as _i from '../../forms-main.js';
 

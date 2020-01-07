@@ -195,16 +195,11 @@ function loadCitTypeFields(typeId) {                                            
         handleSpecialCaseTypeUpdates(elem, fLvl);
         handleCitText(fLvl);
         setCitationFormRowStyles(fLvl);
-        enableSubmitButtonIfRequiredFieldsFilled(fLvl);
+        _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
 }
 function setCitationFormRowStyles(fLvl) {
     _i.ui('setCoreRowStyles', ['#citation_Rows', '.'+fLvl+'-row']);
-}
-function enableSubmitButtonIfRequiredFieldsFilled(fLvl) {
-    if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
-        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit']); 
-    }
 }
 /* ------------------------ TYPE-SPECIFIC UPDATES --------------------------- */
 /**
@@ -372,7 +367,7 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
         $('#'+entity+'_Rows').append(rows);
         initFormCombos(entity, fLvl);
         _i.ui('fillComplexFormFields', [fLvl]);
-        _i.elems('checkReqFieldsAndToggleSubmitBttn', [elem, fLvl]);
+        _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         updateFieldLabelsForType(entity, fLvl);
         focusFieldInput(entity);
     }
@@ -555,7 +550,7 @@ function lastAuthComboEmpty(cnt, authType) {
 }
 /** Builds a new, empty author combobox */
 function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log('buildNewAuthorSelect')            
-    return _i.elems('buildMultiSelectElems', [null, authType, prntLvl, cnt])
+    return _i.elems('buildMultiSelectElem', [null, authType, prntLvl, cnt])
         .then(appendNewAuthSelect);
 
     function appendNewAuthSelect(sel) { 
@@ -609,8 +604,7 @@ function handleNewAuthForm(authCnt, value, authType) {                          
     function handleSubmitBttns() {
         const prntLvl = _i.getNextFormLevel('parent', fLvl);
         _i.ui('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
-        _i.ui('toggleSubmitBttn', 
-            ['#'+fLvl+'-submit', _i.elems('ifAllRequiredFieldsFilled', [fLvl])]);
+        _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
 }
 /* *************************** EDIT FORMS *********************************** */

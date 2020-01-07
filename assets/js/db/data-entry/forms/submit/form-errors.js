@@ -253,9 +253,7 @@ function handleEdBlanks(elem, errTag, fLvl, fieldName) {
 export function clrContribFieldErr(field, fLvl) {                               //console.log('clrContribFieldErr.')
     const elem = $('#'+field+'_errs')[0];    
     clearErrElemAndEnableSubmit(elem, fLvl);
-    if (_i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
-        _i.ui('toggleSubmitBttn', ['#sub-submit', true]); 
-    }
+    _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ----------- Error-Elem Methods -------------- */
 function setOnFormCloseListenerToClearErr(elem, fLvl) {
@@ -301,9 +299,7 @@ function getErrExitBttn(errTag, elem, fLvl) {
 function clrFormLvlErr(elem, fLvl) {
     const childFormLvl = _i.getNextFormLevel('child', fLvl);
     $('#'+fLvl+'_errs').remove();
-    if (!$('#'+childFormLvl+'-form').length && _i.elems('ifAllRequiredFieldsFilled', [fLvl])) {
-        _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
-    }
+    _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 export function clearErrElemAndEnableSubmit(elem, fLvl, enable = false) {                       //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
     const subLvl = _i.getNextFormLevel('child', fLvl);
@@ -320,8 +316,7 @@ export function clearErrElemAndEnableSubmit(elem, fLvl, enable = false) {       
     }
     function enableSubmitIfFormReady() {
         if (!$('#'+fLvl+'-form').length || $('#'+subLvl+'-form').length) { return; }
-        if (enable || _i.elems('ifAllRequiredFieldsFilled', [fLvl])) { 
-            _i.ui('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
-        }
+        if (!enable) { return; }
+        _i.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
 } 

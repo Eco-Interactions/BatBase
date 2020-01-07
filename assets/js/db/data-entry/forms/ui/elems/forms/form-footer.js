@@ -7,7 +7,7 @@
  *     SHOW ALL FIELDS CHECKBOX
  *     SUBMIT AND CANCEL BUTTONS
  */
-import * as _i from '../../forms-main.js';
+import * as _i from '../../../forms-main.js';
 
 let formMmry;
 /**
