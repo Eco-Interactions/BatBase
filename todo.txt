@@ -11,56 +11,18 @@ QUESTIONS:
     -
 
 TASKS:
-    Interaction types
-        Seed Dispersal -
-            Plant (no tags)
-        Consumption -
-            Plant - Flower, leaf, seed, fruit
-        Predation (new type) -
-            Arthropod
-            Bird
-            Reptile
-            Amphibian
-            Fish
-            Mammal
-        Flower Pollination - New interaction type instead of “Pollination” with flower tag
-            Plant
-        Flower Visitation – New interaction type instead of “Visitation” with flower tag
-            Plant
-        Roost -
-            Plant - Leaf, wood (add wood tag? Yes)
-        Host -
-            Arthropod
-            Virus
-            Fungi
-            Bacteria
-        Transport -
-            Arthropod
-        Bryophyte Fragment Transport - New interaction type instead of “Transport” with tag
-            Plant
-        Cohabitation - (new type)
-            Bird
-            Arthropod
-            Mammal (bats and non-bats)
-        Prey (new type) -
-            Arthropod
-            Bird
-            Reptile
-            Amphibian
-            Fish
-            Mammal
-       Hematophagy (new type) -
-            Bird
-            Mammal
     - testing
         - check all errors trigger and clear 
         - tags are restricted by interaction type.
+        - are changes made to taxon names updating the taxon level data?
+            - test on test server after update
     
     - Data Cleanup
         - remove location name from geosjon database    
             - add it on the local storage side
             - or just add the geojson data to locations?
         - Add animalia parent to arthropod
+        - remove slugs from serialization
 
 
 NEXT:
@@ -124,6 +86,7 @@ Sort:
         a diff between the old and new stored data to better track down errors/bugs
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
     - REFACTOR - from 'top' to 'main' form
+    - REFACTOR - map-markers
 
 
 TODOs:

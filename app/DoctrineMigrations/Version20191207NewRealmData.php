@@ -14,11 +14,12 @@ use AppBundle\Entity\Taxon;
 
 /**
  * Creates realms:
- *     Amphibian - Class
- *     Bacteria - Domain
- *     Bird - Class
- *     Fungi - Kingdon
- *     Reptile - Class
+ *     Amphibian - Class Amphibia
+ *     Bacteria - Domain 
+ *     Bird - Class Aves
+ *     Fish - Class Actinopterygii
+ *     Fungi - Kingdom
+ *     Reptile - Class Reptilia
  *     Virus - Domain
  */
 class Version20191207NewRealmData extends AbstractMigration implements ContainerAwareInterface
@@ -178,6 +179,19 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
                 'Taxon' => [
                     'Level' => 'Domain'
                 ]
+            ],
+            'Fish' => [
+                'Realm' => [
+                    'PluralName' => 'Fishes',
+                    'UiLevelsShown' => '[7, 6, 5]'
+                ],
+                'Taxon' => [
+                    'Level' => 'Class',
+                    'Name' => 'Actinopterygii',
+                    'Parent' => 'Animalia'
+
+                ]
+
             ],
             'Fungi' => [
                 'Realm' => [

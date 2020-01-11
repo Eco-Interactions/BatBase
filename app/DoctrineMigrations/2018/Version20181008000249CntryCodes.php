@@ -10,7 +10,7 @@ use AppBundle\Entity\Location;
 use AppBundle\Entity\GeoJson;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Adds iso codes for all countries.
  */
 class Version20181008000249CntryCodes extends AbstractMigration implements ContainerAwareInterface
 {

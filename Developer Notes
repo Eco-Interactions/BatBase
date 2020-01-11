@@ -27,18 +27,6 @@ Run Tests:
 ##  php bin/console doctrine:database:create --env=test
 ##  php bin/console doctrine:schema:update --force --env=test
 
-Writing tests: 
-    - spin method template:
-        $this->spin(function() use () {
-            try {
-
-            } catch (Exception $e) { return false; 
-            } finally {
-                // ... do stuff
-                return true;
-            }
-        }, 'msg');
-
 ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 >Testing setup
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
@@ -142,14 +130,6 @@ data wonkiness:
       000EraseTests, that removes test entities so they can be safely deleted from 
       the db without remaining in memory.
   
->Tips for jumping to specific areas of the code
-sync-data.js:
-    - Data storage init -
-        - Jump to start of data storage - @deriveAndStoreData
-
-    - Data storage updates -
-        - Jump to the start of adding data - @updateEntityData
-        - Jump to the start of removing data - @updateAffectedData
   
 >MISC
 Errors: 
