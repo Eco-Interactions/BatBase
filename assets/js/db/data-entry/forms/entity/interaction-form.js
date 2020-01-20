@@ -25,6 +25,7 @@
  *                 resetTaxonSelectForm
  *                 onLevelSelection
  *                 selectRoleTaxon
+ *         INTERACTION TYPE & TAGS
  *     HELPERS
  */
 import * as _i from '../forms-main.js';
@@ -177,6 +178,7 @@ function finishComboboxInit() {
     _i.cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     _i.cmbx('focusCombobox', ['#Publication-sel', !mmry.editing]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
+    _i.cmbx('enableCombobox', ['#InteractionTags-sel', false]);
 }
 /** Inits comboboxes for the interaction form and the Subject/Object select forms. */
 export function initFormCombos(entity, fLvl) {
@@ -189,7 +191,7 @@ function getEntityComboEvents(entity) {
         'interaction': {
             'CitationTitle': { change: onCitSelection, add: create('citation', 'sub') },
             'Country-Region': { change: onCntryRegSelection },
-            'InteractionType': { change: focusIntTypePin },
+            'InteractionType': { change: onInteractionTypeSelection },
             'InteractionTags': { change: checkIntFieldsAndEnableSubmit },
             'Location': { change: onLocSelection, add: create('location', 'sub')},
             'Publication': { change: onPubSelection, add: create('publication', 'sub')},
@@ -233,9 +235,6 @@ function openSubFormErr(ent, fLvl) {
 function throwAndCatchSubFormErr(entity, fLvl) {
     openSubFormErr(entity, fLvl)
     .catch(() => {});
-}
-function focusIntTypePin() {
-    focusPinAndEnableSubmitIfFormValid('InteractionType');
 }
 /** Displays the [Role] Taxon select form when the field gains focus. */ 
 function addTaxonFocusListener(role) {
@@ -752,6 +751,22 @@ function enableTaxonCombos() {
 }
 function getTxnMmry(prop) {
     return prop ? _i.mmry('getTaxonProp', [prop]) : _i.mmry('getTaxonMemory');
+}
+/* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
+function onInteractionTypeSelection(val) {
+    fillAndEnableTags(val);
+    focusPinAndEnableSubmitIfFormValid('InteractionType');
+}
+function fillAndEnableTags(id) {
+    const tagOpts = buildTagOpts(id);
+    _i.cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
+    _i.cmbx('enableCombobox', ['#InteractionTags-sel', tagOpts.length > 1]);
+    if (tagOpts.length !== 1) { return; }
+    _i.cmbx('setSelVal', ['#InteractionTags-sel', tagOpts[0].value]);
+}
+function buildTagOpts(id) { 
+    const type = getRcrd('interactionType', id);
+    return type.tags.map(t => {  return {value: t.id, text: t.displayName}; })
 }
 /* ========================== HELPERS ======================================= */
 function focusPinAndEnableSubmitIfFormValid(field) {

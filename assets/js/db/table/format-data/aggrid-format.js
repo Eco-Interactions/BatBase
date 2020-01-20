@@ -294,7 +294,7 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         treeLvl: treeLvl,       //Not sure what this is all used for...
         type: 'intRcrd',        //Not sure what this is all used for...
         updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
-        updatedBy: intRcrd.updatedBy,  
+        updatedBy: intRcrd.updatedBy === 'Sarah' ? null : intRcrd.updatedBy,  
         year: intRcrd.source.year       //When filtering interactions by publication date
     };
     if (intRcrd.location) { getLocationData(intRcrd.location); }  //Table & csv export data

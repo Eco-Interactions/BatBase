@@ -70,6 +70,7 @@ function initSearchPage() {
     if (mmryData && mmryData.curFocus) { return initSearchState(mmryData.curFocus); }
     _u.getData('curFocus', true).then(f => initSearchState(f));
 }
+/* -------------- ADD UPDATED SERVER DATA TO LOCAL DB ----------------------- */
 function syncDb(entities, dataUpdatedAt) {
     _u.getAllStoredData().then(data => { mmryData = data; })
     .then(() => downloadAndStoreNewData(entities))
@@ -135,17 +136,29 @@ function parseData(data) {  //shared with init-data. refact
     for (let k in data) { data[k] = JSON.parse(data[k]); }
     return data;
 }
+/* -------------- SYNC UPDATED DATA RECORDS ----------------------- */
 /** Sends the each updated record to the update handler for the entity. */ 
-function storeUpdatedData(rcrds, entity) {  
-    const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
-    const entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
-        addCoreEntityData : addDetailEntityData; 
-    Object.keys(rcrds).forEach(id => {
-        entityHndlr(_u.lcfirst(entity), rcrds[id]);
-    });
+function storeUpdatedData(rcrds, entity) {
+    Object.keys(rcrds).forEach(storeUpdatedDataRecord);
     return Promise.resolve();
+
+    function storeUpdatedDataRecord(id) {
+        if (ifUpdatedByCurUser(rcrds[id])) { return; }
+        const syncRecordData = getEntityUpdateFunc(entity);
+        syncRecordData(entity, rcrds[id]);
+    }
 } 
-function clearMemoryAndLoadTable(dataUpdatedAt) {                                              //console.log('clearMemoryAndLoadTable')
+function ifUpdatedByCurUser(record) {
+    const lclUser = mmryData.user.value;  
+    return lclUser === record.updatedBy; 
+}
+function getEntityUpdateFunc(entity) {
+    const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
+    return coreEntities.indexOf(entity) !== -1 ?  
+        addCoreEntityData : addDetailEntityData;
+}
+/* -------------- ON SYNC COMPLETE ----------------------- */
+function clearMemoryAndLoadTable(dataUpdatedAt) {                               
     const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
     clearMemory();
     _u.setData('lclDataUpdtdAt', dataUpdatedAt);  
@@ -220,7 +233,7 @@ function getRelDataHndlrs(entity, rcrd) {
         'source': {
             'author': { 'authSrcs': addToRcrdAryProp },
             'citation': { 'authors': addContribData, 'source': addToParentRcrd,
-                'tag': addToTagProp },
+                /* 'tag': addToTagProp */ },
             'publication': { 'pubSrcs': addToRcrdAryProp, 'authors': addContribData, 
                 'source': addToParentRcrd, 'editors': addContribData },
             'publisher': { 'publSrcs': addToRcrdAryProp },
@@ -229,7 +242,7 @@ function getRelDataHndlrs(entity, rcrd) {
         'interaction': {
             'location': addInteractionToEntity, 'source': addInteractionToEntity, 
             'subject': addInteractionRole, 'object': addInteractionRole, 
-            'interactionType': addToTypeProp, 'tag': addToTagProp
+            'interactionType': addToTypeProp, //'tag': addToTagProp
         },
         'location': {
             'location': addToParentRcrd, 'habitatType': addToTypeProp, 
@@ -306,15 +319,16 @@ function addToParentRcrd(prop, rcrd, entity) {
     parent.children.push(rcrd.id);
     storeData(prop, rcrds);
 }
-/** Adds a new tagged record to the tag's array of record ids. */
-function addToTagProp(prop, rcrd, entity) {                                 
-    if (!rcrd.tags.length) { return; }  
-    const tagObj = mmryData[prop].value;                                        //console.log("               --addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
-    const toAdd = rcrd.tags.filter(tag => ifNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id));
-    if (!toAdd) { return; }
-    toAdd.forEach(tag => tagObj[tag.id][entity+'s'].push(rcrd.id));
-    storeData(prop, tagObj);
-}
+// NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
+// /** Adds a new tagged record to the tag's array of record ids. */
+// function addToTagProp(prop, rcrd, entity) {                                 
+//     if (!rcrd.tags.length) { return; }  
+//     const tagObj = mmryData[prop].value;                                        //console.log("               --addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
+//     const toAdd = rcrd.tags.filter(tag => ifNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id));
+//     if (!toAdd) { return; }
+//     toAdd.forEach(tag => tagObj[tag.id][entity+'s'].push(rcrd.id));
+//     storeData(prop, tagObj);
+// }
 /** Adds the Taxon's name to the stored names for it's realm and level.  */
 function addToTaxonNames(prop, rcrd, entity) {
     const realm = rcrd.realm.displayName;
@@ -392,12 +406,12 @@ function getRmvDataPropHndlrs(entity) {
         'interaction': {
             'location': rmvIntAndAdjustTotalCnts, 'source': rmvIntFromEntity, 
             'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
-            'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp },
+            'interactionType': rmvFromTypeProp, /* 'tag': rmvFromTagProp */},
         'publication': { 'publicationType': rmvFromTypeProp },
         'publisher': {},
         'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp },
         'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
-            'tag': rmvFromTagProp },
+            /* 'tag': rmvFromTagProp */ },
         'taxon': { 'parentTaxon': rmvFromParent, 'level': rmvFromNameProp,
             'displayName': rmvFromNameProp }
     }[entity];
@@ -453,15 +467,16 @@ function rmvFromTypeProp(prop, rcrd, entity, edits) {
     rmvIdFromAry(type[entity+'s'], rcrd.id);
     storeData(prop, typeObj);
 }
-/** Removes a record from the tag's array of record ids. */
-function rmvFromTagProp(prop, rcrd, entity, edits) {                                 
-    if (!edits.tag.removed) { return; }
-    const tagObj = mmryData[prop].value;
-    edits.tag.removed.forEach(tagId => {
-        rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
-    });
-    storeData(prop, tagObj);
-}
+// NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
+// /** Removes a record from the tag's array of record ids. */
+// function rmvFromTagProp(prop, rcrd, entity, edits) {                                 
+//     if (!edits.tag.removed) { return; }
+//     const tagObj = mmryData[prop].value;
+//     edits.tag.removed.forEach(tagId => {
+//         rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
+//     });
+//     storeData(prop, tagObj);
+// }
 function rmvContrib(prop, rcrd, entity, edits) {                                //console.log("               --rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
     const srcObj = mmryData.source.value;
     edits.contributor.removed.forEach(id => {

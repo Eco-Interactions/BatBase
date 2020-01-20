@@ -28,8 +28,8 @@ const localData = {};
  *   /taxon - Taxon, Realm, Level 
  *   /location - HabitatType, Location, LocationType, GeoJson
  *   /source - Author, Citation, CitationType, Publication, PublicationType, 
- *       Source, SourceType, Tag
- *   /interaction - Interaction, InteractionType  
+ *       Source, SourceType
+ *   /interaction - Interaction, InteractionType, Tag
  */
 export default function initLocalData(reset) {                                  console.log("   --initLocalData");
     return $.when(
@@ -90,6 +90,7 @@ function deriveTaxonData(data) {                                                
     storeTaxaByLevelAndRealm(data.taxon);
     modifyRealmData(data.realm);
     storeLevelData(data.level);
+    delete localData.level;
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
@@ -120,13 +121,13 @@ function storeTaxaByLvl(realm, taxonObj) {
     }
 }
 /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
-function separateTaxaByLevelAndRealm(taxa) {  
+function separateTaxaByLevelAndRealm(taxa) {
     const data = {};
     Object.keys(taxa).forEach(id => addTaxonData(taxa[id], id));
     return data;
     /** Adds the taxon's name (k) and id to it's level's obj. */
-    function addTaxonData(taxon, id) {
-        if (taxon.slug === 'animalia') { return delete taxa[id]; } //not shown anywhere
+    function addTaxonData(taxon, id) {  
+        if (taxon.displayName === 'Animalia') { return delete taxa[id]; } //not shown anywhere
         const realmObj = getRealmObj(taxon);
         const level = taxon.level.displayName;  
         addToRealmLevel(taxon, realmObj, level);
@@ -171,6 +172,8 @@ function deriveLocationData(data) {                                     //consol
     storeData('habTypeNames', getTypeNameData(data.habitatType));
     storeData('locTypeNames', getTypeNameData(data.locationType));
     storeData('location', addInteractionTotalsToLocs(data.location));
+    delete localData.locationType;
+    delete localData.habitatType;
 }
 /** Return an obj with the 2-letter ISO-country-code (k) and the country id (v).*/
 function getCodeNameDataObj(ids, rcrds) { 
@@ -217,16 +220,20 @@ function deriveSourceData(data) {                                       //consol
     storeData('pubSrcs', pubSrcs);              
     storeData('publSrcs', publSrcs);
     storeData('citTypeNames', getTypeNameData(data.citationType));        
-    storeData('pubTypeNames', getTypeNameData(data.publicationType));        
+    storeData('pubTypeNames', getTypeNameData(data.publicationType));      
+    delete localData.citationType;
+    delete localData.publicationType;  
+    delete localData.sourceType;  
 }
 /* -------------------- INTERACTION DATA ------------------------------------ */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
- * [entity]Tags - an object with each entity tag's displayName and id.
  */
 function deriveInteractionData(data) {
     storeData('intTypeNames', getTypeNameData(data.interactionType));
-    storeData('interactionTags', getTagData(data.tag, "Interaction"));        
+    storeData('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));  
+    delete localData.tag;
+    delete localData.interactionType;
 }   
 /** Returns an object with a record (value) for each id (key) in passed array.*/
 function getEntityRcrds(ids, rcrds) {
@@ -248,16 +255,17 @@ function getTypeNameData(typeObj) {
     }  
     return data;
 }
-/** Returns an object with each entity tag's displayName (key) and id. */
-function getTagData(tags, entity) {
-    const data = {};
-    for (var id in tags) {
-        if ( tags[id].constrainedToEntity === entity ) {
-            data[tags[id].displayName] = id;
-        }
-    }  
-    return data;
-}
+// --> SAVE FOR A TIME WHEN MULTIPLE ENTITIES ARE USING TAGS IN THIS WAY <---
+// /** Returns an object with each entity tag's displayName (key) and id. */
+// function getTagData(tags, entity) {
+//     const data = {};
+//     for (var id in tags) {
+//         if ( tags[id].constrainedToEntity === entity ) {
+//             data[tags[id].displayName] = id;
+//         }
+//     }  
+//     return data;
+// }
 /* ---------------------- USER LIST DATA ------------------------------------ */
 /** 
  * [type] - array of user created interaction and filter sets.

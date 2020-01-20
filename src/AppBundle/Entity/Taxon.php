@@ -29,14 +29,13 @@ class Taxon
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
-     * @JMS\Expose
      */
     private $slug;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */

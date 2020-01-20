@@ -29,7 +29,6 @@ class Author
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
-     * @JMS\Expose
      */
     private $slug;
 

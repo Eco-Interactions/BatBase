@@ -5,7 +5,7 @@ import * as _i from '../../../forms-main.js';
  * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
  */
 export default function(fLvl, fClasses, fVals, selId) {                         
-    const formEntity = _i.mmry('getFormProp', ['entity']);  
+    const formEntity = _i.mmry('getFormProp', [fLvl, 'entity']);  
     return _i.elems('buildFormRows', [formEntity, fVals, fLvl])
         .then(buildFormContainer)
 

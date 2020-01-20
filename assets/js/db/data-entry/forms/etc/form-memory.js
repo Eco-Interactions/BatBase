@@ -29,7 +29,7 @@ export function clearMemory() {
  */
 export function initFormMemory(action, entity, id) {  
     const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
-        'author', 'publisher'];
+        'author', 'publisher', 'interactionType'];
     if (ifEditingInteraction(action, entity)) { entities.push('interaction'); }
 
     return _i.util('getData', [entities]).then(data => {

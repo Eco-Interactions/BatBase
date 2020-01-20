@@ -8,7 +8,7 @@ import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as _forms from '../data-entry/forms/forms-main.js';
 import { updateFilterStatusMsg } from './filters/filters-main.js';
 import unqVals from './filters/ag-grid-unique-filter.js';
-import { lcfirst } from '../util.js';
+import { lcfirst, getData } from '../util.js';
 import { enableTableButtons, resetToggleTreeBttn, showTable } from '../ui/ui-main.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
@@ -18,45 +18,46 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(viewTitle, rowData, state) {                               //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+export function init(view, rowData, state) {                               //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
-    initTable(viewTitle, rowData);
-    onTableInitComplete(rowData);
+    initTable(view, rowData)
+    .then(() => onTableInitComplete(rowData));
 }
 function destroyPreviousTable(tblApi) {
     if (tblApi) { tblApi.destroy(); }
 }
-function initTable(viewTitle, rowData) {
-    const tblOpts = getDefaultTblOpts(viewTitle);
-    tblOpts.rowData = rowData;
-    new agGrid.Grid($('#search-tbl')[0], tblOpts);
-    tblState.api = tblOpts.api;
-    tState().set(
-        {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
-    sortTreeColumnIfTaxonFocused(); 
-    onModelUpdated();
+function initTable(view, rowData) {
+    return getBaseTableConfg(view).then(tblOpts => {
+        tblOpts.rowData = rowData;
+        new agGrid.Grid($('#search-tbl')[0], tblOpts);
+        updateTableState(tblOpts, rowData);
+        sortTreeColumnIfTaxonFocused(); 
+        onModelUpdated();
+    });
 }
 /** Base table options object. */
-function getDefaultTblOpts(viewTitle) {  
-    return {
-        columnDefs: getColumnDefs(viewTitle),
-        enableColResize: true,
-        enableFilter: true,
-        enableSorting: true,
-        getHeaderCellTemplate: getHeaderCellTemplate, 
-        getNodeChildDetails: getNodeChildDetails,
-        getRowClass: getRowStyleClass,
-        onBeforeFilterChanged: beforeFilterChange, 
-        onAfterFilterChanged: afterFilterChanged,
-        onBeforeSortChanged: onBeforeSortChanged,
-        onModelUpdated: onModelUpdated,
-        onRowGroupOpened: softRefresh,
-        onRowSelected: rowSelected,
-        rowHeight: 26,
-        rowSelection: 'multiple',   //Used for csv export
-        unSortIcon: true
-    };
+function getBaseTableConfg(viewTitle) {
+    return getColumnDefs(viewTitle).then(colDefs => {
+        return {
+            columnDefs: colDefs,
+            enableColResize: true,
+            enableFilter: true,
+            enableSorting: true,
+            getHeaderCellTemplate: getHeaderCellTemplate, 
+            getNodeChildDetails: getNodeChildDetails,
+            getRowClass: getRowStyleClass,
+            onBeforeFilterChanged: beforeFilterChange, 
+            onAfterFilterChanged: afterFilterChanged,
+            onBeforeSortChanged: onBeforeSortChanged,
+            onModelUpdated: onModelUpdated,
+            onRowGroupOpened: softRefresh,
+            onRowSelected: rowSelected,
+            rowHeight: 26,
+            rowSelection: 'multiple',   //Used for csv export
+            unSortIcon: true
+        };
+    });
 }
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
@@ -96,43 +97,45 @@ function softRefresh() { tblState.api.refreshView(); }
  * plants and arthropods.
  */
 function getColumnDefs(mainCol) { 
-    var realm = tblState.curRealm || false;  
-    var taxonLvlPrefix = realm ? (realm == 2 ? "Subject" : "Object") : "Tree"; 
+    const realm = tblState.curRealm || false;  
+    return getData('tagNames').then(buildColDefs);
 
-    return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-                cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
-                cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
-            {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
-            {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
-            {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
-            {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },            {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
-            {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
-            {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
-            {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
-            {headerName: "Object Class", field: "objClass", width: 10, hide: true },
-            {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
-            {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
-            {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
-            {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
-            {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-            {headerName: "Editor", field: "updatedBy", width: 80, hide: hideEditor(), headerTooltip: "Last Editied By", filter: unqVals },
-            {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
-            {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-            {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
-            {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                filter: unqVals, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '( Blanks )']}},
-            {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
-            {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
-            {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
-            {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-            {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
-            {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-            {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-            {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
-            {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
-            {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+    function buildColDefs(tags) {  console.log('tags = %O', tags)
+        return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
+                    cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
+                    cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
+                {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
+                {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
+                {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
+                {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },            
+                {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
+                {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
+                {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
+                {headerName: "Object Class", field: "objClass", width: 10, hide: true },
+                {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
+                {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
+                {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
+                {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
+                {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
+                {headerName: "Editor", field: "updatedBy", width: 80, hide: hideEditor(), headerTooltip: "Last Editied By", filter: unqVals },
+                {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
+                {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
+                {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
+                    filter: unqVals, filterParams: {values: Object.keys(tags)}},
+                {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
+                {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
+                {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+    }
 }
 /** Adds tooltip to Interaction row cells */
 function addToolTipToCells(params) {
@@ -331,6 +334,12 @@ function getNodeChildDetails(rcrd) {                                            
     if (rcrd.isParent) {
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
+}
+/* -------------------------------------------------------------------------- */
+function updateTableState(tblOpts, rowData) {
+    tblState.api = tblOpts.api;
+    tState().set(
+        {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
 }
 function onTableInitComplete(rowData) {
     hidePopUpMsg();

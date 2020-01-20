@@ -278,10 +278,13 @@ class InteractionType
      */
     public function serializeValidTags()
     {
-        $tags = [];
+        $tags = []; 
 
-        foreach ($this->validTags as $tag) {
-            array_merge($tags, [ $tag->getDisplayName() => $tag->getId() ]);
+        foreach ($this->validTags as $tag) {  
+            array_push($tags, [ 
+                'id' => $tag->getId(), 
+                'displayName' => $tag->getDisplayName() 
+            ]);
         }
 
         return $tags;

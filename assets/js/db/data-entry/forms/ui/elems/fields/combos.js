@@ -26,15 +26,11 @@ import * as _i from '../../../forms-main.js';
  * to allow multiple selections. A data property is added for use form submission.
  */
 export function buildTagField(entity, field, fLvl) {
-    return getSelectOpts(field).then(buildTagElem);
-
-    function buildTagElem(opts) {
-        const attr = { id: field + '-sel', class: 'med-field'};
-        const tagSel = _i.util('buildSelectElem', [opts, attr]);
-        $(tagSel).data('inputType', 'tags');
-        _i.mmry('addComboToMemory', [fLvl, field]);
-        return tagSel;
-    }
+    const attr = { id: field + '-sel', class: 'med-field'};
+    const tagSel = _i.util('buildSelectElem', [[], attr]);
+    $(tagSel).data('inputType', 'tags');
+    _i.mmry('addComboToMemory', [fLvl, field]);
+    return tagSel;
 }
 /* --------------------- SINGLE SELECT/COMBOS ------------------------------- */ 
 /**
@@ -141,7 +137,7 @@ function getSelectOpts(field) {                                                 
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
-        'InteractionTags': [ getTagOpts, 'interaction' ],
+        // 'InteractionTags': [ getTagOpts, 'interaction' ],
         'InteractionType': [ getStoredOpts, 'intTypeNames' ],
         'Location': [ getLocationOpts, null ],
         'Order': [ getTaxonOpts, 'Order' ],
@@ -170,10 +166,11 @@ export function getRcrdOpts(ids, rcrds) {
         return { value: id, text: text };
     });
 }
-/** Returns an array of options objects for tags of the passed entity. */
-function getTagOpts(entity) {
-    return _i.util('getOptsFromStoredData', [entity+"Tags"]);
-}
+// NOTE: DON'T DELETE. USEFUL ONCE TAGS ARE USED FOR MORE THAN JUST INTERACTIONS.
+// /** Returns an array of options objects for tags of the passed entity. */
+// function getTagOpts(entity) {
+//     return _i.util('getOptsFromStoredData', [entity+"Tags"]);
+// }
 /** Returns an array of source-type (prop) options objects. */
 export function getSrcOpts(prop, field, rcrds) {  
     return _i.util('getData', [prop]).then(buildSrcOpts);
