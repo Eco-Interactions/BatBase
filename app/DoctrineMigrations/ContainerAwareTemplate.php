@@ -25,17 +25,7 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
         $this->container = $container;
     }
 
-    /**
-     * @param Schema $schema
-     */
-    public function up(Schema $schema)
-    {
-        $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->getEntity('User', 'id', 6);
-
-    }
-
-    private function getEntity($className, $prop, $val)
+    private function getEntity($className, $val, $prop = 'id')
     {
         return $this->em->getRepository('AppBundle:'.$className)
             ->findOneBy([$prop => $val]);
@@ -48,6 +38,16 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
         }
         $entity->setUpdatedBy($this->admin);
         $this->em->persist($entity);
+    }
+
+    /**
+     * @param Schema $schema
+     */
+    public function up(Schema $schema)
+    {
+        $this->em = $this->container->get('doctrine.orm.entity_manager');
+        $this->admin = $this->getEntity('User', 'id', 6);
+
     }
 
     /**

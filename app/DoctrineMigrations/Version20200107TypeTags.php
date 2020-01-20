@@ -79,7 +79,6 @@ class Version20200107TypeTags extends AbstractMigration implements ContainerAwar
                 $tag->setDescription(null); //Replaces empty strings with null
                 $this->persistEntity($tag);
             }
-
             $this->persistEntity($type);
         }
 
@@ -91,8 +90,8 @@ class Version20200107TypeTags extends AbstractMigration implements ContainerAwar
             'Seed Dispersal' => null,
             'Consumption' => ['Flower', 'Leaf', 'Seed', 'Fruit'],
             'Predation' => null,
-            'Pollination' => null,
-            'Visitation' => null, 
+            'Pollination' => ['Flower'],
+            'Visitation' => ['Flower'], 
             'Roost' => ['Leaf', 'Wood'],
             'Host' => null, 
             'Transport' => ['Arthropod', 'Bryophyte Fragment'],

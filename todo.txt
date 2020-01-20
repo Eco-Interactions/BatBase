@@ -16,13 +16,6 @@ TASKS:
         - tags are restricted by interaction type.
         - are changes made to taxon names updating the taxon level data?
             - test on test server after update
-    
-    - Data Cleanup
-        - remove location name from geosjon database    
-            - add it on the local storage side
-            - or just add the geojson data to locations?
-        - Add animalia parent to arthropod
-        - remove slugs from serialization
 
 
 NEXT:
@@ -87,7 +80,8 @@ Sort:
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
     - REFACTOR - from 'top' to 'main' form
     - REFACTOR - map-markers
-
+    - REFACTOR - get tag names for the tags column filter menu from stored data rather than hard coded.
+    - replace ucfirst and lcfirst with built in 'toUpperCase'
 
 TODOs:
 ##(Category){priority}[difficulty]##

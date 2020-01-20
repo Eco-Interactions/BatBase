@@ -19,6 +19,18 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
+    } 
+
+    private function getEntity($className, $val, $prop = 'id')
+    {
+        return $this->em->getRepository('AppBundle:'.$className)->findOneBy([$prop => $val]);
+    }
+
+    private function persistEntity($entity, $creating = false)
+    {
+        if ($creating) { $entity->setCreatedBy($this->admin); }
+        $entity->setUpdatedBy($this->admin);
+        $this->em->persist($entity);
     }
 
     /**
@@ -29,77 +41,88 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
         //$ents = [[ rmvFrom, addTo ]];
-        // $this->mergeSrcEntities($ents, 'Source', ['detail']);
+        //
+        // $this->mergeEntities($ents, 'Source', 'Publication');
 
         $this->em->flush();
     }
 
-    protected function mergeSrcEntities($ents, $coreEnt, $detail)
+    protected function mergeEntities($ents, $coreClass, $detail)
     {
         foreach ($ents as $ids) {
-            $this->mergeData($ids[0], $ids[1], $coreEnt, $detail);
+            $this->mergeData($ids[0], $ids[1], $coreClass, $detail);
         }
 
     }
-    protected function mergeData($rmvId, $addId, $coreEnt, $detail)
+    protected function mergeData($rmvId, $addId, $coreClass, $detail)
     {
-        $rmv = $this->getEntity($rmvId, $coreEnt);                              //print("\n Remove entity id  = ".$rmvId);
-        $getDetail = 'get'.$detail;
-        $rmvDet = $rmv->$getDetail();
+        $rmv = $this->getEntity($coreClass, $rmvId);                              //print("\n Remove entity id  = ".$rmvId);
 
-        if ($addId) {
-            $add = $this->getEntity($addId, $coreEnt);
-            // $this->mergeMiscData($rmv, $add, $type); 
-            $this->transferChildren($rmv, $add, $coreEnt);
-            // $this->transferInts($rmv, $add, $type);
-            $this->setUpdatedBy($rmv, $add);
-            $this->em->persist($add);
-        }
-        $this->em->persist($rmv);
+        if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
+        if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
+        
+        $this->persistEntity($rmv);
         $this->em->remove($rmv);
-        $this->em->remove($rmvDet);
     }
-    private function getEntity($id, $type)
+
+    private function transferData($coreClass, $addId, $rmv)
     {
-        return $this->em->getRepository('AppBundle:'.$type)->findOneBy(['id' => $id]);
+        $add = $this->getEntity($coreClass, $addId);
+        // $this->mergeMiscData($rmv, $add); 
+        $this->transferChildren($rmv, $add, $coreClass);
+        $this->transferInts($rmv, $add, $coreClass);
+        $this->persistEntity($add, true);
     }
-    private function mergeMiscData(&$rmv, &$add, $type)
+
+    private function removeDetailEntityData($type, $coreEntity)
     {
-        //TODO
-        //Author/Publication/Citation contributions
+        $getDetail = 'get'.$detail;
+        $detailEntity = $coreEntity->$getDetail();
+        $this->em->remove($detailEntity);
+    }
+    private function mergeMiscData(&$rmv, &$add)
+    {
+        //
     }
     private function transferChildren($oldPrnt, $newPrnt, $type)
     {
         $map = [
             'Location' => [ 'ChildLocs', 'ParentLoc' ],
-            'Source' => [ 'ChildSources', 'ParentSource' ]
+            'Source' =>   [ 'ChildSources', 'ParentSource' ],
+            'Taxon' =>    [ 'ChildTaxa', 'ParentTaxon' ]
         ];
-        $childProp = $map[$type][0];
-        $prntProp = $map[$type][1];
-        $getFunc = 'get'.$childProp;
-        $setFunc = 'set'.$prntProp;
-
+        $getFunc = 'get'.$map[$type][0];
+        $setFunc = 'set'.$map[$type][1];
         $children = $oldPrnt->$getFunc();
         if (!count($children)) { return; }                                      print("\nCHILDREN FOUND = ".count($children));
+        
         foreach ($children as $child) {
             $child->$setFunc($newPrnt);
-            $this->em->persist($child);
+            $this->persistEntity($child);
         }
     }
-    private function transferInts($rmv, $add, $prop, &$em)
+    private function transferInts($rmv, $add, $coreClass)
     {
+        $prop = $this->getInteractionProp($add, $coreClass);
 
         foreach ($rmv->getInteractions() as $int) {
             $setFunc = 'set'.$prop;
             $int->$setFunc($add);
-            $em->persist($int);
+            $this->persistEntity($int);
         }
     }
-    private function setUpdatedBy(&$rmv, &$add)
+
+    private function getInteractionProp($add, $coreClass)
     {
-        $rmv->setUpdatedBy($this->admin);
-        $add->setUpdatedBy($this->admin);
+        return $coreClass === 'Taxon' ? $this->getRoleProp($add) : $coreClass;
     }
+
+    private function getRoleProp($taxon)
+    {
+        return $taxon->getRealm()->getSlug() === 'bat' ? 'Subject' : 'Object';
+    }
+
+
     /**
      * @param Schema $schema
      */

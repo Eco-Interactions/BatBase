@@ -233,7 +233,6 @@ function deriveInteractionData(data) {
     storeData('intTypeNames', getTypeNameData(data.interactionType));
     storeData('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));  
     delete localData.tag;
-    delete localData.interactionType;
 }   
 /** Returns an object with a record (value) for each id (key) in passed array.*/
 function getEntityRcrds(ids, rcrds) {
