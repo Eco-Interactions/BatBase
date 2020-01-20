@@ -13,6 +13,7 @@
  */
 import * as _u from '../util.js';
 import * as MM from './map-markers.js'; 
+import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
 import { accessTableState as tState } from '../db-page.js';
 import { create as _create } from '../data-entry/forms/forms-main.js';
@@ -21,7 +22,7 @@ let app;
 
 requireCss();
 fixLeafletBug();
-initAppMemory();
+initMapState();
 /**
  * Added on init and removed from memory on map close
  *     data - (k) entity, (v) all entity data
@@ -37,7 +38,7 @@ initAppMemory();
  *         prevLoc - 
  *         prnt - 
  */         
-function initAppMemory() {
+function initMapState() {
     app = {
         data: {},
         flags: {/*
@@ -50,7 +51,14 @@ function initAppMemory() {
     };
 }
 export function clearMemory() {                                                 //console.log('clearing map memory')
-    initAppMemory();
+    initMapState();
+}
+export function getMapState() {
+    return app;
+}
+export function setMapState(data, k) {
+    if (k) { return app[k] = data; }
+    app = data;
 }
 /** =================== Init Methods ======================================== */
 function requireCss() {
@@ -111,6 +119,16 @@ function ifClickOnMapTool(e) {                                                  
 function getClickedElemClass(elem) {
     return elem.className ? elem.className : 
         elem._container ? elem._container.className : '';
+}
+/**
+ * Drops a new map pin, draws the containing country and displays pins for all  
+ * existing sub locations within the country.
+ */ 
+function dropNewMapPinAndUpdateForm(type, e) {
+    $('#form-map').css('cursor', 'progress');
+    app.geoCoder.reverse(
+        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null); 
+    fillCoordFields(e.latlng);
 }
 function showLatLngPopup(type, e) {
     const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
@@ -562,7 +580,7 @@ function fillCoordFields(latLng) {                                              
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates. 
  */
-function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  //console.log('updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
     updateMapPin(latLng, results[0], zoomFlag); 
 }
@@ -575,11 +593,15 @@ function updateMapPin(latLng, results, zoomFlag) {                              
         if (zoomFlag === 'edit') { $('#'+app.map._container.id).data('loaded'); }
     });
 }
-function buildLocData(results, cntrys) {                                        //console.log('buildLocData. data = %O', data);
+function buildLocData(results, cntrys) {                                        //console.log('buildLocData. results = %O', results);
     return {
-        cntryId: cntrys[results.properties.address.country_code.toUpperCase()],
+        cntryId: getCountryId(cntrys, results.properties.address),
         name: results.name
     };
+}
+function getCountryId(cntrys, address) {
+    if (address.state === 'French Guiana') { return 210; }
+    return cntrys[address.country_code.toUpperCase()];
 }
 /** Note: MarkerType triggers the marker's popup build method.  */
 function replaceMapPin(latLng, loc, zoomFlag) {
@@ -589,7 +611,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
-        addParentLocDataToMap(loc.cntryId, true);
+        addParentLocDataToMap(loc.cntryId, null);
     }
     addPinToMap(latLng, marker.layer, zoomFlag);   
 }
@@ -617,14 +639,14 @@ export function initFormMap(parent, rcrds, type) {                              
     downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);
 } 
 function finishFormMap(parentId, type) {                                        //console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
-    addLocCountLegend();
+    _elems.addLocCountLegend(app.map);
     if (type === 'int') {
-        addNewLocBttn();
+        _elems.addNewLocBttn(app.map);
     } else if (type === 'edit') {
-        addClickToCreateLocBttn();
+        _elems.addClickToCreateLocBttn(app.map);
     } else { //'create'
-        addClickToCreateLocBttn();
-        addDrawNewLocBoundaryBttn();
+        _elems.addClickToCreateLocBttn(app.map);
+        _elems.addDrawNewLocBoundaryBttn(app.map);
     }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);
@@ -638,21 +660,25 @@ function addParentLocDataToMap(id, skipZoom, type, locId) {
     const loc = app.data.locs[id];
     if (!loc) { return console.log('No country data matched in geocode results'); }
     const geoJson = loc.geoJsonId ? app.data.geo[loc.geoJsonId] : false;
-    const hasPolyData = geoJson && geoJson.type !== 'Point';
-    if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }
+    drawLocPolygon(loc, geoJson, skipZoom);
     if (type === 'map') { return; }
-    const zoomLvl = hasPolyData || skipZoom ? false : 
-        loc.locationType.displayName === 'Region' ? 3 : 8;
+    const zoomLvl = app.volatile.poly || skipZoom ? false : 
+        loc.locationType.displayName === 'Region' ? 3 : 8;  
     showChildLocs(id, zoomLvl, type, locId);
 }
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */
-function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
-    if (app.volatile.poly) { app.map.removeLayer(app.volatile.poly); }
+function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map. args = %O', arguments);
+    if (app.volatile.poly) { removePolyLayer() }
+    if (!geoJson || geoJson.type == 'Point') { return; }
     let feature = buildFeature(loc, geoJson);
     app.volatile.poly = L.geoJSON(feature);                                         
     app.volatile.poly.addTo(app.map);
     if (skipZoom) { return; }
     app.map.fitBounds(app.volatile.poly.getBounds(), { padding: [10, 10] });
+}
+function removePolyLayer() {
+    app.map.removeLayer(app.volatile.poly);
+    delete app.volatile.poly;
 }
 /** 
  * Adds all child locations to map and zooms according to passed zoomLvl. 
@@ -676,7 +702,7 @@ function addChildLocsToMap(prnt, coords, type, locId) {
     const noGpsLocs = [];
     const locs = getChildLocData(prnt);   
     addLocsWithGpsDataToMap();
-    addCountToLegend(locs.length, noGpsLocs.length, prnt);
+    _elems.addCountToLegend(locs.length, noGpsLocs.length, prnt);
     if (noGpsLocs.length) { addLocsWithoutGpsDataToMap(noGpsLocs.length); }
 
     function addLocsWithGpsDataToMap() {
@@ -717,127 +743,4 @@ function getChildLocData(prnt) {
     return prnt.children.map(id => app.data.locs[id]).filter(loc => {
         return loc.locationType.displayName !== 'Habitat' || loc.totalInts > 0;        
     });
-}
-/*--- Location Count Legend ---*/
-function addLocCountLegend() {
-    const legend = L.control({position: 'topright'});
-    legend.onAdd = addLocCountHtml;
-    legend.addTo(app.map);
-}
-function addLocCountHtml() {
-    return _u.buildElem('div', { id: 'cnt-legend', class: 'info legend flex-col'});
-}
-function addCountToLegend(ttlLocs, noGpsDataCnt, prnt) {
-    const noGpsDataHtml = noGpsDataCnt === 0 ? null : 
-        `<span style="align-self: flex-end;">${noGpsDataCnt} without GPS data</span>`;
-    const plural = ttlLocs === 1 ? '' : 's';    
-    let name = getLocName(prnt.displayName);
-    $('#cnt-legend').html(`
-        <h3 title='${prnt.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
-        ${noGpsDataHtml ? noGpsDataHtml : ''}`);
-}
-function clearLocCountLegend() {
-    $('#cnt-legend').html('');
-}
-function getLocName(name) {
-    name = name.split('[')[0];                                
-    return name.length < 22 ? name : name.substring(0, 19)+'...';
-}
-/*--- Create New Location Button ---*/
-function addNewLocBttn() {
-    addNewLocControl();
-    L.control.create({ position: 'topleft' }).addTo(app.map);
-}
-function addNewLocControl() {
-    L.Control.Create = L.Control.extend({
-        onAdd: map => {
-            const bttn = createNewLocBttn();
-            $(bttn).click(_create.bind(null, 'location', null));
-            return bttn;
-        },
-        onRemove: map => {}
-    });
-    L.control.create = opts => new L.Control.Create(opts);
-}
-function createNewLocBttn() {
-    const className = 'custom-icon leaflet-control-create',
-        container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('input', className + '-icon', container);
-    button.type = 'button';
-    $(container).attr('title', "Create New Location").append(button);
-    return container;
-}
-/*--- Click To Create New Location Button ---*/
-function addClickToCreateLocBttn() {
-    addNewLocHereControl();
-    L.control.createHere({ position: 'topleft' }).addTo(app.map);
-}
-function addNewLocHereControl() {
-    L.Control.CreateHere = L.Control.extend({
-        onAdd: function(map) {
-            const bttn = createNewLocHereBttn();
-            L.DomEvent.on(bttn, 'click', createNewLocHere);
-            return bttn;
-        },
-        onRemove: function(map) {}
-    });
-    L.control.createHere = function(opts) {return new L.Control.CreateHere(opts);}
-}
-function createNewLocHereBttn() {
-    const className = 'custom-icon leaflet-control-click-create',
-        container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('input', className + '-icon', container);
-    button.type = 'button';
-    
-    $(container).attr('title', "Click on map to select location position").append(button);
-    return container;
-}
-/**
- * Sets a flag that will trigger reverse geocode of the coordinates of subsequent 
- * map clicks.
- */
-function createNewLocHere(e) {                                                  //console.log('Create new location with click! %O', e)
-    const buttonActive = app.flags.onClickDropPin ? !app.flags.onClickDropPin : true;
-    const $bttn = $('input.leaflet-control-click-create-icon');
-    app.flags.onClickDropPin = buttonActive;
-    buttonActive ? $bttn.addClass('active-icon') : $bttn.removeClass('active-icon');
-}
-/**
- * Drops a new map pin, draws the containing country and displays pins for all  
- * existing sub locations within the country.
- */ 
-function dropNewMapPinAndUpdateForm(type, e) {
-    $('#form-map').css('cursor', 'progress');
-    app.geoCoder.reverse(
-        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null); 
-    fillCoordFields(e.latlng);
-}
-/*--- Draw Location Boundary Bttn ---*/
-function addDrawNewLocBoundaryBttn() {
-    addDrawLocBoundsCountrol();
-    L.control.draw({ position: 'topleft' }).addTo(app.map);
-}
-function addDrawLocBoundsCountrol() {
-    L.Control.Draw = L.Control.extend({
-        onAdd: function(map) {
-            const bttn = createDrawLocBttn();
-            L.DomEvent.on(bttn, 'click', drawNewLocBounds);
-            return bttn;
-        },
-        onRemove: function(map) {}
-    });
-    L.control.draw = function(opts) {return new L.Control.Draw(opts);}
-}
-function createDrawLocBttn() {
-    const className = 'custom-icon leaflet-control-draw',
-        container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('input', className + '-icon', container);
-    button.type = 'button';
-    
-    $(button).attr('disabled', 'disabled').css('opacity', '.666');
-    $(container).attr('title', "Draw new location boundary on map").append(button);
-    return container;
-}
-function drawNewLocBounds() {                                                   console.log('Draw new location boundary!')
-
 }
