@@ -8,7 +8,7 @@
  *     addClickToCreateLocBttn
  *     addDrawNewLocBoundaryBttn
  */
-import * as _u from '../util.js';
+import * as _u from '../util/util.js';
 import { getMapState, setMapState } from './map-main.js';
 
 

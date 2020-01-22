@@ -4,7 +4,7 @@
  * Export:
  *     initLocalData
  *
- * Code Sections:
+ * TOC:
  *     DOWNLOAD DATA
  *     DERIVE DATA
  *         TAXON DATA
@@ -15,8 +15,8 @@
  *         HELPERS
  *    STORE DATA
  */
-import * as _u from '../util.js';
-import { resetDataTable, initSearchState } from '../db-page.js';
+import * as _u from '../util/util.js';
+import { resetDataTable, initSearchState } from '../db-main.js';
 
 const localData = {};
 /* ======================= DOWNLOAD DATA ==================================== */
@@ -46,7 +46,6 @@ export default function initLocalData(reset) {                                  
     function loadDatabaseTable() {
         if (reset) { resetDataTable('taxa'); 
         } else { initSearchState(); }
-        // return Promise.resolve();
     }
 }
 /**
@@ -162,7 +161,7 @@ function modifyRealmData(realms) {                                              
  * [entity]Names - an object with each entity's displayName(k) and id.
  * *location - resaved locations with an additional data point for countries. 
  */
-function deriveLocationData(data) {                                     //console.log('loc data to store = %O', data);
+function deriveLocationData(data) {                                             //console.log('loc data to store = %O', data);
     const regns = getTypeObj(data.locationType, 'region', 'locations');
     const cntries = getTypeObj(data.locationType, 'country', 'locations');       //console.log('reg = %O, cntry = %O', regns, cntries);
     storeData('countryNames', getNameDataObj(cntries, data.location));
@@ -212,7 +211,7 @@ function addInteractionTotalsToLocs(locs) {
  * [entity]Names - an object with each entity's displayName(k) and id.
  * [entity]Sources - an array with of all source records for the entity type.
  */
-function deriveSourceData(data) {                                       //console.log("source data = %O", data);
+function deriveSourceData(data) {                                               //console.log("source data = %O", data);
     const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
     const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
     const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources'); 

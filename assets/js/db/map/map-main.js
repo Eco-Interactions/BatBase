@@ -11,12 +11,12 @@
  *   showInts                   db_page, db_ui
  *   showLoc                    db_page
  */
-import * as _u from '../util.js';
 import * as MM from './map-markers.js'; 
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
-import { accessTableState as tState } from '../db-page.js';
-import { create as _create } from '../data-entry/forms/forms-main.js';
+import * as _u from '../util/util.js';
+import { accessTableState as tState } from '../db-main.js';
+import { create as _create } from '../forms/forms-main.js';
 
 let app;
 

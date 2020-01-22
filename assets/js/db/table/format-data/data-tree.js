@@ -17,8 +17,8 @@
  *     buildSrcTree     db-page, save-ints
  *     buildTxnTree     db-page, save-ints
  */
-import { accessTableState as tState } from '../../db-page.js';
-import * as _u from '../../util.js';
+import { accessTableState as tState } from '../../db-main.js';
+import * as _u from '../../util/util.js';
 
 let focusRcrds; //Refreshed with each new entry into the module.
 let tblState;

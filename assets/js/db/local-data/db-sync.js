@@ -20,9 +20,9 @@
  *         ERRS
  * 
  */
-import * as _u from '../util.js';
-import { err as _errs, entity as _entity } from '../data-entry/forms/forms-main.js';
-import { initSearchState, showIntroAndLoadingMsg } from '../db-page.js';
+import * as _u from '../util/util.js';
+import { val as _valErr , forms as _forms } from '../forms/forms-main.js';
+import { initSearchState, showIntroAndLoadingMsg } from '../db-main.js';
 import initLocalData from './init-data.js';
 
 let failed = { errors: [], updates: {}};
@@ -547,7 +547,7 @@ function updateCitations(rcrds, cites) {                                        
             publisherRcrds: rcrds[2],
             srcRcrds: mmryData['source']
         };
-        const citText = _entity('rebuildCitationText', [params]);       
+        const citText = _forms('rebuildCitationText', [params]);       
         return updateCitationData(citSrc, citText);
     }
 }
@@ -555,13 +555,13 @@ function updateCitations(rcrds, cites) {                                        
 function updateCitationData(citSrc, text) { 
     const data = { srcId: citSrc.id, text: text };
     return _u.sendAjaxQuery(
-        data, 'crud/citation/edit', Function.prototype, _errs.formSubmitError);
+        data, 'crud/citation/edit', Function.prototype, _val.formSubmitError);
 }
 function onUpdateSuccess(ajaxData) { 
     return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
 }
 function handledUpdatedSrcData(data) {                                          
-    if (data.errors) { return Promise.resolve(_errs.errUpdatingData(data.errors)); }
+    if (data.errors) { return Promise.resolve(_val.errUpdatingData(data.errors)); }
     // parseEntityData(data.results);
     return updateEntityData(data.results);
 }

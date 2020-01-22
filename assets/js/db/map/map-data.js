@@ -5,8 +5,8 @@
  * Export defaut:        Imported by:
  *     buildMapDataObj      db_map
  */
-import { accessTableState as tState } from '../db-page.js';
-import * as _u from '../util.js';
+import * as _u from '../util/util.js';
+import { accessTableState as tState } from '../db-main.js';
 
 export default function buildMapDataObj(viewRcrds, rcrds) { 
     const tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);

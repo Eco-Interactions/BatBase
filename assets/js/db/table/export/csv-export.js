@@ -13,9 +13,9 @@
  * Export default:
  *     exportCsvData
  */
-import * as _u from '../../util.js';
-import { accessTableState as tState } from '../../db-page.js';
-import { collapseTree, expandTreeByOne, fadeTable, showTable } from '../../ui/ui-main.js';
+import * as _u from '../../util/util.js';
+import { accessTableState as tState } from '../../db-main.js';
+import { collapseTree, expandTreeByOne, fadeTable, showTable } from '../../pg-ui/ui-main.js';
 import { buildLocTree, buildSrcTree, buildTxnTree } from '../format-data/data-tree.js';
 
 let tblState;  

@@ -5,12 +5,12 @@
  *     init            db_page, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
-import * as _forms from '../data-entry/forms/forms-main.js';
+import * as _forms from '../forms/forms-main.js';
 import { updateFilterStatusMsg } from './filters/filters-main.js';
 import unqVals from './filters/ag-grid-unique-filter.js';
-import { lcfirst, getData } from '../util.js';
-import { enableTableButtons, resetToggleTreeBttn, showTable } from '../ui/ui-main.js';
-import { accessTableState as tState, showLocOnMap } from '../db-page.js';
+import { lcfirst, getData } from '../util/util.js';
+import { enableTableButtons, resetToggleTreeBttn, showTable } from '../pg-ui/ui-main.js';
+import { accessTableState as tState, showLocOnMap } from '../db-main.js';
 
 let tblState;
 

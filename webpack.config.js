@@ -54,7 +54,7 @@ Encore
     }])
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/app/oi.js')
-    .addEntry('db', './assets/js/db/db-page.js')
+    .addEntry('db', './assets/js/db/db-main.js')
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.

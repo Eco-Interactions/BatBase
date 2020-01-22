@@ -7,6 +7,7 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
+    - replace 'err' in form code
 QUESTIONS:
     -
 
@@ -18,9 +19,11 @@ TASKS:
             - test on test server after update
 
 
+
 NEXT:
     - Create model of local storage
         - of entity relations
+    - Track machines set to a language not currently handled with our translations
 
 Change Log:
     - 
@@ -153,3 +156,9 @@ TODOs:
             - https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
         - {low}[easy] Fix author field after create form exited
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
+
+
+
+> CODE REVIEW 
+    - Is there a better name for the form's "detail-panel"?
+    - openSubFormErr ??

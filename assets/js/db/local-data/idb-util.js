@@ -12,14 +12,12 @@
  *     setData              util
  */
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
-import * as _u from '../util.js';
-import * as db_page from '../db-page.js';
-
+import * as _u from '../util/util.js';
 import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-sync.js';
 
 const _db = {
     geoJson: null, 
-    v: .033
+    v: .035
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */

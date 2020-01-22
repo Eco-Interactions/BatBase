@@ -17,11 +17,11 @@
  *     updatePubSearch                  util
  *     updateTaxonSearch                util
  */
-import * as _u from '../../util.js';
-import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-page.js';
-import * as db_ui from '../../ui/ui-main.js';
-import { resetStoredFiltersUi, savedFilterSetActive } from '../../ui/panels/save-fltrs.js';
-import { savedIntListLoaded } from '../../ui/panels/save-ints.js';
+import * as _u from '../../util/util.js';
+import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
+import * as db_ui from '../../pg-ui/ui-main.js';
+import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/save-fltrs.js';
+import { savedIntListLoaded } from '../../pg-ui/panels/save-ints.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
