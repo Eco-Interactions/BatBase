@@ -17,11 +17,11 @@ function getFormConfgData(entity, fLvl) {
         entity: entity,
         form: _f.confg('getFormConfg', [entity]), 
         type: getEntityTypeFormConfg(entity, fLvl),
-        showAll: _f.mmry('getFormProp', [fLvl, 'expanded'])
+        showAll: _f.state('getFormProp', [fLvl, 'expanded'])
     };
 }
 function getEntityTypeFormConfg(entity, fLvl) {
-    const type = _f.mmry('getFormProp', [fLvl, 'entityType'])
+    const type = _f.state('getFormProp', [fLvl, 'entityType'])
     return type ? _f.confg('getFormConfg', [entity]).types[type] : false;
 }
 function getIncludedFields(confg) {

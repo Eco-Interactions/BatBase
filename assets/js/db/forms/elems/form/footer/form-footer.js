@@ -9,13 +9,13 @@
  */
 import * as _f from '../../../forms-main.js';
 
-let formMmry;
+let _fs;
 /**
  * Returns row with a checkbox that will toggle optional form fields on the left 
  * and the submit/cancel buttons on the right.
  */
-export default function (entity, level, action) {               
-    formMmry = _f.mmry('getFormState').forms[level];   
+export default function(entity, level, action) {               
+    _fs = _f.state('getFormState').forms[level];   
     const cntnr = _f.util('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     $(cntnr).append(...buildFooterElems(entity, level, action));
     return cntnr;
@@ -52,7 +52,7 @@ function getCheckbox(level, entity) {
 function buildChkbxInput(level) {
     const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };
     const input = _f.util('buildElem', ['input', attr]); 
-    if (formMmry.expanded) { input.checked = true; }
+    if (_fs.expanded) { input.checked = true; }
     return input;
 }
 function setToggleEvent(level, entity, chkbx) {
@@ -100,7 +100,7 @@ function getSubmitEvent(entity, level) {
     return _f.submitForm.bind(null, '#'+level+'-form', level, entity);
 }
 function getCancelFunc(entity, level) {
-    const onExit = formMmry ? formMmry.onFormClose : Function.prototype;
+    const onExit = _fs ? _fs.onFormClose : Function.prototype;
     return level === 'top' ? _f.exitFormWindow : 
         _f.exitFormLevel.bind(null, level, true, onExit);
 }

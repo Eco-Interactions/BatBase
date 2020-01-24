@@ -133,12 +133,12 @@ function getSrcIntCnt(entity, rcrd) {                                           
         rcrd.interactions.length : getAllSourceInts(rcrd); 
 }
 function getAllSourceInts(rcrd) {
-    const srcRcrds = _f.mmry('getEntityRcrds', ['source']);
+    const srcRcrds = _f.state('getEntityRcrds', ['source']);
     return getTtlIntCnt(rcrd, 'interactions', srcRcrds);
 }
 /* ------------- TAXON --------- */
 function fillTxnDetailData(entity, rcrd) {
-    const txnRcrds = _f.mmry('getEntityRcrds', ['taxon']);
+    const txnRcrds = _f.state('getEntityRcrds', ['taxon']);
     const refs = { 
         'int': getTtlIntCnt(rcrd, 'objectRoles', txnRcrds) || 
             getTtlIntCnt(rcrd, 'subjectRoles', txnRcrds)
@@ -247,17 +247,17 @@ function getAllLocData(locRcrd) {
 /** Adds source data to the interaction form's detail panel. */
 export function updateSrcDetails(entity) {                                      //console.log('           --updateSrcDetails');
     const data = {}; 
-    const srcRcrds = _f.mmry('getEntityRcrds', ['source']);  
+    const srcRcrds = _f.state('getEntityRcrds', ['source']);  
     buildSourceData();
     addDataToIntDetailPanel('src', data);
 
     function buildSourceData() { 
         const pubSrc = srcRcrds[$('#Publication-sel').val()]; 
-        const pub = _f.mmry('getRcrd', ['publication', pubSrc.publication]);
+        const pub = _f.state('getRcrd', ['publication', pubSrc.publication]);
         const pubType = getSrcType(pub, 'publication');  
         const citId = $('#CitationTitle-sel').val();
         const citSrc = citId ? srcRcrds[citId] : false;  
-        const cit = !citSrc ? false :  _f.mmry('getRcrd', ['citation', citSrc.citation]);
+        const cit = !citSrc ? false :  _f.state('getRcrd', ['citation', citSrc.citation]);
         const citType = cit ? getSrcType(cit, 'citation') : false;              //console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit); 
 
         addCitationText();

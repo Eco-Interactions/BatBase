@@ -111,13 +111,13 @@ export function buildSrcRowData(tree, tblState) {
 }
 function getSrcRowData(src, treeLvl, idx, tblState) {               /*debg-log*///console.log("getSrcRowData. source = %O", src);
     const entity = src.sourceType.displayName;
-    const detailId = entity === "Publication" ? src.publication.id : null;  
+    const pubType =  entity === "Publication" ? src.publication.publicationType.id : null;  
     const displayName = src.displayName.includes('(citation)') ? 
         'Whole work cited.' : src.displayName;
     return {
         id: src.id,
         entity: entity,
-        pubId: detailId,
+        type: pubType,
         name: displayName,
         isParent: true,      
         parentSource: src.parent,

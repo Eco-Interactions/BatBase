@@ -38,11 +38,11 @@ import * as _f from '../../forms-main.js';
  * field's combobox and completing the appended sub-form.
  */
 export function initCreateForm(entity) {                                        console.log('   //Building New Interaction Form');
-    _f.mmry('initFormState', ['create', 'interaction'])
+    _f.state('initFormState', ['create', 'interaction'])
     .then(getInteractionFormFields)
     .then(fields => _f.elems('buildAndAppendForm', [fields]))
     .then(finishInteractionFormBuild)
-    .then(() => _f.mmry('setOnFormCloseHandler', ['top', resetInteractionForm]))
+    .then(() => _f.state('setOnFormCloseHandler', ['top', resetInteractionForm]))
     .catch(err => _f.util('alertErr', [err]));
 }
 /** Builds and returns all interaction-form elements. */
@@ -59,12 +59,12 @@ function resetInteractionForm() {
     _f.elems('showSuccessMsg', ['New Interaction successfully created.']);
     resetIntFields(vals); 
     resetFormUi();
-    _f.mmry('setOnFormCloseHandler', ['top', resetInteractionForm]);
+    _f.state('setOnFormCloseHandler', ['top', resetInteractionForm]);
 }
 function resetFormUi() {
     $('#top-cancel').val(' Close ');  
     _f.elems('toggleSubmitBttn', ['#top-submit', false]);
-    _f.mmry('setFormProp', ['top', 'unchanged', true]);
+    _f.state('setFormProp', ['top', 'unchanged', true]);
 }
 /** Returns an obj with the form fields and either their pinned values or false. */
 function getPinnedFieldVals() {
@@ -90,7 +90,7 @@ function getPinnedFieldVals() {
  */
 function resetIntFields(vals) {                                                 console.log('resetIntFields. vals = %O', vals);
     _f.elems('toggleSubmitBttn', ["#top-submit", false]);
-    _f.mmry('initEntityFormMemory', ['interaction', 'top', null, 'create']);
+    _f.state('addEntityFormState', ['interaction', 'top', null, 'create']);
     resetUnpinnedFields(vals);
     fillPubDetailsIfPinned(vals.Publication);
 }
@@ -108,7 +108,7 @@ function clearField(field, vals) {
     if (field === 'Location') { syncWithCountryField(vals['Country-Region']); }
 }
 function clearFieldMemory(field) {
-    _f.mmry('setFormFieldData', ['top', field, null]);
+    _f.state('setFormFieldData', ['top', field, null]);
     ifTaxonFieldClearData(field);
 }
 function ifTaxonFieldClearData(field) {  
@@ -124,7 +124,6 @@ function fillPubDetailsIfPinned(pub) {
 }
 /** ======================== EDIT FORM ====================================== */
 export function finishEditFormBuild(entity) {
-    // mmry = _f.mmry('getFormState');
     finishInteractionFormBuild();
 }
 /** =================== ON FORM INIT COMPLETE =============================== */
@@ -176,7 +175,6 @@ function finishComboboxInit() {
     _f.cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
     _f.cmbx('enableCombobox', ['#InteractionTags-sel', false]);
-    focusPubFieldIfNewRecord();
 }
 /** Inits comboboxes for the interaction form and the Subject/Object select forms. */
 export function initFormCombos(entity, fLvl) {
@@ -213,7 +211,7 @@ function create(entity, fLvl) {
 function createTaxon(lvl) {
     return (val) => {
         createSubEntity(null, lvl, 'sub2')
-        .then(() => _f.mmry('setOnFormCloseHandler', ['sub2', enableTaxonLvls]))
+        .then(() => _f.state('setOnFormCloseHandler', ['sub2', enableTaxonLvls]))
         .then(() => enableTaxonLvls(false));
     }
 }
@@ -225,7 +223,7 @@ function ifFormAlreadyOpenAtLevel(fLvl) {
     return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
 }
 function focusPubFieldIfNewRecord() {
-    const action = _f.mmry('getFormProp', ['top', 'action']);
+    const action = _f.state('getFormProp', ['top', 'action']);
     _f.cmbx('focusCombobox', ['#Publication-sel', action === 'create']);
 }
 function openSubFormErr(ent, fLvl) {
@@ -257,8 +255,7 @@ function onPubSelection(val) {                                                  
     fillCitationField(val);
     _f.panel('updateSrcDetails', ['pub']);
     if (!hasCitation(val)) { return createSubEntity('citation', 'sub'); }
-    ifCreateFormFocusFieldPin('#Publication_pin');
-    // if (!mmry.editing) { $('#Publication_pin').focus(); }
+    focusPinAndEnableSubmitIfFormValid('Publication');
 }
 function hasCitation(val) {
     return getRcrd('source', val).children.length;
@@ -305,7 +302,7 @@ function onCntryRegSelection(val) {                                             
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
     const loc = getRcrd('location', val);
     fillLocationSelect(loc);
-    if (!mmry.editing) { $('#Country-Region_pin').focus(); }
+    focusPinAndEnableSubmitIfFormValid('Country-Region');
     if ($('#form-map').length) { showCountryDataOnMap(val); }    
 }
 function showCountryDataOnMap(val) {
@@ -391,7 +388,7 @@ function getObjectRealm() {
 function onRealmSelection(val) {                                                //console.log("               --onRealmSelection. val = ", val)
     if (val === '' || isNaN(parseInt(val))) { return; }
     clearPreviousRealmLevelCombos();
-    _f.mmry('initRealmState', ['Object', val])
+    _f.state('initRealmState', ['Object', val])
     .then(buildAndAppendRealmRows);
     /** A row for each level present in the realm filled with the taxa at that level.  */
     function buildAndAppendRealmRows() {  
@@ -400,7 +397,7 @@ function onRealmSelection(val) {                                                
     }
     function appendRealmRowsAndFinishBuild(rows) {  
         $('#Realm_row').after(rows);
-        _f.mmry('setFormFieldData', ['sub', 'Realm', null, 'select']);
+        _f.state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
     }
 }
@@ -419,19 +416,14 @@ function initTaxonSelectForm(role, realmId) {
         .then(() => finishTaxonSelectBuild(role));
 }
 function buildTaxonSelectForm(role, realmId) {                                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
-    initFormLvlMmry(role);
-    return _f.mmry('initRealmState', [role, realmId])
-        .then(setScopeTaxonMemory)
+    addNewFormState(role);
+    return _f.state('initRealmState', [role, realmId])
         .then(() => _f.elems('initSubForm', 
             ['sub', 'sml-sub-form', {Realm: realmId}, '#'+role+'-sel']));
 }
-function initFormLvlMmry(role) {
+function addNewFormState(role) {
     const lcRole = _f.util('lcfirst', [role]);
-    _f.mmry('initEntityFormMemory', [lcRole, 'sub', '#'+role+'-sel', 'create']);
-}
-function setScopeTaxonMemory(txnMmry) {
-    mmry.forms.realmData = txnMmry;
-    return Promise.resolve();
+    _f.state('addEntityFormState', [lcRole, 'sub', '#'+role+'-sel', 'create']);
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -525,7 +517,7 @@ function selectPrevTaxon(taxon, role) {
 }
 function addTaxonOptToTaxonMemory(taxon) {
     const displayName = _f.getTaxonDisplayName(taxon);
-    _f.mmry('setRealmProp', ['prevSel', {val: taxon.id, text: displayName }]);
+    _f.state('setRealmProp', ['prevSel', {val: taxon.id, text: displayName }]);
 }
 function ifTaxonInDifferentRealm(realm) {  
     return realm.displayName !== 'Bat' && $('#Realm-sel').val() != realm.id;
@@ -708,19 +700,16 @@ function getSelectedTaxonOption() {
     const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
     return { value: taxon.id, text: _f.getTaxonDisplayName(taxon) };
 }
-/** 
- * Finds the most specific level with a selection and returns that taxon record.
- * Note: Called from other modules, so mmry is not always present here.
- */
+/** Finds the most specific level with a selection and returns that taxon record. */
 export function getSelectedTaxon(aboveLvl) {
     const selElems = $('#sub-form .selectized').toArray();  
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
     const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
-    return !selected ? false : _f.mmry('getRcrd', ['taxon', $(selected).val()]);
+    return !selected ? false : _f.state('getRcrd', ['taxon', $(selected).val()]);
     
     function ifEditingTaxon() {
-        const action = mmry ? mmry.forms.top.action : _f.mmry('getFormProp', ['top', 'action']);
-        const entity = mmry ? mmry.forms.top.entity : _f.mmry('getFormProp', ['top', 'entity']);
+        const action = _f.state('getFormProp', ['top', 'action']);
+        const entity = _f.state('getFormProp', ['top', 'entity']);
         return action == 'edit' && entity == 'taxon';
     }
 }
@@ -753,7 +742,7 @@ function enableTaxonCombos() {
     _f.cmbx('enableCombobox', ['#Object-sel']);
 }
 function getRealmData(prop) {
-    return prop ? _f.mmry('getTaxonProp', [prop]) : _f.mmry('getRealmState');
+    return prop ? _f.state('getTaxonProp', [prop]) : _f.state('getRealmState');
 }
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
 function onInteractionTypeSelection(val) {
@@ -763,20 +752,22 @@ function onInteractionTypeSelection(val) {
 function fillAndEnableTags(id) {
     const tagOpts = buildTagOpts(id);
     _f.cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
-    _f.cmbx('enableCombobox', ['#InteractionTags-sel', tagOpts.length > 1]);
-    if (tagOpts.length !== 1) { return; }
-    _f.cmbx('setSelVal', ['#InteractionTags-sel', tagOpts[0].value]);
+    _f.cmbx('enableCombobox', ['#InteractionTags-sel', true]);
+    if (tagOpts.length !== 2) { return; }
+    _f.cmbx('setSelVal', ['#InteractionTags-sel', getDefaultTag(tagOpts)]);
 }
 function buildTagOpts(id) { 
     const type = getRcrd('interactionType', id);
     return type.tags.map(t => {  return {value: t.id, text: t.displayName}; })
 }
-/* ========================== HELPERS ======================================= */
-function ifCreateFormFocusFieldPin() {
-    // body...
+function getDefaultTag(tags) {
+    const tag = tags.find(t => t.text !== 'Secondary');
+    return tag.value;
 }
+/* ========================== HELPERS ======================================= */
 function focusPinAndEnableSubmitIfFormValid(field) {
-    if (!mmry.editing) { $('#'+field+'_pin').focus(); }
+    const editing = _f.state('getFormProp', ['top', 'action']) === 'edit';
+    if (!editing) { $('#'+field+'_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
 }
 /**
@@ -796,13 +787,13 @@ function checkIntFieldsAndEnableSubmit() {
  * flag tracking the state of the new interaction form.  
  */
 function resetIfFormWaitingOnChanges() {  
-    if (!_f.mmry('getFormProp', ['top', 'unchanged'])) { return; }
+    if (!_f.state('getFormProp', ['top', 'unchanged'])) { return; }
     _f.elems('exitSuccessMsg');
-    _f.mmry('setFormProp', ['top', 'unchanged', false]);
+    _f.state('setFormProp', ['top', 'unchanged', false]);
 }
 function getRcrd(entity, id) {
-    return _f.mmry('getRcrd', [entity, id]);
+    return _f.state('getRcrd', [entity, id]);
 }
 function getRcrds(entity) {
-    return _f.mmry('getEntityRcrds', [entity]);
+    return _f.state('getEntityRcrds', [entity]);
 }

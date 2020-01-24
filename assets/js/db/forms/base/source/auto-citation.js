@@ -10,9 +10,8 @@ import * as _f from '../../forms-main.js';
 
 /** Generates full citation text after all required fields are filled. */
 export function getCitationText(fLvl) {    
-    const pubData = _f.mmry('getFormProp', [fLvl, 'rcrds']);                    console.log('getCitationText [%s]. rcrds = %O', fLvl, pubData);
-    
-    const type = $('#CitationType-sel option:selected').text();                 //console.log("getCitationText for [%s]", type);
+    const pubData = _f.state('getFormProp', [fLvl, 'rcrds']);                   //console.log('getCitationText [%s]. rcrds = %O', fLvl, pubData);
+    const type = $('#CitationType-sel option:selected').text();                 console.log("getCitationText for [%s]", type);
     return _f.getFormValData('citation', null, null)
         .then(generateCitText); 
 
@@ -323,7 +322,7 @@ function buildPublString(pub, srcRcrds, publRcrds) {
         return getPublRcrd(publRcrds, 'publisher', publSrc.publisher);
     }
     function getPublRcrd(rcrds, entity, id) {
-        return rcrds ? rcrds[id] : _f.mmry('getRcrd', [entity, id]);
+        return rcrds ? rcrds[id] : _f.state('getRcrd', [entity, id]);
     }
 } /* End buildPublString */
 /** 
@@ -371,5 +370,5 @@ function addPunc(data) {
 }
 
 function getEntityRcrd(rcrds, id, entity) {  
-    return rcrds ? rcrds[id] : _f.mmry('getRcrd', [entity, id]);
+    return rcrds ? rcrds[id] : _f.state('getRcrd', [entity, id]);
 }

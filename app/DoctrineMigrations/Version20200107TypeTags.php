@@ -87,17 +87,17 @@ class Version20200107TypeTags extends AbstractMigration implements ContainerAwar
     private function getTypeTagRestrictions()
     {
         return [
-            'Seed Dispersal' => null,
-            'Consumption' => ['Flower', 'Leaf', 'Seed', 'Fruit'],
-            'Predation' => null,
-            'Pollination' => ['Flower'],
-            'Visitation' => ['Flower'], 
-            'Roost' => ['Leaf', 'Wood'],
-            'Host' => null, 
-            'Transport' => ['Arthropod', 'Bryophyte Fragment'],
-            'Cohabitation' => null, 
-            'Prey' => null,
-            'Hematophagy' => null
+            'Seed Dispersal' => ['Secondary'],
+            'Consumption' => ['Flower', 'Leaf', 'Seed', 'Fruit', 'Secondary'],
+            'Predation' => ['Secondary'],
+            'Pollination' => ['Flower', 'Secondary'],
+            'Visitation' => ['Flower', 'Secondary'], 
+            'Roost' => ['Leaf', 'Wood', 'Secondary'],
+            'Host' => ['Secondary'], 
+            'Transport' => ['Arthropod', 'Bryophyte Fragment', 'Secondary'],
+            'Cohabitation' => ['Secondary'], 
+            'Prey' => ['Secondary'],
+            'Hematophagy' => ['Secondary']
         ];
     }
 

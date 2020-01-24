@@ -18,11 +18,11 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(view, rowData, state) {                               //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+export function init(view, rowData, state) {                                    //console.log('initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
-    initTable(view, rowData)
-    .then(() => onTableInitComplete(rowData));
+    return initTable(view, rowData)
+        .then(() => onTableInitComplete(rowData));
 }
 function destroyPreviousTable(tblApi) {
     if (tblApi) { tblApi.destroy(); }

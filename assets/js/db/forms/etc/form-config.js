@@ -51,7 +51,7 @@ function ifObjectFormAddRealmSelect(role) {
     return role === 'subject' || $('#Realm_row').length ? {} : {'Realm': 'select'};
 }
 function getTaxonSelectFields(addField) {
-    const lvls = _f.mmry('getTaxonProp', ['realmLvls']);
+    const lvls = _f.state('getTaxonProp', ['realmLvls']);
     return Object.keys(addField).length  ? ['Realm', ...lvls] : lvls;
 }
 /* ------------------ CREATE/EDIT FORM CONFG ------------------------------- */

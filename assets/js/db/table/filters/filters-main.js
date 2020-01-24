@@ -580,11 +580,11 @@ function getSelectedVals(val, type) {                                           
  * publication text, the table is rebuilt with the filtered data.
  * NOTE: All Source realms include text search.
  */
-export async function updatePubSearch() {                                       console.log('       +-updatePubSearch.')
+export function updatePubSearch() {                                             console.log('       +-updatePubSearch.')
     tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
-    const newRows = await getFilteredPubRows();
+    const newRows = getFilteredPubRows();
     setPubFilters();
     tblState.api.setRowData(newRows);
     db_ui.resetToggleTreeBttn(false);
@@ -592,21 +592,17 @@ export async function updatePubSearch() {                                       
 
     function getFilteredPubRows() {
         if (!typeId || typeId == 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
-        return _u.getData('publicationType').then(pTypes => {  
-            if (txt === '') { return getAllPubTypeRows(pTypes); }
-            return getPubTypeRows(pTypes[typeId].publications);
-        });
+        return txt === '' ? getAllPubTypeRows() : getPubTypeRows(typeId);
     }
-    function getPubTypeRows(typeIds) {
-        return getAllCurRows().filter(row => {
-            return typeIds.indexOf(row.pubId) !== -1 && 
+    function getPubTypeRows(typeId) {
+        return getAllCurRows().filter(row => { 
+            return row.type == typeId && 
                 row.name.toLowerCase().indexOf(txt) !== -1;
         });
     }
     /** Returns the rows for publications with their id in the selected type's array */
-    function getAllPubTypeRows(pTypes) { 
-        const pubIds = pTypes[typeId].publications;      
-        return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
+    function getAllPubTypeRows() {     
+        return getAllCurRows().filter(row => row.type == typeId);
     }
     function setPubFilters() { 
         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();

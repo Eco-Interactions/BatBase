@@ -71,10 +71,10 @@ export function buildMultiSelectElem() {
  * Note: The 'unchanged' property exists only after the create interaction form 
  * has been submitted and before any changes have been made.
  */
-export function checkReqFieldsAndToggleSubmitBttn(fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, mmry.forms.top.unchanged);
-    const state = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
-    _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', state]); 
-    return state;
+export function checkReqFieldsAndToggleSubmitBttn(fLvl) {                       
+    const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
+    _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', reqFieldsFilled]); 
+    return reqFieldsFilled;
 }
 function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {  
     return _fields.ifAllRequiredFieldsFilled(fLvl) && 
@@ -87,7 +87,8 @@ function hasOpenSubForm(fLvl) {
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {
-    if (_f.mmry('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
+    if (_f.state('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
+    if (_f.state('getFormProp', [fLvl, 'action']) === 'edit') { return false; }
     return ['Latitude', 'Longitude'].some(field => {
         return $(`#${field}_row input`).val();
     });
@@ -136,7 +137,7 @@ export function exitSuccessMsg() {
  * handler stored in the form's params object.
  */
 export function exitSubForm(fLvl, focus, onExit, data) {                           
-    const exitFunc = onExit || _f.mmry('getFormProp', [fLvl, 'onFormClose']);   console.log("               --exitForm fLvl = %s, onExit = %O", fLvl, exitFunc);      
+    const exitFunc = onExit || _f.state('getFormProp', [fLvl, 'onFormClose']);   console.log("               --exitForm fLvl = %s, onExit = %O", fLvl, exitFunc);      
     $('#'+fLvl+'-form').remove();  
     _cmbx.resetFormCombobox(fLvl, focus);
     ifParentFormValidEnableSubmit(fLvl);
@@ -162,7 +163,7 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {                                     
-    const submitData = _f.mmry('getStateProp', ['submit']);                    console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
+    const submitData = _f.state('getStateProp', ['submit']);                    console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
     if (!submitData) { return; }
     if (submitData.focus == 'int') { return refocusAndShowUpdates(submitData); }   
     _f.loadDataTableAfterFormClose(submitData.focus);
@@ -171,7 +172,7 @@ function refocusAndShowUpdates(submitData) {                                    
     if (submitData.action === 'create') {
         _f.showTodaysUpdates('srcs');   
     } else {
-        _f.loadDataTableAfterFormClose(_f.mmry('getStateProp', ['curFocus']));
+        _f.loadDataTableAfterFormClose(_f.state('getStateProp', ['curFocus']));
     }
 }
 /** -------------- sort! --------------- */
@@ -187,7 +188,7 @@ function toggleShowAllFields(entity, fLvl) {                                    
     updateFormMemoryOnFieldToggle(this.checked, fLvl);
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', _f.util('snapshot', [fVals]));
     $('#'+entity+'_Rows').empty();
-    _elems.getFormFieldRows(entity, fVals, fLvl)
+    _rows.getFormFieldRows(entity, fVals, fLvl)
     .then(appendAndFinishRebuild);
 
     function appendAndFinishRebuild(rows) {
@@ -203,8 +204,8 @@ function toggleShowAllFields(entity, fLvl) {                                    
     }
 } /* End toggleShowAllFields */
 function updateFormMemoryOnFieldToggle(isChecked, fLvl) {
-    _f.mmry('setFormProp', [fLvl, 'expanded', isChecked]);
-    _f.mmry('setFormProp', [fLvl, 'reqElems', []]);
+    _f.state('setFormProp', [fLvl, 'expanded', isChecked]);
+    _f.state('setFormProp', [fLvl, 'reqElems', []]);
 }
 function ifOpenSubForm(fLvl) {
     const subLvl = _f.getNextFormLevel('child', fLvl);
@@ -212,7 +213,7 @@ function ifOpenSubForm(fLvl) {
 }
 function showOpenSubFormErr(fLvl) {
     const subLvl = _f.getNextFormLevel('child', fLvl);
-    let entity = _f.util('ucfirst', [_f.mmry('getFormProp', [fLvl, entity])]);
+    let entity = _f.util('ucfirst', [_f.state('getFormProp', [fLvl, entity])]);
     if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
     _f.val('openSubFormErr', [entity, null, subLvl, true]);   
     $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
@@ -221,7 +222,7 @@ function showOpenSubFormErr(fLvl) {
 /*--------------------------- Fill Form Fields -------------------------------*/
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) { 
-    const fieldData = _f.mmry('getFormProp', [fLvl, 'fieldData']);       
+    const fieldData = _f.state('getFormProp', [fLvl, 'fieldData']);       
     const vals = {};
     for (let field in fieldData) {
         vals[field] = fieldData[field].val;
@@ -235,7 +236,7 @@ export function getCurrentFormFieldVals(fLvl) {
  * reinitiation are handled here.
  */
 export function fillComplexFormFields(fLvl) {
-    const fieldData = _f.mmry('getFormProp', [fLvl, 'fieldData']);                       
+    const fieldData = _f.state('getFormProp', [fLvl, 'fieldData']);                       
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
     const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs); 
     return fields.reduce(fillAllComplexFieldsWithData, Promise.resolve());
@@ -250,7 +251,7 @@ function getMultiSelectHandler() {
     return _f.forms.bind(null, 'selectExistingAuthors');
 }
 export function ifFieldIsDisplayed(field, fLvl) {
-    return !!_f.mmry('getFormFieldData', [fLvl, field]);
+    return !!_f.state('getFormFieldData', [fLvl, field]);
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {

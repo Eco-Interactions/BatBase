@@ -538,31 +538,18 @@ function loadAuthSearchHtml() {
     return Promise.resolve();
 }
 function loadPubSearchHtml() {
-    return Promise.resolve(_u.getData('publicationType').then(pTypes => {
-        loadPubSearchElems(pTypes);
-    }));
+    return _u.getOptsFromStoredData('pubTypeNames')
+        .then(loadPubSearchElems);
 }
-function loadPubSearchElems(pubTypes) {
-    const pubTypeElem = buildPubTypeSelect(pubTypes);
+function loadPubSearchElems(pubTypeOpts) {
+    const pubTypeElem = buildPubTypeSelect(pubTypeOpts);
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u.initCombobox('Publication Type');
     _u.setSelVal('Publication Type', 'all', 'silent');
-}           
-
-function buildPubTypeSelect(pubTypes) {
-    const pubTypeOpts = buildPubSelectOpts(pubTypes);
-    return buildPubSelects(pubTypeOpts);
-}
-function buildPubSelectOpts(pubTypes) {
-    const opts = [{value: 'all', text: '- All -'}];
-    for (let t in pubTypes) {
-        opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
-    }
-    return opts.sort(_u.alphaOptionObjs);  
-}
+}         
 /** Builds the publication type dropdown */
-function buildPubSelects(opts) {                                                //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
     const span = _u.buildElem('span', { text: 'Type:' });
     const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');

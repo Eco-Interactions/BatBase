@@ -19,14 +19,14 @@ let entity;
 let action;
 
 export function buildAndAppendRootForm(fields, id) { 
-    setScopeParams(_f.mmry('getFormState'));
+    setScopeParams(_f.state('getFormState'));
     const form = buildForm(id, fields);
     appendAndStyleForm(form, entity); 
     return Promise.resolve();
 }
-function setScopeParams(mmry) {
-    entity = mmry.entity;
-    action = mmry.action;
+function setScopeParams(state) {
+    entity = state.entity;
+    action = state.action;
 }
 /* ======================== BUILD ROOT FORM ================================== */
 /**

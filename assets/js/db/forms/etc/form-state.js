@@ -10,7 +10,7 @@ import * as _f from '../forms-main.js';
 
 let formState = {}; //formState
 
-export function clearMemory() {  
+export function clearState() {  
     formState = {};
 }
 /*--------------------- INIT FORM MEMORY -------------------------------------*/
@@ -34,7 +34,7 @@ export function initFormState(action, entity, id) {
 
     return _f.util('getData', [entities]).then(data => {
         initMainState(data);
-        addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormMemory = %O", _f.util('snapshot', [formState]), formState);
+        addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormState = %O", _f.util('snapshot', [formState]), formState);
         return formState;
     });
 

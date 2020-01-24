@@ -7,23 +7,17 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
-    - replace 'err' in form code
+
 QUESTIONS:
     -
 
 TASKS:
-    - testing
-        - check all errors trigger and clear 
-        - tags are restricted by interaction type.
-        - are changes made to taxon names updating the taxon level data?
-            - test on test server after update
-
 
 
 NEXT:
     - Create model of local storage
         - of entity relations
-    - Track machines set to a language not currently handled with our translations
+    - Replace checkDisplayNameForDups from get-form-data
 
 Change Log:
     - 
@@ -40,7 +34,7 @@ Prep:
 Feedback:
 Next/future rounds:
     Possible:
-        - Data Review panel (1-2 months)
+        - Data Review panel
     Next:
         - UI:
         - testing:
@@ -132,7 +126,9 @@ TODOs:
     - {med}[???] Add testing specifically for mobile responsiveness. (https://github.com/suncat2000/MobileDetectBundle/issues/76)
     - {med}[hard] Separate feature context controllers
     - {med}[???] Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
-
+        - check all errors trigger and clear 
+        - tags are restricted by interaction type.
+        
 (PWA)
     - {low}[easy] Configure webpack's manifest plugin
     - {med}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
@@ -162,3 +158,4 @@ TODOs:
 > CODE REVIEW 
     - Is there a better name for the form's "detail-panel"?
     - openSubFormErr ??
+    - replace 'err' in form code?

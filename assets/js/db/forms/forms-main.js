@@ -11,7 +11,7 @@
 import * as _confg from './etc/form-config.js';
 import editEntity from './edit/edit-forms.js';
 import * as _forms from './base/base-main.js';
-import * as _mmry from './etc/form-memory.js';
+import * as _state from './etc/form-state.js';
 import * as _submit from './submit/submit-main.js';
 import * as _elems from './elems/elems-main.js';
 // REFACTOR
@@ -52,7 +52,7 @@ export function create(entity, name) {
     return _forms.createEntity(entity, name);
 }
 export function edit(id, entity) {                                        
-    _mmry.initFormState('edit', entity, id)
+    _state.initFormState('edit', entity, id)
     .then(() => editEntity(id, entity));
 }   
 export function val(funcName, params = []) {  
@@ -69,12 +69,12 @@ export function formatAndSubmitData(entity, fLvl, formVals) {
 export function confg(funcName, params = []) {
     return _confg[funcName](...params);
 }
-export function mmry(funcName, params = []) {   
-    return _mmry[funcName](...params);
+export function state(funcName, params = []) {   
+    return _state[funcName](...params);
 }
 export function clearFormMemory() {
     _map.clearMemory();
-    _mmry.clearMemory();
+    _state.clearState();
 }
 /** --------------------------- FORM UI ------------------------------------- */
 export function elems(funcName, params = []) {                                     //console.log('ui func = %O', arguments);  //ui interface
@@ -103,7 +103,7 @@ export function getFormValData(entity, fLvl, submitting) {
 }
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {  
-    const fLvls = _mmry.getStateProp('formLevels');   
+    const fLvls = _state.getStateProp('formLevels');   
     const nextLvl = next === 'parent' ? 
         fLvls[fLvls.indexOf(curLvl) - 1] : 
         fLvls[fLvls.indexOf(curLvl) + 1] ;
@@ -114,8 +114,8 @@ export function getNextFormLevel(next, curLvl) {
  * the passed form lvl is reduced by one and returned. 
  */
 export function getSubFormLvl(lvl) { 
-    const topEntity = _mmry.getFormProp('top', 'entity');
-    const fLvls = _mmry.getStateProp('formLevels');   
+    const topEntity = _state.getFormProp('top', 'entity');
+    const fLvls = _state.getStateProp('formLevels');   
     return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
@@ -134,5 +134,5 @@ export function getTaxonDisplayName(taxon) {
         taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
 }
 export function onLevelSelection(val) {
-    _entity.onLevelSelection.bind(this)(val);
+    _forms.onLevelSelection.bind(this)(val);
 }

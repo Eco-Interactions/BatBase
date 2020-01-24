@@ -14,13 +14,13 @@ let _fs; //form state
  * added @handleAdditionalEntityData.
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
-    _fs = _f.mmry('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
+    _fs = _f.state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
     const elems = $('#'+entity+'_Rows')[0].children;                            
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
     if (formVals.displayName) { formVals.displayName = _f.util('ucfirst', [formVals.displayName]) }
     return handleAdditionalEntityData(entity)
-        .then(returnFormVals);
+        .then(() => formVals);
 
     /** Get's the value from the form elem and set it into formVals. */
     function getInputData(elem) {                                           
@@ -198,35 +198,31 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
             return lvl === _fs.forms.realmData.rootLvl || !parentLvl;
         }
     }
-    function returnFormVals() {  
-        checkForErrors(entity, formVals, fLvl);  
-        return formVals.err ? Promise.reject() : Promise.resolve(formVals);
-    }
-} /* End getValidatedFormData */
-function checkForErrors(entity, formVals, fLvl) {
-    const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
-    if (!errs[entity]) { return; }
-    errs[entity](entity, formVals, fLvl);
-}
-/**
- * Checks to ensure the new author's name doesn't already exist in the database. 
- * If it does, a prompt is given to the user to check to ensure they are not 
- * creating a duplicate, and to add initials if they are sure this is a new author. 
- */
-function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
-    if (mmry.action === 'edit') { return; }
-    const cntnr = $('#'+_f.util('ucfirst', [entity])+'s-sel1')[0];
-    const opts = cntnr.selectize.options;  
-    const dup = checkForDuplicate(opts, vals.displayName);  
-    if (!dup) { return; }
-    _f.val.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
-    vals.err = true;
-}
-function checkForDuplicate(opts, name) {  
-    const newName = name.replace(/\./g,'').toLowerCase(); 
-    const optKeys = Object.keys(opts);
-    return optKeys.find(k => {
-        let optName = opts[k].text.replace(/\./g,'').toLowerCase(); 
-        return optName == newName
-    });
-}
+} 
+// function checkForErrors(entity, formVals, fLvl) {
+//     const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
+//     if (!errs[entity]) { return; }
+//     errs[entity](entity, formVals, fLvl);
+// }
+// /**
+//  * Checks to ensure the new author's name doesn't already exist in the database. 
+//  * If it does, a prompt is given to the user to check to ensure they are not 
+//  * creating a duplicate, and to add initials if they are sure this is a new author. 
+//  */
+// function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
+//     if (_fs.action === 'edit') { return; }
+//     const cntnr = $('#'+_f.util('ucfirst', [entity])+'s-sel1')[0];
+//     const opts = cntnr.selectize.options;  
+//     const dup = checkForDuplicate(opts, vals.displayName);  
+//     if (!dup) { return; }
+//     _f.val.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
+//     vals.err = true;
+// }
+// function checkForDuplicate(opts, name) {  
+//     const newName = name.replace(/\./g,'').toLowerCase(); 
+//     const optKeys = Object.keys(opts);
+//     return optKeys.find(k => {
+//         let optName = opts[k].text.replace(/\./g,'').toLowerCase(); 
+//         return optName == newName
+//     });
+// }

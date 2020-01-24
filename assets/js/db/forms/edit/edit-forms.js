@@ -36,7 +36,7 @@ function buildAndAppendEditForm(fields, id, entity) {
 /* --------------------------- FORM FIELDS ---------------------------------- */
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
-    _f.mmry('setFormProp', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
+    _f.state('setFormProp', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
     return buildEditFields(entity, id);
 }   
 function buildEditFields(entity, id) {
@@ -80,7 +80,7 @@ function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
     const prnt = _f.confg('getParentEntity', [ent]);
     const entity = prnt || ent;
-    const rcrd = _f.mmry('getRcrd', [entity, id]);                                           
+    const rcrd = _f.state('getRcrd', [entity, id]);                                           
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
@@ -90,13 +90,13 @@ function fillEntityData(ent, id) {
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
         'interaction': fillIntData };
-    const rcrd = _f.mmry('getRcrd', [ent, id]);                                 console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    const rcrd = _f.state('getRcrd', [ent, id]);                                 console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     return Promise.resolve(hndlrs[ent](ent, id, rcrd));
 }
 function updateEditDetailMemory(detailId) {
-    const editObj = _f.mmry('getStateProp', ['editing']);
+    const editObj = _f.state('getStateProp', ['editing']);
     editObj.detail = detailId;
-    _f.mmry('setStateProp', ['editing', editObj]);
+    _f.state('setStateProp', ['editing', editObj]);
 }
 /* ------------- INTERACTION ----------------- */
 function fillIntData(entity, id, rcrd) {  
@@ -112,12 +112,12 @@ function getInteractionFieldFillTypes() {
 }
 function addTaxon(fieldId, prop, rcrd) {       
     const selApi = $('#'+ fieldId + '-sel')[0].selectize;
-    const taxon = _f.mmry('getRcrd', ['taxon', rcrd[prop]]);                          
+    const taxon = _f.state('getRcrd', ['taxon', rcrd[prop]]);                          
     selApi.addOption({ value: taxon.id, text: _f.getTaxonDisplayName(taxon) });
     selApi.addItem(taxon.id);
 }
 function addSource(fieldId, prop, rcrd) {
-    const citSrc = _f.mmry('getRcrd', ['source', rcrd.source]) 
+    const citSrc = _f.state('getRcrd', ['source', rcrd.source]) 
     _f.cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
     _f.cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
 }
@@ -144,14 +144,14 @@ function fillLocData(entity, id, rcrd) {
     }
     function storeLocGeoJson(id) {
         return _f.util('getData', ['geoJson'])
-            .then(data => _f.mmry('setFormProp', ['top', data[id]]));
+            .then(data => _f.state('setFormProp', ['top', data[id]]));
     }
 } /* End fillLocData */
 /* ------------- SOURCE ----------------- */
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, rcrd) { 
-    const src = _f.mmry('getRcrd', ['source', id]);
-    const detail = _f.mmry('getRcrd', [entity, src[entity]]);                     //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+    const src = _f.state('getRcrd', ['source', id]);
+    const detail = _f.state('getRcrd', [entity, src[entity]]);                     //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
     const fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
     setSrcData();
     setDetailData();
@@ -185,7 +185,7 @@ function setTitleField(entity, srcRcrd) {                                       
     $('#Title_row input[type="text"]').val(name).change();
 
     function getCitTitle(citId) {
-        return _f.mmry('getRcrd', ['citation', citId]).displayName;
+        return _f.state('getRcrd', ['citation', citId]).displayName;
     }
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) { 
@@ -230,7 +230,7 @@ function addDataToField(field, fieldHndlr, rcrd) {                              
 function setMultiSelect(fieldId, prop, rcrd) {                                  //console.log("setMultiSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     if (!rcrd[prop] || !ifFieldInForm(fieldId)) { return; }
     const ucProp = _f.util('ucfirst', [prop]);
-    _f.mmry('setFormFieldData', ['top', ucProp, rcrd[prop]]);
+    _f.state('setFormFieldData', ['top', ucProp, rcrd[prop]]);
     if (!$('#'+ucProp+'-sel-cntnr').length) { return; } //can this be the first line here?
     _f.forms('selectExistingAuthors', [ucProp, rcrd[prop], 'top']);
 }

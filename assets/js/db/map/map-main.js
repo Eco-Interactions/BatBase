@@ -16,7 +16,6 @@ import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
 import * as _u from '../util/util.js';
 import { accessTableState as tState } from '../db-main.js';
-import { create as _create } from '../forms/forms-main.js';
 
 let app;
 
@@ -554,7 +553,7 @@ export function addVolatileMapPin(val, type, cntryId) {                         
     const latLng = getMapPinCoords();  
     if (type === 'edit') { addEditFormMapData(latLng, val, cntryId); 
     } else { addNewLocPinAndFillCoordFields(latLng); }
-    clearLocCountLegend();
+    $('#cnt-legend').html('');
 }
 function getMapPinCoords() {
     return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());

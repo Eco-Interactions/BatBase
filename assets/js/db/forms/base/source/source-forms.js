@@ -74,8 +74,8 @@ function initPubForm(value) {                                                   
     buildAndAppendPubForm(val);
 }
 function initPubMemory() {
-    _f.mmry('initEntityFormMemory', ['publication', 'sub', '#Publication-sel', 'create']);
-    _f.mmry('setOnFormCloseHandler', ['sub', enablePubField]);
+    _f.state('addEntityFormState', ['publication', 'sub', '#Publication-sel', 'create']);
+    _f.state('setOnFormCloseHandler', ['sub', enablePubField]);
 }
 function buildAndAppendPubForm(val) {
     _f.elems('initSubForm', 
@@ -123,18 +123,18 @@ function initCitForm(v) {                                                       
 }
 function initCitFormMemory(data) {
     addSourceDataToMemory(data);
-    _f.mmry('initEntityFormMemory', ['citation', 'sub', '#CitationTitle-sel', 'create']);
-    _f.mmry('setOnFormCloseHandler', ['sub', enablePubField]);
+    _f.state('addEntityFormState', ['citation', 'sub', '#CitationTitle-sel', 'create']);
+    _f.state('setOnFormCloseHandler', ['sub', enablePubField]);
     addPubRcrdsToMemory(data.publication);
     return Promise.resolve();
 }
 function addSourceDataToMemory(data) {
-    const records = _f.mmry('getStateProp', ['records']);
+    const records = _f.state('getStateProp', ['records']);
     Object.keys(data).forEach(k => records[k] = data[k]);
-    _f.mmry('setStateProp', ['records', records]);
+    _f.state('setStateProp', ['records', records]);
 }
 function addPubRcrdsToMemory(pubRcrds) {  
-    const pubSrc = _f.mmry('getRcrd', ['source', $('#Publication-sel').val()]); 
+    const pubSrc = _f.state('getRcrd', ['source', $('#Publication-sel').val()]); 
     const pub = pubRcrds[pubSrc.publication];
     setPubInMemory(pubSrc, pub, 'sub');
 }
@@ -162,7 +162,7 @@ function selectDefaultCitType() {
         .then(types => setCitType(types));
 }
 function setCitType(citTypes) {
-    const rcrds = _f.mmry('getFormProp', ['sub', 'rcrds']);
+    const rcrds = _f.state('getFormProp', ['sub', 'rcrds']);
     const pubType = rcrds.pub.publicationType.displayName;                      
     const defaultType = {
         'Book': getBookDefault(pubType, rcrds), 'Journal': 'Article', 
@@ -177,7 +177,7 @@ function getBookDefault(pubType, rcrds) {
 }
 /* ---------------- SHARED EDIT & CREATE FUNCS --------------------- */
 function setPubInMemory(pubSrc, pub, fLvl) {
-    _f.mmry('setFormProp', [fLvl, 'rcrds', { pub: pub, src: pubSrc}]);
+    _f.state('setFormProp', [fLvl, 'rcrds', { pub: pub, src: pubSrc}]);
 }
 /**
  * Adds relevant data from the parent publication into formVals before 
@@ -187,7 +187,7 @@ function setPubInMemory(pubSrc, pub, fLvl) {
 function loadCitTypeFields(typeId) {                                            console.log('           /--loadCitTypeFields');
     const fLvl = _f.getSubFormLvl('sub');
     const elem = this.$input[0];
-    if (!_f.mmry('isEditForm')) { addPubData(typeId, elem, fLvl); }
+    if (!_f.state('isEditForm')) { addPubData(typeId, elem, fLvl); }
     return loadSrcTypeFields('citation', typeId, elem)
         .then(finishCitTypeFields);
 
@@ -216,8 +216,8 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {                      //conso
     hndlrs[type](type, fLvl);
 
     function updateBookFields() {
-        const mmry = _f.mmry('getFormLvlState', [fLvl]);                          
-        const pubAuths = mmry.rcrds.src.authors;      
+        const _fs = _f.state('getFormLvlState', [fLvl]);                          
+        const pubAuths = _fs.rcrds.src.authors;      
         if (!pubAuths) { return reshowAuthorField(); }
         removeAuthorField();
         if (type === 'Book'){ disableTitleField()} else { enableTitleField()}
@@ -225,27 +225,27 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {                      //conso
         function reshowAuthorField() {                                            
             if (!rmvdAuthField.authRow) { return; } //Field was never removed
             $('#citation_Rows').append(rmvdAuthField.authRow);
-            _f.mmry('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
-            _f.mmry('setFormFieldData', [fLvl, 'Authors', {}, 'multiSelect']);
+            _f.state('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
+            _f.state('setFormFieldData', [fLvl, 'Authors', {}, 'multiSelect']);
             delete rmvdAuthField.authRow;
             delete rmvdAuthField.authElem;
         }
         function removeAuthorField() {
             rmvdAuthField.authRow = $('#Authors_row').detach();
-            _f.mmry('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
+            _f.state('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
             removeFromFieldData();
 
             function removeAuthorElem() {
-                return mmry.reqElems.filter(elem => {
+                return _fs.reqElems.filter(elem => {
                     if (!elem.id.includes('Authors')) { return true; }
                     rmvdAuthField.authElem = elem;                                
                     return false;
                 });
             }
             function removeFromFieldData() {
-                const data = _f.mmry('getFormProp', [fLvl, 'fieldData']);
+                const data = _f.state('getFormProp', [fLvl, 'fieldData']);
                 delete data.Authors;
-                _f.mmry('setFormProp', [fLvl, 'fieldData', data]);
+                _f.state('setFormProp', [fLvl, 'fieldData', data]);
             }
         } 
     } /* End updateBookFields */
@@ -255,7 +255,9 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {                      //conso
         disableAuthorField();
     }
     function disableAuthorField() {
-        $('#Authors-sel-cntnr')[0].lastChild.remove();
+        if ($('#Authors-sel-cntnr')[0].children > 1) {
+            $('#Authors-sel-cntnr')[0].lastChild.remove();
+        }
         _f.cmbx('enableComboboxes', [$('#Authors-sel-cntnr select'), false]);
     }
     function disableTitleField() { 
@@ -274,12 +276,12 @@ function addPubData(typeId, citTypeElem, fLvl) {
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const fieldData = _f.mmry('getFormProp', [fLvl, 'fieldData']);  
-    const rcrds = _f.mmry('getFormProp', [fLvl, 'rcrds']);
+    const fieldData = _f.state('getFormProp', [fLvl, 'fieldData']);  
+    const rcrds = _f.state('getFormProp', [fLvl, 'rcrds']);
     addPubTitle(addValues, fLvl, type);
     addPubYear(addValues, fLvl);
     addAuthorsToCitation(addValues, fLvl, type);
-    _f.mmry('setFormProp', [fLvl, 'fieldData', fieldData]);
+    _f.state('setFormProp', [fLvl, 'fieldData', fieldData]);
     /** 
      * Adds the pub title to the citations form vals, unless the type should 
      * be skipped, ie. have it's own title. (may not actually be needed. REFACTOR and check in later)
@@ -369,13 +371,13 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
         _f.elems('fillComplexFormFields', [fLvl]);
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         updateFieldLabelsForType(entity, fLvl);
-        focusFieldInput(entity);
+        $('#Title_row input').focus();
     }
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {  
     const capsType = _f.util('ucfirst', [entity]);   
-    _f.mmry('setFormFieldData', [fLvl, capsType+'Type', typeId]);
-    _f.mmry('setFormProp', [fLvl, 'reqElems', []]);
+    _f.state('setFormFieldData', [fLvl, capsType+'Type', typeId]);
+    _f.state('setFormProp', [fLvl, 'reqElems', []]);
     _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]); 
 }
 /**
@@ -393,10 +395,10 @@ function getFilledSrcVals(entity, typeId, fLvl) {
     vals[_f.util('ucfirst', [entity])+'Type'] = typeId;
     return vals;
 }
-/** Sets the type confg for the selected source type in form mmry. */
+/** Update form state for the selected source type. */
 function setSourceType(entity, fLvl, tName) {
     const type = tName || getSourceTypeFromCombo(entity);                       //console.log('               --type = [%s]', type);
-    _f.mmry('setFormProp', [fLvl, 'entityType', type]);
+    _f.state('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
     const typeElemId = '#'+_f.util('ucfirst', [entity])+'Type-sel'; 
@@ -448,12 +450,12 @@ function updatePlaceholderText(elem, newTxt) {
     elem.selectize.settings.placeholder = 'Select ' + newTxt;
     elem.selectize.updatePlaceholder();
 }
-function focusFieldInput(type) {
-    if (!$('#Title_row input').val()) { $('#Title_row input').focus() 
-    } else {
-        _f.cmbx('focusCombobox', ['#'+_f.util('ucfirst', [type])+'Type-sel', true]);
-    }
-}
+// function focusFieldInput(type) {
+//     if (!$('#Title_row input').val()) { $('#Title_row input').focus() 
+//     } else {
+//         _f.cmbx('focusCombobox', ['#'+_f.util('ucfirst', [type])+'Type-sel', true]);
+//     }
+// }
 /* ========================== PUBLISHER ===================================== */
 function onPublSelection(val) {
     if (val === 'create') { return initPublisherForm(val); }        
@@ -609,8 +611,8 @@ function handleNewAuthForm(authCnt, value, authType) {                          
 }
 /* *************************** EDIT FORMS *********************************** */
 export function getSrcTypeFields(entity, id) {
-    const srcRcrd = _f.mmry('getRcrd', ['source', id]);
-    const type = _f.mmry('getRcrd', [entity, srcRcrd[entity]]);
+    const srcRcrd = _f.state('getRcrd', ['source', id]);
+    const type = _f.state('getRcrd', [entity, srcRcrd[entity]]);
     const typeId = type[entity+'Type'].id;
     const typeName = type[entity+'Type'].displayName; 
     return ifCitationAddPubToMemory(entity, srcRcrd, id)
@@ -622,14 +624,14 @@ function ifCitationAddPubToMemory(entity, srcRcrd) {
         .then(setPubDataInMemory);
 
     function setPubDataInMemory(pubRcrds) {
-        const pubSrc = _f.mmry('getRcrd', ['source', srcRcrd.parent]);
+        const pubSrc = _f.state('getRcrd', ['source', srcRcrd.parent]);
         const pub = pubRcrds[pubSrc.publication]
         setPubInMemory(pubSrc, pub, 'top');
     }
 }
 function getSrcRcrd(pubId) {
-    const rcrd = _f.mmry('getRcrd', ['source', _f.mmry('getStateProp', '[editing]').core]);
-    return _f.mmry('getRcrd', ['source', rcrd.parent]);
+    const rcrd = _f.state('getRcrd', ['source', _f.state('getStateProp', '[editing]').core]);
+    return _f.state('getRcrd', ['source', rcrd.parent]);
 }
 /** Note: Only citation forms use this. */
 export function finishEditFormBuild(entity) {                                   //console.log('---finishEditFormBuild')
@@ -658,6 +660,6 @@ function enablePubField() {
     _f.forms('fillCitationField', [$('#Publication-sel').val()]);
 }
 function initEntitySubForm(entity, fLvl, fVals, pSel) {
-    _f.mmry('initEntityFormMemory', [entity, fLvl, pSel, 'create']);       
+    _f.state('addEntityFormState', [entity, fLvl, pSel, 'create']);       
     return _f.elems('initSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
 }

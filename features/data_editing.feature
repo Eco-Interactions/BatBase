@@ -86,8 +86,8 @@ Feature: Edit data in the database
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
         When I change the "Interaction Type" form dropdown to "Consumption"
-        And I add the "Seed" interaction tag
         And I remove the "Flower" interaction tag
+        And I add the "Seed" interaction tag
         And I change the "Note" field "textarea" to "New Test Note Description"
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
@@ -99,23 +99,23 @@ Feature: Edit data in the database
         Then I should not see the "Flower" interaction tag
         Then I should see "New Test Note Description" in the "Note" field "textarea"
 
-    # @javascript
-    # Scenario:  I should be able to change an interaction's citation  #TODO
-      # Given the database table is in "Source" view
-      # And I group interactions by "Publications"
-      # And I break
-      # And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
-      # And I click on the edit pencil for the first interaction of "Feeding habits"
-      # And I see "Editing Interaction"
-      # When I change the "Publication" form dropdown to "Book of Mammalogy"
-      # And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
-      # And I press the "Update Interaction" button
-        # And I wait for the "top" form to close
-      # And I uncheck the time-updated filter
-      # And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
-      # And I expand "Book of Mammalogy" in the data tree
-      # Then I should see "3" interactions under "Observations on the life histories of Panama bats"
-      # And I should see "3" interactions under "Feeding habits"
+    @javascript
+    Scenario:  I should be able to change an interaction's citation  #TODO
+      Given the database table is in "Source" view
+      And I group interactions by "Publications"
+      And I break
+      And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
+      And I click on the edit pencil for the first interaction of "Feeding habits"
+      And I see "Editing Interaction"
+      When I change the "Publication" form dropdown to "Book of Mammalogy"
+      And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
+      And I press the "Update Interaction" button
+        And I wait for the "top" form to close
+      And I uncheck the time-updated filter
+      And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
+      And I expand "Book of Mammalogy" in the data tree
+      Then I should see "3" interactions under "Observations on the life histories of Panama bats"
+      And I should see "3" interactions under "Feeding habits"
 
   # -------------------------- Location -------------------------------------##
     @javascript

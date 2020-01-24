@@ -5,7 +5,7 @@
  *     initFormCombos       db-forms   
  *     initSingle           db-forms
  */
-import { mmry as _mmry } from '../../../forms-main.js';
+import { state as _fs } from '../../../forms-main.js';
 
 /*------------------- Combobox (selectized) Methods ----------------------*/
 /**
@@ -60,7 +60,7 @@ export function clearCombobox(selId) {                                          
  * placeholder options and, optionally, brings it into focus.
  */
 export function resetFormCombobox(fLvl, focus) {      
-    const selId = _mmry('getFormParentId', [fLvl]);  
+    const selId = _fs('getFormParentId', [fLvl]);  
     if (!selId) { return; }
     const combobox = $(selId)[0].selectize;   
     combobox.clear();
@@ -93,9 +93,9 @@ export function setSelVal(id, val, silent) {                                    
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, comboEvents) {                     //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
-    const elems = _mmry('getFormProp', [fLvl, 'selElems']);  
+    const elems = _fs('getFormProp', [fLvl, 'selElems']);  
     elems.forEach(selectizeElem);
-    _mmry('setFormProp', [fLvl, 'selElems', []]);
+    _fs('setFormProp', [fLvl, 'selElems', []]);
 
     function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
         const confg = getFieldConfg(comboEvents, fieldName);

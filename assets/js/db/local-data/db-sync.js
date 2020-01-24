@@ -145,7 +145,7 @@ function storeUpdatedData(rcrds, entity) {
     function storeUpdatedDataRecord(id) {
         if (ifUpdatedByCurUser(rcrds[id])) { return; }
         const syncRecordData = getEntityUpdateFunc(entity);
-        syncRecordData(entity, rcrds[id]);
+        syncRecordData(_u.lcfirst(entity), rcrds[id]);
     }
 } 
 function ifUpdatedByCurUser(record) {
@@ -216,12 +216,12 @@ function addCoreEntityData(entity, rcrd) {                                      
  */
 function updateCoreData(entity, rcrd) {                                         //console.log("           --Updating Record data", entity);
     addToRcrdProp(entity, rcrd);
-    addToCoreTypeProp(entity, rcrd);
+    // addToCoreTypeProp(entity, rcrd);
 } 
-function addToCoreTypeProp(entity, rcrd) {    
-    if (entity === "taxon") { return Promise.resolve(); }
-    return addToTypeProp(entity+"Type", rcrd, entity);
-}
+// function addToCoreTypeProp(entity, rcrd) {    
+//     if (entity === "taxon") { return Promise.resolve(); }
+//     return addToTypeProp(entity+"Type", rcrd, entity);
+// }
 function updateCoreDataProps(entity, rcrd) {
     const updateFuncs = getRelDataHndlrs(entity, rcrd);                         //console.log('updatedatahandlers = %O', updateFuncs);
     return updateDataProps(entity, rcrd, updateFuncs)
@@ -242,11 +242,11 @@ function getRelDataHndlrs(entity, rcrd) {
         'interaction': {
             'location': addInteractionToEntity, 'source': addInteractionToEntity, 
             'subject': addInteractionRole, 'object': addInteractionRole, 
-            'interactionType': addToTypeProp, //'tag': addToTagProp
+            // 'interactionType': addToTypeProp, //'tag': addToTagProp
         },
         'location': {
-            'location': addToParentRcrd, 'habitatType': addToTypeProp, 
-            'locationType': addToTypeProp
+            'location': addToParentRcrd, //'habitatType': addToTypeProp, 
+            // 'locationType': addToTypeProp
         },
         'taxon': { 'taxon': addToParentRcrd, 'taxonNames': addToTaxonNames 
         },
@@ -273,7 +273,7 @@ function updateDetailData(entity, rcrd) {
     var update = {
         'author': { 'author': addToRcrdProp },
         'citation': { 'citation': addToRcrdProp }, //Not necessary to add to citation type object.
-        'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
+        'publication': { 'publication': addToRcrdProp, /*'publicationType': addToTypeProp*/ },
         'publisher': { 'publisher': addToRcrdProp },
         'geoJson': { 'geoJson': addToRcrdProp } 
     };
@@ -299,14 +299,14 @@ function addToNameProp(prop, rcrd, entity) {
     storeData(prop, nameObj);
 }
 /** Add the new record's id to the entity-type's stored id array.  */
-function addToTypeProp(prop, rcrd, entity) {                                    
-    const typeId = rcrd[prop] ? rcrd[prop].id : false;
-    if (!typeId) { return; }
-    const typeObj = mmryData[prop].value;
-    if (!ifNewRcrd(typeObj[typeId][entity+'s'], rcrd.id)) { return; }
-    typeObj[typeId][entity+'s'].push(rcrd.id);
-    storeData(prop, typeObj);
-}
+// function addToTypeProp(prop, rcrd, entity) {                console.log('args = %O', arguments);                    
+//     const typeId = rcrd[prop] ? rcrd[prop].id : false;
+//     if (!typeId) { return; }
+//     const typeObj = mmryData[prop].value;
+//     if (!ifNewRcrd(typeObj[typeId][entity+'s'], rcrd.id)) { return; }
+//     typeObj[typeId][entity+'s'].push(rcrd.id);
+//     storeData(prop, typeObj);
+// }
 function ifNewRcrd(ary, id) {
     return ary.indexOf(id) === -1;
 }
@@ -401,15 +401,15 @@ function updateAffectedDataProps(entity, rcrd, edits) {                         
 function getRmvDataPropHndlrs(entity) {
     return {
         'author': {},
-        'citation': { 'citationType': rmvFromTypeProp,  },
+        'citation': {}, // 'citationType': rmvFromTypeProp,  
         'geoJson': {},
         'interaction': {
             'location': rmvIntAndAdjustTotalCnts, 'source': rmvIntFromEntity, 
             'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
-            'interactionType': rmvFromTypeProp, /* 'tag': rmvFromTagProp */},
-        'publication': { 'publicationType': rmvFromTypeProp },
+           /* 'interactionType': rmvFromTypeProp,*/ /* 'tag': rmvFromTagProp */},
+        'publication': {},  //'publicationType': rmvFromTypeProp 
         'publisher': {},
-        'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp },
+        'location': { 'parentLoc': rmvFromParent, /*'locationType': rmvFromTypeProp*/ },
         'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
             /* 'tag': rmvFromTagProp */ },
         'taxon': { 'parentTaxon': rmvFromParent, 'level': rmvFromNameProp,
@@ -459,14 +459,14 @@ function rmvIntFromTaxon(prop, rcrd, entity, edits) {
     rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
     storeData("taxon", taxa);   
 }
-/** Removes the record from the entity-type's stored array. */
-function rmvFromTypeProp(prop, rcrd, entity, edits) { 
-    if (!edits[prop].old) { return; }
-    const typeObj = mmryData[prop].value;
-    const type = typeObj[edits[prop].old];
-    rmvIdFromAry(type[entity+'s'], rcrd.id);
-    storeData(prop, typeObj);
-}
+// /** Removes the record from the entity-type's stored array. */
+// function rmvFromTypeProp(prop, rcrd, entity, edits) { 
+//     if (!edits[prop].old) { return; }
+//     const typeObj = mmryData[prop].value;
+//     const type = typeObj[edits[prop].old];
+//     rmvIdFromAry(type[entity+'s'], rcrd.id);
+//     storeData(prop, typeObj);
+// }
 // NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
 // /** Removes a record from the tag's array of record ids. */
 // function rmvFromTagProp(prop, rcrd, entity, edits) {                                 

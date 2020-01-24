@@ -141,7 +141,7 @@ function hideExportOnlyColumns() {
 /* ------------------------- HELPERS ---------------------------------------- */
 function toggleLocExportData(showing) {
     if (!showing && tblState.curFocus === 'locs') { return; } //Cols are shown in Loc view
-    const cols = ['lat', 'long', 'elev', 'elevMax'];
+    const cols = ['lat', 'lng', 'elev', 'elevMax'];
     toggleTableColumns(cols, showing);
 }
 function toggleTxnExportData(showing) {

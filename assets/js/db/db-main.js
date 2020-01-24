@@ -27,7 +27,7 @@
  *     TABLE (RE)BUILD
  *     LOCATION SEARCH
  *         LOCATION TABLE
- *         LCOATION MAP
+ *         LOCATION MAP
  *     SOURCE SEARCH
  *     TAXON SEARCH
  */
@@ -164,7 +164,7 @@ function resetCurTreeStorageProps() {
 }
 /* ==================== TABLE (RE)BUILDS ============================================================================ */
 function loadTbl(tblName, rowData) {
-    require('./table/init.js').init(tblName, rowData, tblState);
+    return require('./table/init.js').init(tblName, rowData, tblState);
 }
 /** 
  * Table-rebuild entry point after local database updates, filter clears, and 
@@ -262,11 +262,10 @@ function getTopRegionIds() {
     return ids;
 }
 function startLocTableBuildChain(topLocs, textFltr) {               
-    return data_tree.buildLocTree(topLocs, textFltr).then( tree => {  
-        const rowData = frmt_data.buildLocRowData(tree, tblState)
-        loadTbl('Location Tree', rowData);
-        return _ui.loadLocFilterPanelElems(tblState);
-    }).catch(err => _u.alertErr(err));
+    return data_tree.buildLocTree(topLocs, textFltr)
+        .then(tree => frmt_data.buildLocRowData(tree, tblState))
+        .then(rowData => loadTbl('Location Tree', rowData))
+        .then(() => _ui.loadLocFilterPanelElems(tblState));
 }
 /** -------------------- LOCATION MAP --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
@@ -340,11 +339,9 @@ function rebuildSrcTable(val) {                                     /*Perm-log*/
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
     return data_tree.buildSrcTree(tblState.curView)
-    .then(tree => {
-        const rowData = frmt_data.buildSrcRowData(tree, tblState)
-        loadTbl('Source Tree', rowData, tblState);
-        return _ui.loadSrcFilterPanelElems(tblState.curView);
-    }).catch(err => _u.alertErr(err));
+        .then(tree => frmt_data.buildSrcRowData(tree, tblState))
+        .then(rowData => loadTbl('Source Tree', rowData, tblState))
+        .then(() => _ui.loadSrcFilterPanelElems(tblState.curView));
 }
 function storeSrcView(val) {  
     const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
@@ -421,10 +418,11 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/
  */
 function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", tblState.openRows)
-    return data_tree.buildTxnTree(topTaxon, filtering, textFltr).then(tree => {
-        const rowData = frmt_data.buildTxnRowData(tree, tblState)
-        loadTbl('Taxon Tree', rowData, tblState);
-        _ui.loadTxnFilterPanelElems(tblState);
-        db_filters.updateTaxonFilterViewMsg(topTaxon.realm.pluralName);
-    }).catch(err => _u.alertErr(err));
+    return data_tree.buildTxnTree(topTaxon, filtering, textFltr)
+        .then(tree => frmt_data.buildTxnRowData(tree, tblState))
+        .then(rowData => loadTbl('Taxon Tree', rowData, tblState))
+        .then(() => {
+            _ui.loadTxnFilterPanelElems(tblState);
+            db_filters.updateTaxonFilterViewMsg(topTaxon.realm.pluralName);
+        });
 }

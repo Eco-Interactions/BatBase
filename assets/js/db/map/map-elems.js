@@ -10,8 +10,7 @@
  */
 import * as _u from '../util/util.js';
 import { getMapState, setMapState } from './map-main.js';
-
-
+import { create as _create } from '../forms/forms-main.js';
 
 /*--- Location Count Legend ---*/
 export function addLocCountLegend(map) {
@@ -30,9 +29,6 @@ export function addCountToLegend(ttlLocs, noGpsDataCnt, prnt) {
     $('#cnt-legend').html(`
         <h3 title='${prnt.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
         ${noGpsDataHtml ? noGpsDataHtml : ''}`);
-}
-function clearLocCountLegend() {
-    $('#cnt-legend').html('');
 }
 function getLocName(name) {
     name = name.split('[')[0];                                

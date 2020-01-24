@@ -11,13 +11,13 @@
  */
 import * as _f from '../forms-main.js';
 
-let mmry;
+let _fs;
 /*------------------- Form Error Handlers --------------------------------*/
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */
 export function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-    mmry = _f.mmry('getFormState');
-    const fLvl = mmry.ajaxFormLvl;                                          
+    _fs = _f.state('getFormState');
+    const fLvl = _fs.ajaxFormLvl;                                          
     const elem = getFormErrElem(fLvl);
     const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
     const msg = getFormErrMsg(errTag);
@@ -50,7 +50,7 @@ function getFormErrMsg(errTag) {
 }
 /**------------- Data Storage Errors --------------*/
 export function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-    mmry = _f.mmry('getFormState');
+    _fs = _f.state('getFormState');
     const errMsg = data.msg;
     const errTag = data.tag;
     const cntnr = _f.util('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
@@ -77,7 +77,7 @@ function reloadAndRedownloadData() {
  * is already an instance using that form, show the user an error message and 
  * reset the select elem. 
  */
-export function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, mmry = %O ", selId, mmry)
+export function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, _fs = %O ", selId, _fs)
     const selId = id || '#'+field+'-sel';
     return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
 }
@@ -97,7 +97,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * error manually with the close button, or automatically by resolving the error.
  */
 export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       ###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);  
-    mmry = _f.mmry('getFormState');
+    _fs = _f.state('getFormState');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
         'fillAuthBlanks': handleAuthBlanks,
@@ -231,21 +231,21 @@ function clrNeedsName(elem, fLvl, e) {
 }
 /** Note: error used for the publication form. */
 function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
-    var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
+    var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
     var msg = '<p>Please finish the open '+ _f.util('ucfirst', [subEntity]) + ' form.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication/citation form. */
 function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
-    var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
+    var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of authors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication form. */
 function handleEdBlanks(elem, errTag, fLvl, fieldName) {  
-    var subEntity = mmry.forms[fLvl] ? mmry.forms[fLvl].entity : '';
+    var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of editors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);

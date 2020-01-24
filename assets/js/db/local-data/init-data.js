@@ -89,7 +89,6 @@ function deriveTaxonData(data) {                                                
     storeTaxaByLevelAndRealm(data.taxon);
     modifyRealmData(data.realm);
     storeLevelData(data.level);
-    delete localData.level;
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {

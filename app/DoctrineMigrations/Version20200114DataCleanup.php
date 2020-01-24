@@ -86,8 +86,8 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
 
     }
     protected function mergeData($rmvId, $addId, $coreClass, $detail)
-    {
-        $rmv = $this->getEntity($coreClass, $rmvId);                            print("\n mergeData remove = ".$rmvId." addDataTo = ".$addId);
+    {                                                                           print("\n mergeData remove = ".$rmvId." addDataTo = ".$addId);
+        $rmv = $this->getEntity($coreClass, $rmvId);                            
 
         if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
         if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
@@ -163,7 +163,7 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
             2846 => 49, 2848 => 246, 2821 => null, 2842 => null, 315 => null, 
             1798 => null, 1885 => null, 2866 => null, 2949 => null, 2927 => null, 
             2936 => null, 2333 => null, 2332 => null, 1750 => null, 2842 => null, 
-            2843 => null, 2721 => null 
+            2843 => null, 2721 => null, 2505 => null, 2937 => null, 2822 => null
         ];
     }
 

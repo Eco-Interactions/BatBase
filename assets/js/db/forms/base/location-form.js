@@ -25,8 +25,8 @@ function buildLocForm(val) {
     const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#Country-Region-sel').val() 
     }; 
-    _f.mmry('initEntityFormMemory', ['location', 'sub', '#Location-sel', 'create']);
-    _f.mmry('setOnFormCloseHandler', ['sub', _f.forms.bind(null, 'enableCountryRegionField')]);
+    _f.state('addEntityFormState', ['location', 'sub', '#Location-sel', 'create']);
+    _f.state('setOnFormCloseHandler', ['sub', _f.forms.bind(null, 'enableCountryRegionField')]);
     return _f.elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
         .then(appendLocFormAndFinishBuild);
 
@@ -94,7 +94,7 @@ function locCoordErr(field) {
 export function finishEditFormBuild(entity) {  
     initFormCombos('Location', 'top'); 
     updateCountryChangeMethod();
-    addGpsListenerToEditForm(_f.mmry('getEditEntityId', ['core']))
+    addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']))
     $('.all-fields-cntnr').hide();
 }
 function updateCountryChangeMethod() {
@@ -138,22 +138,28 @@ export function addMapToLocForm($elem, type) {                                  
 }
 function initLocFormMap(type) {
     const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
-    const locRcrds = _f.mmry('getEntityRcrds', ['location'])
+    const locRcrds = _f.state('getEntityRcrds', ['location'])
     _f.map('initFormMap', [prntId, locRcrds, type]);
 }
 export function focusParentAndShowChildLocs(type, val) {                               
     if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
-    const locRcrds = _f.mmry('getEntityRcrds', ['location'])
+    const locRcrds = _f.state('getEntityRcrds', ['location'])
     _f.map('initFormMap', [val, locRcrds, type]);
 }
 export function addListenerToGpsFields(fLvl, params = [true]) {
     $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
     
     function toggleNoGpsSubmitBttn() {
+        const coords = getCoordVals()
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
-        if (getCoordVals().length !== 2) { return; }
-        _f.map('addVolatileMapPin', params);
+        if (coords.length === 1) { ifEditingDisableSubmit(fLvl, coords); }
+        if (coords.length !== 2) { _f.map('addVolatileMapPin', [false]); }
+        if (coords.length === 2) { _f.map('addVolatileMapPin', params); }
     }
+}
+function ifEditingDisableSubmit(fLvl, coords) {
+    if (_f.state('getFormProp', [fLvl, 'action']) !== 'edit') { return; }
+    _f.elems('toggleSubmitBttn', ['#top-submit', false]);
 }
 function getCoordVals() {
     return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);  

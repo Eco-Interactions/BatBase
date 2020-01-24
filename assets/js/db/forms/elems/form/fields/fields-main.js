@@ -47,7 +47,7 @@ export function buildFieldInput(field, entity, fLvl) {                          
         return builders[field.type](entity, field.name, fLvl);
     } 
     function finishFieldBuild(input) {
-        _f.mmry('setFormFieldData', [fLvl, field.name, field.value, field.type]);
+        _f.state('setFormFieldData', [fLvl, field.name, field.value, field.type]);
         if (field.required) { handleRequiredField(input, fLvl); }
         addFieldOnChangeHandler(entity, input, field.name, fLvl);
         if (field.type != 'multiSelect') { $(input).val(field.value); }
@@ -84,7 +84,7 @@ function ifCitationFormAutoGenerateCitationOnChange(entity, input) {
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {            
     const val = value || $(elem).val();                             
-    _f.mmry('setFormFieldData', [fLvl, fieldName, val]);
+    _f.state('setFormFieldData', [fLvl, fieldName, val]);
 }
 
 /**
@@ -96,7 +96,7 @@ function storeFieldValue(elem, fieldName, fLvl, value, e) {
 function handleRequiredField(input, fLvl) {
     $(input).change(checkRequiredFields);
     $(input).data('fLvl', fLvl);
-    _f.mmry('addRequiredFieldInput', [fLvl, input]);
+    _f.state('addRequiredFieldInput', [fLvl, input]);
 }
 /**
  * On a required field's change event, the submit button for the element's form 
@@ -109,7 +109,7 @@ function checkRequiredFields(e) {                                               
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {                               
-    const reqElems = _f.mmry('getFormProp', [fLvl, 'reqElems']);                //console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
+    const reqElems = _f.state('getFormProp', [fLvl, 'reqElems']);                //console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */

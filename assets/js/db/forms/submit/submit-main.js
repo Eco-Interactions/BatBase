@@ -29,20 +29,20 @@ export function buildFormDataAndSubmit(entity, fLvl, formVals) {
 }
 /*---------------------- Form Submit Methods ---------------------------------*/
 function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
-    const action = _f.mmry('getFormProp', [fLvl, 'action']);  
+    const action = _f.state('getFormProp', [fLvl, 'action']);  
     const coreEntity = _f.confg('getCoreFormEntity', [entity]);        
     const url = getEntityAjaxUrl(action);   
     addEntityDataToFormData(data, coreEntity);
     storeParamsData(coreEntity, action, fLvl);
     _f.elems('toggleWaitOverlay', [true]); 
-    _f.util('sendAjaxQuery', [data, url, onSuccess, _errs.formSubmitError]);
+    _f.util('sendAjaxQuery', [data, url, onSuccess, _val.formSubmitError]);
 }
 function getEntityAjaxUrl(action) { 
     const path = $('body').data('ajax-target-url');  
     return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity) {  
-    const editingId = _f.mmry('getStateProp', ['editing']);  
+    const editingId = _f.state('getStateProp', ['editing']);  
     if (editingId) { data.ids = editingId; } 
     data.coreEntity = coreEntity;  
 }
@@ -51,7 +51,7 @@ function storeParamsData(entity, action, fLvl) {
     const foci = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
         'interaction': 'int' };
     const props = { action: action, ajaxFormLvl: fLvl, focus: foci[entity] };
-    _f.mmry('setStateProp', ['submit', props]);
+    _f.state('setStateProp', ['submit', props]);
 }
 /* ----------------- Form Submit Success Methods ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                                   _f.util('logAjaxData', [data, arguments]);
@@ -60,14 +60,14 @@ function onSuccess(data, textStatus, jqXHR) {                                   
 }
 function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
     _f.elems('toggleWaitOverlay', [false]);
-    if (data.errors) { return _errs.errUpdatingData(data.errors); }
+    if (data.errors) { return _val.errUpdatingData(data.errors); }
     if (noDataChanges()) { return showNoChangesMessage(); }  
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
 
     function noDataChanges() {
-        const fLvl = _f.mmry('getStateProp', ['submit']).ajaxFormLvl;
-        const action = _f.mmry('getFormProp', [fLvl, 'action'])
+        const fLvl = _f.state('getStateProp', ['submit']).ajaxFormLvl;
+        const action = _f.state('getFormProp', [fLvl, 'action'])
         return action === 'edit'  && !hasChngs(data);
     }
 }
@@ -95,15 +95,15 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
     return _f.util('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
-        const rcrds = _f.mmry('addEntityRecords', [entity, data]);
+        const rcrds = _f.state('addEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }
 /*------------------ Top-Form Success Methods --------------------*/
 function handleFormComplete(data) {   
-    const fLvl = _f.mmry('getStateProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
+    const fLvl = _f.state('getStateProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    const onClose = _f.mmry('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
+    const onClose = _f.state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
     if (onClose) { onClose(data); 
     } else { _f.exitFormWindow() }
     // _f.clearFormMemory();
@@ -114,7 +114,7 @@ function handleFormComplete(data) {
  * entity in the form's parent elem @addAndSelectEntity.
  */
 function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
-    const formParent = _f.mmry('getFormParentId', [fLvl]);         
+    const formParent = _f.state('getFormParentId', [fLvl]);         
     _f.elems('exitSubForm', [fLvl]); 
     if (formParent) { addAndSelectEntity(data, formParent); 
     } else { _f.clearFormMemory(); }

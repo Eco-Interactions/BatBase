@@ -29,7 +29,7 @@ export function buildTagField(entity, field, fLvl) {
     const attr = { id: field + '-sel', class: 'med-field'};
     const tagSel = _f.util('buildSelectElem', [[], attr]);
     $(tagSel).data('inputType', 'tags');
-    _f.mmry('addComboToFormState', [fLvl, field]);
+    _f.state('addComboToFormState', [fLvl, field]);
     return tagSel;
 }
 /* --------------------- SINGLE SELECT/COMBOS ------------------------------- */ 
@@ -46,7 +46,7 @@ export function buildSelect(entity, field, fLvl, cnt) {                         
     function finishSelectBuild(opts) {  
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const attr = { id: fieldId , class: 'med-field'};
-        _f.mmry('addComboToFormState', [fLvl, field]);
+        _f.state('addComboToFormState', [fLvl, field]);
         return _f.util('buildSelectElem', [opts, attr]);
     }
 }
@@ -89,9 +89,9 @@ function getCntLabel(cnt) {
     return cnt in map ? map[cnt] : cnt+'th: '; 
 }
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
-    const valueObj = _f.mmry('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);                
+    const valueObj = _f.state('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);                
     valueObj[cnt] = e.target.value || null;
-    _f.mmry('setFormFieldData', [fLvl, field, valueObj, 'multiSelect']);
+    _f.state('setFormFieldData', [fLvl, field, valueObj, 'multiSelect']);
     checkForBlanksInOrder(valueObj, field, fLvl);    
 }
 /**
@@ -176,7 +176,7 @@ export function getSrcOpts(prop, field, rcrds) {
     return _f.util('getData', [prop]).then(buildSrcOpts);
 
     function buildSrcOpts(ids) {   
-        const srcs = rcrds || _f.mmry('getEntityRcrds', ['source']);
+        const srcs = rcrds || _f.state('getEntityRcrds', ['source']);
         const opts = getRcrdOpts(ids, srcs);
         opts.unshift({ value: 'create', text: 'Add a new '+getFieldName()+'...'});
         return opts;
@@ -202,23 +202,23 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        const pubRcrd = _f.mmry('getFormProp', [fLvl, 'rcrds']).pub; 
+        const pubRcrd = _f.state('getFormProp', [fLvl, 'rcrds']).pub; 
         return opts[pubRcrd.publicationType.displayName];
     }
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
 export function getTaxonOpts(level, field, r) {
-    let realm = r ? r : _f.mmry('getTaxonProp', ['realmName']);
+    let realm = r ? r : _f.state('getTaxonProp', ['realmName']);
     return _f.util('getOptsFromStoredData', [realm+level+'Names'])
         .then(buildTaxonOpts);
 
-        function buildTaxonOpts(opts) {                                         //console.log("taxon opts for [%s] = %O", mmry.forms.realmData.realm+level+"Names", opts)        
+        function buildTaxonOpts(opts) {                                         
             opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
             return opts;
         }
 }
 function getRealmOpts() {
-    const realms = _f.mmry('getTaxonProp', ['realms']);
+    const realms = _f.state('getTaxonProp', ['realms']);
     const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);  
     return opts;
 
@@ -234,7 +234,7 @@ function getCntryRegOpts() {
 }
 /** Returns an array of option objects with all unique locations.  */
 export function getLocationOpts() {
-    const rcrds = _f.mmry('getEntityRcrds', ['location']);
+    const rcrds = _f.state('getEntityRcrds', ['location']);
     let opts = Object.keys(rcrds).map(buildLocOpt);
     opts = opts.sort((a, b) => _f.util('alphaOptionObjs', [a, b]));
     opts.unshift({ value: 'create', text: 'Add a new Location...'});

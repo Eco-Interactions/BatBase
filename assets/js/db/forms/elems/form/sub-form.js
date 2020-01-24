@@ -7,7 +7,7 @@ import * as _f from '../../forms-main.js';
 
 
 export default function(fLvl, fClasses, fVals, selId) {                         
-    const formEntity = _f.mmry('getFormProp', [fLvl, 'entity']);  
+    const formEntity = _f.state('getFormProp', [fLvl, 'entity']);  
     return _f.elems('buildFormRows', [formEntity, fVals, fLvl])
         .then(buildFormContainer)
 
@@ -15,7 +15,7 @@ export default function(fLvl, fClasses, fVals, selId) {
         const subFormContainer = buildSubFormCntnr(); 
         const bttns = _f.elems('getFormFooter', [formEntity, fLvl, 'create']);
         $(subFormContainer).append([buildFormHdr(), rows, bttns]);
-        _f.mmry('setFormProp', [fLvl, 'pSelId', selId]);
+        _f.state('setFormProp', [fLvl, 'pSelId', selId]);
         _f.cmbx('enableCombobox', [selId, false]);
         return subFormContainer;
     }
