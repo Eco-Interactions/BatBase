@@ -115,11 +115,11 @@ Feature: Add new data to the database
         ## Publication Thesis/Dissertation ##
         And I enter "Test Dissertation" in the "Publication" form dropdown
         And I see "New Publication"
+        And I check the "Show all fields" box
         And I select "Thesis/Dissertation" from the "Publication Type" form dropdown
         And I type "1990" in the "Year" field "input"
         And I select "Callaye, Bendry J. Jr" from the "Authors" dynamic dropdown
         And I select "Test Publisher" from the "Publisher" form dropdown
-        And I check the "Show all fields" box
         And I type "10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
         And I type "www.publication.com" in the "Link Url" field "input"
@@ -127,9 +127,9 @@ Feature: Add new data to the database
         And I press the "Create Publication" button
         ## Dissertation Citation ##
         And I see "New Citation"
+        And I check the "Show all fields" box
         And I should see "Ph.D. Dissertation" in the "Citation Type" form dropdown
         And I see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
-        And I check the "Show all fields" box
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
         ## Publication Other ##
@@ -147,9 +147,9 @@ Feature: Add new data to the database
         And I press the "Create Publication" button
         ## Other Citation ##
         And I see "New Citation"
+        And I check the "Show all fields" box
         And I should see "Other" in the "Citation Type" form dropdown
         And I see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
-        And I check the "Show all fields" box
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
         ## ---- Location --- ##

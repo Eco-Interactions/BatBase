@@ -1,5 +1,9 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 
+>WARNINGS
+    - added getAll to idb-keyval. don't update until the feature gets merged in! https://github.com/jakearchibald/idb-keyval/compare/master...zubair-io:get-all
+
+
 >Test Users
     - TestUser: testuser123
     - testeditor: testeditor123
@@ -22,18 +26,6 @@ Run Tests:
 ##  php bin/console doctrine:database:drop --force --env=test 
 ##  php bin/console doctrine:database:create --env=test
 ##  php bin/console doctrine:schema:update --force --env=test
-
-Writing tests: 
-    - spin method template:
-        $this->spin(function() use () {
-            try {
-
-            } catch (Exception $e) { return false; 
-            } finally {
-                // ... do stuff
-                return true;
-            }
-        }, 'msg');
 
 ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 >Testing setup
@@ -96,15 +88,18 @@ Writing tests:
 
 ## Generate Assets ##
 > Asset generation commands: 
-    - $ yarn run encore dev --config-name local
-    - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
-    - $ yarn run encore production --config-name server
+    - $ yarn run encore dev 
+    - $ yarn run encore dev --watch (run while actively working on asset code)
+    - $ yarn run encore production (Switch output path in webpack.config.js first)
 
 ## Live & Learn ##
 > Changing Servers
     Transfer:
         - Cron jobs
         - Email forwards
+
+>Changes to live site
+    - Copy to sub-domain for testing when bugs arise.
 # 
 ##------------------- Bugs ------------------------------------------------##
 >::Known BUGS::
@@ -135,14 +130,6 @@ data wonkiness:
       000EraseTests, that removes test entities so they can be safely deleted from 
       the db without remaining in memory.
   
->Tips for jumping to specific areas of the code
-sync-data.js:
-    - Data storage init -
-        - Jump to start of data storage - @deriveAndStoreData
-
-    - Data storage updates -
-        - Jump to the start of adding data - @updateEntityData
-        - Jump to the start of removing data - @updateAffectedData
   
 >MISC
 Errors: 

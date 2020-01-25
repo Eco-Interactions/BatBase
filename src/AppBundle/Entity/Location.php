@@ -815,6 +815,8 @@ class Location
     public function setUpdatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
@@ -863,6 +865,8 @@ class Location
     public function setDeletedAt($deletedAt)
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
     }
 
     /**

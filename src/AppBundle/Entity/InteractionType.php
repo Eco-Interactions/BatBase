@@ -29,7 +29,6 @@ class InteractionType
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
-     * @JMS\Expose
      */
     private $slug;
 
@@ -268,6 +267,27 @@ class InteractionType
     public function getValidTags()
     {
         return $this->validTags;
+    }
+
+    /**
+     * Serialize validTags.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("tags")
+     *
+     * @return array
+     */
+    public function serializeValidTags()
+    {
+        $tags = []; 
+
+        foreach ($this->validTags as $tag) {  
+            array_push($tags, [ 
+                'id' => $tag->getId(), 
+                'displayName' => $tag->getDisplayName() 
+            ]);
+        }
+
+        return $tags;
     }
 
     /**

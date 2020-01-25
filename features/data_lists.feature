@@ -46,6 +46,7 @@ Feature: Save and manage custom Lists of interaction data
         When I select "add" "All Shown" from the list modification panel
         # And I break "Just move forward."
         And I press the "Save List" button
+        And I break "Press the save button and continue."
         Then I should see "6" interactions in the list
         And I should see "Test Interaction List" in the "Int List" dropdown
 

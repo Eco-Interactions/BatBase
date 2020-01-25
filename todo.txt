@@ -1,170 +1,111 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
-Tasks for others? 
-    - Expand tests
-        - filter sets: test going from each focus into each of the different ones/views
-NOTES:
-    - Leave redundant or unnecessary code commented out until tests are ran to help 
-        trouble shoot when issues arrise.
-    - added getAll to idb-keyval. don't update until the feature gets merged in! https://github.com/jakearchibald/idb-keyval/compare/master...zubair-io:get-all
+#
+# Contents:
+#   TASKS - Current, Next, Change Log
+#   MEETING NOTES - Feedback, Prep, Next/Future 
+#   CHANGES SINCE LAST USER UPDATE
+#   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
+#       
+>==== CURRENT ====
 
-After next server update:
-    - Update where to upload pdfs to registration page, future dev, db about
+QUESTIONS:
+    -
+
+TASKS:
 
 
-Updates:
+NEXT:
+    - Create model of local storage
+        - of entity relations
+    - Replace checkDisplayNameForDups from get-form-data
+
+Change Log:
+    - 
+
+
+
+> ==== MEETING NOTES ==== 
+Prep:
+    Changes:
+    Questions:
+    Notes:
+            Virus people having meeting by end of march
+                - goal to have virus data in.
+Feedback:
+Next/future rounds:
+    Possible:
+        - Data Review panel
+    Next:
+        - UI:
+        - testing:
+    Then:
+    Future:
+        - Review Data
+            * Identical tables
+                - Pending Edits
+                    - entity, id, edits (json), timestamp
+                    - removed once approved 
+                - Edit History
+                    - all fields pending has, plus approvedBy
+        - Edit form
+            - allow selection of another location and merging of all data and 
+                deletion of location being edited
+        - Features
+            - UI - Draw areas and select as parent location
+            - UI - Adjust display point for country
+            - Replace agGrid with MIT alternative 
+
+> ===== CHANGES SINCE LAST USER UPDATE: =====
     - Publication upload
     - Site designed for mobile use
     - Data entry forms improved
         - Added mapping to location forms
     - Ability to save set of filters and lists of interactions
+    - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
 
     Upcoming: 
-        - Adding "Virus" realms, and more.
         - Data review features
         - Figure out how to get Logs in UI for new editors
-
-
-
->==== Change Log ====
-    - All pages look good on all device sizes and the modern browers: chrome, firefox, and safari (IE?)
-
-Current:
-    - move to idb
-        - Set all times to base UTF. Adjusting to PNW time has messed up the "show today's updates" feature.
-
-        - after server update
-            - db-sync
-                - combine the add & remove sync methods to reduce time waiting on async calls?
-                - optimize storeData calls too
-                - look into whether there are other places where something is removed from a collection and needs to be flagged for updates so other editors get all the updated data.
-            - test that data redownloads totally
-                - that updated from other editors update on page refresh 
-                - that user data updates as expected
-    - set email alerts up on feedback
-
-    - Refactoring forms
-        - don't allow creation of anything without display name
-        - store data in memory when updating data db-sync
-        - add warning to new taxon forms without a parent level filled in.
-            - when resetting taxon obj forms, remember which realm and reload 
-        - serialized realm obj 
-            - add lvls within and realm lvl
-
-        - put clear db storage key in db.
-            - add action that resets and refreshes the database
-
-    - Adding realms
-        - Add 'isRealm' flag to Taxon
-        - Add 'sub-ranks' to Realm
-
-
-
-
-    - Write description for email updating current users to all the exciting changes!
-        - frame in context of the last conference to now
-    - Make site mobile-friendly
-        - testing mobile versions
-            - https://github.com/suncat2000/MobileDetectBundle/issues/76
-    - Add to dev notes: workaround with webpack and asset building
-    - save dev version of live site for logs at some new subdomain
-        - to be used for testing to check if new bugs existed in last update
-    - testing
-        - test error pages load without masthead elem in twig
-
-Next:
-    - update tests 
-        - with new 'all' filters, time updated/published
-        - lists, sets, and their interactions
-            - create, edit, delete
-            - load each, then load the other too
-            - resettest filters when list loaded
-        - pdf submission and view page
-    - Add Lists to System Date
-    - Double check all center points for multi-polygons
-    - Figure out how to "stress test" the site:
-        - Large number of people using it
-    - Add property to realm taxa - all contained levels (ie, plant -> family, genus, species)
-
-
-MEETING NOTES:
-    Point out:
-        - Safari - Local storage doesn't work for our large amount of data. Will 
-            need to refactor into idb or spend time writing special handling for safari
-    Next/future rounds:
-        Possible:
-            - Data Review panel (1-2 months)
-            - Refactoring forms (1-2 weeks) 
-
-        Next:
-            - UI:
-            - testing:
-                - Finish updating tests
-                - Refactor TESTS
-                    - Make list of all behat statements being used for reference when adding/editing tests
-                    - Break out scenarios
-        Then:
-        Future:
-            - Review Data
-                * Identical tables
-                    - Pending Edits
-                        - entity, id, edits (json), timestamp
-                        - removed once approved 
-                    - Edit History
-                        - all fields pending has, plus approvedBy
-            - Data
-                - Add more realms
-            - Edit form:\
-                - allow selection of another location and merging of all data and 
-                    deletion of location being edited
-                - Turn all form styles from percentages to pixels
-            - Features
-                - Draw areas and select as parent location
-                - Get shape data for mising countries and regions
-                    - Eg, Central America. Priority?
-                - Adjust display point for country
-                - Replace agGrid with MIT alternative 
-    Feedback:
-
 
 
 >================ DEV Internal Task List ===================
 
 Sort:
-    - ensure that entered coordinates are within selected country
-        on country change, on form submit
-    - Add spanish translations to site
-    - Refactor getTableState to take one arg and determine if it's singular or an array
-    - Upgrade to encore 0.21 & webpack 4
-    - Break util into 
-        - data storage
-        - combobox/selectize?
-        - extend
-        - html
-    - Refactor form code
-        - break out css
-    - Refactor out all styles for the panel displays
-    - Figure out whether the explicit form services are necessary
-    - Refactor TESTS
-        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
-    - Accessibility REFACTORING 
-        - text to speech, etc
-    - Change date time filter html to be more broad than the time updated/changed
-    - refactor @initCOmbobox to take change methods when it makes more sense to pass rather than include 
-##(Category){priority}[difficulty]##
+    - remove all unused properties from serialization (eg, slug)
+    - when clicking reset local data button on menu bar, figure out how to get 
+        a diff between the old and new stored data to better track down errors/bugs
+    - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
+    - REFACTOR - from 'top' to 'main' form
+    - REFACTOR - map-markers
+    - REFACTOR - get tag names for the tags column filter menu from stored data rather than hard coded.
+    - replace ucfirst and lcfirst with built in 'toUpperCase'
+
 TODOs:
+##(Category){priority}[difficulty]##
 (CRUD FORMS/BACKEND)
     - {high}[easy] When nothing is selected but a country, a habitat type, 
         and the displayname, suggest to user they use the country-habitat combo. 
     - {high}[med] add error to interaction form for when an 'invisible' error 
         occurs on entity selection (figure out how to trigger, then do this)
+    - {high}[med] Ensure coordinates are within selected country
+    - {high}[easy] Ensure all entities have a display name before submitting
+    - {med}[easy] Add warning to new Taxon form when no parent is selected
+    - {med}[easy] Add error preventing taxa being moved to their parent's level or above
 
 (DATA)
+    - {med}[med] Add flag to db that will indicate all local data storage needs reset.
+    - {med}[easy] Double check all center points for multi-polygons
+    - {low}[med] Combine geojson into location data in local storage
+    - {med}[med] Map all local data properties and reduce redundency where possible
 
 (SEARCH PAGE)
     - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point
         - Unable to update as rowGrouping is now an enterprise feature (ie min $800 package)
+    - {med}[easy] Refactor getTableState to take one arg and determine if it's singular or an array
+
 
 (STATIC/MISC SITE)
+    - {high}[???] Set up email alert on feedback.
     - {low}[med] Graph active users over time. 
         - daily max users?
     - {med}[easy] Add headers and css styles to FOS pages 
@@ -177,10 +118,17 @@ TODOs:
     - {high}[med] Add error handling for pending updates that can't be resolved 
 
 (TESTS)
-    - {med}[med] Refactor fixtures so that entity changes are easier to handle
+    - {high}[easy] Make list of all behat statements being used for reference when adding/editing tests
+    - {high}[???] Test PDF submission and view page
     - {high}{med} Ensure UI updates as it should when toggling to map
         - search options dimmed and unavailable
-
+    - {med}[med] Refactor fixtures so that entity changes are easier to handle
+    - {med}[???] Add testing specifically for mobile responsiveness. (https://github.com/suncat2000/MobileDetectBundle/issues/76)
+    - {med}[hard] Separate feature context controllers
+    - {med}[???] Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
+        - check all errors trigger and clear 
+        - tags are restricted by interaction type.
+        
 (PWA)
     - {low}[easy] Configure webpack's manifest plugin
     - {med}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
@@ -188,17 +136,12 @@ TODOs:
 (REFACTORING):
     --CRUD--
         - {med}[crud.js] Add '-sel' to the edit taxon form's 'txn-lvl' field 
-        - {low}[easy] Refactor disableSubmitBttn away from passing in '#' and 'submit' 
-            - or into using it to general disable and dim buttons
-            - or both enable/disable submit methods into one func to rule them all
-        - {low}[med] Move interaction create form functions into the same func chain building the rest? 
         - {low}[easy] Change to sisngular tense in ref panel where appropriate. (taxon view complete)
     --General--
         - {med}[easy] use parital, effectively 'group', css selectors
     --Search Page--
-        - {med}{easy} update Loc and Taxa views to alternate color rows as Src is now. 
-        - {low}[med] fillHiddenTaxaColumns... The comments and code are confusing
-        - {low}[med] Download records once and store in memory. (miscObj, maybe?)
+        - {med}[med] Break up core util file.
+        - {med}[med] Refactor css files into styl
     --Testing--
         - {low}[easy] Refactor tests away from sleeping after js changes to attempting to run 
             js or find elems on page multiple times before failing, 'spinning'.
@@ -211,7 +154,8 @@ TODOs:
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
-    Other cool things, sort later:
-        - microsoft app center 
-            - analytics for apps free
-        - Try out some js debugging tools
+
+> CODE REVIEW 
+    - Is there a better name for the form's "detail-panel"?
+    - openSubFormErr ??
+    - replace 'err' in form code?

@@ -713,9 +713,6 @@ button[name="show-hide-col"] {
     left: 24%;
     font-size: .75em !important;
 }
-div[id$="_Rows"] {
-    min-width: 100%;
-}
 [id$="_row"] {
     padding: .2em .75em .3em  .75em;    
     width: 100%;
@@ -820,7 +817,7 @@ select[id$="txn-lvl"] + div {
     text-decoration: underline;
     cursor: pointer;
 }
-#loc-map {
+#form-map {
     border: 1px grey solid;
     height: 366px;
     width: 92%;

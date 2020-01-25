@@ -7,6 +7,9 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+use AppBundle\Entity\InteractionType;
+
+
 /**
  * Template for doctrine migrations where the entity manager is necessary.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
@@ -22,13 +25,28 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
         $this->container = $container;
     }
 
+    private function getEntity($className, $val, $prop = 'id')
+    {
+        return $this->em->getRepository('AppBundle:'.$className)
+            ->findOneBy([$prop => $val]);
+    }
+
+    private function persistEntity($entity, $creating = false)
+    {
+        if ($creating) {
+            $entity->setCreatedBy($this->admin);
+        }
+        $entity->setUpdatedBy($this->admin);
+        $this->em->persist($entity);
+    }
+
     /**
      * @param Schema $schema
      */
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->getEntity('User', 'id', 6);
 
     }
 

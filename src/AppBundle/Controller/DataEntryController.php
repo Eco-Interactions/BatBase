@@ -120,7 +120,6 @@ class DataEntryController extends Controller
         $returnData->coreEntity = $src;
         $returnData->detail = 'citation';
         $returnData->detailEntity = $cit;
-        $returnData->citationUpdate = true;
 
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }

@@ -298,8 +298,8 @@ class Interaction
     {
         if ($this->interactionType) {
             return [ 
-                "id" => $this->interactionType->getId(), 
-                "displayName" => $this->interactionType->getDisplayName() 
+                'id' => $this->interactionType->getId(), 
+                'displayName' => $this->interactionType->getDisplayName() 
             ];
         }
         return null;    
@@ -514,6 +514,8 @@ class Interaction
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
@@ -538,7 +540,6 @@ class Interaction
 
     /**
      * Get updated by user name.
-     * Note: Returns null for records developer (ID = 6) modified
      * @JMS\VirtualProperty
      * @JMS\SerializedName("updatedBy")
      *
@@ -546,12 +547,8 @@ class Interaction
      */
     public function serializeUpdatedBy()
     {
-        $createdBy = $this->createdBy ? 
-            ($this->createdBy->getId() == 6 ? null : $this->createdBy) : null;
-        $user = $this->updatedBy ? 
-            ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
-
-        return !$user ? null : $user->getFirstName();
+        $user = $this->updatedBy ? $this->updatedBy : $this->createdBy;
+        return $user->getFirstName();
     }
 
     /**

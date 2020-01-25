@@ -52,13 +52,6 @@ class GeoJson
     private $displayPoint;
 
     /**
-     * @var string 
-     *
-     * @ORM\Column(name="loc_name", type="string", length=255, nullable=false)
-     */
-    private $locationName;
-
-    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Location", inversedBy="geoJson")
@@ -197,33 +190,6 @@ class GeoJson
     }
 
     /**
-     * Set locationName.
-     *
-     * @param text $locationName
-     *
-     * @return GeoJson
-     */
-    public function setLocationName($locationName)
-    {
-        $this->locationName = $locationName;
-
-        return $this;
-    }
-
-    /**
-     * Get locationName.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("displayName")
-     *
-     * @return text
-     */
-    public function getLocationName()
-    {
-        return $this->locationName;
-    }
-
-
-    /**
      * Set location.
      *
      * @param \AppBundle\Entity\Source $location
@@ -301,9 +267,11 @@ class GeoJson
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**

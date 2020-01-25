@@ -29,14 +29,13 @@ class Taxon
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
-     * @JMS\Expose
      */
     private $slug;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -79,6 +78,15 @@ class Taxon
     private $linkUrl;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_realm", type="boolean")
+     * @JMS\Expose
+     * @JMS\SerializedName("isRealm")
+     */
+    private $isRealm = false;
+
+    /**
      * @var \AppBundle\Entity\Realm
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Realm", mappedBy="taxon")
@@ -89,7 +97,7 @@ class Taxon
      * @var \AppBundle\Entity\Level
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="level_id", referencedColumnName="id", nullable=false)
      */
     private $level;
     
@@ -347,6 +355,30 @@ class Taxon
     }
 
     /**
+     * Set isRealm.
+     *
+     * @param bool $isRealm
+     *
+     * @return Taxon
+     */
+    public function setIsRealm($isRealm)
+    {
+        $this->isRealm = $isRealm;
+
+        return $this;
+    }
+
+    /**
+     * Get isRealm.
+     *
+     * @return bool
+     */
+    public function getIsRealm()
+    {
+        return $this->isRealm;
+    }
+
+    /**
      * Set realm.
      *
      * @param \AppBundle\Entity\Realm $realm
@@ -381,16 +413,18 @@ class Taxon
     {
         return $this->findRealmAndReturnObj($this);
     }
+    
     private function findRealmAndReturnObj($taxon)
     {
-        if ($taxon->getSlug() === 'animalia') { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
+        if ($taxon->getSlug() === 'animalia') { return []; } 
         $realm = $taxon->getRealm();
         if ($realm) {
             return [ 
-                "id" => $realm->getId(), 
-                "displayName" => $realm->getDisplayName() ];
+                'id' => $realm->getId(), 
+                'displayName' => $realm->getDisplayName(),
+                'pluralName' => $realm->getPluralName() 
+            ];
         }
-        if (!$taxon->getParentTaxon()) { print($taxon->getId()."\n");  }
         return $this->findRealmAndReturnObj($taxon->getParentTaxon());
     }
 
@@ -401,7 +435,7 @@ class Taxon
      *
      * @return Taxon
      */
-    public function setLevel(\AppBundle\Entity\Level $level = null)
+    public function setLevel(\AppBundle\Entity\Level $level)
     {
         $this->level = $level;
 
@@ -733,9 +767,11 @@ class Taxon
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
@@ -784,6 +820,8 @@ class Taxon
     public function setDeletedAt($deletedAt)
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
     }
 
     /**

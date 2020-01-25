@@ -768,7 +768,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'SGenus', 'Species' => 'OGenus Species'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Consumption', 'Arthropod', 'Detailed interaction notes.'];
+        $miscData = [ 'Consumption', 'Leaf', 'Detailed interaction notes.'];
         $this->fillMiscIntFields($miscData);
     }
 
@@ -1275,10 +1275,10 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function getFieldData($fieldId)
     {
-        $val = $this->getFieldInnerText($fieldId);
+        $val = $this->getFieldInnerText($fieldId);  
         if ($val === null || $val === "") {
-            $val = $this->getFieldValue($fieldId);
-        }  
+            $val = $this->getFieldValue($fieldId);   
+        }                                           //fwrite(STDOUT, "\n".$fieldId." - ".$val."\n");
         return $val;
     }
     private function getFieldInnerText($fieldId)
@@ -1401,9 +1401,9 @@ class FeatureContext extends RawMinkContext implements Context
     private function textContainedInField($text, $fieldId, $isIn = true)
     {  
         $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $fieldVal = $this->getFieldData($fieldId);
+        $fieldVal = $this->getFieldData($fieldId);          
         return !$isIn && strpos($fieldVal, $text) === false || 
-            $isIn && strpos($fieldVal, $text) != false;
+            $isIn && (strpos($fieldVal, $text) != false || $fieldVal == $text); //strpos fails on exact match
     }
     private function assertFieldValueIs($text, $fieldId, $isIn = true)
     {   
