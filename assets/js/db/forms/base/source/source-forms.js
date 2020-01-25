@@ -359,7 +359,7 @@ function ifNoChildFormOpen(fLvl) {
  * any type-specific labels for fields.  
  * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
  */
-export function loadSrcTypeFields(entity, typeId, elem, typeName) {             console.log('           /--loadSrcTypeFields [%s][%s]', entity, typeName);
+export function loadSrcTypeFields(entity, typeId, elem, typeName) {             //console.log('           /--loadSrcTypeFields [%s][%s]', entity, typeName);
     const fLvl = _f.getSubFormLvl('sub');
     resetOnFormTypeChange(entity, typeId, fLvl);
     return getSrcTypeRows(entity, typeId, fLvl, typeName)
@@ -397,7 +397,7 @@ function getFilledSrcVals(entity, typeId, fLvl) {
 }
 /** Update form state for the selected source type. */
 function setSourceType(entity, fLvl, tName) {
-    const type = tName || getSourceTypeFromCombo(entity);                       //console.log('               --type = [%s]', type);
+    const type = tName || getSourceTypeFromCombo(entity);                       console.log('               --type = [%s]', type);
     _f.state('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {

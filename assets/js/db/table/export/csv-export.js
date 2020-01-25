@@ -20,7 +20,7 @@ import { buildLocTree, buildSrcTree, buildTxnTree } from '../format-data/data-tr
 
 let tblState;  
 
-export default function exportCsvData() {
+export default function exportCsvData() {                                       console.log('       /--exportCsvData')
     fadeTable();
     tblState = tState().get();
     fillTableWithExportOnlyData()
@@ -42,7 +42,7 @@ function fillTableWithExportOnlyData() {
     return _u.getData(['interaction', 'taxon'])
     .then(fillInteractionsWithExportData);
 }
-function fillInteractionsWithExportData(rcrds) {                                console.log('-----fillInteractionsWithExportData')
+function fillInteractionsWithExportData(rcrds) {                                
     const taxa = {};
     const entityRcrds = rcrds;
     tblState.api.forEachNodeAfterFilter(fillRowExportData);

@@ -206,7 +206,7 @@ function updateDetailEntityData(data) {
 }
 /* ------------------------------ ADD DATA ---------------------------------- */
 /** Updates stored-data props related to a core-entity record with new data. */
-function addCoreEntityData(entity, rcrd) {                                      console.log("       --Updating Core entity. %s. %O", entity, rcrd);
+function addCoreEntityData(entity, rcrd) {                                      //console.log("       --Updating Core entity. %s. %O", entity, rcrd);
     updateCoreData(entity, rcrd);
     updateCoreDataProps(entity, rcrd);
 }
@@ -266,7 +266,7 @@ function updateDataProps(entity, rcrd, updateFuncs) {                           
     });
 }
 /** Updates stored-data props related to a detail-entity record with new data. */
-function addDetailEntityData(entity, rcrd) {                                    console.log("       --Updating Detail: [%s] %O", entity, rcrd);
+function addDetailEntityData(entity, rcrd) {                                    //console.log("       --Updating Detail: [%s] %O", entity, rcrd);
     return updateDetailData(entity, rcrd)
 }
 function updateDetailData(entity, rcrd) {
@@ -373,7 +373,7 @@ function addContribData(prop, rcrd, entity) {                                   
 }
 /* ---------------------------- REMOVE DATA --------------------------------- */
 /** Updates any stored data that was affected during editing. */
-function updateAffectedData(data) {                                             console.log("           --updateAffectedData called. data = %O", data);
+function updateAffectedData(data) {                                             //console.log("           --updateAffectedData called. data = %O", data);
     updateRelatedCoreData(data, data.coreEdits);
     updateRelatedDetailData(data);
 }
@@ -389,7 +389,7 @@ function hasEdits(editObj) {
     return editObj && Object.keys(editObj).length > 0;
 }
 /** Updates relational storage props for the entity. */
-function updateAffectedDataProps(entity, rcrd, edits) {                         console.log("               --updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
+function updateAffectedDataProps(entity, rcrd, edits) {                         //console.log("               --updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
     const params = { entity: entity, rcrd: rcrd, stage: 'rmvData' };
     const hndlrs = getRmvDataPropHndlrs(entity);                                
     return Object.keys(edits).forEach(prop => {  
@@ -688,7 +688,7 @@ function retryEntityUpdates(entity) {
 }
 function addUpdatedDataToLocalDb() {
     return Object.keys(mmryData).reduce((p, prop) => {
-        if (!mmryData[prop].changed) { return p; }                              console.log('setting [%s] data = [%O]', prop, mmryData[prop].value);
+        if (!mmryData[prop].changed) { return p; }                              console.log('               --setting [%s] data = [%O]', prop, mmryData[prop].value);
         return p.then(() => _u.setData(prop, mmryData[prop].value));
     }, Promise.resolve());
 }

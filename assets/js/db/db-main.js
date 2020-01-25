@@ -7,7 +7,7 @@
  * 
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
- *     buildTable               db-ui, save-fltrs
+ *     buildTable               db-ui, filter-panel
  *     initSearchState          db_sync, util
  *     resetDataTable            db_sync, db-forms, db-filters, db-tutorial
  *     onLocViewChange          _ui
@@ -38,7 +38,7 @@ import * as db_map from './map/map-main.js';
 import * as _ui from './pg-ui/ui-main.js';
 import * as frmt_data from './table/format-data/aggrid-format.js'; 
 import { startWalkthrough } from './tutorial/db-tutorial.js';
-import { updateFilterPanelHeader } from './pg-ui/panels/save-fltrs.js';
+import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
 
 /** ==================== FACADE ============================================= */
 export function _util(funcName, params = []) {
@@ -152,7 +152,7 @@ function resetTblParams(focus) {
     if (intSet) { tblState.intSet = intSet; }
 }
 /** Resets storage props, buttons, and filters. */
-function resetTableState() {                                                  //console.log('\n### Restting tree state ###')
+function resetTableState() {                                                  
     resetCurTreeStorageProps();
     _ui.resetToggleTreeBttn(false);
     db_filters.clearFilters();
@@ -164,7 +164,7 @@ function resetCurTreeStorageProps() {
 }
 /* ==================== TABLE (RE)BUILDS ============================================================================ */
 function loadTbl(tblName, rowData) {
-    return require('./table/init.js').init(tblName, rowData, tblState);
+    return require('./table/init.js').default(tblName, rowData, tblState);
 }
 /** 
  * Table-rebuild entry point after local database updates, filter clears, and 
@@ -353,10 +353,10 @@ function storeSrcView(val) {
  * Get all data needed for the Taxon-focused table from data storage and send 
  * to @initTaxonSearchUi to begin the data-table build.  
  */
-function buildTaxonTable(v) {                                       /*Perm-log*/console.log("       --Building Taxon Table. view ? [%s]", v);
+function buildTaxonTable(v) {                                       
     if (v) { return getTxnDataAndBuildTable(v); }
     return _u.getData('curView', true).then(storedView => {
-        const view = storedView || getSelValOrDefault(_u.getSelVal('View'));    
+        const view = storedView || getSelValOrDefault(_u.getSelVal('View'));/*Perm-log*/console.log("       --Building [%s] Taxon Table", view);    
         return getTxnDataAndBuildTable(view);
     }).catch(err => _u.alertErr(err));
 }

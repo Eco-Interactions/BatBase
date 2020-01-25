@@ -41,7 +41,7 @@ export function initFilterPanel() {
 function initTimeFilterUi() {
     _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
     $('#selTimeFilter')[0].selectize.disable();
-    db_filters.toggleTimeFilter('disable'); //inits disabled ui
+    db_filters.applyTimeFilterStyles(false); //inits disabled ui
 }
 export function addFilterPanelEvents() {  
     window.addEventListener('resize', resizeFilterPanelTab);
@@ -150,7 +150,7 @@ export function toggleFilterPanel() {
     } else { _uPnl.togglePanel('#filter-opts-pnl', 'close'); }
 }
 /* ============== CREATE/OPEN FILTER SET ==================================== */
-function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           --buildAndShowFilterPanel')
+function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           +--buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
     _u.getOptsFromStoredData('savedFilterNames').then(updateFilterSel);
 }

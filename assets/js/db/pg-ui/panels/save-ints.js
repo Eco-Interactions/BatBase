@@ -4,13 +4,13 @@
  * Exports:                 Imported By:
  *     addListPanelEvents           panels-main
  *     newIntList                   util
- *     savedIntListLoaded           db-filters, save-fltrs
+ *     savedIntListLoaded           db-filters, filter-panel
  *     selIntList                   util
  *     toggleListPanelOrientation   panels-main
  *     toggleSaveIntsPanel          db-ui
  *     enableListReset              db-ui
  *
- * CODE SECTIONS:
+ * TOC:
  *     SHOW/HIDE LIST PANEL
  *         Toggle Panel Vertically or Horizontally
  *     CREATE/OPEN INTERACTION LIST
@@ -23,8 +23,7 @@
  *             PSEUDO TAB INVISIBLE BOTTOM BORDER
  *             Select Rows Radio Toggles
  *             Reset & Enable/Disable UI
- *             Table Methods
- *             
+ *             Table Methods         
  */
 import * as _u from '../../util/util.js';
 import * as _uPnl from './panels-main.js';
@@ -67,7 +66,7 @@ export function toggleSaveIntsPanel() {
         sizeIntPanelTab();
     } else { _uPnl.togglePanel('#int-opts', 'close'); }
 }
-function buildAndShowIntPanel() {                                               
+function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')         
     _uPnl.togglePanel('#int-opts', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
@@ -112,7 +111,7 @@ function filtersApplied() {
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
-export function newIntList(val) {                                   /*debg-log*///console.log('creating interaction list. val = ', val);
+export function newIntList(val) {                                   /*debg-log*///console.log('           --New Interaction List');
     _uPnl.updateSubmitEvent('#submit-list', createDataList);
     updateUiForListCreate();
     fillListDataFields(val, '', 0);
@@ -154,7 +153,7 @@ function editDataList() {
 }
 function fillListData(id) {
     _u.getData('dataLists').then(lists => {
-        const list = addActiveListToMemory(lists[id]);              /*debg-log*/console.log('activeList = %O', list);                                                 
+        const list = addActiveListToMemory(lists[id]);              /*debg-log*///console.log('activeList = %O', list);                                                 
         fillListDataFields(
             list.displayName, list.description, list.details.length);  
     });
@@ -193,11 +192,11 @@ function getUpdatedIntSet(mode) {
         app.list.details.filter(id => rows.indexOf(id) === -1);
 }
 /* ====================== DELETE INTERACTION LIST =========================== */
-function deleteInteractionList() {                                  /*debg-log*///console.log('deleteInteractionList')
+function deleteInteractionList() {                                  
     $('#delete-list').hide();
     $('#list-confm-cntnr').show();    
 }
-function confmDelete() {
+function confmDelete() {                                            /*perm-log*/console.log('           --Deleted Interaction List');
     resetDeleteButton();
     _uPnl.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
     delete app.rowSelMode;
@@ -214,7 +213,7 @@ function resetDeleteButton() {
  * Loads the interaction set in the table, where it can be explored and filtered
  * with the standard UI options
  */
-function loadListInTable() {                                        /*debg-log*/console.log('----Loading Interaction List in Table. %O', app.list);
+function loadListInTable() {                                        /*perm-log*/console.log('           +--Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
     resetDataTable()
     .then(updateRelatedListUi);
@@ -258,7 +257,7 @@ function submitDataList(data, action, hndlr) {
     _uPnl.submitUpdates(data, action, hndlr);
 }
 function onListSubmitComplete(action, results) {                                      
-    const list = JSON.parse(results.list.entity);                   /*temp-log*/console.log('listSubmitComplete results = %O, list = %O', results, list)
+    const list = JSON.parse(results.list.entity);                   /*temp-log*///console.log('listSubmitComplete results = %O, list = %O', results, list)
     updateUserNamedList(results.list, action)
     .then(updateListComboboxOptions)
     .then(updateUiAfterListSubmit.bind(null, list));
@@ -271,7 +270,7 @@ function updateUiAfterListSubmit(list) {
     delete app.submitting;
     $('#submit-list').data('submitting', false);
 }
-function onListDeleteComplete(results) {                            /*temp-log*/console.log('listDeleteComplete results = %O', results)
+function onListDeleteComplete(results) {                            /*temp-log*///console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete')
     .then(updateListComboboxOptions)
     .then(() => $('#selIntList')[0].selectize.open());

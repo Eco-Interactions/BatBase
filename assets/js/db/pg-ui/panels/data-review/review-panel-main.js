@@ -18,38 +18,8 @@ export function addDataReviewEvents() {
 }
 
 function toggleEditorColumn() {
-    const shown = $('#rvw-data').data('shown');
-    if (shown) {
-        hideEditorColumn();
-    } else {
-        showEditorColumn();
-    }
-}
-function hideEditorColumn() {
-    tState().set({'initParams': {editor: false}}); 
-    reloadTable();
-    $('#rvw-data').data('shown', false);
-    $('#rvw-data').removeClass('admin-open-toggle');
-}
-function showEditorColumn() {
-    tState().set({'initParams': {editor: true}}); 
-    reloadTable();
-    $('#rvw-data').data('shown', true);
-    $('#rvw-data').addClass('admin-open-toggle');
-}
-function reloadTable() {
     tblState = tState().get();
-    const treeName = getTreeName(tblState.curView);
-    tblState.api.destroy();
-    require('../../../table/init.js').init(treeName, tblState.rowData, tblState);
-}
-function getTreeName(focus, view) {
-    const map = {
-        locs: 'Location', srcs: getSourceTreeName(view), taxa: 'Taxon'
-    };
-    return map[focus] + ' Tree';
-}
-function getSourceTreeName(view) {
-    const map = { 'pubs': 'Publication', 'auths': 'Author', 'publ': 'Publisher'};
-    return map[view];
+    const shown = $('#rvw-data').data('shown');
+    tblState.columnApi.setColumnsVisible(['updatedBy'], !shown);
+    $('#rvw-data').data('shown', !shown);
 }

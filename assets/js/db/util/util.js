@@ -5,7 +5,7 @@ import * as db_page from '../db-main.js';
 import { addNewDataToStorage, initStoredData, replaceUserData } from '../local-data/db-sync.js';
 import { showLoadingDataPopUp, showPopUpMsg } from '../pg-ui/ui-main.js';
 import { newIntList, selIntList } from '../pg-ui/panels/save-ints.js';
-import { newFilterSet, selFilterSet } from '../pg-ui/panels/save-fltrs.js';
+import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter-panel.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 /* 
  * Exports:                     Imported by:
@@ -227,7 +227,7 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
       }
 }
 /*-----------------AJAX Callbacks---------------------------------------------*/
-export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 logAjaxData(dataPkg, arguments);
+export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 logAjaxData(dataPkg, arguments, 'sending');
     return $.ajax({
         method: "POST",
         url: url,
@@ -239,10 +239,11 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
-export function logAjaxData(dataPkg, args) {
+export function logAjaxData(dataPkg, args, sending = false) {
+    const state = sending ? 'Sent' : 'Recived';
     if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
-        console.log("           --Ajax data =%O arguments = %O", dataPkg, args);
-    } else { console.log("          --Ajax data =%O", dataPkg); }
+        console.log("           --[%s] Ajax data =%O arguments = %O", dataPkg, args);
+    } else { console.log("          --[%s] Ajax data =%O", dataPkg); }
 }
 export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
     if ($('body').data('env') === 'test') { return; }

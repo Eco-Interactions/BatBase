@@ -88,7 +88,7 @@ function getPinnedFieldVals() {
  * Resets the top-form in preparation for another entry. Pinned field values are 
  * persisted. All other fields will be reset. 
  */
-function resetIntFields(vals) {                                                 console.log('resetIntFields. vals = %O', vals);
+function resetIntFields(vals) {                                                 console.log('           --resetIntFields. vals = %O', vals);
     _f.elems('toggleSubmitBttn', ["#top-submit", false]);
     _f.state('addEntityFormState', ['interaction', 'top', null, 'create']);
     resetUnpinnedFields(vals);
@@ -249,7 +249,7 @@ function addTaxonFocusListener(role) {
  * all current citations for the publciation. When a publication is created, 
  * the citation form is automatically opened. 
  */
-function onPubSelection(val) {                                                  console.log('       --onPubSelection[%s]', val); 
+function onPubSelection(val) {                                                  console.log('       +--onPubSelection[%s]', val); 
     if (val === 'create') { return createSubEntity('publication', 'sub'); }        
     if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
     fillCitationField(val);
@@ -283,7 +283,7 @@ function getPubCitationOpts(pubId) {
  * When a Citation is selected, both 'top' location fields are initialized
  * and the publication combobox is reenabled. 
  */    
-function onCitSelection(val) {                                                  console.log('       --onCitSelection [%s]', val);
+function onCitSelection(val) {                                                  console.log('       +--onCitSelection [%s]', val);
     if (val === 'create') { return createSubEntity('citation', 'sub'); }
     if (val === '' || isNaN(parseInt(val))) { return _f.panel('clearDetailPanel', ['cit']); }          
     _f.panel('updateSrcDetails', ['cit']);
@@ -298,7 +298,7 @@ function onCitSelection(val) {                                                  
  * If the map is open, the country is outlined and all existing locations within
  * are displayed @focusParentAndShowChildLocs
  */
-function onCntryRegSelection(val) {                                             console.log("       --onCntryRegSelection [%s]", val);
+function onCntryRegSelection(val) {                                             console.log("       +--onCntryRegSelection [%s]", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
     const loc = getRcrd('location', val);
     fillLocationSelect(loc);
@@ -347,7 +347,7 @@ export function enableCountryRegionField() {
  * combobox and the location record's data is added to the detail panel. If 
  * the location was cleared, the detail panel is cleared. 
  */     
-function onLocSelection(val) {                                                  console.log('       --onLocSelection [%s]', val);
+function onLocSelection(val) {                                                  console.log('       +--onLocSelection [%s]', val);
     if (val === 'create') { return createSubEntity('location', 'sub'); }
     if (val === '' || isNaN(parseInt(val))) { return _f.panel('clearDetailPanel', ['loc']); }   
     if ($('#form-map').length) { removeLocMap(); }
@@ -368,12 +368,12 @@ function removeLocMap() {
  * with the taxa at that level. When one is selected, the remaining boxes
  * are repopulated with related taxa and the 'select' button is enabled.
  */
-function initSubjectSelect() {                                                  console.log('       --initSubjectSelect (selected ? [%s])', $('#Subject-sel').val());
+function initSubjectSelect() {                                                  console.log('       +--initSubjectSelect (selected ? [%s])', $('#Subject-sel').val());
     return initTaxonSelectForm('Subject', 1);
 }
 /* -------------- OBJECT ---------------------- */
 /** Note: The selected realm's level combos are built @onRealmSelection. */
-function initObjectSelect() {                                                   console.log('       --initObjectSelect (selected ? [%s])', $('#Object-sel').val());
+function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
     return initTaxonSelectForm('Object', getObjectRealm());
 } 
 function getObjectRealm() { 
@@ -588,7 +588,7 @@ function getChildlevelOpts(lvlName) {
  */
 function repopulateCombosWithRelatedTaxa(selId) {
     const opts = {}, selected = {};                                               
-    const taxon = getRcrd('taxon', selId);                                    //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
+    const taxon = getRcrd('taxon', selId);                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
     const realm = getRealmData('realmName');
 
     taxon.children.forEach(addRelatedChild); 
@@ -730,7 +730,7 @@ function ifIsLevelComboElem(elem) {
  * When complete, the select form is removed and the most specific taxon is displayed 
  * in the interaction-form <role> combobox. 
  */
-function onTaxonRoleSelection(role, val) {                                      //console.log("       --onTaxonRoleSelection [%s] = ", role, val);
+function onTaxonRoleSelection(role, val) {                                      console.log("       +--onTaxonRoleSelection [%s] = ", role, val);
     if (val === "" || isNaN(parseInt(val))) { return; }         
     $('#'+_f.getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);

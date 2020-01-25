@@ -4,14 +4,15 @@
  * Exports:                     Imported by:                (Added all post initial refactor)
  *     buildTreeSearchHtml              db-ui
  *     enableClearFiltersButton         db-ui
- *     getFilterState                   save-fltrs
- *     clearFilters                  db-page, save-ints
- *     resetFilterParams            db-page, db-ui, save-ints
- *     selTimeFilter                    save-fltrs
+ *     getFilterState                   filter-panel
+ *     clearFilters                     db-page, save-ints
+ *     resetFilterParams                db-page, db-ui, save-ints
+ *     selTimeFilter                        
  *     showTodaysUpdates                db_forms
+ *     applyTimeFilterStyles            filter-panel
  *     syncViewFiltersAndUi             save-ints
  *     toggleTimeFilter                 db_page
- *     updateFilterStatusMsg            db-page, init-tbl, save-fltrs
+ *     updateFilterStatusMsg            db-page, init-tbl, filter-panel
  *     updateTaxonFilterViewMsg         db-page
  *     updateLocSearch                  util
  *     updatePubSearch                  util
@@ -20,7 +21,7 @@
 import * as _u from '../../util/util.js';
 import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
 import * as db_ui from '../../pg-ui/ui-main.js';
-import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/save-fltrs.js';
+import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/filter-panel.js';
 import { savedIntListLoaded } from '../../pg-ui/panels/save-ints.js';
 /** 
  * Filter Params
@@ -212,11 +213,11 @@ function showUpdatesAfterTableLoad() {
     toggleTimeFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
-export function toggleTimeFilter(state, time, skipSync) {                       console.log('       +-toggleTimeFilter. state = %s, time? ', state, time);
+export function toggleTimeFilter(state, time, skipSync) {                       console.log('       +-toggleTimeFilter. state = %s, time? ', state, time); 
     fPs.cal = initCal(); //fPs.cal || 
     const filtering = ifFilteringOnTime(state);
     updateTimeFilterMemory(time);
-    updateRelatedUi(filtering);
+    applyTimeFilterStyles(filtering);
     if (filtering) { filterTableByTime(time);
     } else { resetTimeFilter(skipSync); } 
 } 
@@ -263,8 +264,8 @@ function updateTimeFilterMemory(time) {
     if (!time) { return; }
     fPs.pnlFltrs.time.date = time;
 }
-function updateRelatedUi(filtering) {
-    const opac = filtering ? 1 : .4;
+export function applyTimeFilterStyles(filtering) {
+    const opac = filtering ? 1 : .6;
     $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
     $('.selTimeFilter-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
@@ -364,7 +365,7 @@ function updateUiAfterTimeFilterChange(time, skipSync) {
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi(time) {                                               console.log('       --syncFiltersAndUi after time-filter change');
+function syncFiltersAndUi(time) {                                               console.log('           --syncFiltersAndUi [%s]', time);
     db_ui.resetToggleTreeBttn(false);
     if (time != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
     updateFilterStatusMsg();  

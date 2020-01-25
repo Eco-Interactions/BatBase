@@ -1,8 +1,5 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
- * 
- * Exports:        Imported by:
- *     init            db_page, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as _forms from '../forms/forms-main.js';
@@ -18,7 +15,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(view, rowData, state) {                                    //console.log('initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
+export default function init(view, rowData, state) {                /*Perm-log*/console.log('           +--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
     return initTable(view, rowData)
@@ -100,7 +97,7 @@ function getColumnDefs(mainCol) {
     const realm = tblState.curRealm || false;  
     return getData('tagNames').then(buildColDefs);
 
-    function buildColDefs(tags) {  console.log('tags = %O', tags)
+    function buildColDefs(tags) { 
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
@@ -117,7 +114,7 @@ function getColumnDefs(mainCol) {
                 {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
                 {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
                 {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-                {headerName: "Editor", field: "updatedBy", width: 80, hide: hideEditor(), headerTooltip: "Last Editied By", filter: unqVals },
+                {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
                 {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
                 {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
                 {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
@@ -249,9 +246,6 @@ function getPencilHtml(id, entity, editFunc) {
     $('#search-tbl').on(
         'click', '#edit'+entity+id, _forms.edit.bind(null, id, lcfirst(entity)));
     return editPencil;
-}
-function hideEditor() {
-    return tblState.initParams ? !tblState.initParams.editor : true;
 }
 /** -------- Map Column ---------- */
 function ifLocView() {                                           

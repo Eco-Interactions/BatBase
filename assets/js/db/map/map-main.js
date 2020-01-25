@@ -192,7 +192,7 @@ function getGeocoderOptions() {
         geocoder: app.geoCoder
     };
 }
-function drawPolygonAndUpdateUi(mapId, e) {                                     console.log("geocoding results = %O", e);
+function drawPolygonAndUpdateUi(mapId, e) {                                     console.log("       --geocoding results = %O", e);
     drawPolygon(e.geocode.bbox, e.geocode.properties.address);
     if (mapId == 'form-map') {
         showNearbyLocationsAndUpdateForm(e.geocode.properties);
@@ -264,7 +264,7 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(data, fltrd) {                                          console.log('               //initMap. data = %O', data);
+export function initMap(data, fltrd) {                                          console.log('               //--initMap. data = %O', data);
     app.data.locs = data;
     const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
     downloadDataAndBuildMap(dispFunc, 'map');                                               
@@ -276,7 +276,7 @@ export function showLoc(id, zoom, data) {
     downloadDataAndBuildMap(showLocInMap, 'map');
     
     function showLocInMap() {
-        const loc = app.data.locs[id];                                          console.log('               show loc = %O, zoom = %s', loc, zoom)
+        const loc = app.data.locs[id];                                          console.log('               --show loc = %O, zoom = %s', loc, zoom)
         const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId); 
         if (!latLng) { return noGeoDataErr(); }
         zoomToLocAndShowPopup(loc, latLng, zoom);
@@ -488,7 +488,7 @@ function getLatLngObj(loc, locGeoJson) {
     let array = JSON.parse(locGeoJson.displayPoint); 
     return L.latLng(array[1], array[0]);
 }
-function getLocCenterPoint(loc, locGeoJson) {                                   console.log('getLocCenterPoint. loc = %O, locGeoJson = %O', loc, locGeoJson);
+function getLocCenterPoint(loc, locGeoJson) {                                   //console.log('       getLocCenterPoint. loc = %O, locGeoJson = %O', loc, locGeoJson);
     if (!loc || !locGeoJson) { return false; }
     const feature = buildFeature(loc, locGeoJson);
     const polygon = L.geoJson(feature);
@@ -579,7 +579,7 @@ function fillCoordFields(latLng) {                                              
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates. 
  */
-function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('           --updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
     updateMapPin(latLng, results[0], zoomFlag); 
 }
@@ -632,7 +632,7 @@ function addPinToMap(latLng, pin, zoomFlag) {
 /**
  * what is the case caught in this if??
  */
-export function initFormMap(parent, rcrds, type) {                              console.log('       /--initFormMap type = [%s]', type);
+export function initFormMap(parent, rcrds, type) {                              console.log('           /--initFormMap type = [%s]', type);
     app.data.locs = app.data.locs || rcrds;  
     // if (!type && app.volatile.prnt && parent == app.volatile.prnt) { return; }
     downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);

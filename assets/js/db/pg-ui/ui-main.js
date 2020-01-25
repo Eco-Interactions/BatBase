@@ -29,7 +29,7 @@ import * as db_filters from '../table/filters/filters-main.js';
 import { showInts } from '../map/map-main.js';
 import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/save-ints.js';
 import { addPanelEvents, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
-import { updateFilterPanelHeader } from '../pg-ui/panels/save-fltrs.js';
+import { updateFilterPanelHeader } from '../pg-ui/panels/filter-panel.js';
 
 
 const app = {
@@ -579,7 +579,7 @@ export function updateUiForTableView() {
     enableTableButtons();
     updateBttnToShowRcrdsOnMap(); 
 }
-function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
+function showTableRecordsOnMap() {                                              console.log('       +--showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
     $('#search-tbl').fadeTo('fast', 0.3, () => {
         updateUiForMapView();
@@ -601,12 +601,12 @@ function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Map Interactions');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);
 }
-function returnRcrdsToTable() {
+function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
     updateUiForTableView();
     if (_u.getSelVal('View') === 'map') { _u.setSelVal('View', 'tree'); }
 }
 /* ------------------ Search Tips ------------------------------------------- */
-export function showTips() {                                                           //console.log("show tips called.")
+export function showTips() {                                                    //console.log("show tips called.")
     if (!$('#tips-close-bttn').length) { initSearchTips(); }
     $('#b-overlay-popup').addClass("tips-popup");
     $('#b-overlay, #b-overlay-popup').fadeIn(500);
@@ -711,19 +711,3 @@ export function showPopUpMsg(msg) {                                             
     $('#db-popup, #db-overlay').show();
     fadeTable();
 }
-/** Called seperately so @emptySearchOpts is called once. */
-// export function clearPastHtmlOptions(tableBuilder) {    
-//     $('#opts-col2').fadeTo(100, 0);
-//     $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
-    
-//     function emptySearchOpts() {                                             //console.log("emptying search options");
-//         $('#opts-col2').empty();
-//         // $('#sort-opts').empty();
-//         $('#opts-col1, #opts-col2').fadeTo(0, 1);
-//         updateUiForTableView();
-//         tableBuilder();
-//     }
-// } /* End clearPastHtmlOptions */
-// export function clearCol2() {
-    // $('#opts-col2').empty();
-// }

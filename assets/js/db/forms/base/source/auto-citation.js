@@ -11,7 +11,7 @@ import * as _f from '../../forms-main.js';
 /** Generates full citation text after all required fields are filled. */
 export function getCitationText(fLvl) {    
     const pubData = _f.state('getFormProp', [fLvl, 'rcrds']);                   //console.log('getCitationText [%s]. rcrds = %O', fLvl, pubData);
-    const type = $('#CitationType-sel option:selected').text();                 console.log("getCitationText for [%s]", type);
+    const type = $('#CitationType-sel option:selected').text();                 console.log("           +--getCitationText for [%s]", type);
     return _f.getFormValData('citation', null, null)
         .then(generateCitText); 
 

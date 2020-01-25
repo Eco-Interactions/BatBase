@@ -6,13 +6,13 @@
  * Exports:           Imported by:
  *     addPanelEvents       db-ui
  *     closeOpenPanels      db-ui
- *     parseUserNamed       save-fltrs, save-ints
- *     submitUpdates        save-fltrs, save-ints
- *     togglePanel          save-fltrs, save-ints
- *     updateSubmitEvent    save-fltrs, save-ints
+ *     parseUserNamed       filter-panel, save-ints
+ *     submitUpdates        filter-panel, save-ints
+ *     togglePanel          filter-panel, save-ints
+ *     updateSubmitEvent    filter-panel, save-ints
  */
 import * as _u from '../../util/util.js';
-import { initFilterPanel, toggleFilterPanelOrientation } from './save-fltrs.js';
+import { initFilterPanel, toggleFilterPanelOrientation } from './filter-panel.js';
 import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
 import { addDataReviewEvents } from './data-review/review-panel-main.js';
 
