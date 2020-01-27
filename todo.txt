@@ -128,6 +128,7 @@ TODOs:
     - {med}[???] Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
         - check all errors trigger and clear 
         - tags are restricted by interaction type.
+        - delete test db on test complete.
         
 (PWA)
     - {low}[easy] Configure webpack's manifest plugin

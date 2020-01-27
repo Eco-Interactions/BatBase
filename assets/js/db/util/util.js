@@ -240,10 +240,10 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     }
 }
 export function logAjaxData(dataPkg, args, sending = false) {
-    const state = sending ? 'Sent' : 'Recived';
+    const state = sending ? 'S' : 'R';
     if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
-        console.log("           --[%s] Ajax data =%O arguments = %O", dataPkg, args);
-    } else { console.log("          --[%s] Ajax data =%O", dataPkg); }
+        console.log("           --[%s] Ajax data =%O arguments = %O", state, dataPkg, args);
+    } else { console.log("          --[%s] Ajax data =%O", state, dataPkg); }
 }
 export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
     if ($('body').data('env') === 'test') { return; }

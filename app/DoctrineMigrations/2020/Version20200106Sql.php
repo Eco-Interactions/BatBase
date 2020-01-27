@@ -6,6 +6,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
+ * Fixes Taxon and Realm field defaults.
  * Auto-generated Migration: Please modify to your needs!
  */
 final class Version20200106Sql extends AbstractMigration
