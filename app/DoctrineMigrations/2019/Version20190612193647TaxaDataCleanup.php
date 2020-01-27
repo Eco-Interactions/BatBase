@@ -8,8 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Cleans up duplicate taxonyms created accidently. Added checks to the Taxon 
- * create form to prevent this type of error moving forward. 
+ * Cleans up duplicate taxa created unintentionally. 
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
 class Version20190612193647TaxaDataCleanup extends AbstractMigration implements ContainerAwareInterface

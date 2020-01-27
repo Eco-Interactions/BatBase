@@ -146,4 +146,6 @@ alphabetize:
     Everything than can be should be.  (Adopted 2019-05-01)
 comments:
     //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
-
+    /*Perm-log*/, /*Debg-log*/
+    - Tabs indicate depth in method chain. 
+    '+--' prepends comment logs that are the head of a method chain

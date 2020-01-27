@@ -8,8 +8,9 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Moves all interactions and data from one entity to another and removes the first. 
- * Deletes specified Taxon, Author, and Source records. 
+ * Merges duplicate taxa, deletes specified taxa and sources, fixes french guiana's
+ * center point, drops location name from geojson, changes taxon's display name
+ * default to NOT NULL.
  */
 class Version20200114DataCleanup extends AbstractMigration implements ContainerAwareInterface
 {
