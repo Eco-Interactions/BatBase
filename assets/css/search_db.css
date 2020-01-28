@@ -35,11 +35,6 @@ input[type="radio"], input[type="checkbox"] {
     width: 108px;
     margin-left: .5em;
 }
-#data-opts {
-    padding: 5px;
-    /*border-right: 1px black solid;*/
-    border-left: 1px black solid;
-}
 /*------- Table Tool Bar --------- */
 #tool-bar {
     margin: .7em auto .2em auto;
