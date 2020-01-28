@@ -27,8 +27,8 @@ import { initNewDataForm } from '../forms/forms-main.js';
 import * as db_page from '../db-main.js';
 import * as db_filters from '../table/filters/filters-main.js';
 import { showInts } from '../map/map-main.js';
-import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/save-ints.js';
-import { addPanelEvents, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
+import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/int-list-panel.js';
+import { addPanelEventsAndStyles, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
 import { updateFilterPanelHeader } from '../pg-ui/panels/filter-panel.js';
 
 
@@ -48,7 +48,7 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.buildTable.bind(null, false, false));
-    addPanelEvents(app.userRole);
+    addPanelEventsAndStyles(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp(type) {

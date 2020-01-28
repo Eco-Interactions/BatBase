@@ -1,0 +1,196 @@
+/*
+ * Data list managament panel styles.
+ */
+/* ---------------- Tab container in db-options panel ----------------------- */
+#list-opts 
+    width: 128px
+    border-right: 1px black solid
+    border-left: 1px black solid
+    padding: 5px
+
+#list-opts.shw-col-borders 
+    background: #e2f2f3
+/* ---------------- Data List Panel ----------------------------------------- */
+#list-pnl 
+    max-height: 222px
+    align-items: stretch
+    background: #e2f2f3
+    border-radius: 10px
+
+#list-pnl.vert 
+    max-height: 444px
+
+#list-pnl.closed 
+    max-height: 0
+
+#list-pnl>div
+    padding: 5px 
+
+#list-pnl span 
+    align-self: center
+    margin: 2px 0 10px 0
+
+#list-pnl.vert span 
+    align-self: center
+    margin: inherit
+/* ------------- Select List (First) Column --------------------------------- */
+#int-lists 
+    flex: 0 0 333px
+
+#int-lists.vert 
+    flex: initial
+
+#list-sel-cntnr.vert 
+    justify-content: space-between
+
+#list-sel-cntnr.vert .int-list-sel 
+    flex: 1 0 264px
+
+#load-list-cntnr 
+    align-self: flex-end
+    margin-top: 44px
+    text-align: right
+
+#load-list-cntnr.vert 
+    margin: 0
+    align-self: center
+
+#load-list 
+    margin-right: 0
+    width: 200px
+
+#load-list + div 
+    opacity: .3
+    align-self: flex-end
+    font-size: .9em
+    margin-top: .25em
+
+#load-list-cntnr.vert #load-list+div 
+    margin: auto 0 auto 5px
+
+.int-list-sel 
+    margin: auto 0 auto 0
+/* ------------- List Details (Second) Column ------------------------------- */
+#list-details 
+    flex: 0 1 490px
+    border-left: black 1px solid
+    border-right: black 1px solid
+    margin-left: .5em
+
+#list-details.vert 
+    flex: initial
+    border-left: none
+    border-right: none
+    border-top: black 1px solid
+    border-bottom: black 1px solid
+
+#list-details>span 
+    font-weight: 600
+
+#list-details div, #stored-filters .spaced 
+    margin: .2em
+
+#list-details input 
+    min-width: 333px
+    font-weight: 600
+    font-size: .8em
+    padding-left: 3px
+
+#list-details.vert input 
+    min-width: 306px
+
+#list-details textarea 
+    width: 488px
+    height: 50px
+    font-weight: 600
+    font-size: .8em
+    padding-left: 3px
+
+#list-details.vert textarea 
+    width: 566px
+    height: 33px
+
+.details-desc 
+    width: 99px
+
+#list-count 
+    width: 100%
+
+#list-count.vert 
+    width: 40px
+/* ------------- Modify List (Third) Column --------------------------------- */
+#mod-list-pnl 
+    flex: 1 1 412px
+    padding-left: 0px
+
+#mod-list-pnl.vert 
+    flex: initial
+
+#mod-mode 
+    margin: .4em 1em
+
+#mod-list-pnl.vert #mod-mode 
+    margin: 8px 0 0 1em
+
+#mod-radios 
+    margin-left: 1em
+
+#mod-list-pnl.vert #mod-radios 
+    margin: 5px 0 0 0
+
+#mod-list-pnl div input[type="radio"] 
+    margin: .3em .5em 0 1em
+
+input[name="mod-list"] 
+    margin-top: 3px
+
+#mod-radios label 
+    padding-top: 3px
+
+#unsel-rows 
+    margin-left: 20px
+
+#mod-info 
+    margin: .5em !important
+    border: 1px solid black
+    border-radius: 5px
+    padding: .25em
+    color: darkslategray
+    text-align: center
+    opacity: 0
+    font-size: .85em
+/* -------------- On Submit Styles ------------- */
+#set-submit-msg, #list-submit-msg  
+    opacity: 0
+
+.pnl-submit-msg 
+    color: green
+    margin: 0 .25em .25em .25em !important
+    border: 1px green solid
+    border-radius: 5px
+    padding: 5px
+    width: 26px
+    height: 26px
+
+.submit-cntnr 
+    margin-top: auto
+    width: 100%
+    height: 24px
+
+.submit-cntnr + div 
+    margin-right: auto
+    flex-grow: 1
+
+.submit-cntnr :last-child 
+    margin-left: auto
+
+#set-confm-cntnr 
+    display: none
+    width: min-content
+
+#confm-set-delete 
+    margin-bottom: .5em
+
+#list-confm-cntnr 
+    display: none
+    height: 100%

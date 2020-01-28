@@ -1,0 +1,39 @@
+{% extends "layout.html.twig" %}
+
+{# {% set interaction = entity %} #}
+
+{% block stylesheets %}
+    {{parent()}}
+    {{ encore_entry_link_tags('db') }} 
+{% endblock %}
+
+{# Javascript after detail block. #}
+
+{% block headline %}
+    Database Search
+{% endblock headline %}
+
+{% block detail %}
+    {% if is_full_view() or is_tablet_view() %}
+        {% embed 'ContentBlock/search/db-options-menu.html.twig' %} {% endembed %}
+        <div id='fltr-int-pnl-cntnr' class="flex-col">
+            {% embed 'ContentBlock/search/list-panel.html.twig' %} {% endembed %}
+            {% embed 'ContentBlock/search/filter-panel.html.twig' %} {% endembed %}
+        </div>
+        {% embed 'ContentBlock/search/review-panel.html.twig' %} {% endembed %}
+        {% embed 'ContentBlock/search/table-tool-bar.html.twig' %} {% endembed %}
+        <div id="db-view">
+            <div id="search-tbl" class="ag-fresh"></div>
+            <div id="map" style="display: none;"></div>
+            <div id="db-overlay"></div>
+            <div id="db-popup"></div>
+        </div>
+    {% endif %}
+{% endblock detail %}
+
+{% block javascripts %} 
+    {{parent()}}   
+    {% if is_full_view() or is_tablet_view() %}
+        {{ encore_entry_script_tags('db') }} 
+    {% endif %}
+{% endblock %}

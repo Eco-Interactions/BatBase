@@ -123,7 +123,7 @@ class ContentBlockController extends Controller
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
 
-        return $this->render('ContentBlock/search.html.twig', array());
+        return $this->render('ContentBlock/search/search.html.twig', array());
     }
 
     /**
@@ -203,7 +203,7 @@ class ContentBlockController extends Controller
             array('name' => 'ASC')
         );
 
-        return $this->render('ContentBlock/index.html.twig', array(
+        return $this->render('ContentBlock/entity/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -227,7 +227,7 @@ class ContentBlockController extends Controller
             return $this->redirect($this->generateUrl('admin_content_block_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('ContentBlock/new.html.twig', array(
+        return $this->render('ContentBlock/entity/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -261,7 +261,7 @@ class ContentBlockController extends Controller
         $entity = new ContentBlock();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('ContentBlock/new.html.twig', array(
+        return $this->render('ContentBlock/entity/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -283,7 +283,7 @@ class ContentBlockController extends Controller
             throw $this->createNotFoundException('Unable to find Content Block entity.');
         }
 
-        return $this->render('ContentBlock/show.html.twig', array(
+        return $this->render('ContentBlock/entity/show.html.twig', array(
             'entity' => $entity,        ));
     }
 
@@ -306,7 +306,7 @@ class ContentBlockController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('ContentBlock/edit.html.twig', array(
+        return $this->render('ContentBlock/entity/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -355,7 +355,7 @@ class ContentBlockController extends Controller
 
         $logger = $this->get('logger');
         $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent); $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+        $pushedData = json_decode($requestContent); 
         $content = $pushedData->content;
 
         $entity->setContent($content);

@@ -361,7 +361,7 @@ function addDbLoadNotice() {
         continuing.`);
 }
 function toggleFilterPanelInTutorial(close) {  
-    const closed = $('#filter-opts-pnl').hasClass('closed');   
+    const closed = $('#filter-pnl').hasClass('closed');   
     if ((close && closed) || !close && !closed) { return; }
     $('#filter').click();
 }
