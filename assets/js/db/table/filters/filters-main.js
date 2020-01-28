@@ -22,7 +22,7 @@ import * as _u from '../../util/util.js';
 import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
 import * as db_ui from '../../pg-ui/ui-main.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/filter-panel.js';
-import { savedIntListLoaded } from '../../pg-ui/panels/save-ints.js';
+import { savedIntListLoaded } from '../../pg-ui/panels/int-list-panel.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 

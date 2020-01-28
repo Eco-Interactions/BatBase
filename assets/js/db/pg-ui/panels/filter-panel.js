@@ -17,7 +17,7 @@ import * as frmt_data from '../../table/format-data/aggrid-format.js';
 import { updateUserNamedList } from '../../local-data/db-sync.js';
 import { accessTableState as tState, buildTable } from '../../db-main.js';
 import { resetToggleTreeBttn } from '../../pg-ui/ui-main.js';
-import { savedIntListLoaded } from './save-ints.js';
+import { savedIntListLoaded } from './int-list-panel.js';
 import { exitModal, showHelpModal, showSaveModal } from '../../../misc/intro-core.js';
 
 /**
@@ -34,14 +34,10 @@ export function savedFilterSetActive() {
 }
 /* ------------ Init ------------------- */
 export function initFilterPanel() {
+    require('../../../../styles/db/panels/filters.styl');  
     addFilterPanelEvents();
     initTimeFilterUi();
     disableFilterSetInputs();
-}
-function initTimeFilterUi() {
-    _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
-    $('#selTimeFilter')[0].selectize.disable();
-    db_filters.applyTimeFilterStyles(false); //inits disabled ui
 }
 export function addFilterPanelEvents() {  
     window.addEventListener('resize', resizeFilterPanelTab);
@@ -54,9 +50,14 @@ export function addFilterPanelEvents() {
     $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'selSavedFilters'));
     $('#fltr-pnl-hlp').click(showHelpModal.bind(null, 'filter-panel'));
 }
+function initTimeFilterUi() {
+    _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
+    $('#selTimeFilter')[0].selectize.disable();
+    db_filters.applyTimeFilterStyles(false); //inits disabled ui
+}
 /* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
 function resizeFilterPanelTab() {
-    if ($('#filter-opts-pnl').hasClass('closed')) { return; }
+    if ($('#filter-pnl').hasClass('closed')) { return; }
     if (app.timeout) { return; }
     app.timeout = window.setTimeout(() => {
         sizeFilterPanelTab()
@@ -69,7 +70,7 @@ function resizeFilterPanelTab() {
  */
 function sizeFilterPanelTab() {
     window.setTimeout(function() { 
-        const split = $('#filter-opts-pnl').hasClass('vert');
+        const split = $('#filter-pnl').hasClass('vert');
         const pseudo = split ? getSplitPseudoBorderStyle() : getPseudoBorderStyle();
         const elemClass = '.hide-fltr-bttm-border' + (split ? '-vert' : '');
         $(elemClass + ':before').remove();
@@ -77,7 +78,7 @@ function sizeFilterPanelTab() {
     }, 555);
 }
 function getPseudoBorderStyle() {
-    const panelT = $('#filter-opts-pnl').position().top;
+    const panelT = $('#filter-pnl').position().top;
     const tabW = $('#filter-opts').innerWidth();  
     const tabL = $('#filter-opts').position().left + 1;             /*debg-log*///console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
     return `<style>.hide-fltr-bttm-border:before { 
@@ -92,7 +93,7 @@ function getPseudoBorderStyle() {
         }</style>`;  
 }
 function getSplitPseudoBorderStyle() {
-    const panelT = $('#filter-opts-pnl').position().top;
+    const panelT = $('#filter-pnl').position().top;
     const tabL = getLeftSplitPos(); 
     const tabW = $('#filter-opts').innerWidth();
     const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*debg-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
@@ -109,7 +110,7 @@ function getSplitPseudoBorderStyle() {
         }</style>`;  
 }
 function getLeftSplitPos() {
-    const pnlL = $('#filter-opts-pnl').position().left;
+    const pnlL = $('#filter-pnl').position().left;
     const tabL = $('#filter-opts').position().left + 1;
     return pnlL > (tabL - 2) ? pnlL : tabL;
 }
@@ -134,24 +135,24 @@ export function toggleFilterPanelOrientation(style, close) {
     sizeFilterPanelTab(); 
 }
 function stackFilterPanel() {
-    $('#filter-opts-pnl, #filter-col1, #stored-filters').addClass('vert');
+    $('#filter-pnl, #filter-col1, #stored-filters').addClass('vert');
     $('#filter-opts').removeClass('hide-fltr-bttm-border').addClass('hide-fltr-bttm-border-vert');
 }
 function spreadFilterPanel(close) { 
-    $('#filter-opts-pnl, #filter-col1, #stored-filters').removeClass('vert');
+    $('#filter-pnl, #filter-col1, #stored-filters').removeClass('vert');
     $('#filter-opts').removeClass('hide-fltr-bttm-border-vert');
     if (!close) { $('#filter-opts').addClass('hide-fltr-bttm-border'); }
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleFilterPanel() {  
-    if ($('#filter-opts-pnl').hasClass('closed')) { 
+    if ($('#filter-pnl').hasClass('closed')) { 
         buildAndShowFilterPanel(); 
         sizeFilterPanelTab();
-    } else { _uPnl.togglePanel('#filter-opts-pnl', 'close'); }
+    } else { _uPnl.togglePanel('filter', 'close'); }
 }
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           +--buildAndShowFilterPanel')
-    _uPnl.togglePanel('#filter-opts-pnl', 'open');
+    _uPnl.togglePanel('filter', 'open');
     _u.getOptsFromStoredData('savedFilterNames').then(updateFilterSel);
 }
 function updateFilterSel(filterOpts) {                              /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
