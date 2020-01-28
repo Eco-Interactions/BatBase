@@ -1,108 +1,109 @@
 /**
- * Strutural code and helpers for the menu panels
- */
-
-/**
+ * Strutural code and helpers for the search-options panels
+ *
  * Exports:           Imported by:
  *     addPanelEvents       db-ui
  *     closeOpenPanels      db-ui
  *     parseUserNamed       filter-panel, save-ints
  *     submitUpdates        filter-panel, save-ints
- *     togglePanel          filter-panel, save-ints
+ *     togglePanel          filter-panel, save-ints, review-panel
  *     updateSubmitEvent    filter-panel, save-ints
+ *
+ * TOC:
+ *     EVENTS
+ *     OPEN/CLOSE PANELS
+ *         OPEN PANEL(S)
+ *         CLOSE PANEL(S)
+ *     SUBMIT/SUCCESS METHODS
+ *     MISC
  */
 import * as _u from '../../util/util.js';
 import { initFilterPanel, toggleFilterPanelOrientation } from './filter-panel.js';
-import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
-import { addDataReviewEvents } from './data-review/review-panel-main.js';
+import { initListPanel, toggleListPanelOrientation } from './int-list-panel.js';
+import { initReviewPanel } from './data-review/review-panel-main.js';
 
-/* ----------------- EVENT RELATED ------------------ */
-export function addPanelEvents(userRole) {
-    initFilterPanel();
-    addListPanelEvents();
-    if (userRole !== 'visitor' || userRole !== 'user') {
-        addDataReviewEvents();
+/* Panel confg */
+const panels = { 
+    'filter': { bttn: '#filter',
+        id: '#filter-pnl', tab: '#filter-opts', tabClass: 'hide-fltr-bttm-border'
+    },
+    'lists': { bttn: '#lists',
+        id: '#list-pnl',   tab: '#list-opts',   tabClass: 'hide-int-bttm-border'
+    },
+    'review': { bttn: '#rvw-data',
+        id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
     }
+};
+
+/* ======================= EVENT RELATED ==================================== */
+export function addPanelEventsAndStyles(userRole) {
+    require('../../../../styles/db/panels/panel.styl');  
+    initFilterPanel();
+    initListPanel();
+    if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
 }
 export function updateSubmitEvent(id, event) {
     $(id).off('click').click(event);
 }
-/* -------------------  OPEN/CLOSE PANELS --------------------- */
+/* ==================== OPEN/CLOSE PANELS =================================== */
 export function closeOpenPanels() {
-    ['#filter-opts-pnl', '#int-opts'].forEach(id => {
-        if (!$(id).hasClass('closed')) { togglePanel(id, 'close'); }
-    })
+    Object.keys(panels).forEach(key => {
+        if (!$(panels[key].id).hasClass('closed')) { togglePanel(key, 'close'); }
+    });
 }
-export function togglePanel(id, state) {
-    const tab = getMenuColumn(id);
-    const tabSpcr = getColumnSpacerId(id);
-    if (state === 'open') { openPanel(id, tab, tabSpcr); }
-    else { closePanel(id, tab, tabSpcr) }
+export function togglePanel(key, state) {
+    const panel = panels[key];
+    if (state === 'open') { openPanel(panel); }
+    else { closePanel(panel) }
 }
-/** Section of search options bar */
-function getMenuColumn(id) {
-    return { 
-        '#filter-opts-pnl': '#filter-opts', 
-        '#int-opts': '#list-opts', 
-    }[id];
-}
-function getColumnSpacerId(id) {
-    return { 
-        '#filter-opts-pnl': 'hide-fltr-bttm-border', 
-        '#int-opts': 'hide-int-bttm-border', 
-    }[id];
-}
-/* -------------------------- Open Panel(s) ----------------------------- */
-function openPanel(id, tab, tabSpcr) {
-    if (!bothPanelsOpen(id)) { cssOpenPanel(id, tab, tabSpcr);
-    } else { openVerticalPanels(id, tab, tabSpcr); }
+/* -------------------------- Open Panel(s) --------------------------------- */
+function openPanel(panel) {
+    if (!bothPanelsOpen(panel.id)) { cssOpenPanel(panel);
+    } else { openVerticalPanels(panel); }
 }
 function bothPanelsOpen(id) {
-    const otherPnl = id.includes('int') ? '#filter-opts-pnl' : '#int-opts';
+    const otherPnl = id.includes('int') ? '#filter-pnl' : '#list-pnl';
     return !$(otherPnl).hasClass('closed'); 
 }
-function cssOpenPanel(id, tab, tabSpcr) {
-    const bttn = id.includes('int') ? 'button[name="int-set"]' : '#filter';
-    $(bttn).addClass('panel-open-toggle');
-    $(id).removeClass('closed');  
-    $(tab).addClass('shw-col-borders ' + tabSpcr);
-    window.setTimeout(function() { 
-        $(id).css('overflow-y', 'visible')}, 500);  
+function cssOpenPanel(panel) {
+    $(panel.bttn).addClass('panel-open-toggle');
+    $(panel.id).removeClass('closed');  
+    $(panel.tab).addClass('shw-col-borders ' + panel.tabClass);
+    window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 500);  
 }
-function openVerticalPanels(id, tab, tabSpcr) {
-    $('#fltr-int-panl-cntnr').attr('class', 'flex-row');
-    $('#filter-opts-pnl, #int-opts').removeClass('flex-row').addClass('flex-col');
-    cssOpenPanel(id, tab, tabSpcr);
+function openVerticalPanels(panel) {
+    $('#fltr-int-pnl-cntnr').attr('class', 'flex-row');
+    $('#filter-pnl, #list-pnl').removeClass('flex-row').addClass('flex-col');
+    cssOpenPanel(panel);
     toggleListPanelOrientation('vert');
     toggleFilterPanelOrientation('vert');
 }
-/* ------------------------ Close Panel(s) --------------------------------- */
-function closePanel(id, tab, tabSpcr) {
-    if (!bothPanelsOpen(id)) { cssClosePanel(id, tab, tabSpcr);
-    } else { closeVerticalPanel(id, tab, tabSpcr); }
+/* ------------------------ Close Panel(s) ---------------------------------- */
+function closePanel(panel) {
+    if (!bothPanelsOpen(panel.id)) { cssClosePanel(panel);
+    } else { closeVerticalPanel(panel); }
 }
-function cssClosePanel(id, tab, tabSpcr) {
-    const bttn = id.includes('int') ? 'button[name="int-set"]' : '#filter';
-    $(bttn).removeClass('panel-open-toggle');
-    $(id).css('overflow-y', 'hidden');
-    $(tab).removeClass('shw-col-borders ' + tabSpcr);
-    $(id).addClass('closed');
+function cssClosePanel(panel) {
+    $(panel.bttn).removeClass('panel-open-toggle');
+    $(panel.id).css('overflow-y', 'hidden');
+    $(panel.tab).removeClass('shw-col-borders ' + panel.tabClass);
+    $(panel.id).addClass('closed');
 }
-function closeVerticalPanel(id, tab, tabSpcr) {
-    cssClosePanel(id, tab, tabSpcr);
+function closeVerticalPanel(panel) {
+    cssClosePanel(panel);
     window.setTimeout(() => {
-        toggleFilterPanelOrientation('horz', id.includes('filter'));
+        toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
         toggleListPanelOrientation('horz');
-        $('#fltr-int-panl-cntnr').attr('class', 'flex-col');
-        $('#filter-opts-pnl, #int-opts').removeClass('flex-col').addClass('flex-row');
+        $('#fltr-int-pnl-cntnr').attr('class', 'flex-col');
+        $('#filter-pnl, #list-pnl').removeClass('flex-col').addClass('flex-row');
     }, 500);
 }
-/* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
+/* ================ SUBMIT AND SUCCESS METHODS ============================== */
 export function submitUpdates(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, successFunc);
 }
-/* ----------------- MISC ----------------------------------------------------*/
+/* ================= MISC =================================================== */
 export function parseUserNamed(entity) {                                        
     return entity ? parseEntity(entity) : { details: [] };
 }

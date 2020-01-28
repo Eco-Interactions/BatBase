@@ -4,7 +4,7 @@ import * as db_filters from '../table/filters/filters-main.js';
 import * as db_page from '../db-main.js';
 import { addNewDataToStorage, initStoredData, replaceUserData } from '../local-data/db-sync.js';
 import { showLoadingDataPopUp, showPopUpMsg } from '../pg-ui/ui-main.js';
-import { newIntList, selIntList } from '../pg-ui/panels/save-ints.js';
+import { newIntList, selIntList } from '../pg-ui/panels/int-list-panel.js';
 import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter-panel.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 /* 

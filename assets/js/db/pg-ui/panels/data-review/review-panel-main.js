@@ -10,16 +10,20 @@
  *     addDataReviewEvents          panels-main
  */
 import { accessTableState as tState } from '../../../db-main.js';
+// import * as _u from '../../util/util.js';
+import * as _uPnl from '../panels-main.js';
 
-let tblState;
-
-export function addDataReviewEvents() {
-    $('#rvw-data').click(toggleEditorColumn);
+export function initReviewPanel(userRole) {
+    require('../../../../../styles/db/panels/rvw-data.styl');  
+    $('#rvw-data').click(toggleReviewPanel);
 }
 
-function toggleEditorColumn() {
-    tblState = tState().get();
-    const shown = $('#rvw-data').data('shown');
-    tblState.columnApi.setColumnsVisible(['updatedBy'], !shown);
-    $('#rvw-data').data('shown', !shown);
+function toggleReviewPanel(argument) {
+    if ($('#review-pnl').hasClass('closed')) { 
+        buildAndShowReviewPanel();
+    } else { _uPnl.togglePanel('review', 'close'); }
+}
+
+function buildAndShowReviewPanel() {
+    _uPnl.togglePanel('review', 'open');
 }

@@ -391,3 +391,96 @@ function getSteps() {
         },
     ];
 }
+function setTableState() { 
+    $('#show-tips').off("click");
+    $('#db-view').css("height", "444px");
+    setDbLoadDependentState();
+}
+function setDbLoadDependentState() {
+    if (!$('#search-focus').val()) {
+        return window.setTimeout(setDbLoadDependentState, 200);
+    }
+    $('#search-focus')[0].selectize.addItem('taxa');
+    $('#sel-view')[0].selectize.addItem('3');
+}
+function resetTableState() {   
+    _u.getData('user', true).then(txnData => {
+        if (!txnData) { return window.setTimeout(resetTableState, 500); }
+        resetUiAndReloadTable();
+    });
+}
+function resetUiAndReloadTable() {                                              //console.log('resetUiAndReloadTable')
+    focus = focus || "taxa";
+    intro = null;
+    $('#db-view').css("height", "888px");
+    $('#show-tips').click(showTips);
+    $('#search-focus')[0].selectize.addItem(focus, 'silent');
+    resetDataTable(focus);
+}
+/* ---------- Set Up Functions --------------------*/
+function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
+    const stepConfg = intro._introItems[intro._currentStep];
+    if (!stepConfg.setUpFunc) { return; }
+    stepConfg.setUpFunc();
+}
+function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
+    if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
+}
+function loadLocView(view) {   
+    if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
+        $('#search-focus')[0].selectize.addItem('locs');
+    }
+    window.setTimeout(setLocView(view), 400);  
+}
+function setLocView(view) {
+    if ($('#sel-view')[0].selectize.getValue() !== view) {
+        $('#sel-view')[0].selectize.addItem(view);
+    }
+}
+function addBttnEvents() {  
+    const map = {  
+        'Full Tutorial': 'full', 'Table View': 'tbl',
+        'Map View': 'map', 'Data Entry': 'data'
+    };
+    window.setTimeout(function() { // Needed so events are bound when this step is revisted. afterChange event seems to fire before it is fully loaded. No idea why.
+        $('.intro-bttn').each((i, elem) => {  
+            const key = map[elem.innerText]; 
+            $(elem).click(showTutorial.bind(null, key));
+        });
+    }, 400);
+}
+function showTutorial(tutKey) {  
+    if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
+    if (tutKey === 'map') { intro.goToStep(15); }
+}
+function checkForDbLoad() {
+    if ($('#sel-view').val()) { return; }  
+    window.setTimeout(addDbLoadNotice, 400);
+}
+function addDbLoadNotice() {
+    $('.introjs-tooltiptext').append(`
+        <br><br><center><b>Please wait for database to finish downloading before 
+        continuing.`);
+}
+function toggleFilterPanelInTutorial(close) {  
+    const closed = $('#filter-pnl').hasClass('closed');   
+    if ((close && closed) || !close && !closed) { return; }
+    $('#filter').click();
+}
+function clearFilters() {
+    $('button[name="reset-tbl"]').click();
+    toggleFilterPanelInTutorial(true);
+}
+function toggleListPanelInTutorial(close) {
+    const role = $('body').data('user-role');
+    const closed = $('#int-opts').hasClass('closed');   
+    if ((close && closed) || !close && !closed) { 
+        if (close && role == 'visitor') { $('#button[name="int-set"]').attr({disabled: true}); }
+        return;
+    }
+    if (!close) {
+        $('#button[name="int-set"]').attr({disabled: false}).click();
+    } else {
+        $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
+    }
+}
