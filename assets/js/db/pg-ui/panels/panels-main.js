@@ -24,13 +24,13 @@ import { initReviewPanel } from './data-review/review-panel-main.js';
 
 /* Panel confg */
 const panels = { 
-    'filter': { bttn: '#filter',
+    'filter': { bttn: '#filter', key: 'filter',
         id: '#filter-pnl', tab: '#filter-opts', tabClass: 'hide-fltr-bttm-border'
     },
-    'lists': { bttn: '#lists',
+    'lists': { bttn: '#lists', key: 'lists',
         id: '#list-pnl',   tab: '#list-opts',   tabClass: 'hide-int-bttm-border'
     },
-    'review': { bttn: '#rvw-data',
+    'review': { bttn: '#rvw-data', key: 'review',
         id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
     }
 };
@@ -47,29 +47,29 @@ export function updateSubmitEvent(id, event) {
 }
 /* ==================== OPEN/CLOSE PANELS =================================== */
 export function closeOpenPanels() {
-    Object.keys(panels).forEach(key => {
-        if (!$(panels[key].id).hasClass('closed')) { togglePanel(key, 'close'); }
-    });
+    const opened = getOpenPanels();
+    opened.forEach(panelKey => togglePanel(key, 'close'));
 }
-export function togglePanel(key, state) {
+export function togglePanel(key, state) {                                       //console.log('togglePanel [%s] [%s]', key, state);
     const panel = panels[key];
     if (state === 'open') { openPanel(panel); }
     else { closePanel(panel) }
 }
 /* -------------------------- Open Panel(s) --------------------------------- */
-function openPanel(panel) {
-    if (!bothPanelsOpen(panel.id)) { cssOpenPanel(panel);
-    } else { openVerticalPanels(panel); }
-}
-function bothPanelsOpen(id) {
-    const otherPnl = id.includes('int') ? '#filter-pnl' : '#list-pnl';
-    return !$(otherPnl).hasClass('closed'); 
+function openPanel(panel) {                                                     //console.log('openPanel = %O', panel);
+    const opened = getOpenPanels();
+    if (!opened.length) { return cssOpenPanel(panel); }
+    if (compatiblePanelOpened(opened, panel)) { openVerticalPanels(panel); 
+    } else { closeOpenedPanelThenOpenNewPanel(opened, panel); }
 }
 function cssOpenPanel(panel) {
     $(panel.bttn).addClass('panel-open-toggle');
     $(panel.id).removeClass('closed');  
     $(panel.tab).addClass('shw-col-borders ' + panel.tabClass);
     window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 500);  
+}
+function compatiblePanelOpened(opened, panel) {
+    return panel.key === 'review' ? false : opened.every(k => ['filter', 'lists'].indexOf(k) >= 0);
 }
 function openVerticalPanels(panel) {
     $('#fltr-int-pnl-cntnr').attr('class', 'flex-row');
@@ -78,9 +78,14 @@ function openVerticalPanels(panel) {
     toggleListPanelOrientation('vert');
     toggleFilterPanelOrientation('vert');
 }
+function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
+    opened.forEach(key => closePanel(panels[key]));
+    window.setTimeout(() => openPanel(panel), 500);  
+}
 /* ------------------------ Close Panel(s) ---------------------------------- */
 function closePanel(panel) {
-    if (!bothPanelsOpen(panel.id)) { cssClosePanel(panel);
+    const opened = getOpenPanels();
+    if (opened.length === 1) { cssClosePanel(panel);
     } else { closeVerticalPanel(panel); }
 }
 function cssClosePanel(panel) {
@@ -97,6 +102,10 @@ function closeVerticalPanel(panel) {
         $('#fltr-int-pnl-cntnr').attr('class', 'flex-col');
         $('#filter-pnl, #list-pnl').removeClass('flex-col').addClass('flex-row');
     }, 500);
+}
+/* ------------------------ Shared ---------------------------------- */
+function getOpenPanels() {
+    return Object.keys(panels).filter(key => !$(panels[key].id).hasClass('closed'));
 }
 /* ================ SUBMIT AND SUCCESS METHODS ============================== */
 export function submitUpdates(data, action, successFunc) {
