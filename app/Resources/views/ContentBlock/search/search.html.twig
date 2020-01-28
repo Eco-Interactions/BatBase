@@ -17,10 +17,10 @@
     {% if is_full_view() or is_tablet_view() %}
         {% embed 'ContentBlock/search/db-options-menu.html.twig' %} {% endembed %}
         <div id='fltr-int-pnl-cntnr' class="flex-col">
-            {% embed 'ContentBlock/search/panels/list-panel.html.twig' %} {% endembed %}
-            {% embed 'ContentBlock/search/panels/filter-panel.html.twig' %} {% endembed %}
+            {% embed 'ContentBlock/search/list-panel.html.twig' %} {% endembed %}
+            {% embed 'ContentBlock/search/filter-panel.html.twig' %} {% endembed %}
         </div>
-        {% embed 'ContentBlock/search/panels/review-panel.html.twig' %} {% endembed %}
+        {% embed 'ContentBlock/search/review-panel.html.twig' %} {% endembed %}
         {% embed 'ContentBlock/search/table-tool-bar.html.twig' %} {% endembed %}
         <div id="db-view">
             <div id="search-tbl" class="ag-fresh"></div>
