@@ -71,7 +71,7 @@ function initDbPage () {
     requireCss();
     requireJs();
     _ui.init();
-//The idb-util.initDb will call @initSearchState once local database is ready.
+    //The idb-util.initDb will call @initSearchState once local database is ready.
 }
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
@@ -358,7 +358,7 @@ function buildTaxonTable(v) {
     return _u.getData('curView', true).then(storedView => {
         const view = storedView || getSelValOrDefault(_u.getSelVal('View'));/*Perm-log*/console.log("       --Building [%s] Taxon Table", view);    
         return getTxnDataAndBuildTable(view);
-    }).catch(err => _u.alertErr(err));
+    });
 }
 function getTxnDataAndBuildTable(view) {
     return _u.getData('taxon').then(beginTaxonLoad.bind(null, view));

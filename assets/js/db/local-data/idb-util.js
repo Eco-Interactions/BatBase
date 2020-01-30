@@ -17,7 +17,7 @@ import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-syn
 
 const _db = {
     geoJson: null, 
-    v: .038
+    v: .039
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */

@@ -8,6 +8,12 @@
  *
  * Exports:             Imported by:
  *     startWalkthrough         db-page
+ *
+ * TOC:
+ *     SET UP METHODS
+ *     ON TUTORIAL EXIT
+ *     STEP SET UP
+ *     STEP DEFINITIONS
  */
 import * as _u from '../util/util.js';
 import { resetDataTable } from '../db-main.js';
@@ -35,7 +41,7 @@ function buildIntro() {
     intro = require('../../libs/intro.js').introJs();
     intro.onexit(resetTableState);
     intro.oncomplete(resetTableState);
-    intro.onafterchange(onAfterStepChange.bind(null));
+    intro.onafterchange(onAfterStepChange);
     intro.setOptions(getIntroOptions());
 } 
 function getIntroOptions() {
@@ -48,6 +54,106 @@ function getIntroOptions() {
         steps: getSteps()
     };
 }
+/* -------------------- SET UP METHODS -------------------------------------- */
+function setTableState() { 
+    $('#show-tips').off("click");
+    $('#db-view').css("height", "444px");
+    $('#search-focus')[0].selectize.disable();
+    $('#sel-view')[0].selectize.disable();
+    setDbLoadDependentState();
+}
+function setDbLoadDependentState() {
+    if (!$('#search-focus').val()) {
+        return window.setTimeout(setDbLoadDependentState, 200);
+    }
+    $('#search-focus')[0].selectize.addItem('taxa');
+    $('#sel-view')[0].selectize.addItem('3');
+}
+/* ----------------- ON TUTORIAL EXIT --------------------------------------- */
+function resetTableState() {   
+    resetUi();
+    if ($('#sel-view').val()) { resetDataTable(focus); }
+}
+function resetUi() {                                                            //console.log('resetUiAndReloadTable')
+    focus = focus || "taxa";
+    intro = null;
+    $('#db-view').css("height", "888px");
+    $('#show-tips').click(showTips);
+    $('#search-focus')[0].selectize.addItem(focus, 'silent');
+    $('#search-focus')[0].selectize.enable();
+    $('#sel-view')[0].selectize.enable();
+}
+/* ----------------- STEP SET UP -------------------------------------------- */
+function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
+    const stepConfg = intro._introItems[intro._currentStep];
+    if (intro._currentStep > 2) { checkForDbLoad() }
+    if (!stepConfg.setUpFunc) { return; }
+    stepConfg.setUpFunc();
+}
+function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
+    if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
+}
+function loadLocView(view) {   
+    if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
+        $('#search-focus')[0].selectize.addItem('locs');
+    }
+    window.setTimeout(setLocView(view), 400);  
+}
+function setLocView(view) {
+    if ($('#sel-view')[0].selectize.getValue() !== view) {
+        $('#sel-view')[0].selectize.addItem(view);
+    }
+}
+function addBttnEvents() {  
+    const map = {  
+        'Full Tutorial': 'full', 'Table View': 'tbl',
+        'Map View': 'map', 'Data Entry': 'data'
+    };
+    window.setTimeout(function() { // Needed so events are bound when this step is revisted. afterChange event fires before fully loaded. 
+        $('.intro-bttn').each((i, elem) => {  
+            const key = map[elem.innerText]; 
+            $(elem).click(showTutorial.bind(null, key));
+        });
+    }, 400);
+}
+function showTutorial(tutKey) {  
+    if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
+    if (tutKey === 'map') { intro.goToStep(15); }
+}
+function checkForDbLoad() { 
+    if ($('#sel-view').val()) { return; } 
+    window.setTimeout(addDbLoadNotice, 500);
+    if (intro._currentStep == 14) { return; }
+    intro.goToStep(3); 
+}
+function addDbLoadNotice() {  
+    $('.introjs-tooltiptext').html(`
+        <br><br><center><b>Please wait for database to finish downloading before 
+        continuing.`);
+}
+function toggleFilterPanelInTutorial(close) {  
+    const closed = $('#filter-opts-pnl').hasClass('closed');   
+    if ((close && closed) || !close && !closed) { return; }
+    $('#filter').click();
+}
+function clearFilters() {
+    $('button[name="reset-tbl"]').click();
+    toggleFilterPanelInTutorial(true);
+}
+function toggleListPanelInTutorial(close) {
+    const role = $('body').data('user-role');
+    const closed = $('#int-opts').hasClass('closed');   
+    if ((close && closed) || !close && !closed) { 
+        if (close && role == 'visitor') { $('#button[name="int-set"]').attr({disabled: true}); }
+        return;
+    }
+    if (!close) {
+        $('#button[name="int-set"]').attr({disabled: false}).click();
+    } else {
+        $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
+    }
+}
+/* ------------------------- TUTORIAL STEPS --------------------------------- */
 function getSteps() {
     return [ 
         {
@@ -81,8 +187,7 @@ function getSteps() {
                 books, etc or Authors, which will provide a list of authors.
                 <br><br><b>Taxon</b> - The Bat/Plant/Arthropod in the interaction. 
                 <br><br>Taxon is the default mode and where we will begin.`,
-            position: 'top',
-            setUpFunc: checkForDbLoad
+            position: 'top'
         },
         {
             element:'#focus-opts',
@@ -90,8 +195,7 @@ function getSteps() {
                 <br>Once Taxon has been selected in the “Group Interactions by” 
                 box, select one of the following: Bat, Plant, or Arthropod.<br><br>
                 We have selected the “Plant” view for this tutorial.`,
-            position: 'right',
-            setUpFunc: checkForDbLoad
+            position: 'right'
         },
         {
             element: '#search-tbl',
@@ -288,97 +392,4 @@ function getSteps() {
             position: 'right'
         },
     ];
-}
-function setTableState() { 
-    $('#show-tips').off("click");
-    $('#db-view').css("height", "444px");
-    setDbLoadDependentState();
-}
-function setDbLoadDependentState() {
-    if (!$('#search-focus').val()) {
-        return window.setTimeout(setDbLoadDependentState, 200);
-    }
-    $('#search-focus')[0].selectize.addItem('taxa');
-    $('#sel-view')[0].selectize.addItem('3');
-}
-function resetTableState() {   
-    _u.getData('user', true).then(txnData => {
-        if (!txnData) { return window.setTimeout(resetTableState, 500); }
-        resetUiAndReloadTable();
-    });
-}
-function resetUiAndReloadTable() {                                              //console.log('resetUiAndReloadTable')
-    focus = focus || "taxa";
-    intro = null;
-    $('#db-view').css("height", "888px");
-    $('#show-tips').click(showTips);
-    $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    resetDataTable(focus);
-}
-/* ---------- Set Up Functions --------------------*/
-function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
-    const stepConfg = intro._introItems[intro._currentStep];
-    if (!stepConfg.setUpFunc) { return; }
-    stepConfg.setUpFunc();
-}
-function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
-    if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
-}
-function loadLocView(view) {   
-    if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
-        $('#search-focus')[0].selectize.addItem('locs');
-    }
-    window.setTimeout(setLocView(view), 400);  
-}
-function setLocView(view) {
-    if ($('#sel-view')[0].selectize.getValue() !== view) {
-        $('#sel-view')[0].selectize.addItem(view);
-    }
-}
-function addBttnEvents() {  
-    const map = {  
-        'Full Tutorial': 'full', 'Table View': 'tbl',
-        'Map View': 'map', 'Data Entry': 'data'
-    };
-    window.setTimeout(function() { // Needed so events are bound when this step is revisted. afterChange event seems to fire before it is fully loaded. No idea why.
-        $('.intro-bttn').each((i, elem) => {  
-            const key = map[elem.innerText]; 
-            $(elem).click(showTutorial.bind(null, key));
-        });
-    }, 400);
-}
-function showTutorial(tutKey) {  
-    if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(15); }
-}
-function checkForDbLoad() {
-    if ($('#sel-view').val()) { return; }  
-    window.setTimeout(addDbLoadNotice, 400);
-}
-function addDbLoadNotice() {
-    $('.introjs-tooltiptext').append(`
-        <br><br><center><b>Please wait for database to finish downloading before 
-        continuing.`);
-}
-function toggleFilterPanelInTutorial(close) {  
-    const closed = $('#filter-opts-pnl').hasClass('closed');   
-    if ((close && closed) || !close && !closed) { return; }
-    $('#filter').click();
-}
-function clearFilters() {
-    $('button[name="reset-tbl"]').click();
-    toggleFilterPanelInTutorial(true);
-}
-function toggleListPanelInTutorial(close) {
-    const role = $('body').data('user-role');
-    const closed = $('#int-opts').hasClass('closed');   
-    if ((close && closed) || !close && !closed) { 
-        if (close && role == 'visitor') { $('#button[name="int-set"]').attr({disabled: true}); }
-        return;
-    }
-    if (!close) {
-        $('#button[name="int-set"]').attr({disabled: false}).click();
-    } else {
-        $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
-    }
 }
