@@ -176,7 +176,7 @@ AppBundle\Entity\ContentBlock:
         slug: about-db-data-map
         name: 'About Db Data Map'
         page: about-db
-        content: "<hr>\r\n\t<img id=\"data-map\" src=\"{{ asset('bundles/app/images/data-map.png') }}\" alt=\"Conceptual Map of Data\" height=\"520\" width=\"784\">"
+        content: "<hr>\r\n\t<img id=\"data-map\" src=\"{{ asset('build/images/data-map.png') }}\" alt=\"Conceptual Map of Data\" height=\"520\" width=\"784\">"
         created: '<(new \DateTime("2016-01-08 23:13:05", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-27 20:19:05", new \DateTimeZone("America/Los_Angeles")))>'
