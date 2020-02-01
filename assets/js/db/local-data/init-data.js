@@ -31,29 +31,51 @@ const localData = {};
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
-export default function initLocalData(reset) {                                  console.log("   --initLocalData");
-    return $.when(
-        $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
-        $.ajax("ajax/source"), $.ajax("ajax/interaction"),
-        $.ajax("ajax/lists"),  $.ajax("ajax/data-state")
-    ).then((a1, a2, a3, a4, a5, a6) => {                                        console.log("       --Ajax success: args = %O", arguments); 
-        $.each([a1, a2, a3, a4, a5], (idx, a) => storeServerData(a[0]));
-        deriveAndStoreAdditionalData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
-        addDataToLocalDb(a6[0])
-        .then(loadDatabaseTable)
-    });
+export default function initLocalData(reset) {                                  console.log("   +-initLocalData");
+    return downloadBatchedServerData()
+        .then(() => $.when($.ajax("ajax/data-state")))
+        .then(addDataToLocalDb)
+        .then(loadDatabaseTable);
 
     function loadDatabaseTable() {
         if (reset) { resetDataTable('taxa'); 
         } else { initSearchState(); }
     }
 }
+function downloadBatchedServerData() {                                          //console.log('       --downloading Taxon and Source Data');
+    return $.when(getData('taxon'), getData('lists'))
+        .then(() => getData('source'))
+        .then(() => getData('location'))
+        .then(() => getData('interaction'));
+}
+function getData(url) {
+    return fetchData(url, {}, 3).then(setData.bind(null, url));
+}
+function setData(url, data) {                                                   console.log('               --storing [%s] data = %O', url, data);
+    const setDataFunc = {
+        'interaction': deriveInteractionData, 'lists': deriveUserData, 
+        'location': deriveLocationData,       'source': deriveSourceData,
+        'taxon': deriveTaxonData
+    };
+    if (!data) { return console.log('!data'); }
+    storeServerData(data);
+    setDataFunc[url](data);
+}
+function fetchData(url, options, n) {                                           console.log('           --downloading [%s] data. ([%s] tries remaining)', url, n);
+    return fetch('ajax/'+url, options).then(response => {
+        if (!!response.ok) { return response.json(); }
+        return response => {
+            if (n === 1) { return Promise.reject(console.log("[%s] download error = %O", url, response)); }
+            return fetchData(url, options, n - 1);
+        }
+    });
+};
 /**
  * Loops through the data object returned from the server, parsing and storing
  * the entity data.
  */
 function storeServerData(data) {                                                //console.log("data received = %O", data);
-    for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, rcrdData);
+    for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, data[entity]);
         storeData(entity, parseData(data[entity]));
     }
 }
@@ -67,15 +89,6 @@ function parseData(data) {  //shared. refact
     return data;
 }
 /* ======================= DERIVE DATA ====================================== */
-/** Stores data arranged as needed for use throughout the database features. */
-function deriveAndStoreAdditionalData(data) {
-    deriveTaxonData(data[0]);
-    deriveLocationData(data[1]);
-    deriveSourceData(data[2]);
-    deriveInteractionData(data[3]);
-    deriveUserNamedListData(data[4]);
-    storeData('user', $('body').data('user-name'));
-}
 /* -------------------------- TAXON DATA ------------------------------------ */
 /** 
  * levelNames - an object with each level name (k) and it's id and ordinal (v).
@@ -268,7 +281,7 @@ function getTypeNameData(typeObj) {
  * [type] - array of user created interaction and filter sets.
  * [type]Names - an object with each set item's displayName(k) and id.
  */
-function deriveUserNamedListData(data) {                                        //console.log('list data = %O', data)
+function deriveUserData(data) {                                                 //console.log('list data = %O', data)
     const filters = {};
     const filterIds = [];
     const int_sets = {};
@@ -279,6 +292,7 @@ function deriveUserNamedListData(data) {                                        
     storeData('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
     storeData('dataLists', int_sets);
     storeData('dataListNames', getNameDataObj(int_setIds, int_sets));
+    storeData('user', $('body').data('user-name'));
 
     function addToDataObjs(l) {
         const entities = l.type == 'filter' ? filters : int_sets;
@@ -317,12 +331,12 @@ function getTypeObj(types, type, collection) {
 function storeData(key, data) {
     localData[key] = data;
 }
-function addDataToLocalDb(serverUpdatedAt) {
+function addDataToLocalDb(serverUpdatedAt) {                                    console.log('       --Saving local database.');
     return storeAllLocalData()
     .then(() => _u.setData('lclDataUpdtdAt', serverUpdatedAt.state));
 }
 function storeAllLocalData() {
-    return Object.keys(localData).reduce((p, prop) => {                         console.log('       --setting [%s] = [%O]', prop, localData[prop]);
+    return Object.keys(localData).reduce((p, prop) => {                         //console.log('       --setting [%s] = [%O]', prop, localData[prop]);
         return p.then(() => _u.setData(prop, localData[prop]));
     }, Promise.resolve());
 }
