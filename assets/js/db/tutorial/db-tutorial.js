@@ -86,9 +86,19 @@ function resetUi() {                                                            
 /* ----------------- STEP SET UP -------------------------------------------- */
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
-    if (intro._currentStep > 2) { checkForDbLoad() }
+    if (!$('#sel-view').val() && intro._currentStep > 2) { return waitForDbLoad(); }
     if (!stepConfg.setUpFunc) { return; }
     stepConfg.setUpFunc();
+}
+function waitForDbLoad() { 
+    window.setTimeout(addDbLoadNotice, 500);
+    if (intro._currentStep == 14) { return; }
+    intro.goToStepNumber(3); 
+}
+function addDbLoadNotice() {  
+    $('.introjs-tooltiptext').html(`
+        <br><br><center><b>Please wait for database to finish downloading before 
+        continuing.`);
 }
 function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
     if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
@@ -118,18 +128,7 @@ function addBttnEvents() {
 }
 function showTutorial(tutKey) {  
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(15); }
-}
-function checkForDbLoad() { 
-    if ($('#sel-view').val()) { return; } 
-    window.setTimeout(addDbLoadNotice, 500);
-    if (intro._currentStep == 14) { return; }
-    intro.goToStep(3); 
-}
-function addDbLoadNotice() {  
-    $('.introjs-tooltiptext').html(`
-        <br><br><center><b>Please wait for database to finish downloading before 
-        continuing.`);
+    if (tutKey === 'map') { intro.goToStepNumber(15); }
 }
 function toggleFilterPanelInTutorial(close) {  
     const closed = $('#filter-opts-pnl').hasClass('closed');   
@@ -309,8 +308,7 @@ function getSteps() {
                 map.</h3><br>After filtering the interactions, click here to 
                 display them geographically.<br><br><center>You can try it now.
                 </center>`,
-            position: 'left',
-            setUpFunc: checkForDbLoad
+            position: 'left'
         },
         {
             element: '#db-view',
