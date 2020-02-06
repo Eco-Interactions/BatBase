@@ -6,7 +6,22 @@
             <div id="rvw-hdr-col1">Select Records To Review</div>
             <span style="flex-grow: 1.6;"></span>
         </div>
-        <div id='rvw-pnl-col1-content' class="flex-col"></div>
+        <div class="flex-row spaced">
+            <span>Status: </span>
+            <select id="rvw-status-sel" class="rvw-sel"></select>
+        </div>
+        <div class="flex-row spaced">
+            <span>Editor: </span>
+            <select id="rvw-editor-sel" class="rvw-sel"></select>
+        </div>
+        <div class="flex-row spaced">
+            <span>Date Range: </span>
+            <input type="text" id="rvw-date-start-sel" disabled="disabled">
+            <input type="text" id="rvw-date-end-sel" disabled="disabled">
+            <!-- <select id="" class="start-sel"></select> -->
+            <!-- <select id="rvw-date-end-sel" class="end-sel"></select> -->
+        </div>
+        <button id="rvw-cntrl-bttn" class="ag-fresh tbl-bttn">Start Review</button>
     </div>
     <div id="rvw-pnl-col2" class='flex-col'>                      <!-- Reviewing records details -->
         <div class="flex-row spaced">
