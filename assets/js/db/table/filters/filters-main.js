@@ -224,6 +224,7 @@ export function toggleTimeFilter(state, time, skipSync) {                       
 /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal() {
     if (fPs.cal) { fPs.cal.destroy(); }
+    const flatpickr = require('flatpickr');
     const calOpts = {
         altInput: true, maxDate: "today", enableTime: ifFilteringByUpdates(),   
         plugins: ifFilteringByUpdates() ? getCalPlugins() : [],
@@ -231,14 +232,14 @@ function initCal() {
         onClose: filterByTime, 
     }; 
     addDefaultTimeIfTesting(calOpts);
-    return $('#time-cal').flatpickr(calOpts);
+    return new flatpickr('#time-cal', calOpts);
 }
 function ifFilteringByUpdates() {
     return fPs.pnlFltrs.time && fPs.pnlFltrs.time.type === 'updated'; 
 }
 function getCalPlugins() {
-    const confirmDatePlugin = require('../../../libs/confirmDate.js'); 
-    return [confirmDatePlugin({showAlways: true})];
+    const confirmDatePlugin = require('flatpickr/dist/plugins/confirmDate/confirmDate.js'); 
+    return [new confirmDatePlugin({showAlways: true})];
 }
 function getCalOnReadyMethod() {
     return ifFilteringByUpdates() ? 
@@ -266,7 +267,7 @@ function updateTimeFilterMemory(time) {
 }
 export function applyTimeFilterStyles(filtering) {
     const opac = filtering ? 1 : .6;
-    $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
+    $('#time-cal, #time-cal+.form-control').attr({'disabled': !filtering});  
     $('.selTimeFilter-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
     db_ui.resetToggleTreeBttn(false);
