@@ -98,7 +98,7 @@ function getSrcRcrdKey(realm) {
 function buildPubTree(pubSrcRcrds, data) {                                      //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
     const pubRcrds = data.publication;
     const tree = {};
-    pubSrcRcrds.forEach(function(pub) { 
+    pubSrcRcrds.forEach(pub => { 
         tree[pub.displayName] = getPubData(pub, pubRcrds); 
     });
     return tree;

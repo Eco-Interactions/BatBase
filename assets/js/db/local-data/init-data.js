@@ -64,10 +64,8 @@ function setData(url, data) {                                                   
 function fetchData(url, options, n) {                                           console.log('           --downloading [%s] data. ([%s] tries remaining)', url, n);
     return fetch('ajax/'+url, options).then(response => {
         if (!!response.ok) { return response.json(); }
-        return response => {
-            if (n === 1) { return Promise.reject(console.log("[%s] download error = %O", url, response)); }
-            return fetchData(url, options, n - 1);
-        }
+        if (n === 1) { return Promise.reject(console.log("[%s] download error = %O", url, response)); }
+        return fetchData(url, options, n - 1);
     });
 };
 /**

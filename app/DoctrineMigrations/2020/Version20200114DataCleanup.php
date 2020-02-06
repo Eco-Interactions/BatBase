@@ -74,24 +74,23 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
         $ents = $this->getSourceData();
 
         foreach ($ents as $type => $ids) {
-            $this->mergeEntities($ids, 'Source', $type);
+            $this->mergeEntities($ids, 'Source');
         }
 
     }
 
-    protected function mergeEntities($ents, $coreClass, $detail = false)
+    protected function mergeEntities($ents, $coreClass)
     {
         foreach ($ents as $rmvId => $addId) {
-            $this->mergeData($rmvId, $addId, $coreClass, $detail);
+            $this->mergeData($rmvId, $addId, $coreClass);
         }
 
     }
-    protected function mergeData($rmvId, $addId, $coreClass, $detail)
+    protected function mergeData($rmvId, $addId, $coreClass)
     {                                                                           print("\n mergeData remove = ".$rmvId." addDataTo = ".$addId);
         $rmv = $this->getEntity($coreClass, $rmvId);                            
 
         if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
-        if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
         
         $this->persistEntity($rmv);
         $this->em->remove($rmv);
@@ -110,15 +109,15 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
     {
     }
 
-    private function transferChildren($oldPrnt, $newPrnt, $type)
+    private function transferChildren($oldPrnt, $newPrnt, $entity)
     {
         $map = [
             'Location' => [ 'ChildLocs', 'ParentLoc' ],
             'Source' =>   [ 'ChildSources', 'ParentSource' ],
             'Taxon' =>    [ 'ChildTaxa', 'ParentTaxon' ]
         ];
-        $getFunc = 'get'.$map[$type][0];
-        $setFunc = 'set'.$map[$type][1];
+        $getFunc = 'get'.$map[$entity][0];
+        $setFunc = 'set'.$map[$entity][1];
         $children = $oldPrnt->$getFunc();
         if (!count($children)) { return; }                                      print("\nCHILDREN FOUND = ".count($children));
         
@@ -149,13 +148,6 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
     private function getRoleProp($taxon)
     {
         return $taxon->serializeRealm()['displayName'] === 'Bat' ? 'Subject' : 'Object';
-    }
-
-    private function removeDetailEntityData($type, $coreEntity)
-    {
-        $getDetail = 'get'.$type;
-        $detailEntity = $coreEntity->$getDetail();
-        $this->em->remove($detailEntity);
     }
 
     private function getTaxonData()
