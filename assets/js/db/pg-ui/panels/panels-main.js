@@ -80,7 +80,7 @@ function openVerticalPanels(panel) {
 }
 function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
     opened.forEach(key => closePanel(panels[key]));
-    window.setTimeout(() => openPanel(panel), 500);  
+    window.setTimeout(() => cssOpenPanel(panel), 500);  
 }
 /* ------------------------ Close Panel(s) ---------------------------------- */
 function closePanel(panel) {

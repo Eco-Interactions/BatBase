@@ -144,7 +144,7 @@ function fillLocData(entity, id, rcrd) {
     }
     function storeLocGeoJson(id) {
         return _f.util('getData', ['geoJson'])
-            .then(data => _f.state('setFormProp', ['top', data[id]]));
+            .then(data => _f.state('setFormProp', ['top', 'geoJson', data[id]]));
     }
 } /* End fillLocData */
 /* ------------- SOURCE ----------------- */
