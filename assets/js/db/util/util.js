@@ -293,8 +293,10 @@ export function initComboboxes(fieldAry) {
 }
 function getSelConfgObj(field) {  
     const confgs = { 
-        // Search Page Filter/Focus Comboboxes that Affect UI & Table Directly
+        // Search Page Database Options Bar Comboboxes
         'Focus' : { name: field, id: '#search-focus', change: db_page.buildTable, blur: true },
+        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
+        // Search Page Filter Comboboxes
         'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
@@ -304,10 +306,9 @@ function getSelConfgObj(field) {
         'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Time Filter': { name: 'Filter', id: '#selTimeFilter' },
-        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
-        // Search Page Comboboxes with Create Options and Sub-panels
+        // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', add: newIntList, change: selIntList },
-        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },
+        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },        
     };
     return confgs[field];
 }

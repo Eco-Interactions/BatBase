@@ -10,40 +10,51 @@
  *     addDataReviewEvents          panels-main
  */
 import { accessTableState as tState } from '../../../db-main.js';
-import * as _u from '../../../util/util.js';
-import * as _uPnl from '../panels-main.js';
+// import * as _u from '../../../util/util.js';
+// import * as _uPnl from '../panels-main.js';
 
-export function initReviewPanel(userRole) {
-    // require('../../../../libs/rangePlugin.ts');
+export function initReviewPanel() {
     require('../../../../../styles/db/panels/rvw-data.styl');  
-    initReviewComboboxes();
-    $('#rvw-data').click(toggleReviewPanel);
+    $('#rvw-data').click(toggleEditorColumn);
 }
-/* ----------------------- COMBOBOXES --------------------------------------- */
-function initReviewComboboxes() {
-    // _u.initCombobox('Review-Editor');
-    // _u.initCombobox('Review-Status');
-    // initDateRangeSelect();
+
+function toggleEditorColumn() {
+    const tblState = tState().get();
+    const shown = $('#rvw-data').data('shown');
+    tblState.columnApi.setColumnsVisible(['updatedBy'], !shown);
+    $('#rvw-data').data('shown', !shown);
 }
-function getComboConfg(field) {
-    const confgs = {
-        'Review-Editor': { name: 'Editor', id: 'rvw-editor-sel', change: Function.prototype },
-        'Review-Status': { name: 'Status', id: 'rvw-state-sel', change: Function.prototype },
-        'Review-Date-Range': { name: 'Date Range', id: 'rvw-date-start-sel', change: Function.prototype },
-    };
-    return confgs[field];
-}
-function initDateRangeSelect() {
-    // _u.initCombobox('Review-Date-Range');   
-}
-/* ----------------------- COMBOBOXES --------------------------------------- */
-function toggleReviewPanel(argument) {
-    if ($('#review-pnl').hasClass('closed')) { 
-        buildAndShowReviewPanel();
-    } else { _uPnl.togglePanel('review', 'close'); }
-}
-function buildAndShowReviewPanel() {
-    _uPnl.togglePanel('review', 'open');
-    // window.setTimeout(() => $('#rvw-editor-sel')[0].selectize.focus(), 500);
-}
-/* ------------- Select Records (First) Column ------------------------------- */
+
+// export function initReviewPanel(userRole) {
+//     // require('../../../../libs/rangePlugin.ts');
+//     initReviewComboboxes();
+//     $('#rvw-data').click(toggleReviewPanel);
+// }
+// /* ----------------------- COMBOBOXES --------------------------------------- */
+// function initReviewComboboxes() {
+//     // _u.initCombobox('Review-Editor');
+//     // _u.initCombobox('Review-Status');
+//     // initDateRangeSelect();
+// }
+// function getComboConfg(field) {
+//     const confgs = {
+//         'Review-Editor': { name: 'Editor', id: 'rvw-editor-sel', change: Function.prototype },
+//         'Review-Status': { name: 'Status', id: 'rvw-state-sel', change: Function.prototype },
+//         'Review-Date-Range': { name: 'Date Range', id: 'rvw-date-start-sel', change: Function.prototype },
+//     };
+//     return confgs[field];
+// }
+// function initDateRangeSelect() {
+//     // _u.initCombobox('Review-Date-Range');   
+// }
+// /* ----------------------- COMBOBOXES --------------------------------------- */
+// function toggleReviewPanel(argument) {
+//     if ($('#review-pnl').hasClass('closed')) { 
+//         buildAndShowReviewPanel();
+//     } else { _uPnl.togglePanel('review', 'close'); }
+// }
+// function buildAndShowReviewPanel() {
+//     _uPnl.togglePanel('review', 'open');
+//     // window.setTimeout(() => $('#rvw-editor-sel')[0].selectize.focus(), 500);
+// }
+// /* ------------- Select Records (First) Column ------------------------------- */
