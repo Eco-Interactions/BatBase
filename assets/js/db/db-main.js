@@ -288,20 +288,15 @@ function showLocsInSetOnMap() {
     data_tree.buildLocTree(getTopRegionIds())
     .then(getGeoJsonAndShowLocsOnMap);
 }
-function getGeoJsonAndShowLocsOnMap(tree) {
-    _u.getData('geoJson').then(geo => {  
-        const data = { geo: geo, locs: tblState.rcrdsById};
-        db_map.initMap(data, locTree);
-    });
+function getGeoJsonAndShowLocsOnMap(tree) { 
+    db_map.initMap(tblState.rcrdsById, tree);
 }
 /** Switches to map view and centeres map on selected location. */
-export function showLocOnMap(geoJsonId, zoom) {                     /*Perm-log*/console.log("       --Showing Location on Map");
+export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
     _ui.updateUiForMapView();
-    _u.setSelVal('View', 'map', 'silent');
-    _u.getData('geoJson').then(geo => {  
-        db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
-        $('#tbl-filter-status').html('No Active Filters.');
-    });
+    _u.setSelVal('View', 'map', 'silent'); 
+    db_map.showLoc(locId, zoom, tblState.rcrdsById);
+    $('#tbl-filter-status').html('No Active Filters.');
 }
 /* ==================== SOURCE SEARCH =============================================================================== */
 /**

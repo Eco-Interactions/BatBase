@@ -22,9 +22,7 @@ const _db = {
 initDb();
 /** ----------------------- INIT -------------------------------------------- */
 /** 
- * Checks whether the dataKey exists in indexDB cache. 
- * If it is, the stored geoJson is fetched and stored in the global variable. 
- * If not, the db is cleared and geoJson is redownloaded. 
+ * Checks whether the dataKey exists in indexDB cache and downloads full DB if not.
  * Note: Testing clears idb on load, except as needed for data-entry testing. @addNewDataToStorage
  */
 function initDb() {
