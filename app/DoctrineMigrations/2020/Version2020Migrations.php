@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Not a functional migration. Documents migrations made in 2019.
  */
-class Version202000Migrations extends AbstractMigration
+class Version2020Migrations extends AbstractMigration
 {
     /**
      * 20200106Sql - Fixes Taxon and Realm field defaults.
