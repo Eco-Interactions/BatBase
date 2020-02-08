@@ -30,9 +30,9 @@ const panels = {
     'lists': { bttn: '#lists', key: 'lists',
         id: '#list-pnl',   tab: '#list-opts',   tabClass: 'hide-int-bttm-border'
     },
-    'review': { bttn: '#rvw-data', key: 'review',
-        id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
-    }
+    // 'review': { bttn: '#rvw-data', key: 'review',
+    //     id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
+    // }
 };
 
 /* ======================= EVENT RELATED ==================================== */
@@ -48,7 +48,7 @@ export function updateSubmitEvent(id, event) {
 /* ==================== OPEN/CLOSE PANELS =================================== */
 export function closeOpenPanels() {
     const opened = getOpenPanels();
-    opened.forEach(panelKey => togglePanel(key, 'close'));
+    opened.forEach(key => togglePanel(key, 'close'));
 }
 export function togglePanel(key, state) {                                       //console.log('togglePanel [%s] [%s]', key, state);
     const panel = panels[key];

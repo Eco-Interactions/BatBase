@@ -91,9 +91,11 @@ function buildFormData(entity, formVals, fLvl) {
         };
         data.location.hasDetail = true;
         delete data.false;
-    }
-    function getGeoJsonCoords() {
-        return _f.state('getFormProp', ['top', 'geoJson']).coordinates;
+        
+        function getGeoJsonCoords() {
+            const geoJson = _f.state('getFormProp', ['top', 'geoJson']);
+            return geoJson ? geoJson.coordinates : displayPoint;
+        }
     }
 } /* End buildFormDataObj */
 /** Returns an array of the parent entity's field names. */

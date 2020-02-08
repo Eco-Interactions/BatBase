@@ -525,7 +525,7 @@ function checkLocElems() {
     return locType.length == 1 ? locType[0] : null;
 }
 export function updateLocSearch(val, selType) {                                 
-    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); console.trace();
+    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
     const locType = selType ? selType : getLocType(val, this);                  
     const root = getNewLocRoot(val, locType);    
     const txt = getTreeFilterTextVal('Location');  

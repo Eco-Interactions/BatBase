@@ -63,7 +63,7 @@ function beforeFilterChange() {                                                 
 } 
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
-    if ($('#int-opts').hasClass('closed') || $('#submit-list').data('submitting')) { return; }  
+    if ($('#list-pnl').hasClass('closed') || $('#submit-list').data('submitting')) { return; }  
     $('#unsel-rows').attr({'disabled': false}).fadeTo('slow', 1);
     if (!$('#mod-some-list').prop('checked')) {
         $('#mod-some-list').prop({checked: 'checked'}).change();

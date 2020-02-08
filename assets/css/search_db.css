@@ -102,7 +102,7 @@ button[name="csv"]:before {
 #rst-data {
     z-index: 10000000000;
 }
-button[name="int-set"]:before {
+#lists:before {
     content: url(./images/tasks.svg);
     width: 16px;
 }
@@ -548,10 +548,10 @@ input.active-icon {
     #focus-filters .locSel {
         width: 201px;
     }
-    #int-opts #list-details textarea {
+    #list-pnl #list-details textarea {
         width: 333px;
     }
-    #int-opts.vert #list-details textarea {
+    #list-pnl.vert #list-details textarea {
         width: auto;
         flex-grow: 1;
     }

@@ -88,7 +88,7 @@ function getSavedFilterSteps() {
 function getSavedListSteps() {
     return [
         {
-            element: '#int-opts',
+            element: '#list-pnl',
             intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
                 Studying specific countries in Africa, data from specific publishers or authors, 
                 or a perhaps few habitats in particular? <br><br>Save interactions as a list and 

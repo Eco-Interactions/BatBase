@@ -131,7 +131,7 @@ function showTutorial(tutKey) {
     if (tutKey === 'map') { intro.goToStepNumber(15); }
 }
 function toggleFilterPanelInTutorial(close) {  
-    const closed = $('#filter-opts-pnl').hasClass('closed');   
+    const closed = $('#filter-pnl').hasClass('closed');   
     if ((close && closed) || !close && !closed) { return; }
     $('#filter').click();
 }
@@ -141,15 +141,15 @@ function clearFilters() {
 }
 function toggleListPanelInTutorial(close) {
     const role = $('body').data('user-role');
-    const closed = $('#int-opts').hasClass('closed');   
+    const closed = $('#list-pnl').hasClass('closed');   
     if ((close && closed) || !close && !closed) { 
-        if (close && role == 'visitor') { $('#button[name="int-set"]').attr({disabled: true}); }
+        if (close && role == 'visitor') { $('#lists').attr({disabled: true}); }
         return;
     }
     if (!close) {
-        $('#button[name="int-set"]').attr({disabled: false}).click();
+        $('#lists').attr({disabled: false}).click();
     } else {
-        $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
+        $('#lists').attr({disabled: role !== 'visitor'}).click();
     }
 }
 /* ------------------------- TUTORIAL STEPS --------------------------------- */

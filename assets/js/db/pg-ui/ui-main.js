@@ -75,25 +75,25 @@ function disableUserFeatures() {                                                
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#lists').click(toggleSaveIntsPanel);
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
     $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to admins.');
-    app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"]`;
+    app.enabledSelectors = `#filter, button[name="csv"], #lists`;
 }
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#lists').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
     $('#rvw-data').addClass('adminbttn');
-    app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
+    app.enabledSelectors = `#filter, button[name="csv"], #lists, 
         #new-data, #rvw-data`;
 }
 function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
     $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#lists').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
     $('#rvw-data').addClass('adminbttn');
