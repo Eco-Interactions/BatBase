@@ -170,16 +170,16 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iToggleTheDataListsPanel($state)
     {
-        $isClosed = $this->getUserSession()->evaluateScript("$('#int-opts').hasClass('closed');");
+        $isClosed = $this->getUserSession()->evaluateScript("$('#list-pnl').hasClass('closed');");
         if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
-        $dataListsPanel = $this->getUserSession()->getPage()->find('css', 'button[name="int-set"]');  
+        $dataListsPanel = $this->getUserSession()->getPage()->find('css', '#lists');  
+        if (!$dataListsPanel) { $this->iPutABreakpoint('"Lists" button not found.'); }
         $dataListsPanel->click();
-        /* -- Spin until finished -- */
-        $stepComplete = function() use ($state){
-            $closed = $this->getUserSession()->evaluateScript("$('#int-opts').hasClass('closed');"); 
+        /* -- Spin until finished -- */      
+        $this->spin(function() use ($state){
+            $closed = $this->getUserSession()->evaluateScript("$('#list-pnl').hasClass('closed');"); 
             if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
-        };      
-        $this->spin($stepComplete, 'Data Lists panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+        }, 'Data Lists panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
     }
 
     /**
@@ -187,20 +187,17 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iToggleTheFilterPanel($state)
     {
-        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');");
+        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-pnl').hasClass('closed');"); 
         if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
         $toggleBttn = $this->getUserSession()->getPage()->find('css', '#filter');  
-        /* -- Spin until finished -- */
-        $stepComplete = function() use ($state, $toggleBttn){
-            try {
-                $toggleBttn->click();
-            } catch (Exception $e) { return false; 
-            } finally {
-                $closed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');"); 
-                if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
-            }
-        };      
-        $this->spin($stepComplete, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+        if (!$toggleBttn) { $this->iPutABreakpoint('"Filters" button not found.'); }
+        $toggleBttn->click();
+
+        $this->spin(function() use ($state, $toggleBttn) {
+            sleep(1);
+            $closed = $this->getUserSession()->evaluateScript("$('#filter-pnl').hasClass('closed');"); 
+            if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
+        }, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
     }
 
     /**
@@ -1217,13 +1214,13 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function toggleTheDateFilter($state)
     {
-        $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd'); 
-        $this->spin(function() use ($state, $checkbox) {
+        $this->spin(function() use ($state) {
             try {
+                $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd'); 
                 if ($state) { $checkbox->check(); } else { $checkbox->uncheck(); }
+                return $checkbox->isSelected() == $state;
             } catch (Exception $e) { return; }            
-            return $checkbox->isSelected() == $state;
-            }, 'Time filter not ['.($state ? 'en' : 'dis').'abled].');
+        }, 'Time filter not ['.($state ? 'en' : 'dis').'abled].');
     }
 /** ---------------------- Get From Page -------------------------------------*/
     private function getTableRow($text)
@@ -1566,11 +1563,21 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function userCreatesInteractions($editor, $cntAry)
     {                                                                           fwrite(STDOUT, "\---- userCreatesInteractions.\n");
-        $this->curUser->getPage()->pressButton('New');
+        $this->pressTheNewButton();
         foreach ($cntAry as $cnt) {                                             fwrite(STDOUT, "\n    Creating interaction $cnt\n");
             $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
         }                                                                       fwrite(STDOUT, "\n    Interactions added. Exiting form\n");
         $this->iExitTheFormWindow();
+    }
+
+    private function pressTheNewButton()
+    {                                       
+        $this->spin(function() { 
+            try {
+                $this->curUser->getPage()->pressButton('New');
+                return true;
+            } catch (Exception $e) {}
+        }, "Cant press the 'New' Button.");
     }
 
     private function editorVisitsSearchPage($editor)

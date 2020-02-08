@@ -75,10 +75,9 @@ function initDbPage () {
 }
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
+    require('flatpickr/dist/flatpickr.min.css')
     require('../../css/lib/ag-grid.css');
-    require('../../css/lib/theme-fresh.css');
-    require('../../css/lib/confirmDate.css');
-    require('../../css/lib/flatpickr.min.css');    
+    require('../../css/lib/theme-fresh.css'); 
     require('../../css/lib/selectize.default.css');
     require('../../css/search_db.css');  
     require('../../css/moz-styles.css');
@@ -89,7 +88,6 @@ function requireCss() {
 function requireJs() {
     require('leaflet-control-geocoder');
     require('../libs/selectize.min.js');
-    require('../libs/flatpickr.min.js');
 }
 /**
  * The first time a browser visits the search page, or when local data is reset,

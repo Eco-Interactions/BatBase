@@ -22,7 +22,7 @@ import * as _u from '../../util/util.js';
 import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
 import * as db_ui from '../../pg-ui/ui-main.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/filter-panel.js';
-import { savedIntListLoaded } from '../../pg-ui/panels/save-ints.js';
+import { savedIntListLoaded } from '../../pg-ui/panels/int-list-panel.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -224,6 +224,7 @@ export function toggleTimeFilter(state, time, skipSync) {                       
 /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal() {
     if (fPs.cal) { fPs.cal.destroy(); }
+    const flatpickr = require('flatpickr');
     const calOpts = {
         altInput: true, maxDate: "today", enableTime: ifFilteringByUpdates(),   
         plugins: ifFilteringByUpdates() ? getCalPlugins() : [],
@@ -231,14 +232,14 @@ function initCal() {
         onClose: filterByTime, 
     }; 
     addDefaultTimeIfTesting(calOpts);
-    return $('#time-cal').flatpickr(calOpts);
+    return new flatpickr('#time-cal', calOpts);
 }
 function ifFilteringByUpdates() {
     return fPs.pnlFltrs.time && fPs.pnlFltrs.time.type === 'updated'; 
 }
 function getCalPlugins() {
-    const confirmDatePlugin = require('../../../libs/confirmDate.js'); 
-    return [confirmDatePlugin({showAlways: true})];
+    const confirmDatePlugin = require('flatpickr/dist/plugins/confirmDate/confirmDate.js'); 
+    return [new confirmDatePlugin({showAlways: true})];
 }
 function getCalOnReadyMethod() {
     return ifFilteringByUpdates() ? 
@@ -266,7 +267,7 @@ function updateTimeFilterMemory(time) {
 }
 export function applyTimeFilterStyles(filtering) {
     const opac = filtering ? 1 : .6;
-    $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
+    $('#time-cal, #time-cal+.form-control').attr({'disabled': !filtering});  
     $('.selTimeFilter-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
     db_ui.resetToggleTreeBttn(false);
@@ -524,7 +525,7 @@ function checkLocElems() {
     return locType.length == 1 ? locType[0] : null;
 }
 export function updateLocSearch(val, selType) {                                 
-    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); console.trace();
+    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
     const locType = selType ? selType : getLocType(val, this);                  
     const root = getNewLocRoot(val, locType);    
     const txt = getTreeFilterTextVal('Location');  

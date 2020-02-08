@@ -4,7 +4,7 @@ import * as db_filters from '../table/filters/filters-main.js';
 import * as db_page from '../db-main.js';
 import { addNewDataToStorage, initStoredData, replaceUserData } from '../local-data/db-sync.js';
 import { showLoadingDataPopUp, showPopUpMsg } from '../pg-ui/ui-main.js';
-import { newIntList, selIntList } from '../pg-ui/panels/save-ints.js';
+import { newIntList, selIntList } from '../pg-ui/panels/int-list-panel.js';
 import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter-panel.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 /* 
@@ -239,7 +239,7 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
-export function logAjaxData(dataPkg, args, sending = false) {
+export function logAjaxData(dataPkg, args, sending) {
     const state = sending ? 'S' : 'R';
     if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
         console.log("           --[%s] Ajax data =%O arguments = %O", state, dataPkg, args);
@@ -293,8 +293,10 @@ export function initComboboxes(fieldAry) {
 }
 function getSelConfgObj(field) {  
     const confgs = { 
-        // Search Page Filter/Focus Comboboxes that Affect UI & Table Directly
+        // Search Page Database Options Bar Comboboxes
         'Focus' : { name: field, id: '#search-focus', change: db_page.buildTable, blur: true },
+        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
+        // Search Page Filter Comboboxes
         'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
@@ -304,10 +306,9 @@ function getSelConfgObj(field) {
         'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Time Filter': { name: 'Filter', id: '#selTimeFilter' },
-        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
-        // Search Page Comboboxes with Create Options and Sub-panels
+        // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', add: newIntList, change: selIntList },
-        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },
+        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },        
     };
     return confgs[field];
 }

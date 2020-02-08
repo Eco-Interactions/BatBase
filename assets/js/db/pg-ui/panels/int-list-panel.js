@@ -47,7 +47,11 @@ let app = {};
 export function savedIntListLoaded() {                                          
     return app.listLoaded;
 }
-export function addListPanelEvents() {
+export function initListPanel() {
+    require('../../../../styles/db/panels/lists.styl');  
+    addListPanelEvents();
+}
+function addListPanelEvents() {
     window.addEventListener('resize', resizeIntPanelTab);
     $('button[name="clear-list"]').click(resetTable);
     $('input[name="mod-list"]').on('change', toggleInstructions);
@@ -61,13 +65,13 @@ export function addListPanelEvents() {
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         
-    if ($('#int-opts').hasClass('closed')) { 
+    if ($('#list-pnl').hasClass('closed')) { 
         buildAndShowIntPanel(); 
         sizeIntPanelTab();
-    } else { _uPnl.togglePanel('#int-opts', 'close'); }
+    } else { _uPnl.togglePanel('lists', 'close'); }
 }
 function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')         
-    _uPnl.togglePanel('#int-opts', 'open');
+    _uPnl.togglePanel('lists', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();
@@ -90,7 +94,7 @@ export function toggleListPanelOrientation(style) {
 /* --- Vertical Stacking --- */
 function stackIntListPanel() {
     $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
-    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).addClass('vert');
     stackListElems();
     if (window.innerWidth < 1313) { $('#load-list-cntnr div').text('(Filters reset)'); }
@@ -101,7 +105,7 @@ function stackListElems() {
 /* --- Horizontal Spreading --- */
 function spreadIntListPanel() {
     $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
-    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).removeClass('vert');
     $('#list-details').append($('#list-count').detach());
 }
@@ -313,7 +317,7 @@ function sizeIntPanelTab() {
     $('.hide-int-bttm-border').append(pseudo);
 }
 function getPseudoStyle() {
-    const panelT = $('#int-opts').position().top;
+    const panelT = $('#list-pnl').position().top;
     const tabW = $('#list-opts').innerWidth();  
     const tabL = $('#list-opts').position().left + 1;               /*debg-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-int-bttm-border:before { 
@@ -370,7 +374,7 @@ function clearAndDisableInputs() {
 }
 function enableInputs(creating) {                                               
     $(`#list-details input, #list-details textarea, #list-details span, #mod-list-pnl > span:first-child, 
-        #int-opts button, #mod-mode, #mod-radios input, #mod-radios label`)
+        #list-pnl button, #mod-mode, #mod-radios input, #mod-radios label`)
         .attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
@@ -428,7 +432,7 @@ function updateUiAfterTableReset() {
     enableModUi('add');
     $('#load-list').html('Load Interaction List in Table');
     $('#load-list').off('click').click(loadListInTable);
-    if (!$('#int-opts').hasClass('closed')) { expandAllTableRows(); }
+    if (!$('#list-pnl').hasClass('closed')) { expandAllTableRows(); }
     updateDetailHdr('Selected');
 }
 function expandAllTableRows() {

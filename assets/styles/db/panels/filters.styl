@@ -1,0 +1,139 @@
+/*
+ * Data list managament panel styles.
+ */
+/* ---------------- Tab container in db-options panel ----------------------- */
+#filter-opts 
+    padding: 5px
+    width: 135px
+    border-left: 1px black solid
+    border-right: 1px black solid
+
+#filter-opts.shw-col-borders 
+    background: rgba(121, 201, 183, .1)
+/* ---------------- Filter Options Panel ------------------------------------ */
+#filter-pnl 
+    max-height: 222px
+    border-radius: 10px
+
+#filter-pnl.vert 
+    max-height: 444px
+    border-left: none
+
+#filter-pnl.closed 
+    max-height: 0
+
+#filter-pnl span 
+    padding-top: 5px
+
+.sel-cntnr           /* .flex-row also on elems */
+    margin: .3em
+    flex: 0 0 auto
+    width: 222px    
+    justify-content: space-between
+/* ----------- Table-Focus and Time Filters (First) Column ------------------ */
+#filter-col1 
+    flex: 0 1 618px
+    border-right: black 1px solid
+
+#filter-col1.vert 
+    flex: initial
+    border-bottom: black 1px solid
+    border-right: none
+
+#focus-filter-hdr 
+    align-self: center
+    padding-bottom: 5px
+    font-weight: 600
+
+#focus-filters 
+    margin-bottom: .75em
+/* ---- Text filter ---- */
+.txtLbl 
+    width: 303px
+
+.txtLbl input 
+    height: 27px
+    width: 250px
+/* ---- Focus Specific ---- */
+.taxonLbl 
+    margin: .3em 0 0 1em
+    width: 273px
+
+.taxonSel   /*selectize combobox*/
+    width: 202px
+
+.locLbl 
+    width: 282px
+
+.locSel 
+    width: 217px
+
+.locTxtInput 
+    width: 238px !important
+/* --- Time Updated Filter --- */
+#shw-chngd-ints 
+    width: 100%
+    margin-top: auto
+    align-items: center
+
+#filter-col1.vert #shw-chngd-ints 
+    width: auto
+    margin-bottom: 5px
+
+#shw-chngd 
+    margin: 7px
+
+.time-fltr-sel 
+    margin: 0 .5em
+    width: 111px
+
+#time-cal, #time-cal+.form-control.input
+    width: 202px
+    font-size: .85em
+    padding: 4px
+    margin-left: 11px
+/* ----------------- Filter Sets (Second) Column ---------------------------- */
+#stored-filters 
+    flex: 1 0 472px
+    padding-left: 10px
+
+#stored-filters.vert 
+    flex: initial
+
+#stored-filters button 
+    height: 27px
+    width: 88px
+
+#stored-filters textarea 
+    font-weight: 600
+    font-size: .8em
+    padding-left: 3px
+    flex-grow: 1
+
+.saved-filters-sel 
+    width: 236px
+
+.filter-set-details 
+    flex-grow: 1
+
+#filter-set-name 
+    width: 46px !important
+    margin: 0 .3em 0 .6em
+
+#filter-set-name + input 
+    min-width: 222px
+    font-weight: 600
+    font-size: .8em
+    padding-left: 3px
+    flex-grow: 1
+
+.fltr-desc 
+    width: 95px
+    padding-top: 4px
+
+#apply-filter 
+    margin-top: 5px
+
+/*#delete-filter 
+    align-self: flex-start
+*/

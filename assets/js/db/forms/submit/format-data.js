@@ -84,17 +84,18 @@ function buildFormData(entity, formVals, fLvl) {
         data.geoJson = {
             flat: { 
                 'displayPoint': displayPoint, 
-                'coordinates': getCoords(displayPoint), 
-                'locationName': formVals.displayName,
-                'type': 'Point' },
+                'coordinates': editing ? getGeoJsonCoords() : displayPoint,
+                'type': 'Point' 
+            },
             rel: {}
         };
         data.location.hasDetail = true;
-    }
-    function getCoords(displayPoint) {
-        const geoJson = _f.state('getFormProp', ['top', 'geoJson']);
-        const coords = !geoJson || geoJson.type === 'Point' ? 
-            displayPoint : geoJson.coordinates;
+        delete data.false;
+        
+        function getGeoJsonCoords() {
+            const geoJson = _f.state('getFormProp', ['top', 'geoJson']);
+            return geoJson ? geoJson.coordinates : displayPoint;
+        }
     }
 } /* End buildFormDataObj */
 /** Returns an array of the parent entity's field names. */

@@ -27,8 +27,8 @@ import { initNewDataForm } from '../forms/forms-main.js';
 import * as db_page from '../db-main.js';
 import * as db_filters from '../table/filters/filters-main.js';
 import { showInts } from '../map/map-main.js';
-import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/save-ints.js';
-import { addPanelEvents, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
+import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/int-list-panel.js';
+import { addPanelEventsAndStyles, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
 import { updateFilterPanelHeader } from '../pg-ui/panels/filter-panel.js';
 
 
@@ -48,7 +48,7 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.buildTable.bind(null, false, false));
-    addPanelEvents(app.userRole);
+    addPanelEventsAndStyles(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp(type) {
@@ -75,25 +75,25 @@ function disableUserFeatures() {                                                
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#lists').click(toggleSaveIntsPanel);
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
     $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to admins.');
-    app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"]`;
+    app.enabledSelectors = `#filter, button[name="csv"], #lists`;
 }
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#lists').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
     $('#rvw-data').addClass('adminbttn');
-    app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
+    app.enabledSelectors = `#filter, button[name="csv"], #lists, 
         #new-data, #rvw-data`;
 }
 function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
     $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#lists').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
     $('#rvw-data').addClass('adminbttn');

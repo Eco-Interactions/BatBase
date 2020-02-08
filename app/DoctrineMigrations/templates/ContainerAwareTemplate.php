@@ -46,7 +46,7 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->getEntity('User', 'id', 6);
+        $this->admin = $this->getEntity('User', 6, 'id');
 
     }
 
