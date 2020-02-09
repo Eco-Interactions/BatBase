@@ -129,7 +129,7 @@ export function logAjaxData() {
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
 export function errorHandling(funcName, params = []) {
-    return _err(funcName, params = []);
+    return _err[funcName](...params);
 }
 export function alertErr() {                                                    
     return _err.alertErr(...arguments);
@@ -144,15 +144,10 @@ export function getTaxonName(taxon) {
 }
 /* ------------------ DATA -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
-export function getDetachedRcrd(rcrdKey, rcrds, entity) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
-    try {
-        // _err.reportErr('noRcrd', {id: rcrdKey, entity: entity});
-        return snapshot(rcrds[rcrdKey]);
-    }
-    catch (e) {                                                                 //console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
-        _err.reportErr('noRcrd', {id: rcrdKey, entity: entity});
-        return false;
-    }
+export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
+    if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    //console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+    _err.reportErr('noRcrd', {id: rcrdKey, entity: entity});
+    return false;
 }
 /* ------------ STRING HELPERS ---------------------------------------------- */
 export function ucfirst(str) { 

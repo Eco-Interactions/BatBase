@@ -17,10 +17,10 @@
  *     buildSrcTree     db-page, save-ints
  *     buildTxnTree     db-page, save-ints
  */
-import { accessTableState as tState } from '../../db-main.js';
+import * as _db from '../../db-main.js';
 import * as _u from '../../util/util.js';
 
-let focusRcrds; //Refreshed with each new entry into the module.
+const tState = _db.accessTableState;
 let tblState;
 /* ========================= LOCATION TREE ========================================================================== */
 /**
@@ -31,35 +31,31 @@ let tblState;
  */ 
 export function buildLocTree(topLocs, textFltr) {                               
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
-    focusRcrds = tblState.rcrdsById;
     return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, textFltr));
 }
 function buildLocDataTree(topLocs, textFltr) {
-    let topLoc;
     let tree = {};                                                              //console.log("tree = %O", tree);
-    topLocs.forEach(function(id){  
-        topLoc = _u.getDetachedRcrd(id, focusRcrds);  
-        tree[topLoc.displayName] = getLocChildren(topLoc);
-    });  
+    topLocs.forEach(buildLocBrach);
     tree = filterTreeByText(textFltr, tree);
     tree = filterTreeToInteractionSet(tree, 'locs');
     return sortDataTree(tree);
+
+    function buildLocBrach(id) {
+        const topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById); 
+        tree[topLoc.displayName] = fillLocChildren(topLoc);
+    }
 }
 /** Returns the location record with all child ids replaced with their records. */
-function getLocChildren(rcrd) {   
-    if (rcrd.children.length > 0) { 
-        rcrd.children = rcrd.children.map(getLocChildData);
-    }
+function fillLocChildren(rcrd) {   
+    if (!rcrd.children.length) { return rcrd; }
+    rcrd.children = getTreeRcrds(rcrd.children, tblState.rcrdsById, 'location')
+        .map(loc => fillLocChildren(loc));
     return rcrd;
-}
-function getLocChildData(childId) {  
-    return getLocChildren(_u.getDetachedRcrd(childId, focusRcrds));
 }
 /* ========================= SOURCE TREE ============================================================================ */
 /** (Re)builds source tree for the selected source realm. */
 export async function buildSrcTree(realm) {
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
-    focusRcrds = tblState.rcrdsById;
     const tree = await buildSrcRealmTree(realm);
     return fillTreeWithInteractions('srcs', tree);
 }
@@ -71,19 +67,25 @@ export async function buildSrcTree(realm) {
  * Publishers->Publications->Citations->Interactions. 
  */
 function buildSrcRealmTree(realm) {     
-    const bldr = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
-    const realmSrcKey = getSrcRcrdKey(realm);
-    return Promise.all([_u.getData(['publication', 'author']),_u.getData(realmSrcKey)])
-        .then(data => { 
-            const srcData = data[1].map(id => _u.getDetachedRcrd(id, focusRcrds))
-            let tree = bldr[realm](srcData, data[0]);
-            tree = filterTreeToInteractionSet(tree, 'srcs');
-            return sortDataTree(tree);
-        }).catch(e => console.log('e = %O', e));
+    return Promise.all(getSrcTreeData(realm))
+        .then(data => buildSourceTree(data, realm));
 }  
+function getSrcTreeData(realm) {
+    const realmSrcKey = getSrcRcrdKey(realm);
+    return [ _u.getData(['publication', 'author']), _u.getData(realmSrcKey)];
+}
 function getSrcRcrdKey(realm) {
     const keys = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
     return keys[realm];
+}
+function buildSourceTree(data, realm) {
+    let tree = buildRealmTree(realm, getTreeRcrds(data[1], tblState.rcrdsById, 'source'), data[0]);
+    tree = filterTreeToInteractionSet(tree, 'srcs');
+    return sortDataTree(tree);
+}
+function buildRealmTree(realm, srcData, detailData) {
+    const bldr = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
+    return bldr[realm](srcData, detailData);
 }
 /*-------------- Publication Source Tree -------------------------------------------*/
 /**
@@ -96,24 +98,29 @@ function getSrcRcrdKey(realm) {
  * ->->->Interactions Records
  */
 function buildPubTree(pubSrcRcrds, data) {                                      //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
-    const pubRcrds = data.publication;
     const tree = {};
-    pubSrcRcrds.forEach(pub => { 
-        tree[pub.displayName] = getPubData(pub, pubRcrds); 
-    });
+    pubSrcRcrds.forEach(getPubBranch);
     return tree;
+
+    function getPubBranch(pubSrc) {
+        const branchData = getPubData(pubSrc, data.publication); 
+        if (!branchData) { return; }
+        tree[pubSrc.displayName] = branchData;
+    }
 }
 function getPubData(rcrd, pubRcrds) {                                           //console.log("getPubData. rcrd = %O", rcrd);
     rcrd.children = getPubChildren(rcrd, pubRcrds);
-    if (rcrd.publication) {                                                     //console.log("rcrd with pub = %O", rcrd)
-        rcrd.publication = _u.getDetachedRcrd(rcrd.publication, pubRcrds);
+    if (rcrd.publication) {
+        const pub = _u.getDetachedRcrd(rcrd.publication, pubRcrds, 'publication');
+        if (!pub) { return false; }
+        rcrd.publication = pub;
     }
     return rcrd;
 }
 function getPubChildren(rcrd, pubRcrds) {                                       //console.log("getPubChildren rcrd = %O", rcrd)
     if (rcrd.children.length === 0) { return []; }
-    return rcrd.children.map(id => getPubData(
-        _u.getDetachedRcrd(id, focusRcrds), pubRcrds));
+    return getTreeRcrds(rcrd.children, tblState.rcrdsById, 'source')
+        .map(rcrd => getPubData(rcrd, pubRcrds)).filter(c => c);
 }
 /*-------------- Publisher Source Tree ---------------------------------------*/
 /**
@@ -129,28 +136,24 @@ function buildPublTree(pubSrcRcrds, data) {                                 //co
     const pubRcrds = data.publication;
     const tree = {};
     const noPubl = [];
-    pubSrcRcrds.forEach(function(pub) { addPubl(pub); });
-    tree["Unspecified"] = getPubsWithoutPubls(noPubl);
+    pubSrcRcrds.forEach(getPublBranch);
+    tree["Unspecified"] = getPubsWithoutPubls(noPubl); 
     return tree;
 
-    function addPubl(pub) {
+    function getPublBranch(pub) {
         if (!pub.parent) { noPubl.push(pub); return; }
-        const publ = _u.getDetachedRcrd(pub.parent, focusRcrds);
+        const publ = _u.getDetachedRcrd(pub.parent, tblState.rcrdsById, 'source');
+        if (!publ) { return; }
         tree[publ.displayName] = getPublData(publ); 
     }
     function getPublData(rcrd) {
-        rcrd.children = getPublChildren(rcrd);
+        rcrd.children = getPubChildren(rcrd, pubRcrds);
         return rcrd;
-    }
-    function getPublChildren(rcrd) {                                            //console.log("getPubChildren rcrd = %O", rcrd)
-        if (rcrd.children.length === 0) { return []; }
-        return rcrd.children.map(id => getPubData(
-            _u.getDetachedRcrd(id, focusRcrds), pubRcrds));
     }
     function getPubsWithoutPubls(pubs) {
         const publ = { id: 0, displayName: "Unspecified", parent: null, 
             sourceType: { displayName: 'Publisher' }, interactions: [] };
-        publ.children = pubs.map(pub => getPubData(pub, pubRcrds));
+        publ.children = pubs.map(pub => getPubData(pub, pubRcrds)).filter(c=>c);
         return publ;
     }
 } /* End buildPublTree */
@@ -168,22 +171,22 @@ function buildAuthTree(authSrcRcrds, data) {                                //co
     const pubRcrds = data.publication;
     const authRcrds = data.author;
     const tree = {};
-    authSrcRcrds.forEach(rcrd => getAuthData(rcrd));
+    authSrcRcrds.forEach(getAuthBranch);
     return tree;  
 
-    function getAuthData(authSrc) {                                             //console.log("rcrd = %O", authSrc);
-        if (authSrc.contributions.length > 0) {
-            authSrc.author = _u.getDetachedRcrd(authSrc.author, authRcrds);
-            authSrc.children = getAuthChildren(authSrc.contributions); 
-            tree[authSrc.displayName] = authSrc;
-        }
+    function getAuthBranch(authSrc) {                                             //console.log("rcrd = %O", authSrc);
+        if (!authSrc.contributions.length) { return; }
+        authSrc.author = _u.getDetachedRcrd(authSrc.author, authRcrds, 'author');
+        if (!authSrc.author) { return; }
+        authSrc.children = getAuthChildren(authSrc.contributions); 
+        tree[authSrc.displayName] = authSrc;
     }
     /** For each source work contribution, gets any additional publication children
      *  and return's the source record.
      */
     function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", contribs);
-        return contribs.map(wrkSrcid => getPubData(
-            _u.getDetachedRcrd(wrkSrcid, focusRcrds), pubRcrds));
+        return getTreeRcrds(contribs, tblState.rcrdsById, 'source')
+            .map(rcrd => getPubData(rcrd, pubRcrds)).filter(c => c);
     }
 } /* End buildAuthTree */
 /* ========================= TAXON TREE ============================================================================= */
@@ -194,8 +197,6 @@ function buildAuthTree(authSrcRcrds, data) {                                //co
  */
 export function buildTxnTree(topTaxon, filtering, textFltr) {                   //console.log("buildTaxonTree called for topTaxon = %O. filtering? = %s. textFltr = ", topTaxon, filtering, textFltr);
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
-    focusRcrds = tblState.rcrdsById;
-
     let tree = buildTxnDataTree(topTaxon);
     tree = filterTreeByText(textFltr, tree);
     storeTaxonLevelData(topTaxon, filtering);
@@ -203,26 +204,21 @@ export function buildTxnTree(topTaxon, filtering, textFltr) {                   
 }
 function buildTxnDataTree(topTaxon) {
     let tree = {};                                                              //console.log("tree = %O", tree);
-    tree[topTaxon.displayName] = topTaxon;  
-    topTaxon.children = getChildTaxa(topTaxon.children);   
+    tree[topTaxon.displayName] = buildTaxonBranch(topTaxon);  
     tree = filterTreeToInteractionSet(tree, 'taxa');
     return tree;
+
+    function buildTaxonBranch(taxon) {
+        taxon.children = getChildTaxa(taxon.children);   
+        return taxon;
+    }
     /**
      * Recurses through each taxon's 'children' property and returns a record 
      * for each child ID found. 
      */
-    function getChildTaxa(children) {                                           //console.log("getChildTaxa called. children = %O", children);
-        if (children === null) { return []; } //changed from nullifying the children prop to an empty array... consequences?
-        return children.map(function(child){
-            if (typeof child === "object") { return child; }
-
-            const childRcrd = _u.getDetachedRcrd(child, focusRcrds);            //console.log("child = %O", childRcrd);
-            if (childRcrd.children.length >= 1) { 
-                childRcrd.children = getChildTaxa(childRcrd.children);
-            } else { childRcrd.children = []; } //changed from nullifying the children prop to an empty array... consequences?
-
-            return childRcrd;
-        });
+    function getChildTaxa(taxa) {                                               //console.log("getChildTaxa called. children = %O", children);
+        if (taxa === null) { return []; }
+        return getTreeRcrds(taxa, tblState.rcrdsById, 'taxon').map(buildTaxonBranch);
     }
 } /* End buildTaxonTree */
 function storeTaxonLevelData(topTaxon, filtering) {                             //console.log('storeTaxonLevelData. filtering?', filtering);
@@ -332,31 +328,31 @@ function fillSrcTree(dataTree, entityData) {
 
 } /* End fillSrcTree */
 /** Replace the interaction ids with their interaction records. */
-function replaceInteractions(interactionsAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O, intRcrds = %O", interactionsAry, entityData.interaction);
-    return interactionsAry.map(function(intId){  
-        if (typeof intId === "number") {                                        //console.log("new record = %O",  _u.snapshot(entityData.interaction[intId]));
-            return fillIntRcrd(
-                _u.getDetachedRcrd(intId, entityData.interaction), entityData); 
-        } 
-    });
+function replaceInteractions(intAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O, intRcrds = %O", interactionsAry, entityData.interaction);
+    return getTreeRcrds(intAry, entityData.interaction, 'interaction')
+        .map(rcrd => fillIntRcrd(rcrd, entityData)).filter(i => i);
 }
 /** Returns a filled record with all references replaced with entity records. */
 function fillIntRcrd(intRcrd, entityData) {
     for (let prop in intRcrd) { 
-        if (prop in entityData) { 
-            intRcrd[prop] = entityData[prop][intRcrd[prop]];
-        } else if (prop === "subject" || prop === "object") {
-            intRcrd[prop] = entityData.taxon[intRcrd[prop]];
-        } else if (prop === "tags") {
-            intRcrd[prop] = intRcrd[prop].length > 0 ? 
-                getIntTags(intRcrd[prop]) : null;
-        }
+        intRcrd[prop] = fillIntProp(prop);
+        if (intRcrd[prop] === '_err_') { return null; }
     }
     return intRcrd;
+
+    function fillIntProp(prop) {  
+        if (prop === "tags") { return getIntTags(intRcrd[prop]); }
+        const entity = prop in entityData ? prop : prop.includes('bject') ? 'taxon' : null;
+        return !entity ? intRcrd[prop] : getTreeRcrd(intRcrd[prop], entityData, entity);
+    }
 }
 function getIntTags(tagAry) { 
-    const tags = tagAry.map(function(tag){ return tag.displayName; });
-    return tags.join(", ");
+    return tagAry.map(tag => tag.displayName).join(', ');
+}
+function getTreeRcrd(id, entityData, entity) {
+    const rcrd = entityData[entity][id];
+    if (!rcrd) { _db._errs('reportErr', ['noRcrd', {id: id, entity: entity}]); }
+    return rcrd ? rcrd : '_err_';
 }
 /* ======================== FILTER BY TEXT ================================== */
 function filterTreeByText(text, tree) {
@@ -437,6 +433,9 @@ function filterEntityAndSubs(ent, focus, set) {                                 
     }
 } /* End filterEntityAndSubs */
 /* ================================ UTILITY ========================================================================= */
+function getTreeRcrds(idAry, rcrds, entity) {
+    return idAry.map(id => _u.getDetachedRcrd(id, rcrds, entity)).filter(r => r);
+}
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {
     const sortedTree = {};

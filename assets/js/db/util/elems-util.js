@@ -11,6 +11,7 @@
  *     addEnterKeypressClick
  */
 import * as _db from '../local-data/idb-util';
+import * as _pg from '../db-main.js';
 
 export function buildElem(tag, attrs) {                                         //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
     const elem = document.createElement(tag);
@@ -77,7 +78,7 @@ export function buildSimpleOpts(optAry, placeholder) {                          
     optAry.forEach(function(option, idx){
         opts.push({
             value: idx.toString(),
-            text: ucfirst(option)  });
+            text: _pg._util('ucfirst', [option])  });
     });
     if (placeholder) {
         opts.unshift({ value: "placeholder", text: placeholder });
@@ -105,9 +106,9 @@ export function buildOptsObj(entityObj, sortedKeys) {                           
     return sortedKeys.map(name => {
         return typeof entityObj[name] === 'object' ? 
             { group: entityObj[name].group, 
-              text: ucfirst(name),
+              text: _pg._util('ucfirst', [name]),
               value: entityObj[name].value 
-            } : { value: entityObj[name], text: ucfirst(name) }
+            } : { value: entityObj[name], text: _pg._util('ucfirst', [name]) }
     });    
 }
 /*---------- Keypress event Helpers --------------------------------------*/
