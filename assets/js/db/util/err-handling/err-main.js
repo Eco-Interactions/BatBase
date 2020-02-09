@@ -15,9 +15,6 @@ import * as _rprt from './reporting.js';
 import * as _logs from './logging.js';
 
 /* ----------------------- LOGS --------------------------------------------- */
-export function logToConsole() {
-    _logs.logToConsole(...arguments);    
-}
 export function getLogData() {
     return _logs.getLogData();
 }

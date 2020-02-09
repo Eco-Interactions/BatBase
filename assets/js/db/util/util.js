@@ -128,9 +128,6 @@ export function logAjaxData() {
     return _ajax.logAjaxData(...arguments);
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
-export function logToConsole() {
-    _err.logToConsole(...arguments);
-}
 export function errorHandling(funcName, params = []) {
     return _err(funcName, params = []);
 }

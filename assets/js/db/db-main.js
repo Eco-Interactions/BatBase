@@ -47,9 +47,6 @@ export function _util(funcName, params = []) {
 export function _errs(funcName, params = []) {
     return _u.errorHandling(funcName, params);
 }
-export function logToConsole() {
-    _u.logToConsole(...arguments);
-}
 /** ==================== TABLE STATE OBJ ==================================== */
 /**
  * Stores table state params needed across multiple modules. 
