@@ -53,7 +53,8 @@ extendPrototypes();
 /* ---------------------- SELECTIZE COMBOBOXES ------------------------------ */
 export function initCombobox() {
     return _cmbx.initCombobox(...arguments);
-} export function initComboboxes() {
+} 
+export function initComboboxes() {
     return _cmbx.initComboboxes(...arguments);
 } 
 export function getSelVal() {
@@ -126,28 +127,37 @@ export function sendAjaxQuery() {
 export function logAjaxData() {
     return _ajax.logAjaxData(...arguments);
 }
-/* --------------- ERROR HANDLING ----------------------------------------- */
+/* --------------- ERROR HANDLING ------------------------------------------- */
+export function logToConsole() {
+    _err.logToConsole(...arguments);
+}
+export function errorHandling(funcName, params = []) {
+    return _err(funcName, params = []);
+}
 export function alertErr() {                                                    
     return _err.alertErr(...arguments);
 }
 export function getErrMsgForUserRole() {                                                 
     return _err.getErrMsgForUserRole(...arguments);
 }
-/* ================== MISC UTIL METHODS ===================================== */
+/* ================== MISC UTIL METHODS ============================================================================= */
 export function getTaxonName(taxon) {                                           
     const lvl = taxon.level.displayName;  
     return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
 }
-/* ------------- DATA -------------------------------------------------- */
+/* ------------------ DATA -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
-export function getDetachedRcrd(rcrdKey, rcrds) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
+export function getDetachedRcrd(rcrdKey, rcrds, entity) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
     try {
-       return snapshot(rcrds[rcrdKey]);
+        // _err.reportErr('noRcrd', {id: rcrdKey, entity: entity});
+        return snapshot(rcrds[rcrdKey]);
     }
-    catch (e) {  console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+    catch (e) {                                                                 //console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+        _err.reportErr('noRcrd', {id: rcrdKey, entity: entity});
+        return false;
     }
 }
-/*---------- STRING HELPERS ----------------------------------------------*/
+/* ------------ STRING HELPERS ---------------------------------------------- */
 export function ucfirst(str) { 
     return str.charAt(0).toUpperCase() + str.slice(1); 
 }
@@ -160,7 +170,7 @@ export function stripString(text) {
     const str = text.trim();
     return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
 }
-/*---------- OBJECT HELPERS ----------------------------------------------*/
+/* ------------ OBJECT HELPERS ---------------------------------------------- */
 export function snapshot(obj) {
     return JSON.parse(JSON.stringify(obj));
 }

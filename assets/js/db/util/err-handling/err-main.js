@@ -1,26 +1,37 @@
 /**
  * Error handling throughout the database search page.
- * 
+ *
+ * EXPORTS:
+ *     handleErr
+ *     alertErr
+ *     getErrMsgForUserRole
+ *
+ * TOC:
+ *     ERROR HANDLING
+ *     ERROR REPORTING
  */
+import * as _hndl from './handling.js';
+import * as _rprt from './reporting.js';
+import * as _logs from './logging.js';
 
-export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
-    if ($('body').data('env') === 'test') { return; }
-    alert(`ERROR. Try reloading the page. If error persists, ${getErrMsgForUserRole()}`);
+/* ----------------------- LOGS --------------------------------------------- */
+export function logToConsole() {
+    _logs.logToConsole(...arguments);    
 }
-export function getErrMsgForUserRole() {
-    const userRole = $('body').data('user-role');
-    const msgs = { visitor: getVisitorErrMsg, user: getUserErrMsg };
-    return msgs[userRole] ? msgs[userRole]() : getEditorErrMsg();
+export function getLogData() {
+    return _logs.getLogData();
 }
-function getVisitorErrMsg() {
-    return `please contact us at info@batplant.org and let us know about the issue you are experiencing.`;
+/* -------------------- ERROR HANDLING -------------------------------------- */
+// export function handleErr() {
+//     return _hndl.handleErr(...arguments);
+// }
+/* ------------------- ERROR REPORTING -------------------------------------- */
+export function reportErr() {
+    return _rprt.reportErr(...arguments);
 }
-function getUserErrMsg() {
-    return `please contact us by Leaving Feedback on this page (from the user menu) and let us know about the issue you are experiencing.`;
+export function alertErr() {                                                    
+    return _rprt.alertErr(...arguments);
 }
-function getEditorErrMsg() {
-    return `please follow these steps and email Kelly. 
-> Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
-> Once the panel loads and the "console" tab is displayed, right click and save the log file.
-> Email a description of the steps to reproduce this error and any additional information or screenshots that might help. Thanks!`;
+export function getErrMsgForUserRole() {                                                 
+    return _rprt.getErrMsgForUserRole(...arguments);
 }

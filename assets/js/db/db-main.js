@@ -44,8 +44,12 @@ import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
 export function _util(funcName, params = []) {
     return _u[funcName](...params);
 }
-
-
+export function _errs(funcName, params = []) {
+    return _u.errorHandling(funcName, params);
+}
+export function logToConsole() {
+    _u.logToConsole(...arguments);
+}
 /** ==================== TABLE STATE OBJ ==================================== */
 /**
  * Stores table state params needed across multiple modules. 
