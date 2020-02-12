@@ -29,6 +29,7 @@
         - On map loads
         - On page load, when data syncs
     - Email errs and relevant data to Super
+    - Batch downloads? Built in doctrine tools? serialize?
     - Refactor init download 
         - taxa (bats then interactions) first, load table and tutorial asap.
         - source next, source view available asap

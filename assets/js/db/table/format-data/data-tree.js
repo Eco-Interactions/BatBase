@@ -17,10 +17,10 @@
  *     buildSrcTree     db-page, save-ints
  *     buildTxnTree     db-page, save-ints
  */
-import * as _db from '../../db-main.js';
+import * as _pg from '../../db-main.js';
 import * as _u from '../../util/util.js';
 
-const tState = _db.accessTableState;
+const tState = _pg.accessTableState;
 let tblState;
 /* ========================= LOCATION TREE ========================================================================== */
 /**
@@ -351,7 +351,7 @@ function getIntTags(tagAry) {
 }
 function getTreeRcrd(id, entityData, entity) {
     const rcrd = entityData[entity][id];
-    if (!rcrd) { _db._errs('reportErr', ['noRcrd', {id: id, entity: entity}]); }
+    if (!rcrd) { _pg._alert('alertIssue', ['noRcrd', {id: id, entity: entity}]); }
     return rcrd ? rcrd : '_err_';
 }
 /* ======================== FILTER BY TEXT ================================== */

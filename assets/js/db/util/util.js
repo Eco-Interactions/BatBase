@@ -44,7 +44,7 @@ import * as _ajax from './ajax-util.js';
 import * as _cmbx from './combos.js';
 import * as _db from '../local-data/idb-util';
 import * as _elems from './elems-util.js';
-import * as _err from './err-handling/err-main.js';
+import * as _alert from './alert.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 import extendPrototypes from './extend.js';
 
@@ -128,14 +128,19 @@ export function logAjaxData() {
     return _ajax.logAjaxData(...arguments);
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
-export function errorHandling(funcName, params = []) {
-    return _err[funcName](...params);
+export function alert(funcName, params = []) {
+    return _alert[funcName](...params);
 }
+/** Handles issues without javascript error/exception objects. */
+export function alertIssue() {
+    return _alert.alertIssue(...arguments);
+}
+/** Hanles issues with javascript error/exception objects.  */
 export function alertErr() {                                                    
-    return _err.alertErr(...arguments);
+    return _alert.alertErr(...arguments);
 }
 export function getErrMsgForUserRole() {                                                 
-    return _err.getErrMsgForUserRole(...arguments);
+    return _alert.getErrMsgForUserRole(...arguments);
 }
 /* ================== MISC UTIL METHODS ============================================================================= */
 export function getTaxonName(taxon) {                                           
@@ -146,7 +151,7 @@ export function getTaxonName(taxon) {
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
     if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    //console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
-    _err.reportErr('noRcrd', {id: rcrdKey, entity: entity});
+    alertIssue('noRcrd', {id: rcrdKey, entity: entity});
     return false;
 }
 /* ------------ STRING HELPERS ---------------------------------------------- */
