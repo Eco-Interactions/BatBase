@@ -29,11 +29,20 @@ class Source
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
     private $displayName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("name")
+     */
+    private $name;
 
     /**
      * @var string
@@ -268,6 +277,30 @@ class Source
     public function getDisplayName()
     {
         return $this->displayName;
+    }
+
+    /**
+     * Set name.
+     *
+     * @param string $name
+     *
+     * @return Source
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Migrations;
+namespace Application\Migrations\Templates;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -14,7 +14,7 @@ use AppBundle\Entity\InteractionType;
  * Template for doctrine migrations where the entity manager is necessary.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-class Version20170725183034MoveInts extends AbstractMigration implements ContainerAwareInterface
+class ContainerAwareTemplate extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
     private $em;
@@ -25,13 +25,12 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
         $this->container = $container;
     }
 
-    private function getEntity($className, $val, $prop = 'id')
+    public function getEntities($className)
     {
-        return $this->em->getRepository('AppBundle:'.$className)
-            ->findOneBy([$prop => $val]);
+        return $this->em->getRepository('AppBundle:'.$className)->findAll();
     }
 
-    private function persistEntity($entity, $creating = false)
+    public function persistEntity($entity, $creating = false)
     {
         if ($creating) {
             $entity->setCreatedBy($this->admin);
@@ -39,6 +38,7 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
         $entity->setUpdatedBy($this->admin);
         $this->em->persist($entity);
     }
+/* ========================== up ============================================ */
 
     /**
      * @param Schema $schema
@@ -50,6 +50,7 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
 
     }
 
+/* ======================== down ============================================ */
     /**
      * @param Schema $schema
      */

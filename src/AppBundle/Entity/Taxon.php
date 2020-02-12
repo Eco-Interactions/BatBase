@@ -44,6 +44,15 @@ class Taxon
     /**
      * @var string
      *
+     * @ORM\Column(name="name", type="string", length=255, nullable=false)
+     * @JMS\Expose
+     * @JMS\SerializedName("name")
+     */
+    private $name;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("defaultGuid")
@@ -256,6 +265,30 @@ class Taxon
     public function getDisplayName()
     {
         return $this->displayName;
+    }
+
+    /**
+     * Set name.
+     *
+     * @param string $name
+     *
+     * @return Taxon
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
