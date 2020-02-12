@@ -382,7 +382,7 @@ function buildTxnTable(val) {
  */
 function storeAndReturnRealmRcrd(val) {
     const realmId = val || getSelValOrDefault(_u.getSelVal('View'));/*debg-log*///console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
-    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);/*debg-log*///console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById, 'taxon');/*debg-log*///console.log("realmTaxon = %O", realmTaxonRcrd);
     updateRealmTableState(realmId, realmTaxonRcrd);
     return realmTaxonRcrd;
 }

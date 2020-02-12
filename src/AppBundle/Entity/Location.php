@@ -676,6 +676,7 @@ class Location
         }
         return $geoJson;
     }
+    
     private function isHabitat()
     {
         if ($this->locationType->getDisplayName() !== 'Habitat') { return false;}

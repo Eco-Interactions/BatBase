@@ -7,22 +7,41 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
-- Build error handling system 
+    - add better entity create/edit error handling for 500 errors.
+        - general 500 errors on all forms.
+        - duplicate display names for entities with unique name fields
+            - source: if duplicate name is for a soft-deleted entity. 
+                - if not, 
+                    - are they of different types? 
+                        - if not, different years?
+                            - if not, append first author.
+                - if so, 
+                    - return the data of the deleted record
+                        - display to user with prompt to restore
+                            - submit, restoring the deleted record.
+                        - and to indicate they are creating a distinct record 
+                            - submit, append '-deleted' to deleted record to eliminate conflict. 
+    - Write migration to fill the new 'name' field for taxa and sources.
+        - remove 'gettaxondisplayname' methods
+    - Integrate sentry bug tracking system
     - Add handling to points where the table is likely to err
         - When records are grabbed to build the table tree 
         - On map loads
         - On page load, when data syncs
     - Email errs and relevant data to Super
-- Refactor init download 
-    - taxa first, load table and tutorial asap.
-    - source next, source view available asap
-    - location (minus geojson)
-    - intercation and list data (table fully available here)
-    - geojson last, map views available from there
-- Refactor Source data 
-    - include detail data inside core entity. 
+    - Refactor init download 
+        - taxa (bats then interactions) first, load table and tutorial asap.
+        - source next, source view available asap
+        - location (minus geojson) (table fully available here)
+        - list data 
+        - geojson last, map views available from there (maps available)
+    - Refactor Source data 
+        - merge detail and core data on client side
+    - Replace checkDisplayNameForDups from get-form-data
 
 DUE: MARCH 20
+
+
 
 QUESTIONS:
     -
@@ -32,7 +51,6 @@ TASKS:
 NEXT:
     - Create model of local storage
         - of entity relations
-    - Replace checkDisplayNameForDups from get-form-data
 
 Change Log:
     - 
