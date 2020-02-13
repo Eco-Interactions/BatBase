@@ -162,21 +162,18 @@ export function buildTxnRowData(tree, tblState) {
  * for each taxon in the tree.
  */
 function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*///console.log("taxonRowData. taxon = %O, tblState = %O", taxon, tblState);
-    const lvl = taxon.level.displayName;
-    const name = lvl === "Species" ? taxon.displayName : lvl+" "+taxon.displayName;
     const intCount = getIntCount(taxon); 
     return {
         id: taxon.id,
         children: getTaxonAndChildTaxaRowData(taxon, treeLvl, tblState),
-        displayName: taxon.displayName,
         entity: "Taxon",
         interactions: intCount !== null,          
         intCnt: intCount,   
         isParent: true,                     
-        name: name,
+        name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1, 
         parentTaxon: taxon.parent > 1 ? taxon.parent : false, // 1 = Animalia (not shown)
-        taxonLvl: lvl,
+        taxonLvl: taxon.level.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
     }; 
@@ -287,9 +284,9 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         isParent: false,  //Tell grid and various code not to expect sub-nodes
         name: '',           // Blank tree field
         note: intRcrd.note,    //Table data
-        object: getTaxonName(intRcrd.object),   //Table data
+        object: intRcrd.object.displayName,   //Table data
         rowColorIdx: idx,       //Not sure what this is all used for...
-        subject: getTaxonName(intRcrd.subject),   //Table data
+        subject: intRcrd.subject.displayName,   //Table data
         tags: intRcrd.tags,   //Table data
         treeLvl: treeLvl,       //Not sure what this is all used for...
         type: 'intRcrd',        //Not sure what this is all used for...
@@ -329,7 +326,3 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         }
     } /* End getLocationData */
 } /* End buildIntRowData */
-function getTaxonName(taxon) {                                           
-    var lvl = taxon.level.displayName;  
-    return lvl === 'Species' ? taxon.displayName : lvl+' '+taxon.displayName;
-}   

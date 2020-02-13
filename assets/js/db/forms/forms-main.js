@@ -129,10 +129,6 @@ export function getSelectedVals(cntnr, fieldName) {
             if (subEl.value) { vals[cnt] = subEl.value; }});  
     }                                                                   
 }
-export function getTaxonDisplayName(taxon) { 
-    return taxon.level.displayName === 'Species' ? 
-        taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
-}
 export function onLevelSelection(val) {
     _forms.onLevelSelection.bind(this)(val);
 }

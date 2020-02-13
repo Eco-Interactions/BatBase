@@ -251,7 +251,7 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {
     function separate(taxon) {                                                  //console.log('taxon = %O', taxon)
         const lvl = taxon.level.displayName;
         if (!separated[lvl]) { separated[lvl] = {}; }
-        separated[lvl][taxon.displayName] = taxon.id;
+        separated[lvl][taxon.name] = taxon.id;
         
         if (taxon.children) { 
             taxon.children.forEach(child => separate(child)); 

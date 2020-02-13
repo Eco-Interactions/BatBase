@@ -113,7 +113,7 @@ function getInteractionFieldFillTypes() {
 function addTaxon(fieldId, prop, rcrd) {       
     const selApi = $('#'+ fieldId + '-sel')[0].selectize;
     const taxon = _f.state('getRcrd', ['taxon', rcrd[prop]]);                          
-    selApi.addOption({ value: taxon.id, text: _f.getTaxonDisplayName(taxon) });
+    selApi.addOption({ value: taxon.id, text: taxon.displayName });
     selApi.addItem(taxon.id);
 }
 function addSource(fieldId, prop, rcrd) {

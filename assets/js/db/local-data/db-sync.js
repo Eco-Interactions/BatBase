@@ -336,7 +336,8 @@ function addToTaxonNames(prop, rcrd, entity) {
     const level = rcrd.level.displayName;  
     const nameProp = realm+level+"Names";
     if (!mmryData[nameProp]) { mmryData[nameProp] = { value:{} }; }
-    addToNameProp(nameProp, rcrd, entity);
+    mmryData[nameProp].value[rcrd.name] = rcrd.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
+    storeData(nameProp, mmryData[nameProp].value);
 }
 /** Adds the Interaction to the stored entity's collection.  */
 function addInteractionToEntity(prop, rcrd, entity) {                           //console.log('addInteractionToEntity. prop = [%s] rcrd = %O', prop, rcrd);

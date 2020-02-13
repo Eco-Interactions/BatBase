@@ -151,7 +151,7 @@ function buildNameElem(prnt) {
 }
 function setTaxonPrntNameElem(prnt, elem, pText) {    
     const div = elem || $('#txn-prnt')[0];
-    const text = pText || _f.getTaxonDisplayName(prnt);
+    const text = pText || prnt.displayName;
     div.innerHTML = '<b>Taxon Parent</b>: <span>&nbsp ' + text + '</span>';
     $(div).data('txn', prnt.id).data('lvl', getLvlVal(prnt.level.displayName));
 }

@@ -136,14 +136,14 @@ function separateTaxaByLevelAndRealm(taxa) {
     return data;
     /** Adds the taxon's name (k) and id to it's level's obj. */
     function addTaxonData(taxon, id) {  
-        if (taxon.displayName === 'Animalia') { return delete taxa[id]; } //not shown anywhere
+        if (taxon.name === 'Animalia') { return delete taxa[id]; } //not shown anywhere
         const realmObj = getRealmObj(taxon);
         const level = taxon.level.displayName;  
         addToRealmLevel(taxon, realmObj, level);
     }
     function addToRealmLevel(taxon, realmObj, level) {
         if (!realmObj[level]) { realmObj[level] = {}; }; 
-        realmObj[level][taxon.displayName] = taxon.id;
+        realmObj[level][taxon.name] = taxon.id;
     }
     function getRealmObj(taxon) {
         const realm = taxon.realm.displayName

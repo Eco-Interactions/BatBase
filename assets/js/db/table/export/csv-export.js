@@ -62,8 +62,8 @@ function fillInteractionsWithExportData(rcrds) {
 
         function addTaxonToRowData(role, taxonId) {
             const txn = entityRcrds.taxon[intRcrd[role]];                       
-            if (taxa[txn.displayName]) { 
-                addKnownTaxonAncestry(role, txn.displayName, taxa[txn.displayName]); 
+            if (taxa[txn.name]) { 
+                addKnownTaxonAncestry(role, txn.name, taxa[txn.name]); 
             } else {
                 discoverAndAddTaxonAncestry(role, txn);
             }
@@ -82,11 +82,11 @@ function fillInteractionsWithExportData(rcrds) {
             function addToRowDataAndDiscoveredTaxa() {
                 const colName = getColName();
                 addToDiscoveredTaxa(colName);
-                rowData[colName] = txn.displayName;
+                rowData[colName] = txn.name;
             }
             function addToDiscoveredTaxa(col) {
-                const pName = pTxn ? pTxn.displayName : false;
-                taxa[txn.displayName] = { col: col, prnt: pName };
+                const pName = pTxn ? pTxn.name : false;
+                taxa[txn.name] = { col: col, prnt: pName };
             }
             function getColName() {
                 const prefix = role == 'subject' ? 'subj' : 'obj';

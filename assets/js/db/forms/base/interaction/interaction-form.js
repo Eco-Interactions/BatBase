@@ -484,7 +484,7 @@ function resetTaxonCombobox(role, prevTaxonId) {
     _f.cmbx('setSelVal', ['#'+role+'-sel', prevTaxonId]);
 }
 function getTaxonym(id) {
-    return _f.getTaxonDisplayName(getRcrd('taxon', id));
+    return getRcrd('taxon', id).displayName;
 }
 function enableTaxonLvls(enable = true) {
     $.each($('#sub-form select'), (i, sel) => {  
@@ -516,8 +516,7 @@ function selectPrevTaxon(taxon, role) {
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
-    const displayName = _f.getTaxonDisplayName(taxon);
-    _f.state('setRealmProp', ['prevSel', {val: taxon.id, text: displayName }]);
+    _f.state('setRealmProp', ['prevSel', {val: taxon.id, text: taxon.displayName }]);
 }
 function ifTaxonInDifferentRealm(realm) {  
     return realm.displayName !== 'Bat' && $('#Realm-sel').val() != realm.id;
@@ -698,7 +697,7 @@ function selectRoleTaxon() {
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption() {
     const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
-    return { value: taxon.id, text: _f.getTaxonDisplayName(taxon) };
+    return { value: taxon.id, text:taxon.displayName };
 }
 /** Finds the most specific level with a selection and returns that taxon record. */
 export function getSelectedTaxon(aboveLvl) {

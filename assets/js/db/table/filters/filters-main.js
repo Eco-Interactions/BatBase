@@ -422,7 +422,7 @@ function seperateTaxonTreeByLvl(lvls, rowData) {
 
     function separate(row) {                                                    //console.log('taxon = %O', taxon)
         if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
-        separated[row.taxonLvl][row.displayName] = row.id;
+        separated[row.taxonLvl][row.name] = row.id;
         
         if (row.children) { 
             row.children.forEach(child => separate(child)); 
@@ -659,10 +659,9 @@ export function updateTaxonSearch(val, selLvl) {
 
     function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;
-        const taxonName = rcrd.displayName;
         if (!rcrd.parent || rcrd.parent == 1) { return delete fPs.pnlFltrs.combo; }
         fPs.pnlFltrs.combo = {};
-        fPs.pnlFltrs.combo[curLevel] = { text: taxonName, value: val };
+        fPs.pnlFltrs.combo[curLevel] = { text: rcrd.name, value: val };
         updateNameFilterMemory(txt);
     }
 } /* End updateTaxonSearch */
