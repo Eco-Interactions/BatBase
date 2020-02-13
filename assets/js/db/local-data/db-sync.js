@@ -261,6 +261,7 @@ function getSourceType(entity, rcrd) {                                          
 /** Sends entity-record data to each storage property-type handler. */
 function updateDataProps(entity, rcrd, updateFuncs) {                           //console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
     const params = { entity: entity, rcrd: rcrd, stage: 'addData' };
+    if (!updateFuncs) { return; }
     Object.keys(updateFuncs).forEach(prop => {
         updateData(updateFuncs[prop], prop, params);
     });
