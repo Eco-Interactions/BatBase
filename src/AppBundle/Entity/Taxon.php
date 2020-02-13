@@ -451,14 +451,19 @@ class Taxon
     {
         if ($taxon->getSlug() === 'animalia') { return []; } 
         $realm = $taxon->getRealm();
-        if ($realm) {
-            return [ 
-                'id' => $realm->getId(), 
-                'displayName' => $realm->getDisplayName(),
-                'pluralName' => $realm->getPluralName() 
-            ];
-        }
-        return $this->findRealmAndReturnObj($taxon->getParentTaxon());
+        if ($realm) { return $this->buildRealmObj($realm); }
+        $parent = $taxon->getParentTaxon();
+        if (!$parent) { return []; }
+        return $this->findRealmAndReturnObj($parent);
+    }
+
+    private function buildRealmObj($realm)
+    {
+        return [ 
+            'id' => $realm->getId(), 
+            'displayName' => $realm->getDisplayName(),
+            'pluralName' => $realm->getPluralName() 
+        ];
     }
 
     /**

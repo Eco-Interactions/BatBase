@@ -167,15 +167,31 @@ class AjaxDataController extends Controller
     private function serializeEntity($entity, $serializer, $em)
     {
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
-        $data = new \stdClass;   
+        $data = new \stdClass;  
+        $errs = []; 
 
         for ($i=0; $i < count($entities); $i++) { 
             $entity = $entities[$i];
             $id = $entity->getId();                                             //print('id = '.$id."\n"); 
-            $data->$id = $serializer->serialize($entity, 'json');
+            $jsonData = $this->serializeRcrd($id, $entity, $serializer, $errs);
+            if (!$jsonData) { continue; }
+            $data->$id = $jsonData;
         }
+        if (count($errs)) { print('total errs = '.count($errs)); }
         return $data;
+    }
 
+    private function serializeRcrd($id, $entity, $serializer, &$errs)
+    {
+        $rcrd = false;
+        try {
+            $rcrd = $serializer->serialize($entity, 'json');
+        } catch (\Throwable $e) {
+            array_merge($errs, [$id => $e]);
+        } catch (\Exception $e) {
+            array_merge($errs, [$id => $e]);
+        }
+        return $rcrd;
     }
     /**
      * Serializes and returns all entities of the passed class that have been 
