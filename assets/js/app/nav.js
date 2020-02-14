@@ -18,7 +18,6 @@ export function initMenu() {                                                    
     if (window.innerWidth < app.breakpoint) { initResponsiveNav(); }
 }
 function addEvents() {
-    Sentry.captureException(new Error("Check out the source maps!"));  console.log('error caught??')
     const hndlr = window.innerWidth > app.breakpoint ? collapseNav : expandNav;
     window.addEventListener('resize', hndlr);
     window.addEventListener("orientationchange", hndlr);
