@@ -1,7 +1,7 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
-import * as agGrid from '../../../grid/ag-grid.min.js';
+import * as agGrid from '../../../libs/grid/ag-grid.min.js';
 import * as _forms from '../forms/forms-main.js';
 import { updateFilterStatusMsg } from './filters/filters-main.js';
 import unqVals from './filters/ag-grid-unique-filter.js';
@@ -239,7 +239,7 @@ function uneditableEntityRow(params) {                                          
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
-    const path = require('../../../css/images/eif.pencil.svg');
+    const path = require('../../../images/icons/eif.pencil.svg');
     var editPencil = `<img src=${path} id="edit${entity}${id}"
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
@@ -255,7 +255,7 @@ function addMapIcon(params) {                                                   
     if (!params.data.onMap) { return '<span>'; }
     const id = params.data.id;
     const zoomLvl = getZoomLvl(params.data);  
-    const path = require('../../../css/images/marker-icon.png');
+    const path = require('../../../images/icons/marker-icon.png');
     const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
         title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
     $('#search-tbl').off('click', '#map'+id);

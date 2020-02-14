@@ -75,35 +75,35 @@ input[type="radio"], input[type="checkbox"] {
     margin: 2px 5px 0 0;
 }
 #filter:before {
-    content: url(./images/filter.svg);
+    content: url(../../images/icons/filter.svg);
     width: 15px;
 }
 button[name="reset-tbl"]:before, button[name="clear-list"]:before,  #rst-data:before{
-    content: url(./images/undo-alt.svg);
+    content: url(../../images/icons/undo-alt.svg);
     width: 15px;
     margin: 2px;
 }
 button[name="csv"]:before {
-    content: url(./images/file-download.svg);
+    content: url(../../images/icons/file-download.svg);
     width: 12px;
 }
 #new-data:before {
-    content: url(./images/plus.svg);
+    content: url(../../images/icons/plus.svg);
     width: 14px;
 }
 #rvw-data:before {
-    content: url(./images/eye.svg);
+    content: url(../../images/icons/eye.svg);
     width: 19px;
 }
 #shw-map:before {
-    content: url(./images/globe-africa.svg);
+    content: url(../../images/icons/globe-africa.svg);
     width: 17px;
 }
 #rst-data {
     z-index: 10000000000;
 }
 #lists:before {
-    content: url(./images/tasks.svg);
+    content: url(../../images/icons/tasks.svg);
     width: 16px;
 }
 button[name="xpand-all"] {

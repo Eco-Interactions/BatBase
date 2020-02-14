@@ -77,11 +77,11 @@ function initDbPage () {
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
     require('flatpickr/dist/flatpickr.min.css')
-    require('../../css/lib/ag-grid.css');
-    require('../../css/lib/theme-fresh.css'); 
-    require('../../css/lib/selectize.default.css');
-    require('../../css/search_db.css');  
-    require('../../css/moz-styles.css');
+    require('../../styles/css/lib/ag-grid.css');
+    require('../../styles/css/lib/theme-fresh.css'); 
+    require('../../styles/css/lib/selectize.default.css');
+    require('../../styles/css/search_db.css');  
+    require('../../styles/css/moz-styles.css');
     require('../../styles/db/db.styl');  
     require('../../styles/db/map.styl');  
     require('../../styles/db/forms.styl');  

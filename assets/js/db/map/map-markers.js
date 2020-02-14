@@ -279,11 +279,11 @@ function getCustomIcon(iconType) {                                              
     function getTealPinMarker() {
         return { 
             icon:  L.icon({
-                iconUrl: require('./../../../css/images/teal-marker-icon.png'),
+                iconUrl: require('./../../../images/icons/teal-marker-icon.png'),
                 iconSize: [29, 43],
                 iconAnchor: [16, 42],
                 popupAnchor: [0, -39],
-                shadowUrl: require('./../../../css/images/marker-shadow.png'),
+                shadowUrl: require('./../../../images/icons/marker-shadow.png'),
                 shadowSize: [33, 45],
                 shadowAnchor: [10, 44],
                 className: 'new-loc'

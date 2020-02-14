@@ -61,10 +61,10 @@ export function setMapState(data, k) {
 }
 /** =================== Init Methods ======================================== */
 function requireCss() {
-    require('../../../../node_modules/leaflet/dist/leaflet.css');
-    require('../../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css');
-    require('../../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
-    require('../../../../node_modules/leaflet-control-geocoder/dist/Control.Geocoder.css');
+    require('leaflet/dist/leaflet.css'); //../../../../node_modules/
+    require('leaflet.markercluster/dist/MarkerCluster.Default.css');
+    require('leaflet.markercluster/dist/MarkerCluster.css');
+    require('leaflet-control-geocoder/dist/Control.Geocoder.css');
 }
 /** For more information on this fix: github.com/PaulLeCam/react-leaflet/issues/255 */
 function fixLeafletBug() {

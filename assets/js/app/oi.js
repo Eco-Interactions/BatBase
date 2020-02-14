@@ -5,14 +5,20 @@
 //  PAGE SPECIFIC
 //  BROWSER SPECIFIC
 /* ======================== TOP CALLS ======================================= */
+ifProdInitSentryIssueTracking();
 requireStyles();
 setGlobalJquery();
 initUi();
+
+function ifProdInitSentryIssueTracking() {
+    if ($('body').data('env') !== 'prod') { return; }
+    Sentry.init({ dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194' });
+}
 /* ==================== STYLES & SCRIPTS ==================================== */
 function requireStyles() {
-    require('../../styles/ei-reset.styl');   
-    require('../../styles/oi.styl');    
-    require('../../css/lib/introjs.min.css');  
+    require('../../styles/base/ei-reset.styl');   
+    require('../../styles/base/oi.styl');    
+    require('../../styles/css/lib/introjs.min.css');  
 }
 function setGlobalJquery() { 
     global.$ = $;
