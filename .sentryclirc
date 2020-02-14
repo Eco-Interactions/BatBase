@@ -1,0 +1,4 @@
+auth.token=0dbc42455f464453aab6908b16b682a5940db190812341caa08b5c452317a0ed
+auth.dsn='https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194'
+defaults.project=javascript
+defaults.org=bat-eco-interactions

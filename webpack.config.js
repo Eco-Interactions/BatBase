@@ -1,6 +1,7 @@
 const Encore = require('@symfony/webpack-encore');
+const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
-const autoProvidedVars = { L: 'leaflet', $: 'jquery' };
+const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' };
 
 /** ================= CLI ======================= */
 // yarn run encore [dev|production] [--watch]
@@ -16,6 +17,16 @@ Encore
    /* ==== PROD ==== */ 
     // the public path used by the web server to access the previous directory
     // .setPublicPath('/build')
+
+/* ----------- Producation Plugin ---------------------------- */
+    // .addPlugin(new webpack.SourceMapDevToolPlugin({}))
+    // Sends source maps to Sentry for bug/issue tracking.
+    // .addPlugin(new SentryWebpackPlugin({
+    //     configFile: '.sentryclirc', ignore: '.', include: './web/build', 
+    //     release: 'bat-eco-int-js@1.01', // urlPrefix: '~/web/build', debug: true, 
+    //     // ignore: ['node_modules', 'webpack.config.js', 'old_files', 'assets', 'features'],  
+        
+    // }))
 //--->
 
     /** The prefix isn't being recognized for some reason */
@@ -55,7 +66,7 @@ Encore
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/app/oi.js')
     .addEntry('db', './assets/js/db/db-main.js')
-    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
+    .addEntry('feedback', './assets/js/app/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
@@ -63,10 +74,13 @@ Encore
     .splitEntryChunks()
 ; 
 const confg = Encore.getWebpackConfig();
-
+// Force Webpack to display errors/warnings
+confg.stats.errors = true;
+confg.stats.warnings = true;
 // Change the source map generated in development mode so logs show the original code line numbers
-if (!Encore.isProduction()) {
+if (Encore.isProduction()) {
+    confg.devtool = 'source-map';
+} else {
     confg.devtool = 'eval-source-map';
 }
-
 module.exports = confg;

@@ -119,18 +119,16 @@ mobile_detect:
     device_view_class: SunCat\MobileDetectBundle\Helper\DeviceView
     request_response_listener_class: SunCat\MobileDetectBundle\EventListener\RequestResponseListener
     twig_extension_class: SunCat\MobileDetectBundle\Twig\Extension\MobileDetectExtension
-
-
-sentry:
-    dsn: "https://public:secret@sentry.example.com/1"
-    register_error_listener: false # Disables the ErrorListener
-    monolog:
-        error_handler:
-            enabled: true
-            level: error
-    options:
-        environment: '%kernel.environment%'
-        release: '%env_version%' #your app version
-        excluded_exceptions: #exclude validation errors
-            - App\Exception\UserNotFoundException
-            - Symfony\Component\Security\Core\Exception\AccessDeniedException
+# sentry:
+#     dsn: "https://8f6152ea9c9a4737bbbebb731092904b@sentry.io/2504981"
+#     # register_error_listener: false # Disables the ErrorListener
+#     # monolog:
+#     #     error_handler:
+#     #         enabled: true
+#     #         level: error
+#     options:
+#         environment: '%kernel.environment%'
+#         release: '%env_version%' #your app version
+#         excluded_exceptions: #exclude validation errors
+#             - App\Exception\UserNotFoundException
+#             - Symfony\Component\Security\Core\Exception\AccessDeniedException
