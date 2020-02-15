@@ -36,6 +36,7 @@ import * as data_tree from './table/format-data/data-tree.js';
 import * as db_filters from './table/filters/filters-main.js';
 import * as db_map from './map/map-main.js';
 import * as _ui from './pg-ui/ui-main.js';
+import * as _db from './local-data/local-data-main.js';
 import * as frmt_data from './table/format-data/aggrid-format.js'; 
 import { startWalkthrough } from './tutorial/db-tutorial.js';
 import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
@@ -46,6 +47,12 @@ export function _util(funcName, params = []) {
 }
 export function _alert(funcName, params = []) {
     return _u.alert(funcName, params);
+}
+export function ui(funcName, params = []) {
+    return _ui[funcName](...params);
+}
+export function db(funcName, params = []) {
+    return db[funcName](...params);
 }
 /** ==================== TABLE STATE OBJ ==================================== */
 /**

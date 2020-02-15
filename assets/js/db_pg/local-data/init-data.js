@@ -1,9 +1,6 @@
 /**
  * Downloads all relevant data from the server and stores data locally using IDB.
  *
- * Export:
- *     initLocalData
- *
  * TOC:
  *     DOWNLOAD DATA
  *     DERIVE DATA
@@ -15,8 +12,7 @@
  *         HELPERS
  *    STORE DATA
  */
-import * as _u from '../util/util.js';
-import { resetDataTable, initSearchState } from '../db-main.js';
+import * as _db from './local-data-main.js';
 
 const localData = {};
 /* ======================= DOWNLOAD DATA ==================================== */
@@ -31,15 +27,15 @@ const localData = {};
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
-export default function initLocalData(reset) {                                  console.log("   +-initLocalData");
+export default function(reset) {                                  console.log("   +-initLocalData");
     return downloadBatchedServerData()
         .then(() => $.when($.ajax("ajax/data-state")))
         .then(addDataToLocalDb)
         .then(loadDatabaseTable);
 
     function loadDatabaseTable() {
-        if (reset) { resetDataTable('taxa'); 
-        } else { initSearchState(); }
+        if (reset) { _db.pg('resetDataTable', ['taxa']); 
+        } else { _db.pg('initSearchState'); }
     }
 }
 function downloadBatchedServerData() {                                          //console.log('       --downloading Taxon and Source Data');
@@ -49,7 +45,7 @@ function downloadBatchedServerData() {                                          
         .then(() => getData('interaction'));
 }
 function getData(url) {
-    return fetchData(url, {}, 3).then(setData.bind(null, url));
+    return _db.fetchData(url, {}, 3).then(setData.bind(null, url));
 }
 function setData(url, data) {                                                   console.log('               --storing [%s] data = %O', url, data);
     const setDataFunc = {
@@ -61,13 +57,6 @@ function setData(url, data) {                                                   
     storeServerData(data);
     setDataFunc[url](data);
 }
-function fetchData(url, options, n) {                                           console.log('           --downloading [%s] data. ([%s] tries remaining)', url, n);
-    return fetch('ajax/'+url, options).then(response => {
-        if (!!response.ok) { return response.json(); }
-        if (n === 1) { return Promise.reject(console.log("[%s] download error = %O", url, response)); }
-        return fetchData(url, options, n - 1);
-    });
-};
 /**
  * Loops through the data object returned from the server, parsing and storing
  * the entity data.
@@ -331,10 +320,10 @@ function storeData(key, data) {
 }
 function addDataToLocalDb(serverUpdatedAt) {                                    console.log('       --Saving local database.');
     return storeAllLocalData()
-    .then(() => _u.setData('lclDataUpdtdAt', serverUpdatedAt.state));
+    .then(() => _db.setData('lclDataUpdtdAt', serverUpdatedAt.state));
 }
 function storeAllLocalData() {
     return Object.keys(localData).reduce((p, prop) => {                         //console.log('       --setting [%s] = [%O]', prop, localData[prop]);
-        return p.then(() => _u.setData(prop, localData[prop]));
+        return p.then(() => _db.setData(prop, localData[prop]));
     }, Promise.resolve());
 }

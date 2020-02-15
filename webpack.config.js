@@ -65,7 +65,7 @@ Encore
     }])
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/app/oi.js')
-    .addEntry('db', './assets/js/db/db-main.js')
+    .addEntry('db', './assets/js/db_pg/db-main.js')
     .addEntry('feedback', './assets/js/app/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
@@ -74,9 +74,11 @@ Encore
     .splitEntryChunks()
 ; 
 const confg = Encore.getWebpackConfig();
+
 // Force Webpack to display errors/warnings
 // confg.stats.errors = true;
 // confg.stats.warnings = true;
+
 // Change the source map generated in development mode so logs show the original code line numbers
 if (Encore.isProduction()) {
     confg.devtool = 'source-map';

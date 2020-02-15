@@ -3,7 +3,6 @@
  * 
  * Exports:                 Imported by:
  *     addNewDataToStorage          idb-util
- *     initStoredData               idb-util
  *     replaceUserData              idb-util
  *     resetStoredData              db-forms
  *     updateLocalDb                db-forms
@@ -20,10 +19,9 @@
  *         ERRS
  * 
  */
+import * as _db from './local-data-main.js';
 import * as _u from '../util/util.js';
 import { val as _valErr , forms as _forms } from '../forms/forms-main.js';
-import { initSearchState, showIntroAndLoadingMsg } from '../db-main.js';
-import initLocalData from './init-data.js';
 
 let failed = { errors: [], updates: {}};
 /** Stores entity data while updating to reduce async db calls. */
@@ -38,7 +36,9 @@ let mmryData;
  * search page ui is initialized @initStoredData.
  */
 export function syncLocalDbWithServer(lclUpdtdAt) {                             console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt);
-    _u.sendAjaxQuery({}, "ajax/data-state", checkAgainstLocalDataState);
+    _db.fetchData('data-state', {}, 3).then(checkAgainstLocalDataState);
+    _db.getData('user').then(checkUserData);
+    // _u.sendAjaxQuery({}, "ajax/data-state", checkAgainstLocalDataState);
     
     function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
         if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _u.downloadFullDb(); }
@@ -65,10 +65,6 @@ function entityHasUpdates(timeOne, timeTwo) {
     var time1 = timeOne.replace(/-/g,'/');  
     var time2 = timeTwo.replace(/-/g,'/');                                      //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
     return Date.parse(time1) > Date.parse(time2);
-}
-function initSearchPage() {
-    if (mmryData && mmryData.curFocus) { return initSearchState(mmryData.curFocus); }
-    _u.getData('curFocus', true).then(f => initSearchState(f));
 }
 /* -------------- ADD UPDATED SERVER DATA TO LOCAL DB ----------------------- */
 function syncDb(entities, dataUpdatedAt) {
@@ -136,7 +132,7 @@ function parseData(data) {  //shared with init-data. refact
     for (let k in data) { data[k] = JSON.parse(data[k]); }
     return data;
 }
-/* -------------- SYNC UPDATED DATA RECORDS ----------------------- */
+/* -------------- SYNC UPDATED DATA RECORDS --------------------------------- */
 /** Sends the each updated record to the update handler for the entity. */ 
 function storeUpdatedData(rcrds, entity) {
     Object.keys(rcrds).forEach(storeUpdatedDataRecord);
@@ -157,12 +153,31 @@ function getEntityUpdateFunc(entity) {
     return coreEntities.indexOf(entity) !== -1 ?  
         addCoreEntityData : addDetailEntityData;
 }
-/* -------------- ON SYNC COMPLETE ----------------------- */
+/* ---------------- SYNC USER DATA ------------------------------------------ */
+/**
+ * Updates user specific data in local storage. Useful when the user changes on the
+ * same machine, or when the search page is first visited before a user logged in.
+ */
+function checkUserData(dbUser) {
+    if (dbUser == $('body').data('user-name')) { return; }
+    _u.sendAjaxQuery({}, "ajax/lists", 
+        replaceUserData.bind(null, $('body').data('user-name')));
+}
+function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
+    data.lists = data.lists.map(l => JSON.parse(l));
+    deriveUserNamedListData(data);
+    storeData('user', userName);
+}
+/* -------------- ON SYNC COMPLETE ------------------------------------------ */
 function clearMemoryAndLoadTable(dataUpdatedAt) {                               
     const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
     clearMemory();
     _u.setData('lclDataUpdtdAt', dataUpdatedAt);  
     initSearchPage(); //TODO: send errors during init update to search page and show error message to user.
+}
+function initSearchPage() {
+    if (mmryData && mmryData.curFocus) { return _db.pg('initSearchState', [mmryData.curFocus]); }
+    _u.getData('curFocus', true).then(f => _db.pg('initSearchState', [f]));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -607,26 +622,6 @@ function getFocusAndViewOptionGroupString(list) {  //copy. refact away
     };
     return list.details.focus === 'locs' ? 'Location' : 
         map[list.details.focus] + ' - ' + map[list.details.view];
-}
-/* ====================== INIT DATABASE ===================================== */
-/** When there is an error while storing data, all data is redownloaded. */
-export function resetStoredData() {
-    db_ui.showLoadingDataPopUp();
-    _u.downloadFullDb();
-}
-/**
- * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @initLocalData. A data-loading popup message 
- * and intro-walkthrough are shown on the Search page.
- */
-export function initStoredData(reset) {
-    showIntroAndLoadingMsg(reset);
-    return initLocalData(reset);
-}
-export function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
-    data.lists = data.lists.map(l => JSON.parse(l));
-    deriveUserNamedListData(data);
-    storeData('user', userName);
 }
 /* =========================== HELPERS ====================================== */
 /** Stores passed data under the key in dataStorage. */

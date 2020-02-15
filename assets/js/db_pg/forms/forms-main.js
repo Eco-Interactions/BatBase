@@ -16,33 +16,32 @@ import * as _submit from './submit/submit-main.js';
 import * as _elems from './elems/elems-main.js';
 // REFACTOR
 import * as _map from '../map/map-main.js';
-import * as _page from '../db-main.js';
-import * as _sync from '../local-data/db-sync.js';
+import * as _pg from '../db-main.js';
 
 function getParams(params) {
     return Array.isArray(params) ? params : [params];
 }
 /** =================== DATABASE PAGE FACADE ================================ */
 export function util(funcName, params) {  
-    return _page._util(funcName, params);
+    return _pg._util(funcName, params);
 }
 export function map(funcName, params = []) {
     return _map[funcName](...params);
 }
 export function loadDataTableAfterFormClose(focus) {
-    _page.resetDataTable(focus);
+    _pg.resetDataTable(focus);
 }
 export function showTodaysUpdates(focus) {
-    _page.showTodaysUpdates(focus);
+    _pg.showTodaysUpdates(focus);
 }
 export function initNewDataForm() {
     _forms.createEntity('interaction');
 }
 export function updateLocalDataStorage() {
-    return _sync.updateLocalDb(...arguments);
+    return _pg.db('updateLocalDb', [...arguments]);
 }
 export function resetStoredData() {
-    _sync.resetStoredData();
+    _pg.db('resetStoredData');
 }
 /** ====================== FORMS FACADE ===================================== */
 export function forms(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface

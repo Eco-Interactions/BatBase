@@ -7,26 +7,22 @@
  *     SETTERS
  *         
  * Exports:             Imported by:
+ *     initDb
  *     downloadFullDb       db-sync
  *     getData              util 
  *     setData              util
  */
+import * as _db from './local-data-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
-import * as _u from '../util/util.js';
-import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-sync.js';
 
-const _db = {
-    geoJson: null, 
-    v: .041
-};
-initDb();
+const db_v = .041;
 /** ----------------------- INIT -------------------------------------------- */
 /** 
  * Checks whether the dataKey exists in indexDB cache and downloads full DB if not.
  * Note: Testing clears idb on load, except as needed for data-entry testing. @addNewDataToStorage
  */
-function initDb() {
-    getData(_db.v, true).then(resetDbIfNeeded);
+export function initDb() {
+    getData(db_v, true).then(resetDbIfNeeded);
 }
 function resetDbIfNeeded(noResetNeeded) {                                       console.log('Download DB? ', !noResetNeeded);
     return noResetNeeded ? checkForServerUpdates() : downloadFullDb();
@@ -40,7 +36,7 @@ export function downloadFullDb(reset) {                                         
 }
 function clearAndDownload(reset) {
     idb.clear();     
-    initStoredData(reset).then(() => idb.set(_db.v, true));
+    _db.initStoredData(reset)//.then(() => idb.set(db_v, true));
 }
 /**
  * On page load, syncs local database with sever data. 
@@ -49,17 +45,8 @@ function clearAndDownload(reset) {
  * db_sync calls @initSearchPage. 
  */
 function checkForServerUpdates() {
-    _u.getData('lclDataUpdtdAt').then(syncLocalDbWithServer);
+    getData('lclDataUpdtdAt').then(_db.syncLocalDbWithServer);
     // debugUpdate();
-}
-/**
- * Updates user specific data in local storage. Useful when the user changes on the
- * same machine, or when the search page is first visited before a user logged in.
- */
-function checkUserData(dbUser) {
-    if (dbUser == $('body').data('user-name')) { return; }
-    _u.sendAjaxQuery({}, "ajax/lists", 
-        replaceUserData.bind(null, $('body').data('user-name')));
 }
 /** ----------------------- GETTERS ----------------------------------------- */
 export function getAllStoredData() { 
@@ -105,7 +92,8 @@ function logAndAlert(key) {
     alert(getAlertMsg(key));
 }
 function getAlertMsg(key) {
-    return `Error loading [${key}] data. Try reloading the page. If error persists, ${_u.getErrMsgForUserRole()}`;
+    const usrRoleMsg = _db.pg._util('getErrMsgForUserRole');
+    return `Error loading [${key}] data. Try reloading the page. If error persists, ${usrRoleMsg}`;
 }
 
 /** ----------------------- SETTERS ----------------------------------------- */
