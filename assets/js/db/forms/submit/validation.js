@@ -15,12 +15,11 @@ let _fs;
 /*------------------- Form Error Handlers --------------------------------*/
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */
-export function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-    _fs = _f.state('getFormState');
-    const fLvl = _fs.ajaxFormLvl;                                          
-    const elem = getFormErrElem(fLvl);
-    const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
-    const msg = getFormErrMsg(errTag);
+export function formSubmitError(jqXHR, textStatus, errorThrown) {               console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O]", jqXHR, jqXHR.responseText);
+    const fLvl = _f.state('getStateProp', ['submit']).fLvl;         
+    const elem = getFormErrElem(fLvl);                              
+    const errTag = getFormErrTag(JSON.parse(jqXHR.responseText).DBALException);   
+    const msg = getFormErrMsg(errTag);                              
     _f.elems('toggleWaitOverlay', [false]);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
@@ -31,42 +30,42 @@ export function formSubmitError(jqXHR, textStatus, errorThrown) {               
  * form-error message.
  */
 function getFormErrTag(errTxt) {                                                //console.log("errTxt = %O", errTxt) 
-    return isDuplicateAuthorErr(errTxt) ?
-        'dupSelAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
-        'dupEnt'  : 'genSubmitErr';
+    return isDuplicateAuthorErr(errTxt) ? 'dupSelAuth' : 
+        errTxt.includes("Duplicate entry") ? 'dupEnt'  : 'genSubmitErr';
 }
 function isDuplicateAuthorErr(errTxt) {
-    return errTxt.DBALException.includes("Duplicate entry") &&
-        errTxt.DBALException.includes("contribution");
+    return errTxt.includes("Duplicate entry") && errTxt.includes("contribution");
 }
 function getFormErrMsg(errTag) {
     var msg = {
         'dupSelAuth': 'An author is selected multiple times.',
-        'dupEnt' : 'A record with this display name already exists.',
-        'genSubmitErr': 'There was an error during form submission. Please note the ' + 
-            'record ID and the changes attempted and send to the developer.'
+        'dupEnt' : 'A record with this name already exists.',
+        'genSubmitErr': 'There was an error during form submission. The developer ' +
+            'has been notified.'
     };
     return '<span>' + msg[errTag] + '</span>'; 
 }
 /**------------- Data Storage Errors --------------*/
-export function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-    _fs = _f.state('getFormState');
-    const errMsg = data.msg;
-    const errTag = data.tag;
+export function errUpdatingData(data) {                                         console.log('   !!!errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
     const cntnr = _f.util('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
-    const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
-        ${errTag}</b><br><br>This form will close and all stored data will be 
+    $(cntnr).append([buildErrMsg(data), buildResetDataButton()]);
+    $('#top-hdr').after(cntnr);
+    $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
+        .fadeTo('400', 0.5);
+}
+function buildErrMsg(data) {
+    return `<span>${data.msg}<br><br>Please report this error to the developer: <b> 
+        ${data.tag}</b><br><br>This form will close and all stored data will be 
         redownloaded.</span>`;
+}
+function buildResetDataButton() {
     const confirm = _f.util('buildElem', ['span', { class: 'flex-row', 
             'text': `Please click "OK" to continue.` }]);
     const bttn = _f.util('buildElem', ['input', { type: 'button', value: 'OK', 
             class: 'tbl-bttn exit-bttn' }]);
-    $(confirm).append(bttn);
-    $(cntnr).append([msg, confirm]);
-    $('#top-hdr').after(cntnr);
     $(bttn).click(reloadAndRedownloadData);
-    $('#top-submit, #top-cancel, #exit-form').off('click')
-        .css('disabled', 'disabled').fadeTo('400', 0.5);
+    $(confirm).append(bttn);
+    return confirm;
 }
 function reloadAndRedownloadData() {                                            
     _f.exitFormWindow(null, 'skipTableReset');
@@ -77,7 +76,7 @@ function reloadAndRedownloadData() {
  * is already an instance using that form, show the user an error message and 
  * reset the select elem. 
  */
-export function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, _fs = %O ", selId, _fs)
+export function openSubFormErr(field, id, fLvl, skipClear) {                    //console.log("selId = %s, _fs = %O ", selId, _fs)
     const selId = id || '#'+field+'-sel';
     return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
 }
@@ -85,7 +84,7 @@ export function openSubFormErr(field, id, fLvl, skipClear) {                    
  * When an error prevents a form init, this method shows an error to the user
  * and resets the combobox that triggered the form. 
  */
-export function formInitErr(field, errTag, fLvl, id, skipClear) {                      //console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
+export function formInitErr(field, errTag, fLvl, id, skipClear) {               console.log("       !!!formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
     const selId = id || '#'+field+'-sel';
     reportFormFieldErr(field, errTag, fLvl);
     if (skipClear) { return; }
@@ -96,7 +95,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * Shows the user an error message above the field row. The user can clear the 
  * error manually with the close button, or automatically by resolving the error.
  */
-export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       ###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);  
+export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       !!!formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);  
     _fs = _f.state('getFormState');
     const errMsgMap = {
         'dupAuth': handleDupAuth,

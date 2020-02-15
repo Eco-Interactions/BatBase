@@ -7,8 +7,7 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
-    - add better entity create/edit error handling for 500 errors.
-        - general 500 errors on all forms.
+    - Handle potential source name duplication
         - duplicate display names for entities with unique name fields
             - source: if duplicate name is for a soft-deleted entity. 
                 - if not, 
@@ -22,7 +21,6 @@
                         - and to indicate they are creating a distinct record 
                             - submit, append '-deleted' to deleted record to eliminate conflict. 
     - Add handling to points where the table is likely to err
-        - When records are grabbed to build the table tree 
         - On map loads
         - On page load, when data syncs
     - Batch downloads? Built in doctrine tools? serialize?
@@ -121,6 +119,7 @@ TODOs:
     - {high}[easy] Ensure all entities have a display name before submitting
     - {med}[easy] Add warning to new Taxon form when no parent is selected
     - {med}[easy] Add error preventing taxa being moved to their parent's level or above
+    - add field validation ensure that numeric fields are valid
 
 (DATA)
     - {med}[med] Add flag to db that will indicate all local data storage needs reset.

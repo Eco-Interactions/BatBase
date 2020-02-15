@@ -29,11 +29,10 @@ export function buildFormDataAndSubmit(entity, fLvl, formVals) {
 }
 /*---------------------- Form Submit Methods ---------------------------------*/
 function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
-    const action = _f.state('getFormProp', [fLvl, 'action']);  
     const coreEntity = _f.confg('getCoreFormEntity', [entity]);        
-    const url = getEntityAjaxUrl(action);   
+    const url = getEntityAjaxUrl(_f.state('getFormProp', [fLvl, 'action']));   
     addEntityDataToFormData(data, coreEntity);
-    storeParamsData(coreEntity, action, fLvl);
+    storeParamsData(coreEntity, fLvl);
     _f.elems('toggleWaitOverlay', [true]); 
     _f.util('sendAjaxQuery', [data, url, onSuccess, _val.formSubmitError]);
 }
@@ -47,11 +46,8 @@ function addEntityDataToFormData(data, coreEntity) {
     data.coreEntity = coreEntity;  
 }
 /** Stores data relevant to the form submission that will be used later. */
-function storeParamsData(entity, action, fLvl) {                                  
-    const foci = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
-        'interaction': 'int' };
-    const props = { action: action, ajaxFormLvl: fLvl, focus: foci[entity] };
-    _f.state('setStateProp', ['submit', props]);
+function storeParamsData(entity, fLvl) { 
+    _f.state('setStateProp', ['submit', { fLvl: fLvl, entity: entity }]);
 }
 /* ----------------- Form Submit Success Methods ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                                   _f.util('logAjaxData', [data, arguments]);
@@ -66,7 +62,7 @@ function onDataSynced(data) {                                                   
     .then(handleFormComplete.bind(null, data));
 
     function noDataChanges() {
-        const fLvl = _f.state('getStateProp', ['submit']).ajaxFormLvl;
+        const fLvl = _f.state('getStateProp', ['submit']).fLvl;
         const action = _f.state('getFormProp', [fLvl, 'action'])
         return action === 'edit'  && !hasChngs(data);
     }
@@ -101,7 +97,7 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
 }
 /*------------------ Top-Form Success Methods --------------------*/
 function handleFormComplete(data) {   
-    const fLvl = _f.state('getStateProp', ['submit']).ajaxFormLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
+    const fLvl = _f.state('getStateProp', ['submit']).fLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
     const onClose = _f.state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
     if (onClose) { onClose(data); 

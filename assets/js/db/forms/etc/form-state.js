@@ -24,8 +24,7 @@ export function clearState() {
  * > formLevels - An array of the form level names/tags/prefixes/etc.
  * > records - An object of all records, with id keys, for each of the 
  *   root entities - Location, Source and Taxa, and any sub entities as needed.
- * > submitFocus - Stores the table-focus for the entity of the most recent 
-        form submission. Will be used on form-exit.
+ * > submit - Data used during form submission: fLvl, entity
  */
 export function initFormState(action, entity, id) {  
     const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 

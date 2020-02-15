@@ -75,8 +75,8 @@ Encore
 ; 
 const confg = Encore.getWebpackConfig();
 // Force Webpack to display errors/warnings
-confg.stats.errors = true;
-confg.stats.warnings = true;
+// confg.stats.errors = true;
+// confg.stats.warnings = true;
 // Change the source map generated in development mode so logs show the original code line numbers
 if (Encore.isProduction()) {
     confg.devtool = 'source-map';
