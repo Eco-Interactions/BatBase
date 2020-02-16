@@ -36,7 +36,7 @@ export function downloadFullDb(reset) {                                         
 }
 function clearAndDownload(reset) {
     idb.clear();     
-    _db.initStoredData(reset)//.then(() => idb.set(db_v, true));
+    _db.initStoredData(reset).then(() => idb.set(db_v, true));
 }
 /**
  * On page load, syncs local database with sever data. 

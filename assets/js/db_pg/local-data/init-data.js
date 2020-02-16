@@ -27,9 +27,9 @@ const localData = {};
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
-export default function(reset) {                                  console.log("   +-initLocalData");
+export default function (reset) {                                               console.log("   +-initLocalData");
     return downloadBatchedServerData()
-        .then(() => $.when($.ajax("ajax/data-state")))
+        .then(() => _db.fetchServerData("data-state"))
         .then(addDataToLocalDb)
         .then(loadDatabaseTable);
 
@@ -45,7 +45,7 @@ function downloadBatchedServerData() {                                          
         .then(() => getData('interaction'));
 }
 function getData(url) {
-    return _db.fetchData(url, {}, 3).then(setData.bind(null, url));
+    return _db.fetchServerData(url).then(setData.bind(null, url));
 }
 function setData(url, data) {                                                   console.log('               --storing [%s] data = %O', url, data);
     const setDataFunc = {

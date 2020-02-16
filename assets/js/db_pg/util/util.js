@@ -30,8 +30,8 @@
  *
  * TOC:
  *     UTIL FACADE
- *         IDB STORAGE METHODS
  *         SELECTIZE COMBOBOXES
+ *         IDB STORAGE METHODS
  *         HTML ELEMENT HELPERS
  *         AJAX
  *         ERROR HANDLING
@@ -40,9 +40,9 @@
  *         STRING HELPERS
  *         OBJECT HELPERS
  */
-import * as _ajax from './ajax-util.js';
+import * as _get from './ajax-util.js';
 import * as _cmbx from './combos.js';
-import * as _db from '../local-data/idb-util';
+import * as _db from '../local-data/local-data-main.js';
 import * as _elems from './elems-util.js';
 import * as _alert from './alert.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
@@ -79,6 +79,7 @@ export function downloadFullDb() {
 export function resetLocalDb() {
     const msg = 'Are you sure you want to reset all local data?';
     showSaveModal(msg, '#rst-data', 'left', resetDb, Function.prototype, 'Yes');
+
     function resetDb() {
         exitModal();
         _db.downloadFullDb(true);
@@ -94,9 +95,6 @@ export function getData(props, returnUndefined) {  //breakpoint  //bp
 }
 export function setData(k, v) {
     return _db.setData(k, v);
-}
-export function getAllStoredData() {
-    return _db.getAllStoredData();
 }
 /* -------------- HTML ELEMENT HELPERS  ------------------------------------- */
 export function buildElem() {
@@ -122,10 +120,10 @@ export function addEnterKeypressClick() {
 }
 /* --------------- AJAX ----------------------------------------------------- */
 export function sendAjaxQuery() {
-    return _ajax.sendAjaxQuery(...arguments);
+    return _get.sendAjaxQuery(...arguments);
 }
 export function logAjaxData() {
-    return _ajax.logAjaxData(...arguments);
+    return _get.logAjaxData(...arguments);
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
 export function alert(funcName, params = []) {
@@ -134,10 +132,6 @@ export function alert(funcName, params = []) {
 /** Handles issues without javascript error/exception objects. */
 export function alertIssue() {
     return _alert.alertIssue(...arguments);
-}
-/** Hanles issues with javascript error/exception objects.  */
-export function alertErr() {                                                    
-    return _alert.alertErr(...arguments);
 }
 export function getErrMsgForUserRole() {                                                 
     return _alert.getErrMsgForUserRole(...arguments);

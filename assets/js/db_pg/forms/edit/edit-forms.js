@@ -21,7 +21,6 @@ import * as _f from '../forms-main.js';
 export default function editEntity(id, entity) {                                console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
     initEditForm(id, entity)
     .then(() => _f.forms('finishEditFormInit', [entity, id]))
-    .catch(err => _f.util('alertErr', [err]));;
 }
 /* ============================== FORM INIT ================================= */
 function initEditForm(id, entity) {  

@@ -36,12 +36,12 @@ let mmryData;
  * search page ui is initialized @initStoredData.
  */
 export function syncLocalDbWithServer(lclUpdtdAt) {                             console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt);
-    _db.fetchData('data-state', {}, 3).then(checkAgainstLocalDataState);
+    _db.fetchServerData('data-state').then(checkAgainstLocalDataState);
     _db.getData('user').then(checkUserData);
     // _u.sendAjaxQuery({}, "ajax/data-state", checkAgainstLocalDataState);
     
     function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
-        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _u.downloadFullDb(); }
+        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _db.downloadFullDb(); }
         const entities = checkEachEntityForUpdates(srvrUpdtdAt.state);
         return entities.length ? syncDb(entities, srvrUpdtdAt.state) : initSearchPage();
     }
@@ -68,15 +68,15 @@ function entityHasUpdates(timeOne, timeTwo) {
 }
 /* -------------- ADD UPDATED SERVER DATA TO LOCAL DB ----------------------- */
 function syncDb(entities, dataUpdatedAt) {
-    _u.getAllStoredData().then(data => { mmryData = data; })
+    _db.getAllStoredData().then(data => { mmryData = data; })
     .then(() => downloadAndStoreNewData(entities))
     .then(addUpdatedDataToLocalDb)
     .then(() => clearMemoryAndLoadTable(dataUpdatedAt));
 }
 function trackTimeUpdated(entity, rcrd) {
-    _u.getData('lclDataUpdtdAt').then(stateObj => {
+    _db.getData('lclDataUpdtdAt').then(stateObj => {
         stateObj[entity] = rcrd.serverUpdatedAt;
-        return _u.setData('lclDataUpdtdAt', stateObj);  
+        return _db.setData('lclDataUpdtdAt', stateObj);  
     }); 
     return Promise.resolve()
 }
@@ -112,7 +112,7 @@ function hasInteractionUpdates(entities) {
 }
 function getNewData(entity) {                                                   //console.log('getting new data for ', entity); 
     let data = { entity: entity.name, updatedAt: entity.updated }; 
-    return _u.sendAjaxQuery(data, "ajax/sync-data"); 
+    return _db.fetchServerData("sync-data", {body: JSON.stringify(data)}); 
 } 
 /** Sends each entity's ajax return to be processed and stored. */
 function processUpdatedData(data) {                                             //console.log('processUpdatedData = %O', data);
@@ -160,8 +160,8 @@ function getEntityUpdateFunc(entity) {
  */
 function checkUserData(dbUser) {
     if (dbUser == $('body').data('user-name')) { return; }
-    _u.sendAjaxQuery({}, "ajax/lists", 
-        replaceUserData.bind(null, $('body').data('user-name')));
+    _db.fetchServerData("lists")
+    .then(data => replaceUserData($('body').data('user-name'), data));
 }
 function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));
@@ -172,12 +172,12 @@ function replaceUserData(userName, data) {                               //conso
 function clearMemoryAndLoadTable(dataUpdatedAt) {                               
     const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
     clearMemory();
-    _u.setData('lclDataUpdtdAt', dataUpdatedAt);  
+    _db.setData('lclDataUpdtdAt', dataUpdatedAt);  
     initSearchPage(); //TODO: send errors during init update to search page and show error message to user.
 }
 function initSearchPage() {
     if (mmryData && mmryData.curFocus) { return _db.pg('initSearchState', [mmryData.curFocus]); }
-    _u.getData('curFocus', true).then(f => _db.pg('initSearchState', [f]));
+    _db.getData('curFocus', true).then(f => _db.pg('initSearchState', [f]));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -186,7 +186,7 @@ function initSearchPage() {
  * the data, along with any errors or messages, is returned.
  */
 export function updateLocalDb(data) {                                           console.log("   /--updateLocalDb data recieved = %O", data);
-    return _u.getAllStoredData()
+    return _db.getAllStoredData()
         .then(storeMmryAndUpdate);
 
     function storeMmryAndUpdate(mmry) {
@@ -589,7 +589,7 @@ export function updateUserNamedList(data, action) {                             
     const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
     const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
     
-    return _u.getData([rcrdKey, nameKey])
+    return _db.getData([rcrdKey, nameKey])
         .then(storedData => syncListData(storedData))
         .then(trackTimeUpdated.bind(null, 'UserNamed', list));
 
@@ -600,8 +600,8 @@ export function updateUserNamedList(data, action) {                             
         if (action == 'delete') { removeListData(); 
         } else { updateListData(); }
 
-        _u.setData(rcrdKey, rcrds);
-        _u.setData(nameKey, names);
+        _db.setData(rcrdKey, rcrds);
+        _db.setData(nameKey, names);
     }
     function removeListData() {  
         delete rcrds[list.id];  
@@ -686,7 +686,7 @@ function retryEntityUpdates(entity) {
 function addUpdatedDataToLocalDb() {
     return Object.keys(mmryData).reduce((p, prop) => {
         if (!mmryData[prop].changed) { return p; }                              console.log('               --setting [%s] data = [%O]', prop, mmryData[prop].value);
-        return p.then(() => _u.setData(prop, mmryData[prop].value));
+        return p.then(() => _db.setData(prop, mmryData[prop].value));
     }, Promise.resolve());
 }
 function addErrsToReturnData(data) {

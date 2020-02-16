@@ -20,9 +20,9 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  *     serializeTaxonData
  *     getUpdatedEntityData
  *
- * @Route("/ajax")
+ * @Route("/fetch")
  */
-class AjaxDataController extends Controller
+class FetchController extends Controller
 {
     /**
      * Returns an object with the lastUpdated datetime for the system and for 

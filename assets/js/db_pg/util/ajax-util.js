@@ -5,7 +5,7 @@
  *     sendAjaxQuery
  *     logAjaxData
  */
-
+/* ======================= DATA UTIL ======================================== */
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 logAjaxData(dataPkg, arguments, 'sending');
     return $.ajax({
         method: "POST",

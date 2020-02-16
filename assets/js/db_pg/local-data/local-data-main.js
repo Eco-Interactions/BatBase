@@ -29,7 +29,12 @@ export function setData(prop, data) {
 export function getData(props, returnUndefined) {  //breakpoint  //bp
     return _idb.getData(props, returnUndefined);
 }
-//refactoring data init and all local data methods to using this -main file. 
+export function downloadFullDb(reset) {
+    return _idb.downloadFullDb(reset);
+}
+export function getAllStoredData() {
+    return _idb.getAllStoredData();
+}
 /* -------------------------- DATA SYNC ------------------------------------- */
 export function syncLocalDbWithServer(lclDataUpdatedAt) {
     _sync.syncLocalDbWithServer(lclDataUpdatedAt);
@@ -52,10 +57,8 @@ export function initStoredData(reset) {
     _pg.showIntroAndLoadingMsg(reset);
     return require('./init-data.js').default(reset);
 }
-/* ======================= DATA UTIL ======================================== */
-export function fetchData(url, options, n) {                                    console.log('           --downloading [%s] data. ([%s] tries remaining)', url, n);
-    // return fetch(url, options).then(response => {
-    return fetch('ajax/'+url, options).then(response => {
+export function fetchServerData(url, options = {}, n = 3) {                     console.log('           --fetchServerData [%s] with params = %O', url, Object.keys(options).length ? options : null);
+    return fetch('fetch/'+url, options).then(response => {
         if (!!response.ok) { return response.json(); }
         if (n === 1) { return Promise.reject(console.log("[%s] download error = %O", url, response)); }
         return fetchData(url, options, n - 1);

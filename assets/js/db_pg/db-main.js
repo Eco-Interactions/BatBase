@@ -9,7 +9,7 @@
  *     accessTableState         Almost everything else
  *     buildTable               db-ui, filter-panel
  *     initSearchState          db_sync, util
- *     resetDataTable            db_sync, db-forms, db-filters, db-tutorial
+ *     resetDataTable           db_sync, db-forms, db-filters, db-tutorial
  *     onLocViewChange          _ui
  *     onSrcViewChange          _ui
  *     onTxnViewChange          _ui

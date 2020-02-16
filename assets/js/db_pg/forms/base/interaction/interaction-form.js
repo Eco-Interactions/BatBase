@@ -43,7 +43,6 @@ export function initCreateForm(entity) {                                        
     .then(fields => _f.elems('buildAndAppendForm', [fields]))
     .then(finishInteractionFormBuild)
     .then(() => _f.state('setOnFormCloseHandler', ['top', resetInteractionForm]))
-    .catch(err => _f.util('alertErr', [err]));
 }
 /** Builds and returns all interaction-form elements. */
 function getInteractionFormFields() {  
