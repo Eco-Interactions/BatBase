@@ -1,6 +1,8 @@
-/*=================== Content Block WYSIWYG ======================================================*/
-require('../../libs/wysiwyg/trumbowyg.min.js');
-require('../../libs/wysiwyg/ui/trumbowyg.min.css');
+/**
+ * Handles all wysiwyg related code.
+ */
+require('../../../libs/wysiwyg/trumbowyg.min.js');
+require('../../../libs/wysiwyg/ui/trumbowyg.min.css');
 
 let userRole;                                        
 /**
@@ -98,7 +100,7 @@ function getBlockContainerId(editId) {
  * any div with class 'wysiwyg', on the page.
  */
 function addEditPencils() {     
-    var editIcoSrc = ($('body').data('env') === "dev" ? '../' : '') + 'build/images/eif.pencil.svg';  
+    var editIcoSrc = ($('body').data('env') === "dev" ? '../../' : '../') + 'build/images/eif.pencil.svg';  
     var contentBlocks = $('.wysiwyg');  //console.log("contentBlocks = %O", contentBlocks);
     
     for (var i = 0; i < contentBlocks.length; i++) {
@@ -136,7 +138,7 @@ function addEditPencils() {
                     id: containerElemId
                 }
             },
-            svgPath: require('../../libs/wysiwyg/ui/icons.svg')
+            svgPath: require('../../../libs/wysiwyg/ui/icons.svg')
         });
     }
 } /* End addEditPencils */

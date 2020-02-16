@@ -11,27 +11,46 @@
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
-import { accessTableState as tState } from '../db-main.js';
-import { SentryError } from './sentry-err.js';
+import { accessTableState as tState } from '../../db-pg/db-main.js';
 
 /* ------------------- CREATE SENTRY EVENT ---------------------------------- */
-export function alertIssue(tag, errData, Err) {                                 console.log("    !!!alertIssue [%s] = %O", errTag, errData);
-    if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
+export function alertIssue(tag, errData, Err) {                                 console.log("    !!!alertIssue [%s] = %O", tag, errData);
+    // if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
     const debugData = buildDebugData(errData, tag);
-    Sentry.caputureException(new SentryError(tag, debugData)); 
+    const err = new SentryError(tag, debugData);
+    Sentry.captureException(err); console.log('err = %O', err)
     handleUserAlert(tag, debugData);
 }
-function buildDebugData(errData) {
-    const tblState = tState().get();
-    const data = buildBasicStateData(tblState);
-    data.error = { type: tag, id: errData.id, entity: errData.entity };
+function buildDebugData(errData, tag) {
+    const data = buildBasicStateData();
+    data.error = buildErrObj(errData, tag);
     return JSON.stringify(data, null, 4);
 }
-function buildBasicStateData(tblState, tag) {
-    return {
-        focus: tableState.curFocus,         view: tblState.curView,
-        user: $('body').data('user-name'),  userRole: tblState.userRole
-    }
+function buildBasicStateData() {
+    const data = { user: $('body').data('user-name') };
+    if ($('body').data('this-url') !== '/search') { return data; }
+    const state = tState().get();
+    return Object.assign(data, { 
+        focus: state.curFocus, view: state.curView, userRole: state.userRole});
+}
+function buildErrObj(errData, tag) {
+    const obj = {};
+    Object.keys(errData).forEach(key => obj[key] = errData[key]);
+    return obj;
+}
+/* ------------------------ Sentry Error Object ----------------------------- */
+/** Extends the Error object to add debug data for the error.  */
+class SentryError extends Error {
+  constructor(tag, debugData, ...params) {
+    // Pass remaining arguments (including vendor specific ones) to parent constructor
+    super(...params)
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) { Error.captureStackTrace(this, SentryError); }
+    // Custom debugging information
+    this.name = tag
+    // this.tag = tag;
+    this.message = debugData;
+  }
 }
 /* ------------------- ALERT USER ------------------------------------------- */
 function handleUserAlert(tag, debugData) {

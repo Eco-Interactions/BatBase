@@ -92,7 +92,7 @@ function logAndAlert(key) {
     alert(getAlertMsg(key));
 }
 function getAlertMsg(key) {
-    const usrRoleMsg = _db.pg._util('getErrMsgForUserRole');
+    const usrRoleMsg = _db.pg('getErrMsgForUserRole');
     return `Error loading [${key}] data. Try reloading the page. If error persists, ${usrRoleMsg}`;
 }
 

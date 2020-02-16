@@ -204,6 +204,7 @@ export function buildTxnTree(topTaxon, filtering, textFltr) {                   
 }
 function buildTxnDataTree(topTaxon) {
     let tree = {};                                                              //console.log("tree = %O", tree);
+        topTaxon.children.push(7777);
     tree[topTaxon.displayName] = buildTaxonBranch(topTaxon);  
     tree = filterTreeToInteractionSet(tree, 'taxa');
     return tree;
@@ -351,7 +352,7 @@ function getIntTags(tagAry) {
 }
 function getTreeRcrd(id, entityData, entity) {
     const rcrd = entityData[entity][id];
-    if (!rcrd) { _pg._alert('alertIssue', ['noRcrd', {id: id, entity: entity}]); }
+    if (!rcrd) { _pg.alertIssue('noRcrdFound', {id: id, entity: entity }); }
     return rcrd ? rcrd : '_err_';
 }
 /* ======================== FILTER BY TEXT ================================== */

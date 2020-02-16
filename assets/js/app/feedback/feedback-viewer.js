@@ -8,7 +8,7 @@ var noteHasChanges = statusHasChanges = asgnUserHasChanges = false;
 requireCss();              
 
 function requireCss() {
-	require('../../styles/css/feedback-viewer.css');	
+	require('../../../styles/css/feedback-viewer.css');	
 }
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);

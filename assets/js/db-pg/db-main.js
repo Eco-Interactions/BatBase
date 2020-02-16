@@ -31,6 +31,7 @@
  *     SOURCE SEARCH
  *     TAXON SEARCH
  */
+import * as _alert from '../app/misc/alert-issue.js';
 import * as _u from './util/util.js';
 import * as data_tree from './table/format-data/data-tree.js';
 import * as db_filters from './table/filters/filters-main.js';
@@ -45,14 +46,22 @@ import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
 export function _util(funcName, params = []) {
     return _u[funcName](...params);
 }
-export function _alert(funcName, params = []) {
-    return _u.alert(funcName, params);
-}
 export function ui(funcName, params = []) {
     return _ui[funcName](...params);
 }
 export function db(funcName, params = []) {
     return db[funcName](...params);
+}
+/* --------------- ERROR HANDLING ------------------------------------------- */
+export function alert(funcName, params = []) {
+    return _alert[funcName](...params);
+}
+/** Handles issues without javascript error/exception objects. */
+export function alertIssue() {
+    return _alert.alertIssue(...arguments);
+}
+export function getErrMsgForUserRole() {                                                 
+    return _alert.getErrMsgForUserRole(...arguments);
 }
 /** ==================== TABLE STATE OBJ ==================================== */
 /**

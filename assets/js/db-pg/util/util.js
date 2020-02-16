@@ -34,17 +34,16 @@
  *         IDB STORAGE METHODS
  *         HTML ELEMENT HELPERS
  *         AJAX
- *         ERROR HANDLING
  *     MISC
  *         DATA
  *         STRING HELPERS
  *         OBJECT HELPERS
  */
+import * as _pg from '../db-main.js';
 import * as _get from './ajax-util.js';
 import * as _cmbx from './combos.js';
 import * as _db from '../local-data/local-data-main.js';
 import * as _elems from './elems-util.js';
-import * as _alert from './alert.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 import extendPrototypes from './extend.js';
 
@@ -125,17 +124,6 @@ export function sendAjaxQuery() {
 export function logAjaxData() {
     return _get.logAjaxData(...arguments);
 }
-/* --------------- ERROR HANDLING ------------------------------------------- */
-export function alert(funcName, params = []) {
-    return _alert[funcName](...params);
-}
-/** Handles issues without javascript error/exception objects. */
-export function alertIssue() {
-    return _alert.alertIssue(...arguments);
-}
-export function getErrMsgForUserRole() {                                                 
-    return _alert.getErrMsgForUserRole(...arguments);
-}
 /* ================== MISC UTIL METHODS ============================================================================= */
 export function getTaxonName(taxon) {                                           
     const lvl = taxon.level.displayName;  
@@ -145,7 +133,7 @@ export function getTaxonName(taxon) {
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
     if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    //console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
-    alertIssue('noRcrd', {id: rcrdKey, entity: entity});
+    _pg.alertIssue('noRcrdFound', {id: rcrdKey, entity: entity });
     return false;
 }
 /* ------------ STRING HELPERS ---------------------------------------------- */
