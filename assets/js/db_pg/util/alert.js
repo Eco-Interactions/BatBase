@@ -3,46 +3,40 @@
  * the database search page. Submits new events to our bugb tracker, Sentry. 
  *
  * EXPORTS:
- *     handleErr
+ *     alertIssue
  *     showAlert
  *     getErrMsgForUserRole
  *
  * TOC:
- *     ERROR HANDLING
- *     GENERAL ISSUE ALERTS
+ *     CREATE SENTRY EVENT
  *     ALERT USER
- *     ALERT SENTRY
  */
 import { accessTableState as tState } from '../db-main.js';
+import { SentryError } from './sentry-err.js';
 
-/* ---------------------- ERROR ALERT --------------------------------------- */
-export function alertErr(e) {
-    // actual error object only
-    // triggerSentryEvent();
+/* ------------------- CREATE SENTRY EVENT ---------------------------------- */
+export function alertIssue(tag, errData, Err) {                                 console.log("    !!!alertIssue [%s] = %O", errTag, errData);
+    if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
+    const debugData = buildDebugData(errData, tag);
+    Sentry.caputureException(new SentryError(tag, debugData)); 
+    handleUserAlert(tag, debugData);
 }
-/* ------------------- GENERAL ISSUE ALERTS --------------------------------- */
-export function alertIssue(errTag, errData) {                                    console.log("#########- REPORT ERROR- [%s] = %O", errTag, errData);
-    if ($('body').data('env') == 'dev') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
-    const issueAlertor = {
-        'noRcrd': handleRecordNotFound
-    };
-    return issueAlertor[errTag](errData);
-}
-/**
- * Note: no return value expected
- */
-function reportRecordNotFound(errData) {
-    const jsonDebugData = buildDebugData(errData.id);
-    triggerSentryEvent(jsonDebugData);
-}
-
 function buildDebugData(errData) {
     const tblState = tState().get();
     const data = buildBasicStateData(tblState);
-    data.error = { type: 'rcrdNotFound', id: errData.id, entity: errData.entity };
+    data.error = { type: tag, id: errData.id, entity: errData.entity };
     return JSON.stringify(data, null, 4);
 }
+function buildBasicStateData(tblState, tag) {
+    return {
+        focus: tableState.curFocus,         view: tblState.curView,
+        user: $('body').data('user-name'),  userRole: tblState.userRole
+    }
+}
 /* ------------------- ALERT USER ------------------------------------------- */
+function handleUserAlert(tag, debugData) {
+    // body...
+}
 export function showAlert(err) {                                                 console.log('err = %O', err);console.trace();
     if ($('body').data('env') === 'test') { return; }
     alert(`ERROR. Try reloading the page. If error persists, ${getErrMsgForUserRole()}`);
@@ -63,12 +57,4 @@ function getEditorErrMsg() {
 > Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
 > Once the panel loads and the "console" tab is displayed, right click and save the log file.
 > Email a description of the steps to reproduce this error and any additional information or screenshots that might help. Thanks!`;
-}
-/* ----------------------- ALERT SENTRY ------------------------------------- */
-function buildBasicStateData(tblState) {
-    return {
-        focus: tableState.curFocus,         view: tblState.curView,
-        user: $('body').data('user-name'),  userRole: tblState.userRole,
-        //browser/computer information?
-    }
 }
