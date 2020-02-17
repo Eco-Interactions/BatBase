@@ -187,7 +187,7 @@ function getEntityComboEvents(entity) {
             'CitationTitle': { change: onCitSelection, add: create('citation', 'sub') },
             'Country-Region': { change: onCntryRegSelection },
             'InteractionType': { change: onInteractionTypeSelection },
-            'InteractionTags': { change: checkIntFieldsAndEnableSubmit },
+            'InteractionTags': { change: validateIntTagsAndEnableSubmit },
             'Location': { change: onLocSelection, add: create('location', 'sub')},
             'Publication': { change: onPubSelection, add: create('publication', 'sub')},
             'Subject': { change: onTaxonRoleSelection.bind(null, 'Subject') },
@@ -751,16 +751,30 @@ function fillAndEnableTags(id) {
     const tagOpts = buildTagOpts(id);
     _f.cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
     _f.cmbx('enableCombobox', ['#InteractionTags-sel', true]);
-    if (tagOpts.length !== 2) { return; }
-    _f.cmbx('setSelVal', ['#InteractionTags-sel', getDefaultTag(tagOpts)]);
+    handleRequiredTagForType(tagOpts);
 }
 function buildTagOpts(id) { 
     const type = getRcrd('interactionType', id);
-    return type.tags.map(t => {  return {value: t.id, text: t.displayName}; })
+    return type.tags.map(t => { return {value: t.id, text: t.displayName}; })
+}
+function handleRequiredTagForType(tagOpts) {
+    if (tagOpts.length !== 2) { return $('#InteractionTags-sel').data('default', false); }
+    const defaultTagId = getDefaultTag(tagOpts);
+    _f.cmbx('setSelVal', ['#InteractionTags-sel', defaultTagId]);
+    $('#InteractionTags-sel').data('default', defaultTagId);
 }
 function getDefaultTag(tags) {
     const tag = tags.find(t => t.text !== 'Secondary');
     return tag.value;
+}
+function validateIntTagsAndEnableSubmit(tags) {                          
+    validateIntTags(tags);
+    checkIntFieldsAndEnableSubmit();
+}
+function validateIntTags(tags) {
+    const defaultTagId = $('#InteractionTags-sel').data('default');
+    if (!defaultTagId || tags.indexOf(defaultTagId) !== -1 ) { return; }
+    _f.cmbx('setSelVal', ['#InteractionTags-sel', defaultTagId, 'silent']);
 }
 /* ========================== HELPERS ======================================= */
 function focusPinAndEnableSubmitIfFormValid(field) {
