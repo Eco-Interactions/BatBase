@@ -58,7 +58,9 @@ class Version20200213Names extends AbstractMigration implements ContainerAwareIn
     {
         $srcs = $this->getEntities('Source');
         foreach ($srcs as $src) {
-            $src->setName($src->getDisplayName());
+            $displayName = $src->getDisplayName();
+            if (!strpos($displayName, '(citation)')) { continue; }
+            $src->setName(explode('(citation)', $displayName));
             $this->persistEntity($src);
         }
     }
