@@ -4,7 +4,6 @@
  * Exports:                 Imported by:
  *     addNewDataToStorage          idb-util
  *     replaceUserData              idb-util
- *     resetStoredData              db-forms
  *     updateLocalDb                db-forms
  *     updateUserNamedList          save-ints
  *
@@ -23,7 +22,7 @@ import * as _db from './local-data-main.js';
 import * as _u from '../util/util.js';
 import { val as _valErr , forms as _forms } from '../forms/forms-main.js';
 
-let failed = { errors: [], updates: {}};
+let failed = { data: [], retryQueue: {}};
 
 /* ========================= DATABASE SYNC ================================== */
 /**
@@ -36,7 +35,6 @@ let failed = { errors: [], updates: {}};
 export function syncLocalDbWithServer(lclUpdtdAt) {                             console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt);
     _db.fetchServerData('data-state').then(checkAgainstLocalDataState);
     _db.getData('user').then(checkUserData);
-    // _u.sendAjaxQuery({}, "ajax/data-state", checkAgainstLocalDataState);
     
     function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
         if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _db.downloadFullDb(); }
@@ -163,7 +161,7 @@ function checkUserData(dbUser) {
     _db.fetchServerData("lists")
     .then(data => replaceUserData($('body').data('user-name'), data));
 }
-function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
+function replaceUserData(userName, data) {                                      //console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));
     _db.deriveUserData(data);
     _db.setDataInMemory('user', userName);
@@ -171,7 +169,7 @@ function replaceUserData(userName, data) {                               //conso
 }
 /* -------------- ON SYNC COMPLETE ------------------------------------------ */
 function initSearchPage() {
-    const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
+    reportDataSyncFailures();                                       
     _db.getData('curFocus', true).then(f => _db.pg('initSearchState', [f]));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
@@ -189,11 +187,11 @@ export function updateLocalDb(data) {                                           
         parseEntityData(data);
         updateEntityData(data);
         return _db.setUpdatedDataInLocalDb()
-            .then(() => handleErrsAndReturnData(data)); 
+            .then(() => handleFailuresAndReturnData(data)); 
     }
 }
-function handleErrsAndReturnData(data) {
-    addErrsToReturnData(data);
+function handleFailuresAndReturnData(data) {
+    reportDataSyncFailures(data)
     clearMemory();
     return data;
 }
@@ -575,8 +573,7 @@ function onUpdateSuccess(ajaxData) {
     return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
 }
 function handledUpdatedSrcData(data) {                                          
-    if (data.errors) { return Promise.resolve(_val.errUpdatingData(data.errors)); }
-    // parseEntityData(data.results);
+    if (data.error) { return Promise.resolve(_val.errUpdatingData('updateRelatedCitationsErr')); }
     return updateEntityData(data.results);
 }
 /*---------------- Update User Named Lists -----------------------------------*/
@@ -632,13 +629,18 @@ function getFocusAndViewOptionGroupString(list) {  //copy. refact away
 function updateData(updateFunc, prop, params, edits) {                          //console.log('prop [%s] -> params [%O], updateFunc = %O', prop, params, updateFunc);
     try {
         updateFunc(prop, params.rcrd, params.entity, edits)    
-    } catch (e) { console.log('###### Error with [%s] params = [%O] e = %O', prop, params, e);
-        handleFailedUpdate(prop, updateFunc, params, edits);
+    } catch (e) {                                                               
+        if (failed.final) { return trackDataSyncFailure(e, prop, params); }
+        addToRetryQueue(updateFunc, prop, params, edits);
     }
 }
 /** Returns the current date time in the format: Y-m-d H:i:s */
 function getCurrentDate() {
     return new Date().today() + " " + new Date().timeNow();
+}
+function clearMemory() {
+    _db.clearTempMmry();
+    failed = { data: [], retryQueue: {}};
 }
 /*------------------------------ ERRS ----------------------------------------*/
 /**
@@ -646,51 +648,47 @@ function getCurrentDate() {
  * retried at the end of the update process. If this is the second error, 
  * the error is reported to the user. (<--todo for onPageLoad sync) 
  */
-function handleFailedUpdate(prop, updateFunc, params, edits) {                  //console.log('handleFailedUpdate [%s]. params = %O edits = %O, failed = %O',prop, params, edits, failed);
-    if (failed.twice) { 
-        reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
-    } else {
-        addToFailedUpdates(updateFunc, prop, params, edits);       
-    }
-    return Promise.resolve();
-}
-function addToFailedUpdates(updateFunc, prop, params, edits) {                  //console.log('addToFailedUpdates. edits = %O', edits);
-    if (!failed.updates[params.entity]) { failed.updates[params.entity] = {}; }
-    failed.updates[params.entity][prop] = {
+function addToRetryQueue(updateFunc, prop, params, edits) {                     //console.log('addToRetryQueue. edits = %O', edits);
+    if (!failed.retryQueue[params.entity]) { failed.retryQueue[params.entity] = {}; }
+    failed.retryQueue[params.entity][prop] = {
         edits: edits, entity: params.entity, rcrd: params.rcrd, 
         stage: params.stage, updateFunc: updateFunc
     };
 }
 /** Retries any updates that failed in the first pass. */
-function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates. failed = %O', _u.snapshot(failed));
-    if (!Object.keys(failed.updates).length) { return Promise.resolve(); }
-    failed.twice = true;   
-    Object.keys(failed.updates).forEach(retryEntityUpdates);
+function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates [%s] = %O', failed.retryQueue.length, _u.snapshot(failed));
+    if (!Object.keys(failed.retryQueue).length) { return Promise.resolve(); }
+    failed.final = true;   
+    Object.keys(failed.retryQueue).forEach(retryEntityUpdates);
     return Promise.resolve();
 }
 function retryEntityUpdates(entity) {
-    Object.keys(failed.updates[entity]).forEach(prop => {
-        let params = failed.updates[entity][prop];  
+    Object.keys(failed.retryQueue[entity]).forEach(prop => {
+        let params = failed.retryQueue[entity][prop];  
         updateData(params.updateFunc, prop, params, params.edits);
     });
 }
-function addErrsToReturnData(data) {
-    if (failed.errors.length) {
-        data.errors = { msg: failed.errors[0][0], tag: failed.errors[0][1] };
-    }
+function reportDataSyncFailures(obj) {
+    const data = obj || {};
+    addFailedUpdatesToObj(data);
+    if (!data.fails.length) { return data; }                                    console.log('           !!Reporting failures = %O', data.fails)
+    _db.pg('alertIssue', ['dataSyncFailure', { fails: JSON.stringify(data.fails) }]);
+    return data
+}
+function addFailedUpdatesToObj(data) {
+    data.fails = failed.data;
     return data;
 }
-function clearMemory() {
-    _db.clearTempMmry();
-    failed = { errors: [], updates: {}};
-}
 /** Sends a message and error tag back to the form to be displayed to the user. */
-function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {                //console.log('--------reportDataUpdateErr = %O', arguments)
-    var trans = {
-        'addData': 'adding to', 'rmvData': 'removing from'
+function trackDataSyncFailure(e, prop, params) {                                console.log('               !!Tracking failure with [%s] params = [%O] e = %O', prop, params, e);
+    const failData = {
+        errMsg: e.name + ': ' + e.message, 
+        msg: getDataSyncFailureMsg(params.entity, params.stage),
+        tag: params.entity + ':' + prop + ':' + params.rcrd.id
     };
-    var msg = 'There was an error while '+trans[stage]+' the '+ entity +
-        '\'s stored data.';
-    var errTag = stage + ':' +  prop + ':' + entity + ':' + rcrd.id;
-    failed.errors.push([ msg, errTag ]);
+    failed.data.push(failData);
+}
+function getDataSyncFailureMsg(entity, stage) {
+    const trans = { 'addData': 'adding to', 'rmvData': 'removing from' };
+    return 'There was an error while '+trans[stage]+' the '+ entity +'\'s stored data.';
 }

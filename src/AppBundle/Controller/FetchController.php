@@ -146,6 +146,7 @@ class FetchController extends Controller
     public function serializeUserListData(Request $request)
     {      
         $em = $this->getDoctrine()->getManager();
+        $serializer = $this->container->get('jms_serializer');
 
         $lists = $em->getRepository('AppBundle:UserNamed')
             ->findBy(['createdBy' => $this->getUser()]);
@@ -153,8 +154,9 @@ class FetchController extends Controller
         $returnData = [];
 
         foreach ($lists as $list) {
-            array_push($returnData, $this->container->get('jms_serializer')
-                ->serialize($list, 'json'));
+            $json = serializeRcrd($list, $serializer);
+            if (!$json) { continue; }
+            array_push($returnData, $json);
         }
 
         $response = new JsonResponse();
@@ -168,28 +170,26 @@ class FetchController extends Controller
     {
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
         $data = new \stdClass;  
-        $errs = []; 
 
         for ($i=0; $i < count($entities); $i++) { 
             $entity = $entities[$i];
             $id = $entity->getId();                                             //print('id = '.$id."\n"); 
-            $jsonData = $this->serializeRcrd($id, $entity, $serializer, $errs);
+            $jsonData = $this->serializeRcrd($entity, $serializer);
             if (!$jsonData) { continue; }
             $data->$id = $jsonData;
         }
-        if (count($errs)) { print('total errs = '.count($errs)); }
         return $data;
     }
 
-    private function serializeRcrd($id, $entity, $serializer, &$errs)
+    private function serializeRcrd($entity, $serializer)
     {
         $rcrd = false;
         try {
             $rcrd = $serializer->serialize($entity, 'json');
         } catch (\Throwable $e) {
-            array_merge($errs, [$id => $e]);
+            $this->get('logger')->error($e->getMessage());
         } catch (\Exception $e) {
-            array_merge($errs, [$id => $e]);
+            $this->get('logger')->error($e->getMessage());
         }
         return $rcrd;
     }
@@ -226,7 +226,9 @@ class FetchController extends Controller
 
         foreach ($entities as $entity) {   
             $id = $entity->getId();    
-            $data->$id = $serializer->serialize($entity, 'json');
+            $json = $this->serializeRcrd($entity, $serializer);
+            if (!$json) { continue; }
+            $data->$id = $json;
         }
         return $data;
     }

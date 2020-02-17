@@ -37,7 +37,7 @@ export function showTodaysUpdates(focus) {
 export function initNewDataForm() {
     _forms.createEntity('interaction');
 }
-export function updateLocalDataStorage() {
+export function updateLocalDb() {
     return _pg.db('updateLocalDb', [...arguments]);
 }
 export function resetStoredData() {

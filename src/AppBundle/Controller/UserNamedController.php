@@ -132,22 +132,21 @@ class UserNamedController extends Controller
     {        
         try {
             $em->flush();
-        } catch (\Doctrine\DBAL\DBALException $e) {                             
-            return $this->sendErrorResponse($e, "DBALException");
+        } catch (DBALException $e) {                             
+            return $this->sendErrorResponse($e);
         } catch (\Exception $e) {
-            return $this->sendErrorResponse($e, "\Exception");
+            return $this->sendErrorResponse($e);
         }
-        // $this->setUpdatedAtTimes($data, $em);
         return $this->sendListDataAndResponse($data, $delete);
     }
     /** Logs the error message and returns an error response message. */
-    private function sendErrorResponse($e, $tag)
+    private function sendErrorResponse($e)
     {   
         $this->get('logger')->error($e->getMessage());
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData(array(
-            $tag => $e->getMessage()
+            'error' => $e->getMessage()
         ));
         return $response;
     }
@@ -155,10 +154,14 @@ class UserNamedController extends Controller
     private function sendListDataAndResponse($data, $delete)
     {
         if (!$delete) {
-            $data->entity = $this->container->get('jms_serializer')
-                ->serialize($data->entity, 'json');
+            try {
+                $data->entity = $serializer->serialize($data->entity, 'json');
+            } catch (\Throwable $e) {
+                return $this->sendErrorResponse($e);
+            } catch (\Exception $e) {
+                return $this->sendErrorResponse($e);
+            }
         }
-
         $response = new JsonResponse();
         $response->setData(array(
             'list' => $data

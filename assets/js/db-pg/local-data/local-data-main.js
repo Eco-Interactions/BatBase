@@ -38,7 +38,7 @@ export function updateUserNamedList() {
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {
     _pg.ui('showLoadingDataPopUp');
-    _idb.downloadFullDb(reset);
+    _idb.downloadFullDb(true);
 }
 export function resetLocalDb() {
     const msg = 'Are you sure you want to reset all local data?';

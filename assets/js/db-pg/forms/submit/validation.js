@@ -15,10 +15,10 @@ let _fs;
 /*------------------- Form Error Handlers --------------------------------*/
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */
-export function formSubmitError(jqXHR, textStatus, errorThrown) {               console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O]", jqXHR, jqXHR.responseText);
+export function formSubmitError(jqXHR, textStatus) {                            console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O]", jqXHR, jqXHR.responseText);
     const fLvl = _f.state('getStateProp', ['submit']).fLvl;         
     const elem = getFormErrElem(fLvl);                              
-    const errTag = getFormErrTag(JSON.parse(jqXHR.responseText).DBALException);   
+    const errTag = getFormErrTag(textStatus);   
     const msg = getFormErrMsg(errTag);                              
     _f.elems('toggleWaitOverlay', [false]);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
@@ -40,23 +40,21 @@ function getFormErrMsg(errTag) {
     var msg = {
         'dupSelAuth': 'An author is selected multiple times.',
         'dupEnt' : 'A record with this name already exists.',
-        'genSubmitErr': 'There was an error during form submission. The developer ' +
-            'has been notified.'
+        'genSubmitErr': "An Error occured and the developer has been notified."
     };
     return '<span>' + msg[errTag] + '</span>'; 
 }
 /**------------- Data Storage Errors --------------*/
-export function errUpdatingData(data) {                                         console.log('   !!!errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
+export function errUpdatingData(errTag) {                                       console.log('           !!!errUpdatingData [%s]', errTag);
     const cntnr = _f.util('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
-    $(cntnr).append([buildErrMsg(data), buildResetDataButton()]);
+    $(cntnr).append([buildErrMsg(), buildResetDataButton()]);
     $('#top-hdr').after(cntnr);
     $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
         .fadeTo('400', 0.5);
 }
-function buildErrMsg(data) {
-    return `<span>${data.msg}<br><br>Please report this error to the developer: <b> 
-        ${data.tag}</b><br><br>This form will close and all stored data will be 
-        redownloaded.</span>`;
+function buildErrMsg() {
+    return `<span>An error occured and the developer has been notified.
+        <br>All stored data will be redownloaded.</span>`;
 }
 function buildResetDataButton() {
     const confirm = _f.util('buildElem', ['span', { class: 'flex-row', 

@@ -7,9 +7,6 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
-    - test that editors buttons enable/disable as expect with map and table loads
-    - send errors that occur during data-sync to sentry
-
     - Handle potential source name duplication
         - duplicate display names for entities with unique name fields
             - source: if duplicate name is for a soft-deleted entity. 

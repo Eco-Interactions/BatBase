@@ -51,12 +51,12 @@ function storeParamsData(entity, fLvl) {
 }
 /* ----------------- Form Submit Success Methods ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                                   _f.util('logAjaxData', [data, arguments]);
-    _f.updateLocalDataStorage(data.results)
+    _f.updateLocalDb(data.results)
     .then(onDataSynced);
 }
 function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
     _f.elems('toggleWaitOverlay', [false]);
-    if (data.errors) { return _val.errUpdatingData(data.errors); }
+    if (data.fails) { return _val.errUpdatingData('dataSyncFailures'); }
     if (noDataChanges()) { return showNoChangesMessage(); }  
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
@@ -102,7 +102,6 @@ function handleFormComplete(data) {
     const onClose = _f.state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
     if (onClose) { onClose(data); 
     } else { _f.exitFormWindow() }
-    // _f.clearFormMemory();
 }
 /*--------------------- After Sub-Entity Created -----------------------------*/
 /**

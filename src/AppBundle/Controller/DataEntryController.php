@@ -428,33 +428,39 @@ class DataEntryController extends Controller
     {        
         try {
             $em->flush();
-        } catch (\Doctrine\DBAL\DBALException $e) {                             
-            return $this->sendErrorResponse($e, "DBALException");
+        } catch (\DBALException $e) {                             
+            return $this->sendErrorResponse($e);
         } catch (\Exception $e) {
-            return $this->sendErrorResponse($e, "\Exception");
+            return $this->sendErrorResponse($e);
         }
         $this->setUpdatedAtTimes($entityData, $em);
         return $this->sendDataAndResponse($entityData);
     }
     /** Logs the error message and returns an error response message. */
-    private function sendErrorResponse($e, $tag)
+    private function sendErrorResponse($e)
     {   
         $this->get('logger')->error($e->getMessage());
         $response = new JsonResponse();
         $response->setStatusCode(500);
-        $response->setData(array(
-            $tag => $e->getMessage()
-        ));
+        $response->setData(array('error' => $e->getMessage()));
         return $response;
     }
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($entityData)
     {
         $serializer = $this->container->get('jms_serializer');
-        $entityData->coreEntity = $serializer->serialize($entityData->coreEntity, 'json');
-        $entityData->detailEntity = $entityData->detailEntity ? 
-            $serializer->serialize($entityData->detailEntity, 'json') : false;
+        $serialize = ['coreEntity', 'detailEntity'];
 
+        foreach ($serialize as $prop) {
+            if (!$entityData->$prop) { continue; }
+            try {
+                $entityData->$prop = $serializer->serialize($entityData->$prop, 'json');
+            } catch (\Throwable $e) {
+                return $this->sendErrorResponse($e);
+            } catch (\Exception $e) {
+                return $this->sendErrorResponse($e);
+            }
+        }
         $response = new JsonResponse();
         $response->setData(array(
             'results' => $entityData
