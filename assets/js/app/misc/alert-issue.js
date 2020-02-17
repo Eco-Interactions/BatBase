@@ -18,8 +18,8 @@ import { accessTableState as tState } from '../../db-pg/db-main.js';
 export function reportErr(e) {
     Sentry.captureException(e);
 }
-export function alertIssue(tag, errData) {                                      console.log("    !!!alertIssue [%s] = %O", tag, errData);
-    // if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
+export function alertIssue(tag, errData) {                                      console.log("       !!!alertIssue [%s] = %O", tag, errData);
+    if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
     const debugData = buildDebugData(errData, tag);
     const err = new SentryError(tag, debugData);
     Sentry.captureException(err); console.log('err = %O', err)

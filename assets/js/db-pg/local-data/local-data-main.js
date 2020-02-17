@@ -57,7 +57,7 @@ export function fetchServerData(url, options = {}, n = 3) {                     
     return fetch('fetch/'+url, options).then(response => {
         if (!!response.ok) { return response.json(); }
         if (n === 1) { return alertFetchIssue(use, response.json()); }
-        return fetchData(url, options, n - 1);
+        return fetchServerData(url, options, n - 1);
     });
 };
 function alertFetchIssue(url, responseText) {

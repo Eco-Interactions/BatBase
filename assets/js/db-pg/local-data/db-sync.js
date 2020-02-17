@@ -656,7 +656,7 @@ function addToRetryQueue(updateFunc, prop, params, edits) {                     
     };
 }
 /** Retries any updates that failed in the first pass. */
-function retryFailedUpdates() {                                                 console.log('           --retryFailedUpdates [%s] = %O', failed.retryQueue.length, _u.snapshot(failed));
+function retryFailedUpdates() {                                                 console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, _u.snapshot(failed));
     if (!Object.keys(failed.retryQueue).length) { return Promise.resolve(); }
     failed.final = true;   
     Object.keys(failed.retryQueue).forEach(retryEntityUpdates);
@@ -671,12 +671,12 @@ function retryEntityUpdates(entity) {
 function reportDataSyncFailures(obj) {
     const data = obj || {};
     addFailedUpdatesToObj(data);
-    if (!data.fails.length) { return data; }                                    console.log('           !!Reporting failures = %O', data.fails)
+    if (!data.fails) { return data; }                                           console.log('           !!Reporting failures = %O', data.fails)
     _db.pg('alertIssue', ['dataSyncFailure', { fails: JSON.stringify(data.fails) }]);
     return data
 }
 function addFailedUpdatesToObj(data) {
-    data.fails = failed.data;
+    data.fails = failed.data.length ? failed.data : null;
     return data;
 }
 /** Sends a message and error tag back to the form to be displayed to the user. */

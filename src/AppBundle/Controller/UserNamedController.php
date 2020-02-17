@@ -139,20 +139,10 @@ class UserNamedController extends Controller
         }
         return $this->sendListDataAndResponse($data, $delete);
     }
-    /** Logs the error message and returns an error response message. */
-    private function sendErrorResponse($e)
-    {   
-        $this->get('logger')->error($e->getMessage());
-        $response = new JsonResponse();
-        $response->setStatusCode(500);
-        $response->setData(array(
-            'error' => $e->getMessage()
-        ));
-        return $response;
-    }
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendListDataAndResponse($data, $delete)
     {
+        $serializer = $this->container->get('jms_serializer');
         if (!$delete) {
             try {
                 $data->entity = $serializer->serialize($data->entity, 'json');
@@ -165,6 +155,17 @@ class UserNamedController extends Controller
         $response = new JsonResponse();
         $response->setData(array(
             'list' => $data
+        ));
+        return $response;
+    }
+    /** Logs the error message and returns an error response message. */
+    private function sendErrorResponse($e)
+    {   
+        $this->get('logger')->error($e->getMessage());
+        $response = new JsonResponse();
+        $response->setStatusCode(500);
+        $response->setData(array(
+            'error' => $e->getMessage()
         ));
         return $response;
     }

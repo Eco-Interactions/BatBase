@@ -154,7 +154,7 @@ class FetchController extends Controller
         $returnData = [];
 
         foreach ($lists as $list) {
-            $json = serializeRcrd($list, $serializer);
+            $json = $this->serializeRcrd($list, $serializer);
             if (!$json) { continue; }
             array_push($returnData, $json);
         }
