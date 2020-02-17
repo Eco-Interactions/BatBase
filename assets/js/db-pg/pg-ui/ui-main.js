@@ -20,8 +20,8 @@
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
  */
+import * as _pg from '../db-main.js';
 import * as _u from '../util/util.js';
-import { accessTableState as tState } from '../db-main.js';
 import exportCsvData from '../table/export/csv-export.js';
 import { initNewDataForm } from '../forms/forms-main.js';
 import * as db_page from '../db-main.js';
@@ -36,6 +36,7 @@ const app = {
     userRole: $('body').data("user-role"),
     enabledSelectors: ''
 };
+const tState = _pg.accessTableState;
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
     showPopUpMsg('Loading...');
@@ -59,9 +60,9 @@ export function showLoadingDataPopUp(type) {
 }
 function authDependentInit() {
     const initMap = {
-        visitor: disableUserFeatures, user: enableUserFeatures,
-        editor: enableEditorFeatures, admin: enableAdminFeatures,
-        super: enableAdminFeatures
+        visitor: disableUserFeatures, user: initUserFeatures,
+        editor: initEditorFeatures, admin: initEditorFeatures,
+        super: initEditorFeatures
     };
     initMap[app.userRole]();
 }
@@ -73,31 +74,34 @@ function disableUserFeatures() {                                                
         .prop('title', "Please register to use these features.");
     app.enabledSelectors = '#filter';
 }
-function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
-    $('button[name="csv"]').click(exportCsvData); 
-    $('#lists').click(toggleSaveIntsPanel);
+function initUserFeatures() {                                                 //console.log('enableUserFeatures')
+    initUserButtons();
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
     $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to admins.');
     app.enabledSelectors = `#filter, button[name="csv"], #lists`;
 }
-function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
-    $('button[name="csv"]').click(exportCsvData);  
-    $('#lists').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn').click(initNewDataForm);
-    $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
-    $('#rvw-data').addClass('adminbttn');
-    app.enabledSelectors = `#filter, button[name="csv"], #lists, 
-        #new-data, #rvw-data`;
-}
-function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
-    $('button[name="csv"]').click(exportCsvData);  
-    $('#lists').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn').click(initNewDataForm);
-    $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
-    $('#rvw-data').addClass('adminbttn');
+function initEditorFeatures() {                                               //console.log('enableEditorFeatures')
+    initUserButtons();                                              
+    initEditorButtons();
     app.enabledSelectors = '.map-dsbl';
+    // app.enabledSelectors = `#filter, button[name="csv"], #lists, 
+    //     #new-data, #rvw-data`;
+}
+// function initAdminFeatures() {                                                //console.log('enableAdminFeatures')
+//     initUserButtons();                                              
+//     initEditorButtons();
+//     app.enabledSelectors = '.map-dsbl';
+// }
+function initUserButtons() {
+    $('#lists').click(toggleSaveIntsPanel);
+    $('button[name="csv"]').click(exportCsvData);  
+}
+function initEditorButtons() {
+    $('#rst-data').addClass('adminbttn').click(_pg.resetLocalDb);
+    $('#new-data').addClass('adminbttn').click(initNewDataForm);
+    $('#rvw-data').addClass('adminbttn');
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 export function selectInitialSearchFocus(f, resettingData = false) {            //console.log('--------------selectInitialSearchFocus [%s]', f);

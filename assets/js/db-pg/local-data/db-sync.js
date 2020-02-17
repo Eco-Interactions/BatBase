@@ -24,8 +24,6 @@ import * as _u from '../util/util.js';
 import { val as _valErr , forms as _forms } from '../forms/forms-main.js';
 
 let failed = { errors: [], updates: {}};
-/** Stores entity data while updating to reduce async db calls. */
-let mmryData;
 
 /* ========================= DATABASE SYNC ================================== */
 /**
@@ -68,10 +66,11 @@ function entityHasUpdates(timeOne, timeTwo) {
 }
 /* -------------- ADD UPDATED SERVER DATA TO LOCAL DB ----------------------- */
 function syncDb(entities, dataUpdatedAt) {
-    _db.getAllStoredData().then(data => { mmryData = data; })
+    _db.getAllStoredData().then(data => _db.setMmryDataObj(data))
     .then(() => downloadAndStoreNewData(entities))
-    .then(addUpdatedDataToLocalDb)
-    .then(() => clearMemoryAndLoadTable(dataUpdatedAt));
+    .then(_db.setUpdatedDataInLocalDb)
+    .then(() => _db.setData('lclDataUpdtdAt', dataUpdatedAt))
+    .then(clearMemory);
 }
 function trackTimeUpdated(entity, rcrd) {
     _db.getData('lclDataUpdtdAt').then(stateObj => {
@@ -145,8 +144,7 @@ function storeUpdatedData(rcrds, entity) {
     }
 } 
 function ifUpdatedByCurUser(record) {
-    const lclUser = mmryData.user.value;  
-    return lclUser === record.updatedBy; 
+    return _db.getMmryData('user') === record.updatedBy; 
 }
 function getEntityUpdateFunc(entity) {
     const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
@@ -165,18 +163,13 @@ function checkUserData(dbUser) {
 }
 function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));
-    deriveUserNamedListData(data);
-    storeData('user', userName);
+    _db.deriveUserData(data);
+    _db.setDataInMemory('user', userName);
+    _db.setUpdatedDataInLocalDb().then(_db.clearTempMmry);
 }
 /* -------------- ON SYNC COMPLETE ------------------------------------------ */
-function clearMemoryAndLoadTable(dataUpdatedAt) {                               
-    const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
-    clearMemory();
-    _db.setData('lclDataUpdtdAt', dataUpdatedAt);  
-    initSearchPage(); //TODO: send errors during init update to search page and show error message to user.
-}
 function initSearchPage() {
-    if (mmryData && mmryData.curFocus) { return _db.pg('initSearchState', [mmryData.curFocus]); }
+    const errs = addErrsToReturnData({});                                       if (Object.keys(errs).length) {console.log('errs = %O', errs)}
     _db.getData('curFocus', true).then(f => _db.pg('initSearchState', [f]));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
@@ -190,22 +183,23 @@ export function updateLocalDb(data) {                                           
         .then(storeMmryAndUpdate);
 
     function storeMmryAndUpdate(mmry) {
-        mmryData = mmry;
+        _db.setMmryDataObj(mmry);
         parseEntityData(data);
         updateEntityData(data);
-        return addUpdatedDataToLocalDb()
-            .then(() => {
-                addErrsToReturnData(data);
-                clearMemory();
-                return data;
-            });
+        return setUpdatedDataInLocalDb()
+            .then(() => handleErrsAndReturnData(data)); 
     }
+}
+function handleErrsAndReturnData(data) {
+    addErrsToReturnData(data);
+    clearMemory();
+    return data;
 }
 function parseEntityData(data) {
     for (let prop in data) {
         try {
             data[prop] = JSON.parse(data[prop]);
-        } catch (e) {}
+        } catch (e) { Sentry.captureException(e); }
     }
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */
@@ -297,23 +291,24 @@ function updateDetailData(entity, rcrd) {
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdProp(prop, rcrd, entity) {  
-    const rcrds = mmryData[prop].value;                                         //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, _u.snapshot(rcrds), _u.snapshot(rcrd));
+    const rcrds = _db.getMmryData(prop);                                        //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, _u.snapshot(rcrds), _u.snapshot(rcrd));
     rcrds[rcrd.id] = rcrd;
-    storeData(prop, rcrds);
+    _db.setDataInMemory(prop, rcrds);
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdAryProp(prop, rcrd, entity) {  
-    const rcrds = mmryData[prop].value;                                         //console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    const rcrds = _db.getMmryData(prop);                                         //console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
     if (!ifNewRcrd(rcrds, rcrd.id)) { return; }
     rcrds.push(rcrd.id);
-    storeData(prop, rcrds);
+    _db.setDataInMemory(prop, rcrds);
 }
 /** Add the new entity's display name and id to the prop's stored names object.  */
 function addToNameProp(prop, rcrd, entity) {
-    const nameObj = mmryData[prop].value;
+    const nameObj = _db.getMmryData(prop);
     nameObj[rcrd.displayName] = rcrd.id;
-    storeData(prop, nameObj);
+    _db.setDataInMemory(prop, nameObj);
 }
+// NOTE: DON'T DELETE. COULD BE USED AGAIN 
 /** Add the new record's id to the entity-type's stored id array.  */
 // function addToTypeProp(prop, rcrd, entity) {                console.log('args = %O', arguments);                    
 //     const typeId = rcrd[prop] ? rcrd[prop].id : false;
@@ -321,7 +316,7 @@ function addToNameProp(prop, rcrd, entity) {
 //     const typeObj = mmryData[prop].value;
 //     if (!ifNewRcrd(typeObj[typeId][entity+'s'], rcrd.id)) { return; }
 //     typeObj[typeId][entity+'s'].push(rcrd.id);
-//     storeData(prop, typeObj);
+//     _db.setDataInMemory(prop, typeObj);
 // }
 function ifNewRcrd(ary, id) {
     return ary.indexOf(id) === -1;
@@ -329,11 +324,11 @@ function ifNewRcrd(ary, id) {
 /** Adds a new child record's id to it's parent's 'children' array. */ 
 function addToParentRcrd(prop, rcrd, entity) {                              
     if (!rcrd.parent) { return; }
-    const rcrds = mmryData[prop].value;                                         //console.log("               --addToParentRcrd. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    const rcrds = _db.getMmryData(prop);                                         //console.log("               --addToParentRcrd. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
     const parent = rcrds[rcrd.parent];
     if (!ifNewRcrd(parent.children, rcrd.id)) { return; }
     parent.children.push(rcrd.id);
-    storeData(prop, rcrds);
+    _db.setDataInMemory(prop, rcrds);
 }
 // NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
 // /** Adds a new tagged record to the tag's array of record ids. */
@@ -343,42 +338,42 @@ function addToParentRcrd(prop, rcrd, entity) {
 //     const toAdd = rcrd.tags.filter(tag => ifNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id));
 //     if (!toAdd) { return; }
 //     toAdd.forEach(tag => tagObj[tag.id][entity+'s'].push(rcrd.id));
-//     storeData(prop, tagObj);
+//     _db.setDataInMemory(prop, tagObj);
 // }
 /** Adds the Taxon's name to the stored names for it's realm and level.  */
 function addToTaxonNames(prop, rcrd, entity) {
     const realm = rcrd.realm.displayName;
     const level = rcrd.level.displayName;  
     const nameProp = realm+level+"Names";
-    if (!mmryData[nameProp]) { mmryData[nameProp] = { value:{} }; }
-    mmryData[nameProp].value[rcrd.name] = rcrd.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
-    storeData(nameProp, mmryData[nameProp].value);
+    let data = _db.getMmryData(nameProp) || {};
+    data[rcrd.name] = rcrd.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
+    _db.setDataInMemory(nameProp, data);
 }
 /** Adds the Interaction to the stored entity's collection.  */
 function addInteractionToEntity(prop, rcrd, entity) {                           //console.log('addInteractionToEntity. prop = [%s] rcrd = %O', prop, rcrd);
     if (!rcrd[prop]) { return; }
-    const rcrds = mmryData[prop].value;
+    const rcrds = _db.getMmryData(prop);
     const storedEntity = rcrds[rcrd[prop]];
     if (!ifNewRcrd(storedEntity.interactions, rcrd.id)) { return; }
     storedEntity.interactions.push(rcrd.id);
     if (prop === 'source') { storedEntity.isDirect = true; }
-    storeData(prop, rcrds);
+    _db.setDataInMemory(prop, rcrds);
 }
 /** Adds the Interaction to the taxon's subject/objectRole collection.  */
 function addInteractionRole(prop, rcrd, entity) {  
-    const taxa = mmryData.taxon.value;
+    const taxa = _db.getMmryData('taxon');
     const taxon = taxa[rcrd[prop]];
     if (!ifNewRcrd(taxon[prop+"Roles"], rcrd.id)) { return; }
     taxon[prop+"Roles"].push(rcrd.id);
-    storeData("taxon", taxa);   
+    _db.setDataInMemory("taxon", taxa);   
 }
 /** When a Publication/Citation has been updated, add new author contributions. */
 function addContribData(prop, rcrd, entity) {                                   //console.log("               --addContribData. [%s] [%s]. rcrd = %O", prop, entity, rcrd);
     if (!rcrd[prop]) { return; }
     const changes = false;
-    const srcObj = mmryData.source.value;
+    const srcObj = _db.getMmryData('source');
     addNewContribData();
-    if (changes) { storeData('source', srcObj); }
+    if (changes) { _db.setDataInMemory('source', srcObj); }
 
     function addNewContribData() {
         for (let ord in rcrd[prop]) {
@@ -440,25 +435,25 @@ function rmvIdFromAry(ary, id) {
 /** Removes a record's id from the previous parent's 'children' array. */ 
 function rmvFromParent(prop, rcrd, entity, edits) {  
     if (!edits[prop].old) { return; }
-    const rcrds = mmryData[entity].value;
+    const rcrds = _db.getMmryData(entity);
     rmvIdFromAry(rcrds[edits[prop].old].children, rcrd.id);
-    storeData(entity, rcrds);
+    _db.setDataInMemory(entity, rcrds);
 }
 /** Removes the Interaction from the stored entity's collection. */
 function rmvIntFromEntity(prop, rcrd, entity, edits) {   
-    const rcrds = mmryData[prop].value;                                         //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const rcrds = _db.getMmryData(prop);                                         //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
     const storedEntity = rcrds[edits[prop].old]; 
     rmvIdFromAry(storedEntity.interactions, rcrd.id);
-    storeData(prop, rcrds);
+    _db.setDataInMemory(prop, rcrds);
 }
 /** Removes the Interaction and updates parent location total counts.  */
 function rmvIntAndAdjustTotalCnts(prop, rcrd, entity, edits) {
-    const rcrds = mmryData[prop].value;                                         //console.log("               --rmvIntFromLocation. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const rcrds = _db.getMmryData(prop);                                         //console.log("               --rmvIntFromLocation. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
     const oldLoc = rcrds[edits[prop].old];
     const newLoc = rcrds[edits[prop].new];
     rmvIdFromAry(oldLoc.interactions, rcrd.id);
     adjustLocCnts(oldLoc, newLoc, rcrds);
-    storeData(prop, rcrds);
+    _db.setDataInMemory(prop, rcrds);
 } 
 function adjustLocCnts(oldLoc, newLoc, rcrds) {
     adjustLocAndParentCnts(oldLoc, false);
@@ -471,10 +466,10 @@ function adjustLocCnts(oldLoc, newLoc, rcrds) {
 }
 /** Removes the Interaction from the taxon's subject/objectRole collection. */
 function rmvIntFromTaxon(prop, rcrd, entity, edits) {  
-    const taxa = mmryData.taxon.value;                                          //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+    const taxa = _db.getMmryData('taxon');                                          //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
     const taxon = taxa[edits[prop].old];      
     rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
-    storeData("taxon", taxa);   
+    _db.setDataInMemory("taxon", taxa);   
 }
 // /** Removes the record from the entity-type's stored array. */
 // function rmvFromTypeProp(prop, rcrd, entity, edits) { 
@@ -482,7 +477,7 @@ function rmvIntFromTaxon(prop, rcrd, entity, edits) {
 //     const typeObj = mmryData[prop].value;
 //     const type = typeObj[edits[prop].old];
 //     rmvIdFromAry(type[entity+'s'], rcrd.id);
-//     storeData(prop, typeObj);
+//     _db.setDataInMemory(prop, typeObj);
 // }
 // NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
 // /** Removes a record from the tag's array of record ids. */
@@ -492,21 +487,21 @@ function rmvIntFromTaxon(prop, rcrd, entity, edits) {
 //     edits.tag.removed.forEach(tagId => {
 //         rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
 //     });
-//     storeData(prop, tagObj);
+//     _db.setDataInMemory(prop, tagObj);
 // }
 function rmvContrib(prop, rcrd, entity, edits) {                                //console.log("               --rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
-    const srcObj = mmryData.source.value;
+    const srcObj = _db.getMmryData('source');
     edits.contributor.removed.forEach(id => {
         rmvIdFromAry(srcObj[id].contributions, rcrd.id)
     });
-    storeData('source', srcObj);
+    _db.setDataInMemory('source', srcObj);
 }
 function rmvFromNameProp(prop, rcrd, entity, edits) { 
     const taxonName = getTaxonName(edits.displayName, rcrd); 
     const nameProp = getNameProp(edits, rcrd);
-    const nameObj = mmryData[nameProp].value;
+    const nameObj = _db.getMmryData(nameProp);
     delete nameObj[taxonName];
-    storeData(nameProp, nameObj);  
+    _db.setDataInMemory(nameProp, nameObj);  
 }
 function getTaxonName(nameEdits, rcrd) {
     return nameEdits ? nameEdits.old : rcrd.displayName;
@@ -517,7 +512,7 @@ function getNameProp(edits, rcrd) {
 }
 function getLevel(lvlEdits, rcrd) {  
     return !lvlEdits ? 
-        rcrd.level.displayName : mmryData.level.value[lvlEdits.old].displayName;
+        rcrd.level.displayName : _db.getMmryData('level')[lvlEdits.old].displayName;
 }
 /** ---------------------- UPDATE RELATED DATA ------------------------------ */
 function ifEditedSourceDataUpdatedCitations(data) {
@@ -541,7 +536,7 @@ function updateRelatedCitations(data) {                                         
     function getChildCites(srcs) {  
         const cites = [];
         srcs.forEach(id => {
-            const src = mmryData['source'][id]; 
+            const src = _db.getMmryData('source')[id]; 
             if (src.citation) { return cites.push(id); }
             src.children.forEach(cId => cites.push(cId))
         });
@@ -549,20 +544,21 @@ function updateRelatedCitations(data) {                                         
     }
 } /* End updateRelatedCitations */
 function updateCitations(rcrds, cites) {                                        //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
+    const srcRcrds = _db.getMmryData('source');
     const proms = [];
     cites.forEach(id => proms.push(updateCitText(id)));
     return Promise.all(proms).then(onUpdateSuccess)
     
     function updateCitText(id) {
-        const citSrc = mmryData['source'][id];
+        const citSrc = srcRcrds[id];
         const params = {
             authRcrds: rcrds[0],
             cit: rcrds[1][citSrc.citation],
             citRcrds: rcrds[1],
             citSrc: citSrc,
-            pub: mmryData['source'][citSrc.parent],
+            pub: srcRcrds[citSrc.parent],
             publisherRcrds: rcrds[2],
-            srcRcrds: mmryData['source']
+            srcRcrds: srcRcrds
         };
         const citText = _forms('rebuildCitationText', [params]);       
         return updateCitationData(citSrc, citText);
@@ -624,13 +620,7 @@ function getFocusAndViewOptionGroupString(list) {  //copy. refact away
         map[list.details.focus] + ' - ' + map[list.details.view];
 }
 /* =========================== HELPERS ====================================== */
-/** Stores passed data under the key in dataStorage. */
-function storeData(key, data) {                                                 //console.log('Adding to mmryData [%s] = [%O]', key, data);
-    if (!mmryData) { mmryData = {} }
-    if (!mmryData[key]) { mmryData[key] = {} }
-    mmryData[key].value = data;
-    mmryData[key].changed = true;
-}
+
 /**
  * Attempts to update the data and catches any errors.
  * @param  {func} updateFunc  To update the entity's data.
@@ -683,12 +673,6 @@ function retryEntityUpdates(entity) {
         updateData(params.updateFunc, prop, params, params.edits);
     });
 }
-function addUpdatedDataToLocalDb() {
-    return Object.keys(mmryData).reduce((p, prop) => {
-        if (!mmryData[prop].changed) { return p; }                              console.log('               --setting [%s] data = [%O]', prop, mmryData[prop].value);
-        return p.then(() => _db.setData(prop, mmryData[prop].value));
-    }, Promise.resolve());
-}
 function addErrsToReturnData(data) {
     if (failed.errors.length) {
         data.errors = { msg: failed.errors[0][0], tag: failed.errors[0][1] };
@@ -696,7 +680,7 @@ function addErrsToReturnData(data) {
     return data;
 }
 function clearMemory() {
-    mmryData = {};
+    _db.clearTempMmry();
     failed = { errors: [], updates: {}};
 }
 /** Sends a message and error tag back to the form to be displayed to the user. */
