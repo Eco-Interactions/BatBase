@@ -114,8 +114,9 @@ function ifTaxonFieldClearData(field) {
     if (['Subject', 'Object'].indexOf(field) === -1) { return; }  
     $('#'+field+'-sel').data('selTaxon', false);
 }
-function syncWithCountryField(cntryId) { 
-    fillLocationSelect(getRcrd('location', cntryId));
+function syncWithCountryField(cntryId) {
+    const cntry = cntryId ? getRcrd('location', cntryId) : null;
+    fillLocationSelect(cntry);
 }
 function fillPubDetailsIfPinned(pub) {
     if (pub) { _f.panel('updateSrcDetails', ['pub']); 
@@ -601,7 +602,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
     }
     function addOptToLevelAry(childTxn, level) {
         if (!opts[level]) { opts[level] = []; }                                 //console.log("setting lvl = ", taxon.level)
-        opts[level].push({ value: childTxn.id, text: childTxn.displayName });                                   
+        opts[level].push({ value: childTxn.id, text: childTxn.name });                                   
     }
     function buildUpdatedTaxonOpts() {
         return Promise.all([getSiblingOpts(taxon), getAncestorOpts(taxon.parent)])

@@ -165,11 +165,11 @@ function hideSearchFormPopup() {
 function refocusTableIfFormWasSubmitted() {                                     
     const submitData = _f.state('getStateProp', ['submit']);                    console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
     if (!submitData) { return; }
-    if (submitData.focus == 'int') { return refocusAndShowUpdates(submitData); }   
+    if (submitData.entity === 'interaction') { return refocusAndShowUpdates(submitData); }   
     _f.loadDataTableAfterFormClose(submitData.focus);
 }
 function refocusAndShowUpdates(submitData) {                                              console.log('refocusAndShowUpdates.')
-    if (submitData.action === 'create') {
+    if (_f.state('getFormProp', ['top', 'action']) === 'create') {
         _f.showTodaysUpdates('srcs');   
     } else {
         _f.loadDataTableAfterFormClose(_f.state('getStateProp', ['curFocus']));

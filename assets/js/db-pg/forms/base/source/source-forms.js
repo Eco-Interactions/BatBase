@@ -75,7 +75,6 @@ function initPubForm(value) {                                                   
 }
 function initPubMemory() {
     _f.state('addEntityFormState', ['publication', 'sub', '#Publication-sel', 'create']);
-    _f.state('setOnFormCloseHandler', ['sub', enablePubField]);
 }
 function buildAndAppendPubForm(val) {
     _f.elems('initSubForm', 

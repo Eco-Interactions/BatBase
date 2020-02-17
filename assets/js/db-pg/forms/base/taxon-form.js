@@ -107,13 +107,13 @@ function buildTaxonEditFields(taxon) {
 }
 /** ----------------- NAME FIELD AND LEVEL COMBOBOX ------------------------- */
 function getEditTaxonFields(taxon) {                                            //console.log("getEditTaxonFields for [%s]", taxon.displayName);
-    const input = buildNameInput(taxon.displayName);
+    const input = buildNameInput(taxon.name);
     const lvlSel = buildLvlSel(taxon);
     return [ buildTaxonEditFormRow('Taxon', [lvlSel, input], 'top')];
 }
 /** ----------- NAME INPUT --------------- */
-function buildNameInput(displayName) { 
-    const attr = { id: 'txn-name', type: 'text', value: displayName };
+function buildNameInput(name) { 
+    const attr = { id: 'txn-name', type: 'text', value: name };
     return _f.util('buildElem', ['input', attr]);
 }
 /** ------- LEVEL COMBOBOX --------------- */

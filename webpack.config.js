@@ -23,8 +23,7 @@ Encore
     // .addPlugin(new SentryWebpackPlugin({
     //     configFile: '.sentryclirc', ignore: '.', include: './web/build', 
     //     release: 'bat-eco-int-js@1.01', // urlPrefix: '~/web/build', debug: true, 
-    //     // ignore: ['node_modules', 'webpack.config.js', 'old_files', 'assets', 'features'],  
-        
+    //     // ignore: ['node_modules', 'webpack.config.js', 'old_files', 'assets', 'features'],   
     // }))
 //--->
 

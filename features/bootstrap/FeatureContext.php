@@ -96,7 +96,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->spin(function(){
             return $this->getUserSession()->evaluateScript("$('.ag-row').length");
-        }, 'There are no rows in the database table.');
+        }, 'There are no rows in the database table.', 10);
     }
 
 /** -------------------------- Search Page Interactions --------------------- */

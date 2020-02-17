@@ -70,7 +70,8 @@ function syncDb(entities, dataUpdatedAt) {
     .then(() => downloadAndStoreNewData(entities))
     .then(_db.setUpdatedDataInLocalDb)
     .then(() => _db.setData('lclDataUpdtdAt', dataUpdatedAt))
-    .then(clearMemory);
+    .then(clearMemory)
+    .then(initSearchPage);
 }
 function trackTimeUpdated(entity, rcrd) {
     _db.getData('lclDataUpdtdAt').then(stateObj => {
@@ -111,7 +112,8 @@ function hasInteractionUpdates(entities) {
 }
 function getNewData(entity) {                                                   //console.log('getting new data for ', entity); 
     let data = { entity: entity.name, updatedAt: entity.updated }; 
-    return _db.fetchServerData("sync-data", {body: JSON.stringify(data)}); 
+    const fetchOpts = { method: 'POST', body: JSON.stringify(data)};
+    return _db.fetchServerData('sync-data', fetchOpts); 
 } 
 /** Sends each entity's ajax return to be processed and stored. */
 function processUpdatedData(data) {                                             //console.log('processUpdatedData = %O', data);
@@ -119,7 +121,7 @@ function processUpdatedData(data) {                                             
 } 
 /** Parses and sends the returned data to @storeUpdatedData. */ 
 function processUpdatedEntityData(data) {                                       
-    const entity = Object.keys(data)[0];                                        console.log("       --processUpdatedEntityData [%s] = %O", entity, data[entity]); 
+    const entity = Object.keys(data)[0];                                        console.log("       --processUpdatedEntityData [%s][%s] = %O", Object.keys(data[entity]).length, entity, data[entity]); 
     return storeUpdatedData(parseData(data[entity]), entity); 
 }
 /**
@@ -186,7 +188,7 @@ export function updateLocalDb(data) {                                           
         _db.setMmryDataObj(mmry);
         parseEntityData(data);
         updateEntityData(data);
-        return setUpdatedDataInLocalDb()
+        return _db.setUpdatedDataInLocalDb()
             .then(() => handleErrsAndReturnData(data)); 
     }
 }

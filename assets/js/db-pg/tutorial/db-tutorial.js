@@ -93,7 +93,7 @@ function onAfterStepChange(stepElem) {                                          
 function waitForDbLoad() { 
     window.setTimeout(addDbLoadNotice, 500);
     if (intro._currentStep == 14) { return; }
-    intro.goToStepNumber(3); 
+    intro.goToStep(3); 
 }
 function addDbLoadNotice() {  
     $('.introjs-tooltiptext').html(`
@@ -128,7 +128,7 @@ function addBttnEvents() {
 }
 function showTutorial(tutKey) {  
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStepNumber(15); }
+    if (tutKey === 'map') { intro.goToStep(15); }
 }
 function toggleFilterPanelInTutorial(close) {  
     const closed = $('#filter-pnl').hasClass('closed');   

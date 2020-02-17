@@ -296,7 +296,7 @@ function buildTaxonSelectOpts(tblState) {                                       
             const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
             optsObj[lvl] = [
                 {value: 'all', text: '- All -'}, 
-                {value: taxon.id, text: taxon.displayName}];  
+                {value: taxon.id, text: taxon.name}];  
         } else { optsObj[lvl] = []; }
     }
 } /* End buildTaxonSelectOpts */
@@ -326,7 +326,7 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
     }
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
-    levels.forEach(function(level) {                                            
+    levels.forEach(level => {                                            
         _u.replaceSelOpts('#sel'+level, lvlOptsObj[level], null, level);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
