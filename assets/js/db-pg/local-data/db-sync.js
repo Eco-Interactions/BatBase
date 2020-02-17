@@ -424,8 +424,7 @@ function getRmvDataPropHndlrs(entity) {
         'location': { 'parentLoc': rmvFromParent, /*'locationType': rmvFromTypeProp*/ },
         'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
             /* 'tag': rmvFromTagProp */ },
-        'taxon': { 'parentTaxon': rmvFromParent, 'level': rmvFromNameProp,
-            'displayName': rmvFromNameProp }
+        'taxon': { 'parentTaxon': rmvFromParent, 'displayName': rmvFromNameProp }
     }[entity];
 }
 /** Removes the id from the ary. */
@@ -497,22 +496,22 @@ function rmvContrib(prop, rcrd, entity, edits) {                                
     _db.setDataInMemory('source', srcObj);
 }
 function rmvFromNameProp(prop, rcrd, entity, edits) { 
-    const taxonName = getTaxonName(edits.displayName, rcrd); 
+    const taxonName = getTaxonName(edits, rcrd); 
     const nameProp = getNameProp(edits, rcrd);
     const nameObj = _db.getMmryData(nameProp);
     delete nameObj[taxonName];
     _db.setDataInMemory(nameProp, nameObj);  
 }
-function getTaxonName(nameEdits, rcrd) {
-    return nameEdits ? nameEdits.old : rcrd.displayName;
+function getTaxonName(edits, rcrd) {
+    return edits.name ? edits.name.old : rcrd.name;
 }
 function getNameProp(edits, rcrd) {
     const level = getLevel(edits.level, rcrd);
     return rcrd.realm.displayName + level + 'Names';
 }
 function getLevel(lvlEdits, rcrd) {  
-    return !lvlEdits ? 
-        rcrd.level.displayName : _db.getMmryData('level')[lvlEdits.old].displayName;
+    return !lvlEdits ? rcrd.level.displayName : 
+        _db.getMmryData('level')[lvlEdits.old].displayName;
 }
 /** ---------------------- UPDATE RELATED DATA ------------------------------ */
 function ifEditedSourceDataUpdatedCitations(data) {

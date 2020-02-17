@@ -108,9 +108,7 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
     }
     function getRowRcrdName(rowData, rcrd, baseNode) {
         if (tblState.curFocus === 'srcs') { return getSrcRowName(rowData, rcrd, baseNode)}
-        return rowData.name.indexOf('Unspecified') !== -1 ?
-            getUnspecifiedRowEntityName(rowData, rcrd) : 
-            getRcrdDisplayName(rowData.name, rcrd);
+        return getRcrdDisplayName(rowData.name, rcrd);
     }
     /** Adds the base entity name before the name of the work, eg Author (work) */
     function getSrcRowName(rowData, rcrd, baseNode) {  
@@ -118,14 +116,7 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
         if (work == baseNode) { return baseNode; }
         return `${baseNode} - (${work})`;
     }
-    function getUnspecifiedRowEntityName(row, rcrd) { 
-        return tblState.curFocus === 'taxa' ? 
-            _u.getTaxonName(rcrd) : getRcrdDisplayName(rcrd.displayName, rcrd);
-    }
-    function getRcrdDisplayName(name, rcrd) {
-        return name === 'Whole work cited.' ? getParentName(rcrd) : name;
-    }
-    function getParentName(rcrd) {  
-        return rcrd.displayName.split('(citation)')[0];
+    function getRcrdDisplayName(displayName, rcrd) {
+        return displayName === 'Whole work cited.' ? rcrd.name : displayName;
     }
 } /* End buildTableLocDataObj */

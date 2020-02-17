@@ -368,6 +368,9 @@ export function getFieldTranslations(entity) {                                  
         'publisher': {
             'displayName': { 'source': 'displayName', 'publisher': 'displayName' }
         },
+        'taxon': {
+            'displayName': { 'taxon': 'name' }
+        }
     };
     return fieldTrans[entity] || {};
 }

@@ -112,10 +112,6 @@ export function logAjaxData() {
     return _get.logAjaxData(...arguments);
 }
 /* ================== MISC UTIL METHODS ============================================================================= */
-export function getTaxonName(taxon) {                                           
-    const lvl = taxon.level.displayName;  
-    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
-}
 /* ------------------ DATA -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
