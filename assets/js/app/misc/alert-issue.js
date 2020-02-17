@@ -14,7 +14,11 @@
 import { accessTableState as tState } from '../../db-pg/db-main.js';
 
 /* ------------------- CREATE SENTRY EVENT ---------------------------------- */
-export function alertIssue(tag, errData, Err) {                                 console.log("    !!!alertIssue [%s] = %O", tag, errData);
+/** Sends Error object to Sentry, issue tracker. */
+export function reportErr(e) {
+    Sentry.captureException(e);
+}
+export function alertIssue(tag, errData) {                                      console.log("    !!!alertIssue [%s] = %O", tag, errData);
     // if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
     const debugData = buildDebugData(errData, tag);
     const err = new SentryError(tag, debugData);

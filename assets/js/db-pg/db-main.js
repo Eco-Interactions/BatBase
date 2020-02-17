@@ -63,6 +63,10 @@ export function alert(funcName, params = []) {
 export function alertIssue() {
     return _alert.alertIssue(...arguments);
 }
+/** Sends Error object to Sentry, issue tracker. */
+export function reportErr() {
+    return _alert.reportErr(...arguments);
+}
 export function getErrMsgForUserRole() {                                                 
     return _alert.getErrMsgForUserRole(...arguments);
 }

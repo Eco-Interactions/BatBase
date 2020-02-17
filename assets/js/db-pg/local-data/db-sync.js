@@ -199,7 +199,7 @@ function parseEntityData(data) {
     for (let prop in data) {
         try {
             data[prop] = JSON.parse(data[prop]);
-        } catch (e) { Sentry.captureException(e); }
+        } catch (e) { _db.pg('reportErr', [e]); }
     }
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */

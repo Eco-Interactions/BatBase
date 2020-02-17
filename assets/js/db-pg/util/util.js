@@ -3,7 +3,6 @@
  *
  * Exports:                     Imported by:
  *     (IDB Storage Methods)
- *         downloadFullDb           db-sync
  *         getData
  *         setData
  *   addEnterKeypressClick
@@ -44,7 +43,6 @@ import * as _get from './ajax-util.js';
 import * as _cmbx from './combos.js';
 import * as _db from '../local-data/local-data-main.js';
 import * as _elems from './elems-util.js';
-import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 import extendPrototypes from './extend.js';
 
 extendPrototypes();
@@ -72,18 +70,7 @@ export function triggerComboChangeReturnPromise() {
     return _cmbx.triggerComboChangeReturnPromise(...arguments);
 } 
 /* ----------------------- IDB STORAGE METHODS -----------------------------------------------------------------------*/
-export function downloadFullDb() {
-    _db.downloadFullDb();
-}
-export function resetLocalDb() {
-    const msg = 'Are you sure you want to reset all local data?';
-    showSaveModal(msg, '#rst-data', 'left', resetDb, Function.prototype, 'Yes');
 
-    function resetDb() {
-        exitModal();
-        _db.downloadFullDb(true);
-    }
-}
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 
