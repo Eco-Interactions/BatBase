@@ -196,7 +196,7 @@ function getIntCount(taxon) {
  */
 function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {                 
     let rows = [];
-    if (taxon.level.id !== 7){ //Species
+    if (taxon.level.displayName !== 'Species'){
         handleTaxonWithPotentialChildren();
     } else { rows = getTaxonIntRows(taxon, curTreeLvl, tblState); }
     return rows;
@@ -210,7 +210,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
 
     function handleUnspecifiedInts(curTreeLvl) {
         if (taxon.failedFltr || getIntCount(taxon) === null) { return; }
-        const name = taxon.isRealm ? taxon.realm.displayName : taxon.displayName;
+        const name = taxon.isRealm ? taxon.realm.displayName : taxon.name;
         addUnspecifiedTaxonIntsRow(name, curTreeLvl);
     }
     /**

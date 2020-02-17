@@ -93,6 +93,7 @@ function cssClosePanel(panel) {
     $(panel.id).css('overflow-y', 'hidden');
     $(panel.tab).removeClass('shw-col-borders ' + panel.tabClass);
     $(panel.id).addClass('closed');
+    window.setTimeout(() => $(panel.id).css('overflow-y', 'hidden'), 500);  //Handles potential overlap with opening and closing rapidly due to rapid clicking.
 }
 function closeVerticalPanel(panel) {
     cssClosePanel(panel);

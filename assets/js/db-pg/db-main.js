@@ -49,8 +49,8 @@ export function _util(funcName, params = []) {
 export function ui(funcName, params = []) {
     return _ui[funcName](...params);
 }
-export function db(funcName, params = []) {
-    return db[funcName](...params);
+export function db(funcName, params = []) {  
+    return _db[funcName](...params);
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
 export function alert(funcName, params = []) {

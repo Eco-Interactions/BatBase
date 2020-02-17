@@ -7,6 +7,8 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
+    - Handle taxon names in form code
+
     - Handle potential source name duplication
         - duplicate display names for entities with unique name fields
             - source: if duplicate name is for a soft-deleted entity. 
@@ -37,7 +39,8 @@
 DUE: MARCH 20
 
 
-
+STANDARDS:
+    append '_' before imported file, without it for the access method.
 QUESTIONS:
     -
 

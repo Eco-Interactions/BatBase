@@ -204,7 +204,6 @@ export function buildTxnTree(topTaxon, filtering, textFltr) {                   
 }
 function buildTxnDataTree(topTaxon) {
     let tree = {};                                                              //console.log("tree = %O", tree);
-        topTaxon.children.push(7777);
     tree[topTaxon.displayName] = buildTaxonBranch(topTaxon);  
     tree = filterTreeToInteractionSet(tree, 'taxa');
     return tree;
