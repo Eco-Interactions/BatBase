@@ -21,15 +21,11 @@ Encore
     })
     /* Sends source maps to Sentry for bug/issue tracking. */
     .addPlugin(new SentryWebpackPlugin({
-        include: '.', 
+        include: '.', test: [/\.js$/], release: process.env.RELEASE_HASH, 
         ignore: ['web', 'node_modules', 'webpack.config.js', 'vendor', 
-            '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'], 
-        test: [/\.js$/], 
-        // debug: true, 
-        release: process.env.RELEASE_HASH, 
-        // urlPrefix: '~/build', 
-        // rewrite: true,
-        // validate: true,
+            '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
+        commits: { repo: 'Eco-Interactions/batplant', auto: true }
+        // debug: true, // rewrite: true, // validate: true,
     }))
 /* ======== ALL =========== */
     // the project directory where all compiled assets will be stored

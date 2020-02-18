@@ -46,7 +46,7 @@ export function resetLocalDb() {
 
     function resetDb() {
         exitModal();
-        _db.downloadFullDb(true);
+        _idb.downloadFullDb(true);
     }
 }
 /* ================ LOCAL-DATA INTERNAL FACADE ============================== */

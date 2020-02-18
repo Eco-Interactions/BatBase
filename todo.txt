@@ -20,9 +20,6 @@
                             - submit, restoring the deleted record.
                         - and to indicate they are creating a distinct record 
                             - submit, append '-deleted' to deleted record to eliminate conflict. 
-    - Add handling to points where the table is likely to err
-        - On map loads
-        - On page load, when data syncs
     - Batch downloads? Built in doctrine tools? serialize?
     - Refactor init download 
         - taxa (bats then interactions) first, load table and tutorial asap.
@@ -32,7 +29,6 @@
         - geojson last, map views available from there (maps available)
     - Refactor Source data 
         - merge detail and core data on client side
-    - Replace checkDisplayNameForDups from get-form-data
 
 DUE: MARCH 20
 
