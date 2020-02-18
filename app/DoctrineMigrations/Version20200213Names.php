@@ -60,7 +60,7 @@ class Version20200213Names extends AbstractMigration implements ContainerAwareIn
         foreach ($srcs as $src) {
             $displayName = $src->getDisplayName();
             if (!strpos($displayName, '(citation)')) { continue; }
-            $src->setName(explode('(citation)', $displayName));
+            $src->setName(explode('(citation)', $displayName)[0]);
             $this->persistEntity($src);
         }
     }

@@ -72,6 +72,7 @@ export function resetFormCombobox(fLvl, focus) {
 /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
 export function updateComboboxOptions(selId, opts, focus) {
     const selApi = $(selId)[0].selectize;
+    selApi.clear();
     selApi.clearOptions();
     selApi.addOption(opts);
     selApi.refreshOptions(false);

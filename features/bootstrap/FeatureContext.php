@@ -56,14 +56,21 @@ class FeatureContext extends RawMinkContext implements Context
     public static function beforeSuite()
     {   
         exec('echo -n \'\' > var/logs/test.log');
-        fwrite(STDOUT, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLoading database.\n");
+        fwrite(STDOUT, "\n\n\n\n\n\n\nLoading database.\n\n\n\n");
         exec('php bin/console doctrine:database:drop --force --env=test');
         exec('php bin/console doctrine:database:create --env=test');
         exec('php bin/console doctrine:schema:create --env=test');
         exec('php bin/console hautelook_alice:fixtures:load --no-interaction --env=test');
     }
+
+    /**
+     * @AfterSuite
+     *
+     * Deletes test database.
+     */
     public static function afterSuite()
     {        
+        fwrite(STDOUT, "\n\n\nDeleting database.\n\n\n");
         exec('php bin/console doctrine:database:drop --force --env=test');
     }
     /**

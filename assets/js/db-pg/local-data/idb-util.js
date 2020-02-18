@@ -15,7 +15,7 @@
 import * as _db from './local-data-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
-const db_v = .041;
+const db_v = '.42'; //prod: .42
 /** ----------------------- INIT -------------------------------------------- */
 /** 
  * Checks whether the dataKey exists in indexDB cache and downloads full DB if not.
@@ -67,14 +67,17 @@ export function getAllStoredData() {
  * If a property is not found, false is returned. 
  */
 export function getData(keys, returnUndefined) {                                //console.log('     GET [%O]', keys);
-    if (!Array.isArray(keys)) { return getStoredData(keys, returnUndefined); }
-    return getStoredDataObj(keys, returnUndefined);
+    if (Array.isArray(keys)) { return getStoredDataObj(keys, returnUndefined); }
+    return getStoredData(keys, returnUndefined);
+    
 }
-function getStoredData(key, returnUndefined) {
+function getStoredData(key, returnUndefined) {                                  //console.log('               getData = [%s]', key)
+    if (!key) { return handleMissingDataKey(key); }
+    if (typeof key !== 'string') { return handleInvalidKeyType(key); }
     return idb.get(key).then(d => returnStoredData(d, key, returnUndefined));
 }
 function returnStoredData(data, key, returnUndefined) {                         //console.log('[%s] = %O (returnUndefined ? [%s])', key, data, returnUndefined);
-    if (data == undefined && !returnUndefined) { return logAndAlert(key); }  
+    if (data == undefined && !returnUndefined) { return handleExpectedDataNotFound(key); }  
     return data;
 }
 function getStoredDataObj(keys, returnUndefined) {
@@ -86,16 +89,17 @@ function getStoredDataObj(keys, returnUndefined) {
         return obj;
     });
 } 
-function logAndAlert(key) {
-    console.log(`Error loading [${key}] data.`); console.trace();
-    if ($('body').data('env') === 'test') { return; }
-    alert(getAlertMsg(key));
+/* ----------------------- ERROR HANDLING ----------------------------------- */
+function handleMissingDataKey(key) {                                            console.log('       !!!!getData: key missing [%s]', key); console.trace();
+    _db.pg('alertIssue', ['undefiendDataKey', {key: key}]);
 }
-function getAlertMsg(key) {
-    const usrRoleMsg = _db.pg('getErrMsgForUserRole');
-    return `Error loading [${key}] data. Try reloading the page. If error persists, ${usrRoleMsg}`;
+function handleInvalidKeyType(key) {                                            console.log('       !!!!getData: Non-string key passed = [%O]', key); console.trace();
+    _db.pg('alertIssue', ['invalidDataKeyType', {
+        key: JSON.stringify(key), type: typeof key }]);
 }
-
+function handleExpectedDataNotFound(key) {                                      console.log('       !!!!getData: [%s] Not Found', key); console.trace();
+    _db.pg('alertIssue', ['expectedDataNotFound', {key: key}]);
+}
 /** ----------------------- SETTERS ----------------------------------------- */
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);
     return idb.set(k, v);

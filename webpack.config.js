@@ -1,39 +1,46 @@
 const Encore = require('@symfony/webpack-encore');
+/* ======== DEV ======= */
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+/* ========= PROD ======= */ 
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
-
+const childProcess = require('child_process');
+const RELEASE_HASH = childProcess.execSync('git rev-parse HEAD').toString().trim(); 
+/* ======== ALL =========== */
 const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' };
-
-/** ================= CLI ======================= */
-// yarn run encore [dev|production] [--watch]
-/** ================= Configuration ======================= */
+/** ======================== Configuration ================================== */
 Encore
+/* ======== DEV ======= */
+    /* During rebuilds, all webpack assets that are not used will be removed. */
+    // .addPlugin(new CleanWebpackPlugin())
+    // .setPublicPath('/batplant/web/build')
+/* ========= PROD ======= */ 
+    /* the public path used by the web server to access the previous directory */
+    .setPublicPath('/build')
+    .configureDefinePlugin(options => {
+        options['process.env'].RELEASE_HASH = JSON.stringify(RELEASE_HASH)
+    })
+    /* Sends source maps to Sentry for bug/issue tracking. */
+    .addPlugin(new SentryWebpackPlugin({
+        include: '.', 
+        ignore: ['web', 'node_modules', 'webpack.config.js', 'vendor', 
+            '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'], 
+        test: [/\.js$/], 
+        // debug: true, 
+        release: process.env.RELEASE_HASH, 
+        // urlPrefix: '~/build', 
+        // rewrite: true,
+        // validate: true,
+    }))
+/* ======== ALL =========== */
     // the project directory where all compiled assets will be stored
     .setOutputPath('web/build')
-
-//--->
-   /* ==== DEV ==== */
-    .setPublicPath('/batplant/web/build')
-    
-   /* ==== PROD ==== */ 
-    // the public path used by the web server to access the previous directory
-    // .setPublicPath('/build')
-
-/* ----------- Producation Plugin ---------------------------- */
-    // Sends source maps to Sentry for bug/issue tracking.
-    // .addPlugin(new SentryWebpackPlugin({
-    //     configFile: '.sentryclirc', ignore: '.', include: './web/build', 
-    //     release: 'bat-eco-int-js@1.01', // urlPrefix: '~/web/build', debug: true, 
-    //     // ignore: ['node_modules', 'webpack.config.js', 'old_files', 'assets', 'features'],   
-    // }))
-//--->
-
     /** The prefix isn't being recognized for some reason */
     .setManifestKeyPrefix('build')
     // allow legacy applications to use $/jQuery as an app variable 
     // Note: Doesn't work if js not processed through webpack
     .autoProvidejQuery()
     // enable source maps during development
-    .enableSourceMaps(!Encore.isProduction())
+    .enableSourceMaps(true)
     // empty the outputPath dir before each build
     .cleanupOutputBeforeBuild()
     // show OS notifications when builds finish/fail /** Stopped working and I don't know why. */
@@ -73,7 +80,7 @@ Encore
 ; 
 const confg = Encore.getWebpackConfig();
 
-// Force Webpack to display errors/warnings
+/* Force Webpack to display errors/warnings */
 // confg.stats.errors = true;
 // confg.stats.warnings = true;
 

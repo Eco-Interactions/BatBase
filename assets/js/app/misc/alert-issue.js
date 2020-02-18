@@ -18,12 +18,22 @@ import { accessTableState as tState } from '../../db-pg/db-main.js';
 export function reportErr(e) {
     Sentry.captureException(e);
 }
-export function alertIssue(tag, errData) {                                      console.log("       !!!alertIssue [%s] = %O", tag, errData);
-    if ($('body').data('env') !== 'prod') { return; } //alertErr('rcrdNotFound: ['.errData.id.']'); }
+/**
+ * IssueTags {errDataKeys}:
+ *     TestIssue null (no browser alert)
+ *     undefiendDataKey {key}
+ *     invalidDataKeyType {key, type}
+ *     expectedDataNotFound {key}
+ *     dataSyncFailure {fails} (no browser alert)
+ *     fetchIssue {url, responseText}
+ *     noRcrdFound {id, entity} (no browser alert)
+ */
+export function alertIssue(tag, errData = {}) {                                      
+    if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
     const debugData = buildDebugData(errData, tag);
     const err = new SentryError(tag, debugData);
-    Sentry.captureException(err); console.log('err = %O', err)
-    handleUserAlert(tag, debugData);
+    Sentry.captureException(err); 
+    handleUserAlert(tag);
 }
 function buildDebugData(errData, tag) {
     const data = buildBasicStateData();
@@ -57,26 +67,36 @@ class SentryError extends Error {
   }
 }
 /* ------------------- ALERT USER ------------------------------------------- */
-function handleUserAlert(tag, debugData) {
-    // body...
+/**
+ * IssueTags: alertHandler
+ *     undefiendDataKey: showGeneralAlert
+ *     invalidDataKeyType: showGeneralAlert
+ *     expectedDataNotFound: showGeneralAlert
+ *     dataSyncFailure: (handled in form validation code)
+ *     fetchIssue: showGeneralAlert
+ *     noRcrdFound: (handled at relevant points through the code)
+ */
+function handleUserAlert(tag) {
+    const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue'];
+    if (silent.indexOf(tag) !== -1) { return; }
+    showGeneralAlert();
 }
-export function showAlert(err) {                                                 console.log('err = %O', err);console.trace();
-    if ($('body').data('env') === 'test') { return; }
-    alert(`ERROR. Try reloading the page. If error persists, ${getErrMsgForUserRole()}`);
+function showGeneralAlert() {                                                   
+    alert(`An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);
 }
-export function getErrMsgForUserRole() {
+function getErrMsgForUserRole() {
     const userRole = $('body').data('user-role');
     const msgs = { visitor: getVisitorErrMsg, user: getUserErrMsg };
     return msgs[userRole] ? msgs[userRole]() : getEditorErrMsg();
 }
 function getVisitorErrMsg() {
-    return `please contact us at info@batplant.org and let us know about the issue you are experiencing.`;
+    return `contact us at info@batplant.org and let us know about the issue you are experiencing.`;
 }
 function getUserErrMsg() {
-    return `please contact us by Leaving Feedback on this page (from the user menu) and let us know about the issue you are experiencing.`;
+    return `contact us by Leaving Feedback on this page (in your user menu) and let us know about the issue you are experiencing.`;
 }
 function getEditorErrMsg() {
-    return `please follow these steps and email Kelly. 
+    return `send debug information: 
 > Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
 > Once the panel loads and the "console" tab is displayed, right click and save the log file.
 > Email a description of the steps to reproduce this error and any additional information or screenshots that might help. Thanks!`;

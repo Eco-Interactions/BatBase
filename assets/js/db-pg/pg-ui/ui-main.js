@@ -67,7 +67,7 @@ function authDependentInit() {
     initMap[app.userRole]();
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
-    $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, 
+    $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #rst-data, 
         #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
         #stored-filters input, #stored-filters textarea`)
         .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
@@ -77,6 +77,8 @@ function disableUserFeatures() {                                                
 function initUserFeatures() {                                                 //console.log('enableUserFeatures')
     initUserButtons();
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to editors.');
+    $('#rst-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
     $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to admins.');

@@ -11,7 +11,11 @@ setGlobalJquery();
 initUi();
 
 function initSentryIssueTracking() {
-    Sentry.init({ dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194' });
+    if ($('body').data('env') !== 'prod') { return; } 
+    Sentry.init({ 
+        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
+        release: process.env.RELEASE_HASH
+    });
 }
 /* ==================== STYLES & SCRIPTS ==================================== */
 function requireStyles() {

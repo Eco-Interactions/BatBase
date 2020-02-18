@@ -67,9 +67,6 @@ export function alertIssue() {
 export function reportErr() {
     return _alert.reportErr(...arguments);
 }
-export function getErrMsgForUserRole() {                                                 
-    return _alert.getErrMsgForUserRole(...arguments);
-}
 /** ==================== TABLE STATE OBJ ==================================== */
 /**
  * Stores table state params needed across multiple modules. 
@@ -111,7 +108,7 @@ function requireCss() {
 }
 function requireJs() {
     require('leaflet-control-geocoder');
-    require('../libs/selectize.min.js');
+    require('../libs/selectize.js');
 }
 /**
  * The first time a browser visits the search page, or when local data is reset,
@@ -209,7 +206,7 @@ function updateFocusAndBuildTable(focus, view) {                                
     return onFocusChanged(focus, view)
         .then(() => buildDataTable(focus, view));
 } 
-function onFocusChanged(focus, view) {
+function onFocusChanged(focus, view) {  
     _u.setData('curFocus', focus);
     _u.setData('curView', view);
     updateFilterPanelHeader(focus);
@@ -338,7 +335,7 @@ function getSrcDataAndBuildTable(view) {
     return _u.getData('source').then(srcs => {
         tblState.rcrdsById = srcs;
         _ui.initSrcSearchUi(view);
-        return startSrcTableBuildChain(); //tblState.curView
+        return startSrcTableBuildChain(view); 
     });
 }
 /** Event fired when the source view select box has been changed. */
