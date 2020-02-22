@@ -1,30 +1,42 @@
 const Encore = require('@symfony/webpack-encore');
-
-const autoProvidedVars = { L: 'leaflet', $: 'jquery' };
-
-/** ================= CLI ======================= */
-// yarn run encore [dev|production] [--watch]
-/** ================= Configuration ======================= */
+/* ======== DEV ======= */
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+/* ========= PROD ======= */ 
+const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+const childProcess = require('child_process');
+const RELEASE_HASH = childProcess.execSync('git rev-parse HEAD').toString().trim(); 
+/* ======== ALL =========== */
+const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' };
+/** ======================== Configuration ================================== */
 Encore
+/* ======== DEV ======= */
+    /* During rebuilds, all webpack assets that are not used will be removed. */
+    // .addPlugin(new CleanWebpackPlugin())
+    // .setPublicPath('/batplant/web/build')
+/* ========= PROD ======= */ 
+    /* the public path used by the web server to access the previous directory */
+    .setPublicPath('/build')
+    .configureDefinePlugin(options => {
+        options['process.env'].RELEASE_HASH = JSON.stringify(RELEASE_HASH)
+    })
+    /* Sends source maps to Sentry for bug/issue tracking. */
+    .addPlugin(new SentryWebpackPlugin({
+        include: '.', test: [/\.js$/], release: process.env.RELEASE_HASH, 
+        ignore: ['web', 'node_modules', 'webpack.config.js', 'vendor', 
+            '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
+        commits: { repo: 'Eco-Interactions/batplant', auto: true }
+        // debug: true, // rewrite: true, // validate: true,
+    }))
+/* ======== ALL =========== */
     // the project directory where all compiled assets will be stored
     .setOutputPath('web/build')
-
-//--->
-   /* ==== DEV ==== */
-    .setPublicPath('/batplant/web/build')
-    
-   /* ==== PROD ==== */ 
-    // the public path used by the web server to access the previous directory
-    // .setPublicPath('/build')
-//--->
-
     /** The prefix isn't being recognized for some reason */
     .setManifestKeyPrefix('build')
     // allow legacy applications to use $/jQuery as an app variable 
     // Note: Doesn't work if js not processed through webpack
     .autoProvidejQuery()
     // enable source maps during development
-    .enableSourceMaps(!Encore.isProduction())
+    .enableSourceMaps(true)
     // empty the outputPath dir before each build
     .cleanupOutputBeforeBuild()
     // show OS notifications when builds finish/fail /** Stopped working and I don't know why. */
@@ -54,8 +66,8 @@ Encore
     }])
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/app/oi.js')
-    .addEntry('db', './assets/js/db/db-main.js')
-    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
+    .addEntry('db', './assets/js/db-pg/db-main.js')
+    .addEntry('feedback', './assets/js/app/feedback/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
@@ -64,9 +76,14 @@ Encore
 ; 
 const confg = Encore.getWebpackConfig();
 
+/* Force Webpack to display errors/warnings */
+// confg.stats.errors = true;
+// confg.stats.warnings = true;
+
 // Change the source map generated in development mode so logs show the original code line numbers
-if (!Encore.isProduction()) {
+if (Encore.isProduction()) {
+    confg.devtool = 'source-map';
+} else {
     confg.devtool = 'eval-source-map';
 }
-
 module.exports = confg;

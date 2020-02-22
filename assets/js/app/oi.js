@@ -5,14 +5,23 @@
 //  PAGE SPECIFIC
 //  BROWSER SPECIFIC
 /* ======================== TOP CALLS ======================================= */
+initSentryIssueTracking();
 requireStyles();
 setGlobalJquery();
 initUi();
+
+function initSentryIssueTracking() {
+    if ($('body').data('env') !== 'prod') { return; } 
+    Sentry.init({ 
+        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
+        release: process.env.RELEASE_HASH
+    });
+}
 /* ==================== STYLES & SCRIPTS ==================================== */
 function requireStyles() {
-    require('../../styles/ei-reset.styl');   
-    require('../../styles/oi.styl');    
-    require('../../css/lib/introjs.min.css');  
+    require('../../styles/base/ei-reset.styl');   
+    require('../../styles/base/oi.styl');    
+    require('../../styles/css/lib/introjs.min.css');  
 }
 function setGlobalJquery() { 
     global.$ = $;
@@ -35,28 +44,28 @@ function initHeaderAndNav() {
     $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
 }
 function initNavMenu() {
-    require('./nav.js').initMenu();
-}
-function initTos() {
-    require('./tos.js').initTos();
+    require('./header/nav.js').initMenu();
 }
 function initImageSlider() {    
-    require('./img-slider.js').initSlider();
+    require('./header/img-slider.js').initSlider();
 }
 /* Header sticks when image header scrolls off screen. */
 function initStickyHeader() {
     const hdrHeight = $('#img-slider').outerHeight() || 
      $('#slider-overlay').outerHeight() || $('#slider-logo').outerHeight();  
-
-    $(window).scroll(function () {
-        if ($(window).scrollTop() > hdrHeight) {
-                $('#sticky-hdr').addClass("top-sticky");
-            } else {
-                $('#sticky-hdr').removeClass("top-sticky");
-            }
-    });
+    $(window).scroll(handleStickyNav.bind(null, hdrHeight));
     $(window).scroll();
 };
+function handleStickyNav(hdrHeight) {
+    if ($(window).scrollTop() > hdrHeight) {
+        $('#sticky-hdr').addClass("top-sticky");
+    } else {
+        $('#sticky-hdr').removeClass("top-sticky");
+    }
+}
+function initTos() {
+    require('./misc/tos.js').initTos();
+}
 /* ========================== PAGE SPECIFIC ================================= */
 function handlePageSpecificUiInit() {
     initPageTable();
@@ -134,12 +143,12 @@ function authDependentInit() {
     } 
     
     function initEditContentUi() {
-        const wysiwyg = require('./wysiwyg.js');
+        const wysiwyg = require('./misc/wysiwyg.js');
         wysiwyg.init(userRole);
     }
 }  /* End authDependentInit */
 function initFeedbackUi() {
-    const feedback = require('./feedback.js');
+    const feedback = require('./feedback/feedback.js');
     feedback.init();
 }
 /* ======================= BROWSER SPECIFIC ================================= */

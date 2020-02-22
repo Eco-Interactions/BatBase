@@ -7,17 +7,42 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 >==== CURRENT ====
+    - Handle potential source name duplication
+        - duplicate display names for entities with unique name fields
+            - source: if duplicate name is for a soft-deleted entity. 
+                - if not, 
+                    - are they of different types? 
+                        - if not, different years?
+                            - if not, append first author.
+                - if so, 
+                    - return the data of the deleted record
+                        - display to user with prompt to restore
+                            - submit, restoring the deleted record.
+                        - and to indicate they are creating a distinct record 
+                            - submit, append '-deleted' to deleted record to eliminate conflict. 
+    - Batch downloads? Built in doctrine tools? serialize?
+    - Refactor init download 
+        - taxa (bats then interactions) first, load table and tutorial asap.
+        - source next, source view available asap
+        - location (minus geojson) (table fully available here)
+        - list data 
+        - geojson last, map views available from there (maps available)
+    - Refactor Source data 
+        - merge detail and core data on client side
 
+DUE: MARCH 20
+
+
+STANDARDS:
+    append '_' before imported file, without it for the access method.
 QUESTIONS:
     -
 
 TASKS:
 
-
 NEXT:
     - Create model of local storage
         - of entity relations
-    - Replace checkDisplayNameForDups from get-form-data
 
 Change Log:
     - 
@@ -91,6 +116,7 @@ TODOs:
     - {high}[easy] Ensure all entities have a display name before submitting
     - {med}[easy] Add warning to new Taxon form when no parent is selected
     - {med}[easy] Add error preventing taxa being moved to their parent's level or above
+    - add field validation ensure that numeric fields are valid
 
 (DATA)
     - {med}[med] Add flag to db that will indicate all local data storage needs reset.

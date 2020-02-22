@@ -436,37 +436,6 @@ AppBundle\Entity\Contribution:
         created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
         createdBy: '@User-1' 
         updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
-AppBundle\Entity\Realm: 
-    Realm-1: #1
-        slug: bat
-        displayName: Bat
-        pluralName: Bats
-        uiLevelsShown: '[7, 6, 5]'
-        taxon: '@Taxon-2' #7
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Realm-2: #3
-        slug: plant
-        displayName: Plant
-        pluralName: Plants
-        uiLevelsShown: '[7, 6, 5]'
-        taxon: '@Taxon-3' #20
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Realm-3: #2
-        slug: arthropod
-        displayName: Arthropod
-        pluralName: Arthropods
-        uiLevelsShown: '[7, 6, 5, 4, 3]'
-        taxon: '@Taxon-4'  #11
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
 AppBundle\Entity\Feedback:
     Feedback-1:
         status: 3
@@ -1613,9 +1582,41 @@ AppBundle\Entity\Publisher: #added
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
+AppBundle\Entity\Realm: 
+    Realm-1: #1
+        slug: bat
+        displayName: Bat
+        pluralName: Bats
+        uiLevelsShown: '[7, 6, 5]'
+        taxon: '@Taxon-2' #7
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-2: #3
+        slug: plant
+        displayName: Plant
+        pluralName: Plants
+        uiLevelsShown: '[7, 6, 5]'
+        taxon: '@Taxon-3' #20
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-3: #2
+        slug: arthropod
+        displayName: Arthropod
+        pluralName: Arthropods
+        uiLevelsShown: '[7, 6, 5, 4, 3]'
+        taxon: '@Taxon-4'  #11
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
 AppBundle\Entity\Source:
     Source-1: #1
         displayName: 'Feeding habits'
+        name: null
         description: 'Gardner, A. L. 1977. Feeding habits. Biology of bats of the New World family Phyllostomatidae. Part II (R.J. Baker, J.K. Jones, Jr. & D.C. Carter, ed.), pp. 293-350, Special Publications, The Museum, Texas Tech Univ. Press.'
         isDirect: true
         parentSource: '@Source-2' #
@@ -1968,7 +1969,8 @@ AppBundle\Entity\Tag:
 AppBundle\Entity\Taxon:
     Taxon-1: #21
         slug: animalia
-        displayName: Animalia
+        displayName: 'Kingdom Animalia'
+        name: Animalia
         level: '@Level-1' #7
         childTaxa: ['@Taxon-2']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1977,7 +1979,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-2: #7
         slug: chiroptera
-        displayName: Chiroptera
+        displayName: 'Order Chiroptera'
+        name: Chiroptera
         realm: '@Realm-1' #
         isRealm: true
         level: '@Level-4' #
@@ -1989,7 +1992,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-3: #20
         slug: plantae
-        displayName: Plantae
+        displayName: 'Kingdom Plantae'
+        name: Plantae
         realm: '@Realm-2' #3
         isRealm: true
         level: '@Level-1' #7
@@ -2000,7 +2004,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-4: #11
         slug: arthropoda
-        displayName: Arthropoda
+        displayName: 'Phylum Arthropoda'
+        name: Arthropoda
         realm: '@Realm-3' #2
         isRealm: true
         level: '@Level-2' #6
@@ -2011,7 +2016,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-5: #6
         slug: phyllostomidae
-        displayName: Phyllostomidae
+        displayName: 'Family Phyllostomidae'
+        name: Phyllostomidae
         level: '@Level-5' #3
         parentTaxon: '@Taxon-2' #7
         childTaxa: ['@Taxon-6', '@Taxon-12', '@Taxon-21']
@@ -2022,7 +2028,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-6: #41
         slug: micronycteris
-        displayName: Micronycteris
+        displayName: 'Family Micronycteris'
+        name: Micronycteris
         level: '@Level-6' #2
         parentTaxon: '@Taxon-5' #6
         childTaxa: ['@Taxon-7', '@Taxon-17']
@@ -2034,6 +2041,7 @@ AppBundle\Entity\Taxon:
     Taxon-7:  #40
         slug: micronycteris-hirsuta
         displayName: 'Micronycteris hirsuta'
+        name: 'Micronycteris hirsuta'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-6' #41
         subjectRoles: ['@Interaction-1', '@Interaction-2']
@@ -2043,7 +2051,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-8:  #218
         slug: lepidoptera
-        displayName: Lepidoptera
+        displayName: 'Order Lepidoptera'
+        name: Lepidoptera
         level: '@Level-4' #
         parentTaxon: '@Taxon-4'  #11
         childTaxa: ['@Taxon-9']
@@ -2054,7 +2063,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-9: #859
         slug: sphingidae
-        displayName: Sphingidae
+        displayName: 'Family Sphingidae'
+        name: Sphingidae
         level: '@Level-5' #3
         parentTaxon: '@Taxon-8'  #218
         objectRoles: ['@Interaction-1']
@@ -2064,7 +2074,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-10: #900
         slug: lauraceae
-        displayName: Lauraceae
+        displayName: 'Family Lauraceae'
+        name: Lauraceae
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3'  #20
         childTaxa: ['@Taxon-11']
@@ -2074,7 +2085,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-11: #899
         slug: beilschmiedia
-        displayName: Beilschmiedia
+        displayName: 'Genus Beilschmiedia'
+        name: Beilschmiedia
         level: '@Level-6'  #2
         parentTaxon: '@Taxon-10' #900
         objectRoles: ['@Interaction-2']
@@ -2084,7 +2096,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-12: #56
         slug: artibeus
-        displayName: Artibeus
+        displayName: 'Genus Artibeus'
+        name: Artibeus
         level: '@Level-6'  #6
         parentTaxon: '@Taxon-5'  #6 
         childTaxa: ['@Taxon-13']
@@ -2095,6 +2108,7 @@ AppBundle\Entity\Taxon:
     Taxon-13: #120
         slug: artibeus-lituratus
         displayName: 'Artibeus lituratus'
+        name: 'Artibeus lituratus'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-12' #56
         subjectRoles: ['@Interaction-3']
@@ -2104,7 +2118,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-14: #72
         slug: anacardiaceae
-        displayName: Anacardiaceae
+        displayName: 'Family Anacardiaceae'
+        name: Anacardiaceae
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-15']
@@ -2114,7 +2129,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-15: #73
         slug: anacardium
-        displayName: Anacardium
+        displayName: 'Genus Anacardium'
+        name: Anacardium
         level: '@Level-6' #2
         parentTaxon: '@Taxon-14' #72
         childTaxa: ['@Taxon-16']
@@ -2125,6 +2141,7 @@ AppBundle\Entity\Taxon:
     Taxon-16: #74
         slug: anacardium-excelsum
         displayName: 'Anacardium excelsum'
+        name: 'Anacardium excelsum'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-15' #73
         objectRoles: ['@Interaction-3']
@@ -2135,6 +2152,7 @@ AppBundle\Entity\Taxon:
     Taxon-17: #1250
         slug: micronycteris-schmidtorum
         displayName: 'Micronycteris schmidtorum'
+        name: 'Micronycteris schmidtorum'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-6' #41
         subjectRoles: ['@Interaction-4']
@@ -2144,7 +2162,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-18: #155
         slug: fabaceae
-        displayName: Fabaceae
+        displayName: 'Family Fabaceae'
+        name: Fabaceae
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-19']
@@ -2154,7 +2173,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-19: #562
         slug: mucuna
-        displayName: Mucuna
+        displayName: 'Genus Mucuna'
+        name: Mucuna
         level: '@Level-6' #2
         parentTaxon: '@Taxon-18'    #155
         childTaxa: ['@Taxon-20']
@@ -2165,6 +2185,7 @@ AppBundle\Entity\Taxon:
     Taxon-20: #564
         slug: mucuna-andreana
         displayName: 'Mucuna andreana'
+        name: 'Mucuna andreana'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-19' #562
         objectRoles: ['@Interaction-5', '@Interaction-8']
@@ -2174,7 +2195,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-21: #59
         slug: rhinophylla
-        displayName: Rhinophylla
+        displayName: 'Genus Rhinophylla'
+        name: Rhinophylla
         level: '@Level-6' #2
         parentTaxon: '@Taxon-5' #6
         childTaxa: ['@Taxon-22']
@@ -2186,6 +2208,7 @@ AppBundle\Entity\Taxon:
     Taxon-22: #58
         slug: rhinophylla-pumilio
         displayName: 'Rhinophylla pumilio'
+        name: 'Rhinophylla pumilio'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-21' #59
         subjectRoles: ['@Interaction-6', '@Interaction-7']
@@ -2195,7 +2218,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-23: #507
         slug: araceae
-        displayName: Araceae
+        displayName: 'Family Araceae'
+        name: Araceae
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-24']
@@ -2206,7 +2230,8 @@ AppBundle\Entity\Taxon:
         updatedBy: '@User-1'
     Taxon-24: #510
         slug: philodendron
-        displayName: Philodendron
+        displayName: 'Genus Philodendron'
+        name: Philodendron
         level: '@Level-6' #2
         parentTaxon: '@Taxon-23' #507
         childTaxa: ['@Taxon-25']
@@ -2217,6 +2242,7 @@ AppBundle\Entity\Taxon:
     Taxon-25: #528
         slug: philodendron-sphalerum
         displayName: 'Philodendron sphalerum'
+        name: 'Philodendron sphalerum'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-24' #510
         objectRoles: ['@Interaction-6']

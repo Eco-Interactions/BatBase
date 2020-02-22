@@ -1,0 +1,6 @@
+[auth]
+token=0dbc42455f464453aab6908b16b682a5940db190812341caa08b5c452317a0ed
+
+[defaults]
+project=javascript
+org=bat-eco-interactions

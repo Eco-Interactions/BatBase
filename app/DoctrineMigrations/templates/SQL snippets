@@ -1,0 +1,1 @@
+$this->addSql('ALTER TABLE contribution MODIFY COLUMN is_editor TINYINT(1) DEFAULT NULL AFTER auth_src_id;');

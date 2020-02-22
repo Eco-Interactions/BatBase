@@ -46,3 +46,7 @@ services:
         autowire: true
         tags:
             - { name: kernel.event_subscriber }
+
+
+    Monolog\Processor\PsrLogMessageProcessor:
+        tags: { name: monolog.processor, handler: sentry }
