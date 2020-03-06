@@ -7,6 +7,13 @@
 >Test Users
     - TestUser: testuser123
     - testeditor: testeditor123
+## ======================= DEPLOYMENT STEPS ================================= ##
+GENERATE ASSET FILES WITH WEBPACK:
+    - webpack.config.js > Comment DEV specific config and uncomment PROD config
+    - yarn run encore production
+    - update relevant changed files and data on server 
+    NOTIFY SENTRY OF NEW RELEASE:
+        - run ./sentry_release.sh 
 
 ##------------------- TESTING ------------------------------------------------##
 >TESTING:

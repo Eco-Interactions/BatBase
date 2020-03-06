@@ -1,31 +1,21 @@
 const Encore = require('@symfony/webpack-encore');
-/* ======== DEV ======= */
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 /* ========= PROD ======= */ 
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
-const childProcess = require('child_process');
-const RELEASE_HASH = childProcess.execSync('git rev-parse HEAD').toString().trim(); 
 /* ======== ALL =========== */
 const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' };
 /** ======================== Configuration ================================== */
 Encore
 /* ======== DEV ======= */
     /* During rebuilds, all webpack assets that are not used will be removed. */
-    // .addPlugin(new CleanWebpackPlugin())
     // .setPublicPath('/batplant/web/build')
 /* ========= PROD ======= */ 
     /* the public path used by the web server to access the previous directory */
     .setPublicPath('/build')
-    .configureDefinePlugin(options => {
-        options['process.env'].RELEASE_HASH = JSON.stringify(RELEASE_HASH)
-    })
     /* Sends source maps to Sentry for bug/issue tracking. */
     .addPlugin(new SentryWebpackPlugin({
-        include: '.', test: [/\.js$/], release: process.env.RELEASE_HASH, 
-        ignore: ['web', 'node_modules', 'webpack.config.js', 'vendor', 
-            '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
-        commits: { repo: 'Eco-Interactions/batplant', auto: true }
-        // debug: true, // rewrite: true, // validate: true,
+        include: '.', test: [/\.js$/], release: '20200223_BEI', 
+        debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',  
+            'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
     }))
 /* ======== ALL =========== */
     // the project directory where all compiled assets will be stored

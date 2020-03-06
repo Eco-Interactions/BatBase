@@ -27,7 +27,7 @@ monolog:
             id: Sentry\Monolog\Handler
 
 sentry:
-    dsn: "https://8f6152ea9c9a4737bbbebb731092904b@sentry.io/2504981"
+    dsn: "https://a3af0bd37c034a91b7027754e47ab947@sentry.io/2776038"
     register_error_listener: false # Disables the ErrorListener
     monolog:
         error_handler:
@@ -35,7 +35,7 @@ sentry:
             level: error
     options:
         environment: '%kernel.environment%'
-        release: '%env_version%' #your app version
+        release: '%release%' 
         excluded_exceptions: #exclude validation errors
             - App\Exception\UserNotFoundException
             - Symfony\Component\Security\Core\Exception\AccessDeniedException
