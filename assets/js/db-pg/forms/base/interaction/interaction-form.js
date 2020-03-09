@@ -410,7 +410,7 @@ function ifLevelComboRemoveCombo(i, elem) {
 /* ------------------- ROLE SHARED HELPERS --------------- */
 /* ------- initTaxonSelectForm --------- */
 function initTaxonSelectForm(role, realmId) {                                     
-    if (ifFormAlreadyOpenAtLevel('sub')) { return openSubFormErr(role, 'sub'); }
+    if (ifFormAlreadyOpenAtLevel('sub')) { return throwAndCatchSubFormErr(role, 'sub'); }
     return buildTaxonSelectForm(role, realmId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));

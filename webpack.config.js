@@ -40,6 +40,11 @@ Encore
     .autoProvideVariables(autoProvidedVars)  
     /** ------- Loaders ----------------- */
     .enableStylusLoader()
+    .addLoader({
+        test: /\.js$/,
+        exclude: /node_modules\/(?!(idb-keyval)\/).*/,
+        loader: 'babel-loader',
+    })
     // .configureLoaderRule('images', loaderRule => {
     //     loaderRule.test = /\.(png|svg|jpe?g|gif)$/;
     //     loaderRule.options = { name: 'images/[name].[hash:8].[ext]' };
