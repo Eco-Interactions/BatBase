@@ -7,16 +7,16 @@ const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' 
 Encore
 /* ======== DEV ======= */
     /* During rebuilds, all webpack assets that are not used will be removed. */
-    // .setPublicPath('/batplant/web/build')
+    .setPublicPath('/batplant/web/build')
 /* ========= PROD ======= */ 
     /* the public path used by the web server to access the previous directory */
-    .setPublicPath('/build')
+    // .setPublicPath('/build')
     /* Sends source maps to Sentry for bug/issue tracking. */
-    .addPlugin(new SentryWebpackPlugin({
-        include: '.', test: [/\.js$/], release: '20200223_BEI', 
-        debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',  
-            'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
-    }))
+    // .addPlugin(new SentryWebpackPlugin({
+    //     include: '.', test: [/\.js$/], release: '20200223_BEI', 
+    //     debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',  
+    //         'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
+    // }))
 /* ======== ALL =========== */
     // the project directory where all compiled assets will be stored
     .setOutputPath('web/build')

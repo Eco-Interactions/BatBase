@@ -8,14 +8,26 @@
     - TestUser: testuser123
     - testeditor: testeditor123
 ## ======================= DEPLOYMENT STEPS ================================= ##
+>STEPS TO DEPLOY TO SERVER
+NOTIFY SENTRY OF NEW RELEASE:  
+    - run ./sentry_release.sh
+    - copy the release name <YYYMMDD_BEI> 
 GENERATE ASSET FILES WITH WEBPACK:
     - webpack.config.js > Comment DEV specific config and uncomment PROD config
+    - paste in the release name
     - yarn run encore production
-    - update relevant changed files and data on server 
-    NOTIFY SENTRY OF NEW RELEASE:
-        - run ./sentry_release.sh 
+SERVER UPDATES:
+    - set up the 'prod_copy' sub-domain first
+        - set 'release' in parameters.yml
+        - update relevant changed files on server
+        - handle any database changes
+        - test and bug fix
+    - set up the main domain
+        - set up the new prod database
+        - copy the 'prod_copy' as 'prod' to set up main domain
+        - update the database name in parameters.yml
 
-##------------------- TESTING ------------------------------------------------##
+## =========================== TESTING ====================================== ##
 >TESTING:
 Start Selenium: 
     $ java -jar selenium-server-standalone-3.141.59.jar
