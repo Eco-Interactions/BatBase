@@ -120,7 +120,7 @@ class Location
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc", fetch="EXTRA_LAZY")
      * @ORM\OrderBy({
      *     "description"="ASC"
      * })
@@ -145,7 +145,7 @@ class Location
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location", fetch="EXTRA_LAZY")
      */
     private $interactions;
 

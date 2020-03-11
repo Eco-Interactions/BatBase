@@ -60,12 +60,19 @@ class Realm
     private $uiLevelsShown;
 
     /**
-     * @var \AppBundle\Entity\Taxon
+     * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="realm")
-     * @ORM\JoinColumn(name="taxon_id", referencedColumnName="id", unique=true)
+     * @ORM\OneToMany(
+     *     targetEntity="AppBundle\Entity\RealmTaxon", 
+     *     mappedBy="realm", 
+     *     cascade={"remove"},
+     *     orphanRemoval=true,
+     *     fetch="EXTRA_LAZY"
+     * )
+     *
+     * A collection of all works an Author source contributed to.
      */
-    private $taxon;
+    private $taxa;
 
     /**
      * @var \DateTime
@@ -208,37 +215,37 @@ class Realm
     }
 
     /**
-     * Set taxon.
+     * Add a Taxon.
      *
-     * @param \AppBundle\Entity\Taxon $taxon
+     * @param \AppBundle\Entity\RealmTaxon $taxa
      *
      * @return Realm
      */
-    public function setTaxon(\AppBundle\Entity\Taxon $taxon = null)
+    public function addTaxon(\AppBundle\Entity\RealmTaxon $taxa)
     {
-        $this->taxon = $taxon;
+        $this->taxa[] = $taxa;
 
         return $this;
     }
 
     /**
-     * Get taxon.
+     * Remove a Taxon.
      *
-     * @return \AppBundle\Entity\Taxon
+     * @param \AppBundle\Entity\RealmTaxon $taxa
      */
-    public function getTaxon()
+    public function removeTaxon(\AppBundle\Entity\RealmTaxon $taxa)
     {
-        return $this->taxon;
+        $this->taxa->removeElement($taxa);
     }
 
     /**
-     * Get the realm Taxon's id.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("taxon")
+     * Get Taxons.
+     *
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getTaxonId()
+    public function getTaxa()
     {
-        return $this->taxon->getId();
+        return $this->taxa;
     }
 
     /**

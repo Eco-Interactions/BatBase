@@ -54,7 +54,7 @@ class GeoJson
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Location", inversedBy="geoJson")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Location", inversedBy="geoJson", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="loc_id", referencedColumnName="id", unique=true)
      */
     private $location;

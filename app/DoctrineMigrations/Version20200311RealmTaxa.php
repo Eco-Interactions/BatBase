@@ -7,14 +7,14 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\InteractionType;
+use AppBundle\Entity\RealmTaxon;
 
 
 /**
  * Template for doctrine migrations where the entity manager is necessary.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-class ContainerAwareTemplate extends AbstractMigration implements ContainerAwareInterface
+class Version20200311RealmTaxa extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
     private $em;
@@ -54,6 +54,46 @@ class ContainerAwareTemplate extends AbstractMigration implements ContainerAware
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->getEntity('User', 6);
 
+        $this->setNewRealmTaxonData();
+        $this->em->flush();
+
+        $this->addSql('ALTER TABLE realm DROP FOREIGN KEY FK_A7A91E0BDE13F470');
+        $this->addSql('DROP INDEX UNIQ_FA96DBDADE13F470 ON realm');
+        $this->addSql('ALTER TABLE realm DROP taxon_id');
+    }
+
+    private function setNewRealmTaxonData()
+    {
+        $realms = $this->getEntities('Realm');
+        foreach ($realms as $realm) {                                           //print("\n".$realm->getDisplayName());
+            $this->setRealmDataForTaxonAndChildren($realm->getTaxon(), $realm, true);
+            $this->persistEntity($realm);
+        }
+    }
+
+    private function setRealmDataForTaxonAndChildren($taxon, $realm, $isRoot)
+    {
+        $this->setTaxonRealmData($taxon, $realm, $isRoot);
+
+        foreach ($taxon->getChildTaxa() as $childTaxon) {  
+            $this->setRealmDataForTaxonAndChildren($childTaxon, $realm, false);
+        }
+    }
+
+    private function setTaxonRealmData($taxon, $realm, $isRoot)
+    {                                                                           //print("\n       -- ".$taxon->getId());
+        $realmTaxonData = $this->createRealmTaxonData($taxon, $realm, $isRoot);
+        $this->persistEntity($realmTaxonData, true);
+        $this->persistEntity($taxon);
+    }
+
+    private function createRealmTaxonData($taxon, $realm, $isRoot)
+    {
+        $realmTaxon = new RealmTaxon();
+        $realmTaxon->setTaxon($taxon);
+        $realmTaxon->setRealm($realm);
+        $realmTaxon->setIsRoot($isRoot);
+        return $realmTaxon;
     }
 
 /* ======================== down ============================================ */

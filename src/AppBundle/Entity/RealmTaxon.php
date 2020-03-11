@@ -4,17 +4,15 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use JMS\Serializer\Annotation as JMS;
 
 /**
- * Level.
+ * Realm Taxon.
  *
- * @ORM\Table(name="level")
+ * @ORM\Table(name="realm_taxon")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
- * @JMS\ExclusionPolicy("all")
  */
-class Level
+class RealmTaxon
 {
     /**
      * @var int
@@ -26,37 +24,24 @@ class Level
     private $id;
 
     /**
-     * @var string
+     * True if the taxon is the root of the realm's taxon tree.
+     * @var bool
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
-     * @JMS\Expose
-     * @JMS\SerializedName("displayName")
+     * @ORM\Column(name="is_root", type="boolean")
      */
-    private $displayName;
+    private $isRoot;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(name="ordinal", type="integer", nullable=true)
-     * @JMS\Expose
+     * @ORM\ManyToOne(targetEntity="Realm")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $ordinal;
+    private $realm;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="plural_name", type="string", length=255, nullable=true)
-     * @JMS\Expose
-     * @JMS\SerializedName("pluralName")
+     * @ORM\ManyToOne(targetEntity="Taxon")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $pluralName;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Taxon", mappedBy="level", fetch="EXTRA_LAZY")
-     */
-    private $taxons;
+    private $taxon;
 
     /**
      * @var \DateTime
@@ -65,7 +50,7 @@ class Level
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User
      *
@@ -93,17 +78,7 @@ class Level
     private $updatedBy;
 
     /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->taxons = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    /**
      * Get id.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -113,109 +88,75 @@ class Level
     }
 
     /**
-     * Set displayName.
+     * Set isRoot.
      *
-     * @param string $displayName
+     * @param bool $isRoot
      *
-     * @return Level
+     * @return RealmTaxon
      */
-    public function setDisplayName($displayName)
+    public function setIsRoot($isRoot = false)
     {
-        $this->displayName = $displayName;
+        $this->isRoot = $isRoot;
 
         return $this;
     }
 
     /**
-     * Get displayName.
+     * Get isRoot.
      *
-     * @return string
+     * @return bool
      */
-    public function getDisplayName()
+    public function getIsRoot()
     {
-        return $this->displayName;
+        return $this->isRoot;
     }
 
     /**
-     * Set ordinal.
+     * Set realm.
      *
-     * @param int $ordinal
+     * @param \AppBundle\Entity\Realm $realm
      *
-     * @return Level
+     * @return RealmTaxon
      */
-    public function setOrdinal($ordinal)
+    public function setRealm(\AppBundle\Entity\Realm $realm)
     {
-        $this->ordinal = $ordinal;
+        $this->realm = $realm;
 
         return $this;
     }
 
     /**
-     * Get ordinal.
+     * Get realm.
      *
-     * @return int
+     * @return \AppBundle\Entity\Realm
      */
-    public function getOrdinal()
+    public function getRealm()
     {
-        return $this->ordinal;
+        return $this->realm;
     }
 
     /**
-     * Set pluralName.
+     * Set Taxon.
      *
-     * @param string $pluralName
+     * @param \AppBundle\Entity\Taxon $taxon
      *
-     * @return Level
+     * @return RealmTaxon
      */
-    public function setPluralName($pluralName)
+    public function setTaxon(\AppBundle\Entity\Taxon $taxon)
     {
-        $this->pluralName = $pluralName;
+        $this->taxon = $taxon;
 
         return $this;
     }
 
     /**
-     * Get pluralName.
+     * Get Taxon.
      *
-     * @return string
+     * @return \AppBundle\Entity\Taxon
      */
-    public function getPluralName()
+    public function getTaxon()
     {
-        return $this->pluralName;
-    }
-
-    /**
-     * Add taxons.
-     *
-     * @param \AppBundle\Entity\Taxon $taxons
-     *
-     * @return Level
-     */
-    public function addTaxon(\AppBundle\Entity\Taxon $taxons)
-    {
-        $this->taxons[] = $taxons;
-
-        return $this;
-    }
-
-    /**
-     * Remove taxons.
-     *
-     * @param \AppBundle\Entity\Taxon $taxons
-     */
-    public function removeTaxon(\AppBundle\Entity\Taxon $taxons)
-    {
-        $this->taxons->removeElement($taxons);
-    }
-
-    /**
-     * Get taxons.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getTaxons()
-    {
-        return $this->taxons;
+        return $this->taxon;
     }
 
     /**
@@ -253,11 +194,9 @@ class Level
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
-
-        return $this;
     }
 
     /**
@@ -287,6 +226,6 @@ class Level
      */
     public function __toString()
     {
-        return $this->getDisplayName();
+        return $realm->getDisplayName() . ' ' . $taxon->getDisplayName();
     }
 }

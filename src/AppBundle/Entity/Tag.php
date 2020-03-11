@@ -52,7 +52,7 @@ class Tag
     private $constrainedToEntity;
 
     /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="tags", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $interactions;
@@ -64,7 +64,7 @@ class Tag
     private $intTypeConstraints;
 
     /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", mappedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", mappedBy="tags", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(name="source_tag")
      */
     private $sources;
