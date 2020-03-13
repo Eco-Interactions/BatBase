@@ -87,17 +87,11 @@ class Taxon
     private $linkUrl;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var \AppBundle\Entity\Realm
      *
-     * @ORM\OneToMany(
-     *     targetEntity="AppBundle\Entity\RealmTaxon", 
-     *     mappedBy="taxon", 
-     *     cascade={"remove"},
-     *     orphanRemoval=true,
-     *     fetch="EXTRA_LAZY"
-     * )
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RealmTaxon", mappedBy="taxon")
      */
-    private $realms;
+    private $realm;
 
     /**
      * @var \AppBundle\Entity\Level
@@ -204,7 +198,6 @@ class Taxon
         $this->childNamings = new \Doctrine\Common\Collections\ArrayCollection();
         $this->subjectRoles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->objectRoles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->realms = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -386,63 +379,45 @@ class Taxon
     }
 
     /**
-     * Add a Realm.
+     * Set Realm.
      *
      * @param \AppBundle\Entity\RealmTaxon $realm
      *
-     * @return Source
+     * @return Taxon
      */
-    public function addRealm(\AppBundle\Entity\RealmTaxon $realm)
+    public function setRealm(\AppBundle\Entity\RealmTaxon $realm)
     {
-        $this->realms[] = $realm;
+        $this->realm = $realm;
 
         return $this;
     }
 
     /**
-     * Remove a Realm.
+     * Get Realm.
      *
-     * @param \AppBundle\Entity\RealmTaxon $realm
+     * @return \AppBundle\Entity\Realm
      */
-    public function removeRealm(\AppBundle\Entity\RealmTaxon $realm)
+    public function getRealm()
     {
-        $this->realms->removeElement($realm);
-    }
-
-    /**
-     * Get Realms.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRealms()
-    {
-        return $this->realms;
+        return $this->realm->getRealm();
     }
 
     /**
      * Get Realm Ids.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("realms")
+     * @JMS\SerializedName("realm")
      *
      * @return array
      */
-    public function getRealmIds()
+    public function getRealmId()
     {
-        $ids = [];
-        foreach ($this->realms as $realmTaxon) {
-            array_merge($ids, ['id' => $realmTaxon->getRealm()->getId(), 'isRoot' => $realmTaxon->getIsRoot()]);
-        }
-        return $ids;
+        $realm = $this->realm->getRealm();
+        return [
+            'id' => $realm->getId(),
+            'displayName' => $realm->getDisplayName(),
+            'pluralName' => $realm->getPluralName()
+        ];
     }
-
-    // private function buildRealmObj($realm)
-    // {
-    //     return [ 
-    //         'id' => $realm->getId(), 
-    //         'displayName' => $realm->getDisplayName(),
-    //         'pluralName' => $realm->getPluralName() 
-    //     ];
-    // }
 
     /**
      * Set level.
@@ -857,9 +832,6 @@ class Taxon
      */
     public function __toString()
     {
-        if ($this->getDisplayName()) {
-            return $this->getDisplayName();
-        }
-        return 'Unnamed Taxon';
+        return $this->getDisplayName();
     }
 }

@@ -11,7 +11,8 @@ use AppBundle\Entity\RealmTaxon;
 
 
 /**
- * Template for doctrine migrations where the entity manager is necessary.
+ * Creates a new Realm Taxon entity for each taxon in each realm. This will allow 
+ * easier handling of realm taxa collections.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
 class Version20200313RealmTaxa extends AbstractMigration implements ContainerAwareInterface

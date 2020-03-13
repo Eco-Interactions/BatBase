@@ -38,7 +38,7 @@ class RealmTaxon
     private $realm;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Taxon")
+     * @ORM\OneToOne(targetEntity="Taxon", inversedBy="realm")
      * @ORM\JoinColumn(nullable=false)
      */
     private $taxon;

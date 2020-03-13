@@ -87,7 +87,7 @@ class Author
     private $fullName;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var \AppBundle\Entity\Source
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="author")
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)

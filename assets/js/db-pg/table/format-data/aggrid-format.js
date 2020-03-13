@@ -5,8 +5,14 @@
  *     buildLocRowData         db-page
  *     buildSrcRowData         db-page
  *     buildTxnRowData         db-page
+ *
+ * TOC:
+ *     LOCATION ROW DATA
+ *     SOURCE ROW DATA
+ *     TAXON ROW DATA
+ *     INTERACTION ROW DATA
  */
-/*--------- Location Data Formatting ---------------------------------------------------------------------------------*/
+/* --------------------- LOCATION ROW DATA ---------------------------------- */
 export function buildLocRowData(tree, tblState) {
     const finalRowData = [];                                                    
     for (let topNode in tree) {                                                 
@@ -98,7 +104,7 @@ function hasChildInteractions(row) {
         return childRow.interactions || hasChildInteractions(childRow);  
     });
 }
-/*--------- Source Data Formatting -----------------------------------------------------------------------------------*/
+/* ------------------ SOURCE ROW DATA --------------------------------------- */
 export function buildSrcRowData(tree, tblState) {
     let rowColorIdx = 0;
     const finalRowData = [];
@@ -149,7 +155,7 @@ function getSrcTreeName(view) {
     const prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
     return prefix[view] + ' Tree';
 }
-/*-------- Taxon Data Formatting ------------------------------------------*/
+/* ---------------- TAXON ROW DATA ------------------------------------------ */
 export function buildTxnRowData(tree, tblState) {
     const finalRowData = [];
     for (let topTaxon in tree) {
@@ -261,14 +267,14 @@ function getCurTaxonLvlCols(tblState) {
     var lvls = Object.keys(tblState.taxaByLvl);
     return lvls.map(function(lvl){ return 'tree' + lvl; });
 }
-/*------------------------ UTILITY ------------------------------------------ */
+/*------------------------ INTERACTION ROW DATA ----------------------------- */
 /**
  * Returns an array with table-row objects for each interaction record.
  * Note: var idx is used for row coloring.
  */
 function getIntRowData(intRcrdAry, treeLvl, idx) {
     if (intRcrdAry) {
-        return intRcrdAry.map(function(intRcrd){                                
+        return intRcrdAry.map(intRcrd => {                                
             return buildIntRowData(intRcrd, treeLvl, idx);
         });
     }

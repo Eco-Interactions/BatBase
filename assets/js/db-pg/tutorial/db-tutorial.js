@@ -97,7 +97,7 @@ function waitForDbLoad() {
 }
 function addDbLoadNotice() {  
     $('.introjs-tooltiptext').html(`
-        <br><br><center><b>Please wait for database to finish downloading before 
+        <br><br><center><b>Please wait for the data to finish downloading before 
         continuing.`);
 }
 function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)

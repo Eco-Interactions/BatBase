@@ -369,12 +369,12 @@ function removeLocMap() {
  * are repopulated with related taxa and the 'select' button is enabled.
  */
 function initSubjectSelect() {                                                  console.log('       +--initSubjectSelect (selected ? [%s])', $('#Subject-sel').val());
-    return initTaxonSelectForm('Subject', 1);
+    initTaxonSelectForm('Subject', 1);
 }
 /* -------------- OBJECT ---------------------- */
 /** Note: The selected realm's level combos are built @onRealmSelection. */
 function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
-    return initTaxonSelectForm('Object', getObjectRealm());
+    initTaxonSelectForm('Object', getObjectRealm());
 } 
 function getObjectRealm() { 
     const prevSelectedId = $('#Object-sel').data('selTaxon');

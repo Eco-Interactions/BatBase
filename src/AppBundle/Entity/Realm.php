@@ -217,13 +217,13 @@ class Realm
     /**
      * Add a Taxon.
      *
-     * @param \AppBundle\Entity\RealmTaxon $taxa
+     * @param \AppBundle\Entity\RealmTaxon $realmTaxon
      *
      * @return Realm
      */
-    public function addTaxon(\AppBundle\Entity\RealmTaxon $taxa)
+    public function addTaxon(\AppBundle\Entity\RealmTaxon $realmTaxon)
     {
-        $this->taxa[] = $taxa;
+        $this->taxa[] = $realmTaxon;
 
         return $this;
     }
@@ -231,11 +231,11 @@ class Realm
     /**
      * Remove a Taxon.
      *
-     * @param \AppBundle\Entity\RealmTaxon $taxa
+     * @param \AppBundle\Entity\RealmTaxon $realmTaxon
      */
-    public function removeTaxon(\AppBundle\Entity\RealmTaxon $taxa)
+    public function removeTaxon(\AppBundle\Entity\RealmTaxon $realmTaxon)
     {
-        $this->taxa->removeElement($taxa);
+        $this->taxa->removeElement($realmTaxon);
     }
 
     /**
@@ -245,7 +245,13 @@ class Realm
      */
     public function getTaxa()
     {
-        return $this->taxa;
+        $taxa = [];
+
+        foreach ($this->taxa as $realmTaxon) {
+            array_push($taxa, $realmTaxon->getTaxon());
+        }
+
+        return $taxa;
     }
 
     /**
