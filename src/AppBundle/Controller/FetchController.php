@@ -66,7 +66,7 @@ class FetchController extends Controller
         $response = new JsonResponse(); 
         $response->setData(array(                                    
             'realm' => $realm,    'level' => $level,
-            'bats' => $bats            
+            'taxon' => $bats            
         )); 
         return $response;
     }

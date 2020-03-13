@@ -87,6 +87,7 @@ function resetUi() {                                                            
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
     if (!$('#sel-view').val() && intro._currentStep > 2) { return waitForDbLoad(); }
+    //Only allow map slides once geojson is available
     if (!stepConfg.setUpFunc) { return; }
     stepConfg.setUpFunc();
 }

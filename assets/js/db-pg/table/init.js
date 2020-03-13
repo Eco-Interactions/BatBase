@@ -95,9 +95,10 @@ function softRefresh() { tblState.api.refreshView(); }
  */
 function getColumnDefs(mainCol) { 
     const realm = tblState.curRealm || false;  
-    return getData('tagNames').then(buildColDefs);
+    return getData('tagNames', true).then(buildColDefs);
 
     function buildColDefs(tags) { 
+
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
@@ -117,22 +118,26 @@ function getColumnDefs(mainCol) {
                 {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
                 {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
                 {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-                {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                    filter: unqVals, filterParams: {values: Object.keys(tags)}},
+                {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Object Taxon", field: "object", width: 127, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Type", field: "interactionType", width: 88, cellRenderer: addToolTipToCells, filter: unqVals },
+                getTagColDef(tags),
                 {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
-                {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Location", field: "location", width: 111, hide: ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
                 {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Country", field: "country", width: 94, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Region", field: "region", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
                 {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
     }
+}
+function getTagColDef(tags) {
+    const values = tags ? Object.keys(tags) : [];
+    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
+                    filter: unqVals, filterParams: {values: values}}
 }
 /** Adds tooltip to Interaction row cells */
 function addToolTipToCells(params) {

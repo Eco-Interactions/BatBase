@@ -226,6 +226,7 @@ function getViewOpts(realms) {
     
     function taxonHasInteractions(id) {
         const taxon = taxa[id];  
+        if (!taxon) { return false; }
         const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
         return hasInts || taxon.children.find(taxonHasInteractions);
     }

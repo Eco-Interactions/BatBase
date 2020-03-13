@@ -270,7 +270,8 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
     const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source'];
-    const data = await _u.getData(entities);
+    const data = await _u.getData(entities, true);
+    if (!data[0]) { return dataTree; }
     fillInts[focus](dataTree, data);
     return dataTree;
 } 

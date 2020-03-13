@@ -161,9 +161,11 @@ function resetTableParams(focus) {
 function resetTblParams(focus) {
     const intSet =  tblState.intSet;
     const prevApi = tblState.api; //will be destroyed before new table loads. Visually jarring to remove before the new one is ready.
+    const flags = tblState.flags ? tblState.flags : {};
     tblState = {
         api: prevApi,
         curFocus: focus,
+        flags: flags,
         openRows: [],
         selectedOpts: {},
         userRole: $('body').data("user-role")
@@ -180,6 +182,10 @@ function resetCurTreeStorageProps() {
     delete tblState.curTree;
     tblState.selectedOpts = {};
     db_filters.resetFilterParams();
+}
+export function fillTableWithInteractions(argument) {
+    tblState.flags.interactionDataAvailable = true;
+    _u.getData('curView', true).then(buildTxnTable);
 }
 /* ==================== TABLE (RE)BUILDS ============================================================================ */
 function loadTbl(tblName, rowData) {

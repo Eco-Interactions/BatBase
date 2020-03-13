@@ -3,6 +3,10 @@
  *
  * TOC:
  *     DOWNLOAD DATA
+ *         INIT BASE TABLE
+ *         DOWNLOAD REMAINING TABLE DATA
+ *         DOWNLOAD REMAINING DATA
+ *         HELPERS
  *     DERIVE DATA
  *         TAXON DATA
  *         LOCATION DATA
@@ -29,33 +33,74 @@ const localData = {};
 export default function (reset) {                                               console.log("   +-initLocalData");
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
-        .then(downloadBatchedServerData)
-        .then(_db.setUpdatedDataInLocalDb)
-        .then(loadDatabaseTable);
-
-    function loadDatabaseTable() {
-        if (reset) { _db.pg('resetDataTable', ['taxa']); 
-        } else { _db.pg('initSearchState'); }
-    }
+        .then(() => initBaseDataAndLoadBatTable(reset))
+        // .then(downloadInteractionDataAndFillTable)
+        // .then(downloadRemainingTableTreeData)
+        // .then(downloadGeoJsonDataAndEnableMaps)
+        // .then(_db.setUpdatedDataInLocalDb)
+        // .then(loadDatabaseTable);
+        // .then(downloadBatchedServerData)
+        // .then(_db.setUpdatedDataInLocalDb)
+        // .then(loadDatabaseTable);
 }
-function downloadBatchedServerData() {                                          //console.log('       --downloading Taxon and Source Data');
-    return $.when(getData('taxon'), getData('lists'))
-        .then(() => getData('source'))
-        .then(() => getData('location'))
-        .then(() => getData('interaction'));
+// function downloadBatchedServerData() {                                          //console.log('       --downloading Taxon and Source Data');
+//     return $.when(getAndSetData('taxon'), getAndSetData('lists'))
+//         .then(() => getAndSetData('source'))
+//         .then(() => getAndSetData('location'))
+//         .then(() => getAndSetData('interaction'));
+// }
+/* ---------------- INIT BASE TABLE ----------------------------------------- */
+function initBaseDataAndLoadBatTable(reset) {
+    return downloadBaseTableDataAndLoadTable(reset)
 }
-function getData(url) {
+function downloadBaseTableDataAndLoadTable(reset) {
+    return getAndSetData('init')
+        .then(() => getAndSetData('lists'))
+        .then(() => loadDatabaseTable(reset))
+}
+function loadDatabaseTable(reset) {
+    if (reset) { _db.pg('resetDataTable', ['taxa']); 
+    } else { _db.pg('initSearchState'); }
+}
+function downloadInteractionDataAndFillTable() {
+    return getAndSetData('interaction')
+        .then(_db.pg('fillTableWithInteractions'));
+}
+/* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
+function downloadRemainingTaxaData() {
+    return getAndSetData('taxa')
+}
+function downloadRemainingTableTreeData() {
+    return downloadRemainingTaxaData()
+        .then(() => downloadDataAndEnableTableView('source', 'src'))
+        .then(() => downloadDataAndEnableTableView('location', 'loc'));
+}
+function downloadDataAndEnableTableView(entity, key) {
+    return getAndSetData(entity)
+        .then(() => enableTableView(entity, key));
+}
+function enableTableView(entity, key) {
+    //add focus to combobox
+}
+/* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
+function downloadGeoJsonDataAndEnableMaps() {
+    // body...
+}
+/* -------------------------- HELPERS --------------------------------------- */
+function getAndSetData(url) {
     return _db.fetchServerData(url).then(setData.bind(null, url));
 }
 function setData(url, data) {                                                   console.log('               --storing [%s] data = %O', url, data);
     const setDataFunc = {
+        'init': deriveBaseTaxonData,
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
         'location': deriveLocationData,       'source': deriveSourceData,
-        'taxon': deriveTaxonData
+        'taxa': deriveRemainingTaxonData
     };
     if (!data) { return console.log('!data'); }
     storeServerData(data);
     setDataFunc[url](data);
+    return _db.setUpdatedDataInLocalDb();
 }
 /**
  * Loops through the data object returned from the server, parsing and storing
@@ -84,11 +129,14 @@ function parseData(data) {  //shared. refact
  * *realm - resaved with 'uiLevelsShown' filled with the level display names. 
  */ 
 /** Stores an object of taxon names and ids for each level in each realm. */
-function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
+function deriveBaseTaxonData(data) {                                            console.log("deriveBaseTaxonData called. data = %O", data);
     _db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
     storeTaxaByLevelAndRealm(data.taxon);
     modifyRealmData(data.realm);
     storeLevelData(data.level);
+}
+function deriveRemainingTaxonData(data) {
+    storeTaxaByLevelAndRealm(data.taxa);
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
@@ -129,17 +177,23 @@ function separateTaxaByLevelAndRealm(taxa) {
         const realmObj = getRealmObj(taxon);
         const level = taxon.level.displayName;  
         addToRealmLevel(taxon, realmObj, level);
-    }
-    function addToRealmLevel(taxon, realmObj, level) {
-        if (!realmObj[level]) { realmObj[level] = {}; }; 
-        realmObj[level][taxon.name] = taxon.id;
+        if (taxon.isRoot) { addRootToRealmEntity(taxon); }
     }
     function getRealmObj(taxon) {
         const realm = taxon.realm.displayName
         if (!data[realm]) { data[realm] = {}; }
         return data[realm];
     }
+    function addToRealmLevel(taxon, realmObj, level) {
+        if (!realmObj[level]) { realmObj[level] = {}; }; 
+        realmObj[level][taxon.name] = taxon.id;
+    }
 } /* End separateTaxaByLevelAndRealm */
+function addRootToRealmEntity(taxon) {
+    const realms = _db.getMmryData('realm');  
+    realms[taxon.realm.id].taxon = taxon.id;
+    _db.setDataInMemory('realm', realms);
+}
 /* ---------- Modify Realm Data -------------- */
 function modifyRealmData(realms) {                                              //console.log('realms = %O', realms);
     modifyRealms(Object.keys(realms));

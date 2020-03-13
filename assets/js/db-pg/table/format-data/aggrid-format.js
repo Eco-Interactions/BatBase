@@ -247,6 +247,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
     }
 } /* End getTaxonAndChildTaxaRowData */
 function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
+    if (!tblState.flags.interactionDataAvailable) { return getPendingDataRow(); }
     const ints = [];
     ['subjectRoles', 'objectRoles'].forEach(role => {
         taxon[role].forEach(intRcrd => {
@@ -254,6 +255,17 @@ function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*/
         });
     });
     return ints;
+}
+function getPendingDataRow() {
+    const props = ['citation', 'subject', 'object', 'interactionType', 'tags', 
+        'citation', 'habitat', 'location', 'country', 'region', 'note'];
+    const rowData = {
+        entity: 'interaction',
+        isParent: false,
+        name: ''
+    };
+    props.forEach(p => rowData[p] = 'Loading...');
+    return [rowData];
 }
 /** Adds the taxon heirarchical data to the interactions row data. */ 
 function buildTaxonIntRowData(intRcrd, treeLvl, tblState) {

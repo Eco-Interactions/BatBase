@@ -420,6 +420,18 @@ class Taxon
     }
 
     /**
+     * If taxon is the root taxon of the realm.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("isRoot")
+     *
+     * @return array
+     */
+    public function getIsRoot()
+    {
+        return $this->realm->getIsRoot();
+    }
+
+    /**
      * Set level.
      *
      * @param \AppBundle\Entity\Level $level
