@@ -14,7 +14,7 @@ use AppBundle\Entity\RealmTaxon;
  * Template for doctrine migrations where the entity manager is necessary.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-class Version20200311RealmTaxa extends AbstractMigration implements ContainerAwareInterface
+class Version20200313RealmTaxa extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
     private $em;
