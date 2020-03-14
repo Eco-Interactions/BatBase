@@ -270,8 +270,8 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
     const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source'];
-    const data = await _u.getData(entities, true);
-    if (!data[0]) { return dataTree; }
+    const data = await _u.getData(entities, true);  
+    if (!data.interaction) { return dataTree; }
     fillInts[focus](dataTree, data);
     return dataTree;
 } 
@@ -329,7 +329,7 @@ function fillSrcTree(dataTree, entityData) {
 
 } /* End fillSrcTree */
 /** Replace the interaction ids with their interaction records. */
-function replaceInteractions(intAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O, intRcrds = %O", interactionsAry, entityData.interaction);
+function replaceInteractions(intAry, entityData) {                     
     return getTreeRcrds(intAry, entityData.interaction, 'interaction')
         .map(rcrd => fillIntRcrd(rcrd, entityData)).filter(i => i);
 }
@@ -344,14 +344,21 @@ function fillIntRcrd(intRcrd, entityData) {
     function fillIntProp(prop) {  
         if (prop === "tags") { return getIntTags(intRcrd[prop]); }
         const entity = prop in entityData ? prop : prop.includes('bject') ? 'taxon' : null;
-        return !entity ? intRcrd[prop] : getTreeRcrd(intRcrd[prop], entityData, entity);
+        return !entity ? intRcrd[prop] : getTreeRcrd(intRcrd[prop], entityData, entity, prop);
     }
 }
 function getIntTags(tagAry) { 
     return tagAry.map(tag => tag.displayName).join(', ');
 }
-function getTreeRcrd(id, entityData, entity) {
+/**
+ * Refactor. Hastily coded. Object taxa are not loaded until after interactions
+ * on intial database download. They will be filled in after table loads. Rewrite
+ * so a missing object record triggers the alert once all taxon data is avaiable. 
+ */
+function getTreeRcrd(id, entityData, entity, prop) {  //console.log('getTreeRcrd. [%s][%s] (%s) in %O', entity, id, prop, entityData);
+    if (entityData[entity] === undefined) { return {}; }
     const rcrd = entityData[entity][id];
+    if (!rcrd && prop === 'object') { return {}; }
     if (!rcrd) { _pg.alertIssue('noRcrdFound', {id: id, entity: entity }); }
     return rcrd ? rcrd : '_err_';
 }

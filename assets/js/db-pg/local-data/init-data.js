@@ -34,7 +34,7 @@ export default function (reset) {                                               
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initBaseDataAndLoadBatTable(reset))
-        // .then(downloadInteractionDataAndFillTable)
+        .then(downloadInteractionDataAndFillTable)
         // .then(downloadRemainingTableTreeData)
         // .then(downloadGeoJsonDataAndEnableMaps)
         // .then(_db.setUpdatedDataInLocalDb)
@@ -64,7 +64,7 @@ function loadDatabaseTable(reset) {
 }
 function downloadInteractionDataAndFillTable() {
     return getAndSetData('interaction')
-        .then(_db.pg('fillTableWithInteractions'));
+        .then(() => _db.pg('fillTableWithInteractions'));
 }
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
 function downloadRemainingTaxaData() {

@@ -120,18 +120,18 @@ function getColumnDefs(mainCol) {
                 {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
                 {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Object Taxon", field: "object", width: 127, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Type", field: "interactionType", width: 88, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Type", field: "interactionType", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
                 getTagColDef(tags),
-                {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
+                {headerName: "Citation", field: "citation", width: 133, cellRenderer: addToolTipToCells},
                 {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Location", field: "location", width: 111, hide: ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
                 {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Country", field: "country", width: 94, cellRenderer: addToolTipToCells, filter: unqVals },
                 {headerName: "Region", field: "region", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+                {headerName: "Note", field: "note", width: 166, cellRenderer: addToolTipToCells} ];
     }
 }
 function getTagColDef(tags) {

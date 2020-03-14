@@ -183,9 +183,9 @@ function resetCurTreeStorageProps() {
     tblState.selectedOpts = {};
     db_filters.resetFilterParams();
 }
-export function fillTableWithInteractions(argument) {
+export function fillTableWithInteractions() {
     tblState.flags.interactionDataAvailable = true;
-    _u.getData('curView', true).then(buildTxnTable);
+    _u.getData('curView', true).then(onTxnViewChange);
 }
 /* ==================== TABLE (RE)BUILDS ============================================================================ */
 function loadTbl(tblName, rowData) {
