@@ -133,7 +133,10 @@ function setTableInitState(isAllDataAvailable) {
     resetTableParams('taxa');
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.clearFilters();  //Sets default filter status message
-    if (isAllDataAvailable) { tState.flags.allDataAvailable = true; }
+    if (isAllDataAvailable) { 
+        tState.flags.allDataAvailable = true; 
+        _ui.enableMapFeatures();
+    }
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {

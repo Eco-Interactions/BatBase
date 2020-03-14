@@ -118,8 +118,8 @@ function getColumnDefs(mainCol) {
                 {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
                 {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
                 {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-                {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Object Taxon", field: "object", width: 127, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Subject Taxon", field: "subject", width: 144, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Object Taxon", field: "object", width: 144, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Type", field: "interactionType", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
                 getTagColDef(tags),
                 {headerName: "Citation", field: "citation", width: 133, cellRenderer: addToolTipToCells},
@@ -131,7 +131,7 @@ function getColumnDefs(mainCol) {
                 {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
                 {headerName: "Country", field: "country", width: 94, cellRenderer: addToolTipToCells, filter: unqVals },
                 {headerName: "Region", field: "region", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Note", field: "note", width: 166, cellRenderer: addToolTipToCells} ];
+                {headerName: "Note", field: "note", width: 133, cellRenderer: addToolTipToCells} ];
     }
 }
 function getTagColDef(tags) {

@@ -33,40 +33,36 @@ export default function (reset) {                                               
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initBaseDataAndLoadBatTable(reset))
-        .then(downloadRemainingTableTreeData)
-        // .then(downloadGeoJsonDataAndEnableMaps);
-        // .then(_db.clearTempMmry)
+        .then(downloadRemainingData)
+        .then(_db.clearTempMmry);
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
 function initBaseDataAndLoadBatTable(reset) {
     return getAndSetData('init')
         .then(() => getAndSetData('lists'))
+        .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable', [null, false]));
 }
-/* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
-function downloadRemainingTableTreeData() {
-    const entities = ['taxa', 'source', 'location', 'interaction']; 
-    return $.when(...entities.map(ent => getAndSetData(ent)))
-        .then(() => _db.pg('initSearchStateAndTable'));
-}
 /* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
-function downloadGeoJsonDataAndEnableMaps() {
-    // body...
+function downloadRemainingData() {
+    const urls = ['taxa', 'source', 'location', 'interaction']; 
+    return $.when(...urls.map(url => getAndSetData(url)))
+        .then(() => _db.setUpdatedDataInLocalDb())
+        .then(() => _db.pg('initSearchStateAndTable'));
 }
 /* -------------------------- HELPERS --------------------------------------- */
 function getAndSetData(url) {
-    return _db.fetchServerData(url).then(setData.bind(null, url));
+    return _db.fetchServerData(url).then(setData.bind(null, url))
 }
 function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
     const setDataFunc = {
-        'init': deriveBaseTaxonData,
+        'geojson': Function.prototype, 'init': deriveBaseTaxonData,
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
         'location': deriveLocationData,       'source': deriveSourceData,
         'taxa': deriveRemainingTaxonData
     };
     storeServerData(data);
     setDataFunc[url](data);
-    return _db.setUpdatedDataInLocalDb();
 }
 /**
  * Loops through the data object returned from the server, parsing and storing

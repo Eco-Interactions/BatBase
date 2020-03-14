@@ -200,6 +200,7 @@ export function buildTxnTree(topTaxon, filtering, textFltr) {                   
     let tree = buildTxnDataTree(topTaxon);
     tree = filterTreeByText(textFltr, tree);
     storeTaxonLevelData(topTaxon, filtering);
+    if (!tblState.flags.allDataAvailable) { return Promise.resolve(tree); }
     return fillTreeWithInteractions('taxa', tree);  
 }
 function buildTxnDataTree(topTaxon) {
@@ -268,7 +269,6 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
-    if (!tblState.flags.allDataAvailable) { return dataTree; }
     const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source'];
     const data = await _u.getData(entities, true);  

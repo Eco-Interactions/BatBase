@@ -42,6 +42,7 @@ export function init() {
     showPopUpMsg('Loading...');
     addDomEventListeners();
     authDependentInit();
+    disableMapsUntilGeoJsonAvailable();
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
@@ -55,7 +56,7 @@ function addDomEventListeners() {
 export function showLoadingDataPopUp(type) {
     const msgs = { 'user': 'Downloading all user-specific data.' };
     const msg = msgs[type] || `Downloading and caching all interaction records. 
-        Please allow for a ~45 second download.`;
+        Please allow for a ~30 second download.`;
     showPopUpMsg(msg);   
 }
 function authDependentInit() {
@@ -88,14 +89,7 @@ function initEditorFeatures() {                                               //
     initUserButtons();                                              
     initEditorButtons();
     app.enabledSelectors = '.map-dsbl';
-    // app.enabledSelectors = `#filter, button[name="csv"], #lists, 
-    //     #new-data, #rvw-data`;
 }
-// function initAdminFeatures() {                                                //console.log('enableAdminFeatures')
-//     initUserButtons();                                              
-//     initEditorButtons();
-//     app.enabledSelectors = '.map-dsbl';
-// }
 function initUserButtons() {
     $('#lists').click(toggleSaveIntsPanel);
     $('button[name="csv"]').click(exportCsvData);  
@@ -104,6 +98,21 @@ function initEditorButtons() {
     $('#rst-data').addClass('adminbttn').click(_pg.resetLocalDb);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
+}
+/** While the database is being initialized, the Map Interactions feature is disabled. */
+function disableMapsUntilGeoJsonAvailable() {
+    $('#shw-map').fadeTo(100, .5).attr('disabled', 'disabled')
+        .prop('title', 'Enabled once map data is available.');
+}
+/** 
+ * Once db init complete, the feature is enabled after a delay so the table can 
+ * finish reloading before the button fades in.
+ */
+export function enableMapFeatures() {
+    window.setTimeout(() => {
+        $('#shw-map').fadeTo(100, 1).attr('disabled', false)
+            .prop('title', 'Show interactions on a map.');
+    }, 1500);
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 export function selectInitialSearchFocus(f) {                                   //console.log('--------------selectInitialSearchFocus [%s]', f);
@@ -160,7 +169,7 @@ function toggleTreeByOneLvl(opening) {
     const bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
-    tblModel.rowsToDisplay.forEach(function(row) {                              //console.log("rowToDisplay = %O", row)
+    tblModel.rowsToDisplay.forEach(row => {                              //console.log("rowToDisplay = %O", row)
         if (!opening && !isNextOpenLeafRow(row)) { return; }
         row.expanded = opening;
         row.data.open = opening;
@@ -183,7 +192,7 @@ function toggleTreeByOneLvl(opening) {
 } /* End toggleTreeByOneLvl */
 function getCurTreeRowCount(tblApi) {
     let cnt = 0;
-    tblApi.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
+    tblApi.forEachNodeAfterFilter(node => cnt += 1); 
     return cnt;
 }
 /**
@@ -191,9 +200,7 @@ function getCurTreeRowCount(tblApi) {
  */
 function isNextOpenLeafRow(node) {                                              //console.log("node = %O", node);
     if (node.childrenAfterFilter) {
-        return node.childrenAfterFilter.every(function(childNode){
-            return !childNode.expanded;
-        });
+        return node.childrenAfterFilter.every(childNode => !childNode.expanded);
     } 
     return true;
 }     
@@ -604,11 +611,13 @@ function showTableRecordsOnMap() {                                              
 }
 function updateBttnToReturnRcrdsToTable() {
     $('#shw-map').text('Return to Table');
-    $('#shw-map').off('click').on('click', returnRcrdsToTable);
+    $('#shw-map').off('click').on('click', returnRcrdsToTable)
+        .prop('title', 'Close map and reopen records in table.');
 }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Map Interactions');
-    $('#shw-map').off('click').on('click', showTableRecordsOnMap);
+    $('#shw-map').off('click').on('click', showTableRecordsOnMap)
+        .prop('title', 'Show interactions on a map.');
 }
 function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
     updateUiForTableView();

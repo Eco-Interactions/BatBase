@@ -30,6 +30,7 @@ export function setDataInMemory(key, data) {                                    
 export function setUpdatedDataInLocalDb() {
     return Object.keys(mmryData).reduce((p, prop) => {
         if (!mmryData[prop].changed) { return p; }                              //console.log('               --setting [%s] data = [%O]', prop, mmryData[prop].value);
+        mmryData[prop].changed = false;
         return p.then(() => setData(prop, mmryData[prop].value));
     }, Promise.resolve());
 }

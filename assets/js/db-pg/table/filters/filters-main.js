@@ -83,7 +83,7 @@ function resetFilterUi() {
 function resetFilterStatus() {
     const flags = tState().get('flags'); // if (flags.allDataAvailable) { console.trace(); }
     const status = flags.allDataAvailable ? 'No Active Filters.' :
-        '[ Database initializing... Table will reset once complete. ]';
+        '[ Database initializing... Table will reset once complete, in ~25 seconds. ]';
     $('#filter-status').text(status);
     if (!flags.allDataAvailable) { 
         $('#filter-status').css('color', 'teal'); 
