@@ -53,7 +53,7 @@ export function resetLocalDb() {
 export function pg(funcName, params = []) {                                     //console.log('func = [%s], agrs = %O', funcName, params);
     return _pg[funcName](...params);
 }
-export function fetchServerData(url, options = {}, n = 3) {                     console.log('       --fetchServerData [%s] with params = %O', url, Object.keys(options).length ? options : null);
+export function fetchServerData(url, options = {}, n = 3) {                     console.log('       *-fetchServerData [%s] with params = %O', url, Object.keys(options).length ? options : null);
     return fetch('fetch/'+url, options).then(response => {
         if (!!response.ok) { return response.json(); }
         if (n === 1) { return alertFetchIssue(use, response.json()); }

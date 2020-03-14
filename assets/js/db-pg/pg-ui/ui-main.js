@@ -200,14 +200,14 @@ function isNextOpenLeafRow(node) {                                              
 /* ====================== DATABASE ENTITY VIEW UI =================================================================== */
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTaxonSearchUi(curView) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
+export function initTaxonSearchUi(curView, reset) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
     _u.getData('realm').then( realms => {                                       //console.log('--initTaxonSearchUi. realms = %O', realms)
-        loadTxnViewOpts(realms);
+        loadTxnViewOpts(realms, reset);
         setTaxonView(curView); 
     });
 }
-function loadTxnViewOpts(realms) {
-    if ($('#sel-view').data('focus') === 'taxa') { return; }
+function loadTxnViewOpts(realms, reset) {
+    if ($('#sel-view').data('focus') === 'taxa' && !reset) { return; }
     buildAndLoadTxnOpts(realms);
 }
 function buildAndLoadTxnOpts(realms) {
@@ -224,12 +224,13 @@ function getViewOpts(realms) {
     function buildRealmOpt(id) {  
         const rootTxn = taxa[realms[id].taxon];  
         const val = rootTxn ? rootTxn.id : id+'temp';                           //console.log('realm = %O rootTxn = %O', realms[id], rootTxn);
-        if (Number.isInteger(val) && !ifRealmHasInts(rootTxn)) { return; }
+        if (Number.isInteger(val) && !ifTxnHasInts(rootTxn.id)) { return; }
         optsAry.push({ value: val, text: realms[id].pluralName });
     }
-    function ifRealmHasInts(taxon) {
+    function ifTxnHasInts(id) {
+        const taxon = taxa[id];
         const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
-        return hasInts || taxon.children.find(txnHasInts);
+        return hasInts || taxon.children.find(ifTxnHasInts);
     }
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */

@@ -662,7 +662,7 @@ function getSelectedTaxonLvl(selected) {
 export function updateTaxonSearch(val, selLvl) {                                        
     if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
     tblState = tState().get(['rcrdsById', 'flags']);  
-    if (!tblState.flags.addDataAvailable) { return; }
+    if (!tblState.flags.allDataAvailable) { return; }
     const rcrd = getRootTaxonRcrd(val, tblState.rcrdsById);
     const txt = getTreeFilterTextVal('Taxon');                                  //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});   //console.log("selectedVals = %O", tParams.selectedVals);
@@ -698,16 +698,14 @@ function getPreviouslySelectedTaxonId(that) {
 }
 /** The selected taxon's ancestors will be selected in their levels combobox. */
 function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
-    const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
     const selected = {};                                                        //console.log("selected = %O", selected)
     selectAncestorTaxa(selTaxonObj);
     return selected;
     /** Adds parent taxa to selected object, until the realm parent. */
     function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
-        if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-            selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
-            selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
-        }
+        if (taxon.isRoot) { return; }
+        selected[taxon.level.displayName] = taxon.id;                           
+        selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
     }
 } /* End getRelatedTaxaToSelect */
 /* ========================== FILTER UTILITY METHODS ================================================================ */

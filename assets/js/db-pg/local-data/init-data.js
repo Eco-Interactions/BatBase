@@ -17,7 +17,6 @@
  */
 import * as _db from './local-data-main.js';
 
-const localData = {};
 /* ======================= DOWNLOAD DATA ==================================== */
 /**
  * The first time a browser visits the search page all entity data is downloaded
@@ -30,24 +29,25 @@ const localData = {};
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
-export default function (reset) {                                               console.log("   +-initLocalData");
+export default function (reset) {                                               console.log("   *-initLocalData");
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initBaseDataAndLoadBatTable(reset))
         .then(downloadRemainingTableTreeData)
         // .then(downloadGeoJsonDataAndEnableMaps);
+        // .then(_db.clearTempMmry)
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
 function initBaseDataAndLoadBatTable(reset) {
     return getAndSetData('init')
         .then(() => getAndSetData('lists'))
-        .then(() => _db.pg('initSearchStateAndTable'));
+        .then(() => _db.pg('initSearchStateAndTable', [null, false]));
 }
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
 function downloadRemainingTableTreeData() {
-    const entities = ['source', 'location', 'interaction']; //, 'taxa'
+    const entities = ['taxa', 'source', 'location', 'interaction']; 
     return $.when(...entities.map(ent => getAndSetData(ent)))
-        .then(() => _db.pg('initSearchStateAndTable', [null, true]));
+        .then(() => _db.pg('initSearchStateAndTable'));
 }
 /* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
 function downloadGeoJsonDataAndEnableMaps() {
@@ -57,14 +57,13 @@ function downloadGeoJsonDataAndEnableMaps() {
 function getAndSetData(url) {
     return _db.fetchServerData(url).then(setData.bind(null, url));
 }
-function setData(url, data) {                                                   console.log('           --storing [%s] data = %O', url, data);
+function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
     const setDataFunc = {
         'init': deriveBaseTaxonData,
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
         'location': deriveLocationData,       'source': deriveSourceData,
         'taxa': deriveRemainingTaxonData
     };
-    if (!data) { return console.log('!data'); }
     storeServerData(data);
     setDataFunc[url](data);
     return _db.setUpdatedDataInLocalDb();
@@ -75,7 +74,13 @@ function setData(url, data) {                                                   
  */
 function storeServerData(data) {                                                //console.log("data received = %O", data);
     for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, data[entity]);
-        _db.setDataInMemory(entity, parseData(data[entity]));
+        let eData = entity === 'taxon' ? mergeTaxonData() : parseData(data[entity]);
+        _db.setDataInMemory(entity, eData);
+    }
+
+    function mergeTaxonData() {
+        const bats = _db.getMmryData('taxon') || {};
+        return Object.assign(bats, parseData(data.taxon));
     }
 }
 /**
@@ -103,7 +108,7 @@ function deriveBaseTaxonData(data) {                                            
     storeLevelData(data.level);
 }
 function deriveRemainingTaxonData(data) {
-    storeTaxaByLevelAndRealm(data.taxa);
+    storeTaxaByLevelAndRealm(data.taxon);
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {

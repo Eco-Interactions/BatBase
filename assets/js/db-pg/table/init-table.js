@@ -15,7 +15,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export default function init(view, rowData, state) {                /*Perm-log*/console.log('           +--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
+export default function init(view, rowData, state) {                /*Perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
     return initTable(view, rowData)

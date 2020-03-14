@@ -72,10 +72,36 @@ class FetchController extends Controller
     }
     private function serializeBatTaxa($serializer, $em)
     {
-        $batRealm = $em->getRepository('AppBundle:Realm')
-            ->findOneBy(['displayName' => 'Bat']);
+        $batRealm = $em->getRepository('AppBundle:Realm')->findOneBy(['displayName' => 'Bat']);
         return $this->serializeEntities($batRealm->getTaxa(), $serializer);
     }
+    /* ------------ SERIALIZE REMAINING TAXA -------------------------------- */
+    /**
+     * Returns serialized data objects for the Realm, Level, and Taxon entities.
+     *
+     * @Route("/taxa", name="app_serialize_taxa")
+     */
+    public function serializeNonBatTaxonData(Request $request) 
+    {
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->container->get('jms_serializer');
+        
+        $taxa = $this->getAllNonBatTaxa($em, $serializer);
+
+        $response = new JsonResponse(); 
+        $response->setData(array(                                    
+            'taxon' => $taxa        
+        )); 
+        return $response;
+    }
+
+    private function getAllNonBatTaxa($em, $serializer)
+    {
+        $batRealm = $em->getRepository('AppBundle:Realm')->findOneBy(['displayName' => 'Bat']);
+        $taxa = $em->getRepository('AppBundle:Taxon')->findAllNonBatTaxa($batRealm);
+        return $this->serializeEntities($taxa, $serializer);
+    }
+/* =================== FETCH LOCATION DATA ================================== */
     /**
      * Returns serialized data objects for Habitat Type, Location Type, and Location. 
      *

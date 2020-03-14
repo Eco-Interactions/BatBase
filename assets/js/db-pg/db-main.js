@@ -123,7 +123,7 @@ export function showIntroAndLoadingMsg(resettingData) {
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchStateAndTable(focus, isAllDataAvailable) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s]', focus);
+export function initSearchStateAndTable(focus, isAllDataAvailable = true) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s]', focus);
     setTableInitState(isAllDataAvailable);      
     _ui.selectInitialSearchFocus(focus);
     buildTable(null, null, isAllDataAvailable)

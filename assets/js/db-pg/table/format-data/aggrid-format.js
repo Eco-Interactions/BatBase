@@ -253,17 +253,18 @@ function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*/
 
     function buildTxnIntRow(intRcrd) {
         const noData = !tblState.flags.allDataAvailable;
-        const row = noData ? getPendingDataRow() : getTxnIntRow(intRcrd, treeLvl, tblState)
+        const row = noData ? getPendingDataRow(treeLvl) : getTxnIntRow(intRcrd, treeLvl, tblState)
         ints.push(row);
     }
 }
-function getPendingDataRow() {
+function getPendingDataRow(treeLvl) {
     const props = ['citation', 'subject', 'object', 'interactionType', 'tags', 
         'citation', 'habitat', 'location', 'country', 'region', 'note'];
     const rowData = {
         entity: 'interaction',
         isParent: false,
-        name: ''
+        name: '',
+        treeLvl: treeLvl
     };
     props.forEach(p => rowData[p] = 'Loading...');
     return rowData;
@@ -307,7 +308,7 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         rowColorIdx: idx,       //Not sure what this is all used for...
         subject: getEntityData('taxon', 'displayName', 'subject'),
         tags: intRcrd.tags,   //Table data
-        treeLvl: treeLvl,       //Not sure what this is all used for...
+        treeLvl: treeLvl,       //Influences row coloring
         type: 'intRcrd',        //Not sure what this is all used for...
         updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
         updatedBy: intRcrd.updatedBy === 'Sarah' ? null : intRcrd.updatedBy,  
