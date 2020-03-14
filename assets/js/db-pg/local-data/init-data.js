@@ -22,7 +22,7 @@ const localData = {};
 /**
  * The first time a browser visits the search page all entity data is downloaded
  * from the server and stored locally @storeEntityData. Database search page 
- * table build begins @initSearchState.
+ * table build begins @initSearchStateAndTable.
  * Entities downloaded with each ajax call:
  *   /taxon - Taxon, Realm, Level 
  *   /location - HabitatType, Location, LocationType, GeoJson
@@ -34,53 +34,20 @@ export default function (reset) {                                               
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initBaseDataAndLoadBatTable(reset))
-        .then(downloadInteractionDataAndFillTable)
-        // .then(downloadRemainingTableTreeData)
-        // .then(downloadGeoJsonDataAndEnableMaps)
-        // .then(_db.setUpdatedDataInLocalDb)
-        // .then(loadDatabaseTable);
-        // .then(downloadBatchedServerData)
-        // .then(_db.setUpdatedDataInLocalDb)
-        // .then(loadDatabaseTable);
+        .then(downloadRemainingTableTreeData)
+        // .then(downloadGeoJsonDataAndEnableMaps);
 }
-// function downloadBatchedServerData() {                                          //console.log('       --downloading Taxon and Source Data');
-//     return $.when(getAndSetData('taxon'), getAndSetData('lists'))
-//         .then(() => getAndSetData('source'))
-//         .then(() => getAndSetData('location'))
-//         .then(() => getAndSetData('interaction'));
-// }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
 function initBaseDataAndLoadBatTable(reset) {
-    return downloadBaseTableDataAndLoadTable(reset)
-}
-function downloadBaseTableDataAndLoadTable(reset) {
     return getAndSetData('init')
         .then(() => getAndSetData('lists'))
-        .then(() => loadDatabaseTable(reset))
-}
-function loadDatabaseTable(reset) {
-    if (reset) { _db.pg('resetDataTable', ['taxa']); 
-    } else { _db.pg('initSearchState'); }
-}
-function downloadInteractionDataAndFillTable() {
-    return getAndSetData('interaction')
-        .then(() => _db.pg('fillTableWithInteractions'));
+        .then(() => _db.pg('initSearchStateAndTable'));
 }
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
-function downloadRemainingTaxaData() {
-    return getAndSetData('taxa')
-}
 function downloadRemainingTableTreeData() {
-    return downloadRemainingTaxaData()
-        .then(() => downloadDataAndEnableTableView('source', 'src'))
-        .then(() => downloadDataAndEnableTableView('location', 'loc'));
-}
-function downloadDataAndEnableTableView(entity, key) {
-    return getAndSetData(entity)
-        .then(() => enableTableView(entity, key));
-}
-function enableTableView(entity, key) {
-    //add focus to combobox
+    const entities = ['source', 'location', 'interaction']; //, 'taxa'
+    return $.when(...entities.map(ent => getAndSetData(ent)))
+        .then(() => _db.pg('initSearchStateAndTable', [null, true]));
 }
 /* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
 function downloadGeoJsonDataAndEnableMaps() {
@@ -90,7 +57,7 @@ function downloadGeoJsonDataAndEnableMaps() {
 function getAndSetData(url) {
     return _db.fetchServerData(url).then(setData.bind(null, url));
 }
-function setData(url, data) {                                                   console.log('               --storing [%s] data = %O', url, data);
+function setData(url, data) {                                                   console.log('           --storing [%s] data = %O', url, data);
     const setDataFunc = {
         'init': deriveBaseTaxonData,
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
@@ -129,7 +96,7 @@ function parseData(data) {  //shared. refact
  * *realm - resaved with 'uiLevelsShown' filled with the level display names. 
  */ 
 /** Stores an object of taxon names and ids for each level in each realm. */
-function deriveBaseTaxonData(data) {                                            console.log("deriveBaseTaxonData called. data = %O", data);
+function deriveBaseTaxonData(data) {                                            //console.log("deriveBaseTaxonData called. data = %O", data);
     _db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
     storeTaxaByLevelAndRealm(data.taxon);
     modifyRealmData(data.realm);
@@ -156,7 +123,7 @@ function storeLevelData(levelData) {
 }
 /* --------- Taxa by Realm & Level ------------- */
 function storeTaxaByLevelAndRealm(taxa) {
-    const realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym realmData = %O", realmData);
+    const realmData = separateTaxaByLevelAndRealm(taxa);                        //console.log("taxonym realmData = %O", realmData);
     for (let realm in realmData) {  
         storeTaxaByLvl(realm, realmData[realm]);
     }
@@ -287,13 +254,13 @@ function deriveInteractionData(data) {
 /** Returns an object with a record (value) for each id (key) in passed array.*/
 function getEntityRcrds(ids, rcrds) {
     const data = {};
-    ids.forEach(function(id) { data[id] = rcrds[id]; });        
+    ids.forEach(id => data[id] = rcrds[id]);        
     return data;
 }
 /** Returns an object with each entity record's displayName (key) and id. */
 function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
     const data = {};
-    ids.forEach(function(id) { data[rcrds[id].displayName] = id; });            //console.log("nameDataObj = %O", data);
+    ids.forEach(id => data[rcrds[id].displayName] = id);            //console.log("nameDataObj = %O", data);
     return data;
 }
 /** Returns an object with each entity types's displayName (key) and id. */

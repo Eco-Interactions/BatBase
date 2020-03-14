@@ -196,7 +196,7 @@ function buildAuthTree(authSrcRcrds, data) {                                //co
  * stored in tblState.
  */
 export function buildTxnTree(topTaxon, filtering, textFltr) {                   //console.log("buildTaxonTree called for topTaxon = %O. filtering? = %s. textFltr = ", topTaxon, filtering, textFltr);
-    tblState = tState().get(null, ['rcrdsById', 'intSet']);
+    tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags']);
     let tree = buildTxnDataTree(topTaxon);
     tree = filterTreeByText(textFltr, tree);
     storeTaxonLevelData(topTaxon, filtering);
@@ -268,10 +268,10 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
+    if (!tblState.flags.allDataAvailable) { return dataTree; }
     const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source'];
     const data = await _u.getData(entities, true);  
-    if (!data.interaction) { return dataTree; }
     fillInts[focus](dataTree, data);
     return dataTree;
 } 

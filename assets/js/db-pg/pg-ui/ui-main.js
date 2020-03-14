@@ -106,7 +106,7 @@ function initEditorButtons() {
     $('#rvw-data').addClass('adminbttn');
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-export function selectInitialSearchFocus(f, resettingData = false) {            //console.log('--------------selectInitialSearchFocus [%s]', f);
+export function selectInitialSearchFocus(f) {                                   //console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
@@ -218,17 +218,18 @@ function buildAndLoadTxnOpts(realms) {
 function getViewOpts(realms) { 
     const taxa = tState().get('rcrdsById');
     const optsAry = [];
-    for (let id in realms) {
-        if (!taxonHasInteractions(realms[id].taxon)) { continue; }
-        optsAry.push({ value: realms[id].taxon, text: realms[id].pluralName });
-    }
+    Object.keys(realms).forEach(buildRealmOpt);
     return optsAry;
     
-    function taxonHasInteractions(id) {
-        const taxon = taxa[id];  
-        if (!taxon) { return false; }
+    function buildRealmOpt(id) {  
+        const rootTxn = taxa[realms[id].taxon];  
+        const val = rootTxn ? rootTxn.id : id+'temp';                           //console.log('realm = %O rootTxn = %O', realms[id], rootTxn);
+        if (Number.isInteger(val) && !ifRealmHasInts(rootTxn)) { return; }
+        optsAry.push({ value: val, text: realms[id].pluralName });
+    }
+    function ifRealmHasInts(taxon) {
         const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
-        return hasInts || taxon.children.find(taxonHasInteractions);
+        return hasInts || taxon.children.find(txnHasInts);
     }
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */

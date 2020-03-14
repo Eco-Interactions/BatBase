@@ -170,7 +170,7 @@ function replaceUserData(userName, data) {                                      
 /* -------------- ON SYNC COMPLETE ------------------------------------------ */
 function initSearchPage() {
     reportDataSyncFailures();                                       
-    _db.getData('curFocus', true).then(f => _db.pg('initSearchState', [f]));
+    _db.getData('curFocus', true).then(f => _db.pg('initSearchStateAndTable', [f]));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**

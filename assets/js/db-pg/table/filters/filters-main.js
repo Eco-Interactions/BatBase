@@ -75,11 +75,22 @@ export function clearFilters() {
     resetStoredFiltersUi();
     resetFilterParams();
 }
-function resetFilterUi(focus) {
-    $('#filter-status').text('No Active Filters.');
+function resetFilterUi() {  
+    resetFilterStatus();
     $('#focus-filters input').val('');
-    updateTaxonFilterViewMsg('');
     if ($('#shw-chngd').prop('checked')) { resetDataTimeFilter(); }
+}
+function resetFilterStatus() {
+    const flags = tState().get('flags'); // if (flags.allDataAvailable) { console.trace(); }
+    const status = flags.allDataAvailable ? 'No Active Filters.' :
+        '[ Database initializing... Table will reset once complete. ]';
+    $('#filter-status').text(status);
+    if (!flags.allDataAvailable) { 
+        $('#filter-status').css('color', 'teal'); 
+    } else { 
+        $('#filter-status').css('color', 'black'); 
+        updateTaxonFilterViewMsg('');
+    }
 }
 function resetDataTimeFilter() {
     $('#shw-chngd').prop('checked', false);
@@ -95,8 +106,8 @@ export function updateTaxonFilterViewMsg(view) {
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called."); 
-    tblState = tState().get(null, ['api', 'intSet']);
-    if (!tblState.api) { return; }
+    tblState = tState().get(['api', 'intSet', 'flags']);
+    if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
     setFilterStatus(getActiveFilters());
     enableClearFiltersButton();
 }
@@ -650,10 +661,11 @@ function getSelectedTaxonLvl(selected) {
  */
 export function updateTaxonSearch(val, selLvl) {                                        
     if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
-    const taxonRcrds = tState().get('rcrdsById');  
-    const rcrd = getRootTaxonRcrd(val, taxonRcrds);
+    tblState = tState().get(['rcrdsById', 'flags']);  
+    if (!tblState.flags.addDataAvailable) { return; }
+    const rcrd = getRootTaxonRcrd(val, tblState.rcrdsById);
     const txt = getTreeFilterTextVal('Taxon');                                  //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
-    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
+    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});   //console.log("selectedVals = %O", tParams.selectedVals);
     addToFilterMemory();
     return rebuildTxnTable(rcrd, 'filtering', txt);
 

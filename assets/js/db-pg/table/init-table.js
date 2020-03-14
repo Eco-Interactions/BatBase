@@ -301,7 +301,7 @@ function isOpenRowWithChildInts(params) {
 }
 function txnHasIntsAfterFilters(params) {
     if (params.data.taxonLvl === 'Species') { return true; }
-    return params.node.childrenAfterFilter.some(function(childRow) {
+    return params.node.childrenAfterFilter.some(childRow => {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });
 }
@@ -310,7 +310,7 @@ function txnHasIntsAfterFilters(params) {
  * data tree after filtering.
  */
 function locHasIntsAfterFilters(params) {  
-    return params.node.childrenAfterFilter.some(function(childRow) {
+    return params.node.childrenAfterFilter.some(childRow => {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });
 }

@@ -235,7 +235,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
             interactions: true,
             isParent: true,
             name: `Unspecified ${taxonName} Interactions`,
-            open: !taxon.isRealm && tblState.openRows.indexOf(taxon.id.toString()) !== -1,
+            open: !taxon.isRoot && tblState.openRows.indexOf(taxon.id.toString()) !== -1,
             taxonLvl: taxon.level.displayName,
             treeLvl: treeLvl,
         });
@@ -247,14 +247,15 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
     }
 } /* End getTaxonAndChildTaxaRowData */
 function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
-    if (!tblState.flags.interactionDataAvailable) { return getPendingDataRow(); }
     const ints = [];
-    ['subjectRoles', 'objectRoles'].forEach(role => {
-        taxon[role].forEach(intRcrd => {
-            ints.push(buildTaxonIntRowData(intRcrd, treeLvl, tblState));
-        });
-    });
+    ['sub', 'ob'].forEach(prfx => taxon[prfx+'jectRoles'].forEach(buildTxnIntRow));
     return ints;
+
+    function buildTxnIntRow(intRcrd) {
+        const noData = !tblState.flags.allDataAvailable;
+        const row = noData ? getPendingDataRow() : getTxnIntRow(intRcrd, treeLvl, tblState)
+        ints.push(row);
+    }
 }
 function getPendingDataRow() {
     const props = ['citation', 'subject', 'object', 'interactionType', 'tags', 
@@ -265,10 +266,10 @@ function getPendingDataRow() {
         name: ''
     };
     props.forEach(p => rowData[p] = 'Loading...');
-    return [rowData];
+    return rowData;
 }
 /** Adds the taxon heirarchical data to the interactions row data. */ 
-function buildTaxonIntRowData(intRcrd, treeLvl, tblState) {
+function getTxnIntRow(intRcrd, treeLvl, tblState) {
     const rowData = buildIntRowData(intRcrd, treeLvl);
     getCurTaxonLvlCols(tblState).forEach(colName => {
         rowData[colName] = intRcrd[colName];
