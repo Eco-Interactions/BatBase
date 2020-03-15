@@ -59,10 +59,10 @@ export function getFilterState() {
 export function enableClearFiltersButton() {
     if (!filtersActive()) { 
         $('button[name="reset-tbl"]')
-            .attr('disabled', true).css({'opacity': .5, cursor: 'inherit'}); 
-    } else {  
+            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5); 
+    } else { 
         $('button[name="reset-tbl"]')
-            .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
+            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('slow', 1); 
     }
 }
 function filtersActive() {
@@ -83,7 +83,7 @@ function resetFilterUi() {
 function resetFilterStatus() {
     const flags = tState().get('flags'); // if (flags.allDataAvailable) { console.trace(); }
     const status = flags.allDataAvailable ? 'No Active Filters.' :
-        '[ Database initializing... Table will reset once complete, in ~25 seconds. ]';
+        '[ Database initializing... Table will reset once complete, in ~30 seconds. ]';
     $('#filter-status').text(status);
     if (!flags.allDataAvailable) { 
         $('#filter-status').css('color', 'teal'); 
@@ -454,10 +454,10 @@ export function buildTreeSearchHtml(entity) {
     const func = onTextFilterChange.bind(null, entity);  
     const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
     const span = _u.buildElem('span', { text: 'Name:' });
-    const input = _u.buildElem('input', { 
-        name: 'sel'+entity, type: 'text', placeholder: entity+' Name (Press Enter to Filter)'  });
-    const bttn = _u.buildElem('button', { text: 'Search', 
-        name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
+    const input = _u.buildElem('input', { type: 'text', name: 'sel'+entity, 
+        placeholder: entity+' Name (Press Enter to Filter)' });
+    const bttn = _u.buildElem('button', { text: 'Search', class: 'ag-fresh', 
+        name: 'sel'+entity+'_submit' });
     addInputClass(entity, input);
     addLblClass(entity, lbl);
     $(input).onEnter(func);

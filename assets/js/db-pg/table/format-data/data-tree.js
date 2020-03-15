@@ -278,18 +278,18 @@ async function fillTreeWithInteractions(focus, dataTree) {                      
 function fillTaxonTree(dataTree, entityData) {                                  //console.log("fillingTaxonTree. dataTree = %O", dataTree);
     fillTaxaInteractions(dataTree);  
 
-    function fillTaxaInteractions(treeLvl) {                                    //console.log("fillTaxonInteractions called. taxonTree = %O", dataTree) 
-        for (let taxon in treeLvl) {   
-            fillTaxonInteractions(treeLvl[taxon]);
-            if (treeLvl[taxon].children !== null) { 
-                fillTaxaInteractions(treeLvl[taxon].children); }
+    function fillTaxaInteractions(branch) {                                     //console.log("fillTaxonInteractions called. branch = %O", branch); 
+        for (let key in branch) {  
+            fillTaxonInteractions(branch[key]);
+            if (branch[key].children !== null) { 
+                fillTaxaInteractions(branch[key].children); 
+            }
         }
     }
     function fillTaxonInteractions(taxon) {                                     //console.log("fillTaxonInteractions. taxon = %O", taxon);
-        const roles = ['subjectRoles', 'objectRoles'];
-        for (let r in roles) {
-            taxon[roles[r]] = replaceInteractions(taxon[roles[r]], entityData); 
-        }
+        ['subjectRoles', 'objectRoles'].forEach(role => {
+            taxon[role] = replaceInteractions(taxon[role], entityData); 
+        });  
     }
 } /* End fillTaxonTree */
 /**

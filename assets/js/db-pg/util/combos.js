@@ -125,14 +125,14 @@ export function replaceSelOpts(selId, opts, changeHndlr, name) {                
         $selApi.off('change');
         $selApi.on('change', changeHndlr); 
     }  
-    $selApi.clear(); 
+    $selApi.clear('silent'); 
     $selApi.clearOptions();
     $selApi.addOption(opts);
     $selApi.refreshOptions(false);
 }
 function clearCombobox($selApi) {
     $selApi.off('change');
-    $selApi.clear();
+    $selApi.clear('silent');
     $selApi.clearOptions();
 }
 export function triggerComboChangeReturnPromise(field, val) {                   //console.log('triggerComboChange [%s] = [%s]', field, val);

@@ -60,7 +60,7 @@ function buildResetDataButton() {
     const confirm = _f.util('buildElem', ['span', { class: 'flex-row', 
             'text': `Please click "OK" to continue.` }]);
     const bttn = _f.util('buildElem', ['input', { type: 'button', value: 'OK', 
-            class: 'tbl-bttn exit-bttn' }]);
+            class: 'exit-bttn' }]);
     $(bttn).click(reloadAndRedownloadData);
     $(confirm).append(bttn);
     return confirm;

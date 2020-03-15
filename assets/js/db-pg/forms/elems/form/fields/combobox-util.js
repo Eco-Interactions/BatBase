@@ -51,9 +51,9 @@ export function focusFirstCombobox(cntnrId, focus) {
 }
 export function clearCombobox(selId) {                                          //console.log("clearCombobox [%s]", selId);
     const selApi = $(selId)[0].selectize;
-    selApi.clear(true);
+    selApi.clear('silent');
     selApi.updatePlaceholder();
-    selApi.removeOption("");
+    selApi.removeOption('');
 }    
 /**
  * Clears and enables the parent combobox for the exited form. Removes any 
@@ -63,7 +63,7 @@ export function resetFormCombobox(fLvl, focus) {
     const selId = _fs('getFormParentId', [fLvl]);  
     if (!selId) { return; }
     const combobox = $(selId)[0].selectize;   
-    combobox.clear();
+    combobox.clear('silent');
     combobox.enable();
     combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.
     if (focus) { combobox.focus(); 
@@ -72,7 +72,7 @@ export function resetFormCombobox(fLvl, focus) {
 /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
 export function updateComboboxOptions(selId, opts, focus) {
     const selApi = $(selId)[0].selectize;
-    selApi.clear();
+    selApi.clear('silent');
     selApi.clearOptions();
     selApi.addOption(opts);
     selApi.refreshOptions(false);

@@ -121,7 +121,7 @@ function getSuccessMsgHtml(msg) {
     return div;
 }
 function getSuccessMsgExitBttn() {
-    const attr = { 'id': 'sucess-exit', 'class': 'tbl-bttn exit-bttn', 
+    const attr = { 'id': 'sucess-exit', 'class': 'exit-bttn', 
         'type': 'button', 'value': 'X' }
     const bttn = _f.util('buildElem', ['input', attr]);
     $(bttn).click(exitSuccessMsg);

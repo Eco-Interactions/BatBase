@@ -15,7 +15,7 @@
  *     loadTxnFilterPanelElems          db-page, db-filters     
  *     resetToggleTreeBttn              db_page, init-table
  *     selectInitialSearchFocus         db-page
- *     showLoadingDataPopUp             util
+ *     updateUiForDatabaseInit             util
  *     showTips                         intro
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
@@ -34,7 +34,7 @@ import { updateFilterPanelHeader } from '../pg-ui/panels/filter-panel.js';
 
 const app = {
     userRole: $('body').data("user-role"),
-    enabledSelectors: ''
+    enabledSelectors: false
 };
 const tState = _pg.accessTableState;
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
@@ -42,23 +42,16 @@ export function init() {
     showPopUpMsg('Loading...');
     addDomEventListeners();
     authDependentInit();
-    disableMapsUntilGeoJsonAvailable();
+    _u.initComboboxes(['Focus', 'View']);
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-    $('button[name="reset-tbl"]').click(db_page.buildTable.bind(null, false, false));
     addPanelEventsAndStyles(app.userRole);
 }
-/** Shows a loading popup message for the inital data-download wait. */
-export function showLoadingDataPopUp(type) {
-    const msgs = { 'user': 'Downloading all user-specific data.' };
-    const msg = msgs[type] || `Downloading and caching all interaction records. 
-        Please allow for a ~30 second download.`;
-    showPopUpMsg(msg);   
-}
+/* --------------------- Auth-Dependent Init -------------------------------- */
 function authDependentInit() {
     const initMap = {
         visitor: disableUserFeatures, user: initUserFeatures,
@@ -67,23 +60,23 @@ function authDependentInit() {
     };
     initMap[app.userRole]();
 }
-function disableUserFeatures() {                                                //console.log('disableUserFeatures')
+function disableUserFeatures(cursor = 'not-allowed') {                                  //console.log('disableUserFeatures')
     $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #rst-data, 
         #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
         #stored-filters input, #stored-filters textarea`)
-        .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
-        .prop('title', "Please register to use these features.");
-    app.enabledSelectors = '#filter';
+        .css('cursor', cursor).prop('disabled', true).fadeTo('fast', .5)
+        .prop('title', 'Please register to use these features.');
+    app.enabledSelectors = false;
 }
-function initUserFeatures() {                                                 //console.log('enableUserFeatures')
+function initUserFeatures() {                                                   //console.log('enableUserFeatures')
     initUserButtons();
-    $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+    $('#new-data').css('cursor', 'not-allowed' ).fadeTo('fast', .5)
         .prop('title', 'This feature is only available to editors.');
-    $('#rst-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+    $('#rst-data').css('cursor', 'not-allowed' ).fadeTo('fast', .5)
         .prop('title', 'This feature is only available to editors.');
-    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+    $('#rvw-data').css('cursor', 'not-allowed' ).fadeTo('fast', .5)
         .prop('title', 'This feature is only available to admins.');
-    app.enabledSelectors = `#filter, button[name="csv"], #lists`;
+    app.enabledSelectors = `button[name="csv"], #lists`;
 }
 function initEditorFeatures() {                                               //console.log('enableEditorFeatures')
     initUserButtons();                                              
@@ -99,25 +92,30 @@ function initEditorButtons() {
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
 }
+/* --------------------- Database-Init UI ----------------------------------- */
+/** Shows a loading popup message for the inital data-download wait. */
 /** While the database is being initialized, the Map Interactions feature is disabled. */
-function disableMapsUntilGeoJsonAvailable() {
-    $('#shw-map').fadeTo(100, .5).attr('disabled', 'disabled')
-        .prop('title', 'Enabled once map data is available.');
+export function updateUiForDatabaseInit(type) {
+    $('.ico-bttn').css('cursor', 'wait').prop('disabled', true).fadeTo('fast', .5);
+    $('#search-focus')[0].selectize.disable();
+    $('#sel-view')[0].selectize.disable();   
+    app.dbInitializing = true;
 }
 /** 
- * Once db init complete, the feature is enabled after a delay so the table can 
- * finish reloading before the button fades in.
+ * Once db init complete, the page features are enabled after a delay so the table  
+ * finishes reloading before the feature buttons fades in.
  */
-export function enableMapFeatures() {
-    window.setTimeout(() => {
-        $('#shw-map').fadeTo(100, 1).attr('disabled', false)
-            .prop('title', 'Show interactions on a map.');
-    }, 1500);
+function enableFeaturesAfterDbInitComplete() {
+    $('.ico-bttn').css('cursor', 'pointer').prop('disabled', false).fadeTo('fast', 1);
+    $('#search-focus')[0].selectize.enable(); 
+    $('#sel-view')[0].selectize.enable();
+    authDependentInit();
+    delete app.dbInitializing;
 }
+/* --------------------- Init Table Focus ----------------------------------- */
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 export function selectInitialSearchFocus(f) {                                   //console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
-    _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
 }
@@ -704,17 +702,27 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
-    $('.tbl-tools button, .tbl-tools input, #focus-opts, ' + app.enabledSelectors)
+    if (app.dbInitializing === 'complete') { enableFeaturesAfterDbInitComplete() }
+    if (app.dbInitializing) { return enableToggleTreeButtons(); }
+    $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts'))
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools, ' + app.enabledSelectors).fadeTo('slow', 1);
+    $(getAllSelectors('.tbl-tools')).fadeTo('slow', 1);
     enableListReset();
     db_filters.enableClearFiltersButton();
 }
-export function disableTableButtons() {
+function enableToggleTreeButtons() {
+    $('#xpand-tree, #xpand-tree button').attr('disabled', false).css('cursor', 'pointer')
+        .fadeTo('slow', 1);
+    app.dbInitializing = 'complete';
+}
+function getAllSelectors(selectors) {
+    return app.enabledSelectors ? selectors += ', '+ app.enabledSelectors : selectors;
+}
+export function disableTableButtons(cursor = 'default') {
     $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 
     $(`.tbl-tools button, .tbl-tools input, .map-dsbl`)
-        .attr('disabled', 'disabled').css('cursor', 'default');
+        .attr('disabled', 'disabled').css('cursor', cursor);
 }
 export function fadeTable() {  
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);

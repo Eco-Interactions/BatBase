@@ -41,7 +41,8 @@ export function initFilterPanel() {
 }
 export function addFilterPanelEvents() {  
     window.addEventListener('resize', resizeFilterPanelTab);
-    $('#filter').click(toggleFilterPanel);                                      
+    $('#filter').click(toggleFilterPanel);             
+    $('button[name="reset-tbl"]').click(buildTable.bind(null, false, false));
     $('#shw-chngd').change(db_filters.toggleTimeFilter.bind(null, null, null, null));
     $('#delete-filter').click(showCnfrmDeleteBttns);
     $('#apply-filter').click(applyFilterSet);
@@ -116,7 +117,7 @@ function getLeftSplitPos() {
 }
 export function resetStoredFiltersUi() {
     if (!$('#selSavedFilters')[0].selectize) { return; }
-    $('#selSavedFilters')[0].selectize.clear();
+    $('#selSavedFilters')[0].selectize.clear('silent');
     $('#stored-filters input, #stored-filters textarea').val('');
 }
 /** Adds the focus to the filter panel header, "[Focus] and Time Filters" */

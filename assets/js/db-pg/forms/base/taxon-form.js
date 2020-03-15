@@ -158,7 +158,7 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
 /** ----------- CHANGE PARENT BUTTON --------------- */
 function buildEditPrntBttn(prnt) {
     const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt', 
-        class: 'ag-fresh tbl-bttn' };
+        class: 'ag-fresh' };
     const bttn = _f.util('buildElem', ['input', attr]);
     $(bttn).click(showParentTaxonSelectForm);
     return bttn;
@@ -243,7 +243,7 @@ function onParentLevelSelection(val) {
 }
 export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, realmData.rcrds);                          
     const prntTxn = realmData.rcrds[prntId];
-    if (prntTxn.isRealm) { return; }
+    if (prntTxn.isRoot) { return; }
     const prntLvl = prntTxn.level.displayName;
     _f.cmbx('setSelVal', ['#'+prntLvl+'-sel', prntId]);
 }

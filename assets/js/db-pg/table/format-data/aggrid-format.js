@@ -178,7 +178,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*/
         isParent: true,                     
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1, 
-        parentTaxon: taxon.parent > 1 ? taxon.parent : false, // 1 = Animalia (not shown)
+        parentTaxon: taxon.isRoot ? false : taxon.parent,
         taxonLvl: taxon.level.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
@@ -216,7 +216,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
 
     function handleUnspecifiedInts(curTreeLvl) {
         if (taxon.failedFltr || getIntCount(taxon) === null) { return; }
-        const name = taxon.isRealm ? taxon.realm.displayName : taxon.name;
+        const name = taxon.isRoot ? taxon.realm.displayName : taxon.name;
         addUnspecifiedTaxonIntsRow(name, curTreeLvl);
     }
     /**

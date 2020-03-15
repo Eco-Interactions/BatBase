@@ -37,7 +37,7 @@ export function updateUserNamedList() {
 /* -------------------------- DATA INIT ------------------------------------- */
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {
-    _pg.ui('showLoadingDataPopUp');
+    _pg.ui('updateUiForDatabaseInit');
     _idb.downloadFullDb(true);
 }
 export function resetLocalDb() {

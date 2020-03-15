@@ -503,10 +503,10 @@ function resetTaxonSelectForm(role) {
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(id, role) {                                       
     const taxon = getRcrd('taxon', id);   
-    if (ifSelectedTaxonIsRealmTaxon(taxon)) { return; }                         console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
+    if (ifSelectedTaxonIsRootTaxon(taxon)) { return; }                         console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
     selectPrevTaxon(taxon, role);
 }
-function ifSelectedTaxonIsRealmTaxon(taxon) { 
+function ifSelectedTaxonIsRootTaxon(taxon) { 
     return getRealmData('rootLvl') == taxon.level.displayName;
 }
 function selectPrevTaxon(taxon, role) {
@@ -618,7 +618,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
     }
     function getAncestorOpts(prntId) {                                          //console.log('getAncestorOpts. prntId = [%s]', prntId);
         const prntTaxon = getRcrd('taxon', prntId);
-        if (prntTaxon.isRealm) { return Promise.resolve();}
+        if (prntTaxon.isRoot) { return Promise.resolve();}
         selected[prntTaxon.level.displayName] = prntTaxon.id;                            
         return buildAncestorOpts(prntTaxon);
     }

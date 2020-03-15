@@ -117,9 +117,9 @@ function requireJs() {
  * shown on first visit.
  */ 
 export function showIntroAndLoadingMsg(resettingData) {
-    _ui.showLoadingDataPopUp();
+    _ui.updateUiForDatabaseInit();
     _ui.selectInitialSearchFocus('taxa', resettingData);
-    if (resettingData) { return $('#sel-view')[0].selectize.clear(); }
+    if (resettingData) { return $('#sel-view')[0].selectize.clear('silent'); }
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
@@ -133,10 +133,7 @@ function setTableInitState(isAllDataAvailable) {
     resetTableParams('taxa');
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.clearFilters();  //Sets default filter status message
-    if (isAllDataAvailable) { 
-        tState.flags.allDataAvailable = true; 
-        _ui.enableMapFeatures();
-    }
+    if (isAllDataAvailable) { tState.flags.allDataAvailable = true; }
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {

@@ -49,7 +49,7 @@ function getExitButtonRow() {
     return row;        
 }
 export function getExitButton() {
-    const attr = { 'id': 'exit-form', 'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' }
+    const attr = { 'id': 'exit-form', 'class': 'exit-bttn', 'type': 'button', 'value': 'X' }
     const bttn = _f.util('buildElem', ['input', attr]);
     $(bttn).click(_f.exitFormWindow);
     return bttn;
