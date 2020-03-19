@@ -118,29 +118,40 @@ function getColumnDefs(mainCol) {
                 {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
                 {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
                 {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-                {headerName: "Subject Taxon", field: "subject", width: 144, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Object Taxon", field: "object", width: 144, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Type", field: "interactionType", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
+                {headerName: "Subject Taxon", field: "subject", width: respW('sub'), cellRenderer: addTitle, comparator: sortByRankThenName },
+                {headerName: "Object Taxon", field: "object", width: respW('ob'), cellRenderer: addTitle, comparator: sortByRankThenName },
+                {headerName: "Type", field: "interactionType", width: respW('typ'), cellRenderer: addTitle, filter: unqVals },
                 getTagColDef(tags),
-                {headerName: "Citation", field: "citation", width: 133, cellRenderer: addToolTipToCells},
-                {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Citation", field: "citation", width: respW('cit'), cellRenderer: addTitle},
+                {headerName: "Habitat", field: "habitat", width: respW('hab'), cellRenderer: addTitle, filter: unqVals },
+                {headerName: "Location", field: "location", width: respW('loc'), hide: ifLocView(), cellRenderer: addTitle },
+                {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
                 {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
-                {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Country", field: "country", width: 94, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Region", field: "region", width: 90, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Note", field: "note", width: 133, cellRenderer: addToolTipToCells} ];
+                {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+                {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+                {headerName: "Country", field: "country", width: respW('cty'), cellRenderer: addTitle, filter: unqVals },
+                {headerName: "Region", field: "region", width: respW('reg'), cellRenderer: addTitle, filter: unqVals },
+                {headerName: "Note", field: "note", width: respW('nt'), cellRenderer: addTitle} ];
     }
+}
+function respW(col) {
+    const pgW =$(window).width() < 1500 ? 'sml' : 'reg';
+    const map = {
+        sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 }, 
+        typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 }, 
+        hab: { sml: 90,  reg: 100 }, loc: { sml: 111, reg: 122 }, 
+        cty: { sml: 94,  reg: 102 }, reg: { sml: 90,  reg: 100 }, 
+        nt:  { sml: 100, reg: 127 }
+    };
+    return map[col][pgW];
 }
 function getTagColDef(tags) {
     const values = tags ? Object.keys(tags) : [];
-    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
+    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addTitle, 
                     filter: unqVals, filterParams: {values: values}}
 }
 /** Adds tooltip to Interaction row cells */
-function addToolTipToCells(params) {
+function addTitle(params) {
     var value = params.value || null;
     return value === null ? null : '<span title="'+value+'">'+value+'</span>';
 }
@@ -153,7 +164,7 @@ function addToolTipToTree(params) {
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() { 
     var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
-    if (tblState.curFocus === 'locs') { offset = offset + 60; }
+    if (tblState.curFocus === 'locs') { offset = offset + 66; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */

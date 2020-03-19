@@ -70,12 +70,8 @@ function disableUserFeatures(cursor = 'not-allowed') {                          
 }
 function initUserFeatures() {                                                   //console.log('enableUserFeatures')
     initUserButtons();
-    $('#new-data').css('cursor', 'not-allowed' ).fadeTo('fast', .5)
-        .prop('title', 'This feature is only available to editors.');
-    $('#rst-data').css('cursor', 'not-allowed' ).fadeTo('fast', .5)
-        .prop('title', 'This feature is only available to editors.');
-    $('#rvw-data').css('cursor', 'not-allowed' ).fadeTo('fast', .5)
-        .prop('title', 'This feature is only available to admins.');
+    $('#rst-data, #new-data, #rvw-data').css('cursor', 'not-allowed' )
+        .prop('title', 'This feature is only available to editors.').fadeTo('fast', .5);
     app.enabledSelectors = `button[name="csv"], #lists`;
 }
 function initEditorFeatures() {                                               //console.log('enableEditorFeatures')

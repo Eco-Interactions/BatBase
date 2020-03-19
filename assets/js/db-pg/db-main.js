@@ -88,8 +88,7 @@ let tState = {};
 initDbPage();
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () { 
-    const winWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;  
-    if (winWidth < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js
+    if ($(window).width() < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js
     requireCss();
     requireJs();
     _ui.init();
