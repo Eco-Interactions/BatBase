@@ -38,6 +38,7 @@ import * as _f from '../../forms-main.js';
  * field's combobox and completing the appended sub-form.
  */
 export function initCreateForm(entity) {                                        console.log('   //Building New Interaction Form');
+    if (_f.state('getFormState')) { return; } //Form is already opened. 
     _f.state('initFormState', ['create', 'interaction'])
     .then(getInteractionFormFields)
     .then(fields => _f.elems('buildAndAppendForm', [fields]))
@@ -88,7 +89,7 @@ function getPinnedFieldVals() {
  * persisted. All other fields will be reset. 
  */
 function resetIntFields(vals) {                                                 console.log('           --resetIntFields. vals = %O', vals);
-    _f.elems('toggleSubmitBttn', ["#top-submit", false]);
+    _f.elems('toggleSubmitBttn', ['#top-submit', false]);
     _f.state('addEntityFormState', ['interaction', 'top', null, 'create']);
     resetUnpinnedFields(vals);
     fillPubDetailsIfPinned(vals.Publication);
@@ -258,7 +259,8 @@ function onPubSelection(val) {                                                  
     focusPinAndEnableSubmitIfFormValid('Publication');
 }
 function hasCitation(val) {
-    return getRcrd('source', val).children.length;
+    const pub = getRcrd('source', val);
+    return pub ? pub.children.length : null; //If no pub found, the issue was alerted to developer and editor
 }
 function onPubClear() {
     _f.cmbx('clearCombobox', ['#CitationTitle-sel']);
@@ -327,9 +329,10 @@ function getOptsForLoc(loc) {
     return opts;
 }
 function getChildLocOpts(children) {
-    return children.map(id => ({
-        value: id, text: getRcrd('location', id).displayName 
-    }));
+    return children.map(id => {
+        const loc = getRcrd('location', id);  //error alerted to developer and editor
+        return loc ? { value: id, text: loc.displayName } : null
+    }).filter(l => l);
 }
 export function selectLoc(id) {
     $('#sub-form').remove();
@@ -352,6 +355,7 @@ function onLocSelection(val) {                                                  
     if (val === '' || isNaN(parseInt(val))) { return _f.panel('clearDetailPanel', ['loc']); }   
     if ($('#form-map').length) { removeLocMap(); }
     const locRcrd = getRcrd('location', val);
+    if (!locRcrd) { return; } //error alerted to developer and editor
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _f.cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
     _f.panel('fillLocDataInDetailPanel', [locRcrd]);
@@ -503,7 +507,7 @@ function resetTaxonSelectForm(role) {
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(id, role) {                                       
     const taxon = getRcrd('taxon', id);   
-    if (ifSelectedTaxonIsRootTaxon(taxon)) { return; }                         console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
+    if (ifSelectedTaxonIsRootTaxon(taxon)) { return; }                          console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
     selectPrevTaxon(taxon, role);
 }
 function ifSelectedTaxonIsRootTaxon(taxon) { 
@@ -589,13 +593,14 @@ function repopulateCombosWithRelatedTaxa(selId) {
     const opts = {}, selected = {};                                               
     const taxon = getRcrd('taxon', selId);                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
     const realm = getRealmData('realmName');
-
+    if (!taxon) { return; } //issue alerted to developer and editor
     taxon.children.forEach(addRelatedChild); 
     return buildUpdatedTaxonOpts()
         .then(repopulateLevelCombos.bind(null, opts, selected));
 
     function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
         const childTxn = getRcrd('taxon', id);  
+        if (!childTxn) { return; } //issue alerted to developer and editor
         const level = childTxn.level.displayName;
         addOptToLevelAry(childTxn, level);
         childTxn.children.forEach(addRelatedChild);
@@ -691,12 +696,14 @@ function selectRoleTaxon() {
     const role = getRealmData('realmName') === 'Bat' ? 'Subject' : 'Object';
     const opt = getSelectedTaxonOption();
     $('#sub-form').remove();
+    if (!opt) { return; } //issue alerted to developer and editor
     _f.cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
     _f.cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption() {
     const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
+    if (!taxon) { return; } //issue alerted to developer and editor
     return { value: taxon.id, text:taxon.displayName };
 }
 /** Finds the most specific level with a selection and returns that taxon record. */
@@ -745,6 +752,7 @@ function getRealmData(prop) {
 }
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
 function onInteractionTypeSelection(val) {
+    if (!val) { return; }
     fillAndEnableTags(val);
     focusPinAndEnableSubmitIfFormValid('InteractionType');
 }
@@ -805,7 +813,7 @@ function resetIfFormWaitingOnChanges() {
     _f.state('setFormProp', ['top', 'unchanged', false]);
 }
 function getRcrd(entity, id) {
-    return _f.state('getRcrd', [entity, id]);
+    return _f.state('getRcrd', [entity, id]) || false;
 }
 function getRcrds(entity) {
     return _f.state('getEntityRcrds', [entity]);

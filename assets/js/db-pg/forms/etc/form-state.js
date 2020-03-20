@@ -28,7 +28,7 @@ export function clearState() {
  */
 export function initFormState(action, entity, id) {  
     const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
-        'author', 'publisher', 'interactionType'];
+    formState.init = true; //eliminates possibility of opening form multiple times.
     if (ifEditingInteraction(action, entity)) { entities.push('interaction'); }
 
     return _f.util('getData', [entities]).then(data => {
@@ -114,7 +114,7 @@ export function getEditEntityId(type) {
     return formState.editing[type];
 }
 export function getFormState() {  
-    return formState;
+    return Object.keys(formState).length ? formState : false;
 }
 export function getStateProp(prop) {                                            //console.log('args = %O, memory = %O', arguments, formState); 
     return formState[prop];
@@ -150,9 +150,9 @@ function buildRcrdsObj(entities) {
 }/** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {                                           
     if (!formState.records[entity]) { return; }
-    const rcrd = formState.records[entity][id];
-    if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, formState.records); console.trace() }
-    return _f.util('snapshot', [formState.records[entity][id]]); 
+    return formState.records[entity][id] ? 
+        _f.util('snapshot', [formState.records[entity][id]]) :
+        _f.alertIssue('noRcrdFound', {id: id, entity: entity });
 }
 /* ---------------------------- Setters ------------------------------------- */
 export function addEntityRecords(entity, rcrds) {

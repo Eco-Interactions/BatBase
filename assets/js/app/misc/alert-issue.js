@@ -69,6 +69,7 @@ class SentryError extends Error {
 /* ------------------- ALERT USER ------------------------------------------- */
 /**
  * IssueTags: alertHandler
+ *     alertNoRcrdFound: noRcrdFoundInForms
  *     undefiendDataKey: showGeneralAlert
  *     invalidDataKeyType: showGeneralAlert
  *     expectedDataNotFound: showGeneralAlert
@@ -79,7 +80,14 @@ class SentryError extends Error {
 function handleUserAlert(tag) {
     const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue'];
     if (silent.indexOf(tag) !== -1) { return; }
-    showGeneralAlert();
+    const map = {
+        'alertNoRcrdFound': noRcrdFoundInForms
+    };
+    if (tag in map) { map[tag](); 
+    } else { showGeneralAlert(); }
+}
+function noRcrdFoundInForms() {
+    alert(`Expected record not found. Try reloading the page or ${getEditorErrMsg()}`);
 }
 function showGeneralAlert() {                                                   
     alert(`An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);

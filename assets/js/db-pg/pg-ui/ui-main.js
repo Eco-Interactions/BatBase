@@ -105,7 +105,7 @@ function enableFeaturesAfterDbInitComplete() {
     $('.ico-bttn').css('cursor', 'pointer').prop('disabled', false).fadeTo('fast', 1);
     $('#search-focus')[0].selectize.enable(); 
     $('#sel-view')[0].selectize.enable();
-    authDependentInit();
+    if (app.userRole === 'visitor') { disableUserFeatures(); }
     delete app.dbInitializing;
 }
 /* --------------------- Init Table Focus ----------------------------------- */

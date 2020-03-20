@@ -199,7 +199,7 @@ function parseEntityData(data) {
     for (let prop in data) {
         try {
             data[prop] = JSON.parse(data[prop]);
-        } catch (e) { _db.pg('reportErr', [e]); }
+        } catch (e) { /* Fails on string values */ }
     }
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */

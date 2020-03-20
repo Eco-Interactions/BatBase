@@ -43,6 +43,9 @@ export function updateLocalDb() {
 export function resetStoredData() {
     _pg.db('resetStoredData');
 }
+export function alertIssue() {
+    return _pg.alertIssue(...arguments);
+}
 /** ====================== FORMS FACADE ===================================== */
 export function forms(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface
     return _forms[funcName](...getParams(params));

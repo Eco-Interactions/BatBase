@@ -135,7 +135,7 @@ function getColumnDefs(mainCol) {
     }
 }
 function respW(col) {
-    const pgW =$(window).width() < 1500 ? 'sml' : 'reg';
+    const pgW = $(window).width() < 1500 ? 'sml' : 'reg';
     const map = {
         sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 }, 
         typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 }, 
