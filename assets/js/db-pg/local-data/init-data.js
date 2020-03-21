@@ -41,7 +41,7 @@ function initBaseDataAndLoadBatTable(reset) {
     return getAndSetData('init')
         .then(() => getAndSetData('lists'))
         .then(() => _db.setUpdatedDataInLocalDb())
-        .then(() => _db.pg('initSearchStateAndTable', [null, false]));
+        .then(() => _db.pg('initSearchStateAndTable', ['taxa', false]));
 }
 /* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
 function downloadRemainingData() {

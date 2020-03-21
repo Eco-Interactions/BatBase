@@ -202,6 +202,7 @@ function setStatus(status) {                                                    
     $('#filter-status').text(status);
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
+/** Change event for the time-filter-type combobox. */
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
     fPs.pnlFltrs.time.type = val;

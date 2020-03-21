@@ -29,7 +29,6 @@ import * as db_filters from '../table/filters/filters-main.js';
 import { showInts } from '../map/map-main.js';
 import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/int-list-panel.js';
 import { addPanelEventsAndStyles, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
-import { updateFilterPanelHeader } from '../pg-ui/panels/filter-panel.js';
 
 
 const app = {

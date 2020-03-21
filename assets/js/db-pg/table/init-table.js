@@ -1,7 +1,7 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
-import * as agGrid from '../../../libs/grid/ag-grid.min.js';
+import * as agGrid from '../../../libs/grid/ag-grid.js';
 import * as _forms from '../forms/forms-main.js';
 import { updateFilterStatusMsg } from './filters/filters-main.js';
 import unqVals from './filters/ag-grid-unique-filter.js';
