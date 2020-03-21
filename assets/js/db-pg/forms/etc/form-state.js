@@ -27,13 +27,12 @@ export function clearState() {
  * > submit - Data used during form submission: fLvl, entity
  */
 export function initFormState(action, entity, id) {  
-    const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
+    const entities = getDataKeysForEntityForm(action, entity);
     formState.init = true; //eliminates possibility of opening form multiple times.
-    if (ifEditingInteraction(action, entity)) { entities.push('interaction'); }
-
     return _f.util('getData', [entities]).then(data => {
         initMainState(data);
         addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormState = %O", _f.util('snapshot', [formState]), formState);
+        delete formState.init;
         return formState;
     });
 
@@ -48,8 +47,39 @@ export function initFormState(action, entity, id) {
         };
     }
 }
-function ifEditingInteraction(action, entity) {
-    return action === 'edit' && entity === 'interaction';
+function getDataKeysForEntityForm(action, entity) {
+    const coreKeys = ['author', 'citation', 'interaction', 'interactionType', 
+        'location', 'publication', 'publisher', 'source', 'taxon'];
+    return entity === 'interaction' ? 
+        getIntFormDataKeys() : getSubEntityFormDataKeys(entity, 'edit');
+
+    function getIntFormDataKeys() {
+        if (action === 'create') { coreKeys.splice(2, 1); }
+        return coreKeys;
+    }
+}
+function getSubEntityFormDataKeys(entity, action) {
+    const map = {
+        'author': {
+            'edit': ['source', 'author']
+        },
+        'citation': {
+            'edit': ['source', 'citation', 'author']
+        },
+        'location': {
+            'edit': ['location']
+        },
+        'publication': {
+            'edit': ['source', 'publication']
+        },
+        'publisher': {
+            'edit': ['source', 'publisher']
+        },
+        'taxon': {
+            'edit': ['taxon']
+        }
+    }
+    return map[entity][action];
 }
 /**
  * Adds the properties and confg that will be used throughout the code for 
