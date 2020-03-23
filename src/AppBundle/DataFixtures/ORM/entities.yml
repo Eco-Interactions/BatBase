@@ -805,6 +805,7 @@ AppBundle\Entity\Level:
         displayName: Class
         ordinal: 50
         pluralName: Classes
+        taxons: ['@Taxon-27'] #
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -841,6 +842,15 @@ AppBundle\Entity\Level:
         ordinal: 130
         pluralName: Species
         taxons: ['@Taxon-7', '@Taxon-13', '@Taxon-16', '@Taxon-17', '@Taxon-20', '@Taxon-22', '@Taxon-25']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-8: #1
+        displayName: Domain
+        ordinal: 5
+        pluralName: Domains
+        taxons: ['@Taxon-26', '@Taxon-30']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1588,7 +1598,8 @@ AppBundle\Entity\Realm:
         displayName: Bat
         pluralName: Bats
         uiLevelsShown: '[7, 6, 5]'
-        taxon: '@Taxon-2' #7
+        taxa: ['@RealmTaxon-1', '@RealmTaxon-4', '@RealmTaxon-5', '@RealmTaxon-11', '@RealmTaxon-12', 
+            '@RealmTaxon-16', '@RealmTaxon-20', '@RealmTaxon-21', '@RealmTaxon-6', '@RealmTaxon-16']
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1598,7 +1609,9 @@ AppBundle\Entity\Realm:
         displayName: Plant
         pluralName: Plants
         uiLevelsShown: '[7, 6, 5]'
-        taxon: '@Taxon-3' #20
+        taxa: ['@RealmTaxon-2', '@RealmTaxon-9', '@RealmTaxon-10', '@RealmTaxon-13', '@RealmTaxon-14', 
+            '@RealmTaxon-15', '@RealmTaxon-17', '@RealmTaxon-18', '@RealmTaxon-19', '@RealmTaxon-22', 
+            '@RealmTaxon-23', '@RealmTaxon-24']
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1608,11 +1621,306 @@ AppBundle\Entity\Realm:
         displayName: Arthropod
         pluralName: Arthropods
         uiLevelsShown: '[7, 6, 5, 4, 3]'
-        taxon: '@Taxon-4'  #11
+        taxa: ['@RealmTaxon-3', '@RealmTaxon-7', '@RealmTaxon-8']
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
+    Realm-4: 
+        slug: bacteria
+        displayName: Bacteria
+        pluralName: Bacteria
+        uiLevelsShown: '[7, 6, 5, 4, 3]'
+        taxa: ['@RealmTaxon-25', '@RealmTaxon-26']  #11
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-5: 
+        slug: fish
+        displayName: Fish
+        pluralName: Fishes
+        uiLevelsShown: '[7, 6, 5]'
+        taxa: ['@RealmTaxon-27']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-6: 
+        slug: fungi
+        displayName: Fungi
+        pluralName: Fungi
+        uiLevelsShown: '[7, 6, 5]'
+        taxa: ['@RealmTaxon-28'] 
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-7: 
+        slug: virus
+        displayName: Virus
+        pluralName: Viruses
+        uiLevelsShown: '[7, 6, 5]'
+        taxa: ['@RealmTaxon-29']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-8:
+        slug: bird
+        displayName: Bird
+        pluralName: Birds
+        uiLevelsShown: '[7, 6, 5]'
+        taxa: ['@RealmTaxon-30'] 
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-9:
+        slug: reptile
+        displayName: Reptile
+        pluralName: Reptiles
+        uiLevelsShown: '[7, 6, 5]'
+        taxa: ['@RealmTaxon-31']  #11
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Realm-10:
+        slug: amphibian
+        displayName: Amphibian
+        pluralName: Amphibians
+        uiLevelsShown: '[7, 6, 5]'
+        taxa: ['@RealmTaxon-32']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+AppBundle\Entity\RealmTaxon: 
+    RealmTaxon-1:
+        isRoot: true
+        realm: '@Realm-1'
+        taxon: '@Taxon-2'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-2:
+        isRoot: true
+        realm: '@Realm-2'
+        taxon: '@Taxon-3'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-3:
+        isRoot: true
+        realm: '@Realm-3'
+        taxon: '@Taxon-4'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-4:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-5'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-5:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-6'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-6:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-7'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-7:
+        isRoot: false
+        realm: '@Realm-3'
+        taxon: '@Taxon-8'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-8:
+        isRoot: false
+        realm: '@Realm-3'
+        taxon: '@Taxon-9'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-9:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-10'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-10:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-11'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-11:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-12'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-12:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-13'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-13:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-14'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-14:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-15'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-15:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-16'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-16:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-17'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-17:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-18'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-18:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-19'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-19:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-20'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-20:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-21'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-21:
+        isRoot: false
+        realm: '@Realm-1'
+        taxon: '@Taxon-22'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-22:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-23'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-23:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-24'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-24:
+        isRoot: false
+        realm: '@Realm-2'
+        taxon: '@Taxon-25'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-25:
+        isRoot: true
+        realm: '@Realm-4'
+        taxon: '@Taxon-26'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-26:
+        isRoot: false
+        realm: '@Realm-4'
+        taxon: '@Taxon-27'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-27:
+        isRoot: true
+        realm: '@Realm-5'
+        taxon: '@Taxon-28'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-28:
+        isRoot: true
+        realm: '@Realm-6'
+        taxon: '@Taxon-29'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-29:
+        isRoot: true
+        realm: '@Realm-7'
+        taxon: '@Taxon-30'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-30:
+        isRoot: true
+        realm: '@Realm-8'
+        taxon: '@Taxon-31'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-31:
+        isRoot: true
+        realm: '@Realm-9'
+        taxon: '@Taxon-32'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    RealmTaxon-32:
+        isRoot: true
+        realm: '@Realm-10'
+        taxon: '@Taxon-33'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
 AppBundle\Entity\Source:
     Source-1: #1
         displayName: 'Feeding habits'
@@ -1967,35 +2275,33 @@ AppBundle\Entity\Tag:
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 AppBundle\Entity\Taxon:
-    Taxon-1: #21
+    Taxon-1: 
         slug: animalia
         displayName: 'Kingdom Animalia'
         name: Animalia
-        level: '@Level-1' #7
+        level: '@Level-1' 
         childTaxa: ['@Taxon-2']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-    Taxon-2: #7
+    Taxon-2: 
         slug: chiroptera
         displayName: 'Order Chiroptera'
         name: Chiroptera
-        realm: '@Realm-1' #
-        isRealm: true
-        level: '@Level-4' #
-        parentTaxon: '@Taxon-1' #21
+        realm: '@RealmTaxon-1' 
+        level: '@Level-4' 
+        parentTaxon: '@Taxon-1' 
         childTaxa: ['@Taxon-5']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-    Taxon-3: #20
+    Taxon-3: 
         slug: plantae
         displayName: 'Kingdom Plantae'
         name: Plantae
-        realm: '@Realm-2' #3
-        isRealm: true
+        realm: '@RealmTaxon-2' #3
         level: '@Level-1' #7
         childTaxa: ['@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2006,8 +2312,7 @@ AppBundle\Entity\Taxon:
         slug: arthropoda
         displayName: 'Phylum Arthropoda'
         name: Arthropoda
-        realm: '@Realm-3' #2
-        isRealm: true
+        realm: '@RealmTaxon-3' #2
         level: '@Level-2' #6
         childTaxa: ['@Taxon-8']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2018,6 +2323,7 @@ AppBundle\Entity\Taxon:
         slug: phyllostomidae
         displayName: 'Family Phyllostomidae'
         name: Phyllostomidae
+        realm: '@RealmTaxon-4' #
         level: '@Level-5' #3
         parentTaxon: '@Taxon-2' #7
         childTaxa: ['@Taxon-6', '@Taxon-12', '@Taxon-21']
@@ -2030,6 +2336,7 @@ AppBundle\Entity\Taxon:
         slug: micronycteris
         displayName: 'Family Micronycteris'
         name: Micronycteris
+        realm: '@RealmTaxon-5' #
         level: '@Level-6' #2
         parentTaxon: '@Taxon-5' #6
         childTaxa: ['@Taxon-7', '@Taxon-17']
@@ -2042,6 +2349,7 @@ AppBundle\Entity\Taxon:
         slug: micronycteris-hirsuta
         displayName: 'Micronycteris hirsuta'
         name: 'Micronycteris hirsuta'
+        realm: '@RealmTaxon-6' #
         level: '@Level-7' #1
         parentTaxon: '@Taxon-6' #41
         subjectRoles: ['@Interaction-1', '@Interaction-2']
@@ -2053,6 +2361,7 @@ AppBundle\Entity\Taxon:
         slug: lepidoptera
         displayName: 'Order Lepidoptera'
         name: Lepidoptera
+        realm: '@RealmTaxon-7' #
         level: '@Level-4' #
         parentTaxon: '@Taxon-4'  #11
         childTaxa: ['@Taxon-9']
@@ -2065,6 +2374,7 @@ AppBundle\Entity\Taxon:
         slug: sphingidae
         displayName: 'Family Sphingidae'
         name: Sphingidae
+        realm: '@RealmTaxon-8' #
         level: '@Level-5' #3
         parentTaxon: '@Taxon-8'  #218
         objectRoles: ['@Interaction-1']
@@ -2076,6 +2386,7 @@ AppBundle\Entity\Taxon:
         slug: lauraceae
         displayName: 'Family Lauraceae'
         name: Lauraceae
+        realm: '@RealmTaxon-9'
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3'  #20
         childTaxa: ['@Taxon-11']
@@ -2087,6 +2398,7 @@ AppBundle\Entity\Taxon:
         slug: beilschmiedia
         displayName: 'Genus Beilschmiedia'
         name: Beilschmiedia
+        realm: '@RealmTaxon-10' #
         level: '@Level-6'  #2
         parentTaxon: '@Taxon-10' #900
         objectRoles: ['@Interaction-2']
@@ -2098,6 +2410,7 @@ AppBundle\Entity\Taxon:
         slug: artibeus
         displayName: 'Genus Artibeus'
         name: Artibeus
+        realm: '@RealmTaxon-11' #
         level: '@Level-6'  #6
         parentTaxon: '@Taxon-5'  #6 
         childTaxa: ['@Taxon-13']
@@ -2109,6 +2422,7 @@ AppBundle\Entity\Taxon:
         slug: artibeus-lituratus
         displayName: 'Artibeus lituratus'
         name: 'Artibeus lituratus'
+        realm: '@RealmTaxon-12'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-12' #56
         subjectRoles: ['@Interaction-3']
@@ -2120,6 +2434,7 @@ AppBundle\Entity\Taxon:
         slug: anacardiaceae
         displayName: 'Family Anacardiaceae'
         name: Anacardiaceae
+        realm: '@RealmTaxon-13'
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-15']
@@ -2131,6 +2446,7 @@ AppBundle\Entity\Taxon:
         slug: anacardium
         displayName: 'Genus Anacardium'
         name: Anacardium
+        realm: '@RealmTaxon-14'
         level: '@Level-6' #2
         parentTaxon: '@Taxon-14' #72
         childTaxa: ['@Taxon-16']
@@ -2142,6 +2458,7 @@ AppBundle\Entity\Taxon:
         slug: anacardium-excelsum
         displayName: 'Anacardium excelsum'
         name: 'Anacardium excelsum'
+        realm: '@RealmTaxon-15'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-15' #73
         objectRoles: ['@Interaction-3']
@@ -2153,6 +2470,7 @@ AppBundle\Entity\Taxon:
         slug: micronycteris-schmidtorum
         displayName: 'Micronycteris schmidtorum'
         name: 'Micronycteris schmidtorum'
+        realm: '@RealmTaxon-16' #
         level: '@Level-7' #1
         parentTaxon: '@Taxon-6' #41
         subjectRoles: ['@Interaction-4']
@@ -2164,6 +2482,7 @@ AppBundle\Entity\Taxon:
         slug: fabaceae
         displayName: 'Family Fabaceae'
         name: Fabaceae
+        realm: '@RealmTaxon-17'
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-19']
@@ -2175,6 +2494,7 @@ AppBundle\Entity\Taxon:
         slug: mucuna
         displayName: 'Genus Mucuna'
         name: Mucuna
+        realm: '@RealmTaxon-18'
         level: '@Level-6' #2
         parentTaxon: '@Taxon-18'    #155
         childTaxa: ['@Taxon-20']
@@ -2186,6 +2506,7 @@ AppBundle\Entity\Taxon:
         slug: mucuna-andreana
         displayName: 'Mucuna andreana'
         name: 'Mucuna andreana'
+        realm: '@RealmTaxon-19'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-19' #562
         objectRoles: ['@Interaction-5', '@Interaction-8']
@@ -2197,6 +2518,7 @@ AppBundle\Entity\Taxon:
         slug: rhinophylla
         displayName: 'Genus Rhinophylla'
         name: Rhinophylla
+        realm: '@RealmTaxon-20'
         level: '@Level-6' #2
         parentTaxon: '@Taxon-5' #6
         childTaxa: ['@Taxon-22']
@@ -2209,6 +2531,7 @@ AppBundle\Entity\Taxon:
         slug: rhinophylla-pumilio
         displayName: 'Rhinophylla pumilio'
         name: 'Rhinophylla pumilio'
+        realm: '@RealmTaxon-21'
         level: '@Level-7' #1
         parentTaxon: '@Taxon-21' #59
         subjectRoles: ['@Interaction-6', '@Interaction-7']
@@ -2220,6 +2543,7 @@ AppBundle\Entity\Taxon:
         slug: araceae
         displayName: 'Family Araceae'
         name: Araceae
+        realm: '@RealmTaxon-22'
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-24']
@@ -2232,6 +2556,7 @@ AppBundle\Entity\Taxon:
         slug: philodendron
         displayName: 'Genus Philodendron'
         name: Philodendron
+        realm: '@RealmTaxon-23'
         level: '@Level-6' #2
         parentTaxon: '@Taxon-23' #507
         childTaxa: ['@Taxon-25']
@@ -2243,12 +2568,99 @@ AppBundle\Entity\Taxon:
         slug: philodendron-sphalerum
         displayName: 'Philodendron sphalerum'
         name: 'Philodendron sphalerum'
-        level: '@Level-7' #1
+        realm: '@RealmTaxon-24'
+        level: '@Level-7'
         parentTaxon: '@Taxon-24' #510
         objectRoles: ['@Interaction-6']
         created: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-26: 
+        slug: domain-bacteria
+        displayName: 'Domain Bacteria'
+        name: Bacteria
+        realm: '@RealmTaxon-25' #
+        level: '@Level-8' #
+        childTaxa: ['@Taxon-27']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-27: 
+        slug: class-gammaproteobacteria
+        displayName: 'Class Gammaproteobacteria'
+        name: Gammaproteobacteria
+        realm: '@RealmTaxon-26' 
+        level: '@Level-3' #
+        parentTaxon: '@Taxon-26'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-28: 
+        slug: class-actinopterygii
+        displayName: 'Class Actinopterygii'
+        name: Actinopterygii
+        realm: '@RealmTaxon-27' 
+        level: '@Level-3' 
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-29:
+        slug: kingdom-fungi
+        displayName: 'Kingdom Fungi'
+        name: Fungi
+        realm: '@RealmTaxon-28' 
+        level: '@Level-1'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-30: 
+        slug: domain-virus
+        displayName: 'Domain Virus'
+        name: Virus
+        realm: '@RealmTaxon-29' 
+        level: '@Level-8' 
+        childTaxa: ['@Taxon-27']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-31: 
+        slug: class-aves
+        displayName: 'Class Aves'
+        name: Aves
+        realm: '@RealmTaxon-30' 
+        level: '@Level-3' 
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-32: 
+        slug: class-reptilia
+        displayName: 'Class Reptilia'
+        name: Reptilia
+        realm: '@RealmTaxon-31' 
+        level: '@Level-3' 
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-33: 
+        slug: class-amphibia
+        displayName: 'Class Amphibia'
+        name: Amphibia
+        realm: '@RealmTaxon-32' 
+        level: '@Level-3' 
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 AppBundle\Entity\User:  #passwordhere
     User-1:  
