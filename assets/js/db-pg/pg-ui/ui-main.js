@@ -59,11 +59,11 @@ function authDependentInit() {
     };
     initMap[app.userRole]();
 }
-function disableUserFeatures(cursor = 'not-allowed') {                                  //console.log('disableUserFeatures')
+function disableUserFeatures() {                                                //console.log('disableUserFeatures')
     $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #rst-data, 
         #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
         #stored-filters input, #stored-filters textarea`)
-        .css('cursor', cursor).prop('disabled', true).fadeTo('fast', .5)
+        .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
         .prop('title', 'Please register to use these features.');
     app.enabledSelectors = false;
 }
@@ -73,7 +73,7 @@ function initUserFeatures() {                                                   
         .prop('title', 'This feature is only available to editors.').fadeTo('fast', .5);
     app.enabledSelectors = `button[name="csv"], #lists`;
 }
-function initEditorFeatures() {                                               //console.log('enableEditorFeatures')
+function initEditorFeatures() {                                                 //console.log('enableEditorFeatures')
     initUserButtons();                                              
     initEditorButtons();
     app.enabledSelectors = '.map-dsbl';
@@ -158,11 +158,11 @@ function collapseTreeByOne() {
  */
 function toggleTreeByOneLvl(opening) {
     const tblApi = db_page.accessTableState().get('api');
-    const tblModel = tblApi.getModel();                                         //console.log("tblModel = %O", tblModel);
+    const tblModel = tblApi.getModel();                                  
     const bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
-    tblModel.rowsToDisplay.forEach(row => {                              //console.log("rowToDisplay = %O", row)
+    tblModel.rowsToDisplay.forEach(row => {                             
         if (!opening && !isNextOpenLeafRow(row)) { return; }
         row.expanded = opening;
         row.data.open = opening;
@@ -200,7 +200,7 @@ function isNextOpenLeafRow(node) {                                              
 /* ====================== DATABASE ENTITY VIEW UI =================================================================== */
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTaxonSearchUi(curView, reset) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
+export function initTaxonSearchUi(curView, reset) {                             //console.log("initTaxonSearchUi. realms = %O", realms);
     _u.getData('realm').then( realms => {                                       //console.log('--initTaxonSearchUi. realms = %O', realms)
         loadTxnViewOpts(realms, reset);
         setTaxonView(curView); 

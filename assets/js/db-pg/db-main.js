@@ -131,8 +131,8 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 function setTableInitState(isAllDataAvailable) {
     resetTableParams('taxa');
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
-    db_filters.clearFilters();  //Sets default filter status message
-    if (isAllDataAvailable) { tState.flags.allDataAvailable = true; }
+    if (isAllDataAvailable) { tState.flags.allDataAvailable = true; 
+    } else { db_filters.clearFilters(); } //Sets default filter status message
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
@@ -189,6 +189,10 @@ function resetCurTreeStorageProps() {
 /* ==================== TABLE (RE)BUILDS ============================================================================ */
 function loadTbl(tblName, rowData) {
     return require('./table/init-table.js').default(tblName, rowData, tState);
+}
+export function reloadTableWithCurrentFilters() {  
+    const filters = db_filters.getFilterState();
+    db_filters.reloadTableAndApplyFilters(filters);
 }
 /** 
  * Table-rebuild entry point after local database updates, filter clears, and 
@@ -384,7 +388,7 @@ function getTxnDataAndBuildTable(view) {
     return _u.getData('taxon').then(beginTaxonLoad.bind(null, view));
 }
 function beginTaxonLoad(realmId, taxa) {                                                 
-    tState.rcrdsById = taxa;                                                  //console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
+    tState.rcrdsById = taxa;                                                    //console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd(realmId);
     _ui.initTaxonSearchUi(realmTaxon.id, tState.flags.allDataAvailable);
     return startTxnTableBuildChain(realmTaxon);

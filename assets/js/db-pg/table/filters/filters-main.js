@@ -21,7 +21,7 @@
 import * as _u from '../../util/util.js';
 import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
 import * as db_ui from '../../pg-ui/ui-main.js';
-import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/filter-panel.js';
+import { resetStoredFiltersUi, savedFilterSetActive, reloadTableThenApplyFilters } from '../../pg-ui/panels/filter-panel.js';
 import { savedIntListLoaded } from '../../pg-ui/panels/int-list-panel.js';
 /** 
  * Filter Params
@@ -56,6 +56,9 @@ export function getFilterState() {
         table: getTableFilterModels()
     };
 }
+export function reloadTableAndApplyFilters(filters) {
+    reloadTableThenApplyFilters(filters);
+}
 export function enableClearFiltersButton() {
     if (!filtersActive()) { 
         $('button[name="reset-tbl"]')
@@ -80,10 +83,10 @@ function resetFilterUi() {
     $('#focus-filters input').val('');
     if ($('#shw-chngd').prop('checked')) { resetDataTimeFilter(); }
 }
-function resetFilterStatus() {
+function resetFilterStatus() { 
     const flags = tState().get('flags'); // if (flags.allDataAvailable) { console.trace(); }
     const status = flags.allDataAvailable ? 'No Active Filters.' :
-        '[ Database initializing... Table will reset once complete, in ~30 seconds. ]';
+        '[ Database initializing... Table will reset once complete. ]';
     $('#filter-status').text(status);
     if (!flags.allDataAvailable) { 
         $('#filter-status').css('color', 'teal'); 
@@ -461,7 +464,7 @@ export function buildTreeSearchHtml(entity) {
         name: 'sel'+entity+'_submit' });
     addInputClass(entity, input);
     addLblClass(entity, lbl);
-    $(input).onEnter(func);
+    $(input).change(func);
     $(lbl).append([span, input]);
     return lbl;
 }
@@ -519,16 +522,18 @@ function nonSrcRowHasChildren(row) {
     return row.children && row.children.length > 0;
 }
 /*------------------ Location Filter Updates -----------------------------*/
-function filterLocs(text) {  
-    const selType = getSelectedLocType();  
-    if (selType) { return updateLocSearch(selected[selType], selType); }
+function filterLocs(text) { 
+    const selVal = getSelectedLoc('val');  
+    if (selVal) { return updateLocSearch(selVal); }
     filterTableByText(text);
 }
-function getSelectedLocType() {
-    const selected = tState().get('selectedOpts');
-    return getSelectedLocVal(selected);                         
+/* --- Get selected location data --- */
+function getSelectedLoc(prop) {
+    const selObj = tState().get('selectedOpts');
+    const selType = getSelectedLocType(selObj);
+    return prop === 'val' ? selObj[selType] : selType;                  
 }
-function getSelectedLocVal(selected) {
+function getSelectedLocType(selected) {
     const sels = Object.keys(selected);
     return !sels.length ? checkLocElems() : (sels.length == 1 ? 'Region' : 'Country');
 }
@@ -536,26 +541,21 @@ function checkLocElems() {
     const locType = ['Country', 'Region'].filter(type => $('#sel'+type).val());
     return locType.length == 1 ? locType[0] : null;
 }
+/* ----------- Apply location filters ------------------------ */
 export function updateLocSearch(val, selType) {                                 
     if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
-    const locType = selType ? selType : getLocType(val, this);                  
-    const root = getNewLocRoot(val, locType);    
+    const locType = selType ? selType : getSelectedLoc('type');     
+    const root = getNewLocRoot(val, locType);  
     const txt = getTreeFilterTextVal('Location');  
     updateLocFilterMemory(root, locType);
     updateNameFilterMemory(txt);
     db_ui.resetToggleTreeBttn(false);
     return rebuildLocTable(root, txt)
-    .then(() => {
-        if ($('#shw-chngd')[0].checked) { 
-            reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
-    });
+        .then(() => {
+            if ($('#shw-chngd')[0].checked) { 
+                reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
+        });
 } 
-function getLocType(val, that) {        
-    if (that == undefined) { return getSelectedLocType(); }                             
-    const selTypes = { selCountry: 'Country', selRegion: 'Region' };
-    const type = selTypes[that.$input[0].id];
-    return val !== 'all' ? type : (type == 'Country' ? 'Region' : false);
-}
 function getNewLocRoot(val, locType) {
     return val == 'all' ? getParentId(locType) : [parseInt(val)];
 }
