@@ -70,6 +70,7 @@ class SentryError extends Error {
 /**
  * IssueTags: alertHandler
  *     alertNoRcrdFound: noRcrdFoundInForms
+ *     comboboxNotFound: showGeneralAlert
  *     undefiendDataKey: showGeneralAlert
  *     invalidDataKeyType: showGeneralAlert
  *     expectedDataNotFound: showGeneralAlert
