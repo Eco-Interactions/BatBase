@@ -64,7 +64,7 @@ function getSubEntityFormDataKeys(entity, action) {
             'edit': ['source', 'author']
         },
         'citation': {
-            'edit': ['source', 'citation', 'author']
+            'edit': ['source', 'citation', 'author', 'publisher']
         },
         'location': {
             'edit': ['location']

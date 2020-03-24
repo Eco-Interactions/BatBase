@@ -125,6 +125,7 @@ export function showIntroAndLoadingMsg(resettingData) {
 export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = true) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s], allDataAvailable ? [%s]', focus, isAllDataAvailable);
     setTableInitState(isAllDataAvailable);      
     _ui.selectInitialSearchFocus(focus);
+    if ($('body').data('env') === 'test' && isAllDataAvailable === false) { return; }
     buildTable(null, null, isAllDataAvailable)
     .then(updateFilterPanelHeader.bind(null, focus));
 } 
@@ -422,7 +423,8 @@ function updateRealmTableState(realmId, realmTaxonRcrd) {
 }
 /** This catches errors in realm value caused by exiting mid-tutorial. TODO */
 function getSelValOrDefault(val) {
-    return !val ? 2 : isNaN(val) ? 2 : val; //2 - Bats
+    const bats = $('body').data('env') == 'test' ? 1 : 2; //Default
+    return !val ? bats : isNaN(val) ? bats : val; 
 }
 /**
  * Builds a taxon data-tree for the passed taxon. The taxon levels present in 

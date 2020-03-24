@@ -102,8 +102,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function theDatabaseHasLoaded()
     {
         $this->spin(function(){
-            return $this->getUserSession()->evaluateScript("$('.ag-row').length");
-        }, 'There are no rows in the database table.', 10);
+            return $this->getUserSession()->evaluateScript("$('#filter-status').text() === 'No Active Filters.';");
+        }, 'The database did not load as expected', 10);
     }
 
 /** -------------------------- Search Page Interactions --------------------- */
@@ -142,8 +142,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iGroupInteractionsBy($type)
     {
-        $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 2, 
-            'Arthropoda' => 4, 'Plants' => 3, 'Publishers' => 'publ'];
+        $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 1, 
+            'Arthropoda' => 3, 'Plants' => 2, 'Publishers' => 'publ'];
         $newElems = ['Authors' => 'input[name="selAuthor"]', 'Publications' => '#selPubType', 
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
             'Publishers' => 'input[name="selPublisher"]'];
@@ -1097,11 +1097,11 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iCheckTheBox($text)
     {
-        $form = $this->getOpenFormPrefix();
-        $selector = '#'.$form.'-all-fields';
-        $checkbox = $this->getUserSession()->getPage()->find('css', $selector);
-        $this->handleNullAssert($checkbox, false, "Couldn't find the show all fields checkbox");  
-        $this->spin(function() use ($checkbox) {
+        $this->spin(function() {
+            $form = $this->getOpenFormPrefix();
+            $selector = '#'.$form.'-all-fields';
+            $checkbox = $this->getUserSession()->getPage()->find('css', $selector);
+            if (!$checkbox) { return false; }
             $checkbox->check();  
             return $checkbox->isSelected();
         }, 'Could not check "Show all fields".');

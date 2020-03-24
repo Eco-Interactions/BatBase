@@ -7,6 +7,7 @@ use AppBundle\Entity\Interaction;
 use AppBundle\Entity\Location;
 use AppBundle\Entity\Source;
 use AppBundle\Entity\Taxon;
+use AppBundle\Entity\RealmTaxon;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -217,7 +218,9 @@ class DataEntryController extends Controller
             "tags" => function($ary) use (&$entity, &$edits, &$em) { 
                 $this->handleTags($ary, $entity, $edits, $em); },
             "source" => function($id) use (&$entity, &$edits, &$em) {
-                $this->addInteractionToSource($id, $entity, $edits, $em);
+                $this->addInteractionToSource($id, $entity, $edits, $em);},
+            "realm" => function($id) use (&$entity, &$edits, &$em) {
+                $this->createRealmTaxon($id, $entity, $edits, $em);
             }
         ];
         foreach ($formData as $rEntityName => $val) {  
@@ -378,6 +381,19 @@ class DataEntryController extends Controller
             $relEntity->setIsDirect(true);
             $em->persist($relEntity);
         }
+    }
+    private function createRealmTaxon($realmId, $entity, &$edits, &$em)
+    {
+        $realmTaxon = new RealmTaxon();
+        $realmTaxon->setIsRoot(false);
+
+        $realmTaxon->setRealm($this->getEntity("Realm", $realmId, $em));
+        $realm->addTaxon($realmTaxon);
+
+        $realmTaxon->setTaxon($entity);
+        $entity->setRealm($realmTaxon);
+
+        $em->persist($realmTaxon);
     }
     /**
      * Checks whether current value is equal to the passed value. If not, the 

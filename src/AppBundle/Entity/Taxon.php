@@ -89,7 +89,7 @@ class Taxon
     /**
      * @var \AppBundle\Entity\Realm
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RealmTaxon", mappedBy="taxon")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RealmTaxon", mappedBy="taxon", cascade={"persist", "remove"})
      */
     private $realm;
 
@@ -376,6 +376,20 @@ class Taxon
     public function getLinkUrl()
     {
         return $this->linkUrl;
+    }
+
+    /**
+     * Set Realm.
+     *
+     * @param \AppBundle\Entity\Realm $realm
+     *
+     * @return Taxon
+     */
+    public function setRealmTaxon(\AppBundle\Entity\Realm $realm)
+    {
+        RealmTaxon::create($realm, $this);
+        
+        return $this;
     }
 
     /**

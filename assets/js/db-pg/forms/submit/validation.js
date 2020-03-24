@@ -67,7 +67,7 @@ function buildResetDataButton() {
 }
 function reloadAndRedownloadData() {                                            
     _f.exitFormWindow(null, 'skipTableReset');
-    _f.resetStoredData();
+    _f.resetStoredData(true);
 }
 /**
  * When the user attempts to create an entity that uses the sub-form and there 

@@ -39,13 +39,12 @@ export default function (reset) {                                               
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
 function initBaseDataAndLoadBatTable(reset) {
     return getAndSetData('init')
-        .then(() => getAndSetData('lists'))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable', ['taxa', false]));
 }
 /* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
 function downloadRemainingData() {
-    const urls = ['taxa', 'source', 'location', 'interaction']; 
+    const urls = ['taxa', 'source', 'location', 'interaction', 'lists']; 
     return $.when(...urls.map(url => getAndSetData(url)))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable'));

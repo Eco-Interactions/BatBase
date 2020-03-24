@@ -157,7 +157,7 @@ Feature: Add new data to the database
         And I click on "use the map interface" link
         And I press the "New Location" button in the map  
         And I should see "New Location"
-        And I press the "Click to select position" button in the map
+        # And I press the "Click to select position" button in the map
         And I type "9.79026" in the "Latitude" field "input"
         And I type "-83.91546" in the "Longitude" field "input"
         And I see the "new" location's pin on the map

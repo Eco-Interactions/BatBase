@@ -523,28 +523,31 @@ function nonSrcRowHasChildren(row) {
 }
 /*------------------ Location Filter Updates -----------------------------*/
 function filterLocs(text) { 
-    const selVal = getSelectedLoc('val');  
+    const selVal = getSelectedLoc();  
     if (selVal) { return updateLocSearch(selVal); }
     filterTableByText(text);
 }
 /* --- Get selected location data --- */
-function getSelectedLoc(prop) {
+function getSelectedLoc() {
     const selObj = tState().get('selectedOpts');
     const selType = getSelectedLocType(selObj);
-    return prop === 'val' ? selObj[selType] : selType;                  
+    return selObj[selType];
 }
 function getSelectedLocType(selected) {
     const sels = Object.keys(selected);
-    return !sels.length ? checkLocElems() : (sels.length == 1 ? 'Region' : 'Country');
+    return !sels.length ? getLocTypeFromElems() : (sels.length == 1 ? 'Region' : 'Country');
 }
-function checkLocElems() {
-    const locType = ['Country', 'Region'].filter(type => $('#sel'+type).val());
+function getLocTypeFromElems() {
+    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
     return locType.length == 1 ? locType[0] : null;
+}
+function hasSelVal(val) {
+    return val && val !== 'all';
 }
 /* ----------- Apply location filters ------------------------ */
 export function updateLocSearch(val, selType) {                                 
     if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
-    const locType = selType ? selType : getSelectedLoc('type');     
+    const locType = selType ? selType : getLocTypeFromElems();     
     const root = getNewLocRoot(val, locType);  
     const txt = getTreeFilterTextVal('Location');  
     updateLocFilterMemory(root, locType);
@@ -565,7 +568,7 @@ function getParentId(locType) {
 function getTopRegions() {
     return Object.values(tState().get('data')['topRegionNames']);      
 }
-function updateLocFilterMemory(loc, locType) {
+function updateLocFilterMemory(loc, locType) { 
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});

@@ -37,7 +37,7 @@ export function syncLocalDbWithServer(lclUpdtdAt) {                             
     _db.getData('user').then(checkUserData);
     
     function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
-        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _db.downloadFullDb(); }
+        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _db.resetStoredData(); }
         const entities = checkEachEntityForUpdates(srvrUpdtdAt.state);
         return entities.length ? syncDb(entities, srvrUpdtdAt.state) : initSearchPage();
     }

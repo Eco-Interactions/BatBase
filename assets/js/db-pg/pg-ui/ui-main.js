@@ -555,17 +555,21 @@ function loadPubSearchElems(pubTypeOpts) {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u.initCombobox('Publication Type');
-    _u.setSelVal('Publication Type', 'all', 'silent');
+    $('#selPubType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
 }         
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
     const span = _u.buildElem('span', { text: 'Type:' });
-    const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+    const sel = newSelEl(addAllOpt(opts), '', 'selPubType', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';
     $(sel).css('width', '177px');
     $(lbl).css('width', lblW).append([span, sel]);
     return lbl;
+}
+function addAllOpt(opts) {
+    opts.unshift({value: 'all', text: '- All -'});
+    return opts;
 }
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
@@ -697,7 +701,7 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
-    if (app.dbInitializing === 'complete') { enableFeaturesAfterDbInitComplete() }
+    if (app.dbInitializing === 'complete' || testingDbInit()) { enableFeaturesAfterDbInitComplete() }
     if (app.dbInitializing) { return enableToggleTreeButtons(); }
     $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts'))
         .attr('disabled', false).css('cursor', 'pointer');
@@ -705,6 +709,9 @@ export function enableTableButtons() {                                          
     $(getAllSelectors('.tbl-tools')).fadeTo('slow', 1);
     enableListReset();
     db_filters.enableClearFiltersButton();
+}
+function testingDbInit() {
+    return app.dbInitializing && $('body').data('env') === 'test';
 }
 function enableToggleTreeButtons() {
     $('#xpand-tree, #xpand-tree button').attr('disabled', false).css('cursor', 'pointer')
@@ -714,10 +721,10 @@ function enableToggleTreeButtons() {
 function getAllSelectors(selectors) {
     return app.enabledSelectors ? selectors += ', '+ app.enabledSelectors : selectors;
 }
-export function disableTableButtons(cursor = 'default') {
+function disableTableButtons() {
     $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 
     $(`.tbl-tools button, .tbl-tools input, .map-dsbl`)
-        .attr('disabled', 'disabled').css('cursor', cursor);
+        .attr('disabled', 'disabled').css('cursor', 'default');
 }
 export function fadeTable() {  
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);

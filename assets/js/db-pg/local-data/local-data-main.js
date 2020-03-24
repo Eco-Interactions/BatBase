@@ -35,10 +35,8 @@ export function updateUserNamedList() {
     return _sync.updateUserNamedList(...arguments);
 }
 /* -------------------------- DATA INIT ------------------------------------- */
-/** When there is an error while storing data, all data is redownloaded. */
-export function resetStoredData() {
-    _pg.ui('updateUiForDatabaseInit');
-    _idb.downloadFullDb(true);
+export function resetStoredData(reset) {
+    _idb.downloadFullDb(reset);
 }
 export function resetLocalDb() {
     const msg = 'Are you sure you want to reset all local data?';
@@ -66,9 +64,6 @@ function alertFetchIssue(url, responseText) {
 }
 export function getAllStoredData() {
     return _idb.getAllStoredData();
-}
-export function downloadFullDb(reset) {
-    return _idb.downloadFullDb(reset);
 }
 /* -------------------------- DATA SYNC ------------------------------------- */
 export function syncLocalDbWithServer(lclDataUpdatedAt) {

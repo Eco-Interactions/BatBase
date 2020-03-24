@@ -111,7 +111,7 @@ export function updatePlaceholderText(selId, newTxt, optCnt) {                  
     const emptySel = optCnt === 0;
     const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false; 
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
-    $selApi.settings.placeholder = getPlaceholer(id, newTxt, false, emptySel);
+    $selApi.settings.placeholder = getPlaceholer(selId, newTxt, false, emptySel);
     $selApi.updatePlaceholder();
 }
 // export function enableComboboxes($pElems, enable) {   console.log('############ enableComboboxes used')

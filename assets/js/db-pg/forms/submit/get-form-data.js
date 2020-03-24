@@ -181,6 +181,8 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         const formTaxonLvl = _fs.forms.realmData.formTaxonLvl;
         formVals.parentTaxon = getParentTaxon(formTaxonLvl);
         formVals.level = formTaxonLvl;
+        if (_fs.action === 'edit') { return; }
+        formVals.realm = _fs.forms.realmData.realmTaxon.id;
     }
     /** -------------------- Additional Taxon Data -----------------------*/ 
     /**
@@ -190,7 +192,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     function getParentTaxon(lvl) {
         const lvls = _fs.forms.realmData.realmLvls;
         const parentLvl = lvls[lvls.indexOf(lvl)+1]; 
-        if (ifParentIsRealmTaxon(lvl, parentLvl)) { 
+        if (ifParentIsRootTaxon(lvl, parentLvl)) { 
             return _fs.forms.realmData.realmTaxon.id; 
         }
         return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);

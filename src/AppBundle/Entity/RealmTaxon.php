@@ -32,13 +32,13 @@ class RealmTaxon
     private $isRoot;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Realm")
+     * @ORM\ManyToOne(targetEntity="Realm", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $realm;
 
     /**
-     * @ORM\OneToOne(targetEntity="Taxon", inversedBy="realm")
+     * @ORM\OneToOne(targetEntity="Taxon", inversedBy="realm", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $taxon;
