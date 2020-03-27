@@ -387,7 +387,8 @@ class DataEntryController extends Controller
         $realmTaxon = new RealmTaxon();
         $realmTaxon->setIsRoot(false);
 
-        $realmTaxon->setRealm($this->getEntity("Realm", $realmId, $em));
+        $realm = $this->getEntity("Realm", $realmId, $em);
+        $realmTaxon->setRealm($realm);
         $realm->addTaxon($realmTaxon);
 
         $realmTaxon->setTaxon($entity);

@@ -167,7 +167,8 @@ Feature: Add new data to the database
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
         # And I see the country's polygon drawn on the map  #(Couldn't identify elem)
-        And I press "Create Location" in the added green pin's popup
+        And I break "Press 'Create Location' in the green pin's popup"
+        # And I press "Create Location" in the added green pin's popup (Not clicking reliably)
         And I wait for the "sub" form to close
         ## Without GPS ##
         And I enter "Test Location Without GPS" in the "Location" form dropdown
