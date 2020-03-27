@@ -60,20 +60,19 @@ export function reloadTableAndApplyFilters(filters) {
     reloadTableThenApplyFilters(filters);
 }
 export function enableClearFiltersButton() {
-    if (!filtersActive()) { 
-        $('button[name="reset-tbl"]')
-            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5); 
-    } else { 
-        $('button[name="reset-tbl"]')
-            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('slow', 1); 
-    }
+    const noFilters = !filtersActive();
+    const opac = noFilters ? .5 : 1;
+    const cursor = noFilters ? 'inherit' : 'pointer';
+    $('button[name="reset-tbl"]')
+        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('slow', opac); 
 }
 function filtersActive() {
     const tbl = Object.keys(getTableFilters([])).length > 0;
     const pnl = Object.keys(fPs.pnlFltrs).length > 0;
     return tbl || pnl;
 }
-export function clearFilters() {
+export function clearFilters() { 
+    if ($('#filter-status').data('loading')) { return; } //DB initializing status displayed.
     resetFilterUi();
     resetStoredFiltersUi();
     resetFilterParams();
@@ -84,16 +83,8 @@ function resetFilterUi() {
     if ($('#shw-chngd').prop('checked')) { resetDataTimeFilter(); }
 }
 function resetFilterStatus() { 
-    const flags = tState().get('flags'); // if (flags.allDataAvailable) { console.trace(); }
-    const status = flags.allDataAvailable ? 'No Active Filters.' :
-        '[ Database initializing... Table will reset once complete. ]';
-    $('#filter-status').text(status);
-    if (!flags.allDataAvailable) { 
-        $('#filter-status').css('color', 'teal'); 
-    } else { 
-        $('#filter-status').css('color', 'black'); 
-        updateTaxonFilterViewMsg('');
-    }
+    $('#filter-status').text('No Active Filters.');
+    updateTaxonFilterViewMsg('');
 }
 function resetDataTimeFilter() {
     $('#shw-chngd').prop('checked', false);

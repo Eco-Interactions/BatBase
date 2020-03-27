@@ -39,8 +39,8 @@ export function resetStoredData(reset) {
     _idb.downloadFullDb(reset);
 }
 export function resetLocalDb() {
-    const msg = 'Are you sure you want to reset all local data?';
-    showSaveModal(msg, '#rst-data', 'left', resetDb, Function.prototype, 'Yes');
+    const msg = '<center>Click "Reset" to redownload all data.</center>';
+    showSaveModal(msg, '#rst-data', 'left', resetDb, Function.prototype, 'Reset');
 
     function resetDb() {
         exitModal();

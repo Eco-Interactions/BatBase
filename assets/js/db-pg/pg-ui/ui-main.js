@@ -91,19 +91,33 @@ function initEditorButtons() {
 /** Shows a loading popup message for the inital data-download wait. */
 /** While the database is being initialized, the Map Interactions feature is disabled. */
 export function updateUiForDatabaseInit(type) {
-    $('.ico-bttn').css('cursor', 'wait').prop('disabled', true).fadeTo('fast', .5);
-    $('#search-focus')[0].selectize.disable();
-    $('#sel-view')[0].selectize.disable();   
     app.dbInitializing = true;
+    showDataInitLoadingStatus();
+    toggleSearchOptions('disable');
+}
+function showDataInitLoadingStatus() {
+    const status = '[ Database initializing... Table will reset once complete, ~30 seconds. ]';
+    $('#filter-status').text(status).css('color', 'teal').data('loading', true);
+    showPopUpMsg();
+}
+function toggleSearchOptions(toggleKey) {
+    handleButtons(toggleKey);
+    $('#search-focus')[0].selectize[toggleKey](); 
+    $('#sel-view')[0].selectize[toggleKey]();
+}
+function handleButtons(toggleKey) {
+    const opac = toggleKey === 'enable' ? 1 : .5;
+    const disabled = toggleKey === 'disable';
+    const cursor = toggleKey === 'enable' ? 'pointer' : 'wait';
+    $('.ico-bttn').css('cursor', cursor).prop('disabled', disabled).fadeTo('fast', opac);
 }
 /** 
  * Once db init complete, the page features are enabled after a delay so the table  
  * finishes reloading before the feature buttons fades in.
  */
-function enableFeaturesAfterDbInitComplete() {
-    $('.ico-bttn').css('cursor', 'pointer').prop('disabled', false).fadeTo('fast', 1);
-    $('#search-focus')[0].selectize.enable(); 
-    $('#sel-view')[0].selectize.enable();
+function updateUiAfterDatabaseInit() {
+    toggleSearchOptions('enable');
+    $('#filter-status').css('color', 'black').data('loading', false);
     if (app.userRole === 'visitor') { disableUserFeatures(); }
     delete app.dbInitializing;
 }
@@ -701,7 +715,7 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
-    if (app.dbInitializing === 'complete' || testingDbInit()) { enableFeaturesAfterDbInitComplete() }
+    if (app.dbInitializing === 'complete' || testingDbInit()) { updateUiAfterDatabaseInit() }
     if (app.dbInitializing) { return enableToggleTreeButtons(); }
     $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts'))
         .attr('disabled', false).css('cursor', 'pointer');

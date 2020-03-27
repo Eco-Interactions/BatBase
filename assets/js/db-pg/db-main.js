@@ -126,14 +126,13 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
     setTableInitState(isAllDataAvailable);      
     _ui.selectInitialSearchFocus(focus);
     if ($('body').data('env') === 'test' && isAllDataAvailable === false) { return; }
-    buildTable(null, null, isAllDataAvailable)
+    buildTable()
     .then(updateFilterPanelHeader.bind(null, focus));
 } 
 function setTableInitState(isAllDataAvailable) {
     resetTableParams('taxa');
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
-    if (isAllDataAvailable) { tState.flags.allDataAvailable = true; 
-    } else { db_filters.clearFilters(); } //Sets default filter status message
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
+    tState.flags.allDataAvailable = isAllDataAvailable; 
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
@@ -176,10 +175,9 @@ function resetTblParams(focus) {
     if (intSet) { tState.intSet = intSet; }
 }
 /** Resets storage props, buttons, and filters. */
-function resetTableState(onDbInitComplete) {                                                  
+function resetTableState() {                                                  
     resetCurTreeStorageProps();
     _ui.resetToggleTreeBttn(false);
-    if (onDbInitComplete) { return; }
     db_filters.clearFilters();
     db_filters.resetFilterParams();
 }
@@ -204,11 +202,10 @@ export function resetDataTable(focus) {                              /*Perm-log*
     return buildTable(focus)
         .then(_ui.updateUiForTableView);
 }
-export function buildTable(f, view = false, dbInitComplete) {              
+export function buildTable(f, view = false) {   
     if (f === '') { return Promise.resolve(); } //Combobox cleared by user
-    if (tState.api && !tState.flags.allDataAvailable) { return Promise.resolve(); } //While local database is still initializing.
     const focus = f ? f : _u.getSelVal('Focus');                    /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view); 
-    resetTableState(dbInitComplete);
+    resetTableState();
     return updateFocusAndBuildTable(focus, view);
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
