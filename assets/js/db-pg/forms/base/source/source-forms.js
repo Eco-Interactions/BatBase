@@ -286,6 +286,7 @@ function addPubValues(fLvl, addValues, type) {
      * be skipped, ie. have it's own title. (may not actually be needed. REFACTOR and check in later)
      */
     function addPubTitle(addTitle, fLvl, type) {     
+        if (fieldData.Title.val) { return; }     
         const skip = ['Chapter']; 
         fieldData.Title = {};
         fieldData.Title.val = addTitle && skip.indexOf(type) === -1 ? 

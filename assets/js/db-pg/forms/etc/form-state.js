@@ -203,7 +203,7 @@ export function setFormProp(fLvl, prop, val) {
 export function setRealmProp(prop, val) {  
     return formState.forms.realmData[prop] = val;
 }
-export function setFormFieldData(fLvl, field, val, type) {
+export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = formState.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }

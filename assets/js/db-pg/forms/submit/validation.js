@@ -15,10 +15,10 @@ let _fs;
 /*------------------- Form Error Handlers --------------------------------*/
 /**------------- Form Submit-Errors --------------*/
 /** Builds and appends an error elem that displays the error to the user. */
-export function formSubmitError(jqXHR, textStatus) {                            console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O]", jqXHR, jqXHR.responseText);
+export function formSubmitError(jqXHR, textStatus) {                            console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
     const fLvl = _f.state('getStateProp', ['submit']).fLvl;         
     const elem = getFormErrElem(fLvl);                              
-    const errTag = getFormErrTag(textStatus);   
+    const errTag = getFormErrTag(jqXHR.responseText);   
     const msg = getFormErrMsg(errTag);                              
     _f.elems('toggleWaitOverlay', [false]);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);

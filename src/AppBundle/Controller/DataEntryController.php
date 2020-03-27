@@ -455,10 +455,12 @@ class DataEntryController extends Controller
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {   
-        $this->get('logger')->error($e->getMessage());
+        if (!strpos($e->getMessage(), 'Duplicate Entry')) {
+            $this->get('logger')->error($e->getMessage());
+        }
         $response = new JsonResponse();
         $response->setStatusCode(500);
-        $response->setData(array('error' => $e->getMessage()));
+        $response->setData($e->getMessage());
         return $response;
     }
     /** Sends an object with the entities' serialized data back to the crud form. */
