@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * Level.
  *
  * @ORM\Table(name="level")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -56,7 +56,7 @@ class Level
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Taxon", mappedBy="level", fetch="EXTRA_LAZY")
      */
-    private $taxons;
+    private $taxa;
 
     /**
      * @var \DateTime
@@ -97,7 +97,7 @@ class Level
      */
     public function __construct()
     {
-        $this->taxons = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->taxa = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -185,37 +185,37 @@ class Level
     }
 
     /**
-     * Add taxons.
+     * Add Taxon.
      *
-     * @param \AppBundle\Entity\Taxon $taxons
+     * @param \AppBundle\Entity\Taxon $taxon
      *
      * @return Level
      */
-    public function addTaxon(\AppBundle\Entity\Taxon $taxons)
+    public function addTaxon(\AppBundle\Entity\Taxon $taxon)
     {
-        $this->taxons[] = $taxons;
+        $this->taxa[] = $taxon;
 
         return $this;
     }
 
     /**
-     * Remove taxons.
+     * Remove taxon.
      *
-     * @param \AppBundle\Entity\Taxon $taxons
+     * @param \AppBundle\Entity\Taxon $taxon
      */
-    public function removeTaxon(\AppBundle\Entity\Taxon $taxons)
+    public function removeTaxon(\AppBundle\Entity\Taxon $taxon)
     {
-        $this->taxons->removeElement($taxons);
+        $this->taxa->removeElement($taxon);
     }
 
     /**
-     * Get taxons.
+     * Get taxa.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getTaxons()
+    public function getTaxa()
     {
-        return $this->taxons;
+        return $this->taxa;
     }
 
     /**

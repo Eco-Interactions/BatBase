@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * Tag.
  *
  * @ORM\Table(name="tag")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */

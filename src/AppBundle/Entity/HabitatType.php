@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * HabitatType.
  *
  * @ORM\Table(name="habitat_type")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -44,7 +44,7 @@ class HabitatType
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="habitatType")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="habitatType", fetch="EXTRA_LAZY")
      */
     private $locations;
 

@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * PublicationType.
  *
  * @ORM\Table(name="publication_type")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -52,7 +52,7 @@ class PublicationType
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Publication", mappedBy="publicationType")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Publication", mappedBy="publicationType", fetch="EXTRA_LAZY")
      */
     private $publications;
 

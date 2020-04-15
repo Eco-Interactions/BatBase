@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * SourceType.
  *
  * @ORM\Table(name="source_type")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -60,7 +60,7 @@ class SourceType
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="sourceType")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="sourceType", fetch="EXTRA_LAZY")
      */
     private $sources;
 

@@ -205,17 +205,20 @@ class FetchController extends Controller
     private function serializeEntityRecords($entity, $serializer, $em)
     {
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
-        return $this->serializeEntities($entities, $serializer);
+        $data = $this->serializeEntities($entities, $serializer, $em);
+        $em->clear();
+        return $data;
     }
-    private function serializeEntities($entities, $serializer)
+    private function serializeEntities($entities, $serializer, $em)
     {
         $data = new \stdClass;  //print("\n total entities = ".count($entities));
-        
+        $count = 0;
         foreach ($entities as $entity) {
-            $id = $entity->getId();                                             
+            $id = $entity->getId();
             $jsonData = $this->serializeRcrd($entity, $serializer);
-            if (!$jsonData) { continue; }
-            $data->$id = $jsonData;   //print('id = '.$id."\n"); 
+            if ($jsonData) { $data->$id = $jsonData; }
+            if ($count < 3000) { ++$count; 
+            } else { $em->clear(); $count = 0; }
         }
         return $data;
     }
