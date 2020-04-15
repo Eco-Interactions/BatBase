@@ -51,6 +51,16 @@ class Taxon
     private $name;
 
     /**
+     * True if the taxon is the root of the realm's taxon tree.
+     * @var bool
+     *
+     * @ORM\Column(name="is_root", type="boolean", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("isRoot")
+     */
+    private $isRoot;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
@@ -89,7 +99,7 @@ class Taxon
     /**
      * @var \AppBundle\Entity\Realm
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RealmTaxon", mappedBy="taxon", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RealmRoot", mappedBy="taxon", cascade={"persist", "remove"})
      */
     private $realm;
 
@@ -119,7 +129,7 @@ class Taxon
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Taxon", mappedBy="parentTaxon")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Taxon", mappedBy="parentTaxon", fetch="EXTRA_LAZY")
      * @ORM\OrderBy({
      *     "displayName"="ASC"
      * })
@@ -136,14 +146,14 @@ class Taxon
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="subject")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="subject", fetch="EXTRA_LAZY")
      */
     private $subjectRoles;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="object")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="object", fetch="EXTRA_LAZY")
      */
     private $objectRoles;
 
@@ -283,6 +293,30 @@ class Taxon
     }
 
     /**
+     * Set isRoot.
+     *
+     * @param bool $isRoot
+     *
+     * @return Taxon
+     */
+    public function setIsRoot($isRoot = false)
+    {
+        $this->isRoot = $isRoot;
+
+        return $this;
+    }
+
+    /**
+     * Get isRoot.
+     *
+     * @return bool
+     */
+    public function getIsRoot()
+    {
+        return $this->isRoot;
+    }
+
+    /**
      * Set defaultGuid.
      *
      * @param string $defaultGuid
@@ -381,25 +415,11 @@ class Taxon
     /**
      * Set Realm.
      *
-     * @param \AppBundle\Entity\Realm $realm
+     * @param \AppBundle\Entity\RealmRoot $realm
      *
      * @return Taxon
      */
-    public function setRealmTaxon(\AppBundle\Entity\Realm $realm)
-    {
-        RealmTaxon::create($realm, $this);
-        
-        return $this;
-    }
-
-    /**
-     * Set Realm.
-     *
-     * @param \AppBundle\Entity\RealmTaxon $realm
-     *
-     * @return Taxon
-     */
-    public function setRealm(\AppBundle\Entity\RealmTaxon $realm)
+    public function setRealm(\AppBundle\Entity\RealmRoot $realm)
     {
         $this->realm = $realm;
 
@@ -414,35 +434,6 @@ class Taxon
     public function getRealm()
     {
         return $this->realm->getRealm();
-    }
-
-    /**
-     * Get Realm Ids.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("realm")
-     *
-     * @return array
-     */
-    public function getRealmId()
-    {
-        $realm = $this->realm->getRealm();
-        return [
-            'id' => $realm->getId(),
-            'displayName' => $realm->getDisplayName(),
-            'pluralName' => $realm->getPluralName()
-        ];
-    }
-
-    /**
-     * If taxon is the root taxon of the realm.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("isRoot")
-     *
-     * @return array
-     */
-    public function getIsRoot()
-    {
-        return $this->realm->getIsRoot();
     }
 
     /**
@@ -593,13 +584,13 @@ class Taxon
      */
     public function getChildTaxonIds()
     {
-        if ($this->childTaxa) {
+        // if ($this->childTaxa) {
             $childIds = [];
             foreach ($this->childTaxa as $child) {
                 array_push($childIds, $child->getId());
             }
             return $childIds;
-        }
+        // }
     }
 
     /**
@@ -727,14 +718,14 @@ class Taxon
         $interactions = $this->objectRoles;
         return $this->getInteractionids($interactions);
     }
-    // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
-    public function getInteractions()
-    {
-        $subj = $this->getSubjectRoles();  
-        $obj = $this->getObjectRoles();     
+    // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
+    // public function getInteractions()
+    // {
+    //     $subj = $this->getSubjectRoles();  
+    //     $obj = $this->getObjectRoles();     
 
-        return count($subj) > 0 ? $subj : $obj;
-    }
+    //     return count($subj) > 0 ? $subj : $obj;
+    // }
 
     /**
      * Returns an array of ids for all passed interactions. 

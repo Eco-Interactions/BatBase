@@ -58,12 +58,12 @@ class Realm
      * @JMS\SerializedName("uiLevelsShown")     
      */
     private $uiLevelsShown;
-
+    
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
-     *     targetEntity="AppBundle\Entity\RealmTaxon", 
+     *     targetEntity="AppBundle\Entity\RealmRoot", 
      *     mappedBy="realm", 
      *     cascade={"remove"},
      *     orphanRemoval=true,
@@ -217,13 +217,13 @@ class Realm
     /**
      * Add a Taxon.
      *
-     * @param \AppBundle\Entity\RealmTaxon $realmTaxon
+     * @param \AppBundle\Entity\RealmRoot $realmRoot
      *
      * @return Realm
      */
-    public function addTaxon(\AppBundle\Entity\RealmTaxon $realmTaxon)
+    public function addTaxon(\AppBundle\Entity\RealmRoot $realmRoot)
     {
-        $this->taxa[] = $realmTaxon;
+        $this->taxa[] = $realmRoot;
 
         return $this;
     }
@@ -231,15 +231,15 @@ class Realm
     /**
      * Remove a Taxon.
      *
-     * @param \AppBundle\Entity\RealmTaxon $realmTaxon
+     * @param \AppBundle\Entity\RealmRoot $realmRoot
      */
-    public function removeTaxon(\AppBundle\Entity\RealmTaxon $realmTaxon)
+    public function removeTaxon(\AppBundle\Entity\RealmRoot $realmRoot)
     {
-        $this->taxa->removeElement($realmTaxon);
+        $this->taxa->removeElement($realmRoot);
     }
 
     /**
-     * Get Taxons.
+     * Get Taxa.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -247,8 +247,8 @@ class Realm
     {
         $taxa = [];
 
-        foreach ($this->taxa as $realmTaxon) {
-            array_push($taxa, $realmTaxon->getTaxon());
+        foreach ($this->taxa as $realmRoot) {
+            array_push($taxa, $realmRoot->getTaxon());
         }
 
         return $taxa;

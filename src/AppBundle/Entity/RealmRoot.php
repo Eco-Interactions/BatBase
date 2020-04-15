@@ -4,15 +4,17 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as JMS;
 
 /**
- * Realm Taxon.
+ * Realm Root.
  *
- * @ORM\Table(name="realm_taxon")
+ * @ORM\Table(name="realm_root")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
-class RealmTaxon
+class RealmRoot
 {
     /**
      * @var int
@@ -22,14 +24,6 @@ class RealmTaxon
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
-
-    /**
-     * True if the taxon is the root of the realm's taxon tree.
-     * @var bool
-     *
-     * @ORM\Column(name="is_root", type="boolean")
-     */
-    private $isRoot;
 
     /**
      * @ORM\ManyToOne(targetEntity="Realm", cascade={"persist", "remove"})
@@ -88,39 +82,17 @@ class RealmTaxon
     }
 
     /**
-     * Set isRoot.
-     *
-     * @param bool $isRoot
-     *
-     * @return RealmTaxon
-     */
-    public function setIsRoot($isRoot = false)
-    {
-        $this->isRoot = $isRoot;
-
-        return $this;
-    }
-
-    /**
-     * Get isRoot.
-     *
-     * @return bool
-     */
-    public function getIsRoot()
-    {
-        return $this->isRoot;
-    }
-
-    /**
      * Set realm.
      *
      * @param \AppBundle\Entity\Realm $realm
      *
-     * @return RealmTaxon
+     * @return RealmRoot
      */
     public function setRealm(\AppBundle\Entity\Realm $realm)
     {
         $this->realm = $realm;
+
+        $realm->addTaxon($this);
 
         return $this;
     }
@@ -134,17 +106,29 @@ class RealmTaxon
     {
         return $this->realm;
     }
+   
+    /**
+     * Get Realm Id
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("realm")
+     */
+    public function getRealmId()
+    {
+        return $this->realm->getId();
+    }
 
     /**
      * Set Taxon.
      *
      * @param \AppBundle\Entity\Taxon $taxon
      *
-     * @return RealmTaxon
+     * @return RealmRoot
      */
     public function setTaxon(\AppBundle\Entity\Taxon $taxon)
     {
         $this->taxon = $taxon;
+
+        $taxon->setRealm($this);
 
         return $this;
     }
@@ -157,6 +141,16 @@ class RealmTaxon
     public function getTaxon()
     {
         return $this->taxon;
+    }
+   
+    /**
+     * Get Taxon Id
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("taxon")
+     */
+    public function getTaxonId()
+    {
+        return $this->taxon->getId();
     }
 
     /**

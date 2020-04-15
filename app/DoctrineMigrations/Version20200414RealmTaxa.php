@@ -7,7 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\RealmTaxon;
+use AppBundle\Entity\RealmRoot;
 
 
 /**
@@ -15,7 +15,7 @@ use AppBundle\Entity\RealmTaxon;
  * easier handling of realm taxa collections.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-class Version20200313RealmTaxa extends AbstractMigration implements ContainerAwareInterface
+class Version20200414RealmTaxa extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
     private $em;
@@ -55,7 +55,7 @@ class Version20200313RealmTaxa extends AbstractMigration implements ContainerAwa
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->getEntity('User', 6);
 
-        $this->setNewRealmTaxonData();
+        $this->createRealmRoots();
         $this->em->flush();
 
         $this->addSql('ALTER TABLE realm DROP FOREIGN KEY FK_A7A91E0BDE13F470');
@@ -63,39 +63,24 @@ class Version20200313RealmTaxa extends AbstractMigration implements ContainerAwa
         $this->addSql('ALTER TABLE realm DROP taxon_id');
     }
 
-    private function setNewRealmTaxonData()
+    private function createRealmRoots()
     {
         $realms = $this->getEntities('Realm');
         foreach ($realms as $realm) {                                           //print("\n".$realm->getDisplayName());
-            $this->setRealmDataForTaxonAndChildren($realm->getTaxon(), $realm, true);
-            $this->persistEntity($realm);
+            $root = $this->createRealmRoot($realm);
+            $this->persistEntity($root, true);
+            // $this->persistEntity($realm);
         }
     }
 
-    private function setRealmDataForTaxonAndChildren($taxon, $realm, $isRoot)
+    private function createRealmRoot($realm)
     {
-        $this->setTaxonRealmData($taxon, $realm, $isRoot);
-
-        foreach ($taxon->getChildTaxa() as $childTaxon) {  
-            $this->setRealmDataForTaxonAndChildren($childTaxon, $realm, false);
-        }
+        $root = new RealmRoot();
+        $root->setTaxon($realm->getTaxon());
+        $root->setRealm($realm);
+        return $root;
     }
 
-    private function setTaxonRealmData($taxon, $realm, $isRoot)
-    {                                                                           //print("\n       -- ".$taxon->getId());
-        $realmTaxonData = $this->createRealmTaxonData($taxon, $realm, $isRoot);
-        $this->persistEntity($realmTaxonData, true);
-        $this->persistEntity($taxon);
-    }
-
-    private function createRealmTaxonData($taxon, $realm, $isRoot)
-    {
-        $realmTaxon = new RealmTaxon();
-        $realmTaxon->setTaxon($taxon);
-        $realmTaxon->setRealm($realm);
-        $realmTaxon->setIsRoot($isRoot);
-        return $realmTaxon;
-    }
 
 /* ======================== down ============================================ */
     /**
