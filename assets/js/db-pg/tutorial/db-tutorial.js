@@ -67,7 +67,7 @@ function setDbLoadDependentState() {
         return window.setTimeout(setDbLoadDependentState, 200);
     }
     $('#search-focus')[0].selectize.addItem('taxa');
-    $('#sel-view')[0].selectize.addItem('2');
+    $('#sel-view')[0].selectize.addItem('3');
 }
 /* ----------------- ON TUTORIAL EXIT --------------------------------------- */
 function resetTableState() {   
@@ -199,12 +199,12 @@ function getSteps() {
             intro: `<h3><center>Select the Table Tree view.<center></h3>
                 <br>Once "Taxon" has been selected in the “Group Interactions by” 
                 box, select a 'realm' of taxa to view.<br><br>
-                <center>We have selected the "Bat" view for this tutorial.</center>`,
+                <center>We have selected the "Plant" view for this tutorial.</center>`,
             position: 'right'
         },
         {
             element: '#search-tbl',
-            intro: `<h4><center>All interactions for the selected view are displayed 
+            intro: `<h4><center>All interactions involving Plants are displayed 
                 and are available for further sorting and filtering.</center></h4>
                 <br>Columns can be resized by dragging the column header dividers 
                 and rearranged by dragging the header iteself.<br><br>Hovering 

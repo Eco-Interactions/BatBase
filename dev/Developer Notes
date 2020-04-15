@@ -16,6 +16,8 @@ GENERATE ASSET FILES WITH WEBPACK:
     - webpack.config.js > Comment DEV specific config and uncomment PROD config
     - paste in the release name
     - yarn run encore production
+OPTIMIZE COMPOSER AUTOLOADER  (https://symfony.com/doc/3.4/performance.html)
+    - composer dump-autoload --no-dev --classmap-authoritative
 SERVER UPDATES:
     - set up the 'prod_copy' sub-domain first
         - set 'release' in parameters.yml
@@ -59,7 +61,7 @@ Run Tests:
 # https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
 # https://knpuniversity.com/screencast/behat
 # 
-##------------------------- Serve Side ---------------------------------------##
+##------------------------- Server Side ---------------------------------------##
 > SSH
     ssh user@batplant.org -p18765
 

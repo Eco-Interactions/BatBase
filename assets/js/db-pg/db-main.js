@@ -134,6 +134,11 @@ function setTableInitState(isAllDataAvailable) {
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
 }
+export function enableMaps() {
+    $('#shw-map').prop('disabled', false).fadeTo('fast', 1);
+    $('#shw-map').data('disabled', false);
+    $('.map-ico').fadeTo('fast', 1);
+}
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
     return {
@@ -322,6 +327,7 @@ function getGeoJsonAndShowLocsOnMap(tree) {
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
+    if ($('#shw-map').prop('disabled')) { return; }
     _ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent'); 
     db_map.showLoc(locId, zoom, tState.rcrdsById);

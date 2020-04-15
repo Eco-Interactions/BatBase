@@ -32,33 +32,38 @@ import * as _db from './local-data-main.js';
 export default function (reset) {                                               console.log("   *-initLocalData");
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
-        .then(() => initBaseDataAndLoadBatTable(reset))
-        .then(downloadRemainingData)
+        .then(() => initTaxonDataAndLoadTable(reset))
+        .then(downloadRemainingTableData)
+        .then(downloadGeoJsonDataAndEnableMap)
         .then(_db.clearTempMmry);
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
-function initBaseDataAndLoadBatTable(reset) {
-    return getAndSetData('init')
+function initTaxonDataAndLoadTable(reset) {
+    return getAndSetData('taxon')
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable', ['taxa', false]));
 }
-/* -------------- DOWNLOAD REMAINING DATA ----------------------------------- */
-function downloadRemainingData() {
-    const urls = ['taxa', 'source', 'location', 'interaction', 'lists']; 
+/* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
+function downloadRemainingTableData() {
+    const urls = ['source', 'location', 'interaction']; 
     return $.when(...urls.map(url => getAndSetData(url)))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable'));
+}
+/* ------------------- DOWNLOAD MAP DATA ------------------------------------ */
+function downloadGeoJsonDataAndEnableMap() {
+    return getAndSetData('geojson')
+        .then(_db.pg('enableMap'));
 }
 /* -------------------------- HELPERS --------------------------------------- */
 function getAndSetData(url) {
     return _db.fetchServerData(url).then(setData.bind(null, url))
 }
 function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
-    const setDataFunc = {
-        'geojson': Function.prototype, 'init': deriveBaseTaxonData,
+    const setDataFunc = { 
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
         'location': deriveLocationData,       'source': deriveSourceData,
-        'taxa': deriveRemainingTaxonData
+        'taxon': deriveTaxonData,             'geojson': Function.prototype,
     };
     storeServerData(data);
     setDataFunc[url](data);
@@ -96,14 +101,12 @@ function parseData(data) {  //shared. refact
  * *realm - resaved with 'uiLevelsShown' filled with the level display names. 
  */ 
 /** Stores an object of taxon names and ids for each level in each realm. */
-function deriveBaseTaxonData(data) {                                            //console.log("deriveBaseTaxonData called. data = %O", data);
+function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
     _db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
-    storeTaxaByLevelAndRealm(data.taxon);
-    modifyRealmData(data.realm);
+    storeTaxaByLevelAndRealm(data.taxon, data.realm, data.realmRoot);
+    modifyRealmData(data.realm, data.level);
     storeLevelData(data.level);
-}
-function deriveRemainingTaxonData(data) {
-    storeTaxaByLevelAndRealm(data.taxon);
+    _db.deleteMmryData('realmRoot')
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
@@ -122,47 +125,48 @@ function storeLevelData(levelData) {
     }
 }
 /* --------- Taxa by Realm & Level ------------- */
-function storeTaxaByLevelAndRealm(taxa) {
-    const realmData = separateTaxaByLevelAndRealm(taxa);                        //console.log("taxonym realmData = %O", realmData);
-    for (let realm in realmData) {  
-        storeTaxaByLvl(realm, realmData[realm]);
+function storeTaxaByLevelAndRealm(taxa, realms, roots) {  
+    for (let rootId in roots) { 
+        const root = roots[rootId];
+        realms[root.realm].taxon = root.taxon;
+        separateAndStoreRealmTaxa(realms[root.realm], taxa[root.taxon]);
     }
+    _db.setDataInMemory('realm', realms);
+
+    function separateAndStoreRealmTaxa(realm, taxon) {
+        const data = {};
+        separateRealmTaxaByLevel(taxon.children, data, realm, taxa); 
+        storeTaxaByLvl(realm.displayName, data);
+    }
+}
+function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {  
+    taxa.forEach(separateTaxonAndChildren);
+    return data;
+
+    function separateTaxonAndChildren(id) {
+        const taxon = rcrds[id];
+        addToRealmLevel(taxon, taxon.level.displayName);
+        addRealmDataToTaxon(taxon, realm);
+        taxon.children.forEach(separateTaxonAndChildren);
+    }
+    function addToRealmLevel(taxon, level) {
+        if (!data[level]) { data[level] = {}; }; 
+        data[level][taxon.name] = taxon.id;
+    }
+}
+function addRealmDataToTaxon(taxon, realm) {
+    taxon.realm = {
+        id: realm.id, displayName: realm.displayName, pluralName: realm.pluralName
+    };
 }
 function storeTaxaByLvl(realm, taxonObj) {
     for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
         _db.setDataInMemory(realm+level+'Names', taxonObj[level]);
+        //TODO: Check for previously sorted taxa for realms with multiple roots
     }
-}
-/** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
-function separateTaxaByLevelAndRealm(taxa) {
-    const data = {};
-    Object.keys(taxa).forEach(id => addTaxonData(taxa[id], id));
-    return data;
-    /** Adds the taxon's name (k) and id to it's level's obj. */
-    function addTaxonData(taxon, id) {  
-        if (taxon.name === 'Animalia') { return delete taxa[id]; } //not shown anywhere
-        const realmObj = getRealmObj(taxon);
-        const level = taxon.level.displayName;  
-        addToRealmLevel(taxon, realmObj, level);
-        if (taxon.isRoot) { addRootToRealmEntity(taxon); }
-    }
-    function getRealmObj(taxon) {
-        const realm = taxon.realm.displayName
-        if (!data[realm]) { data[realm] = {}; }
-        return data[realm];
-    }
-    function addToRealmLevel(taxon, realmObj, level) {
-        if (!realmObj[level]) { realmObj[level] = {}; }; 
-        realmObj[level][taxon.name] = taxon.id;
-    }
-} /* End separateTaxaByLevelAndRealm */
-function addRootToRealmEntity(taxon) {
-    const realms = _db.getMmryData('realm');  
-    realms[taxon.realm.id].taxon = taxon.id;
-    _db.setDataInMemory('realm', realms);
 }
 /* ---------- Modify Realm Data -------------- */
-function modifyRealmData(realms) {                                              //console.log('realms = %O', realms);
+function modifyRealmData(realms, levels) {                                              //console.log('realms = %O', realms);
     modifyRealms(Object.keys(realms));
     _db.setDataInMemory('realm', realms);  
     
@@ -173,7 +177,6 @@ function modifyRealmData(realms) {                                              
         });
     }
     function fillLevelNames(lvlAry) {
-        const levels = _db.getMmryData('level');
         return lvlAry.map(id => levels[id].displayName);
     }
 }

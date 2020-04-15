@@ -270,13 +270,20 @@ function ifLocView() {
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
     const id = params.data.id;
-    const zoomLvl = getZoomLvl(params.data);  
-    const path = require('../../../images/icons/marker-icon.png');
-    const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
-        title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
     $('#search-tbl').off('click', '#map'+id);
-    $('#search-tbl').on('click', '#map'+id, showLocOnMap.bind(null, params.data.onMap, zoomLvl));
+    $('#search-tbl').on('click', '#map'+id, 
+        showLocOnMap.bind(null, params.data.onMap, getZoomLvl(params.data)));
     return icon;
+}
+function getMapIcon() {
+    const path = require('../../../images/icons/marker-icon.png');
+    return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'  
+        title='Show on Map' style='${getMapIconStyles()}'>`;
+}
+function getMapIconStyles() {
+    const styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
+    if ($('#shw-map').data('disabled')) { styles += ' opacity: .3;' }
+    return styles;
 }
 function getZoomLvl(loc) {  
     return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;   

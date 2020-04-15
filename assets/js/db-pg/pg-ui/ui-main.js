@@ -94,6 +94,7 @@ export function updateUiForDatabaseInit(type) {
     app.dbInitializing = true;
     showDataInitLoadingStatus();
     toggleSearchOptions('disable');
+    $('#shw-map').data('disabled', true);
 }
 function showDataInitLoadingStatus() {
     const status = '[ Database initializing... Table will reset once complete, ~30 seconds. ]';
@@ -110,6 +111,7 @@ function handleButtons(toggleKey) {
     const disabled = toggleKey === 'disable';
     const cursor = toggleKey === 'enable' ? 'pointer' : 'wait';
     $('.ico-bttn').css('cursor', cursor).prop('disabled', disabled).fadeTo('fast', opac);
+    if (toggleKey === 'enable') { $('#shw-map').prop('disabled', disabled).fadeTo('fast', .5) }
 }
 /** 
  * Once db init complete, the page features are enabled after a delay so the table  

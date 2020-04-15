@@ -47,59 +47,29 @@ class FetchController extends Controller
         return $response;
     }
 /* ===================== FETCH TAXON DATA =================================== */
-    /* --------------- SERIALIZE BAT TAXA ----------------------------------- */
     /**
-     * Returns data necessary to load the bat taxon tree. This is the first batch
+     * Returns data necessary to load the  taxon tree. This is the first batch
      * downloaded when local data is initialized. 
      *
-     * @Route("/init", name="app_serialize_init")
+     * @Route("/taxon", name="app_serialize_taxon")
      */ 
-    public function serializeBaseBatTaxaData(Request $request)
+    public function serializeTaxonData(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+        $em->getConnection()->getConfiguration()->setSQLLogger(null);
         $serializer = $this->container->get('jms_serializer');
 
-        $realm = $this->serializeEntityRecords('Realm', $serializer, $em);
         $level = $this->serializeEntityRecords('Level', $serializer, $em);
-        $bats = $this->serializeBatTaxa($serializer, $em);
+        $realm = $this->serializeEntityRecords('Realm', $serializer, $em);
+        $realmRoot = $this->serializeEntityRecords('RealmRoot', $serializer, $em);
+        $taxa = $this->serializeEntityRecords('Taxon', $serializer, $em);
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'realm' => $realm,    'level' => $level,
-            'taxon' => $bats            
+            'level' => $level,  'realm' => $realm,  'realmRoot' => $realmRoot,    
+            'taxon' => $taxa            
         )); 
         return $response;
-    }
-    private function serializeBatTaxa($serializer, $em)
-    {
-        $batRealm = $em->getRepository('AppBundle:Realm')->findOneBy(['displayName' => 'Bat']);
-        return $this->serializeEntities($batRealm->getTaxa(), $serializer);
-    }
-    /* ------------ SERIALIZE REMAINING TAXA -------------------------------- */
-    /**
-     * Returns serialized data objects for the Realm, Level, and Taxon entities.
-     *
-     * @Route("/taxa", name="app_serialize_taxa")
-     */
-    public function serializeNonBatTaxonData(Request $request) 
-    {
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
-        
-        $taxa = $this->getAllNonBatTaxa($em, $serializer);
-
-        $response = new JsonResponse(); 
-        $response->setData(array(                                    
-            'taxon' => $taxa        
-        )); 
-        return $response;
-    }
-
-    private function getAllNonBatTaxa($em, $serializer)
-    {
-        $batRealm = $em->getRepository('AppBundle:Realm')->findOneBy(['displayName' => 'Bat']);
-        $taxa = $em->getRepository('AppBundle:Taxon')->findAllNonBatTaxa($batRealm);
-        return $this->serializeEntities($taxa, $serializer);
     }
 /* =================== FETCH LOCATION DATA ================================== */
     /**
@@ -112,7 +82,6 @@ class FetchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $geoJson = $this->serializeEntityRecords('GeoJson', $serializer, $em);
         $habitatType = $this->serializeEntityRecords('HabitatType', $serializer, $em);
         $location = $this->serializeEntityRecords('Location', $serializer, $em);
         $locType = $this->serializeEntityRecords('LocationType', $serializer, $em);
@@ -120,7 +89,25 @@ class FetchController extends Controller
         $response = new JsonResponse();
         $response->setData(array( 
             'location' => $location,    'habitatType' => $habitatType,   
-            'locationType' => $locType, 'geoJson' => $geoJson
+            'locationType' => $locType
+        )); 
+        return $response;
+    }
+    /**
+     * Returns serialized data objects for Habitat Type, Location Type, and Location. 
+     *
+     * @Route("/geojson", name="app_serialize_geojson")
+     */
+    public function serializeGeoJsonData(Request $request) 
+    {
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->container->get('jms_serializer');
+
+        $geoJson = $this->serializeEntityRecords('GeoJson', $serializer, $em);
+
+        $response = new JsonResponse();
+        $response->setData(array( 
+            'geoJson' => $geoJson
         )); 
         return $response;
     }
