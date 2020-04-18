@@ -138,7 +138,8 @@ class Location
     /**
      * @var \AppBundle\Entity\GeoJson
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", mappedBy="location", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", cascade={"persist"})
+     * @ORM\JoinColumn(name="geo_json", referencedColumnName="id", nullable=true)
      */
     private $geoJson;
 
