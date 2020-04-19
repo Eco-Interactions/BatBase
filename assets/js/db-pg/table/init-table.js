@@ -273,9 +273,9 @@ function addMapIcon(params) {                                                   
     $('#search-tbl').off('click', '#map'+id);
     $('#search-tbl').on('click', '#map'+id, 
         showLocOnMap.bind(null, params.data.onMap, getZoomLvl(params.data)));
-    return icon;
+    return getMapIcon(id);
 }
-function getMapIcon() {
+function getMapIcon(id) {
     const path = require('../../../images/icons/marker-icon.png');
     return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'  
         title='Show on Map' style='${getMapIconStyles()}'>`;

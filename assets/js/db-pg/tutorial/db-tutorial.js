@@ -204,8 +204,8 @@ function getSteps() {
         },
         {
             element: '#search-tbl',
-            intro: `<h4><center>All interactions involving Plants are displayed 
-                and are available for further sorting and filtering.</center></h4>
+            intro: `<h4><center>All interactions with plants are displayed 
+                and available for further sorting and filtering.</center></h4>
                 <br>Columns can be resized by dragging the column header dividers 
                 and rearranged by dragging the header iteself.<br><br>Hovering 
                 over a column header reveals the filter menu for that column.<br><br>

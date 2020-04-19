@@ -134,9 +134,8 @@ function setTableInitState(isAllDataAvailable) {
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
 }
-export function enableMaps() {
-    $('#shw-map').prop('disabled', false).fadeTo('fast', 1);
-    $('#shw-map').data('disabled', false);
+export function enableMap() {
+    $('#shw-map').data('loaded', true).prop('disabled', false).fadeTo('fast', 1);
     $('.map-ico').fadeTo('fast', 1);
 }
 /* ================== TABLE "STATE" ========================================= */

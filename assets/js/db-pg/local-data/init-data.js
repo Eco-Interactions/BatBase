@@ -34,7 +34,7 @@ export default function (reset) {                                               
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initTaxonDataAndLoadTable(reset))
         .then(downloadRemainingTableData)
-        .then(downloadGeoJsonDataAndEnableMap)
+        .then(downloadRemainingDataAndEnableMap)
         .then(_db.clearTempMmry);
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
@@ -51,8 +51,9 @@ function downloadRemainingTableData() {
         .then(() => _db.pg('initSearchStateAndTable'));
 }
 /* ------------------- DOWNLOAD MAP DATA ------------------------------------ */
-function downloadGeoJsonDataAndEnableMap() {
-    return getAndSetData('geojson')
+function downloadRemainingDataAndEnableMap() {
+    return $.when(...['lists', 'geoJson'].map(url => getAndSetData(url)))
+        .then(() => _db.setUpdatedDataInLocalDb())
         .then(_db.pg('enableMap'));
 }
 /* -------------------------- HELPERS --------------------------------------- */
@@ -63,7 +64,7 @@ function setData(url, data) {                                                   
     const setDataFunc = { 
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
         'location': deriveLocationData,       'source': deriveSourceData,
-        'taxon': deriveTaxonData,             'geojson': Function.prototype,
+        'taxon': deriveTaxonData,             'geoJson': Function.prototype,
     };
     storeServerData(data);
     setDataFunc[url](data);
@@ -106,7 +107,7 @@ function deriveTaxonData(data) {                                                
     storeTaxaByLevelAndRealm(data.taxon, data.realm, data.realmRoot);
     modifyRealmData(data.realm, data.level);
     storeLevelData(data.level);
-    _db.deleteMmryData('realmRoot')
+    _db.deleteMmryData('realmRoot');
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
@@ -127,13 +128,16 @@ function storeLevelData(levelData) {
 /* --------- Taxa by Realm & Level ------------- */
 function storeTaxaByLevelAndRealm(taxa, realms, roots) {  
     for (let rootId in roots) { 
-        const root = roots[rootId];
-        realms[root.realm].taxon = root.taxon;
-        separateAndStoreRealmTaxa(realms[root.realm], taxa[root.taxon]);
+        const root = roots[rootId];  
+        const realm = realms[root.realm];
+        const taxon = taxa[root.taxon];
+        realm.taxon = root.taxon;
+        addRealmDataToTaxon(taxon, realm);
+        separateAndStoreRealmTaxa(taxon, realm);
     }
     _db.setDataInMemory('realm', realms);
 
-    function separateAndStoreRealmTaxa(realm, taxon) {
+    function separateAndStoreRealmTaxa(taxon, realm) { 
         const data = {};
         separateRealmTaxaByLevel(taxon.children, data, realm, taxa); 
         storeTaxaByLvl(realm.displayName, data);
@@ -301,7 +305,7 @@ export function deriveUserData(data) {                                          
     _db.setDataInMemory('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
     _db.setDataInMemory('dataLists', int_sets);
     _db.setDataInMemory('dataListNames', getNameDataObj(int_setIds, int_sets));
-    _db.setDataInMemory('user', $('body').data('user-name'));
+    _db.setDataInMemory('user', getUserName());
 
     function addToDataObjs(l) {
         const entities = l.type == 'filter' ? filters : int_sets;
@@ -309,6 +313,9 @@ export function deriveUserData(data) {                                          
         entities[l.id] = l;
         idAry.push(l.id);
     }
+}
+function getUserName() {
+    return $('body').data('user-name') ? $('body').data('user-name') : 'visitor'; 
 }
 function getFilterOptionGroupObj(ids, filters) {                                //console.log('getFilterOptionGroupObj ids = %O, filters = %O', ids, filters);
     const data = {};
