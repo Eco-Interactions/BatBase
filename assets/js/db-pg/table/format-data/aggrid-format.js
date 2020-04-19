@@ -214,7 +214,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
         }
     }
 
-    function handleUnspecifiedInts(curTreeLvl) {
+    function handleUnspecifiedInts(curTreeLvl) {  
         if (taxon.failedFltr || getIntCount(taxon) === null) { return; }
         const name = taxon.isRoot ? taxon.realm.displayName : taxon.name;
         addUnspecifiedTaxonIntsRow(name, curTreeLvl);

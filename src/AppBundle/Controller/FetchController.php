@@ -96,7 +96,7 @@ class FetchController extends Controller
     /**
      * Returns serialized data objects for Habitat Type, Location Type, and Location. 
      *
-     * @Route("/geojson", name="app_serialize_geojson")
+     * @Route("/geoJson", name="app_serialize_geojson")
      */
     public function serializeGeoJsonData(Request $request) 
     {

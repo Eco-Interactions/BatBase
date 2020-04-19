@@ -32,7 +32,8 @@
         "symfony/webpack-encore-bundle": "^1.7",
         "jms/serializer-bundle": "^3.4",
         "suncat/mobile-detect-bundle": "1.0.*",
-        "sentry/sentry-symfony": "^3.4"
+        "sentry/sentry-symfony": "^3.4",
+        "symfony/intl": "^5.0"
     },
     "require-dev": {
         "hautelook/alice-bundle": "^1.4",

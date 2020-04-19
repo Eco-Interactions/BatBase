@@ -28,7 +28,7 @@ function addCloseButton() {
         <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
     $('#close-tos-bttn').click(closeTosWindow)
 }
-function showTosWindow() {  console.log("showTosWindow called")
+function showTosWindow() {      
     $("#b-overlay-popup").html(getTosHtml);
     $("#b-overlay-popup").addClass("tos-popup");
     bindEscEvents();
@@ -53,10 +53,10 @@ function unbindEscEvents() {
 }
 function removeTosStyles() {
     $("#b-overlay-popup").removeClass("tos-popup");
-    $("#b-overlay").removeClass("flex-col");
+    // $("#b-overlay").removeClass("flex-col");
     $("#b-overlay-popup").empty();
 }
-function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
+function addRegistrationTosElems() { 
     var acceptDiv = document.createElement("div");
     acceptDiv.id = "accept-tos-cntnr";
     acceptDiv.className = "flex-col";
