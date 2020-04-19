@@ -353,11 +353,12 @@ function addActiveFilterToMemory(set) {
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 function showSaveFilterModal(success) {
     if (!$('.filter-set-details input').val()) { return $('.filter-set-details input').focus(); }
-    let readyToSave = true;  
-    const modalHtml = buildModalHtml();
-    const succFunc = readyToSave ? success : false;
-    const bttnText = readyToSave ? 'Submit' : 'Cancel';
-    showSaveModal(modalHtml, '#save-filter', 'right', succFunc, Function.prototype, bttnText);
+    let saveReady = true;  
+    const confg = {
+        html: buildModalHtml(), elem: '#save-filter', dir: 'right', 
+        submit: saveReady ? success : false, bttn: saveReady ? 'Submit' : 'Cancel'
+    };
+    showSaveModal(confg); 
     
     function buildModalHtml() {
         const hdr = '<h2> Saving Filter Set: </h2>';

@@ -53,7 +53,7 @@ export function db(funcName, params = []) {
     return _db[funcName](...params);
 }
 export function resetLocalDb() {
-    return _db.resetLocalDb();
+    return _db.resetStoredData();
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
 export function alert(funcName, params = []) {

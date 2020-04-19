@@ -20,13 +20,14 @@ export function reportErr(e) {
 }
 /**
  * IssueTags {errDataKeys}:
- *     TestIssue null (no browser alert)
- *     undefiendDataKey {key}
  *     invalidDataKeyType {key, type}
- *     expectedDataNotFound {key}
  *     dataSyncFailure {fails} (no browser alert)
+ *     editorReport {summary, steps, etc} (no browser alert)
+ *     expectedDataNotFound {key}
  *     fetchIssue {url, responseText}
  *     noRcrdFound {id, entity} (no browser alert)
+ *     TestIssue null (no browser alert)
+ *     undefiendDataKey {key}
  */
 export function alertIssue(tag, errData = {}) {                                      
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
@@ -71,15 +72,16 @@ class SentryError extends Error {
  * IssueTags: alertHandler
  *     alertNoRcrdFound: noRcrdFoundInForms
  *     comboboxNotFound: showGeneralAlert
- *     undefiendDataKey: showGeneralAlert
- *     invalidDataKeyType: showGeneralAlert
- *     expectedDataNotFound: showGeneralAlert
  *     dataSyncFailure: (handled in form validation code)
+ *     editorReport: (handled in bug report form)
+ *     expectedDataNotFound: showGeneralAlert
  *     fetchIssue: showGeneralAlert
+ *     invalidDataKeyType: showGeneralAlert
  *     noRcrdFound: (handled at relevant points through the code)
+ *     undefiendDataKey: showGeneralAlert
  */
 function handleUserAlert(tag) {
-    const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue'];
+    const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue', 'editorReport'];
     if (silent.indexOf(tag) !== -1) { return; }
     const map = {
         'alertNoRcrdFound': noRcrdFoundInForms

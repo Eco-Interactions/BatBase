@@ -74,6 +74,7 @@ Run Tests:
 
 >Deployment Steps
     (Need to update)
+##-------------------- Local Installation ------------------------------------##
 
 >Install Steps ## 
 - Install & Update COMPOSER:
@@ -122,7 +123,7 @@ Run Tests:
 >Changes to live site
     - Copy to sub-domain for testing when bugs arise.
 # 
-##------------------- Bugs ------------------------------------------------##
+##------------------- Bugs ---------------------------------------------------##
 >::Known BUGS::
 ## Bugs that I attempted to solve but ended up stumped or without time to delve in more. 
 Search Page:

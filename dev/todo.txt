@@ -12,7 +12,6 @@ Change Log:
 QUESTIONS:
 
 >==== CURRENT ====
-    - When duplicate name error occurs on location forms, trigger correct error handling
     - remove all outdated tags from interactions
     - add 'feedback/issue' reporting to ui
           Sentry.showReportDialog({ eventId: '<?php echo Sentry\State\Hub::getCurrent()->getLastEventId(); ?>' })
@@ -43,7 +42,8 @@ QUESTIONS:
     -
 
 STANDARDS:
-    append '_' before imported file, without it for the access method.
+    - append '_' before imported file, without it for the access method.
+    - alphbetize where sensible
 
 
 
