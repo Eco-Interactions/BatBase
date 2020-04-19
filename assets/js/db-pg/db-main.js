@@ -8,6 +8,7 @@
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
  *     buildTable               db-ui, filter-panel
+ *     getCurrentFilterState   alertIssue
  *     initSearchStateAndTable          db_sync, util
  *     resetDataTable           db_sync, db-forms, db-filters, db-tutorial
  *     onLocViewChange          _ui
@@ -33,12 +34,12 @@
  */
 import * as _alert from '../app/misc/alert-issue.js';
 import * as _u from './util/util.js';
-import * as data_tree from './table/format-data/data-tree.js';
-import * as db_filters from './table/filters/filters-main.js';
-import * as db_map from './map/map-main.js';
+import * as _tree from './table/format-data/data-tree.js';
+import * as _filters from './table/filters/filters-main.js';
+import * as _map from './map/map-main.js';
 import * as _ui from './pg-ui/ui-main.js';
 import * as _db from './local-data/local-data-main.js';
-import * as frmt_data from './table/format-data/aggrid-format.js'; 
+import * as _format from './table/format-data/aggrid-format.js'; 
 import { startWalkthrough } from './tutorial/db-tutorial.js';
 import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
 
@@ -84,6 +85,19 @@ export function reportErr() {
  * {str} userRole       Stores the role of the user.
  */
 let tState = {};
+/** Sends status for a new Sentry issue report. */
+export function getCurrentFilterState() {
+    return getActiveFilters();
+
+    function getActiveFilters() {
+        const st = _filters.getFilterState();  
+        Object.keys(st.table).forEach(col => { 
+            if (!st.table[col]) { delete st.table[col]; }});
+        if (!Object.keys(st.table).length) { delete st.table; }
+        if (!Object.keys(st.panel).length) { delete st.panel; }
+        return st;
+    }
+}
 /** ==================== PAGE INIT ========================================== */
 initDbPage();
 /** Initializes the UI unless on mobile device.  */
@@ -131,7 +145,7 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 } 
 function setTableInitState(isAllDataAvailable) {
     resetTableParams('taxa');
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { _filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
 }
 export function enableMap() {
@@ -182,8 +196,8 @@ function resetTblParams(focus) {
 function resetTableState() {                                                  
     resetCurTreeStorageProps();
     _ui.resetToggleTreeBttn(false);
-    db_filters.clearFilters();
-    db_filters.resetFilterParams();
+    _filters.clearFilters();
+    _filters.resetFilterParams();
 }
 function resetCurTreeStorageProps() {
     delete tState.curTree;
@@ -194,8 +208,8 @@ function loadTbl(tblName, rowData) {
     return require('./table/init-table.js').default(tblName, rowData, tState);
 }
 export function reloadTableWithCurrentFilters() {  
-    const filters = db_filters.getFilterState();
-    db_filters.reloadTableAndApplyFilters(filters);
+    const filters = _filters.getFilterState();
+    _filters.reloadTableAndApplyFilters(filters);
 }
 /** 
  * Table-rebuild entry point after local database updates, filter clears, and 
@@ -233,7 +247,7 @@ function buildDataTable(focus, view, fChange) {
     return builders[focus](view);
 }
 export function showTodaysUpdates(focus) {
-    db_filters.showTodaysUpdates(focus);
+    _filters.showTodaysUpdates(focus);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(v) {                                    /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
@@ -293,8 +307,8 @@ function getTopRegionIds() {
     return ids;
 }
 function startLocTableBuildChain(topLocs, textFltr) {               
-    return data_tree.buildLocTree(topLocs, textFltr)
-        .then(tree => frmt_data.buildLocRowData(tree, tState))
+    return _tree.buildLocTree(topLocs, textFltr)
+        .then(tree => _format.buildLocRowData(tree, tState))
         .then(rowData => loadTbl('Location Tree', rowData))
         .then(() => _ui.loadLocFilterPanelElems(tState));
 }
@@ -309,7 +323,7 @@ export function showLocInDataTable(loc) {                          /*Perm-log*/c
 function buildLocMap() {    
     _ui.updateUiForMapView();      
     if (tState.intSet) { return showLocsInSetOnMap(); }
-    db_map.initMap(tState.rcrdsById);           
+    _map.initMap(tState.rcrdsById);           
     return Promise.resolve();
 }
 /**
@@ -318,18 +332,18 @@ function buildLocMap() {
  * and their popup data reflects the data of the set. 
  */
 function showLocsInSetOnMap() {
-    data_tree.buildLocTree(getTopRegionIds())
+    _tree.buildLocTree(getTopRegionIds())
     .then(getGeoJsonAndShowLocsOnMap);
 }
 function getGeoJsonAndShowLocsOnMap(tree) { 
-    db_map.initMap(tState.rcrdsById, tree);
+    _map.initMap(tState.rcrdsById, tree);
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
     if ($('#shw-map').prop('disabled')) { return; }
     _ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent'); 
-    db_map.showLoc(locId, zoom, tState.rcrdsById);
+    _map.showLoc(locId, zoom, tState.rcrdsById);
     $('#tbl-filter-status').html('No Active Filters.');
 }
 /* ==================== SOURCE SEARCH =============================================================================== */
@@ -365,8 +379,8 @@ function rebuildSrcTable(val) {                                     /*Perm-log*/
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    return data_tree.buildSrcTree(tState.curView)
-        .then(tree => frmt_data.buildSrcRowData(tree, tState))
+    return _tree.buildSrcTree(tState.curView)
+        .then(tree => _format.buildSrcRowData(tree, tState))
         .then(rowData => loadTbl('Source Tree', rowData, tState))
         .then(() => _ui.loadSrcFilterPanelElems(tState.curView));
 }
@@ -445,11 +459,11 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/
  */
 function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     tState.openRows = [topTaxon.id.toString()];
-    return data_tree.buildTxnTree(topTaxon, filtering, textFltr)
-        .then(tree => frmt_data.buildTxnRowData(tree, tState))
+    return _tree.buildTxnTree(topTaxon, filtering, textFltr)
+        .then(tree => _format.buildTxnRowData(tree, tState))
         .then(rowData => loadTbl('Taxon Tree', rowData, tState))
         .then(() => {
             _ui.loadTxnFilterPanelElems(tState);
-            db_filters.updateTaxonFilterViewMsg(topTaxon.realm.pluralName);
+            _filters.updateTaxonFilterViewMsg(topTaxon.realm.pluralName);
         });
 }

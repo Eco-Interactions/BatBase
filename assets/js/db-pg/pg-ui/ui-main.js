@@ -745,7 +745,7 @@ function showBugReportPopup() {
     $("#b-overlay-popup").html(getBugReportHtml());
     $("#b-overlay-popup").addClass("bugs-popup flex-row");
     bindEscEvents();
-    $('#b-overlay, #b-overlay-popup').fadeIn(500);
+    $('#b-overlay, #b-overlay-popup').fadeIn(500, () => $('.bug-rprt-input')[0].focus());
 
     function bindEscEvents() {
         $(document).on('keyup',function(evt) {
@@ -797,7 +797,7 @@ function buildFormButton(action, onClick) {
     return bttn;
 }
 /* -------- SUBMIT REPORT -------------------- */
-function submitBugRprt() {  console.log('submit report if required fields filled')
+function submitBugRprt() {                                                      
     const ready = checkRequiredBugReportFields($('.bug-prompt.required'));
     if (!ready) { showReportStatus('Please fill all required fields.', 'red'); 
     } else { submitNewSentryIssue(); }

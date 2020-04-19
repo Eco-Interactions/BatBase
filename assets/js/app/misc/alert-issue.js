@@ -11,7 +11,7 @@
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
-import { accessTableState as tState } from '../../db-pg/db-main.js';
+import { accessTableState as tState, getCurrentFilterState } from '../../db-pg/db-main.js';
 
 /* ------------------- CREATE SENTRY EVENT ---------------------------------- */
 /** Sends Error object to Sentry, issue tracker. */
@@ -46,7 +46,9 @@ function buildBasicStateData() {
     if ($('body').data('this-url') !== '/search') { return data; }
     const state = tState().get();
     return Object.assign(data, { 
-        focus: state.curFocus, view: state.curView, userRole: state.userRole});
+        focus: state.curFocus, view: state.curView, userRole: state.userRole,
+        filters: getCurrentFilterState()
+    });
 }
 function buildErrObj(errData, tag) {
     const obj = {};
