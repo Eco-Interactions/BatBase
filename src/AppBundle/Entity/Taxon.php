@@ -433,7 +433,27 @@ class Taxon
      */
     public function getRealm()
     {
-        return $this->realm->getRealm();
+        return $this->realm ? $this->realm->getRealm() : null;
+    }
+    
+    /**
+     * Get id.
+     *
+     * @return int
+     */
+    public function getTaxonRealm()
+    {
+        return $this->findRealmAndReturnObj($this);
+    }
+    
+    private function findRealmAndReturnObj($taxon)
+    {
+        if ($taxon->getSlug() === 'animalia') { return []; } 
+        $realm = $taxon->getRealm();
+        if ($realm) { return $realm; }
+        $parent = $taxon->getParentTaxon();
+        if (!$parent) { return []; }
+        return $this->findRealmAndReturnObj($parent);
     }
 
     /**

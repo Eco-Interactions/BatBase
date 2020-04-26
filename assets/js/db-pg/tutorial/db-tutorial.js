@@ -33,8 +33,8 @@ function searchPageInit() {
 export function startWalkthrough(curFocus){  
     if (intro) { return; } 
     if (curFocus) { focus = curFocus; }      
-    buildIntro();
     setTableState();
+    buildIntro();
     intro.start();
 } 
 function buildIntro() {                                                         
@@ -60,6 +60,7 @@ function setTableState() {
     $('#db-view').css("height", "444px");
     $('#search-focus')[0].selectize.disable();
     $('#sel-view')[0].selectize.disable();
+    $('#data-help').css('z-index', '1');
     setDbLoadDependentState();
 }
 function setDbLoadDependentState() {
@@ -82,6 +83,7 @@ function resetUi() {                                                            
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
     $('#search-focus')[0].selectize.enable();
     $('#sel-view')[0].selectize.enable();
+    $('#data-help').css('z-index', '10000000000');
 }
 /* ----------------- STEP SET UP -------------------------------------------- */
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);

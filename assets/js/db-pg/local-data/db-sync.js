@@ -257,7 +257,8 @@ function getRelDataHndlrs(entity, rcrd) {
             'location': addToParentRcrd, //'habitatType': addToTypeProp, 
             // 'locationType': addToTypeProp
         },
-        'taxon': { 'taxon': addToParentRcrd, 'taxonNames': addToTaxonNames 
+        'taxon': { 'realm': addRealmDataToRcrd, 'taxon': addToParentRcrd, 
+            'taxonNames': addToTaxonNames
         },
     };
     return type ? update[entity][type] : update[entity];
@@ -340,13 +341,28 @@ function addToParentRcrd(prop, rcrd, entity) {
 //     toAdd.forEach(tag => tagObj[tag.id][entity+'s'].push(rcrd.id));
 //     _db.setDataInMemory(prop, tagObj);
 // }
-/** Adds the Taxon's name to the stored names for it's realm and level.  */
+function addRealmDataToRcrd(prop, rcrd, entity) {
+    const taxa = _db.getMmryData('taxon');
+    const taxon = taxa[rcrd.id];
+    taxon.realm = getTaxonRealm(taxon, taxa);
+    _db.setDataInMemory('taxon', taxa);
+}
+function getTaxonRealm(taxon, taxa) {
+    const parent = taxa[taxon.parent];
+    if (parent.realm) { return parent.realm; }
+    return getTaxonRealmId(parent, taxa);
+}
+/** 
+ * Adds the Taxon's name to the stored names for it's realm and level.  
+ * Note: 'realm' is added above, so the taxon from storage is used rather than the rcrd.  
+ */
 function addToTaxonNames(prop, rcrd, entity) {
-    const realm = rcrd.realm.displayName;
-    const level = rcrd.level.displayName;  
+    const taxon = _db.getMmryData('taxon')[rcrd.id];
+    const realm = taxon.realm.displayName;
+    const level = taxon.level.displayName;  
     const nameProp = realm+level+"Names";
     let data = _db.getMmryData(nameProp) || {};
-    data[rcrd.name] = rcrd.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
+    data[taxon.name] = taxon.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
     _db.setDataInMemory(nameProp, data);
 }
 /** Adds the Interaction to the stored entity's collection.  */

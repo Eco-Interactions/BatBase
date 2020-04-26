@@ -181,8 +181,6 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         const formTaxonLvl = _fs.forms.realmData.formTaxonLvl;
         formVals.parentTaxon = getParentTaxon(formTaxonLvl);
         formVals.level = formTaxonLvl;
-        if (_fs.action === 'edit') { return; }
-        formVals.realm = _fs.forms.realmData.realmTaxon.id;
     }
     /** -------------------- Additional Taxon Data -----------------------*/ 
     /**

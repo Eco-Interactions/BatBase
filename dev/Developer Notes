@@ -3,11 +3,26 @@
 >WARNINGS
     - added getAll to idb-keyval. don't update until the feature gets merged in! https://github.com/jakearchibald/idb-keyval/compare/master...zubair-io:get-all
 
-
 >Test Users
     - TestUser: testuser123
     - testeditor: testeditor123
+## ======================= REGULAR USE ====================================== ##
+
+## RESET LOCAL DB ##
+    - $ ./dev/resetdb.sh
+
+## Generate Assets ##
+> Asset generation commands: 
+    - $ yarn run encore dev 
+    - $ yarn run encore dev --watch (run while actively working on asset code)
+    - $ yarn run encore production (Switch output path in webpack.config.js first)
+
+## Composer Memory Limit ##
+    - $ which composer (returns path to composer)
+    - $ php -d memory_limit=-1 [path] [command]
+
 ## ======================= DEPLOYMENT STEPS ================================= ##
+
 >STEPS TO DEPLOY TO SERVER
 NOTIFY SENTRY OF NEW RELEASE:  
     - run ./sentry_release.sh
@@ -18,50 +33,22 @@ GENERATE ASSET FILES WITH WEBPACK:
     - yarn run encore production
 OPTIMIZE COMPOSER AUTOLOADER  (https://symfony.com/doc/3.4/performance.html)
     - composer dump-autoload --no-dev --classmap-authoritative
+    - composer install --optimize-autoloader --no-dev --classmap-authoritative
+
 SERVER UPDATES:
     - set up the 'prod_copy' sub-domain first
         - set 'release' in parameters.yml
         - update relevant changed files on server
         - handle any database changes
+        - copy 'uploads' from prod
         - test and bug fix
     - set up the main domain
         - set up the new prod database
         - copy the 'prod_copy' as 'prod' to set up main domain
         - update the database name in parameters.yml
 
-## =========================== TESTING ====================================== ##
->TESTING:
-Start Selenium: 
-    $ java -jar selenium-server-standalone-3.141.59.jar
+##------------------------- Server Stuff -------------------------------------##
 
-Run Tests:
-    - Functional Tests (Behat/Mink):
-        all tests: ./vendor/bin/behat 
-        single feature: ./vendor/bin/behat features/[FeatureName].feature
-    # - Unit Tests:
-    #     $phpunit = ./vendor/bin/simple-phpunit
-    #     [$phpunit] -c app/ tests   
-    #     [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
-##Automatically ran at the start of tests:
-##  (generate fixtures as needed: php bin/console generate:fixtures)
-##  php bin/console doctrine:database:drop --force --env=test 
-##  php bin/console doctrine:database:create --env=test
-##  php bin/console doctrine:schema:update --force --env=test
-
-##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
->Testing setup
-- Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
-    - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
-- Install Chrome Driver 
-    - Linux: (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
-    - Mac: 
-        $ brew tap homebrew/cask
-        $ brew cask install chromedriver
->Resources used during tests set-up 
-# https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
-# https://knpuniversity.com/screencast/behat
-# 
-##------------------------- Server Side ---------------------------------------##
 > SSH
     ssh user@batplant.org -p18765
 
@@ -72,9 +59,29 @@ Run Tests:
     RewriteCond %{REQUEST_URI} !prod/web/
     RewriteRule (.*) /prod/web/$1 [L]
 
->Deployment Steps
-    (Need to update)
-##-------------------- Local Installation ------------------------------------##
+## =========================== TESTING ====================================== ##
+
+Start Selenium: 
+    $ java -jar selenium-server-standalone-3.141.59.jar
+    - Exit = ctrl+c 
+        - Clear port if necessary -  sudo fuser -k 4444/tcp
+
+Run Tests:
+    - Functional Tests (Behat/Mink):
+        all tests: ./vendor/bin/behat 
+        single feature: ./vendor/bin/behat features/[FeatureName].feature
+            ##Automatically ran at the start of tests:
+            ##  (generate fixtures as needed: php bin/console generate:fixtures)
+            ##  php bin/console doctrine:database:drop --force --env=test 
+            ##  php bin/console doctrine:database:create --env=test
+            ##  php bin/console doctrine:schema:update --force --env=test
+            ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
+    # - Unit Tests:
+    #     $phpunit = ./vendor/bin/simple-phpunit
+    #     [$phpunit] -c app/ tests   
+    #     [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+
+## ==================== Local Installation ================================== ##
 
 >Install Steps ## 
 - Install & Update COMPOSER:
@@ -108,11 +115,18 @@ Run Tests:
 - After installing new plugin/package:
     - run $ sudo yarn install
 
-## Generate Assets ##
-> Asset generation commands: 
-    - $ yarn run encore dev 
-    - $ yarn run encore dev --watch (run while actively working on asset code)
-    - $ yarn run encore production (Switch output path in webpack.config.js first)
+## TESTING ## 
+- Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
+    - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
+- Install Chrome Driver 
+    - Linux: (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
+        - https://tecadmin.net/setup-selenium-with-chromedriver-on-debian/
+    - Mac: 
+        $ brew tap homebrew/cask
+        $ brew cask install chromedriver
+>Resources used during tests set-up 
+# https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
+# https://knpuniversity.com/screencast/behat
 
 ## Live & Learn ##
 > Changing Servers
@@ -120,9 +134,17 @@ Run Tests:
         - Cron jobs
         - Email forwards
 
->Changes to live site
-    - Copy to sub-domain for testing when bugs arise.
-# 
+
+##------------------------- Server Stuff ---------------------------------------##
+> SSH
+    ssh user@batplant.org -p18765
+
+>.htaccess rewrite for batplant.org 
+    RewriteEngine on
+    RewriteCond %{HTTP_HOST} ^batplant.org$ [NC,OR]
+    RewriteCond %{HTTP_HOST} ^www.batplant.org$
+    RewriteCond %{REQUEST_URI} !prod/web/
+    RewriteRule (.*) /prod/web/$1 [L]
 ##------------------- Bugs ---------------------------------------------------##
 >::Known BUGS::
 ## Bugs that I attempted to solve but ended up stumped or without time to delve in more. 

@@ -131,7 +131,7 @@ Feature: Edit data in the database
         And I change the "Elevation" field "input" to "1000"
         And I change the "Elevation Max" field "input" to "2000"
         And I change the "Latitude" field "input" to "9.7489"
-        And I change the "Longitude" field "input" to "83.7534"
+        And I change the "Longitude" field "input" to "-83.7534"
         And I see the location's pin on the map
         And I press the "Update Location" button
         And I wait for the "top" form to close
@@ -145,7 +145,7 @@ Feature: Edit data in the database
         Then I should see "1000" in the "Elevation" field "input"
         Then I should see "2000" in the "Elevation Max" field "input"
         Then I should see "9.7489" in the "Latitude" field "input"
-        Then I should see "83.7534" in the "Longitude" field "input"
+        Then I should see "-83.7534" in the "Longitude" field "input"
 
     @javascript
     Scenario:  I should be able to change the parent of an existing location

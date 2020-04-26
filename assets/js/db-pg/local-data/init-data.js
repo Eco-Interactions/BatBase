@@ -45,8 +45,8 @@ function initTaxonDataAndLoadTable(reset) {
 }
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
 function downloadRemainingTableData() {
-    const urls = ['source', 'location', 'interaction']; 
-    return $.when(...urls.map(url => getAndSetData(url)))
+    return $.when(...['source', 'location'].map(url => getAndSetData(url)))
+        .then(() => getAndSetData('interaction'))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable'));
 }

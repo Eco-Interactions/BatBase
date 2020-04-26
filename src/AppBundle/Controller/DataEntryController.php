@@ -163,10 +163,11 @@ class DataEntryController extends Controller
     private function setDetailData($dData, $dName, &$returnData, &$em)
     {
         $dEntity = $this->getDetailEntity($dName, $returnData->detailEdits, $em);
-        $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity);
+        if ($dName !== 'geoJson') { 
+            $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity); 
+        }
         $this->addDetailToCoreEntity($returnData->coreEntity, $dEntity, $dName, $em);
         $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);  
-
         return $dEntity;
     }
     private function setCoreEntity($coreName, &$coreEntity, &$dEntity)
