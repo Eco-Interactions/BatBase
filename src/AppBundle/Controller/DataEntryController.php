@@ -438,9 +438,9 @@ class DataEntryController extends Controller
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
-    {   
+    {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         if (!strpos($e->getMessage(), 'Duplicate Entry')) {
-            $this->get('logger')->error($e->getMessage());
+            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);

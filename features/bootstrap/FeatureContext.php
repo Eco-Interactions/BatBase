@@ -1188,14 +1188,6 @@ class FeatureContext extends RawMinkContext implements Context
 /** ------------ Page Interactions ------------------------------------------ */
     private function addValueToFormInput($selector, $text)
     {
-        // $msg = "\nCouldn't set [".$text."] into [".$selector."].";
-        // try {
-        //     $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
-        //     $this->getUserSession()->executeScript("$('$selector').change();");        
-        // } catch (Exception $e) {
-        //     $this->iPutABreakpoint($msg);
-        // }
-
         $this->spin(function() use ($selector, $text) {
             $input = $this->getUserSession()->getPage()->find('css', $selector);
             if (!$input) { return false; }
@@ -1545,13 +1537,12 @@ class FeatureContext extends RawMinkContext implements Context
     public function theyShouldSeeTheExpectedChangesInTheDataTable()
     {
         $this->curUser = $this->editor1;
-        // $this->editorSeesExpectedInteractions();
         $this->checkSourceData();
         $this->checkTaxonData();
+
         $this->curUser = $this->editor2;
         $this->checkSourceData();
         $this->checkLocationData();
-        // $this->editorSeesExpectedInteractions();
     }
     /** ------------------ multi-editor feature helpers ----------------- */
     private function getEditorSession()
@@ -1723,12 +1714,6 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Family Sphingidaey');
         $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
     }
-    private function editorSeesExpectedInteractions($editor)
-    {                                                                           fwrite(STDOUT, "\n        Editor sees expected data.\n");
-        $this->checkSourceData();
-        $this->checkLocationData();
-        $this->checkTaxonData();
-    }    
     private function checkSourceData()
     {
         $this->theDatabaseTableIsInFocus('Source'); 

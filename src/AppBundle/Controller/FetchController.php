@@ -215,10 +215,10 @@ class FetchController extends Controller
         $rcrd = false;
         try {
             $rcrd = $serializer->serialize($entity, 'json');
-        } catch (\Throwable $e) {    print("\n\n### Error = ".$e->getMessage()."\n\n");
-            $this->get('logger')->error($e->getMessage());
-        } catch (\Exception $e) {    print("\n\n### Error = ".$e->getMessage()."\n\n");
-            $this->get('logger')->error($e->getMessage());
+        } catch (\Throwable $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        } catch (\Exception $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n\n");
+            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         return $rcrd;
     }
