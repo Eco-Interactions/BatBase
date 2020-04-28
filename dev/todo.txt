@@ -7,15 +7,11 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
-    - 
+    - Init Download previously: 30-45 seconds (~34 Locally), now reduced ~5-15 seconds
 
 QUESTIONS:
 
 >==== CURRENT ====
-    - remove all outdated tags from interactions
-    - add 'feedback/issue' reporting to ui
-          Sentry.showReportDialog({ eventId: '<?php echo Sentry\State\Hub::getCurrent()->getLastEventId(); ?>' })
-
 
 >Next
     - Refactor Source data 

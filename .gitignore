@@ -49,6 +49,7 @@ composer.lock
 
 # Local Files
 /web/uploads/publications/*
+/dev/local/*
 *.sublime-project
 *.sublime-workspace
 *.DS_Store
