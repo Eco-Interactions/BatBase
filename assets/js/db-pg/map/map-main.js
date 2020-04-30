@@ -98,6 +98,7 @@ function buildAndShowMap(loadFunc, mapId, type) {                               
 }
 function getMapInstance(mapId) {
     if (app.map) { app.map.remove(); }
+    $(mapId).empty();
     app.popups = {};
     return L.map(mapId); 
 }

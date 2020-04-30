@@ -360,7 +360,7 @@ function updateTableState(tblOpts, rowData) {
 }
 function onTableInitComplete(rowData) {
     hidePopUpMsg();
-    enableTableButtons();
+    enableTableButtons(tblState.flags.allDataAvailable);
     hideUnusedColFilterMenus();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
     updateFilterStatusMsg();

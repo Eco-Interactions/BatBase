@@ -38,10 +38,10 @@ const app = {
 const tState = _pg.accessTableState;
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
+    _u.initComboboxes(['Focus', 'View']);
     showPopUpMsg('Loading...');
     addDomEventListeners();
     authDependentInit();
-    _u.initComboboxes(['Focus', 'View']);
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
@@ -98,14 +98,13 @@ export function updateUiForDatabaseInit(type) {
     $('#shw-map').data('loaded', false);
 }
 function showDataInitLoadingStatus() {
-    const status = '[ Database initializing... Table will reset once complete, ~30 seconds. ]';
+    const status = '[ Database initializing... Table will reset once complete, ~45 seconds. ]';
     $('#filter-status').text(status).css('color', 'teal').data('loading', true);
     showPopUpMsg();
 }
 function toggleSearchOptions(toggleKey) {
     handleButtons(toggleKey);
     $('#search-focus')[0].selectize[toggleKey](); 
-    $('#sel-view')[0].selectize[toggleKey]();
 }
 function handleButtons(toggleKey) {
     const opac = toggleKey === 'enable' ? 1 : .5;
@@ -736,7 +735,7 @@ function setBttnEvents() {
         'Reset Local Data': _pg.resetLocalDb.bind(null, true),
         'Report A Bug': showBugReportPopup
     }
-    $('.intro-bttn').each((i, elem) => {  console.log('binding event for [%s]', elem.innerText)
+    $('.intro-bttn').each((i, elem) => { 
         $(elem).click(() => { exitModal(map[elem.innerText]); }
     )});
 }
@@ -853,9 +852,9 @@ function newSelEl(opts, c, i, field) {                                          
     $(elem).data('field', field);
     return elem;
 }
-export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
-    if (app.dbInitializing === 'complete' || testingDbInit()) { updateUiAfterDatabaseInit() }
-    if (app.dbInitializing) { return enableToggleTreeButtons(); }
+export function enableTableButtons(allDataAvailable) {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
+    if (app.dbInitializing && allDataAvailable || testingDbInit()) { updateUiAfterDatabaseInit() }
+    if (app.dbInitializing === true) { return enableToggleTreeButtons(); }
     $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts'))
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');

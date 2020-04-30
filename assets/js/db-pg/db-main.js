@@ -144,6 +144,7 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
     .then(updateFilterPanelHeader.bind(null, focus));
 } 
 function setTableInitState(isAllDataAvailable) {
+    resetFilterPanel('taxa');
     resetTableParams('taxa');
     if ($('#shw-chngd')[0].checked) { _filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
@@ -235,9 +236,12 @@ function updateFocusAndBuildTable(focus, view) {                                
 function onFocusChanged(focus, view) {  
     _u.setData('curFocus', focus);
     _u.setData('curView', view);
+    resetFilterPanel(focus);
+    return resetTableParams(focus);
+}
+function resetFilterPanel(focus) {
     updateFilterPanelHeader(focus);
     $('#focus-filters').empty();  
-    return resetTableParams(focus);
 }
 function buildDataTable(focus, view, fChange) {
     const builders = { 
@@ -412,7 +416,7 @@ function beginTaxonLoad(realmId, taxa) {
 }
 /** Event fired when the taxon view select box has been changed. */
 export function onTxnViewChange(val) {                              /*Perm-log*/console.log('       --onTxnViewChange. [%s]', val)
-    if (!val || !tState.flags.allDataAvailable) { return; } //Flag not true when local database is still initializing.
+    if (!val) { return; }
     $('#focus-filters').empty();  
     buildTxnTable(val);
 }
