@@ -38,7 +38,7 @@ import * as _tree from './table/format-data/data-tree.js';
 import * as _filters from './table/filters/filters-main.js';
 import * as _map from './map/map-main.js';
 import * as _ui from './pg-ui/ui-main.js';
-import * as _db from './local-data/local-data-main.js';
+import * as _data from './local-data/local-data-main.js';
 import * as _format from './table/format-data/aggrid-format.js'; 
 import { startWalkthrough } from './tutorial/db-tutorial.js';
 import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
@@ -51,10 +51,10 @@ export function ui(funcName, params = []) {
     return _ui[funcName](...params);
 }
 export function db(funcName, params = []) {  
-    return _db[funcName](...params);
+    return _data[funcName](...params);
 }
 export function resetLocalDb() {
-    return _db.resetStoredData();
+    return _data.resetStoredData();
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
 export function alert(funcName, params = []) {

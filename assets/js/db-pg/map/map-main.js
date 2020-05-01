@@ -11,12 +11,12 @@
  *   showInts                   db_page, db_ui
  *   showLoc                    db_page
  */
+import * as _pg from '../db-main.js';
 import * as MM from './map-markers.js'; 
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
-import * as _u from '../util/util.js';
-import { accessTableState as tState } from '../db-main.js';
 
+const tState = _pg.accessTableState;
 let app;
 
 requireCss();
@@ -78,7 +78,7 @@ function fixLeafletBug() {
 /*=========================== Shared Methods =================================*/
 function downloadDataAndBuildMap(loadFunc, mapId, type) {
     const map = { geoJson: 'geo', interaction: 'ints', taxon: 'taxa' };
-    _u.getData(Object.keys(map)).then(data => {
+    _pg.db('getData', [Object.keys(map)]).then(data => {
         Object.keys(data).forEach(k => {app.data[map[k]] = data[k]});
         buildAndShowMap(loadFunc, mapId, type);
     });                                   
@@ -156,7 +156,8 @@ function addTipsLegend() {
     legend.addTo(app.map);
 }
 function addViewTips(map) {
-    const div = _u.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
+    const attr = { id: 'tips-legend', class: 'info legend flex-col'};
+    const div = _pg._util('buildElem', ['div', attr]);
     div.innerHTML = getDefaultTipTxt();
     $(div).click(toggleTips)
     return div;
@@ -233,7 +234,7 @@ function addMarkerLegend() {
     legend.addTo(app.map);
 }
 function addMarkerLegendHtml(map) {
-    const div = _u.buildElem('div', { class: 'info legend flex-col'});
+    const div = _pg._util('buildElem', ['div', { class: 'info legend flex-col'}]);
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
@@ -255,7 +256,8 @@ function addIntCountLegend() {
     legend.addTo(app.map);
 }
 function addIntCntLegendHtml(map) {
-    const div = _u.buildElem('div', { id: 'int-legend', class: 'info legend flex-col'});
+    const attr = { id: 'int-legend', class: 'info legend flex-col'};
+    const div = _pg._util('buildElem', ['div', attr]);
     return div;
 }
 function fillIntCntLegend(shown, notShown) {
@@ -335,7 +337,7 @@ function addAllIntMrkrsToMap() {
     }
 }
 function getRegionLocs() {
-    return Promise.resolve(_u.getData('topRegionNames').then(data => {  
+    return Promise.resolve(_pg.db('getData', ['topRegionNames']).then(data => {  
         return Object.values(data).map(id => app.data.locs[id]);
     }));
 }
@@ -541,7 +543,7 @@ function showNearbyLocationsAndUpdateForm(results) {                            
     const cntryCode = results.address.country_code ? 
         results.address.country_code.toUpperCase() : null;
     if (!cntryCode) { return; } //console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); 
-    _u.getData('countryCodes').then(codes => loadCountryAndSubLocs(codes[cntryCode]));
+    _pg.db('getData', ['countryCodes']).then(codes => loadCountryAndSubLocs(codes[cntryCode]));
 }
 function loadCountryAndSubLocs(cntryId) {
     app.volatile.prnt = cntryId; 
@@ -586,7 +588,7 @@ function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  
 }
 function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
-    _u.getData('countryCodes').then(cntrys => {
+    _pg.db('getData', ['countryCodes']).then(cntrys => {
         const loc = results ? buildLocData(results, cntrys) : null;
         replaceMapPin(latLng, loc, zoomFlag);  
         $('#'+app.map._container.id).css('cursor', 'default');
