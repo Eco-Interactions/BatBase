@@ -19,7 +19,7 @@
  *     updateTaxonSearch                util
  */
 import * as _u from '../../util/util.js';
-import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
+import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable, _util } from '../../db-main.js';
 import * as db_ui from '../../pg-ui/ui-main.js';
 import { resetStoredFiltersUi, savedFilterSetActive, reloadTableThenApplyFilters } from '../../pg-ui/panels/filter-panel.js';
 import { savedIntListLoaded } from '../../pg-ui/panels/int-list-panel.js';
@@ -446,27 +446,31 @@ function seperateTaxonTreeByLvl(lvls, rowData) {
 /*------------------------- Tree Name Filter -------------------------------- */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function buildTreeSearchHtml(entity) {
-    const func = onTextFilterChange.bind(null, entity);  
-    const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
+    const lbl = buildTxtSearchLbl(entity);
     const span = _u.buildElem('span', { text: 'Name:' });
-    const input = _u.buildElem('input', { type: 'text', name: 'sel'+entity, 
-        placeholder: entity+' Name (Press Enter to Filter)' });
-    const bttn = _u.buildElem('button', { text: 'Search', class: 'ag-fresh', 
-        name: 'sel'+entity+'_submit' });
-    addInputClass(entity, input);
-    addLblClass(entity, lbl);
-    $(input).change(func);
+    const input = buildTxtSearchInput(entity);
     $(lbl).append([span, input]);
     return lbl;
+}
+function buildTxtSearchLbl(entity) {
+    const classes = 'sel-cntnr flex-row' + (entity == 'Taxon' ? 'taxonLbl' : 'txtLbl');
+    return _util('buildElem', ['label', { class: classes }]);
+}
+function buildTxtSearchInput(entity) {
+    const attr = { type: 'text', name: 'sel'+entity, 
+        placeholder: entity+' Name (Press Enter to Filter)' };
+    const input = _util('buildElem', ['input', attr]);
+    addInputClass(entity, input);
+    return addInputChangeEvent(entity, input);
 }
 function addInputClass(entity, input) {
     const map = { 'Location': 'locTxtInput', 'Taxon': 'taxonSel' };
     if (!map[entity]) { return; }
     $(input).addClass(map[entity]);
 }
-function addLblClass(entity, lbl) {
-    const className = entity == 'Taxon' ? 'taxonLbl' : 'txtLbl';
-    $(lbl).addClass(className);
+function addInputChangeEvent(entity, input) {
+    $(input).change(onTextFilterChange.bind(null, entity));
+    return input;    
 }
 function onTextFilterChange(entity, e) {
     const map = {
