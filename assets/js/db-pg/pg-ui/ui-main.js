@@ -22,6 +22,9 @@
  */
 import * as _pg from '../db-main.js';
 import * as _u from '../util/util.js';
+import * as pM from './panels/panels-main.js';
+import showTips from './tips-popup.js';
+
 import exportCsvData from '../table/export/csv-export.js';
 import { initNewDataForm } from '../forms/forms-main.js';
 import * as db_filters from '../table/filters/filters-main.js';
@@ -30,12 +33,24 @@ import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/int-list-p
 import { addPanelEventsAndStyles, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
 import showEditorHelpModal from './editor-help-modal.js';
 
-
+const tState = _pg.accessTableState;
 const app = {
     userRole: $('body').data("user-role"),
     enabledSelectors: false
 };
-const tState = _pg.accessTableState;
+/* ======================== FILTER PANEL ==================================== */
+export function loadLocFilterPanelUi(tblState) {                      
+    pM.loadLocFilterPanelUi(tblState);
+}
+export function loadSrcFilterPanelUi(realm) {                      
+    pM.loadSrcFilterPanelUi(realm);
+}
+export function loadTxnFilterPanelUi(tblState) {
+    pM.loadTxnFilterPanelUi(tblState);
+}
+export function toggleDateFilter(state) {
+    pM.toggleDateFilter(state);
+}
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
     _u.initComboboxes(['Focus', 'View']);
@@ -44,6 +59,7 @@ export function init() {
     authDependentInit();
 }
 function addDomEventListeners() {
+    $("#show-tips").click(showTips);
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
@@ -261,109 +277,6 @@ function setTaxonView(curView) {
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
-/* ---------------------------- TAXON FILTER UI ----------------------------- */
-export function loadTxnFilterPanelElems(tblState) {
-    if ($('#focus-filters label').length) { return loadTaxonComboboxes(tblState); }
-    loadTaxonComboboxes(tblState);
-    loadTxnNameSearchElem(tblState);
-}
-function loadTxnNameSearchElem(tblState) {
-    const searchTreeElem = db_filters.buildTreeSearchHtml('Taxon');
-    $('#focus-filters').append(searchTreeElem);
-}
-/**
- * Builds and initializes a search-combobox for each level present in the 
- * the unfiltered realm tree. Each level's box is populated with the names 
- * of every taxon at that level in the displayed, filtered, table-tree. After 
- * appending, the selects are initialized with the 'selectize' library @initComboboxes.
- */
-function loadTaxonComboboxes(tblState) {
-    const lvlOptsObj = buildTaxonSelectOpts(tblState);
-    const levels = Object.keys(lvlOptsObj);
-    if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
-    updateTaxonComboboxes(lvlOptsObj, levels, tblState);
-}
-/**
- * Builds select options for each level with taxon data in the current realm.
- * If there is no data after filtering at a level, a 'none' option obj is built
- * and will be selected.
- */
-function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts levels = %O", tblState.taxaByLvl);
-    const optsObj = {};
-    const taxaByLvl = tblState.taxaByLvl;       
-    tblState.allRealmLvls.forEach(buildLvlOptions);
-    return optsObj;
-
-    function buildLvlOptions(lvl) {
-        return lvl in taxaByLvl ? 
-            getTaxaOptsAtLvl(taxaByLvl[lvl], lvl) : fillInLvlOpts(lvl)
-    }
-    /** Child levels can have multiple taxa.  */
-    function getTaxaOptsAtLvl(rcrds, lvl) {
-        const taxonNames = Object.keys(taxaByLvl[lvl]).sort();                  //console.log("taxonNames = %O", taxonNames);
-        optsObj[lvl] = buildTaxonOptions(taxonNames, taxaByLvl[lvl]);
-    }
-    function buildTaxonOptions(taxonNames, data) {
-        if (!taxonNames.length) { return []; }
-        const opts = taxonNames.map(name => {
-            return { value: data[name],
-                     text: name}});
-        if (optionIsSelected(opts[0].value)) {  
-            opts.unshift({value: 'all', text: '- All -'});
-        }
-        return opts;
-    }
-    function optionIsSelected(id) { 
-        if (Object.keys(tblState.selectedOpts).length > 2) { return; }
-        return Object.keys(tblState.selectedOpts).some(k => id == tblState.selectedOpts[k]);
-    }
-    function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-        if (lvl in tblState.selectedOpts) {
-            const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
-            optsObj[lvl] = [
-                {value: 'all', text: '- All -'}, 
-                {value: taxon.id, text: taxon.name}];  
-        } else { optsObj[lvl] = []; }
-    }
-} /* End buildTaxonSelectOpts */
-function updateTaxonComboboxes(lvlOptsObj, levels, tblState) {
-    if ($('#focus-filters label').length) {
-        updateTaxonSelOptions(lvlOptsObj, levels, tblState);    
-    } else {
-        loadLevelSelects(lvlOptsObj, levels, tblState);
-    }
-}
-function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
-    const elems = buildTaxonSelects(levelOptsObj, levels);
-    $('#focus-filters').append(elems);
-    _u.initComboboxes(tblState.allRealmLvls);
-    setSelectedTaxonVals(tblState.selectedOpts, tblState);
-    
-    function buildTaxonSelects(opts, levels) {  
-        const elems = [];
-        levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
-            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row taxonLbl' });
-            const span = _u.buildElem('span', { text: level + ': ' });
-            const sel = newSelEl(opts[level], 'opts-box taxonSel', 'sel' + level, level);            
-            $(lbl).append([span, sel])
-            elems.push(lbl);
-        });
-        return elems;
-    }
-}
-function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O, levels = %O, tState = %O", lvlOptsObj, levels, tState)          
-    levels.forEach(level => {                                            
-        _u.replaceSelOpts('#sel'+level, lvlOptsObj[level], null, level);
-    });
-    setSelectedTaxonVals(tblState.selectedOpts, tblState);
-}
-function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
-    if (!selected || !Object.keys(selected).length) {return;}
-    tblState.allRealmLvls.forEach(lvl => {                               
-        if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
-        _u.setSelVal(lvl, selected[lvl], 'silent');
-    });
-}
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
  * Builds location view html and initializes table load. Either builds the table 
@@ -384,142 +297,6 @@ function loadLocationViewOpts(argument) {
 }
 function setLocView(view) {
     _u.setSelVal('View', view, 'silent');
-}
-/* ------------------------- LOCATION FILTER UI ----------------------------- */
-/**
- * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
- * data into table rows and load the table @transformLocDataAndLoadTable.
- */
-export function loadLocFilterPanelElems(tblState) {                 /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
-    if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
-    loadLocComboboxes(tblState);
-    loadLocNameSearchElem();
-}
-function updateLocSelOptions(tblState) {
-    const opts = buildLocSelectOpts(tblState); 
-    Object.keys(opts).forEach(locType => {                                            
-        _u.replaceSelOpts('#sel'+locType, opts[locType], null, locType);
-    });
-    setSelectedLocVals(tblState.selectedOpts);
-}
-function loadLocNameSearchElem() {  
-    const searchTreeElem = db_filters.buildTreeSearchHtml('Location');
-    $('#focus-filters').append(searchTreeElem);
-}
-/**
- * Create and append the location search comboboxes, Region and Country, and
- * set any previously 'selected' values.
- */
-function loadLocComboboxes(tblState) {  
-    const opts = buildLocSelectOpts(tblState); 
-    const selElems = buildLocSelects(opts);
-    $('#focus-filters').append(selElems);
-    _u.initComboboxes(['Region', 'Country']);
-    setSelectedLocVals(tblState.selectedOpts);
-}
-/** Builds arrays of options objects for the location comboboxes. */
-function buildLocSelectOpts(tblState, data) {  
-    const processedOpts = { Region: [], Country: [] };
-    const opts = { Region: [], Country: [] };  
-    tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
-    modifyOpts();
-    return opts; 
-    /**
-     * Recurses through the tree and builds a option object for each unique 
-     * country and region in the current table with interactions.
-     */
-    function buildLocOptsForNode(row) {                                 
-        const rowData = row.data;  
-        if (rowData.interactionType) {return;}                                  //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
-        if (rowData.type === 'Region' || rowData.type === 'Country') {
-            buildLocOpt(rowData, rowData.name, rowData.type); 
-        }
-        if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
-    }
-    /** If the location has interactions an option object is built for it. */
-    function buildLocOpt(rowData, name, type) {  
-        if (name.includes('Unspecified')) { return; }
-        if (processedOpts[type].indexOf(name) !== -1) { return; }
-        const id = rowData.id;             
-        if (isOpenRow(id)) { addToSelectedObj(id, type); }
-        opts[type].push({ value: id, text: name.split('[')[0] }); 
-        processedOpts[type].push(name);
-    }
-    function isOpenRow(id) {  
-        return tblState.openRows.indexOf(id) !== -1
-    }
-    /** Handles all modification of the location options. */
-    function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _u.snapshot(opts));
-        if (opts.Region.length === 2) { rmvTopRegion(); }        
-        addMissingOpts();
-        sortLocOpts();
-        addAllOption();
-    }
-    /** 
-     * If both top & sub regions are in the table, only the sub-region opt is 
-     * included, unless the top region is the location being filtered on. 
-     */
-    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tblState.selectedOpts)
-        const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
-        if (!selLoc || !selLoc.parent) { return; }
-        opts.Region = opts.Region.filter(function(region) {
-            return region.value == tblState.selectedOpts.region;
-        });             
-    }
-    /** If the Region or Country aren't in the table, they are added as options here. */
-    function addMissingOpts() {                                                 
-        if (!tblState.openRows.length && !tblState.selectedOpts) { return; }
-        const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
-        if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
-        if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
-    }
-    /** build the new opts and adds their loc ids to the selected-options obj. */
-    function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
-        const val = loc && loc[type] ?  loc[type].id : false;
-        const txt = loc && loc[type] ?  loc[type].displayName : false;
-        if (!val) { return }
-        addToSelectedObj(val, _u.ucfirst(type));  
-        tblState.openRows.push(val);
-        opts[optProp].push({ value: val, text: txt });
-    }         
-    function addToSelectedObj(id, type) {
-        const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s] = %O', type, loc);
-        sel[type] = id;
-    }
-    /** Alphabetizes the options. */
-    function sortLocOpts() {
-        for (let type in opts) {
-            opts[type] = opts[type].sort(_u.alphaOptionObjs); 
-        }
-    }
-    function addAllOption() {  
-        Object.keys(tblState.selectedOpts).forEach(type => {
-            opts[type].unshift({value: 'all', text: '- All -'})
-        });
-    }
-} /* End buildLocSelectOpts */
-/** Builds the location select elements */
-function buildLocSelects(locOptsObj) {  
-    const selElems = [];
-    for (let locSelName in locOptsObj) {
-        let elem = buildLocSel(_u.ucfirst(locSelName), locOptsObj[locSelName]); 
-        selElems.push(elem);
-    }
-    return selElems;
-    
-    function buildLocSel(selName, opts) {
-        const lbl = _u.buildElem('label', { class: "sel-cntnr flex-row" });
-        const span = _u.buildElem('span', { text: selName + ': ', class: "opts-span" });
-        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
-        $(lbl).addClass('locLbl').append([span, sel]);
-        $(sel).addClass('locSel');
-        return lbl;
-    }
-}
-function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
-    Object.keys(selected).forEach(locType => {
-        _u.setSelVal(locType, selected[locType], 'silent');
-    });
 }
 /* ---------------------------- SOURCE VIEW ------------------------------------------------------------------------- */
 /**
@@ -542,60 +319,6 @@ function loadSourceViewOpts() {
 function setSrcView(view) {
     _pg.accessTableState().set({'curView': view});
     if (!_u.getSelVal('View')) { _u.setSelVal('View', view, 'silent'); } 
-}
-/* ------------------------- SOURCE FILTER UI ------------------------------- */
-/**
- * Will build the select elems for the source search options. Clears previous 
- * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
- * format and load the data table.
- * NOTE: This is the entry point for source table rebuilds as filters alter data
- * contained in the data tree.
- */
-export function loadSrcFilterPanelElems(realm) {                    /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
-    if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
-    const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
-        'publ':loadPublSearchHtml }; 
-    return buildUi[realm](); 
-} 
-function clearPanelCombos(realm) {
-    if (realm !== 'pubs') { return Promise.resolve(); }
-    return Promise.resolve($('#selPubType')[0].selectize.clear('silent'));
-}
-/** Builds a text input for searching author names. */
-function loadAuthSearchHtml() {
-    const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
-    $('#focus-filters').append(searchTreeElem);
-    return Promise.resolve();
-}
-function loadPubSearchHtml() {
-    return _u.getOptsFromStoredData('pubTypeNames')
-        .then(loadPubSearchElems);
-}
-function loadPubSearchElems(pubTypeOpts) {
-    const pubTypeElem = buildPubTypeSelect(pubTypeOpts);
-    const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
-    $('#focus-filters').append([searchTreeElem, pubTypeElem]);
-    _u.initCombobox('Publication Type');
-    $('#selPubType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
-}         
-/** Builds the publication type dropdown */
-function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-    const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
-    const span = _u.buildElem('span', { text: 'Type:' });
-    const sel = newSelEl(addAllOpt(opts), '', 'selPubType', 'Publication Type');
-    const lblW = $(window).width() > 1500 ? '222px' : '230px';
-    $(sel).css('width', '177px');
-    $(lbl).css('width', lblW).append([span, sel]);
-    return lbl;
-}
-function addAllOpt(opts) {
-    opts.unshift({value: 'all', text: '- All -'});
-    return opts;
-}
-function loadPublSearchHtml() {
-    const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
-    $('#focus-filters').append(searchTreeElem);
-    return Promise.resolve();
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
 export function updateUiForMapView() {
@@ -641,87 +364,8 @@ function returnRcrdsToTable() {                                                 
     updateUiForTableView();
     if (_u.getSelVal('View') === 'map') { _u.setSelVal('View', 'tree'); }
 }
-/* ------------------ Search Tips ------------------------------------------- */
-export function showTips() {                                                    //console.log("show tips called.")
-    if (!$('#tips-close-bttn').length) { initSearchTips(); }
-    $('#b-overlay-popup').addClass("tips-popup");
-    $('#b-overlay, #b-overlay-popup').fadeIn(500);
-    $('#show-tips').html("Tips");
-    $('#show-tips').off("click");
-    $('#show-tips').click(hideTips);
-}
-function initSearchTips() { 
-    $('#b-overlay-popup').html(getSearchTipsHtml());
-    bindEscEvents();
-}
-function hideTips() {
-    $('#b-overlay').fadeOut(500, removeTips);
-    $('#show-tips').html("Tips");
-    $('#show-tips').off("click");
-    $('#show-tips').click(showTips);
-    $('#b-overlay-popup').removeClass("tips-popup");
-    $('#b-overlay-popup').empty();
-}
-function removeTips() {                                                         //console.log("removeTips called.")
-    $('#b-overlay, #b-overlay-popup').css("display", "none");
-    $('#b-overlay-popup').removeClass("tips-popup");
-}
-function bindEscEvents() {
-    addCloseButton();
-    $(document).on('keyup',function(evt) {
-        if (evt.keyCode == 27) { hideTips(); }
-    });
-    $("#b-overlay").click(hideTips);
-    $('#show-tips').off("click");
-    $('#show-tips').click(hideTips);
-    $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
-}
-function addCloseButton() {
-    $("#b-overlay-popup").append(`
-        <button id="tips-close-bttn" class="tos-bttn">Close</button>`);
-    $('#tips-close-bttn').click(hideTips)
-}
-function getSearchTipsHtml() {
-    return `
-        <h3>Tips for searching</h3>
-        <ul> 
-            <br><li><strong>To search by specific interaction or habitat types</strong>, click on the 
-            filter menu of the Type or Habitat columns and select which ones to include in your search.  
-            (<a href="definitions">Click here to see definitions</a> 
-            for each interaction and habitat type.)</li>
-            <br><li><strong>Interested in knowing all the fruit species known from a bat species’ 
-            diet?</strong> Search for the bat species by selecting "Taxon" in the "Group Interactions by"
-            field, then select "Bat" below in the "Group Taxon by" field, and then select only “Fruit” and “Seed” in the filter 
-            menu for the Tags column on the table. This will provide you with a list of all plant species known to have their 
-            fruit consumed, seeds consumed, and seeds dispersed by that particular bat species.</li>
-            <br><li><strong>Or all of the flower species known from a bat species’ diet?</strong> 
-            Search for the bat species as described above, then select only “Flower” in the filter menu for the Tags column
-            on the table. This will provide you with a list of all plant species known to have their flowers visited, consumed, 
-            or pollinated by that particular bat species.</li>
-            <br><li><strong>Interested in knowing all of the bat species known to visit or 
-            pollinate a particular plant species/genus/family?</strong> Select "Taxon" for "Group Interactions by" 
-            and then "Plant" for “Group Taxa by” in the field below. You can narrow the search by selecting
-            family, genus, or species in the menu to the right. Next, select only “Flower” in the filter menu for the 
-            Tags column on the table. This will provide information on the bats that visited 
-            the flower as well as those that have been confirmed pollinating it.</li><br>
-            <li><strong>Want to see all interactions for a particular bat species/genus/family on a map?</strong> 
-            Search for the bat as described above, filtering as desired, and then click “Show Interactions on Map”. 
-            All interactions with GPS data will be displayed on the map.</li>
-            <br><li><b>Follow along with the tutorial for a guided tour 
-            of the search functionality.</b></li><br>
-        </ul>
-        <p> Note: "csv" stands for comma separated values. The interaction 
-        data in the table can be downloaded in this format, as a plain-text file containing tabular 
-        data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
-    `.replace(/\n\s+/g, '');
-}
 
 /* ========================== UTILITY =============================================================================== */
-function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
-    const elem = _u.buildSelectElem(opts, { class: c, id: i });
-    $(elem).data('field', field);
-    return elem;
-}
 export function enableTableButtons(allDataAvailable) {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing && allDataAvailable || testingDbInit()) { updateUiAfterDatabaseInit() }
     if (app.dbInitializing === true) { return enableToggleTreeButtons(); }

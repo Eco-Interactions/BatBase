@@ -5,18 +5,18 @@
  * authors, publications, or publishers). The data map displays interactions
  * geographically. Filtered interactions can be viewed in either form. 
  * 
- * Exports:                 Imported by:
- *     accessTableState         Almost everything else
- *     buildTable               db-ui, filter-panel
- *     getCurrentFilterState   alertIssue
- *     initSearchStateAndTable          db_sync, util
- *     resetDataTable           db_sync, db-forms, db-filters, db-tutorial
- *     onLocViewChange          _ui
- *     onSrcViewChange          _ui
- *     onTxnViewChange          _ui
- *     rebuildLocTable          db-filters, save-ints
- *     rebuildTxnTable          db-filters, save-ints
- *     showIntroAndLoadingMsg   db_sync
+ * Exports:             
+ *     accessTableState 
+ *     buildTable       
+ *     getCurrentFilterState 
+ *     initSearchStateAndTable 
+ *     resetDataTable          
+ *     onLocViewChange         
+ *     onSrcViewChange         
+ *     onTxnViewChange         
+ *     rebuildLocTable         
+ *     rebuildTxnTable         
+ *     showIntroAndLoadingMsg  
  *     showLocInDataTable
  *     showLocOnMap
  *
@@ -40,8 +40,9 @@ import * as _map from './map/map-main.js';
 import * as _ui from './pg-ui/ui-main.js';
 import * as _data from './local-data/local-data-main.js';
 import * as _format from './table/format-data/aggrid-format.js'; 
-import { startWalkthrough } from './tutorial/db-tutorial.js';
-import { updateFilterPanelHeader } from './pg-ui/panels/filter-panel.js';
+import * as _modal from '../misc/intro-core.js';
+import startWalkthrough from './tutorial/db-tutorial.js';
+import { updateFilterPanelHeader } from './pg-ui/panels/filter/filter-panel-main.js';
 
 /** ==================== FACADE ============================================= */
 export function _util(funcName, params = []) {
@@ -55,6 +56,9 @@ export function db(funcName, params = []) {
 }
 export function resetLocalDb() {
     return _data.resetStoredData();
+}
+export function modal(funcName, params = []) {  
+    return _modals[funcName](...params);
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
 export function alert(funcName, params = []) {
@@ -75,6 +79,7 @@ export function reportErr() {
  * {obj} columnApi      Ag-grid Column API (available after table-init complete)
  * {str} curFocus       Focus of the data in table: taxa, srcs, locs
  * {str} curView        Sub-sort of table data. Eg: bats, auths, etc 
+ * {obj} filters        Current filter state. 
  * {obj} flags          allDataAvailable, tutorialActive
  * {ary} intSet         An array of interactions saved and loaded in the table by the user
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
@@ -85,6 +90,7 @@ export function reportErr() {
  * {str} userRole       Stores the role of the user.
  */
 let tState = {};
+/* --------------------------- FILTER STATE --------------------------------- */
 /** Sends status for a new Sentry issue report. */
 export function getCurrentFilterState() {
     return getActiveFilters();
@@ -146,7 +152,8 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 function setTableInitState(isAllDataAvailable) {
     resetFilterPanel('taxa');
     resetTableParams('taxa');
-    if ($('#shw-chngd')[0].checked) { _filters.toggleTimeFilter('disable'); }//init the updatedAt table filter
+    _ui.toggleDateFiler('disable');
+    // if ($('#shw-chngd')[0].checked) { _filters.toggleDateFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
 }
 export function enableMap() {
@@ -314,7 +321,7 @@ function startLocTableBuildChain(topLocs, textFltr) {
     return _tree.buildLocTree(topLocs, textFltr)
         .then(tree => _format.buildLocRowData(tree, tState))
         .then(rowData => loadTbl('Location Tree', rowData))
-        .then(() => _ui.loadLocFilterPanelElems(tState));
+        .then(() => _ui.loadLocFilterPanelUi(tState));
 }
 /** -------------------- LOCATION MAP --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
@@ -386,7 +393,7 @@ function startSrcTableBuildChain(val) {
     return _tree.buildSrcTree(tState.curView)
         .then(tree => _format.buildSrcRowData(tree, tState))
         .then(rowData => loadTbl('Source Tree', rowData, tState))
-        .then(() => _ui.loadSrcFilterPanelElems(tState.curView));
+        .then(() => _ui.loadSrcFilterPanelUi(tState.curView));
 }
 function storeSrcView(val) {  
     const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
@@ -467,7 +474,7 @@ function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
         .then(tree => _format.buildTxnRowData(tree, tState))
         .then(rowData => loadTbl('Taxon Tree', rowData, tState))
         .then(() => {
-            _ui.loadTxnFilterPanelElems(tState);
+            _ui.loadTxnFilterPanelUi(tState);
             _filters.updateTaxonFilterViewMsg(topTaxon.realm.pluralName);
         });
 }

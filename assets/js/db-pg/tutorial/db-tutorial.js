@@ -10,10 +10,11 @@
  *     startWalkthrough         db-page
  *
  * TOC:
- *     SET UP METHODS
- *     ON TUTORIAL EXIT
+ *     INIT
+ *     SET UP
  *     STEP SET UP
- *     STEP DEFINITIONS
+ *     TEAR DOWN
+ *     TUTORIAL STEP CONFIG
  */
 import * as _u from '../util/util.js';
 import { resetDataTable, accessTableState as tState } from '../db-main.js';
@@ -21,16 +22,12 @@ import { showTips } from '../pg-ui/ui-main.js';
 
 let intro, focus;
 
-if (window.location.pathname.includes('search')) {
-    searchPageInit();
-}
-
-function searchPageInit() {  
+addWalkthroughEventListener();
+/* ============================== INIT ====================================== */
+function addWalkthroughEventListener() {  
     $("#strt-tut").click(startWalkthrough.bind(null, null));
-    $("#show-tips").click(showTips);
 }
-/* ======================= TUTORIAL ========================================= */
-export function startWalkthrough(curFocus){  
+export default function startWalkthrough(curFocus){  
     if (intro) { return; } 
     if (curFocus) { focus = curFocus; }      
     setTableState();
@@ -54,7 +51,7 @@ function getIntroOptions() {
         steps: getSteps()
     };
 }
-/* -------------------- SET UP METHODS -------------------------------------- */
+/* ==================== SET UP ============================================== */
 function setTableState() { 
     $('#show-tips').off("click");
     $('#db-view').css("height", "444px");
@@ -69,21 +66,6 @@ function setDbLoadDependentState() {
     }
     $('#search-focus')[0].selectize.addItem('taxa');
     $('#sel-view')[0].selectize.addItem('3');
-}
-/* ----------------- ON TUTORIAL EXIT --------------------------------------- */
-function resetTableState() {   
-    resetUi();
-    if ($('#sel-view').val() && isAllDataAvailable()) { resetDataTable(focus); }
-}
-function resetUi() {                                                            //console.log('resetUiAndReloadTable')
-    focus = focus || "taxa";
-    intro = null;
-    $('#db-view').css("height", "888px");
-    $('#show-tips').click(showTips);
-    $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    $('#search-focus')[0].selectize.enable();
-    $('#sel-view')[0].selectize.enable();
-    $('#data-help').css('z-index', '10000000000');
 }
 /* ----------------- STEP SET UP -------------------------------------------- */
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
@@ -164,7 +146,22 @@ function toggleListPanelInTutorial(close) {
         $('#lists').attr({disabled: role !== 'visitor'}).click();
     }
 }
-/* ------------------------- TUTORIAL STEPS --------------------------------- */
+/* ==================== TEAR DOWN =========================================== */
+function resetTableState() {   
+    resetUi();
+    if ($('#sel-view').val() && isAllDataAvailable()) { resetDataTable(focus); }
+}
+function resetUi() {                                                            //console.log('resetUiAndReloadTable')
+    focus = focus || "taxa";
+    intro = null;
+    $('#db-view').css("height", "888px");
+    $('#show-tips').click(showTips);
+    $('#search-focus')[0].selectize.addItem(focus, 'silent');
+    $('#search-focus')[0].selectize.enable();
+    $('#sel-view')[0].selectize.enable();
+    $('#data-help').css('z-index', '10000000000');
+}
+/* =================== TUTORIAL STEP CONFIG ================================= */
 function getSteps() {
     return [ 
         {

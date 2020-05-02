@@ -12,6 +12,7 @@ Change Log:
 QUESTIONS:
 
 >==== CURRENT ====
+    - disable CSV button until all data loaded. 
 
 >Next
     - Refactor Source data 
@@ -38,7 +39,7 @@ QUESTIONS:
     -
 
 STANDARDS:
-    - append '_' before imported file, without it for the access method.
+    - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
 
 

@@ -10,6 +10,9 @@
  *     updateSubmitEvent    filter-panel, save-ints
  *
  * TOC:
+ *     FACADE
+ *         EXTERNAL
+ *         INTERNAL
  *     EVENTS
  *     OPEN/CLOSE PANELS
  *         OPEN PANEL(S)
@@ -17,9 +20,9 @@
  *     SUBMIT/SUCCESS METHODS
  *     MISC
  */
-import * as _u from '../../util/util.js';
-import { initFilterPanel, toggleFilterPanelOrientation } from './filter-panel.js';
-import { initListPanel, toggleListPanelOrientation } from './int-list-panel.js';
+import * as _pg from '../../db-main.js';
+import * as fPnl from './filter/filter-panel-main.js';
+import * as iPnl from './int-list-panel.js';
 import { initReviewPanel } from './data-review/review-panel-main.js';
 
 /* Panel confg */
@@ -35,11 +38,61 @@ const panels = {
     // }
 };
 
-/* ======================= EVENT RELATED ==================================== */
+/* ************************* FACADE ***************************************** */
+/* ======================== EXTERNAL USE ==================================== */
+/* ------------- FILTER SETS ------------- */
+export function isSavedFilterSetActive() {
+    return fPnl.savedFilterSetActive();
+}
+/* -------- INTERACTION LISTS ------------- */
+export function isSavedIntListLoaded() {
+    return iPnl.isSavedIntListLoaded();
+}
+/* -------- DYNAMIC FILTERS ------------- */
+export function loadLocFilterPanelUi(tblState) {                      
+    fPanel.loadLocFilterPanelUi(tblState);
+}
+export function loadSrcFilterPanelUi(realm) {                      
+    fPanel.loadSrcFilterPanelUi(realm);
+}
+export function loadTxnFilterPanelUi(tblState) {
+    fPanel.loadTxnFilterPanelUi(tblState);
+}
+/* -------- STATIC FILTERS ------------- */
+export function toggleDateFilter(state) {
+    fPanel.toggleDateFilter(state);
+}
+/* ============================ INTERNAL USE ================================ */
+export function pg(funcName, params) {
+    return _pg[funcName](...params);
+}
+export function pgUtil() {
+    return _pg._util(...arguments);
+}
+export function getTableState() {
+    return _pg.accessTableState();
+}
+export function resetDataTbl() {
+    return _pg.resetDataTable();
+}
+export function modal() {
+    return _pg.modal(...arguments);
+}
+export function updateUserNamedList(data, action) {
+    return _pg.db('updateUserNamedList', [data, action]);
+}
+export function pgUi() {
+    return _pg.ui(...arguments);
+}
+export function resetToggleTreeBttn(state) {
+    return _pg.ui('resetToggleTreeBttn', [state]);
+}
+/* ********************* MAIN CODE ****************************************** */
+/* ======================= EVENTS =========================================== */
 export function addPanelEventsAndStyles(userRole) {
     require('../../../../styles/db/panels/panel.styl');  
-    initFilterPanel();
-    initListPanel();
+    fPnl.initFilterPanel();
+    iPnl.initListPanel();
     if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
 }
 export function updateSubmitEvent(id, event) {
@@ -75,8 +128,8 @@ function openVerticalPanels(panel) {
     $('#fltr-int-pnl-cntnr').attr('class', 'flex-row');
     $('#filter-pnl, #list-pnl').removeClass('flex-row').addClass('flex-col');
     cssOpenPanel(panel);
-    toggleListPanelOrientation('vert');
-    toggleFilterPanelOrientation('vert');
+    iPnl.toggleListPanelOrientation('vert');
+    fPnl.toggleFilterPanelOrientation('vert');
 }
 function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
     opened.forEach(key => closePanel(panels[key]));
@@ -98,20 +151,20 @@ function cssClosePanel(panel) {
 function closeVerticalPanel(panel) {
     cssClosePanel(panel);
     window.setTimeout(() => {
-        toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
-        toggleListPanelOrientation('horz');
+        fPnl.toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
+        iPnl.toggleListPanelOrientation('horz');
         $('#fltr-int-pnl-cntnr').attr('class', 'flex-col');
         $('#filter-pnl, #list-pnl').removeClass('flex-col').addClass('flex-row');
     }, 500);
 }
-/* ------------------------ Shared ---------------------------------- */
+/* ------------------------ UTIL ---------------------------------- */
 function getOpenPanels() {
     return Object.keys(panels).filter(key => !$(panels[key].id).hasClass('closed'));
 }
 /* ================ SUBMIT AND SUCCESS METHODS ============================== */
 export function submitUpdates(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
-    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, successFunc);
+    _util('sendAjaxQuery', [data, envUrl + 'lists/' + action, successFunc]);
 }
 /* ================= MISC =================================================== */
 export function parseUserNamed(entity) {                                        
@@ -122,12 +175,3 @@ function parseEntity(entity) {
         JSON.parse(entity.details) : entity.details;
     return entity
 }
-
-
-
-
-
-
-
-
-
