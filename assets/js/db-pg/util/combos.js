@@ -13,7 +13,7 @@
 import * as _pg from '../db-main.js';
 import * as db_filters from '../table/filters/filters-main.js';
 import { newIntList, selIntList } from '../pg-ui/panels/int-list-panel.js';
-import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter-panel.js';
+import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter/filter-panel-main.js';
 
 
 /**
@@ -41,7 +41,7 @@ function getSelConfgObj(field) {
         'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
-        'Time Filter': { name: 'Filter', id: '#selTimeFilter' },
+        'Date Filter': { name: 'Filter', id: '#selDateFilter' },
         // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', add: newIntList, change: selIntList },
         'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },        

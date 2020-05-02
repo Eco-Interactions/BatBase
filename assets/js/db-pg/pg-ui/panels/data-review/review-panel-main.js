@@ -11,7 +11,7 @@
  */
 import { accessTableState as tState } from '../../../db-main.js';
 // import * as _u from '../../../util/util.js';
-// import * as _uPnl from '../panels-main.js';
+// import * as pM from '../panels-main.js';
 
 export function initReviewPanel() {
     require('../../../../../styles/db/panels/rvw-data.styl');  
@@ -51,10 +51,10 @@ function toggleEditorColumn() {
 // function toggleReviewPanel(argument) {
 //     if ($('#review-pnl').hasClass('closed')) { 
 //         buildAndShowReviewPanel();
-//     } else { _uPnl.togglePanel('review', 'close'); }
+//     } else { pM.togglePanel('review', 'close'); }
 // }
 // function buildAndShowReviewPanel() {
-//     _uPnl.togglePanel('review', 'open');
+//     pM.togglePanel('review', 'open');
 //     // window.setTimeout(() => $('#rvw-editor-sel')[0].selectize.focus(), 500);
 // }
 // /* ------------- Select Records (First) Column ------------------------------- */

@@ -1,166 +1,45 @@
-/**
- * Handles the saving, editing, and display of saved sets of filters.
- *
- * Exports:                 Imported By:                  (Added all post initial refactor)
- *     initFilterPanel              panels-main
- *     newFilterSet                 util
- *     resetStoredFiltersUi         db-page
- *     savedFilterSetActive         db-filters
- *     selFilterSet                 util
- *     updateFilterSel              util
+/*
+ * Handles the right section of the filter panel, saved filter sets. 
+ * 
+ * Exports:
+ *      disableFilterSetInputs
+ *      reloadTableThenApplyFilters
+ *      savedFilterSetActive
+ *      selFilterSet
+ *      newFilterSet
+ *      updateFilterSetSel
+ *      
+ * TOC:
+ *      INIT UI
+ *      CREATE
+ *      SELECT/EDIT
+ *          BUILD FILTER SET JSON DATA
+ *      DELETE
+ *      APPLY FILTER SET
+ *      UTILITY
+ *          SUBMIT & SUCCESS METHODS
+ *          RESET & ENABLE/DISABLE UI
  */
-import * as _u from '../../util/util.js';
-import * as _uPnl from './panels-main.js';
-import * as data_tree from '../../table/format-data/data-tree.js';
-import * as db_filters from '../../table/filters/filters-main.js';
-import * as frmt_data from '../../table/format-data/aggrid-format.js'; 
-import { updateUserNamedList } from '../../local-data/db-sync.js';
-import { accessTableState as tState, buildTable } from '../../db-main.js';
-import { resetToggleTreeBttn } from '../../pg-ui/ui-main.js';
-import { savedIntListLoaded } from './int-list-panel.js';
-import { exitModal, showHelpModal, showSaveModal } from '../../../misc/intro-core.js';
-
-/**
- * fltr - List open in panel
- *     active - true when loading saved filters
- * tblApi - AgGrid table api
- * tblState - state data for table and search page
- * timeout - present when window is being resized.
- */
+import * as pM from '../panels-main.js';
+const _u = pM.pgUtil;
+/* Holds selected filter data and table state. */
 let app = {};
 
 export function savedFilterSetActive() {  
     return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
 }
-/* ------------ Init ------------------- */
-export function initFilterPanel() {
-    require('../../../../styles/db/panels/filters.styl');  
-    addFilterPanelEvents();
-    initTimeFilterUi();
-    disableFilterSetInputs();
-}
-export function addFilterPanelEvents() {  
-    window.addEventListener('resize', resizeFilterPanelTab);
-    $('#filter').click(toggleFilterPanel);             
-    $('button[name="reset-tbl"]').click(buildTable.bind(null, false, false));
-    $('#shw-chngd').change(db_filters.toggleTimeFilter.bind(null, null, null, null));
+/* ============================= INIT UI ==================================== */
+export function setFilterSetEventListeners() {    
     $('#delete-filter').click(showCnfrmDeleteBttns);
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
-    $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'selSavedFilters'));
-    $('#fltr-pnl-hlp').click(showHelpModal.bind(null, 'filter-panel'));
 }
-function initTimeFilterUi() {
-    _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
-    $('#selTimeFilter')[0].selectize.disable();
-    db_filters.applyTimeFilterStyles(false); //inits disabled ui
-}
-/* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
-function resizeFilterPanelTab() {
-    if ($('#filter-pnl').hasClass('closed')) { return; }
-    if (app.timeout) { return; }
-    app.timeout = window.setTimeout(() => {
-        sizeFilterPanelTab()
-        app.timeout = false;
-    }, 500);
-}
-/**
- * Working around a timeout in panel_util. Utlimately, this should be refactored
- * into the util file, but I'm in a time crunch. 
- */
-function sizeFilterPanelTab() {
-    window.setTimeout(function() { 
-        const split = $('#filter-pnl').hasClass('vert');
-        const pseudo = split ? getSplitPseudoBorderStyle() : getPseudoBorderStyle();
-        const elemClass = '.hide-fltr-bttm-border' + (split ? '-vert' : '');
-        $(elemClass + ':before').remove();
-        $(elemClass).append(pseudo);
-    }, 555);
-}
-function getPseudoBorderStyle() {
-    const panelT = $('#filter-pnl').position().top;
-    const tabW = $('#filter-opts').innerWidth();  
-    const tabL = $('#filter-opts').position().left + 1;             /*debg-log*///console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
-    return `<style>.hide-fltr-bttm-border:before { 
-        position: absolute;
-        content: '';
-        height: 3px;
-        z-index: 10;
-        width: ${tabW}px;
-        top: ${panelT}px;
-        left: ${tabL}px;
-        background: #f2f9f8;
-        }</style>`;  
-}
-function getSplitPseudoBorderStyle() {
-    const panelT = $('#filter-pnl').position().top;
-    const tabL = getLeftSplitPos(); 
-    const tabW = $('#filter-opts').innerWidth();
-    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*debg-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
-    return `<style>.hide-fltr-bttm-border-vert:before { 
-        position: absolute;
-        content: '';
-        height: 5px;
-        z-index: 10;
-        max-width: 133px;
-        width: ${borderW}px;
-        top: ${panelT}px;
-        left: ${tabL}px;
-        background: #f2f9f8;
-        }</style>`;  
-}
-function getLeftSplitPos() {
-    const pnlL = $('#filter-pnl').position().left;
-    const tabL = $('#filter-opts').position().left + 1;
-    return pnlL > (tabL - 2) ? pnlL : tabL;
-}
-export function resetStoredFiltersUi() {
-    if (!$('#selSavedFilters')[0].selectize) { return; }
-    $('#selSavedFilters')[0].selectize.clear('silent');
-    $('#stored-filters input, #stored-filters textarea').val('');
-}
-/** Adds the focus to the filter panel header, "[Focus] and Time Filters" */
-export function updateFilterPanelHeader(focus) {  
-    const map = {
-        locs: 'Location', srcs: 'Source', taxa: 'Taxon'
-    };
-    const hdrPieces = $('#focus-filter-hdr').text().split(' ');  
-    hdrPieces.splice(0, 1, map[focus]);  
-    $('#focus-filter-hdr').text(hdrPieces.join(' '));   
-}
-/* --- Toggle Panel Vertically or Horizontally --- */
-export function toggleFilterPanelOrientation(style, close) {
-    if (style == 'vert') { stackFilterPanel();
-    } else { spreadFilterPanel(close); }
-    sizeFilterPanelTab(); 
-}
-function stackFilterPanel() {
-    $('#filter-pnl, #filter-col1, #stored-filters').addClass('vert');
-    $('#filter-opts').removeClass('hide-fltr-bttm-border').addClass('hide-fltr-bttm-border-vert');
-}
-function spreadFilterPanel(close) { 
-    $('#filter-pnl, #filter-col1, #stored-filters').removeClass('vert');
-    $('#filter-opts').removeClass('hide-fltr-bttm-border-vert');
-    if (!close) { $('#filter-opts').addClass('hide-fltr-bttm-border'); }
-}
-/* ====================== SHOW/HIDE LIST PANEL ============================== */
-export function toggleFilterPanel() {  
-    if ($('#filter-pnl').hasClass('closed')) { 
-        buildAndShowFilterPanel(); 
-        sizeFilterPanelTab();
-    } else { _uPnl.togglePanel('filter', 'close'); }
-}
-/* ============== CREATE/OPEN FILTER SET ==================================== */
-function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           +--buildAndShowFilterPanel')
-    _uPnl.togglePanel('filter', 'open');
-    _u.getOptsFromStoredData('savedFilterNames').then(updateFilterSel);
-}
-function updateFilterSel(filterOpts) {                              /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
+export function updateFilterSetSel(filterOpts) {                              /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
     const opts = getSavedFilterOpts(filterOpts);     
     const optGroups = buildOptGroups(opts);                         /*debg-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
-    _u.initCombobox('Saved Filter Set', getSpecialOpts());
+    _u('initCombobox', ['Saved Filter Set', getSpecialOpts()]);
 
     function getSpecialOpts() { 
         return {
@@ -192,33 +71,33 @@ function buildOptGroups(opts) {
     groups = groups.map(g => { return {text: g, value: g }}); 
     return groups;
 }
-/* ------ CREATE FILTER SET ------- */
+/* ============================== CREATE ==================================== */
 export function newFilterSet(val) {                                 /*debg-log*///console.log('newFilterSet. val = %s', val);
     enableFilterSetInputs('create');
-    updateSubmitButton(createFilterSet, savedIntListLoaded());
+    updateSubmitButton(createFilterSet, pM.isSavedIntListLoaded());
     $('#filter-set-name + input').val(val).focus();
     return { value: 'new', text: val ? val : "Creating New Filter Set" };
 }
 function createFilterSet() {  
     const data = buildFilterData();
-    _uPnl.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
-    exitModal();
+    pM.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
+    pM.modal('exitModal');
 }
-/* ------ OPEN FILTER SET ------- */
+/* ========================= SELECT/EDIT ==================================== */
 export function selFilterSet(val) {                                             
     if (val === 'new') { return; } // New list typed into combobox
     resetFilterUi();
     if (val === 'create') { return newFilterSet(); }                            
     if (!val) { return;  }                                          /*debg-log*///console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
-    updateSubmitButton(editFilterSet, savedIntListLoaded());
-    _u.getData('savedFilters').then(filters => fillFilterData(val, filters));
+    updateSubmitButton(editFilterSet, pM.isSavedIntListLoaded());
+    _u('getData', ['savedFilters']).then(filters => fillFilterData(val, filters));
 }
 function editFilterSet() {  
     const data = buildFilterData();
-    data.id = _u.getSelVal('Saved Filter Set');
-    _uPnl.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
-    exitModal();
+    data.id = _u('getSelVal', ['Saved Filter Set']);
+    pM.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
+    pM.modal('exitModal');
 }
 function fillFilterData(id, filters) {
     const filter = addActiveFilterToMemory(filters[id]);            /*debg-log*///console.log('activeFilter = %O', filter);                                                 
@@ -228,11 +107,11 @@ function fillFilterDetailFields(name, description) {
     $('#filter-set-name + input').val(name).focus();
     $('.filter-set-details textarea').val(description);
 }
-/* =================== BUILD FILTER DATA JSON =============================== */
+/* ----------------- BUILD FILTER SET JSON DATA ----------------------------- */
 function buildFilterData() {
     app.tblState = tState().get(null, ['curFocus', 'curView', 'api']);
     const data = {
-        displayName: _u.ucfirst($('#filter-set-name + input').val()),
+        displayName: _u('ucfirst', [$('#filter-set-name + input').val()]),
         type: 'filter',
         description: $('#stored-filters textarea').val(),
         details: getFilterSetJson(app.tblState),
@@ -265,7 +144,7 @@ function getColumnHeaderFilters(models) {
         return filters;
     }
 }
-/* ====================== DELETE FILTER SET ================================= */
+/* ============================== DELETE ==================================== */
 function showCnfrmDeleteBttns() {                                   /*debg-log*///console.log('deleteInteractionList')
     $('#delete-filter').hide();
     $('#set-confm-cntnr').show();  
@@ -273,7 +152,7 @@ function showCnfrmDeleteBttns() {                                   /*debg-log*/
 }
 function confmDelete() {  
     resetDeleteButton();
-    _uPnl.submitUpdates({id: app.fltr.id}, 'remove', onFilterDeleteComplete);
+    pM.submitUpdates({id: app.fltr.id}, 'remove', onFilterDeleteComplete);
 }
 function cancelDelete() {
     resetDeleteButton();
@@ -282,7 +161,7 @@ function resetDeleteButton() {
     $('#set-confm-cntnr').hide();    
     $('#delete-filter').show();
 }
-/* ================== APPLY FILTER SET TO TABLE DATA ======================== */
+/* ================== APPLY FILTER SET ====================================== */
 function applyFilterSet() {                                                     
     const filters = app.fltr.details;                               /*Perm-log*/console.log('//Applying Filter Set = %O', filters);
     app.fltr.active = true; 
@@ -294,17 +173,17 @@ export function reloadTableThenApplyFilters(filters, id) {
     .then(onTableReloadComplete.bind(null, filters, id));     
 }
 function setSavedFilterFocusAndView(filters) { 
-    _u.setSelVal('Focus', filters.focus, 'silent'); 
+    _u('setSelVal', ['Focus', filters.focus, 'silent']); 
     setView(filters);
 }
 function setView(filters) {
     if (filters.view == tState().get('curView')) { return; }
     const view =  filters.view ? filters.view : 'tree'; //Location filters are only saved in tree view
-    _u.setData('curView', view); 
-    _u.setSelVal('View', filters.view, 'silent'); 
+    _u('setData', ['curView', view]); 
+    _u('setSelVal', ['View', filters.view, 'silent']); 
 }
 function onTableReloadComplete(filters, id) {                       /*debg-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
-    if (id) { _u.setSelVal('Saved Filter Set', id);  }  //If no id, reapplying filters after form closed.
+    if (id) { _u('setSelVal', ['Saved Filter Set', id]);  }  //If no id, reapplying filters after form closed.
     setFiltersThatResetTableThenApplyRemaining(filters);
 }
 function setFiltersThatResetTableThenApplyRemaining(filters) {
@@ -314,7 +193,7 @@ function setFiltersThatResetTableThenApplyRemaining(filters) {
 }
 function setComboboxFilter(filter) {                                
     const name = Object.keys(filter)[0];                            /*debg-log*///console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
-    return _u.triggerComboChangeReturnPromise(name, filter[name].value);
+    return _u('triggerComboChangeReturnPromise', [name, filter[name].value]);
 }
 function applyRemainingFilters(filters) {                           /*debg-log*///console.log('       --applyRemainingFilters = %O', filters);
     setNameSearchFilter(filters.panel.name);
@@ -331,8 +210,8 @@ function setNameSearchFilter(text) {                                /*debg-log*/
 }
 function setTimeUpdatedFilter(time) {                               /*debg-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     if (!time) { return; } 
-    _u.setSelVal('Time Filter', time.type);
-    if (time.date) { db_filters.toggleTimeFilter(true, time.date); }
+    _u('setSelVal', ['Date Filter', time.type]);
+    if (time.date) { db_filters.toggleDateFilter(true, time.date); }
 }
 function applyColumnFilters(filters) {                              /*debg-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
@@ -346,7 +225,7 @@ function applyColumnFilters(filters) {                              /*debg-log*/
 /* ====================== UTILITY =========================================== */
 function addActiveFilterToMemory(set) {
     const status = app.fltr ? app.fltr.active : false;
-    app.fltr = _uPnl.parseUserNamed(set);
+    app.fltr = pM.parseUserNamed(set);
     app.fltr.active = status;
     return app.fltr;
 }
@@ -358,7 +237,7 @@ function showSaveFilterModal(success) {
         html: buildModalHtml(), elem: '#save-filter', dir: 'right', 
         submit: saveReady ? success : false, bttn: saveReady ? 'Submit' : 'Cancel'
     };
-    showSaveModal(confg); 
+    pM.modal('showSaveModal', [confg]);
     
     function buildModalHtml() {
         const hdr = '<h2> Saving Filter Set: </h2>';
@@ -374,15 +253,15 @@ function getActiveFilters(statusMsg) {
 }
 function submitFilterSet(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
-    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
+    _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action)]);
 }
 function onFilterSubmitComplete(action, results) {
     addActiveFilterToMemory(JSON.parse(results.list.entity));                     /*debg-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
-    updateUserNamedList(results.list, action)
+    pM.updateUserNamedList(results.list, action)
     .then(onUpdateSuccessUpdateFilterUi.bind(null, app.fltr.id));
 }
 function onUpdateSuccessUpdateFilterUi(id) {
-    _u.getOptsFromStoredData('savedFilterNames')
+    _u('getOptsFromStoredData', ['savedFilterNames'])
     .then(updateFilterSel)
     .then(() => {
         $('#selSavedFilters')[0].selectize.addItem(id);
@@ -402,12 +281,12 @@ function dataFiltersSaved(fltr) {
     return panleFilters || tableFilters;
 }
 function onFilterDeleteComplete(results) {                          /*debg-log*///console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete')
+    pM.updateUserNamedList(results.list, 'delete')
     .then(onDeleteSuccessUpdateFilterUi);
 }
 function onDeleteSuccessUpdateFilterUi() {
     resetFilterUi();
-    _u.getOptsFromStoredData('savedFilterNames').then(updateFilterSel);
+    _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSel);
     $('#selSavedFilters')[0].selectize.open();
 }
 function showSavedMsg() {
@@ -417,8 +296,7 @@ function showSavedMsg() {
 function hideSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 0);
 }
-/* ------------------------------- UI ----------------------------------------*/
-/* ---- Reset & Enable/Disable UI --- */
+/* ------------------- RESET & ENABLE/DISABLE UI -----------------------------*/
 function resetFilterUi() {
     if (app.filtr && !app.fltr.active) { app.fltr = null; }
     hideSavedMsg();
@@ -430,7 +308,7 @@ function clearFilterDetailFields() {
     $('#filter-set-name + input').val('');
     $('.filter-set-details textarea').val('');
 }
-function disableFilterSetInputs() {
+export function disableFilterSetInputs() {
     $('.filter-set-details input, .filter-set-details textarea').val('');
     $(`.filter-set-details input, .filter-set-details span, #delete-filter, 
         .filter-set-details textarea, #save-filter, #apply-filter`)
@@ -453,6 +331,6 @@ function updateSubmitButton(func, listLoaded) {
         $(`#save-filter`).css('opacity', '.5')
             .attr({'disabled': true, 'title': 'Set can not be changed while interaction list loaded.'});
     } else {
-        _uPnl.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
+        pM.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
     }
 }

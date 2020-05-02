@@ -1,14 +1,14 @@
 /**
  * Handles the saving, editing, and display of saved lists of interactions.
  *
- * Exports:                 Imported By:
- *     addListPanelEvents           panels-main
- *     newIntList                   util
- *     savedIntListLoaded           db-filters, filter-panel
- *     selIntList                   util
- *     toggleListPanelOrientation   panels-main
- *     toggleSaveIntsPanel          db-ui
- *     enableListReset              db-ui
+ * Exports:                 
+ *     addListPanelEvents   
+ *     newIntList           
+ *     isSavedIntListLoaded 
+ *     selIntList           
+ *     toggleListPanelOrientation
+ *     toggleSaveIntsPanel       
+ *     enableListReset           
  *
  * TOC:
  *     SHOW/HIDE LIST PANEL
@@ -25,13 +25,11 @@
  *             Reset & Enable/Disable UI
  *             Table Methods         
  */
-import * as _u from '../../util/util.js';
-import * as _uPnl from './panels-main.js';
-import { updateUserNamedList } from '../../local-data/db-sync.js';
-import { accessTableState as tState, resetDataTable } from '../../db-main.js';
+import * as pM from './panels-main.js';
 import { resetToggleTreeBttn } from '../../pg-ui/ui-main.js';
 import { updateFilterStatusMsg, syncViewFiltersAndUi, resetFilterParams } from '../../table/filters/filters-main.js';
-import { showHelpModal } from '../../../misc/intro-core.js';
+const _u = pM.pgUtil;
+const tState = pM.getTableState;
 /**
  * list - List open in panel
  * listLoaded - List loaded in table
@@ -44,7 +42,7 @@ import { showHelpModal } from '../../../misc/intro-core.js';
  */
 let app = {};
 
-export function savedIntListLoaded() {                                          
+export function isSavedIntListLoaded() {                                          
     return app.listLoaded;
 }
 export function initListPanel() {
@@ -61,17 +59,17 @@ function addListPanelEvents() {
     $('#delete-list').click(deleteInteractionList);
     $('#confm-list-delete').click(confmDelete);
     $('#cncl-list-delete').click(cancelDelete);
-    $('#svd-list-hlp').click(showHelpModal.bind(null, 'saved-lists'));
+    $('#svd-list-hlp').click(pM.modal.bind(null, 'showHelpModal', ['saved-lists']));
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         
     if ($('#list-pnl').hasClass('closed')) { 
         buildAndShowIntPanel(); 
         sizeIntPanelTab();
-    } else { _uPnl.togglePanel('lists', 'close'); }
+    } else { pM.togglePanel('lists', 'close'); }
 }
 function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')         
-    _uPnl.togglePanel('lists', 'open');
+    pM.togglePanel('lists', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();
@@ -116,7 +114,7 @@ function filtersApplied() {
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                   /*debg-log*///console.log('           --New Interaction List');
-    _uPnl.updateSubmitEvent('#submit-list', createDataList);
+    pM.updateSubmitEvent('#submit-list', createDataList);
     updateUiForListCreate();
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
@@ -143,7 +141,7 @@ export function selIntList(val) {
     if (val === 'new'|| (!val && app.submitting)) { return; } // New list typed into combobox or mid edit-submit
     fillListData(val);
     resetPrevListUiState();
-    _uPnl.updateSubmitEvent('#submit-list', editDataList);
+    pM.updateSubmitEvent('#submit-list', editDataList);
     enableInputs();
     enableModUi('add');
     updateDetailHdr('Selected');
@@ -152,11 +150,11 @@ function editDataList() {
     if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
-    data.id = _u.getSelVal('Int-lists');
+    data.id = _u('getSelVal', ['Int-lists']);
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
-    _u.getData('dataLists').then(lists => {
+    _u('getData', ['dataLists']).then(lists => {
         const list = addActiveListToMemory(lists[id]);              /*debg-log*///console.log('activeList = %O', list);                                                 
         fillListDataFields(
             list.displayName, list.description, list.details.length);  
@@ -165,7 +163,7 @@ function fillListData(id) {
 /* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {
     const data = {
-        displayName: _u.ucfirst($('#list-details input').val()),
+        displayName: _u('ucfirst', [$('#list-details input').val()]),
         type: 'interaction',
         description: $('#list-details textarea').val(),
         details: JSON.stringify(getInteractions()),
@@ -202,7 +200,7 @@ function deleteInteractionList() {
 }
 function confmDelete() {                                            /*perm-log*/console.log('           --Deleted Interaction List');
     resetDeleteButton();
-    _uPnl.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
+    pM.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
     delete app.rowSelMode;
 }
 function cancelDelete() {
@@ -219,7 +217,7 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*perm-log*/console.log('           +--Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    resetDataTable()
+    pM.resetDataTbl()
     .then(updateRelatedListUi);
 }
 function prepareMemoryForTableLoad() {
@@ -251,18 +249,18 @@ function updateListLoadButton(text, clickFunc) {
 }
 /* ====================== UTILITY =========================================== */
 function addActiveListToMemory(list) {
-    app.list = _uPnl.parseUserNamed(list); 
+    app.list = pM.parseUserNamed(list); 
     return app.list;
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 /** Submit new or edited interaction list. */
 function submitDataList(data, action, hndlr) {
     app.submitting = app.modMode; //Flag tells various event handlers how to handle submit
-    _uPnl.submitUpdates(data, action, hndlr);
+    pM.submitUpdates(data, action, hndlr);
 }
 function onListSubmitComplete(action, results) {                                      
     const list = JSON.parse(results.list.entity);                   /*temp-log*///console.log('listSubmitComplete results = %O, list = %O', results, list)
-    updateUserNamedList(results.list, action)
+    pM.updateUserNamedList(results.list, action)
     .then(updateListComboboxOptions)
     .then(updateUiAfterListSubmit.bind(null, list));
 }
@@ -275,7 +273,7 @@ function updateUiAfterListSubmit(list) {
     $('#submit-list').data('submitting', false);
 }
 function onListDeleteComplete(results) {                            /*temp-log*///console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete')
+    pM.updateUserNamedList(results.list, 'delete')
     .then(updateListComboboxOptions)
     .then(() => $('#selIntList')[0].selectize.open());
 }
@@ -288,7 +286,7 @@ function hideSavedMsg() {
 }
 /* =============================== UI ======================================= */
 function initListCombobox() {
-    _u.initCombobox('Int-lists');   
+    _u('initCombobox', ['Int-lists']);   
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
         disableInputs();
@@ -408,10 +406,10 @@ function updateDetailHdr(type) {
     $('#list-details>span').html(type + ' List Details');
 }
 function updateListComboboxOptions() {
-    return Promise.resolve(_u.getOptsFromStoredData('dataListNames').then(
+    return Promise.resolve(_u('getOptsFromStoredData', ['dataListNames']).then(
         opts => { 
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
-            _u.replaceSelOpts('#selIntList', opts);
+            _u('replaceSelOpts', ['#selIntList', opts]);
     }));
 }
 function resetPrevListUiState() {
@@ -425,7 +423,7 @@ function resetPrevListUiState() {
 function resetTable() {                     
     tState().set({'intSet': false});                                            
     delete app.listLoaded;
-    resetDataTable()
+    pM.resetDataTbl()
     .then(updateUiAfterTableReset);
 }
 function updateUiAfterTableReset() {
