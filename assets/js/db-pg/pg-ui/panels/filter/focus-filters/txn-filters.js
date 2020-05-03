@@ -11,21 +11,17 @@
  *      FILTER
  */
 import * as pM from '../../panels-main.js';
-import { newSelEl } from './focus-filters-main.js';
-import { buildTreeSearchHtml } from '../../../../table/filters/filters-main.js';
 const _u = pM.pgUtil;
-const _ui = pM.pgUi;
+const _fM = pM.accessFilterPanel;
 const tState = pM.getTableState;
-let tblState;
 
  /* ========================= UI ============================================ */
 export function loadTxnFilterPanelUi(tblState) {
-    if ($('#focus-filters label').length) { return loadTaxonComboboxes(tblState); }
     loadTaxonComboboxes(tblState);
-    loadTxnNameSearchElem(tblState);
+    if (!$('.txtLbl').length) { return loadTxnNameSearchElem(tblState); }
 }
 function loadTxnNameSearchElem(tblState) {
-    const searchTreeElem = buildTreeSearchHtml('Taxon');
+    const searchTreeElem = _fM('getTreeTextFilterElem', ['Taxon']);
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -93,7 +89,7 @@ function updateTaxonComboboxes(lvlOptsObj, levels, tblState) {
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
     $('#focus-filters').append(elems);
-    _u('initComboboxes', [tblState.allRealmLvls]);
+    initLevelComboboxes(tblState.allRealmLvls);
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
     
     function buildTaxonSelects(opts, levels) {  
@@ -101,12 +97,17 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
             const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
             const span = _u('buildElem', ['span', { text: level + ': ' }]);
-            const sel = newSelEl(opts[level], 'opts-box taxonSel', 'sel' + level, level);            
+            const sel = _fM('newSelEl', [opts[level], 'opts-box taxonSel', 'sel' + level, level]);            
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
         return elems;
     }
+}
+function initLevelComboboxes(realmLvls) {
+    const confg = {};
+    realmLvls.forEach(lvl => {confg[lvl] = updateTaxonSearch});
+    _u('initComboboxes', [confg]);
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O, levels = %O, tblState = %O", lvlOptsObj, levels, tblState)          
     levels.forEach(level => {                                            
@@ -122,41 +123,6 @@ function setSelectedTaxonVals(selected, tblState) {                             
     });
 }
 
-/**
- * When the time-updated filter is updated, the taxa-by-level property has to be
- * updated based on the rows displayed in the grid so that the combobox options
- * show only taxa in the filtered tree.
- */
-function updateTaxonComboboxes() {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
-    const rowData = _u.snapshot(getCurRowData());
-    _u.getData('levelNames').then(lvls => {  
-        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
-        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
-        db_ui.loadTxnFilterPanelUi(tState().get());
-    });
-}
-/** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(lvls, rowData) {                                
-    const separated = {};
-    rowData.forEach(data => separate(data));
-    return sortObjByLevelRank();
-
-    function separate(row) {                                                    //console.log('taxon = %O', taxon)
-        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
-        separated[row.taxonLvl][row.name] = row.id;
-        
-        if (row.children) { 
-            row.children.forEach(child => separate(child)); 
-        }
-    }
-    function sortObjByLevelRank() {
-        const obj = {};
-        Object.keys(lvls).forEach(lvl => { 
-            if (lvl in separated) { obj[lvl] = separated[lvl]; }
-        });
-        return obj;
-    }
-} /* End seperateTaxonTreeByLvl */
  /* ===================== FILTER ============================================ */
 /**
  * When a taxon is selected from one of the taxon-level comboboxes, the table 
@@ -165,40 +131,50 @@ function seperateTaxonTreeByLvl(lvls, rowData) {
  */
 export function updateTaxonSearch(val, selLvl) {                                        
     if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
-    tblState = tState().get(['rcrdsById', 'flags']);  
-    if (!tblState.flags.allDataAvailable) { return; }
+    const tblState = tState().get(['rcrdsById', 'flags']);  
+    if (!tblState.flags.allDataAvailable) { return $(this)[0].selectize.clear(); } 
     const rcrd = getRootTaxonRcrd(val, tblState.rcrdsById);
-    const txt = getTreeFilterTextVal('Taxon');                                  //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
+    const txt = getTreeFilterText(val);
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});   //console.log("selectedVals = %O", tParams.selectedVals);
-    addToFilterMemory();
+    addToFilterState();
     return rebuildTxnTable(rcrd, 'filtering', txt);
 
-    function addToFilterMemory() {
+    function addToFilterState() {
         const curLevel = rcrd.level.displayName;
-        if (!rcrd.parent || rcrd.parent == 1) { return delete fPs.pnlFltrs.combo; }
-        fPs.pnlFltrs.combo = {};
-        fPs.pnlFltrs.combo[curLevel] = { text: rcrd.name, value: val };
-        updateNameFilterMemory(txt);
+        if (!rcrd.parent || rcrd.parent == 1) { return _fM('setPanelFilterState', ['combo', false]); }
+        const state = {};
+        state[curLevel] = { text: rcrd.name, value: val };
+        _fM('setPanelFilterState', ['combo', state]);
     }
-} /* End updateTaxonSearch */
+}
+function getTreeFilterText(v) {
+    return typeof v === string && v !== all ? v : _fM('getTreeFilterTextVal', ['Taxon']);                               //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
+}
 /**
  * When a taxon is selected from the filter comboboxes, the record is returned.
  * When 'all' is selected, the selected parent is returned, or the realm record.
+ * When the tree-text filter is being applied, returns the most specific taxon selected.
  */
 function getRootTaxonRcrd(val, rcrds) {
-    const id = val == 'all' ? getTaxonParentId(rcrds) : val;
-    return _u.getDetachedRcrd(id, rcrds);  
+    // if (typeof val === 'string' & val !== 'all') {  } 
+    const id = val === 'string' ? getSelectedTaxonId() : val;
+    return _u('getDetachedRcrd', [id, rcrds]);  
+    
+    function getSelectedTaxonId() {  
+        const id = getMostSpecificTaxonSelected(); 
+        const rcrd = _u('getDetachedRcrd', [id, rcrds]);  
+        return val === 'all' ? rcrd.parent : rcrd;
+    }
 }
-function getTaxonParentId(rcrds) {  
-    const prevId = getPreviouslySelectedTaxonId(); 
-    const prevRcrd = _u.getDetachedRcrd(prevId, rcrds);  
-    return prevRcrd.parent;
-}
-/** Returns the ID of the parent of the reset taxon combobox */
-function getPreviouslySelectedTaxonId(that) { 
+function getMostSpecificTaxonSelected() { 
     const selected = tState().get('selectedOpts');
-    const lvl = getSelectedTaxonLvl(selected); //REPLACE WITH GETTING THE LVL FROM THE TAXON RCRD
+    const lvl = getSelectedTaxonLvl(selected); 
     return selected[lvl];
+}
+function getSelectedTaxonLvl(selected) {                
+    if (Object.keys(selected).length == 0) { return; }
+    const lvls = ['Class', 'Order', 'Family', 'Genus', 'Species'];
+    return lvls.reverse().find(lvl => selected[lvl]);
 }
 /** The selected taxon's ancestors will be selected in their levels combobox. */
 function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
@@ -209,6 +185,6 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      
     function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
         if (taxon.isRoot) { return; }
         selected[taxon.level.displayName] = taxon.id;                           
-        selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
+        selectAncestorTaxa(_u('getDetachedRcrd', [taxon.parent, taxonRcrds]));
     }
-} /* End getRelatedTaxaToSelect */
+} 

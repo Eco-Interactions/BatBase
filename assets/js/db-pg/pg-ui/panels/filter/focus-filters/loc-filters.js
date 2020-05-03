@@ -11,10 +11,8 @@
  *      FILTER
  */
 import * as pM from '../../panels-main.js';
-import { newSelEl } from './focus-filters-main.js';
-import { buildTreeSearchHtml } from '../../../../table/filters/filters-main.js';
+const _fM = pM.accessFilterPanel;
 const _u = pM.pgUtil;
-const _ui = pM.pgUi;
  /* ========================= UI ============================================ */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter. 
@@ -32,7 +30,7 @@ function updateLocSelOptions(tblState) {
     setSelectedLocVals(tblState.selectedOpts);
 }
 function loadLocNameSearchElem() {  
-    const searchTreeElem = buildTreeSearchHtml('Location');
+    const searchTreeElem = _fM('getTreeTextFilterElem', ['Location']);
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -43,7 +41,7 @@ function loadLocComboboxes(tblState) {
     const opts = buildLocSelectOpts(tblState); 
     const selElems = buildLocSelects(opts);
     $('#focus-filters').append(selElems);
-    _u('initComboboxes', [['Region', 'Country']]);
+    _u('initComboboxes', [{'Region': updateLocSearch, 'Country': updateLocSearch}]);
     setSelectedLocVals(tblState.selectedOpts);
 }
 /** Builds arrays of options objects for the location comboboxes. */
@@ -103,7 +101,7 @@ function buildLocSelectOpts(tblState, data) {
         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
     /** build the new opts and adds their loc ids to the selected-options obj. */
-    function buildOpt(loc, type, optProp) {                                     console.log('building opt for [%s]. loc = %O', type, loc);
+    function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
         const val = loc && loc[type] ?  loc[type].id : false;
         const txt = loc && loc[type] ?  loc[type].displayName : false;
         if (!val) { return }
@@ -112,7 +110,7 @@ function buildLocSelectOpts(tblState, data) {
         opts[optProp].push({ value: val, text: txt });
     }         
     function addToSelectedObj(id, type) {
-        const sel = tblState.selectedOpts;                                      console.log('building opt for [%s]', type);
+        const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s]', type);
         sel[type] = id;
     }
     /** Alphabetizes the options. */
@@ -122,7 +120,7 @@ function buildLocSelectOpts(tblState, data) {
         }
     }
     function addAllOption() {  
-        Object.keys(tblState.selectedOpts).forEach(type => {   console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
+        Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
             opts[type].unshift({value: 'all', text: '- All -'})
         });
     }
@@ -144,7 +142,7 @@ function buildLocSelects(locOptsObj) {
     function buildLocSel(selName, opts) {
         const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
         const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
-        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
+        const sel = _fM('newSelEl', [opts, 'opts-box', 'sel' + selName, selName]);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;
@@ -162,8 +160,8 @@ export function updateLocSearch(val, selType) {
     const root = getNewLocRoot(val, locType);  
     const txt = getTreeFilterTextVal('Location');  
     updateLocFilterMemory(root, locType);
-    updateNameFilterMemory(txt);
-    _ui('resetToggleTreeBttn', [false]);
+    updateTreeFilterState(txt);
+    pM.pgUi('resetToggleTreeBttn', [false]);
     return pM.pg('rebuildLocTable', [root, txt])
         .then(fM.reapplyDateFilterIfActive);
 } 
@@ -182,11 +180,11 @@ function updateLocFilterMemory(loc, locType) {
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
-    fPnl.setPanelFilterState('combo', filter);
+    _fM('setPanelFilterState', ['combo', filter]);
 }
 function resetLocComboMemory() {
     tState().set({'selectedOpts': {}});
-    fPnl.setPanelFilterState('combo', false);
+    _fM('setPanelFilterState', ['combo', false]);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};

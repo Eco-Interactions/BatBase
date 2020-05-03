@@ -27,8 +27,9 @@
  */
 import * as pM from './panels-main.js';
 import { resetToggleTreeBttn } from '../../pg-ui/ui-main.js';
-import { updateFilterStatusMsg, syncViewFiltersAndUi, resetFilterParams } from '../../table/filters/filters-main.js';
+import { updateFilterStatusMsg, resetFilterParams } from '../../table/filters/filters-main.js';
 const _u = pM.pgUtil;
+const _fM = pM.accessFilterPanel;
 const tState = pM.getTableState;
 /**
  * list - List open in panel
@@ -238,7 +239,7 @@ function updateRelatedListUi() {
     delete app.tblState;
 }
 function syncFilterUi(focus) {
-    syncViewFiltersAndUi(focus);
+    pM.accessFilterPanel('syncViewFiltersAndUi', [focus]);
     if ($('#selSavedFilters')[0].selectize) { 
         $('#selSavedFilters')[0].selectize.clear('silent') 
     }
@@ -286,7 +287,7 @@ function hideSavedMsg() {
 }
 /* =============================== UI ======================================= */
 function initListCombobox() {
-    _u('initCombobox', ['Int-lists']);   
+    _u('initCombobox', ['Int-lists', selIntList, {create: newIntList}]);   
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
         disableInputs();

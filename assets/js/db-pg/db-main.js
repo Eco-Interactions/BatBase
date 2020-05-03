@@ -112,6 +112,7 @@ function initDbPage () {
     requireCss();
     requireJs();
     _ui.init();
+    _u.initComboboxes({'Focus': buildTable, 'View': Function.prototype});
     //The idb-util.initDb will call @initSearchStateAndTable once local database is ready.
 }
 /** Loads css files used on the search database page, using Encore webpack. */
@@ -152,7 +153,7 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 function setTableInitState(isAllDataAvailable) {
     resetFilterPanel('taxa');
     resetTableParams('taxa');
-    _ui.toggleDateFiler('disable');
+    _ui.toggleDateFilter('disable');
     // if ($('#shw-chngd')[0].checked) { _filters.toggleDateFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
 }
@@ -258,7 +259,7 @@ function buildDataTable(focus, view, fChange) {
     return builders[focus](view);
 }
 export function showTodaysUpdates(focus) {
-    _filters.showTodaysUpdates(focus);
+    _ui.showTodaysUpdates(focus);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(v) {                                    /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);

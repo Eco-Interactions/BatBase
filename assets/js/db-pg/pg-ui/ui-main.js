@@ -23,7 +23,7 @@
 import * as _pg from '../db-main.js';
 import * as _u from '../util/util.js';
 import * as pM from './panels/panels-main.js';
-import showTips from './tips-popup.js';
+import showTipsPopup from './tips-popup.js';
 
 import exportCsvData from '../table/export/csv-export.js';
 import { initNewDataForm } from '../forms/forms-main.js';
@@ -38,6 +38,13 @@ const app = {
     userRole: $('body').data("user-role"),
     enabledSelectors: false
 };
+/* ************************** FACADE **************************************** */
+/* ======================== EXTERNAL USE ==================================== */
+export function showTips() {
+    showTipsPopup();
+}
+/* ======================== SUB USE ONLY ==================================== */
+
 /* ======================== FILTER PANEL ==================================== */
 export function loadLocFilterPanelUi(tblState) {                      
     pM.loadLocFilterPanelUi(tblState);
@@ -51,9 +58,11 @@ export function loadTxnFilterPanelUi(tblState) {
 export function toggleDateFilter(state) {
     pM.toggleDateFilter(state);
 }
+export function showTodaysUpdates(focus) {
+    pM.showTodaysUpdates(focus);
+}
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
-    _u.initComboboxes(['Focus', 'View']);
     showPopUpMsg('Loading...');
     addDomEventListeners();
     authDependentInit();

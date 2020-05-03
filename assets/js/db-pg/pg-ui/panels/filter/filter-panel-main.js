@@ -40,7 +40,7 @@ import { resetToggleTreeBttn } from '../../../pg-ui/ui-main.js';
  *      name: name filter string
  *      time: Obj with the datetime and filter type, time published or time added/updated 
  */
-const fState = {};
+const fState = { active: {}};
 /* ========================= FILTER SETS ==================================== */
 export function savedFilterSetActive() {  
     return fSets.savedFilterSetActive();
@@ -58,18 +58,27 @@ export function reloadTableThenApplyFilters(filters, id) {
     fSets.reloadTableThenApplyFilters(filters, id);
 }
 /* ====================== STATIC FILTERS ==================================== */
-export function buildTreeSearchHtml(entity) {
-    return fTree.buildTreeSearchHtml(entity);
+export function getTreeTextFilterElem(entity) {
+    return fTree.getTreeTextFilterElem(entity);
 }
 export function filterTableByText(entity) {
     fTree.filterTableByText(entity);
 }
-export function reapplyDateFilterifActive() {
+export function getTreeFilterTextVal(entity) {
+    return fTree.getTreeFilterTextVal(entity);
+}
+export function reapplyDateFilterIfActive() {
     if (!$('#shw-chngd')[0].checked) { return; }
     fDate.reapplyPreviousDateFilter(fState.active.date, 'skip'); 
 }
 export function toggleDateFilter(state) {
-    fData.toggleDateFilter(state);
+    fDate.toggleDateFilter(state);
+}
+export function showTodaysUpdates(focus) {
+    fDate.showTodaysUpdates(focus);
+}
+export function syncViewFiltersAndUi(focus) {
+    fDate.syncViewFiltersAndUi(focus);
 }
 /* ===================== DYNAMIC FILTERS ==================================== */
 export function loadLocFilterPanelUi(tblState) {                      
@@ -90,7 +99,9 @@ export function loadTxnFilterPanelUi(tblState) {
 export function updateTaxonSearch(val, selLvl) {                                        
     return fEntity.updateTaxonSearch(val, selLvl);
 }
-
+export function newSelEl() {
+    return fEntity.newSelEl(...arguments);
+}
 /* ========================== FILTER UTILITY METHODS ================================================================ */
 /** If table is filtered by an external filter, the rows are stored in timeRows. */
 export function getCurRowData() {                                                      //console.log('getCurRowData. timeRows = %O, baseRowData = %O', fPs.timeRows, tblState.rowData);
@@ -111,7 +122,7 @@ export function getPanelFilterState(key) {
 export function initFilterPanel() {
     require('../../../../../styles/db/panels/filters.styl');  
     addFilterPanelEvents();
-    fDate.initDataFilterUi();
+    fDate.initDateFilterUi();
     fSets.disableFilterSetInputs();
 }
 export function addFilterPanelEvents() {  

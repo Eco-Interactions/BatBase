@@ -15,8 +15,8 @@
  */
 import * as pM from '../../panels-main.js';
 import * as fLoc from './loc-filters.js';
-import * as fSrc from './loc-filters.js';
-import * as fTxn from './loc-filters.js';
+import * as fSrc from './src-filters.js';
+import * as fTxn from './txn-filters.js';
 
 /* ============================ LOCATION ==================================== */
 export function loadLocFilterPanelUi(tblState) {                    
