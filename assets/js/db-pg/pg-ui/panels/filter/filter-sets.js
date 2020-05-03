@@ -39,10 +39,11 @@ export function updateFilterSetSel(filterOpts) {                              /*
     const opts = getSavedFilterOpts(filterOpts);     
     const optGroups = buildOptGroups(opts);                         /*debg-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
-    _u('initCombobox', ['Saved Filter Set', getSpecialOpts()]);
+    _u('initCombobox', ['Saved Filter Set', selFilterSet, getSpecialOpts()]);
 
     function getSpecialOpts() { 
         return {
+            create: newFilterSet,
             options: opts,
             optgroups: optGroups, 
             optgroupField: 'group',

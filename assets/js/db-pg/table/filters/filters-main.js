@@ -2,7 +2,6 @@
  * Handles custom filtering of the data displayed in the table and related UI.
  * 
  * Exports:                     Imported by:                (Added all post initial refactor)
- *     buildTreeSearchHtml              db-ui
  *     enableClearFiltersButton         db-ui
  *     getFilterState                   filter-panel
  *     clearFilters                     db-page, save-ints

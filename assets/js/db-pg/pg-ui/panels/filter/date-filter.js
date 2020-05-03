@@ -3,7 +3,7 @@
  * 
  * Exports:
  *      clearDateFilter
- *      initDataFilterUi
+ *      initDateFilterUi
  *      selDateFilter
  *      reapplyPreviousDateFilter
  *      showTodaysUpdates
@@ -19,11 +19,15 @@
  *          SHOW TODAY'S UPDATES AFTER CREATE FORM CLOSED
  *          APPLY FILTER
  *      CLEAR 
- *      SYNC FILTER UI
+ *      SYNC WITH ACTIVE FILTERS
+ *          TREE-TEXT
+ *          SOURCE
+ *          TAXON
  */
 import * as pM from '../panels-main.js';
 import * as fM from './filter-panel-main.js';
 const _u = pM.pgUtil;
+const tState = pM.getTableState;
 let tblState;
 /* 
  * {obj} cal    Stores the flatpickr calendar instance.  
@@ -31,9 +35,9 @@ let tblState;
  */
 let app = {};
 /* ========================== INIT ========================================== */
-export function initDataFilterUi() {
+export function initDateFilterUi() {
     $('#shw-chngd').change(toggleDateFilter.bind(null, null, null, null));
-    _u('initCombobox', ['Date Filter', null, selDateFilter]);
+    _u('initCombobox', ['Date Filter', selDateFilter]);
     $('#selDateFilter')[0].selectize.disable();
     applyDateFilterStyles(false); //inits disabled ui
 }
@@ -215,7 +219,7 @@ function resetDateFilter(skipSync) {                                            
         syncFiltersAndUi();
     }
 }
-/* ============================ SYNC FILTER UI ============================== */
+/* ======================= SYNC WITH ACTIVE FILTERS ========================= */
 /**
  * When filtering by date or view saved int lists, some filters will need to be reapplied.
  * (Taxa and loation filter rowdata directly, and so do not need to be reapplied.
@@ -232,16 +236,11 @@ export function syncViewFiltersAndUi(focus) {
     const map = {
         locs: fM.loadLocFilterPanelUi,
         srcs: applySrcFltrs,
-        taxa: fM.loadTxnFilterPanelUi//updateTaxonComboboxes
+        taxa: updateTaxonComboboxes
     }; 
     map[focus](tblState);
 }
-/** Reapplys active external filters, author name or publication type. */
-function applySrcFltrs(tblState) {
-    const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
-        'publ': reapplyTreeTextFltr };
-    resets[tblState.curView]();
-}
+/* -------------------- TREE-TEXT ------------------------------------------- */
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
     if (getTreeFilterTextVal(entity) === '') { return; }
@@ -253,7 +252,50 @@ function getTableEntityName() {
     const ent = tblState.curFocus === 'srcs' ? tblState.curView : tblState.curFocus;
     return names[ent];
 }
+/* ------------------ SOURCE ------------------------------------------------- */
+/** Reapplys active external filters, author name or publication type. */
+function applySrcFltrs(tblState) {
+    const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
+        'publ': reapplyTreeTextFltr };
+    resets[tblState.curView]();
+}
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
     if (_u('getSelVal', ['Publication Type']) === 'all') { return; }
     fM.updatePubSearch();
 }
+/* ------------------ TAXON ------------------------------------------------- */
+/**
+ * When the time-updated filter is updated, the taxa-by-level property has to be
+ * updated based on the rows displayed in the grid so that the combobox options
+ * show only taxa in the filtered tree.
+ */
+function updateTaxonComboboxes() {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
+    const rowData = _u('snapshot', [fM.getCurRowData()]);
+    _u('getData', ['levelNames']).then(lvls => {  
+        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
+        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
+        pM.loadTxnFilterPanelUi(tState().get());
+    });
+}
+/** Returns an object with taxon records by level and keyed with display names. */
+function seperateTaxonTreeByLvl(lvls, rowData) {                                
+    const separated = {};
+    rowData.forEach(data => separate(data));
+    return sortObjByLevelRank();
+
+    function separate(row) {                                                    //console.log('taxon = %O', taxon)
+        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
+        separated[row.taxonLvl][row.name] = row.id;
+        
+        if (row.children) { 
+            row.children.forEach(child => separate(child)); 
+        }
+    }
+    function sortObjByLevelRank() {
+        const obj = {};
+        Object.keys(lvls).forEach(lvl => { 
+            if (lvl in separated) { obj[lvl] = separated[lvl]; }
+        });
+        return obj;
+    }
+} 

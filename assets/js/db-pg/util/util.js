@@ -51,8 +51,8 @@ extendPrototypes();
 export function initCombobox() {
     return _cmbx.initCombobox(...arguments);
 } 
-export function initComboboxes(fieldAry) {
-    return _cmbx.initComboboxes(fieldAry);
+export function initComboboxes(fields) {
+    return _cmbx.initComboboxes(fields);
 } 
 export function getSelVal(field) {
     return _cmbx.getSelVal(field);

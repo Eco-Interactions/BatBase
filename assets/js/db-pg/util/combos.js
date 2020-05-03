@@ -20,31 +20,31 @@ import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter/filter-panel-
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initCombobox(field, options, change) {                          //console.log("initCombobox [%s] args = %O", field, arguments);
+export function initCombobox(field, change, options) {                          console.log("initCombobox [%s] args = %O", field, arguments);
     const confg = getSelConfgObj(field); 
     initSelectCombobox(confg, options, change);  
 } /* End initComboboxes */
-export function initComboboxes(fieldAry) {
-    fieldAry.forEach(field => initCombobox(field));
+export function initComboboxes(fields) {                                        //console.log('initComboboxes = %O', fields);
+    Object.keys(fields).forEach(field => initCombobox(field, fields[field]));
 }
-function getSelConfgObj(field) {  
+function getSelConfgObj(field, onChange) {  
     const confgs = { 
         // Search Page Database Options Bar Comboboxes
-        'Focus' : { name: field, id: '#search-focus', change: _pg.buildTable, blur: true },
-        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
+        'Focus' : { name: field, id: '#search-focus', change: onChange, blur: true },
+        'View': { name: 'View', id: '#sel-view', change: onChange, blur: true },
         // Search Page Filter Comboboxes
-        'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
-        'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
-        'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
-        'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
-        'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
-        'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch, blur: true },
-        'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
-        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Class' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Country' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Family' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Genus' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Order' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Publication Type' : {name: field, id: '#selPubType', change: onChange, blur: true },
+        'Region' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Species' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Date Filter': { name: 'Filter', id: '#selDateFilter' },
         // Search Page Comboboxes with Create Options
-        'Int-lists': { name: 'Interaction List', id: '#selIntList', add: newIntList, change: selIntList },
-        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },        
+        'Int-lists': { name: 'Interaction List', id: '#selIntList', change: onChange },
+        'Saved Filter Set': {name: field, id: '#selSavedFilters', change: onChange },        
     };
     return confgs[field];
 }

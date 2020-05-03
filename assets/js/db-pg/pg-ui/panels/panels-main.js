@@ -21,7 +21,7 @@
  *     MISC
  */
 import * as _pg from '../../db-main.js';
-import * as fPnl from './filter/filter-panel-main.js';
+import * as fM from './filter/filter-panel-main.js';
 import * as iPnl from './int-list-panel.js';
 import { initReviewPanel } from './data-review/review-panel-main.js';
 
@@ -40,27 +40,30 @@ const panels = {
 
 /* ************************* FACADE ***************************************** */
 /* ======================== EXTERNAL USE ==================================== */
-/* ------------- FILTER SETS ------------- */
-export function isSavedFilterSetActive() {
-    return fPnl.savedFilterSetActive();
-}
 /* -------- INTERACTION LISTS ------------- */
 export function isSavedIntListLoaded() {
     return iPnl.isSavedIntListLoaded();
 }
+/* ------------- FILTER SETS ------------- */
+export function isSavedFilterSetActive() {
+    return fM.savedFilterSetActive();
+}
 /* -------- DYNAMIC FILTERS ------------- */
 export function loadLocFilterPanelUi(tblState) {                      
-    fPanel.loadLocFilterPanelUi(tblState);
+    fM.loadLocFilterPanelUi(tblState);
 }
 export function loadSrcFilterPanelUi(realm) {                      
-    fPanel.loadSrcFilterPanelUi(realm);
+    fM.loadSrcFilterPanelUi(realm);
 }
 export function loadTxnFilterPanelUi(tblState) {
-    fPanel.loadTxnFilterPanelUi(tblState);
+    fM.loadTxnFilterPanelUi(tblState);
 }
 /* -------- STATIC FILTERS ------------- */
 export function toggleDateFilter(state) {
-    fPanel.toggleDateFilter(state);
+    fM.toggleDateFilter(state);
+}
+export function showTodaysUpdates(focus) {
+    fM.showTodaysUpdates(focus);
 }
 /* ============================ INTERNAL USE ================================ */
 export function pg(funcName, params) {
@@ -87,11 +90,15 @@ export function pgUi() {
 export function resetToggleTreeBttn(state) {
     return _pg.ui('resetToggleTreeBttn', [state]);
 }
+/* ----------- SUB-MODULE --------------- */
+export function accessFilterPanel(funcName, params) {  console.log('calling [%s]', funcName)
+    return fM[funcName](...params);
+}
 /* ********************* MAIN CODE ****************************************** */
 /* ======================= EVENTS =========================================== */
 export function addPanelEventsAndStyles(userRole) {
     require('../../../../styles/db/panels/panel.styl');  
-    fPnl.initFilterPanel();
+    fM.initFilterPanel();
     iPnl.initListPanel();
     if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
 }
@@ -129,7 +136,7 @@ function openVerticalPanels(panel) {
     $('#filter-pnl, #list-pnl').removeClass('flex-row').addClass('flex-col');
     cssOpenPanel(panel);
     iPnl.toggleListPanelOrientation('vert');
-    fPnl.toggleFilterPanelOrientation('vert');
+    fM.toggleFilterPanelOrientation('vert');
 }
 function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
     opened.forEach(key => closePanel(panels[key]));
@@ -151,7 +158,7 @@ function cssClosePanel(panel) {
 function closeVerticalPanel(panel) {
     cssClosePanel(panel);
     window.setTimeout(() => {
-        fPnl.toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
+        fM.toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
         iPnl.toggleListPanelOrientation('horz');
         $('#fltr-int-pnl-cntnr').attr('class', 'flex-col');
         $('#filter-pnl, #list-pnl').removeClass('flex-col').addClass('flex-row');
