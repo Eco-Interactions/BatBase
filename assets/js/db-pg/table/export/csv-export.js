@@ -126,7 +126,7 @@ function exportCsv() {
 }
 /* ------------------------------ RESET ------------------------------------- */
 function returnTableState() {
-    collapseTree(tblState.api);
+    collapseTree();
     hideExportOnlyColumns();
     toggleUiTableColumns(true);
     showTable();

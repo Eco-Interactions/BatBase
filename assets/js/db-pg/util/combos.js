@@ -11,10 +11,6 @@
  *     triggerComboChangeReturnPromise
  */
 import * as _pg from '../db-main.js';
-import * as db_filters from '../table/filters/filters-main.js';
-import { newIntList, selIntList } from '../pg-ui/panels/int-list-panel.js';
-import { newFilterSet, selFilterSet } from '../pg-ui/panels/filter/filter-panel-main.js';
-
 
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array

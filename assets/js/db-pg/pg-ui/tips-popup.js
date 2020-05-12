@@ -1,6 +1,7 @@
 /*
  * Displays a popup with various search tips. 
  */
+ 
 export default function showTips() {                                                    //console.log("show tips called.")
     if (!$('#tips-close-bttn').length) { initSearchTips(); }
     $('#b-overlay-popup').addClass("tips-popup");

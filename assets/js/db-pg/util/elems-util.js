@@ -10,8 +10,7 @@
  *     buildOptsObj
  *     addEnterKeypressClick
  */
-import * as _db from '../local-data/idb-util';
-import * as _pg from '../db-main.js';
+import { _db, _u} from '../db-main.js';
 
 export function buildElem(tag, attrs) {                                         //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
     const elem = document.createElement(tag);
@@ -78,7 +77,7 @@ export function buildSimpleOpts(optAry, placeholder) {                          
     optAry.forEach(function(option, idx){
         opts.push({
             value: idx.toString(),
-            text: _pg._util('ucfirst', [option])  });
+            text: _u('ucfirst', [option])  });
     });
     if (placeholder) {
         opts.unshift({ value: "placeholder", text: placeholder });
@@ -92,7 +91,7 @@ export function alphaOptionObjs(a, b) {
 }  
 /** Builds options out of a stored entity-name object. */
 export function getOptsFromStoredData(prop) {                                   //bp
-    return _db.getData(prop, true).then(data => {                               //console.log('       --getOptsFromStoredData. [%s].', prop);
+    return _db('getData', [prop, true]).then(data => {                               //console.log('       --getOptsFromStoredData. [%s].', prop);
         if (!data) { console.log('NO STORED DATA for [%s]', prop);return []; }
         return buildOptsObj(data, Object.keys(data).sort());
     });
@@ -106,9 +105,9 @@ export function buildOptsObj(entityObj, sortedKeys) {                           
     return sortedKeys.map(name => {
         return typeof entityObj[name] === 'object' ? 
             { group: entityObj[name].group, 
-              text: _pg._util('ucfirst', [name]),
+              text: _u('ucfirst', [name]),
               value: entityObj[name].value 
-            } : { value: entityObj[name], text: _pg._util('ucfirst', [name]) }
+            } : { value: entityObj[name], text: _u('ucfirst', [name]) }
     });    
 }
 /*---------- Keypress event Helpers --------------------------------------*/

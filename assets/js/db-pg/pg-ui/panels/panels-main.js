@@ -20,9 +20,9 @@
  *     SUBMIT/SUCCESS METHODS
  *     MISC
  */
-import * as _pg from '../../db-main.js';
+import { _db, _modal, _u } from '../../db-main.js';
 import * as fM from './filter/filter-panel-main.js';
-import * as iPnl from './int-list-panel.js';
+import * as iM from './int-list-panel.js';
 import { initReviewPanel } from './data-review/review-panel-main.js';
 
 /* Panel confg */
@@ -39,68 +39,53 @@ const panels = {
 };
 
 /* ************************* FACADE ***************************************** */
-/* ======================== EXTERNAL USE ==================================== */
-/* -------- INTERACTION LISTS ------------- */
-export function isSavedIntListLoaded() {
-    return iPnl.isSavedIntListLoaded();
+/* ======================== FILTER PANEL ==================================== */
+export function updateFilterPanelHeader() {
+    fM.updateFilterPanelHeader();
+}
+export function enableClearFiltersButton() {
+    fM.enableClearFiltersButton();
+}
+export function clearFilterUi() {
+    fM.clearFilterUi();
+}
+export function updateFilterStatusMsg() {
+    fM.updateFilterStatusMsg();
+}
+export function updateTaxonFilterViewMsg(realmName) {
+    fM.updateTaxonFilterViewMsg(realmName);
 }
 /* ------------- FILTER SETS ------------- */
-export function isSavedFilterSetActive() {
-    return fM.savedFilterSetActive();
+export function isFilterSetActive() {
+    return fM.isFilterSetActive();
 }
-/* -------- DYNAMIC FILTERS ------------- */
-export function loadLocFilterPanelUi(tblState) {                      
-    fM.loadLocFilterPanelUi(tblState);
+export function reloadTableThenApplyFilters(filters) {
+    fM.reloadTableThenApplyFilters(filters);
 }
-export function loadSrcFilterPanelUi(realm) {                      
-    fM.loadSrcFilterPanelUi(realm);
+/* -------- INTERACTION LISTS ------------- */
+export function isSavedIntListLoaded() {
+    return iM.isSavedIntListLoaded();
 }
-export function loadTxnFilterPanelUi(tblState) {
-    fM.loadTxnFilterPanelUi(tblState);
-}
-/* -------- STATIC FILTERS ------------- */
-export function toggleDateFilter(state) {
-    fM.toggleDateFilter(state);
-}
-export function showTodaysUpdates(focus) {
-    fM.showTodaysUpdates(focus);
+export function enableListResetBttn() {
+    return iM.enableListResetBttn();
 }
 /* ============================ INTERNAL USE ================================ */
-export function pg(funcName, params) {
-    return _pg[funcName](...params);
-}
-export function pgUtil() {
-    return _pg._util(...arguments);
-}
-export function getTableState() {
-    return _pg.accessTableState();
-}
-export function resetDataTbl() {
-    return _pg.resetDataTable();
-}
-export function modal() {
-    return _pg.modal(...arguments);
-}
 export function updateUserNamedList(data, action) {
-    return _pg.db('updateUserNamedList', [data, action]);
-}
-export function pgUi() {
-    return _pg.ui(...arguments);
-}
-export function resetToggleTreeBttn(state) {
-    return _pg.ui('resetToggleTreeBttn', [state]);
-}
-/* ----------- SUB-MODULE --------------- */
-export function accessFilterPanel(funcName, params) {  console.log('calling [%s]', funcName)
-    return fM[funcName](...params);
+    return _db('updateUserNamedList', [data, action]);
 }
 /* ********************* MAIN CODE ****************************************** */
 /* ======================= EVENTS =========================================== */
 export function addPanelEventsAndStyles(userRole) {
     require('../../../../styles/db/panels/panel.styl');  
+    setInfoButtonClickEvents();
     fM.initFilterPanel();
-    iPnl.initListPanel();
+    iM.initListPanel();
     if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
+}
+function setInfoButtonClickEvents() {    
+    $('#svd-list-hlp').click(_modal.bind(null, 'showHelpModal', ['saved-lists']));
+    $('#svd-fltr-hlp').click(_modal.bind(null, 'showHelpModal', ['selSavedFilters']));
+    $('#fltr-pnl-hlp').click(_modal.bind(null, 'showHelpModal', ['filter-panel']));
 }
 export function updateSubmitEvent(id, event) {
     $(id).off('click').click(event);
@@ -135,7 +120,7 @@ function openVerticalPanels(panel) {
     $('#fltr-int-pnl-cntnr').attr('class', 'flex-row');
     $('#filter-pnl, #list-pnl').removeClass('flex-row').addClass('flex-col');
     cssOpenPanel(panel);
-    iPnl.toggleListPanelOrientation('vert');
+    iM.toggleListPanelOrientation('vert');
     fM.toggleFilterPanelOrientation('vert');
 }
 function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
@@ -159,7 +144,7 @@ function closeVerticalPanel(panel) {
     cssClosePanel(panel);
     window.setTimeout(() => {
         fM.toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
-        iPnl.toggleListPanelOrientation('horz');
+        iM.toggleListPanelOrientation('horz');
         $('#fltr-int-pnl-cntnr').attr('class', 'flex-col');
         $('#filter-pnl, #list-pnl').removeClass('flex-col').addClass('flex-row');
     }, 500);
@@ -171,7 +156,7 @@ function getOpenPanels() {
 /* ================ SUBMIT AND SUCCESS METHODS ============================== */
 export function submitUpdates(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
-    _util('sendAjaxQuery', [data, envUrl + 'lists/' + action, successFunc]);
+    _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, successFunc]);
 }
 /* ================= MISC =================================================== */
 export function parseUserNamed(entity) {                                        

@@ -1,49 +1,20 @@
 /**
- * Handles the saving, editing, and display of saved sets of filters.
- *
- * Exports:              
- *     initFilterPanel   
- *     getCurRowData
- *     newFilterSet      
- *     resetStoredFiltersUi
- *     savedFilterSetActive
- *     selFilterSet        
- *     setPanelFilterState
- *     updateFilterSel     
+ * Left column: Contains all custom filters: Tree Text, Date Updated/Published, and
+ *     Focus specific filters (Loc: Region/Country, Src: Pub Type, Txn: Rank Taxa )
+ * Rigth column: Saved Filter Set managment 
  *     
  * TOC:
  *     FILTER SETS
- *     FOCUS FILTERS
- *     FILTER STATE TRACKING
  *     INIT PANEL
  *     SHOW/HIDE PANEL
  */
 import * as pM from '../panels-main.js';
-import * as fEntity from './focus-filters/focus-filters-main.js';
+import { buildTable, _filter, _ui, _u, accessTableState as tState } from '../../../db-main.js';
 import * as fSets from './filter-sets.js';
-import * as fDate from './date-filter.js';
-import * as fTree from './tree-filter.js';
 
-
-import * as data_tree from '../../../table/format-data/data-tree.js';
-import * as db_filters from '../../../table/filters/filters-main.js';
-import * as frmt_data from '../../../table/format-data/aggrid-format.js'; 
-import { updateUserNamedList } from '../../../local-data/db-sync.js';
-import { accessTableState as tState, buildTable } from '../../../db-main.js';
-import { resetToggleTreeBttn } from '../../../pg-ui/ui-main.js';
-/**
- * Filter State Tracking
- * {str} timeout        Present when window is being resized.
- * {ary} fRowData       rowData when the date-filter is applied.
- * {obj} active
- *      combo: obj with combo-label (k): obj with text and value (k) with their respective values
- *      name: name filter string
- *      time: Obj with the datetime and filter type, time published or time added/updated 
- */
-const fState = { active: {}};
 /* ========================= FILTER SETS ==================================== */
-export function savedFilterSetActive() {  
-    return fSets.savedFilterSetActive();
+export function isFilterSetActive() {  
+    return fSets.isFilterSetActive();
 }
 export function updateFilterSetSel(filterOpts) {
     fSets.updateFilterSetSel(filterOpts);
@@ -57,72 +28,11 @@ export function selFilterSet(val) {
 export function reloadTableThenApplyFilters(filters, id) { 
     fSets.reloadTableThenApplyFilters(filters, id);
 }
-/* ====================== STATIC FILTERS ==================================== */
-export function getTreeTextFilterElem(entity) {
-    return fTree.getTreeTextFilterElem(entity);
-}
-export function filterTableByText(entity) {
-    fTree.filterTableByText(entity);
-}
-export function getTreeFilterTextVal(entity) {
-    return fTree.getTreeFilterTextVal(entity);
-}
-export function reapplyDateFilterIfActive() {
-    if (!$('#shw-chngd')[0].checked) { return; }
-    fDate.reapplyPreviousDateFilter(fState.active.date, 'skip'); 
-}
-export function toggleDateFilter(state) {
-    fDate.toggleDateFilter(state);
-}
-export function showTodaysUpdates(focus) {
-    fDate.showTodaysUpdates(focus);
-}
-export function syncViewFiltersAndUi(focus) {
-    fDate.syncViewFiltersAndUi(focus);
-}
-/* ===================== DYNAMIC FILTERS ==================================== */
-export function loadLocFilterPanelUi(tblState) {                      
-    fEntity.loadLocFilterPanelUi(tblState);
-}
-export function updateLocSearch(val, selType) {                                 
-    return fEntity.updateLocSearch(val, selType);
-}
-export function loadSrcFilterPanelUi(realm) {                      
-    fEntity.loadSrcFilterPanelUi(realm);
-}
-export function updatePubSearch() {
-    return fEntity.updatePubSearch();
-}
-export function loadTxnFilterPanelUi(tblState) {
-    fEntity.loadTxnFilterPanelUi(tblState);
-}
-export function updateTaxonSearch(val, selLvl) {                                        
-    return fEntity.updateTaxonSearch(val, selLvl);
-}
-export function newSelEl() {
-    return fEntity.newSelEl(...arguments);
-}
-/* ========================== FILTER UTILITY METHODS ================================================================ */
-/** If table is filtered by an external filter, the rows are stored in timeRows. */
-export function getCurRowData() {                                                      //console.log('getCurRowData. timeRows = %O, baseRowData = %O', fPs.timeRows, tblState.rowData);
-    return fState.fRowData ? fState.fRowData : pM.getTableState().get('rowData');
-} 
-/* ==================== FILTER STATE TRACKING =============================== */
-export function setCurrentRowData(data) {
-    fState.fRowData = data;
-}
-export function setPanelFilterState(key, value) {
-    if (value === false) { delete fState.active[key]; 
-    } else { fState.active[key] = value; }
-}
-export function getPanelFilterState(key) {
-    return key ? fState.active[key] : fState.active;
-}
 /* ================================ Init ==================================== */
 export function initFilterPanel() {
     require('../../../../../styles/db/panels/filters.styl');  
     addFilterPanelEvents();
-    fDate.initDateFilterUi();
+    _filter('initDateFilterUi');
     fSets.disableFilterSetInputs();
 }
 export function addFilterPanelEvents() {  
@@ -130,8 +40,6 @@ export function addFilterPanelEvents() {
     $('button[name="reset-tbl"]').click(buildTable.bind(null, false, false));
     window.addEventListener('resize', resizeFilterPanelTab);
     fSets.setFilterSetEventListeners();
-    $('#svd-fltr-hlp').click(pM.modal.bind(null, 'showHelpModal', ['selSavedFilters']));
-    $('#fltr-pnl-hlp').click(pM.modal.bind(null, 'showHelpModal', ['filter-panel']));
 }
 /* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
 function resizeFilterPanelTab() {
@@ -143,7 +51,7 @@ function resizeFilterPanelTab() {
     }, 500);
 }
 /**
- * Working around a timeout in panel_util. Utlimately, this should be refactored
+ * Working around a timeout in panel_u. Utlimately, this should be refactored
  * into the util file, but I'm in a time crunch. 
  */
 function sizeFilterPanelTab() {
@@ -192,11 +100,6 @@ function getLeftSplitPos() {
     const tabL = $('#filter-opts').position().left + 1;
     return pnlL > (tabL - 2) ? pnlL : tabL;
 }
-export function resetStoredFiltersUi() {
-    if (!$('#selSavedFilters')[0].selectize) { return; }
-    $('#selSavedFilters')[0].selectize.clear('silent');
-    $('#stored-filters input, #stored-filters textarea').val('');
-}
 /** Adds the focus to the filter panel header, "[Focus] and Date Filters" */
 export function updateFilterPanelHeader(focus) {  
     const map = {
@@ -230,5 +133,66 @@ export function toggleFilterPanel() {
 }
 function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           +--buildAndShowFilterPanel')
     pM.togglePanel('filter', 'open');
-    pM.pgUtil('getOptsFromStoredData', ['savedFilterNames']).then(fSets.updateFilterSetSel);
+    _u('getOptsFromStoredData', ['savedFilterNames']).then(fSets.updateFilterSetSel);
+}
+/* ======================= CLEAR FILTERS ==================================== */
+/* -------------------- RESET BUTTON ---------------------------------------- */
+export function enableClearFiltersButton() {
+    const noFilters = !_filter('isFilterActive');
+    const opac = noFilters ? .5 : 1;
+    const cursor = noFilters ? 'inherit' : 'pointer';
+    $('button[name="reset-tbl"]')
+        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('slow', opac); 
+}
+/* ----------------------- RESET UI ----------------------------------------- */
+export function clearFilterUi() { 
+    if ($('#filter-status').data('loading')) { return; } //DB initializing status displayed.
+    resetFilterUi();
+    resetStoredFiltersUi();
+    _filter('resetFilterState');
+}
+function resetFilterUi() {  
+    resetFilterStatus();
+    $('#focus-filters input').val('');
+    if ($('#shw-chngd').prop('checked')) { clearDateFilter(); }
+}
+function resetFilterStatus() { 
+    $('#filter-status').text('No Active Filters.');
+    updateTaxonFilterViewMsg('');
+}
+function resetStoredFiltersUi() {
+    if (!$('#selSavedFilters')[0].selectize) { return; }
+    $('#selSavedFilters')[0].selectize.clear('silent');
+    $('#stored-filters input, #stored-filters textarea').val('');
+}
+/* ======================== TABLE DATA-STATUS =============================== */
+/** Used in taxon views to indicate the filtering happening at the view level. */
+export function updateTaxonFilterViewMsg(view) {
+    $('#view-fltr').text(view);
+}
+/**
+ * Either displays all filters currently applied, or applies the previous filter 
+ * message persisted through table update into map view.
+ */
+export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called."); 
+    const tblState = tState().get(['api', 'intSet', 'flags']);
+    if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
+    setFilterStatus(_filter('getActiveFilterText'));
+    enableClearFiltersButton();
+}
+
+function setFilterStatus(filters) {  
+    if (filters.length > 0 || _ui('isSavedIntListLoaded')) { setStatus(getStatus(filters)); 
+    } else { resetFilterUi() }
+}
+function getStatus(filters) {                                                   
+    const list = isSavedIntListLoaded() ? '(LIST)' : ''; 
+    const set = isFilterSetActive() ? '(SET)' : '';
+    const loaded = [list, set].filter(f=>f).join(' '); 
+    const fltrs = filters.join(', ');
+    return loaded !== '' & fltrs !== '' ? `${loaded} ${fltrs}.` :
+        loaded ? loaded : fltrs+'.';
+}
+function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
+    $('#filter-status').text(status);
 }

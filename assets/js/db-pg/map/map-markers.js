@@ -1,8 +1,7 @@
 /*
  *
  */
-import * as _pg from '../db-main.js';
-import { forms as _form } from '../forms/forms-main.js';
+import { _form, showLocInDataTable, _u} from '../db-main.js';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -453,7 +452,7 @@ function getSelectLocationBttn(loc, editing) {
 function buildSelectLocBttn(editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
     const attr = {type: 'button', class:'ag-fresh popup-bttn', value: text}; 
-    return _pg._util('buildElem', ['input', attr]);
+    return _u('buildElem', ['input', attr]);
 }
 function addSelectLocClickEvent(bttn, editing, locId) {
     const onClick = editing ? Function.prototype : _form.bind(null, 'selectIntLoc');
@@ -612,13 +611,13 @@ function finishLocTop3ReportString(str, ttl, tabs) {
 /** --- Button to show interactions in the data-table --- */
 function getLoadInTableButton(loc) {
     const bttn = buildLoadInTableBttn();
-    $(bttn).click(_pg.showLocInDataTable.bind(null, loc));
+    $(bttn).click(showLocInDataTable.bind(null, loc));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }
 function buildLoadInTableBttn() {
     const attr = {type: 'button', class:'ag-fresh', value: 'Show Interactions In Data-Table'}
-    return _pg._util('buildElem', ['input', attr]);
+    return _u('buildElem', ['input', attr]);
 }
 /* ============ Location Details Popup ================== */
 /* Used for Countries displayed in forms. */
@@ -630,7 +629,7 @@ function buldCntryDetailsHtml(loc) {
         ${loc.displayName}</b></div>`;
 }
 function getEditLocHtml(loc, editing) {
-    const div = _pg._util('buildElem', ['div', { class: 'flex-col' }]);    
+    const div = _u('buildElem', ['div', { class: 'flex-col' }]);    
     const name = `<div style="font-size:1.1em; margin-bottom: .5em;"><b>
         The location being edited.</b></div>`;  
     $(div).append(name);
@@ -638,7 +637,7 @@ function getEditLocHtml(loc, editing) {
 }
 /* Used for locations displayed in forms. */
 function getLocDetailsHtml(loc, editing, htmlFunc) {
-    const div = _pg._util('buildElem', ['div', { class: 'flex-col' }]);
+    const div = _u('buildElem', ['div', { class: 'flex-col' }]);
     const html = htmlFunc ? htmlFunc(loc) : buildDetailsHtml(loc);
     const bttn = getSelectLocationBttn(loc, editing);
     $(div).append([html, bttn]);
@@ -676,8 +675,8 @@ function getNoGpsHdr(cnt) {
         </div><span>Hover over a location name to see the location data.</span><br>`;
 }
 function buildLocDetailHtml(loc, editing) {  
-    const cntnr = _pg._util('buildElem', ['div', {class: 'info-tooltip'}]);
-    const locDetails = _pg._util('buildElem', ['div', {class: 'tip'}]);
+    const cntnr = _u('buildElem', ['div', {class: 'info-tooltip'}]);
+    const locDetails = _u('buildElem', ['div', {class: 'tip'}]);
     const bttn = getSelectLocationBttn(loc, editing);
     $(locDetails).append([buildLocDetails(loc), '<br>', bttn]);
     $(cntnr).append([loc.displayName, locDetails]);
@@ -694,7 +693,7 @@ function buildLocDetails(loc) {
 /* ============ New Location Popup ============== */
 /** Used when displaying a geocoded (new or edit) location on the form.  */
 function getGeocodedLocHtml(loc, editing) {                                     //console.log('buildingGeocodedLocationPopup. editing? ', editing);
-    const cntnr = _pg._util('buildElem', ['div', {class: 'flex-col new-loc-popup'}]);
+    const cntnr = _u('buildElem', ['div', {class: 'flex-col new-loc-popup'}]);
     const text = getNewLocText(loc, editing);
     const bttn = editing ? '' : getCreateLocBttn();
     $(cntnr).append([text, bttn]);
@@ -710,7 +709,7 @@ function getNewLocText(loc, editing) {
 /** Click event added in location-form. */
 function getCreateLocBttn() {
     const attr = {type: 'button', id: 'new-gps-loc', class:'ag-fresh', value: 'Create Location'};
-    const bttn = _pg._util('buildElem', ['input', attr]);
+    const bttn = _u('buildElem', ['input', attr]);
     $(bttn).click(_form.bind(null, 'addNewLocationWithGps', []));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;

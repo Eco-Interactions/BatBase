@@ -3,17 +3,14 @@
  * Synchronizes the tree-text filter and the combobox filter. 
  * 
  * Exports:
- *      loadSrcFilterPanelUi
+ *      loadSrcFilters
  *      updatePubSearch
  *      
  * TOC:
  *      UI
  *      FILTER
  */
-import * as pM from '../../panels-main.js';
-const _u = pM.pgUtil;
-const _fM = pM.accessFilterPanel;
-
+import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
 /* ========================= UI ============================================ */
  /**
  * Will build the select elems for the source search options. Clears previous 
@@ -22,7 +19,7 @@ const _fM = pM.accessFilterPanel;
  * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-export function loadSrcFilterPanelUi(realm) {                       /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
+export function loadSrcFilters(realm) {                       /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
     if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml }; 
@@ -34,7 +31,7 @@ function clearPanelCombos(realm) {
 }
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
-    const searchTreeElem = _fM('getTreeTextFilterElem', ['Author']);
+    const searchTreeElem = _filter('getTreeTextFilterElem', ['Author'])
     $('#focus-filters').append(searchTreeElem);
     return Promise.resolve();
 }
@@ -44,7 +41,7 @@ function loadPubSearchHtml() {
 }
 function loadPubSearchElems(pubTypeOpts) {
     const pubTypeElem = buildPubTypeSelect(pubTypeOpts);
-    const searchTreeElem = _fM('getTreeTextFilterElem', ['Publication']);
+    const searchTreeElem = _filter('getTreeTextFilterElem', ['Publication'])
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u('initCombobox', ['Publication Type', updatePubSearch]);
     $('#selPubType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
@@ -53,18 +50,23 @@ function loadPubSearchElems(pubTypeOpts) {
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u('buildElem', ['label', {class: "sel-cntnr flex-row"}]);
     const span = _u('buildElem', ['span', { text: 'Type:' }]);
-    const sel = _fM('newSelEl', [addAllOpt(opts), '', 'selPubType', 'Publication Type']);
+    const sel = newSelEl(addAllOpt(opts), '', 'selPubType', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';
     $(sel).css('width', '177px');
     $(lbl).css('width', lblW).append([span, sel]);
     return lbl;
+}
+function newSelEl(opts, c, i, field) {                                   //console.log('newSelEl for [%s]. args = %O', field, arguments);
+    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
+    $(elem).data('field', field);
+    return elem;
 }
 function addAllOpt(opts) {
     opts.unshift({value: 'all', text: '- All -'});
     return opts;
 }
 function loadPublSearchHtml() {
-    const searchTreeElem = _fM('getTreeTextFilterElem', ['Publisher']);
+    const searchTreeElem = _filter('getTreeTextFilterElem', ['Publisher'])
     $('#focus-filters').append(searchTreeElem);
     return Promise.resolve();
 }
@@ -76,25 +78,26 @@ function loadPublSearchHtml() {
 export function updatePubSearch() {                                             console.log('       +-updatePubSearch.')
     const tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
     const typeId = _u('getSelVal', ['Publication Type']); 
-    const txt = _fM('getTreeTextFilterElem', ['Publication']);
+    const txt = _filter('getTreeTextFilterVal', ['Publication'])
     const newRows = getFilteredPubRows();
     setPubFilters();
     tblState.api.setRowData(newRows);
-    pM.pgUtil.resetToggleTreeBttn(false);
+    _ui('setTreeToggleData', [false]);
     return Promise.resolve(); //Needed when loading filter set
 
     function getFilteredPubRows() {
-        if (!typeId || typeId == 'all') { return getTreeRowsWithText(getCurRowData(), txt); }
+        if (!typeId || typeId == 'all') { 
+            return getTreeRowsWithText(_filter('getCurRowData'), txt); }
         return txt === '' ? getAllPubTypeRows() : getPubTypeRows(typeId);
     }
     function getPubTypeRows(typeId) {
-        return getCurRowData().filter(r => { 
+        return _filter('getCurRowData').filter(r => { 
             return r.type == typeId && r.name.toLowerCase().indexOf(txt) !== -1;
         });
     }
     /** Returns the rows for publications with their id in the selected type's array */
     function getAllPubTypeRows() {     
-        return getCurRowData().filter(row => row.type == typeId);
+        return _filter('getCurRowData').filter(row => row.type == typeId);
     }
     function setPubFilters() { 
         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
@@ -102,11 +105,11 @@ export function updatePubSearch() {                                             
             (txt.length > 50 ? txt.substring(0, 50)+'...' : txt) : null; 
         updatePubFilterState(typeVal, typeId, truncTxt);
         // updatePubFocusFilters(typeVal, typeId, truncTxt);
-        updateFilterStatusMsg();
+        _ui('updateFilterStatusMsg');
     }
     function updatePubFilterState(type, id, text) {
         const filter = type === '- All -' ? false : buildPubFilterObj({});
-        _fM('setPanelFilterState', ['combo', filter]);
+        _filter('setPanelFilterState', ['combo', filter]);
         
         function buildPubFilterObj(obj) {
             obj['Publication Type'] = { text: 'Publication Type', value: id };

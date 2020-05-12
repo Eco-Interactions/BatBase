@@ -16,35 +16,35 @@ import * as _submit from './submit/submit-main.js';
 import * as _elems from './elems/elems-main.js';
 // REFACTOR
 import * as _map from '../map/map-main.js';
-import * as _pg from '../db-main.js';
+import * as pg from '../db-main.js';
 
 function getParams(params) {
     return Array.isArray(params) ? params : [params];
 }
 /** =================== DATABASE PAGE FACADE ================================ */
 export function util(funcName, params) {  
-    return _pg._util(funcName, params);
+    return pg._u(funcName, params);
 }
 export function map(funcName, params = []) {
     return _map[funcName](...params);
 }
 export function loadDataTableAfterFormClose() {
-    _pg.reloadTableWithCurrentFilters();
+    pg.reloadTableWithCurrentFilters();
 }
 export function showTodaysUpdates(focus) {
-    _pg.showTodaysUpdates(focus);
+    pg.showTodaysUpdates(focus);
 }
 export function initNewDataForm() {
     _forms.createEntity('interaction');
 }
 export function updateLocalDb() {
-    return _pg.db('updateLocalDb', [...arguments]);
+    return pg._db('updateLocalDb', [...arguments]);
 }
 export function resetStoredData() {
-    _pg.db('resetStoredData');
+    pg._db('resetStoredData');
 }
 export function alertIssue() {
-    return _pg.alertIssue(...arguments);
+    return pg._alert('alertIssue', [...arguments]);
 }
 /** ====================== FORMS FACADE ===================================== */
 export function forms(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface
