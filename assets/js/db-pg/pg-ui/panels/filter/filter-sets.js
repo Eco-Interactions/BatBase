@@ -1,10 +1,10 @@
 /*
- * Handles the right section of the filter panel, saved filter sets. 
+ * Handles the right section of the filter panel, saved filter set managment. 
  * 
  * Exports:
  *      disableFilterSetInputs
  *      reloadTableThenApplyFilters
- *      savedFilterSetActive
+ *      isFilterSetActive
  *      selFilterSet
  *      newFilterSet
  *      updateFilterSetSel
@@ -21,11 +21,11 @@
  *          RESET & ENABLE/DISABLE UI
  */
 import * as pM from '../panels-main.js';
-const _u = pM.pgUtil;
+import { _filter, _modal, _ui, _u } from '../../../db-main.js';
 /* Holds selected filter data and table state. */
 let app = {};
 
-export function savedFilterSetActive() {  
+export function isFilterSetActive() {  
     return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
 }
 /* ============================= INIT UI ==================================== */
@@ -82,7 +82,7 @@ export function newFilterSet(val) {                                 /*debg-log*/
 function createFilterSet() {  
     const data = buildFilterData();
     pM.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
-    pM.modal('exitModal');
+    _modal('exitModal');
 }
 /* ========================= SELECT/EDIT ==================================== */
 export function selFilterSet(val) {                                             
@@ -98,7 +98,7 @@ function editFilterSet() {
     const data = buildFilterData();
     data.id = _u('getSelVal', ['Saved Filter Set']);
     pM.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
-    pM.modal('exitModal');
+    _modal('exitModal');
 }
 function fillFilterData(id, filters) {
     const filter = addActiveFilterToMemory(filters[id]);            /*debg-log*///console.log('activeFilter = %O', filter);                                                 
@@ -124,7 +124,7 @@ function buildFilterData() {
  * filter panel and the table column headers.
  */
 function getFilterSetJson(tState) {                                             
-    const fState = db_filters.getFilterState();
+    const fState = _filter.getFilterState();
     const filters = {
         focus: tState.curFocus, panel: fState.panel,
         table: getColumnHeaderFilters(fState.table), view: tState.curView
@@ -212,7 +212,7 @@ function setNameSearchFilter(text) {                                /*debg-log*/
 function setTimeUpdatedFilter(time) {                               /*debg-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     if (!time) { return; } 
     _u('setSelVal', ['Date Filter', time.type]);
-    if (time.date) { db_filters.toggleDateFilter(true, time.date); }
+    if (time.date) { _filter.toggleDateFilter(true, time.date); }
 }
 function applyColumnFilters(filters) {                              /*debg-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
@@ -238,7 +238,7 @@ function showSaveFilterModal(success) {
         html: buildModalHtml(), elem: '#save-filter', dir: 'right', 
         submit: saveReady ? success : false, bttn: saveReady ? 'Submit' : 'Cancel'
     };
-    pM.modal('showSaveModal', [confg]);
+    _modal('showSaveModal', [confg]);
     
     function buildModalHtml() {
         const hdr = '<h2> Saving Filter Set: </h2>';
@@ -273,7 +273,7 @@ function onUpdateSuccessUpdateFilterUi(id) {
 function addSetToFilterStatus() {
     if (!dataFiltersSaved(app.fltr)) { return; }
     app.fltr.active = true;
-    db_filters.updateFilterStatusMsg();
+    _ui('updateFilterStatusMsg');
     delete app.fltr.active;
 }
 function dataFiltersSaved(fltr) {
@@ -303,7 +303,7 @@ function resetFilterUi() {
     hideSavedMsg();
     clearFilterDetailFields();
     disableFilterSetInputs();
-    db_filters.updateFilterStatusMsg();
+    _ui('updateFilterStatusMsg');
 }
 function clearFilterDetailFields() {
     $('#filter-set-name + input').val('');

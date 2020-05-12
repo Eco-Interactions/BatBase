@@ -3,25 +3,21 @@
  * in the filter panel.  Synchronizes the tree-text filter and the combobox filter. 
  * 
  * Exports:
- *      loadTxnFilterPanelUi
+ *      loadTxnFilters
  *      updateTaxonSearch
  *      
  * TOC:
  *      UI
  *      FILTER
  */
-import * as pM from '../../panels-main.js';
-const _u = pM.pgUtil;
-const _fM = pM.accessFilterPanel;
-const tState = pM.getTableState;
-
- /* ========================= UI ============================================ */
-export function loadTxnFilterPanelUi(tblState) {
+import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
+/* ========================== UI ============================================ */
+export function loadTxnFilters(tblState) {
     loadTaxonComboboxes(tblState);
     if (!$('.txtLbl').length) { return loadTxnNameSearchElem(tblState); }
 }
 function loadTxnNameSearchElem(tblState) {
-    const searchTreeElem = _fM('getTreeTextFilterElem', ['Taxon']);
+    const searchTreeElem = _filter('getTreeTextFilterElem', ['Taxon'])
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -97,12 +93,17 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
             const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
             const span = _u('buildElem', ['span', { text: level + ': ' }]);
-            const sel = _fM('newSelEl', [opts[level], 'opts-box taxonSel', 'sel' + level, level]);            
+            const sel = newSelEl(opts[level], 'opts-box taxonSel', 'sel' + level, level);
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
         return elems;
     }
+}
+function newSelEl(opts, c, i, field) {                                   //console.log('newSelEl for [%s]. args = %O', field, arguments);
+    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
+    $(elem).data('field', field);
+    return elem;
 }
 function initLevelComboboxes(realmLvls) {
     const confg = {};
@@ -141,14 +142,14 @@ export function updateTaxonSearch(val, selLvl) {
 
     function addToFilterState() {
         const curLevel = rcrd.level.displayName;
-        if (!rcrd.parent || rcrd.parent == 1) { return _fM('setPanelFilterState', ['combo', false]); }
-        const state = {};
-        state[curLevel] = { text: rcrd.name, value: val };
-        _fM('setPanelFilterState', ['combo', state]);
+        if (!rcrd.parent || rcrd.parent == 1) { return _filter('setPanelFilterState', ['combo', false]); }
+        const filter = {};
+        filter[curLevel] = { text: rcrd.name, value: val };
+        _filter('setPanelFilterState', ['combo', filter]);
     }
 }
 function getTreeFilterText(v) {
-    return typeof v === string && v !== all ? v : _fM('getTreeFilterTextVal', ['Taxon']);                               //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
+    return typeof v === string && v !== all ? v : _filter('getTreeTextFilterVal', ['Taxon']);                               //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
 }
 /**
  * When a taxon is selected from the filter comboboxes, the record is returned.

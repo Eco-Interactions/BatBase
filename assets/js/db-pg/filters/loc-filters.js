@@ -3,21 +3,19 @@
  * Synchronizes the tree-text filter and the combobox filters.
  * 
  * Exports:
- *      loadLocFilterPanelUi
+ *      loadLocFilters
  *      updateLocSearch
  *      
  * TOC:
  *      UI
  *      FILTER
  */
-import * as pM from '../../panels-main.js';
-const _fM = pM.accessFilterPanel;
-const _u = pM.pgUtil;
+import { _filter, _ui, _u, rebuildLocTable, accessTableState as tState } from '../db-main.js';
  /* ========================= UI ============================================ */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter. 
  */
-export function loadLocFilterPanelUi(tblState) {                      /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
+export function loadLocFilters(tblState) {                      /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
     if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
@@ -30,7 +28,7 @@ function updateLocSelOptions(tblState) {
     setSelectedLocVals(tblState.selectedOpts);
 }
 function loadLocNameSearchElem() {  
-    const searchTreeElem = _fM('getTreeTextFilterElem', ['Location']);
+    const searchTreeElem = _filter('getTreeTextFilterElem', ['Location']);
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -142,11 +140,15 @@ function buildLocSelects(locOptsObj) {
     function buildLocSel(selName, opts) {
         const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
         const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
-        const sel = _fM('newSelEl', [opts, 'opts-box', 'sel' + selName, selName]);
+        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;
     }
+}function newSelEl(opts, c, i, field) {                                   //console.log('newSelEl for [%s]. args = %O', field, arguments);
+    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
+    $(elem).data('field', field);
+    return elem;
 }
 function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
@@ -158,12 +160,12 @@ export function updateLocSearch(val, selType) {
     if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
     const locType = selType ? selType : getLocTypeFromElems();     
     const root = getNewLocRoot(val, locType);  
-    const txt = getTreeFilterTextVal('Location');  
+    const txt = _filter('getTreeFilterTextVal', ['Location']);  
     updateLocFilterMemory(root, locType);
     updateTreeFilterState(txt);
-    pM.pgUi('resetToggleTreeBttn', [false]);
-    return pM.pg('rebuildLocTable', [root, txt])
-        .then(fM.reapplyDateFilterIfActive);
+    _ui('setTreeToggleData', [false]);
+    return rebuildLocTable(root, txt)
+        .then(_filter('reapplyDateFilterIfActive'));
 } 
 function getNewLocRoot(val, locType) {
     return val == 'all' ? getParentId(locType) : [parseInt(val)];
@@ -180,11 +182,11 @@ function updateLocFilterMemory(loc, locType) {
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
-    _fM('setPanelFilterState', ['combo', filter]);
+    _filter('setPanelFilterState', ['combo', filter]);
 }
 function resetLocComboMemory() {
     tState().set({'selectedOpts': {}});
-    _fM('setPanelFilterState', ['combo', false]);
+    _filter('setPanelFilterState', ['combo', false]);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};

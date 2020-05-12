@@ -6,9 +6,8 @@
  * 
  * TOC:
  */
-import * as pM from '../panels-main.js';
-import * as fM from './filter-panel-main.js';
-const _u = pM.pgUtil;
+import * as fM from './filters-main.js';
+import { _ui, _u } from '../db-main.js';
 /* ====================== BUILD FILTER ELEM ================================= */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function getTreeTextFilterElem(entity) {
@@ -55,8 +54,8 @@ export function filterTableByText(text) {                                       
     const tblState = tState().get(null, ['api', 'curFocus', 'rowData']);  
     tblState.api.setRowData(newRows); 
     updateTreeFilterState(text);
-    updateFilterStatusMsg();
-    db_ui.resetToggleTreeBttn(false);
+    _ui('updateFilterStatusMsg');
+    _ui('setTreeToggleData', [false]);
     
     function getRowsAfterTextFilter(text) {
         const allRows = fM.getCurRowData();                     

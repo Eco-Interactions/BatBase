@@ -7,7 +7,6 @@
  *     isSavedIntListLoaded 
  *     selIntList           
  *     toggleListPanelOrientation
- *     toggleSaveIntsPanel       
  *     enableListReset           
  *
  * TOC:
@@ -26,11 +25,7 @@
  *             Table Methods         
  */
 import * as pM from './panels-main.js';
-import { resetToggleTreeBttn } from '../../pg-ui/ui-main.js';
-import { updateFilterStatusMsg, resetFilterParams } from '../../table/filters/filters-main.js';
-const _u = pM.pgUtil;
-const _fM = pM.accessFilterPanel;
-const tState = pM.getTableState;
+import { _u, _filter, _ui, resetDataTable, accessTableState as tState } from '../../db-main.js';
 /**
  * list - List open in panel
  * listLoaded - List loaded in table
@@ -47,11 +42,13 @@ export function isSavedIntListLoaded() {
     return app.listLoaded;
 }
 export function initListPanel() {
+    if ($('body').data('user-role') === 'visitor') { return; }
     require('../../../../styles/db/panels/lists.styl');  
     addListPanelEvents();
 }
 function addListPanelEvents() {
     window.addEventListener('resize', resizeIntPanelTab);
+    $('#lists').click(toggleSaveIntsPanel);
     $('button[name="clear-list"]').click(resetTable);
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#unsel-rows').click(deselectAllRows);
@@ -60,10 +57,9 @@ function addListPanelEvents() {
     $('#delete-list').click(deleteInteractionList);
     $('#confm-list-delete').click(confmDelete);
     $('#cncl-list-delete').click(cancelDelete);
-    $('#svd-list-hlp').click(pM.modal.bind(null, 'showHelpModal', ['saved-lists']));
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
-export function toggleSaveIntsPanel() {                                         
+function toggleSaveIntsPanel() {                                         
     if ($('#list-pnl').hasClass('closed')) { 
         buildAndShowIntPanel(); 
         sizeIntPanelTab();
@@ -76,7 +72,7 @@ function buildAndShowIntPanel() {                                   /*perm-log*/
         expandAllTableRows();
     }
 }
-export function enableListReset() {  
+export function enableListResetBttn() {  
     if (!app.listLoaded) { 
         $('button[name="clear-list"]')
             .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5); 
@@ -180,7 +176,7 @@ function getInteractions() {
 function getAllIntsInTable(mode) {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
-    resetToggleTreeBttn(true);
+    _ui('setTreeToggleData', [true]);
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, true));           
     return getUpdatedIntSet(mode);
 }
@@ -218,7 +214,7 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*perm-log*/console.log('           +--Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    pM.resetDataTbl()
+    resetDataTable()
     .then(updateRelatedListUi);
 }
 function prepareMemoryForTableLoad() {
@@ -228,18 +224,18 @@ function prepareMemoryForTableLoad() {
 }
 function updateRelatedListUi() {
     app.tblState.api.expandAll();
-    resetToggleTreeBttn(true);
+    _ui('setTreeToggleData', [true]);
     syncFilterUi(app.tblState.curFocus);
     updateListLoadButton('Reset to All Interactions', resetTable);
     hideSavedMsg();
     enableModUi('rmv');
-    updateFilterStatusMsg();
+    _ui('updateFilterStatusMsg');
     enableListReset();
     updateDetailHdr('Loaded');
     delete app.tblState;
 }
 function syncFilterUi(focus) {
-    pM.accessFilterPanel('syncViewFiltersAndUi', [focus]);
+    _filter('syncViewFiltersAndUi', [focus]);
     if ($('#selSavedFilters')[0].selectize) { 
         $('#selSavedFilters')[0].selectize.clear('silent') 
     }
@@ -424,7 +420,7 @@ function resetPrevListUiState() {
 function resetTable() {                     
     tState().set({'intSet': false});                                            
     delete app.listLoaded;
-    pM.resetDataTbl()
+    resetDataTable()
     .then(updateUiAfterTableReset);
 }
 function updateUiAfterTableReset() {
@@ -437,7 +433,7 @@ function updateUiAfterTableReset() {
 function expandAllTableRows() {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
-    resetToggleTreeBttn(true);
+    _ui('setTreeToggleData', [true]);
 }
 function deselectAllRows() {                                                    
     app.tblApi = tState().get('api');

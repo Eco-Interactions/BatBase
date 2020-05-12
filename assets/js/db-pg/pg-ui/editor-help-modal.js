@@ -2,8 +2,7 @@
  * Handles displaying the 'help' modal for editors and above with options to either
  * reset the local database or submit a bug report.
  */
-import * as _pg from '../db-main.js';
-import { exitModal, showSaveModal } from '../../misc/intro-core.js';
+import { resetLocalDb, _modal, _u } from '../db-main.js';
 
 /* ====================== EDITOR HELP ======================================= */
 /* --------------------- HELP MODAL ----------------------------------------- */
@@ -11,7 +10,7 @@ export default function showEditorHelpModal() {
     const confg = {
         html: getHelpHtml(), elem: '#data-help', dir: 'left', onLoad: setBttnEvents
     }
-    showSaveModal(confg);
+    _modal('showSaveModal', [confg]);
 }
 function getHelpHtml() {
     return `<center><h3>Experiencing issues?</h3></center><br><br>
@@ -22,11 +21,11 @@ function getModalBttn(text) {
 }
 function setBttnEvents() {
     const map = {
-        'Reset Local Data': _pg.resetLocalDb.bind(null, true),
+        'Reset Local Data': resetLocalDb.bind(null, true),
         'Report A Bug': showBugReportPopup
     }
     $('.intro-bttn').each((i, elem) => { 
-        $(elem).click(() => { exitModal(map[elem.innerText]); }
+        $(elem).click(() => { _modal('exitModal', [map[elem.innerText]]); }
     )});
 }
 /* --------------------- BUG REPORT POPUP ----------------------------------- */
@@ -60,19 +59,19 @@ function getReportPrompts() {
 }
 function buildRprtPrompt(text, isRequired) {
     const lbl = buildPromptContainer(isRequired); 
-    const span = _pg._util('buildElem', ['span', { text: text, class: 'bug-span' }]);
-    const txt = _pg._util('buildElem', ['textarea', { class: 'bug-rprt-input' }]);
+    const span = _u('buildElem', ['span', { text: text, class: 'bug-span' }]);
+    const txt = _u('buildElem', ['textarea', { class: 'bug-rprt-input' }]);
     $(lbl).append([span, txt]);
     return lbl;
 }
 function buildPromptContainer(isRequired) {
     const classes = 'bug-prompt' + (isRequired ? ' required' : '');  
-    return _pg._util('buildElem', ['label', { class: classes }]);
+    return _u('buildElem', ['label', { class: classes }]);
 }
 /* ------ BUTTONS ----------------- */
 function getReportBttns() {
-    const cntnr = _pg._util('buildElem', ['div', { class: 'flex-row' }]);
-    const spacer = _pg._util('buildElem', ['div', { class: 'flex-grow' }]);
+    const cntnr = _u('buildElem', ['div', { class: 'flex-row' }]);
+    const spacer = _u('buildElem', ['div', { class: 'flex-grow' }]);
     const sub = buildFormButton('Submit', submitBugRprt);
     const cncl = buildFormButton('Cancel', closeBugReportPopup);
     $(cntnr).append([spacer, sub, cncl]);
@@ -81,7 +80,7 @@ function getReportBttns() {
 /** Returns a (submit or cancel) button */
 function buildFormButton(action, onClick) {
     const attr = { id: 'rprt-'+action, class: 'ag-fresh', type: 'button', value: action}
-    const bttn = _pg._util('buildElem', ['input', attr]);
+    const bttn = _u('buildElem', ['input', attr]);
     $(bttn).click(onClick);
     return bttn;
 }
@@ -102,7 +101,7 @@ function submitNewSentryIssue() {
         steps: $('.bug-rprt-input')[1].value,
         etc: $('.bug-rprt-input')[0].value,
     };
-    _pg.alertIssue('editorReport', data);
+    pg.alertIssue('editorReport', data);
     updateBugReportUiAfterSubmit();
 }
 function updateBugReportUiAfterSubmit() {
@@ -115,7 +114,7 @@ function showReportStatus(msg, color) {
     $('.bugs-popup h3').after(buildReportStatus(msg, color));
 }
 function buildReportStatus(text, color) {
-    const msg = _pg._util('buildElem', ['div', { class: 'rprt-status', text: text }]);
+    const msg = _u('buildElem', ['div', { class: 'rprt-status', text: text }]);
     $(msg).css({'color': color, 'margin-top': '1em'});
     return msg;
 }

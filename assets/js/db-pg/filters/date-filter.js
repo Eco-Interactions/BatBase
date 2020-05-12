@@ -24,10 +24,8 @@
  *          SOURCE
  *          TAXON
  */
-import * as pM from '../panels-main.js';
-import * as fM from './filter-panel-main.js';
-const _u = pM.pgUtil;
-const tState = pM.getTableState;
+import * as fM from './filters-main.js';
+import { accessTableState as tState,_ui, _u } from '../db-main.js';
 let tblState;
 /* 
  * {obj} cal    Stores the flatpickr calendar instance.  
@@ -105,7 +103,7 @@ function applyDateFilterStyles(filtering) {
     $('#filter-cal, #filter-cal+.form-control').attr({'disabled': !filtering});  
     $('.selDateFilter-sel, #filter-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
-    pM.resetToggleTreeBttn(false);
+    _ui('setTreeToggleData', [false]);
     if (filtering) {
         $('#selDateFilter')[0].selectize.enable();
     } else { 
@@ -227,15 +225,15 @@ function resetDateFilter(skipSync) {                                            
  * The table filter's status message is updated. 
  */
 function syncFiltersAndUi(time) {                                               console.log('           --syncFiltersAndUi [%s]', time);
-    pM.resetToggleTreeBttn(false);
+    _ui('setTreeToggleData', [false]);
     if (time != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
-    updateFilterStatusMsg();  
+    _ui('updateFilterStatusMsg')
 }
 export function syncViewFiltersAndUi(focus) {
     tblState = tState().get();
     const map = {
-        locs: fM.loadLocFilterPanelUi,
-        srcs: applySrcFltrs,
+        locs: fM.loadLocFilters,
+        srcs: applySrcFilters,
         taxa: updateTaxonComboboxes
     }; 
     map[focus](tblState);
@@ -254,7 +252,7 @@ function getTableEntityName() {
 }
 /* ------------------ SOURCE ------------------------------------------------- */
 /** Reapplys active external filters, author name or publication type. */
-function applySrcFltrs(tblState) {
+function applySrcFilters(tblState) {
     const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
     resets[tblState.curView]();
@@ -274,7 +272,7 @@ function updateTaxonComboboxes() {                                              
     _u('getData', ['levelNames']).then(lvls => {  
         const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
         tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
-        pM.loadTxnFilterPanelUi(tState().get());
+        fM.loadTxnFilters(tState().get());
     });
 }
 /** Returns an object with taxon records by level and keyed with display names. */
