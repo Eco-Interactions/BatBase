@@ -30,30 +30,30 @@ import * as form from './forms/forms-main.js';
 import startWalkthrough from './tutorial/db-tutorial.js';
 
 /** ==================== FACADE ============================================= */
-export function _u(funcName, params = []) {
+export function _u(funcName, params = []) {                         /*debg-log*///console.log('_ui args = %O', arguments);
     return u[funcName](...params);
 }
 export function _ui(funcName, params = []) {                         /*debg-log*/console.log('_ui args = %O', arguments);
     return ui[funcName](...params);
 }
-export function _modal(funcName, params = []) {  
+export function _modal(funcName, params = []) {                     /*debg-log*///console.log('_ui args = %O', arguments);
     return modal[funcName](...params);
 }
-export function _filter(funcName, params = []) {  
+export function _filter(funcName, params = []) {                     /*debg-log*///console.log('_filter args = %O', arguments);  
     return filter[funcName](...params);
 }
-export function _form(funcName, params = []) {  
+export function _form(funcName, params = []) {                      /*debg-log*///console.log('_ui args = %O', arguments);
     return form[funcName](...params);
 }
 /* ------------------- LOCAL DATA ------------------------------------------- */
-export function _db(funcName, params = []) {  
+export function _db(funcName, params = []) {                        /*debg-log*///console.log('_ui args = %O', arguments);
     return db[funcName](...params);
 }
 export function resetLocalDb() {
     return db.resetStoredData();
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
-export function _alert(funcName, params = []) {
+export function _alert(funcName, params = []) {                     /*debg-log*///console.log('_ui args = %O', arguments);
     return alert[funcName](...params);
 }
 /** Handles issues without javascript error/exception objects. */
