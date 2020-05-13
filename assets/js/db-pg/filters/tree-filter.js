@@ -2,12 +2,16 @@
  * Filters the interactions by the text in the tree column of the data table.
  * 
  * Exports:
- * 
+ *      getRowsWithText
+ *      getTreeTextFilterElem
+ *      getTreeFilterVal
  * 
  * TOC:
+ *      BUILS FILTER ELEM
+ *      SYNC WITH ACTIVE FILTERS
  */
 import * as fM from './filters-main.js';
-import { _ui, _u } from '../db-main.js';
+import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
 /* ====================== BUILD FILTER ELEM ================================= */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function getTreeTextFilterElem(entity) {
@@ -38,22 +42,24 @@ function addInputChangeEvent(entity, input) {
     return input;    
 }
 function onTextFilterChange(entity, e) {
-    const filterTreeData = getTextFilterHandler(entity);
-    filterTreeData(getTreeFilterTextVal(entity));
+    const filterTreeData = getTextFilterHandler(entity);                        
+    const text = getTreeFilterVal(entity);
+    updateTreeFilterState(text);
+    filterTreeData(text);
 }
-function getTextFilterHandler(entity) {
-    let h = { 'Location': filterLocs, 'Publication': updatePubSearch, 'Taxon': filterTaxa };
-    return h[entity] ? h[entity] : filterTableByText;
+function getTextFilterHandler(entity) {                                         //console.log('entity = [%s]', entity);
+    let cmplxHndlrs = { 
+        'Location': filterLocs, 'Publication': filterSrcs, 'Taxon': filterTaxa 
+    };
+    return cmplxHndlrs[entity] ? cmplxHndlrs[entity] : filterTableByText;
 }
-export function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
+export function getTreeFilterVal(entity) {                                      //console.log('getTreeFilterVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
 /* ====================== APPLY FILTER ====================================== */
-
-export function filterTableByText(text) {                                              //console.log('----filterTableByText [%s]', text);
+export function filterTableByText(text) {                                       //console.log('----filterTableByText [%s]', text);
     const tblState = tState().get(null, ['api', 'curFocus', 'rowData']);  
-    tblState.api.setRowData(newRows); 
-    updateTreeFilterState(text);
+    tblState.api.setRowData(getRowsAfterTextFilter(text)); 
     _ui('updateFilterStatusMsg');
     _ui('setTreeToggleData', [false]);
     
@@ -61,37 +67,38 @@ export function filterTableByText(text) {                                       
         const allRows = fM.getCurRowData();                     
         return text === "" ? allRows : getTreeRowsWithText(allRows, text);
     }
-    function getTreeRowsWithText(data, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
-        const rows = data.map(row => Object.assign({}, row));
-        return rows.filter(row => {  
-            const isRow = ifRowContainsText(row, text); 
-            if (rowChildrenAreTreeEntities(row)) {
-                row.children = getTreeRowsWithText(row.children, text);
-            }                                                                       //console.log('isRow = [%s] children [%s]', isRow, nonSrcRowHasChildren(row))
-            return isRow || (nonSrcRowHasChildren(row) ? 
-                !row.children[0].hasOwnProperty('interactionType') : false );
-        });
-    }
-    function rowChildrenAreTreeEntities(row) {
-        return nonSrcRowHasChildren(row) && !row.children[0].hasOwnProperty('interactionType');
-    }
-    function nonSrcRowHasChildren(row) { 
-        if (tblState.curFocus === 'srcs') { return false; }
-        return row.children && row.children.length > 0;
-    }
 }
 function updateTreeFilterState(text) { 
     const val = !text ? false : '"'+text+'"';
-    fM.setPanelFilterState('text', val);
+    _filter('setPanelFilterState', ['name', val]);
 }
 function ifRowContainsText(row, text) {
     return row.name.toLowerCase().includes(text);
 }
+export function getTreeRowsWithText(data, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
+    const curFocus = tState().get('curFocus');  
+    const rows = data.map(row => Object.assign({}, row));
+    return rows.filter(row => {  
+        const isRow = ifRowContainsText(row, text); 
+        if (rowChildrenAreTreeEntities(curFocus, row)) {
+            row.children = getTreeRowsWithText(row.children, text);
+        }                                                                       //console.log('isRow = [%s] children [%s]', isRow, nonSrcRowHasChildren(row))
+        return isRow || (nonSrcRowHasChildren(curFocus, row) ? 
+            !row.children[0].hasOwnProperty('interactionType') : false );
+    });
+}
+function rowChildrenAreTreeEntities(curFocus, row) {
+    return nonSrcRowHasChildren(curFocus, row) && !row.children[0].hasOwnProperty('interactionType');
+}
+function nonSrcRowHasChildren(curFocus, row) { 
+    if (curFocus === 'srcs') { return false; }
+    return row.children && row.children.length > 0;
+}
 /* ================= SYNC WITH ACTIVE FILTERS =============================== */
 /*------------------ LOCATION -----------------------------*/
-function filterLocs(text) { 
+function filterLocs(text) {
     const selVal = getSelectedLoc();  
-    if (selVal) { return updateLocSearch(selVal); }
+    if (selVal) { return _filter('updateLocSearch', [selVal, text]); }
     filterTableByText(text);
 }
 /* --- Get selected location data --- */
@@ -110,6 +117,14 @@ function getLocTypeFromElems() {
 }
 function hasSelVal(val) {
     return val && val !== 'all';
+}
+/* ------------------- SOURCE ----------------------------------------------- */
+function filterSrcs(text) {
+    const pubTypeId = _u('getSelVal', ['Publication Type']);
+    if (pubTypeId) {
+        return _filter('updatePubSearch', [pubTypeId, text]);    
+    } 
+    filterTableByText(text);    
 }
 /* -------------------- TAXON ----------------------------------------------- */
 function filterTaxa(text) {                                                     //console.log('filterTaxa! text [%s]', text);
