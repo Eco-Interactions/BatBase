@@ -241,7 +241,7 @@ export function syncViewFiltersAndUi(focus) {
 /* -------------------- TREE-TEXT ------------------------------------------- */
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
-    if (getTreeFilterTextVal(entity) === '') { return; }
+    if (getTreeFilterVal(entity) === '') { return; }
     fM.filterTableByText(entity);
 }
 function getTableEntityName() {

@@ -10,11 +10,11 @@
  *      UI
  *      FILTER
  */
-import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
+import { _filter, _ui, _u, rebuildTxnTable, accessTableState as tState } from '../db-main.js';
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {
     loadTaxonComboboxes(tblState);
-    if (!$('.txtLbl').length) { return loadTxnNameSearchElem(tblState); }
+    if (!$('.taxonLbl input[type="text"]').length) { return loadTxnNameSearchElem(tblState); }
 }
 function loadTxnNameSearchElem(tblState) {
     const searchTreeElem = _filter('getTreeTextFilterElem', ['Taxon'])
@@ -100,7 +100,7 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
         return elems;
     }
 }
-function newSelEl(opts, c, i, field) {                                   //console.log('newSelEl for [%s]. args = %O', field, arguments);
+function newSelEl(opts, c, i, field) {                               
     const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
     $(elem).data('field', field);
     return elem;
@@ -123,20 +123,19 @@ function setSelectedTaxonVals(selected, tblState) {                             
         _u('setSelVal', [lvl, selected[lvl], 'silent']);
     });
 }
-
- /* ===================== FILTER ============================================ */
+/* ====================== FILTER ============================================ */
 /**
  * When a taxon is selected from one of the taxon-level comboboxes, the table 
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-export function updateTaxonSearch(val, selLvl) {                                        
-    if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
+export function updateTaxonSearch(val, text) {
+    if (!val && text === undefined) { return; }                                              //console.log('       +-updateTaxonSearch.')
     const tblState = tState().get(['rcrdsById', 'flags']);  
     if (!tblState.flags.allDataAvailable) { return $(this)[0].selectize.clear(); } 
-    const rcrd = getRootTaxonRcrd(val, tblState.rcrdsById);
-    const txt = getTreeFilterText(val);
-    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});   //console.log("selectedVals = %O", tParams.selectedVals);
+    const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
+    const txt = text || _filter('getTreeFilterVal', ['Taxon']);
+    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});  
     addToFilterState();
     return rebuildTxnTable(rcrd, 'filtering', txt);
 
@@ -148,29 +147,28 @@ export function updateTaxonSearch(val, selLvl) {
         _filter('setPanelFilterState', ['combo', filter]);
     }
 }
-function getTreeFilterText(v) {
-    return typeof v === string && v !== all ? v : _filter('getTreeTextFilterVal', ['Taxon']);                               //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
-}
 /**
  * When a taxon is selected from the filter comboboxes, the record is returned.
  * When 'all' is selected, the selected parent is returned, or the realm record.
  * When the tree-text filter is being applied, returns the most specific taxon selected.
  */
-function getRootTaxonRcrd(val, rcrds) {
-    // if (typeof val === 'string' & val !== 'all') {  } 
-    const id = val === 'string' ? getSelectedTaxonId() : val;
-    return _u('getDetachedRcrd', [id, rcrds]);  
+function getTaxonTreeRootRcrd(val, rcrds, that) {
+    return isNaN(parseInt(val)) ? getSelTxn() : _u('getDetachedRcrd', [val, rcrds]);
     
-    function getSelectedTaxonId() {  
-        const id = getMostSpecificTaxonSelected(); 
-        const rcrd = _u('getDetachedRcrd', [id, rcrds]);  
-        return val === 'all' ? rcrd.parent : rcrd;
+    function getSelTxn() {
+        return that.hasOwnProperty('$input') ? getParentTxn() : getSelectedTxn();
     }
-}
-function getMostSpecificTaxonSelected() { 
-    const selected = tState().get('selectedOpts');
-    const lvl = getSelectedTaxonLvl(selected); 
-    return selected[lvl];
+    function getParentTxn() {  
+        const selected = tState().get('selectedOpts'); 
+        const rank = that.$input[0].id.split('sel')[1]; 
+        const prntId = _u('getDetachedRcrd', [selected[rank], rcrds]).parent;
+        return _u('getDetachedRcrd', [prntId, rcrds])
+    }
+    function getSelectedTxn() { 
+        const selected = tState().get('selectedOpts');
+        const id = selected[getSelectedTaxonLvl(selected)] || _u('getSelVal', ['View']);
+        return _u('getDetachedRcrd', [id, rcrds]);
+    }
 }
 function getSelectedTaxonLvl(selected) {                
     if (Object.keys(selected).length == 0) { return; }
@@ -178,12 +176,12 @@ function getSelectedTaxonLvl(selected) {
     return lvls.reverse().find(lvl => selected[lvl]);
 }
 /** The selected taxon's ancestors will be selected in their levels combobox. */
-function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
-    const selected = {};                                                        //console.log("selected = %O", selected)
+function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      
+    const selected = {};                                                        
     selectAncestorTaxa(selTaxonObj);
     return selected;
     /** Adds parent taxa to selected object, until the realm parent. */
-    function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
+    function selectAncestorTaxa(taxon) {                                        
         if (taxon.isRoot) { return; }
         selected[taxon.level.displayName] = taxon.id;                           
         selectAncestorTaxa(_u('getDetachedRcrd', [taxon.parent, taxonRcrds]));

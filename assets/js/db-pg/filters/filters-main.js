@@ -38,8 +38,8 @@ export function getTreeTextFilterElem(entity) {
 export function filterTableByText(entity) {
     fTree.filterTableByText(entity);
 }
-export function getTreeFilterTextVal(entity) {
-    return fTree.getTreeFilterTextVal(entity);
+export function getTreeFilterVal(entity) {
+    return fTree.getTreeFilterVal(entity);
 }
 /* ------------------ DATE FILTER ------------------------------------------- */
 export function initDateFilterUi() {
@@ -74,8 +74,8 @@ export function updatePubSearch() {
 export function loadTxnFilters(tblState) {
     fTxn.loadTxnFilters(tblState);
 }
-export function updateTaxonSearch(val, selLvl) {                                        
-    return fTxn.updateTaxonSearch(val, selLvl);
+export function updateTaxonSearch() {                                        
+    return fTxn.updateTaxonSearch(...arguments);
 }
 /* ==================== FILTER STATE ======================================== */
 /* --------------------------- SET ----------------------------------------- */

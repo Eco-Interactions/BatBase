@@ -186,8 +186,8 @@ function setFilterStatus(filters) {
     } else { resetFilterUi() }
 }
 function getStatus(filters) {                                                   
-    const list = isSavedIntListLoaded() ? '(LIST)' : ''; 
-    const set = isFilterSetActive() ? '(SET)' : '';
+    const list = _ui('isSavedIntListLoaded') ? '(LIST)' : ''; 
+    const set = fSets.isFilterSetActive() ? '(SET)' : '';
     const loaded = [list, set].filter(f=>f).join(' '); 
     const fltrs = filters.join(', ');
     return loaded !== '' & fltrs !== '' ? `${loaded} ${fltrs}.` :

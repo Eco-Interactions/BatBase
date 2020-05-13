@@ -113,6 +113,5 @@ function hasSelVal(val) {
 }
 /* -------------------- TAXON ----------------------------------------------- */
 function filterTaxa(text) {                                                     //console.log('filterTaxa! text [%s]', text);
-    // updateTreeFilterState(text);
-    updateTaxonSearch(text);
+    _filter('updateTaxonSearch', [null, text]);
 }
