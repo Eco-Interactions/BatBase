@@ -15,7 +15,7 @@ import { _filter, _ui, _u, rebuildLocTable, accessTableState as tState } from '.
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter. 
  */
-export function loadLocFilters(tblState) {                      /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
+export function loadLocFilters(tblState) {                          /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
     if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
@@ -43,7 +43,7 @@ function loadLocComboboxes(tblState) {
     setSelectedLocVals(tblState.selectedOpts);
 }
 /** Builds arrays of options objects for the location comboboxes. */
-function buildLocSelectOpts(tblState, data) {  
+function buildLocSelectOpts(tblState, data) {
     const processedOpts = { Region: [], Country: [] };
     const opts = { Region: [], Country: [] };  
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
@@ -99,11 +99,11 @@ function buildLocSelectOpts(tblState, data) {
         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
     /** build the new opts and adds their loc ids to the selected-options obj. */
-    function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
+    function buildOpt(loc, type, optProp) {                                    //console.log('building opt for [%s]. loc = %O', type, loc);
         const val = loc && loc[type] ?  loc[type].id : false;
         const txt = loc && loc[type] ?  loc[type].displayName : false;
         if (!val) { return }
-        addToSelectedObj(val, _u('ucfirst', [type]));  
+        addToSelectedObj(val, optProp);  
         tblState.openRows.push(val);
         opts[optProp].push({ value: val, text: txt });
     }         
@@ -145,7 +145,8 @@ function buildLocSelects(locOptsObj) {
         $(sel).addClass('locSel');
         return lbl;
     }
-}function newSelEl(opts, c, i, field) {                                   //console.log('newSelEl for [%s]. args = %O', field, arguments);
+}
+function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
     const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
     $(elem).data('field', field);
     return elem;
@@ -156,17 +157,23 @@ function setSelectedLocVals(selected) {                                         
     });
 }
 /* =========================== FILTER ======================================= */
-export function updateLocSearch(val, selType) {                                 
-    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
-    const locType = selType ? selType : getLocTypeFromElems();     
+export function updateLocSearch(val, text) {                                 
+    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] text = [%s]', val, text); 
+    const locType = getLocTypeFromElems();     
     const root = getNewLocRoot(val, locType);  
-    const txt = _filter('getTreeFilterTextVal', ['Location']);  
+    const txt = text || _filter('getTreeFilterVal', ['Location']);  
     updateLocFilterMemory(root, locType);
-    updateTreeFilterState(txt);
     _ui('setTreeToggleData', [false]);
     return rebuildLocTable(root, txt)
         .then(_filter('reapplyDateFilterIfActive'));
 } 
+function getLocTypeFromElems() {
+    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
+    return locType.length == 1 ? locType[0] : null;
+}
+function hasSelVal(val) {
+    return val && val !== 'all';
+}
 function getNewLocRoot(val, locType) {
     return val == 'all' ? getParentId(locType) : [parseInt(val)];
 }

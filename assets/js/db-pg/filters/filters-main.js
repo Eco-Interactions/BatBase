@@ -65,8 +65,8 @@ export function syncViewFiltersAndUi(focus) {
 export function loadLocFilters(tblState) {                      
     fLoc.loadLocFilters(tblState);
 }
-export function updateLocSearch(val, selType) {                                 
-    return fLoc.updateLocSearch(val, selType);
+export function updateLocSearch() {                                 
+    return fLoc.updateLocSearch(...arguments);
 }
 export function loadSrcFilters(realm) {                      
     fSrc.loadSrcFilters(realm);
