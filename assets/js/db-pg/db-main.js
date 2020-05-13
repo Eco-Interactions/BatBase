@@ -300,6 +300,7 @@ function showLocInteractionData(view) {                                         
  */
 export function rebuildLocTable(topLoc, textFltr) {                 /*Perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
     const topLocs = topLoc || getTopRegionIds();    
+    resetCurTreeStorageProps();
     tState.openRows = topLocs.length === 1 ? topLocs : [];
     ui.fadeTable();
     return startLocTableBuildChain(topLocs, textFltr);
