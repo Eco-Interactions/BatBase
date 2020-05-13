@@ -41,6 +41,9 @@ export function filterTableByText(entity) {
 export function getTreeFilterVal(entity) {
     return fTree.getTreeFilterVal(entity);
 }
+export function getRowsWithText(text) {
+    return fTree.getTreeRowsWithText(getCurRowData(), text);
+}
 /* ------------------ DATE FILTER ------------------------------------------- */
 export function initDateFilterUi() {
     fDate.initDateFilterUi();
@@ -69,7 +72,7 @@ export function loadSrcFilters(realm) {
     fSrc.loadSrcFilters(realm);
 }
 export function updatePubSearch() {
-    return fSrc.updatePubSearch();
+    return fSrc.updatePubSearch(...arguments);
 }
 export function loadTxnFilters(tblState) {
     fTxn.loadTxnFilters(tblState);

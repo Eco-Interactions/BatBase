@@ -10,16 +10,9 @@
  *      UI
  *      FILTER
  */
-import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
+import { _filter, _ui, _u,  accessTableState as tState } from '../db-main.js';
 /* ========================= UI ============================================ */
- /**
- * Will build the select elems for the source search options. Clears previous 
- * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
- * format and load the data table.
- * NOTE: This is the entry point for source table rebuilds as filters alter data
- * contained in the data tree.
- */
-export function loadSrcFilters(realm) {                       /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
+export function loadSrcFilters(realm) {                             /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
     if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml }; 
@@ -75,20 +68,20 @@ function loadPublSearchHtml() {
  * When viewing by publication, interactions can be filtered by the publication type.
  * Handles synchronizing with the tree-text filter. 
  */
-export function updatePubSearch() {                                             console.log('       +-updatePubSearch.')
+export function updatePubSearch(tId, text) {                                    console.log('       +-updatePubSearch. typeId [%s], text [%s]', typeId, text);
+    if (!tId) { return; }
     const tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
-    const typeId = _u('getSelVal', ['Publication Type']); 
-    const txt = _filter('getTreeTextFilterVal', ['Publication'])
+    const typeId = tId || _u('getSelVal', ['Publication Type']); 
+    const txt = text || _filter('getTreeFilterVal', ['Publication']);
     const newRows = getFilteredPubRows();
-    setPubFilters();
+    if (typeId) { setPubFilters(); }
     tblState.api.setRowData(newRows);
     _ui('setTreeToggleData', [false]);
     return Promise.resolve(); //Needed when loading filter set
 
     function getFilteredPubRows() {
-        if (!typeId || typeId == 'all') { 
-            return getTreeRowsWithText(_filter('getCurRowData'), txt); }
-        return txt === '' ? getAllPubTypeRows() : getPubTypeRows(typeId);
+        return !typeId || typeId == 'all' ? _filter('getRowsWithText', [txt])
+            : (txt === '' ? getAllPubTypeRows() : getPubTypeRows(typeId));
     }
     function getPubTypeRows(typeId) {
         return _filter('getCurRowData').filter(r => { 
@@ -104,7 +97,6 @@ export function updatePubSearch() {                                             
         const truncTxt = txt ? 
             (txt.length > 50 ? txt.substring(0, 50)+'...' : txt) : null; 
         updatePubFilterState(typeVal, typeId, truncTxt);
-        // updatePubFocusFilters(typeVal, typeId, truncTxt);
         _ui('updateFilterStatusMsg');
     }
     function updatePubFilterState(type, id, text) {
@@ -116,21 +108,4 @@ export function updatePubSearch() {                                             
             return obj;
         }
     }
-    // function updatePubFocusFilters(type, typeId, text) {
-    //     updatePubComboboxFilter();
-    //     updatePubNameFilter();
-
-    //     function updatePubComboboxFilter() { 
-    //         if (type === '- All -') { delete fPs.pnlFltrs.combo; 
-    //         } else { 
-    //             fPs.pnlFltrs.combo = {}; 
-    //             fPs.pnlFltrs.combo["Publication Type"] = 
-    //                 { text: 'Publication Type', value: typeId }
-    //         };
-    //     }
-    //     function updatePubNameFilter() {  
-    //         if (text == '' || text == null) { delete fPs.pnlFltrs.name;
-    //         } else { fPs.pnlFltrs.name = '"'+text+'"'; }
-    //     }
-    // }
 } 
