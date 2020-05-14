@@ -30,30 +30,30 @@ import * as form from './forms/forms-main.js';
 import startWalkthrough from './tutorial/db-tutorial.js';
 
 /** ==================== FACADE ============================================= */
-export function _u(funcName, params = []) {                         /*debg-log*///console.log('_ui args = %O', arguments);
+export function _u(funcName, params = []) {                         /*dbug-log*///console.log('_ui args = %O', arguments);
     return u[funcName](...params);
 }
-export function _ui(funcName, params = []) {                         /*debg-log*/console.log('_ui args = %O', arguments);
+export function _ui(funcName, params = []) {                        /*dbug-log*///console.log('_ui args = %O', arguments);
     return ui[funcName](...params);
 }
-export function _modal(funcName, params = []) {                     /*debg-log*///console.log('_ui args = %O', arguments);
+export function _modal(funcName, params = []) {                     /*dbug-log*///console.log('_ui args = %O', arguments);
     return modal[funcName](...params);
 }
-export function _filter(funcName, params = []) {                     /*debg-log*///console.log('_filter args = %O', arguments);  
+export function _filter(funcName, params = []) {                    /*dbug-log*///console.log('_filter args = %O', arguments);  
     return filter[funcName](...params);
 }
-export function _form(funcName, params = []) {                      /*debg-log*///console.log('_ui args = %O', arguments);
+export function _form(funcName, params = []) {                      /*dbug-log*///console.log('_ui args = %O', arguments);
     return form[funcName](...params);
 }
 /* ------------------- LOCAL DATA ------------------------------------------- */
-export function _db(funcName, params = []) {                        /*debg-log*///console.log('_ui args = %O', arguments);
+export function _db(funcName, params = []) {                        /*dbug-log*///console.log('_ui args = %O', arguments);
     return db[funcName](...params);
 }
 export function resetLocalDb() {
     return db.resetStoredData();
 }
 /* --------------- ERROR HANDLING ------------------------------------------- */
-export function _alert(funcName, params = []) {                     /*debg-log*///console.log('_ui args = %O', arguments);
+export function _alert(funcName, params = []) {                     /*dbug-log*///console.log('_ui args = %O', arguments);
     return alert[funcName](...params);
 }
 /** Handles issues without javascript error/exception objects. */
@@ -432,8 +432,8 @@ function buildTxnTable(val) {
  * the taxon's record.
  */
 function storeAndReturnRealmRcrd(val) {
-    const realmId = val || getSelValOrDefault(u.getSelVal('View'));/*debg-log*///console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
-    const realmTaxonRcrd = u.getDetachedRcrd(realmId, tState.rcrdsById, 'taxon');/*debg-log*///console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmId = val || getSelValOrDefault(u.getSelVal('View'));/*dbug-log*///console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
+    const realmTaxonRcrd = u.getDetachedRcrd(realmId, tState.rcrdsById, 'taxon');/*dbug-log*///console.log("realmTaxon = %O", realmTaxonRcrd);
     updateRealmTableState(realmId, realmTaxonRcrd);
     return realmTaxonRcrd;
 }

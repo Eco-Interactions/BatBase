@@ -4,18 +4,19 @@
  * 
  * Exports:
  *      loadLocFilters
- *      updateLocSearch
+ *      applyLocFilter
  *      
  * TOC:
  *      UI
  *      FILTER
  */
-import { _filter, _ui, _u, rebuildLocTable, accessTableState as tState } from '../db-main.js';
+import * as fM from './filters-main.js';
+import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../db-main.js';
  /* ========================= UI ============================================ */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter. 
  */
-export function loadLocFilters(tblState) {                          /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
+export function loadLocFilters(tblState) {                          /*Perm-log*/console.log("       --Loading location filters.");
     if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
@@ -28,7 +29,7 @@ function updateLocSelOptions(tblState) {
     setSelectedLocVals(tblState.selectedOpts);
 }
 function loadLocNameSearchElem() {  
-    const searchTreeElem = _filter('getTreeTextFilterElem', ['Location']);
+    const searchTreeElem = fM.getTreeTextFilterElem('Location');
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -39,7 +40,7 @@ function loadLocComboboxes(tblState) {
     const opts = buildLocSelectOpts(tblState); 
     const selElems = buildLocSelects(opts);
     $('#focus-filters').append(selElems);
-    _u('initComboboxes', [{'Region': updateLocSearch, 'Country': updateLocSearch}]);
+    _u('initComboboxes', [{'Region': applyLocFilter, 'Country': applyLocFilter}]);
     setSelectedLocVals(tblState.selectedOpts);
 }
 /** Builds arrays of options objects for the location comboboxes. */
@@ -157,43 +158,37 @@ function setSelectedLocVals(selected) {                                         
     });
 }
 /* =========================== FILTER ======================================= */
-export function updateLocSearch(val, text) {                                 
-    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] text = [%s]', val, text); 
-    const locType = getLocTypeFromElems();     
-    const root = getNewLocRoot(val, locType);  
-    const txt = text || _filter('getTreeFilterVal', ['Location']);  
+export function applyLocFilter(val, text) {            
+    if (!val && text === undefined) { return; }             
+    const selectedOpts = tState().get('selectedOpts');    
+    const locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text); 
+    const root = getNewLocRoot();  
+    const txt = text || fM.getTreeFilterVal('Location');  
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
     return rebuildLocTable(root, txt)
-        .then(_filter('reapplyDateFilterIfActive'));
+        .then(() => fM.reapplyDateFilterIfActive());
+    
+    function getNewLocRoot() {
+        return isNaN(parseInt(val)) ? getParentId(locType) : [parseInt(val)];
+    }
+    function getParentId(locType) {                                                   
+        return (!locType || locType === 'Region' && val === 'all') ? 
+            Object.values(tState().get('data')['topRegionNames']) : 
+            [selectedOpts['Region']];
+    }
 } 
-function getLocTypeFromElems() {
-    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
-    return locType.length == 1 ? locType[0] : null;
-}
-function hasSelVal(val) {
-    return val && val !== 'all';
-}
-function getNewLocRoot(val, locType) {
-    return val == 'all' ? getParentId(locType) : [parseInt(val)];
-}
-function getParentId(locType) {                                                   
-    return !locType ? getTopRegions() : [tState().get('selectedOpts')['Region']];
-}
-function getTopRegions() {
-    return Object.values(tState().get('data')['topRegionNames']);      
-}
 function updateLocFilterMemory(loc, locType) { 
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
-    _filter('setPanelFilterState', ['combo', filter]);
+    fM.setPanelFilterState('combo', filter);
 }
 function resetLocComboMemory() {
     tState().set({'selectedOpts': {}});
-    _filter('setPanelFilterState', ['combo', false]);
+    fM.setPanelFilterState('combo', false);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};
@@ -207,3 +202,22 @@ function getSelectedVals(val, type) {                                           
         selected['Region'] = loc.region.id;
     }
 } 
+/* ------------------- GET SELECTED LOCATION -------------------------------- */
+function getSelectedLocVal(locType, selectedOpts) {
+    return selectedOpts[getLocType(null, selectedOpts)];
+}
+function getLocType(that, selectedOpts) {
+    return that.hasOwnProperty('$input') ? 
+        that.$input[0].id.split('sel')[1] : getSelectedLocType(selectedOpts) 
+}
+function getSelectedLocType(selectedOpts) {
+    const sels = Object.keys(selectedOpts);
+    return !sels.length ? getLocTypeFromElems() : (sels.length == 1 ? 'Region' : 'Country');
+}
+function getLocTypeFromElems() {
+    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
+    return locType.length == 1 ? locType[0] : null;
+}
+function hasSelVal(val) {
+    return val && val !== 'all';
+}

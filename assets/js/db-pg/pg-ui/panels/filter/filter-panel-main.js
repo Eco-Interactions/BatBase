@@ -66,7 +66,7 @@ function sizeFilterPanelTab() {
 function getPseudoBorderStyle() {
     const panelT = $('#filter-pnl').position().top;
     const tabW = $('#filter-opts').innerWidth();  
-    const tabL = $('#filter-opts').position().left + 1;             /*debg-log*///console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
+    const tabL = $('#filter-opts').position().left + 1;             /*dbug-log*///console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
     return `<style>.hide-fltr-bttm-border:before { 
         position: absolute;
         content: '';
@@ -82,7 +82,7 @@ function getSplitPseudoBorderStyle() {
     const panelT = $('#filter-pnl').position().top;
     const tabL = getLeftSplitPos(); 
     const tabW = $('#filter-opts').innerWidth();
-    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*debg-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*dbug-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-fltr-bttm-border-vert:before { 
         position: absolute;
         content: '';
@@ -154,7 +154,7 @@ export function clearFilterUi() {
 function resetFilterUi() {  
     resetFilterStatus();
     $('#focus-filters input').val('');
-    if ($('#shw-chngd').prop('checked')) { clearDateFilter(); }
+    if ($('#shw-chngd').prop('checked')) { _filter('clearDateFilter'); }
 }
 function resetFilterStatus() { 
     $('#filter-status').text('No Active Filters.');

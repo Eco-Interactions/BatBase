@@ -20,12 +20,13 @@
  *          APPLY FILTER
  *      CLEAR 
  *      SYNC WITH ACTIVE FILTERS
- *          TREE-TEXT
+ *          LOCATION
  *          SOURCE
  *          TAXON
+ *          TREE-TEXT
  */
 import * as fM from './filters-main.js';
-import { accessTableState as tState,_ui, _u } from '../db-main.js';
+import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
 let tblState;
 /* 
  * {obj} cal    Stores the flatpickr calendar instance.  
@@ -49,18 +50,19 @@ export function selDateFilter(val) {                                            
     }
 }
 /* ============================== SET UP ==================================== */
-export function toggleDateFilter(state, time, skipSync) {                       console.log('       +-toggleDateFilter. state = %s, time? ', state, time); 
+export function toggleDateFilter(state, dateTime, skipSync) {                   console.log('       +-toggleDateFilter. state = %s, time? ', state, dateTime); 
     app.cal = initCal();
+    app.date = fM.getFilterStateKey('date');
     tblState = tState().get();
     const filtering = ifDateFilterActive(state);
-    updateDateFilterState(time);
+    updateDateFilterState(dateTime);
     applyDateFilterStyles(filtering);
-    if (filtering) { filterTableByDate(time);
+    if (filtering) { filterTableByDate(dateTime);
     } else { resetDateFilter(skipSync); } 
 } 
-export function reapplyPreviousDateFilter(time, skipSync) { 
-    app.cal.setDate(time);  
-    filterByTime(null, time, null, skipSync);
+export function reapplyPreviousDateFilter(dateTime, skipSync) {                 //console.log('reapplyPreviousDateFilter [%s] skipSync [%s]', dateTime ,skipSync);
+    app.cal.setDate(dateTime);  
+    filterByTime(null, dateTime, null, skipSync);
 }
 /* ---------------------- FLATPICKR CAL CONFIG ------------------------------ */
 /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
@@ -90,7 +92,7 @@ function getCalOnReadyMethod() {
 /**
  * There doesn't seem to be a way to set the date on the flatpickr calendar
  * from the selenium/behat tests. A data property is added to the calendar elem 
- * and that time is set as the default for the calendar. 
+ * and that date is set as the default for the calendar. 
  */
 function addDefaultTimeIfTesting(calOpts) {
     const date = $('#selDateFilter').data('default');  
@@ -113,17 +115,17 @@ function applyDateFilterStyles(filtering) {
 function ifDateFilterActive(state) {
     return state === 'disable' ? false : state === true ? true : $('#shw-chngd')[0].checked;
 }
-function updateDateFilterState(time) {
+function updateDateFilterState(dateTime) {
     if (!app.date) { app.date = {}; }
-    app.date = { time: time || null, type:  _u('getSelVal', ['Date Filter']) };
+    app.date = { time: dateTime || app.date.time, type:  _u('getSelVal', ['Date Filter']) };
     fM.setPanelFilterState('date', app.date);
 }
 /* ============================ FILTER BY DATE ============================== */
-function filterTableByDate(time) {                                              //console.log('filterTableByDate. time? = [%s] fPs = %O', time, fPs.pnlFltrs);
-    if (time == 'today') { 
+function filterTableByDate(date) {                                              //console.log('filterTableByDate. date? = [%s] prevDate = %O', date, app.date.time);
+    if (date == 'today') { 
         filterToChangesToday(); 
-    } else if (time) { 
-        filterToSpecifiedTime(time);
+    } else if (date) { 
+        filterToSpecifiedTime(date);
     } else if (app.date.time) {  
         reapplyPreviousDateFilter(app.date.time);
     } else {
@@ -139,16 +141,16 @@ function filterToChangesToday() {
     app.cal.setDate(today, false, 'Y-m-d');  
     filterByTime(null, today);
 }
-function filterToSpecifiedTime(time) {
-    app.cal.setDate(time, false, 'F d, Y h:i K');  
-    filterByTime(null, time);
+function filterToSpecifiedTime(dateTime) {
+    app.cal.setDate(dateTime, false, 'F d, Y h:i K');  
+    filterByTime(null, dateTime);
 }
 /* ------------- SHOW TODAY'S UPDATES AFTER CREATE FORM CLOSE --------------- */
 /**
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
-export function showTodaysUpdates(focus) {                                      console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
+export function showTodaysUpdates(focus) {                                      //console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
     _u('setSelVal', ['Focus', focus, 'silent']);
     resetDataTable(focus)
     .then(showUpdatesAfterTableLoad);
@@ -163,19 +165,19 @@ function showUpdatesAfterTableLoad() {
  * since the datetime specified by the user.
  * Note: Params 1-3 sent by calendar
  */
-function filterByTime(dates, dateStr, instance, skipSync) {
-    const time = updateMemoryAndReturnTime(dateStr);
+function filterByTime(dates, dateTime, instance, skipSync) {
+    const time = updateMemoryAndReturnTime(dateTime);
     filterInteractionsByTime(time, app.date.type);
-    updateUiAfterTimeFilterChange(dateStr, skipSync);
+    updateUiAfterTimeFilterChange(dateTime, skipSync);
 }
-function updateMemoryAndReturnTime(dateStr) {
+function updateMemoryAndReturnTime(dateTime) {
     tblState = tState().get();
-    const fltrSince = dateStr || app.date.time;
+    const fltrSince = dateTime || app.date.time;
     app.date.time = fltrSince;
     return new Date(fltrSince).getTime(); 
 }
-function filterInteractionsByTime(time, type) {
-    const rows = getRowsAfterTime(time, type);                                  //console.log("rows = %O", rows);
+function filterInteractionsByTime(dateTime, type) {
+    const rows = getRowsAfterTime(dateTime, type);                              //console.log("rows = %O", rows);
     tblState.api.setRowData(rows);
     fM.setCurrentRowData(rows);
 }
@@ -191,17 +193,19 @@ function getRowsAfterTime(filterTime, type) {
 
         function checkIntRowForUpdates(row) { 
             const date = type === 'cited' ? row.year + '-01-01' : row.updatedAt;
-            let rowTime = new Date(date)
-            rowTime.setHours(rowTime.getHours()+8);     //Resets from PCT to GMT                       
-            rowTime = rowTime.getTime();                                        //console.log("row [%O] rowTime = %O >= since = %O [%s]", row, rowTime, filterTime, rowTime >= filterTime);
-            return rowTime >= filterTime;
+            return getRowTime(date) >= filterTime;
         }
+        function getRowTime(date) {
+            const rowTime = new Date(date)
+            rowTime.setHours(rowTime.getHours()+8);     //Resets from PCT to GMT                       
+            return rowTime.getTime();                                           //console.log("row [%O] rowTime = %O >= since = %O [%s]", row, rowTime, filterTime, rowTime >= filterTime);
+        }  
     } /* End addAllRowsWithUpdates */
 } /* End getRowsAfterTime */
-function updateUiAfterTimeFilterChange(time, skipSync) {
-    $('.flatpickr-input').val(time);
+function updateUiAfterTimeFilterChange(dateTime, skipSync) {
+    $('.flatpickr-input').val(dateTime);
     if (skipSync) { return; } //console.log('skipping filter sync');
-    syncFiltersAndUi(time);
+    syncFiltersAndUi(dateTime);
 }
 /* ============================== CLEAR ===================================== */
 export function clearDateFilter() {
@@ -224,31 +228,23 @@ function resetDateFilter(skipSync) {                                            
  * Source, both auth and pub views, must be reapplied.) The date filter radios are synced.
  * The table filter's status message is updated. 
  */
-function syncFiltersAndUi(time) {                                               console.log('           --syncFiltersAndUi [%s]', time);
+function syncFiltersAndUi(dateTime) {                              /*debug-log*///console.log('           --syncFiltersAndUi [%s]', dateTime);
     _ui('setTreeToggleData', [false]);
-    if (time != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
+    if (dateTime != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
     _ui('updateFilterStatusMsg')
 }
 export function syncViewFiltersAndUi(focus) {
     tblState = tState().get();
     const map = {
-        locs: fM.loadLocFilters,
+        locs: applyLocFilters,
         srcs: applySrcFilters,
         taxa: updateTaxonComboboxes
     }; 
     map[focus](tblState);
 }
-/* -------------------- TREE-TEXT ------------------------------------------- */
-function reapplyTreeTextFltr() {                                            
-    const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
-    if (getTreeFilterVal(entity) === '') { return; }
-    fM.filterTableByText(entity);
-}
-function getTableEntityName() {
-    const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
-        'publ': 'Publisher', 'pubs': 'Publication' };
-    const ent = tblState.curFocus === 'srcs' ? tblState.curView : tblState.curFocus;
-    return names[ent];
+/* ----------------------- LOCATION ----------------------------------------- */
+function applyLocFilters(tblState) {
+    fM.applyLocFilter(null);
 }
 /* ------------------ SOURCE ------------------------------------------------- */
 /** Reapplys active external filters, author name or publication type. */
@@ -258,12 +254,13 @@ function applySrcFilters(tblState) {
     resets[tblState.curView]();
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
-    if (_u('getSelVal', ['Publication Type']) === 'all') { return; }
-    fM.updatePubSearch();
+    const pubTypeId = _u('getSelVal', ['Publication Type']); 
+    if (pubTypeId === 'all') { return; }
+    fM.applyPubFilter(pubTypeId);
 }
 /* ------------------ TAXON ------------------------------------------------- */
 /**
- * When the time-updated filter is updated, the taxa-by-level property has to be
+ * When the date-updated filter is updated, the taxa-by-level property has to be
  * updated based on the rows displayed in the grid so that the combobox options
  * show only taxa in the filtered tree.
  */
@@ -297,3 +294,16 @@ function seperateTaxonTreeByLvl(lvls, rowData) {
         return obj;
     }
 } 
+/* -------------------- TREE-TEXT ------------------------------------------- */
+function reapplyTreeTextFltr() {                                            
+    const entity = getTableEntityName();                           /*debug-log*///console.log("reapplying [%s] text filter", entity);
+    const text = fM.getTreeFilterVal(entity); 
+    if (text === '') { return; }
+    fM.filterTableByText(text);
+}
+function getTableEntityName() {
+    const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
+        'publ': 'Publisher', 'pubs': 'Publication' };
+    const ent = tblState.curFocus === 'srcs' ? tblState.curView : tblState.curFocus;
+    return names[ent];
+}

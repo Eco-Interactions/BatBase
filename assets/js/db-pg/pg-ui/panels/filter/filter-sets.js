@@ -35,9 +35,9 @@ export function setFilterSetEventListeners() {
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
 }
-export function updateFilterSetSel(filterOpts) {                              /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
+export function updateFilterSetSel(filterOpts) {                    /*dbug-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
     const opts = getSavedFilterOpts(filterOpts);     
-    const optGroups = buildOptGroups(opts);                         /*debg-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
+    const optGroups = buildOptGroups(opts);                         /*dbug-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
     _u('initCombobox', ['Saved Filter Set', selFilterSet, getSpecialOpts()]);
 
@@ -73,7 +73,7 @@ function buildOptGroups(opts) {
     return groups;
 }
 /* ============================== CREATE ==================================== */
-export function newFilterSet(val) {                                 /*debg-log*///console.log('newFilterSet. val = %s', val);
+export function newFilterSet(val) {                                 /*dbug-log*///console.log('newFilterSet. val = %s', val);
     enableFilterSetInputs('create');
     updateSubmitButton(createFilterSet, pM.isSavedIntListLoaded());
     $('#filter-set-name + input').val(val).focus();
@@ -89,7 +89,7 @@ export function selFilterSet(val) {
     if (val === 'new') { return; } // New list typed into combobox
     resetFilterUi();
     if (val === 'create') { return newFilterSet(); }                            
-    if (!val) { return;  }                                          /*debg-log*///console.log('loading filter set. val = %s', val);
+    if (!val) { return;  }                                          /*dbug-log*///console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
     updateSubmitButton(editFilterSet, pM.isSavedIntListLoaded());
     _u('getData', ['savedFilters']).then(filters => fillFilterData(val, filters));
@@ -101,7 +101,7 @@ function editFilterSet() {
     _modal('exitModal');
 }
 function fillFilterData(id, filters) {
-    const filter = addActiveFilterToMemory(filters[id]);            /*debg-log*///console.log('activeFilter = %O', filter);                                                 
+    const filter = addActiveFilterToMemory(filters[id]);            /*dbug-log*///console.log('activeFilter = %O', filter);                                                 
     fillFilterDetailFields(filter.displayName, filter.description);
 }
 function fillFilterDetailFields(name, description) {
@@ -146,7 +146,7 @@ function getColumnHeaderFilters(models) {
     }
 }
 /* ============================== DELETE ==================================== */
-function showCnfrmDeleteBttns() {                                   /*debg-log*///console.log('deleteInteractionList')
+function showCnfrmDeleteBttns() {                                   /*dbug-log*///console.log('deleteInteractionList')
     $('#delete-filter').hide();
     $('#set-confm-cntnr').show();  
     hideSavedMsg();  
@@ -183,7 +183,7 @@ function setView(filters) {
     _u('setData', ['curView', view]); 
     _u('setSelVal', ['View', filters.view, 'silent']); 
 }
-function onTableReloadComplete(filters, id) {                       /*debg-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
+function onTableReloadComplete(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
     if (id) { _u('setSelVal', ['Saved Filter Set', id]);  }  //If no id, reapplying filters after form closed.
     setFiltersThatResetTableThenApplyRemaining(filters);
 }
@@ -193,10 +193,10 @@ function setFiltersThatResetTableThenApplyRemaining(filters) {
     .then(applyRemainingFilters.bind(null, filters));
 }
 function setComboboxFilter(filter) {                                
-    const name = Object.keys(filter)[0];                            /*debg-log*///console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
+    const name = Object.keys(filter)[0];                            /*dbug-log*///console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
     return _u('triggerComboChangeReturnPromise', [name, filter[name].value]);
 }
-function applyRemainingFilters(filters) {                           /*debg-log*///console.log('       --applyRemainingFilters = %O', filters);
+function applyRemainingFilters(filters) {                           /*dbug-log*///console.log('       --applyRemainingFilters = %O', filters);
     setNameSearchFilter(filters.panel.name);
     setTimeUpdatedFilter(filters.panel.time);
     applyColumnFilters(filters.table);
@@ -204,21 +204,21 @@ function applyRemainingFilters(filters) {                           /*debg-log*/
     $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
-function setNameSearchFilter(text) {                                /*debg-log*///console.log('setNameSearchFilter. text = [%s]', text);
+function setNameSearchFilter(text) {                                /*dbug-log*///console.log('setNameSearchFilter. text = [%s]', text);
     if (!text) { return; }
     text = text.replace(/['"]+/g, '');
     $('#focus-filters input[type="text"]').val(text).change();
 }
-function setTimeUpdatedFilter(time) {                               /*debg-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
+function setTimeUpdatedFilter(time) {                               /*dbug-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     if (!time) { return; } 
     _u('setSelVal', ['Date Filter', time.type]);
     if (time.date) { _filter.toggleDateFilter(true, time.date); }
 }
-function applyColumnFilters(filters) {                              /*debg-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
+function applyColumnFilters(filters) {                              /*dbug-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
     for (let name in filters) {
         if (filters[name] === null) { continue; }  
-        const colName = Object.keys(filters[name])[0];              /*debg-log*///console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
+        const colName = Object.keys(filters[name])[0];              /*dbug-log*///console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
     delete app.tblApi;
@@ -257,7 +257,7 @@ function submitFilterSet(data, action, successFunc) {
     _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action)]);
 }
 function onFilterSubmitComplete(action, results) {
-    addActiveFilterToMemory(JSON.parse(results.list.entity));                     /*debg-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
+    addActiveFilterToMemory(JSON.parse(results.list.entity));                     /*dbug-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
     pM.updateUserNamedList(results.list, action)
     .then(onUpdateSuccessUpdateFilterUi.bind(null, app.fltr.id));
 }
@@ -281,7 +281,7 @@ function dataFiltersSaved(fltr) {
     const tableFilters = Object.keys(fltr.details.table).length > 0;
     return panleFilters || tableFilters;
 }
-function onFilterDeleteComplete(results) {                          /*debg-log*///console.log('listDeleteComplete results = %O', results)
+function onFilterDeleteComplete(results) {                          /*dbug-log*///console.log('listDeleteComplete results = %O', results)
     pM.updateUserNamedList(results.list, 'delete')
     .then(onDeleteSuccessUpdateFilterUi);
 }
