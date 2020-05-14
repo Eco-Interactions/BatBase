@@ -11,7 +11,7 @@
  *      SYNC WITH ACTIVE FILTERS
  */
 import * as fM from './filters-main.js';
-import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
+import { _ui, _u, accessTableState as tState } from '../db-main.js';
 /* ====================== BUILD FILTER ELEM ================================= */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function getTreeTextFilterElem(entity) {
@@ -53,11 +53,11 @@ function getTextFilterHandler(entity) {                                         
     };
     return cmplxHndlrs[entity] ? cmplxHndlrs[entity] : filterTableByText;
 }
-export function getTreeFilterVal(entity) {                                      //console.log('getTreeFilterVal entity = ', entity);
+export function getTreeFilterVal(entity) {                         /*debug-log*///console.log('getTreeFilterVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
 /* ====================== APPLY FILTER ====================================== */
-export function filterTableByText(text) {                                       //console.log('----filterTableByText [%s]', text);
+export function filterTableByText(text) {                           /*perm-log*///console.log('       +filterTableByText [%s]', text);
     const tblState = tState().get(null, ['api', 'curFocus', 'rowData']);  
     tblState.api.setRowData(getRowsAfterTextFilter(text)); 
     _ui('updateFilterStatusMsg');
@@ -70,19 +70,19 @@ export function filterTableByText(text) {                                       
 }
 function updateTreeFilterState(text) { 
     const val = !text ? false : '"'+text+'"';
-    _filter('setPanelFilterState', ['name', val]);
+    fM.setPanelFilterState('name', val);
 }
-function ifRowContainsText(row, text) {
+function ifRowContainsText(row, text) {                             /*dbug-log*///console.log('ifRow [%s] ContainsText [%s]', row.name, text);
     return row.name.toLowerCase().includes(text);
 }
-export function getTreeRowsWithText(data, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
+export function getTreeRowsWithText(data, text) {                   /*dbug-log*///console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
     const curFocus = tState().get('curFocus');  
     const rows = data.map(row => Object.assign({}, row));
     return rows.filter(row => {  
         const isRow = ifRowContainsText(row, text); 
         if (rowChildrenAreTreeEntities(curFocus, row)) {
             row.children = getTreeRowsWithText(row.children, text);
-        }                                                                       //console.log('isRow = [%s] children [%s]', isRow, nonSrcRowHasChildren(row))
+        }                                                           /*dbug-log*///console.log('   isRow = [%s] children [%s]', isRow, nonSrcRowHasChildren(curFocus, row))
         return isRow || (nonSrcRowHasChildren(curFocus, row) ? 
             !row.children[0].hasOwnProperty('interactionType') : false );
     });
@@ -97,36 +97,17 @@ function nonSrcRowHasChildren(curFocus, row) {
 /* ================= SYNC WITH ACTIVE FILTERS =============================== */
 /*------------------ LOCATION -----------------------------*/
 function filterLocs(text) {
-    const selVal = getSelectedLoc();  
-    if (selVal) { return _filter('updateLocSearch', [selVal, text]); }
-    filterTableByText(text);
-}
-/* --- Get selected location data --- */
-function getSelectedLoc() {
-    const selObj = tState().get('selectedOpts');
-    const selType = getSelectedLocType(selObj);
-    return selObj[selType];
-}
-function getSelectedLocType(selected) {
-    const sels = Object.keys(selected);
-    return !sels.length ? getLocTypeFromElems() : (sels.length == 1 ? 'Region' : 'Country');
-}
-function getLocTypeFromElems() {
-    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
-    return locType.length == 1 ? locType[0] : null;
-}
-function hasSelVal(val) {
-    return val && val !== 'all';
+    fM.applyLocFilter(null, text);
 }
 /* ------------------- SOURCE ----------------------------------------------- */
 function filterSrcs(text) {
     const pubTypeId = _u('getSelVal', ['Publication Type']);
     if (pubTypeId) {
-        return _filter('updatePubSearch', [pubTypeId, text]);    
+        return fM.applyPubFilter(pubTypeId, text);    
     } 
     filterTableByText(text);    
 }
 /* -------------------- TAXON ----------------------------------------------- */
 function filterTaxa(text) {                                                     //console.log('filterTaxa! text [%s]', text);
-    _filter('updateTaxonSearch', [null, text]);
+    fM.applyTxnFilter(null, text);
 }

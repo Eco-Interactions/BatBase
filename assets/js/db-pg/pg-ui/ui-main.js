@@ -25,6 +25,7 @@ import * as pM from './panels/panels-main.js';
 import * as bttns from './feature-buttons.js';
 import * as rowToggle from './table-row-toggle.js'; 
 import * as views from './view-opts.js'; 
+import * as mapUi from './ui-map-state.js';
 
 /* ************************** FACADE **************************************** */
 /* ======================== EXTERNAL USE ==================================== */

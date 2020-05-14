@@ -4,20 +4,21 @@
  * 
  * Exports:
  *      loadTxnFilters
- *      updateTaxonSearch
+ *      applyTxnFilter
  *      
  * TOC:
  *      UI
  *      FILTER
  */
-import { _filter, _ui, _u, rebuildTxnTable, accessTableState as tState } from '../db-main.js';
+import * as fM from './filters-main.js';
+import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../db-main.js';
 /* ========================== UI ============================================ */
-export function loadTxnFilters(tblState) {
+export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
     loadTaxonComboboxes(tblState);
     if (!$('.taxonLbl input[type="text"]').length) { return loadTxnNameSearchElem(tblState); }
 }
 function loadTxnNameSearchElem(tblState) {
-    const searchTreeElem = _filter('getTreeTextFilterElem', ['Taxon'])
+    const searchTreeElem = fM.getTreeTextFilterElem('Taxon');
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -107,7 +108,7 @@ function newSelEl(opts, c, i, field) {
 }
 function initLevelComboboxes(realmLvls) {
     const confg = {};
-    realmLvls.forEach(lvl => {confg[lvl] = updateTaxonSearch});
+    realmLvls.forEach(lvl => {confg[lvl] = applyTxnFilter});
     _u('initComboboxes', [confg]);
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O, levels = %O, tblState = %O", lvlOptsObj, levels, tblState)          
@@ -129,22 +130,23 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-export function updateTaxonSearch(val, text) {
-    if (!val && text === undefined) { return; }                                              //console.log('       +-updateTaxonSearch.')
+export function applyTxnFilter(val, text) {
+    if (!val && text === undefined) { return; }                                              //console.log('       +-applyTxnFilter.')
     const tblState = tState().get(['rcrdsById', 'flags']);  
     if (!tblState.flags.allDataAvailable) { return $(this)[0].selectize.clear(); } 
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
-    const txt = text || _filter('getTreeFilterVal', ['Taxon']);
+    const txt = text || fM.getTreeFilterVal('Taxon');
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});  
     addToFilterState();
-    return rebuildTxnTable(rcrd, 'filtering', txt);
+    return rebuildTxnTable(rcrd, 'filtering', txt)
+        .then(() => fM.reapplyDateFilterIfActive());
 
     function addToFilterState() {
         const curLevel = rcrd.level.displayName;
-        if (!rcrd.parent || rcrd.parent == 1) { return _filter('setPanelFilterState', ['combo', false]); }
+        if (!rcrd.parent || rcrd.parent == 1) { return fM.setPanelFilterState('combo', false); }
         const filter = {};
         filter[curLevel] = { text: rcrd.name, value: val };
-        _filter('setPanelFilterState', ['combo', filter]);
+        fM.setPanelFilterState('combo', filter);;
     }
 }
 /**

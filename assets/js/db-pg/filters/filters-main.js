@@ -24,9 +24,9 @@ import * as fTxn from './txn-filters.js';
  * {str} timeout        Ppresent when window is being resized.
  * {ary} fRowData       rowData when the date-filter is applied.
  * {obj} active
- *      combo: obj with combo-label (k): obj with text and value (k) with their respective values
+ *      combo: obj with combo-label(k): obj with text and value(v) with their respective values
  *      name: name filter string
- *      time: obj with the datetime and filter type, time published or time added/updated 
+ *      date: obj with the datetime(v) and filter type(k), date published or added/updated 
  */
 let fState = { active: {}};
 
@@ -48,9 +48,12 @@ export function getRowsWithText(text) {
 export function initDateFilterUi() {
     fDate.initDateFilterUi();
 }
+export function clearDateFilter() {
+    fDate.clearDateFilter();
+}
 export function reapplyDateFilterIfActive() {
     if (!$('#shw-chngd')[0].checked) { return; }
-    fDate.reapplyPreviousDateFilter(fState.active.date, 'skip'); 
+    fDate.reapplyPreviousDateFilter(fState.active.date.time, 'skip'); 
 }
 export function toggleDateFilter(state) {
     fDate.toggleDateFilter(state);
@@ -65,20 +68,20 @@ export function syncViewFiltersAndUi(focus) {
 export function loadLocFilters(tblState) {                      
     fLoc.loadLocFilters(tblState);
 }
-export function updateLocSearch() {                                 
-    return fLoc.updateLocSearch(...arguments);
+export function applyLocFilter() {                                 
+    return fLoc.applyLocFilter(...arguments);
 }
 export function loadSrcFilters(realm) {                      
     fSrc.loadSrcFilters(realm);
 }
-export function updatePubSearch() {
-    return fSrc.updatePubSearch(...arguments);
+export function applyPubFilter() {
+    return fSrc.applyPubFilter(...arguments);
 }
 export function loadTxnFilters(tblState) {
     fTxn.loadTxnFilters(tblState);
 }
-export function updateTaxonSearch() {                                        
-    return fTxn.updateTaxonSearch(...arguments);
+export function applyTxnFilter() {                                        
+    return fTxn.applyTxnFilter(...arguments);
 }
 /* ==================== FILTER STATE ======================================== */
 /* --------------------------- SET ----------------------------------------- */
@@ -89,11 +92,13 @@ export function setPanelFilterState(key, value) {
     if (value === false) { delete fState.active[key]; 
     } else { fState.active[key] = value; }
 }
+/** Because of how time consuming it is to choose a date, it persists through reset */
 export function resetFilterState() {
-    fState = { active: {}};
+    const prevDateFilter = fState.active.date;
+    fState = { active: { date: prevDateFilter }};
 }
 /* --------------------------- GET ----------------------------------------- */
-export function getPanelFilterState(key) {
+export function getFilterStateKey(key) {
     return key ? fState.active[key] : fState.active;
 }
 export function getFilterState() {
@@ -128,12 +133,12 @@ function getSavedFilterStatus(set) {                                            
 }
 function getPanelFilters(filters) {
     return Object.keys(filters).map(type => {  
-        return type === 'time' ? 
-            getTimeFltrString(filters[type]) : Object.keys(filters[type])[0]
+        return type === 'date' ? 
+            getDateFltrString(filters[type]) : Object.keys(filters[type])[0]
     });
 }
 function addExternalFilters() {  
-    const map = { combo: addComboValue, name: addName, time: getTimeFltrString };
+    const map = { combo: addComboValue, name: addName, date: getDateFltrString };
     return getFocusFilterDisplayVals();
 
     function getFocusFilterDisplayVals() {
@@ -152,10 +157,10 @@ function addComboValue(comboObj) {                                              
 function addName(name) {
     return name;
 }
-function getTimeFltrString(time) {
+function getDateFltrString(date) {
     if (!fState.fRowData) { return null; }
-    const type = time.type === 'cited' ? 'Published' : 'Updated';
-    return 'Time '+ type;
+    const type = date.type === 'cited' ? 'Published' : 'Updated';
+    return 'Date '+ type;
 }
 function getTableFilters(filters) {
     const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 

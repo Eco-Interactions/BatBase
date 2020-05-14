@@ -110,7 +110,7 @@ function filtersApplied() {
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
-export function newIntList(val) {                                   /*debg-log*///console.log('           --New Interaction List');
+export function newIntList(val) {                                   /*dbug-log*///console.log('           --New Interaction List');
     pM.updateSubmitEvent('#submit-list', createDataList);
     updateUiForListCreate();
     fillListDataFields(val, '', 0);
@@ -152,7 +152,7 @@ function editDataList() {
 }
 function fillListData(id) {
     _u('getData', ['dataLists']).then(lists => {
-        const list = addActiveListToMemory(lists[id]);              /*debg-log*///console.log('activeList = %O', list);                                                 
+        const list = addActiveListToMemory(lists[id]);              /*dbug-log*///console.log('activeList = %O', list);                                                 
         fillListDataFields(
             list.displayName, list.description, list.details.length);  
     });
@@ -314,7 +314,7 @@ function sizeIntPanelTab() {
 function getPseudoStyle() {
     const panelT = $('#list-pnl').position().top;
     const tabW = $('#list-opts').innerWidth();  
-    const tabL = $('#list-opts').position().left + 1;               /*debg-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    const tabL = $('#list-opts').position().left + 1;               /*dbug-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-int-bttm-border:before { 
         position: absolute;
         content: '';

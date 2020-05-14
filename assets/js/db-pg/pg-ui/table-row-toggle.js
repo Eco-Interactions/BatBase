@@ -45,7 +45,7 @@ function toggleTreeByOneLvl(tApi, opening) {
     function updateToggleTreeButton() {
         const shownRows = tblModel.rowsToDisplay.length; 
         const allRows = getCurTreeRowCount(tApi);
-        const closedRows = shownRows < allRows;                     /*debg-log*///console.log("%s < %s ? %s... treeBttn = %s ", shownRows, allRows, closedRows, bttXpandedAll);
+        const closedRows = shownRows < allRows;                     /*dbug-log*///console.log("%s < %s ? %s... treeBttn = %s ", shownRows, allRows, closedRows, bttXpandedAll);
 
         if (!closedRows) { setTreeToggleData(true); 
         } else if (bttXpandedAll === true) { setTreeToggleData(false); }
