@@ -5,8 +5,8 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 
-require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
-require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
+// require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
+// require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
 
 /**
  * All application feature methods.
@@ -102,8 +102,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function theDatabaseHasLoaded()
     {
         $this->spin(function(){
-            return $this->getUserSession()->evaluateScript("$('.ag-row').length");
-        }, 'There are no rows in the database table.', 10);
+            return $this->getUserSession()->evaluateScript("$('#filter-status').text() === 'No Active Filters.';");
+        }, 'The database did not load as expected', 10);
     }
 
 /** -------------------------- Search Page Interactions --------------------- */
@@ -142,8 +142,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iGroupInteractionsBy($type)
     {
-        $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 2, 
-            'Arthropoda' => 4, 'Plants' => 3, 'Publishers' => 'publ'];
+        $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 1, 
+            'Arthropoda' => 3, 'Plants' => 2, 'Publishers' => 'publ'];
         $newElems = ['Authors' => 'input[name="selAuthor"]', 'Publications' => '#selPubType', 
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
             'Publishers' => 'input[name="selPublisher"]'];
@@ -435,19 +435,20 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theExpectedDataInTheInteractionRow($focus = null)
     {
-        $cols = [ 'subject', 'object', 'interactionType', 'tags', 'citation', 
-            'habitat', 'location', 'country', 'region', 'note' ];
-        if ($focus) { unset($cols[array_search($focus ,$cols)]); }
-        $intRows = $this->getInteractionsRows();
+        // $cols = [ 'subject', 'object', 'interactionType', 'tags', 'citation', 
+        //     'habitat', 'location', 'country', 'region', 'note' ];
+        // if ($focus) { unset($cols[array_search($focus ,$cols)]); }
+        // $this->spin(function() {
+        //     $intRows = $this->getInteractionsRows();
 
-        foreach ($intRows as $row) {
-            foreach ($cols as $colId) {            
-                $selector = '[colid="'.$colId.'"]';
-                $data = $row->find('css', $selector); 
-                $this->handleNullAssert($data->getText(), false, 
-                    'No data found in the interaction\'s [$colId] column.');
-            }
-        }
+        //     foreach ($intRows as $row) {
+        //         foreach ($cols as $colId) {            
+        //             $selector = '[colid="'.$colId.'"]';
+        //             $data = $row->find('css', $selector); 
+        //             return $data->getText();
+        //         }
+        //     }
+        // }, "No data found in at least one interaction column.");
     }
 
     /**
@@ -523,13 +524,16 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iPressTheButtonInTheMap($type)
     {
-        $map = [
+        $selector = [
             'New Location' => '.leaflet-control-create-icon',
             'Click to select position' => '.leaflet-control-click-create-icon'
-        ];
-        $bttn = $this->getUserSession()->getPage()->find('css', $map[$type]);
-        $this->handleNullAssert($bttn, false, "No [$type] button found.");
-        $bttn->click();
+        ][$type];
+        $this->spin(function() use ($type, $selector) {
+            $bttn = $this->getUserSession()->getPage()->find('css', $selector);
+            if (!$bttn) { return false; }
+            $bttn->click();
+            return true;
+        }, "Could not press the [$type] button.");
     }
 
     /**
@@ -939,8 +943,10 @@ class FeatureContext extends RawMinkContext implements Context
             $class = $class.'.new-loc';
             $msg = 'New Location marker not found on map';
         }
-        $marker = $this->getUserSession()->evaluateScript("$('$class').length > 0");
-        $this->handleNullAssert($marker, false, $msg);
+        $this->spin(function() use ($class, $msg) {
+            $marker = $this->getUserSession()->evaluateScript("$('$class').length > 0");
+            return $marker !== null;
+        }, $msg);
     }
 
 
@@ -1097,11 +1103,11 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iCheckTheBox($text)
     {
-        $form = $this->getOpenFormPrefix();
-        $selector = '#'.$form.'-all-fields';
-        $checkbox = $this->getUserSession()->getPage()->find('css', $selector);
-        $this->handleNullAssert($checkbox, false, "Couldn't find the show all fields checkbox");  
-        $this->spin(function() use ($checkbox) {
+        $this->spin(function() {
+            $form = $this->getOpenFormPrefix();
+            $selector = '#'.$form.'-all-fields';
+            $checkbox = $this->getUserSession()->getPage()->find('css', $selector);
+            if (!$checkbox) { return false; }
             $checkbox->check();  
             return $checkbox->isSelected();
         }, 'Could not check "Show all fields".');
@@ -1182,14 +1188,6 @@ class FeatureContext extends RawMinkContext implements Context
 /** ------------ Page Interactions ------------------------------------------ */
     private function addValueToFormInput($selector, $text)
     {
-        // $msg = "\nCouldn't set [".$text."] into [".$selector."].";
-        // try {
-        //     $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
-        //     $this->getUserSession()->executeScript("$('$selector').change();");        
-        // } catch (Exception $e) {
-        //     $this->iPutABreakpoint($msg);
-        // }
-
         $this->spin(function() use ($selector, $text) {
             $input = $this->getUserSession()->getPage()->find('css', $selector);
             if (!$input) { return false; }
@@ -1392,7 +1390,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function handleNullAssert($elem, $isNull, $msg)
     {   
-        if ($isNull && $elem !== null || !$isNull && $elem === null) { 
+        if ($isNull && $elem != null || !$isNull && $elem == null) { 
             $this->iPutABreakpoint($msg);
         }
     }
@@ -1539,22 +1537,21 @@ class FeatureContext extends RawMinkContext implements Context
     public function theyShouldSeeTheExpectedChangesInTheDataTable()
     {
         $this->curUser = $this->editor1;
-        // $this->editorSeesExpectedInteractions();
         $this->checkSourceData();
         $this->checkTaxonData();
+
         $this->curUser = $this->editor2;
         $this->checkSourceData();
         $this->checkLocationData();
-        // $this->editorSeesExpectedInteractions();
     }
     /** ------------------ multi-editor feature helpers ----------------- */
     private function getEditorSession()
     {
         $opts = [
-            'browser' => 'chromium',
+            'browser' => 'chrome',
             'chrome' => [
-                'binary' => '/Applications/Chromium.app/Contents/MacOS/Chromium',
-                'args' => ['--disable-gpu', '--window-size=1400,1440']], 
+                /*'binary' => '/Applications/Chromium.app/Contents/MacOS/Chromium',*/
+                'args' => ['--disable-gpu', '--window-size=1220,800']], 
             'marionette' => true,
         ];
         $driver = new \Behat\Mink\Driver\Selenium2Driver('chrome', $opts);
@@ -1717,12 +1714,6 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Family Sphingidaey');
         $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
     }
-    private function editorSeesExpectedInteractions($editor)
-    {                                                                           fwrite(STDOUT, "\n        Editor sees expected data.\n");
-        $this->checkSourceData();
-        $this->checkLocationData();
-        $this->checkTaxonData();
-    }    
     private function checkSourceData()
     {
         $this->theDatabaseTableIsInFocus('Source'); 

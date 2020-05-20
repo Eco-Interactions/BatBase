@@ -106,7 +106,7 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="parentSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="parentSource", fetch="EXTRA_LAZY")
      * @ORM\OrderBy({
      *     "description"="ASC"
      * })
@@ -130,7 +130,7 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="source")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="source", fetch="EXTRA_LAZY")
      */
     private $interactions;
 
@@ -183,7 +183,8 @@ class Source
      *     targetEntity="AppBundle\Entity\Contribution", 
      *     mappedBy="authorSource", 
      *     cascade={"remove"},
-     *     orphanRemoval=true
+     *     orphanRemoval=true,
+     *     fetch="EXTRA_LAZY"
      * )
      *
      * A collection of all works an Author source contributed to.

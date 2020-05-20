@@ -6,7 +6,16 @@
 #   CHANGES SINCE LAST USER UPDATE
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
+Change Log:
+    - Init Download previously: 30-45 seconds (~34 Locally), now reduced ~5-15 seconds
+
+QUESTIONS:
+
 >==== CURRENT ====
+
+>Next
+    - Refactor Source data 
+        - merge detail and core data on client side
     - Handle potential source name duplication
         - duplicate display names for entities with unique name fields
             - source: if duplicate name is for a soft-deleted entity. 
@@ -21,31 +30,17 @@
                         - and to indicate they are creating a distinct record 
                             - submit, append '-deleted' to deleted record to eliminate conflict. 
     - Batch downloads? Built in doctrine tools? serialize?
-    - Refactor init download 
-        - taxa (bats then interactions) first, load table and tutorial asap.
-        - source next, source view available asap
-        - location (minus geojson) (table fully available here)
-        - list data 
-        - geojson last, map views available from there (maps available)
-    - Refactor Source data 
-        - merge detail and core data on client side
-
-DUE: MARCH 20
-
-
-STANDARDS:
-    append '_' before imported file, without it for the access method.
-QUESTIONS:
-    -
-
-TASKS:
-
-NEXT:
     - Create model of local storage
         - of entity relations
 
-Change Log:
-    - 
+
+
+    -
+
+STANDARDS:
+    - append '_' before imported file, without it for the access method.
+    - alphbetize where sensible
+
 
 
 
@@ -59,8 +54,8 @@ Prep:
 Feedback:
 Next/future rounds:
     Possible:
-        - Data Review panel
     Next:
+        - Data Review panel
         - UI:
         - testing:
     Then:

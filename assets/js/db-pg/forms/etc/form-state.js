@@ -27,13 +27,12 @@ export function clearState() {
  * > submit - Data used during form submission: fLvl, entity
  */
 export function initFormState(action, entity, id) {  
-    const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
-        'author', 'publisher', 'interactionType'];
-    if (ifEditingInteraction(action, entity)) { entities.push('interaction'); }
-
+    const entities = getDataKeysForEntityForm(action, entity);
+    formState.init = true; //eliminates possibility of opening form multiple times.
     return _f.util('getData', [entities]).then(data => {
         initMainState(data);
         addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormState = %O", _f.util('snapshot', [formState]), formState);
+        delete formState.init;
         return formState;
     });
 
@@ -48,8 +47,39 @@ export function initFormState(action, entity, id) {
         };
     }
 }
-function ifEditingInteraction(action, entity) {
-    return action === 'edit' && entity === 'interaction';
+function getDataKeysForEntityForm(action, entity) {
+    const coreKeys = ['author', 'citation', 'interaction', 'interactionType', 
+        'location', 'publication', 'publisher', 'source', 'taxon'];
+    return entity === 'interaction' ? 
+        getIntFormDataKeys() : getSubEntityFormDataKeys(entity, 'edit');
+
+    function getIntFormDataKeys() {
+        if (action === 'create') { coreKeys.splice(2, 1); }
+        return coreKeys;
+    }
+}
+function getSubEntityFormDataKeys(entity, action) {
+    const map = {
+        'author': {
+            'edit': ['source', 'author']
+        },
+        'citation': {
+            'edit': ['source', 'citation', 'author', 'publisher']
+        },
+        'location': {
+            'edit': ['location']
+        },
+        'publication': {
+            'edit': ['source', 'publication']
+        },
+        'publisher': {
+            'edit': ['source', 'publisher']
+        },
+        'taxon': {
+            'edit': ['taxon']
+        }
+    }
+    return map[entity][action];
 }
 /**
  * Adds the properties and confg that will be used throughout the code for 
@@ -114,7 +144,7 @@ export function getEditEntityId(type) {
     return formState.editing[type];
 }
 export function getFormState() {  
-    return formState;
+    return Object.keys(formState).length ? formState : false;
 }
 export function getStateProp(prop) {                                            //console.log('args = %O, memory = %O', arguments, formState); 
     return formState[prop];
@@ -150,9 +180,9 @@ function buildRcrdsObj(entities) {
 }/** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {                                           
     if (!formState.records[entity]) { return; }
-    const rcrd = formState.records[entity][id];
-    if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, formState.records); console.trace() }
-    return _f.util('snapshot', [formState.records[entity][id]]); 
+    return formState.records[entity][id] ? 
+        _f.util('snapshot', [formState.records[entity][id]]) :
+        _f.alertIssue('noRcrdFound', {id: id, entity: entity });
 }
 /* ---------------------------- Setters ------------------------------------- */
 export function addEntityRecords(entity, rcrds) {
@@ -173,7 +203,7 @@ export function setFormProp(fLvl, prop, val) {
 export function setRealmProp(prop, val) {  
     return formState.forms.realmData[prop] = val;
 }
-export function setFormFieldData(fLvl, field, val, type) {
+export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = formState.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }

@@ -308,17 +308,17 @@ export function rebuildCitationText(params) {                                   
 } /* End rebuildCitationText */
 /** ======================== HELPERS ======================================== */
 /** Formats publisher data and returns the Name, City, Country. */
-function buildPublString(pub, srcRcrds, publRcrds) {  
-    const publ = getPublisher(pub);
+function buildPublString(pubSrc, srcRcrds, publRcrds) {
+    const publ = getPublisher(pubSrc);
     if (!publ) { return false; }
     const name = publ.displayName;
     const city = publ.city ? publ.city : '[ADD CITY]';
     const cntry = publ.country ? publ.country : '[ADD COUNTRY]';
     return [name, city, cntry].join(', ');
 
-    function getPublisher(pub) {
-        if (!pub.parent) { return false; }
-        const publSrc = getPublRcrd(srcRcrds, 'source', pub.parent);
+    function getPublisher(pubSrc) {
+        if (!pubSrc.parent) { return false; }  
+        const publSrc = getPublRcrd(srcRcrds, 'source', pubSrc.parent);
         return getPublRcrd(publRcrds, 'publisher', publSrc.publisher);
     }
     function getPublRcrd(rcrds, entity, id) {

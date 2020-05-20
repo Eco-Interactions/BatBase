@@ -11,7 +11,7 @@
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
-import { accessTableState as tState } from '../../db-pg/db-main.js';
+import { accessTableState as tState, getCurrentFilterState } from '../../db-pg/db-main.js';
 
 /* ------------------- CREATE SENTRY EVENT ---------------------------------- */
 /** Sends Error object to Sentry, issue tracker. */
@@ -20,13 +20,14 @@ export function reportErr(e) {
 }
 /**
  * IssueTags {errDataKeys}:
- *     TestIssue null (no browser alert)
- *     undefiendDataKey {key}
  *     invalidDataKeyType {key, type}
- *     expectedDataNotFound {key}
  *     dataSyncFailure {fails} (no browser alert)
+ *     editorReport {summary, steps, etc} (no browser alert)
+ *     expectedDataNotFound {key}
  *     fetchIssue {url, responseText}
  *     noRcrdFound {id, entity} (no browser alert)
+ *     TestIssue null (no browser alert)
+ *     undefiendDataKey {key}
  */
 export function alertIssue(tag, errData = {}) {                                      
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
@@ -45,7 +46,9 @@ function buildBasicStateData() {
     if ($('body').data('this-url') !== '/search') { return data; }
     const state = tState().get();
     return Object.assign(data, { 
-        focus: state.curFocus, view: state.curView, userRole: state.userRole});
+        focus: state.curFocus, view: state.curView, userRole: state.userRole,
+        filters: getCurrentFilterState()
+    });
 }
 function buildErrObj(errData, tag) {
     const obj = {};
@@ -69,17 +72,27 @@ class SentryError extends Error {
 /* ------------------- ALERT USER ------------------------------------------- */
 /**
  * IssueTags: alertHandler
- *     undefiendDataKey: showGeneralAlert
- *     invalidDataKeyType: showGeneralAlert
- *     expectedDataNotFound: showGeneralAlert
+ *     alertNoRcrdFound: noRcrdFoundInForms
+ *     comboboxNotFound: showGeneralAlert
  *     dataSyncFailure: (handled in form validation code)
+ *     editorReport: (handled in bug report form)
+ *     expectedDataNotFound: showGeneralAlert
  *     fetchIssue: showGeneralAlert
+ *     invalidDataKeyType: showGeneralAlert
  *     noRcrdFound: (handled at relevant points through the code)
+ *     undefiendDataKey: showGeneralAlert
  */
 function handleUserAlert(tag) {
-    const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue'];
+    const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue', 'editorReport'];
     if (silent.indexOf(tag) !== -1) { return; }
-    showGeneralAlert();
+    const map = {
+        'alertNoRcrdFound': noRcrdFoundInForms
+    };
+    if (tag in map) { map[tag](); 
+    } else { showGeneralAlert(); }
+}
+function noRcrdFoundInForms() {
+    alert(`Expected record not found. Try reloading the page or ${getEditorErrMsg()}`);
 }
 function showGeneralAlert() {                                                   
     alert(`An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);
@@ -90,7 +103,7 @@ function getErrMsgForUserRole() {
     return msgs[userRole] ? msgs[userRole]() : getEditorErrMsg();
 }
 function getVisitorErrMsg() {
-    return `contact us at info@batplant.org and let us know about the issue you are experiencing.`;
+    return `contact us at info@batbase.org and let us know about the issue you are experiencing.`;
 }
 function getUserErrMsg() {
     return `contact us by Leaving Feedback on this page (in your user menu) and let us know about the issue you are experiencing.`;

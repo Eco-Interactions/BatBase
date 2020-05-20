@@ -386,7 +386,7 @@ export function getRelationshipFields(entity) {
         'publication': ['publicationType', 'contributor', 'publisher', 
             'publisher/University'],
         'publisher': [],
-        'taxon': ['level', 'parentTaxon'],
+        'taxon': ['level', 'parentTaxon', 'realm'],
         'interaction': ['citationTitle', 'location', 'subject', 'object', 
             'interactionTags', 'interactionType' ]
     };

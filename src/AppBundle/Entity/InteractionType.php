@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation as JMS;
  * InteractionType.
  *
  * @ORM\Table(name="interaction_type")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -52,7 +52,10 @@ class InteractionType
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="interactionType")
+     * @ORM\OneToMany(
+     *      targetEntity="AppBundle\Entity\Interaction", 
+     *      mappedBy="interactionType", 
+     *      fetch="EXTRA_LAZY" )
      */
     private $interactions;
 

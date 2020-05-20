@@ -17,9 +17,6 @@
  *     getRcrdOpts      
  *     getTaxonOpts     
  *     buildMultiSelectElems
- *
- *
- *
  * 
  */
 import * as _f from '../forms-main.js';
@@ -121,7 +118,7 @@ function getSuccessMsgHtml(msg) {
     return div;
 }
 function getSuccessMsgExitBttn() {
-    const attr = { 'id': 'sucess-exit', 'class': 'tbl-bttn exit-bttn', 
+    const attr = { 'id': 'sucess-exit', 'class': 'exit-bttn', 
         'type': 'button', 'value': 'X' }
     const bttn = _f.util('buildElem', ['input', attr]);
     $(bttn).click(exitSuccessMsg);
@@ -163,16 +160,16 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {                                     
-    const submitData = _f.state('getStateProp', ['submit']);                    console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
+    const submitData = _f.state('getStateProp', ['submit']);                    //console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
     if (!submitData) { return; }
     if (submitData.entity === 'interaction') { return refocusAndShowUpdates(submitData); }   
-    _f.loadDataTableAfterFormClose(submitData.focus);
+    _f.loadDataTableAfterFormClose();
 }
-function refocusAndShowUpdates(submitData) {                                              console.log('refocusAndShowUpdates.')
+function refocusAndShowUpdates(submitData) {                                    //console.log('refocusAndShowUpdates.')
     if (_f.state('getFormProp', ['top', 'action']) === 'create') {
         _f.showTodaysUpdates('srcs');   
     } else {
-        _f.loadDataTableAfterFormClose(_f.state('getStateProp', ['curFocus']));
+        _f.loadDataTableAfterFormClose();
     }
 }
 /** -------------- sort! --------------- */

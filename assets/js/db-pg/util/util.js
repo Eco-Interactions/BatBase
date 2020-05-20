@@ -51,11 +51,11 @@ extendPrototypes();
 export function initCombobox() {
     return _cmbx.initCombobox(...arguments);
 } 
-export function initComboboxes() {
-    return _cmbx.initComboboxes(...arguments);
+export function initComboboxes(fieldAry) {
+    return _cmbx.initComboboxes(fieldAry);
 } 
-export function getSelVal() {
-    return _cmbx.getSelVal(...arguments);
+export function getSelVal(field) {
+    return _cmbx.getSelVal(field);
 } 
 export function setSelVal() {
     return _cmbx.setSelVal(...arguments);
@@ -95,8 +95,8 @@ export function buildSimpleOpts() {
 export function alphaOptionObjs() {
     return _elems.alphaOptionObjs(...arguments);
 }
-export function getOptsFromStoredData() {
-    return _elems.getOptsFromStoredData(...arguments);
+export function getOptsFromStoredData(prop) {
+    return _elems.getOptsFromStoredData(prop);
 }
 export function buildOptsObj() {
     return _elems.buildOptsObj(...arguments);

@@ -163,10 +163,11 @@ class DataEntryController extends Controller
     private function setDetailData($dData, $dName, &$returnData, &$em)
     {
         $dEntity = $this->getDetailEntity($dName, $returnData->detailEdits, $em);
-        $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity);
+        if ($dName !== 'geoJson') { 
+            $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity); 
+        }
         $this->addDetailToCoreEntity($returnData->coreEntity, $dEntity, $dName, $em);
         $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);  
-
         return $dEntity;
     }
     private function setCoreEntity($coreName, &$coreEntity, &$dEntity)
@@ -217,8 +218,7 @@ class DataEntryController extends Controller
             "tags" => function($ary) use (&$entity, &$edits, &$em) { 
                 $this->handleTags($ary, $entity, $edits, $em); },
             "source" => function($id) use (&$entity, &$edits, &$em) {
-                $this->addInteractionToSource($id, $entity, $edits, $em);
-            }
+                $this->addInteractionToSource($id, $entity, $edits, $em); }
         ];
         foreach ($formData as $rEntityName => $val) {  
             if (array_key_exists($rEntityName, $edgeCases)) {
@@ -438,11 +438,13 @@ class DataEntryController extends Controller
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
-    {   
-        $this->get('logger')->error($e->getMessage());
+    {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        if (!strpos($e->getMessage(), 'Duplicate Entry')) {
+            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        }
         $response = new JsonResponse();
         $response->setStatusCode(500);
-        $response->setData(array('error' => $e->getMessage()));
+        $response->setData($e->getMessage());
         return $response;
     }
     /** Sends an object with the entities' serialized data back to the crud form. */

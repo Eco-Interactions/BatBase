@@ -28,8 +28,8 @@ export function util(funcName, params) {
 export function map(funcName, params = []) {
     return _map[funcName](...params);
 }
-export function loadDataTableAfterFormClose(focus) {
-    _pg.resetDataTable(focus);
+export function loadDataTableAfterFormClose() {
+    _pg.reloadTableWithCurrentFilters();
 }
 export function showTodaysUpdates(focus) {
     _pg.showTodaysUpdates(focus);
@@ -42,6 +42,9 @@ export function updateLocalDb() {
 }
 export function resetStoredData() {
     _pg.db('resetStoredData');
+}
+export function alertIssue() {
+    return _pg.alertIssue(...arguments);
 }
 /** ====================== FORMS FACADE ===================================== */
 export function forms(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface

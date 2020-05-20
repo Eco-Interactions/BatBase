@@ -1,7 +1,7 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
-import * as agGrid from '../../../libs/grid/ag-grid.min.js';
+import * as agGrid from '../../../libs/grid/ag-grid.js';
 import * as _forms from '../forms/forms-main.js';
 import { updateFilterStatusMsg } from './filters/filters-main.js';
 import unqVals from './filters/ag-grid-unique-filter.js';
@@ -15,7 +15,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export default function init(view, rowData, state) {                /*Perm-log*/console.log('           +--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
+export default function init(view, rowData, state) {                /*Perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
     return initTable(view, rowData)
@@ -95,9 +95,10 @@ function softRefresh() { tblState.api.refreshView(); }
  */
 function getColumnDefs(mainCol) { 
     const realm = tblState.curRealm || false;  
-    return getData('tagNames').then(buildColDefs);
+    return getData('tagNames', true).then(buildColDefs);
 
     function buildColDefs(tags) { 
+
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
@@ -117,25 +118,40 @@ function getColumnDefs(mainCol) {
                 {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
                 {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
                 {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-                {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-                {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                    filter: unqVals, filterParams: {values: Object.keys(tags)}},
-                {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
-                {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+                {headerName: "Subject Taxon", field: "subject", width: respW('sub'), cellRenderer: addTitle, comparator: sortByRankThenName },
+                {headerName: "Object Taxon", field: "object", width: respW('ob'), cellRenderer: addTitle, comparator: sortByRankThenName },
+                {headerName: "Type", field: "interactionType", width: respW('typ'), cellRenderer: addTitle, filter: unqVals },
+                getTagColDef(tags),
+                {headerName: "Citation", field: "citation", width: respW('cit'), cellRenderer: addTitle},
+                {headerName: "Habitat", field: "habitat", width: respW('hab'), cellRenderer: addTitle, filter: unqVals },
+                {headerName: "Location", field: "location", width: respW('loc'), hide: ifLocView(), cellRenderer: addTitle },
+                {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
                 {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
-                {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-                {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
-                {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+                {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+                {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+                {headerName: "Country", field: "country", width: respW('cty'), cellRenderer: addTitle, filter: unqVals },
+                {headerName: "Region", field: "region", width: respW('reg'), cellRenderer: addTitle, filter: unqVals },
+                {headerName: "Note", field: "note", width: respW('nt'), cellRenderer: addTitle} ];
     }
 }
+function respW(col) {
+    const pgW = $(window).width() < 1500 ? 'sml' : 'reg';
+    const map = {
+        sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 }, 
+        typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 }, 
+        hab: { sml: 90,  reg: 100 }, loc: { sml: 111, reg: 122 }, 
+        cty: { sml: 94,  reg: 102 }, reg: { sml: 90,  reg: 100 }, 
+        nt:  { sml: 100, reg: 127 }
+    };
+    return map[col][pgW];
+}
+function getTagColDef(tags) {
+    const values = tags ? Object.keys(tags) : [];
+    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addTitle, 
+                    filter: unqVals, filterParams: {values: values}}
+}
 /** Adds tooltip to Interaction row cells */
-function addToolTipToCells(params) {
+function addTitle(params) {
     var value = params.value || null;
     return value === null ? null : '<span title="'+value+'">'+value+'</span>';
 }
@@ -148,7 +164,7 @@ function addToolTipToTree(params) {
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() { 
     var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
-    if (tblState.curFocus === 'locs') { offset = offset + 60; }
+    if (tblState.curFocus === 'locs') { offset = offset + 66; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
@@ -254,13 +270,20 @@ function ifLocView() {
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
     const id = params.data.id;
-    const zoomLvl = getZoomLvl(params.data);  
-    const path = require('../../../images/icons/marker-icon.png');
-    const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
-        title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
     $('#search-tbl').off('click', '#map'+id);
-    $('#search-tbl').on('click', '#map'+id, showLocOnMap.bind(null, params.data.onMap, zoomLvl));
-    return icon;
+    $('#search-tbl').on('click', '#map'+id, 
+        showLocOnMap.bind(null, params.data.onMap, getZoomLvl(params.data)));
+    return getMapIcon(id);
+}
+function getMapIcon(id) {
+    const path = require('../../../images/icons/marker-icon.png');
+    return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'  
+        title='Show on Map' style='${getMapIconStyles()}'>`;
+}
+function getMapIconStyles() {
+    const styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
+    if ($('#shw-map').data('disabled')) { styles += ' opacity: .3;' }
+    return styles;
 }
 function getZoomLvl(loc) {  
     return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;   
@@ -296,7 +319,7 @@ function isOpenRowWithChildInts(params) {
 }
 function txnHasIntsAfterFilters(params) {
     if (params.data.taxonLvl === 'Species') { return true; }
-    return params.node.childrenAfterFilter.some(function(childRow) {
+    return params.node.childrenAfterFilter.some(childRow => {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });
 }
@@ -305,7 +328,7 @@ function txnHasIntsAfterFilters(params) {
  * data tree after filtering.
  */
 function locHasIntsAfterFilters(params) {  
-    return params.node.childrenAfterFilter.some(function(childRow) {
+    return params.node.childrenAfterFilter.some(childRow => {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });
 }
@@ -337,7 +360,7 @@ function updateTableState(tblOpts, rowData) {
 }
 function onTableInitComplete(rowData) {
     hidePopUpMsg();
-    enableTableButtons();
+    enableTableButtons(tblState.flags.allDataAvailable);
     hideUnusedColFilterMenus();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
     updateFilterStatusMsg();

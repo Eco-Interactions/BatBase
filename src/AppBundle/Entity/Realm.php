@@ -58,14 +58,21 @@ class Realm
      * @JMS\SerializedName("uiLevelsShown")     
      */
     private $uiLevelsShown;
-
+    
     /**
-     * @var \AppBundle\Entity\Taxon
+     * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="realm")
-     * @ORM\JoinColumn(name="taxon_id", referencedColumnName="id", unique=true)
+     * @ORM\OneToMany(
+     *     targetEntity="AppBundle\Entity\RealmRoot", 
+     *     mappedBy="realm", 
+     *     cascade={"remove"},
+     *     orphanRemoval=true,
+     *     fetch="EXTRA_LAZY"
+     * )
+     *
+     * A collection of all works an Author source contributed to.
      */
-    private $taxon;
+    private $taxa;
 
     /**
      * @var \DateTime
@@ -208,37 +215,43 @@ class Realm
     }
 
     /**
-     * Set taxon.
+     * Add a Taxon.
      *
-     * @param \AppBundle\Entity\Taxon $taxon
+     * @param \AppBundle\Entity\RealmRoot $realmRoot
      *
      * @return Realm
      */
-    public function setTaxon(\AppBundle\Entity\Taxon $taxon = null)
+    public function addTaxon(\AppBundle\Entity\RealmRoot $realmRoot)
     {
-        $this->taxon = $taxon;
+        $this->taxa[] = $realmRoot;
 
         return $this;
     }
 
     /**
-     * Get taxon.
+     * Remove a Taxon.
      *
-     * @return \AppBundle\Entity\Taxon
+     * @param \AppBundle\Entity\RealmRoot $realmRoot
      */
-    public function getTaxon()
+    public function removeTaxon(\AppBundle\Entity\RealmRoot $realmRoot)
     {
-        return $this->taxon;
+        $this->taxa->removeElement($realmRoot);
     }
 
     /**
-     * Get the realm Taxon's id.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("taxon")
+     * Get Taxa.
+     *
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getTaxonId()
+    public function getTaxa()
     {
-        return $this->taxon->getId();
+        $taxa = [];
+
+        foreach ($this->taxa as $realmRoot) {
+            array_push($taxa, $realmRoot->getTaxon());
+        }
+
+        return $taxa;
     }
 
     /**

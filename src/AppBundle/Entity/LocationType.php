@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * LocationType.
  *
  * @ORM\Table(name="location_type")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -61,7 +61,7 @@ class LocationType
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="locationType")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="locationType", fetch="EXTRA_LAZY")
      */
     private $locations;
 

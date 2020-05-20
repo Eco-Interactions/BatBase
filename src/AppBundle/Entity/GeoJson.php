@@ -52,14 +52,6 @@ class GeoJson
     private $displayPoint;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Location", inversedBy="geoJson")
-     * @ORM\JoinColumn(name="loc_id", referencedColumnName="id", unique=true)
-     */
-    private $location;
-
-    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
@@ -187,49 +179,6 @@ class GeoJson
     public function getDisplayPoint()
     {
         return $this->displayPoint;
-    }
-
-    /**
-     * Set location.
-     *
-     * @param \AppBundle\Entity\Source $location
-     *
-     * @return GeoJson
-     */
-    public function setLocation(\AppBundle\Entity\Location $location)
-    {
-        $this->location = $location;
-
-        return $this;
-    }
-
-    public function removeLocation()
-    {
-        $this->location = null;
-
-        return $this;
-    }
-
-    /**
-     * Get location.
-     *
-     * @return \AppBundle\Entity\Location
-     */
-    public function getLocation()
-    {
-        return $this->location;
-    }
-
-    /**
-     * Get location Id.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("location")
-     *
-     * @return integer
-     */
-    public function getLocationId()
-    {
-        return $this->location->getId();
     }
     
     /**

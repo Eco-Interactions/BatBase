@@ -52,7 +52,7 @@ input[type="radio"], input[type="checkbox"] {
     font-size: .9em;
     color: #666;
     margin-right: 3px;
-    padding-top: 2px;
+    padding-top: 0px;
 }
 #tbl-status {
     flex-grow: 1;
@@ -78,7 +78,7 @@ input[type="radio"], input[type="checkbox"] {
     content: url(../../images/icons/filter.svg);
     width: 15px;
 }
-button[name="reset-tbl"]:before, button[name="clear-list"]:before,  #rst-data:before{
+button[name="reset-tbl"]:before, button[name="clear-list"]:before{
     content: url(../../images/icons/undo-alt.svg);
     width: 15px;
     margin: 2px;
@@ -99,8 +99,14 @@ button[name="csv"]:before {
     content: url(../../images/icons/globe-africa.svg);
     width: 17px;
 }
-#rst-data {
+#data-help {
     z-index: 10000000000;
+}
+#data-help:before {
+    content: url(../../images/icons/life-ring.svg);
+    z-index: 10000000001;
+    width: 18px;
+    margin-right: 1px;
 }
 #lists:before {
     content: url(../../images/icons/tasks.svg);

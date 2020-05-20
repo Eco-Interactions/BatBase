@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Migrations\Templates;
+namespace Application\Migrations;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -25,6 +25,12 @@ class ContainerAwareTemplate extends AbstractMigration implements ContainerAware
         $this->container = $container;
     }
 
+    private function getEntity($className, $val, $prop = 'id')
+    {
+        return $this->em->getRepository('AppBundle:'.$className)
+            ->findOneBy([$prop => $val]);
+    }
+
     public function getEntities($className)
     {
         return $this->em->getRepository('AppBundle:'.$className)->findAll();
@@ -46,7 +52,7 @@ class ContainerAwareTemplate extends AbstractMigration implements ContainerAware
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->getEntity('User', 6, 'id');
+        $this->admin = $this->getEntity('User', 6);
 
     }
 

@@ -5,8 +5,14 @@
  *     buildLocRowData         db-page
  *     buildSrcRowData         db-page
  *     buildTxnRowData         db-page
+ *
+ * TOC:
+ *     LOCATION ROW DATA
+ *     SOURCE ROW DATA
+ *     TAXON ROW DATA
+ *     INTERACTION ROW DATA
  */
-/*--------- Location Data Formatting ---------------------------------------------------------------------------------*/
+/* --------------------- LOCATION ROW DATA ---------------------------------- */
 export function buildLocRowData(tree, tblState) {
     const finalRowData = [];                                                    
     for (let topNode in tree) {                                                 
@@ -98,7 +104,7 @@ function hasChildInteractions(row) {
         return childRow.interactions || hasChildInteractions(childRow);  
     });
 }
-/*--------- Source Data Formatting -----------------------------------------------------------------------------------*/
+/* ------------------ SOURCE ROW DATA --------------------------------------- */
 export function buildSrcRowData(tree, tblState) {
     let rowColorIdx = 0;
     const finalRowData = [];
@@ -149,7 +155,7 @@ function getSrcTreeName(view) {
     const prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
     return prefix[view] + ' Tree';
 }
-/*-------- Taxon Data Formatting ------------------------------------------*/
+/* ---------------- TAXON ROW DATA ------------------------------------------ */
 export function buildTxnRowData(tree, tblState) {
     const finalRowData = [];
     for (let topTaxon in tree) {
@@ -172,7 +178,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*/
         isParent: true,                     
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1, 
-        parentTaxon: taxon.parent > 1 ? taxon.parent : false, // 1 = Animalia (not shown)
+        parentTaxon: taxon.isRoot ? false : taxon.parent,
         taxonLvl: taxon.level.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
@@ -208,9 +214,9 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
         }
     }
 
-    function handleUnspecifiedInts(curTreeLvl) {
+    function handleUnspecifiedInts(curTreeLvl) {  
         if (taxon.failedFltr || getIntCount(taxon) === null) { return; }
-        const name = taxon.isRealm ? taxon.realm.displayName : taxon.name;
+        const name = taxon.isRoot ? taxon.realm.displayName : taxon.name;
         addUnspecifiedTaxonIntsRow(name, curTreeLvl);
     }
     /**
@@ -229,7 +235,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
             interactions: true,
             isParent: true,
             name: `Unspecified ${taxonName} Interactions`,
-            open: !taxon.isRealm && tblState.openRows.indexOf(taxon.id.toString()) !== -1,
+            open: !taxon.isRoot && tblState.openRows.indexOf(taxon.id.toString()) !== -1,
             taxonLvl: taxon.level.displayName,
             treeLvl: treeLvl,
         });
@@ -242,15 +248,29 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
 } /* End getTaxonAndChildTaxaRowData */
 function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
     const ints = [];
-    ['subjectRoles', 'objectRoles'].forEach(role => {
-        taxon[role].forEach(intRcrd => {
-            ints.push(buildTaxonIntRowData(intRcrd, treeLvl, tblState));
-        });
-    });
+    ['sub', 'ob'].forEach(prfx => taxon[prfx+'jectRoles'].forEach(buildTxnIntRow));
     return ints;
+
+    function buildTxnIntRow(intRcrd) {
+        const noData = !tblState.flags.allDataAvailable;
+        const row = noData ? getPendingDataRow(treeLvl) : getTxnIntRow(intRcrd, treeLvl, tblState)
+        ints.push(row);
+    }
+}
+function getPendingDataRow(treeLvl) {
+    const props = ['citation', 'subject', 'object', 'interactionType', 'tags', 
+        'citation', 'habitat', 'location', 'country', 'region', 'note'];
+    const rowData = {
+        entity: 'interaction',
+        isParent: false,
+        name: '',
+        treeLvl: treeLvl
+    };
+    props.forEach(p => rowData[p] = 'Loading...');
+    return rowData;
 }
 /** Adds the taxon heirarchical data to the interactions row data. */ 
-function buildTaxonIntRowData(intRcrd, treeLvl, tblState) {
+function getTxnIntRow(intRcrd, treeLvl, tblState) {
     const rowData = buildIntRowData(intRcrd, treeLvl);
     getCurTaxonLvlCols(tblState).forEach(colName => {
         rowData[colName] = intRcrd[colName];
@@ -261,14 +281,14 @@ function getCurTaxonLvlCols(tblState) {
     var lvls = Object.keys(tblState.taxaByLvl);
     return lvls.map(function(lvl){ return 'tree' + lvl; });
 }
-/*------------------------ UTILITY ------------------------------------------ */
+/*------------------------ INTERACTION ROW DATA ----------------------------- */
 /**
  * Returns an array with table-row objects for each interaction record.
  * Note: var idx is used for row coloring.
  */
 function getIntRowData(intRcrdAry, treeLvl, idx) {
     if (intRcrdAry) {
-        return intRcrdAry.map(function(intRcrd){                                
+        return intRcrdAry.map(intRcrd => {                                
             return buildIntRowData(intRcrd, treeLvl, idx);
         });
     }
@@ -277,23 +297,24 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
 /** Returns an interaction rowData object with flat data in table-ready format. */
 function buildIntRowData(intRcrd, treeLvl, idx){              
     const rowData = {
-        citation: intRcrd.source.description,   //Table data
+        citation: getEntityData('source', 'description'),
         entity: 'Interaction',       //Not sure what this is all used for...
         id: intRcrd.id,
         interactionType: intRcrd.interactionType.displayName,   //Table data
         isParent: false,  //Tell grid and various code not to expect sub-nodes
         name: '',           // Blank tree field
         note: intRcrd.note,    //Table data
-        object: intRcrd.object.displayName,   //Table data
+        object: getEntityData('taxon', 'displayName', 'object'),
         rowColorIdx: idx,       //Not sure what this is all used for...
-        subject: intRcrd.subject.displayName,   //Table data
+        subject: getEntityData('taxon', 'displayName', 'subject'),
         tags: intRcrd.tags,   //Table data
-        treeLvl: treeLvl,       //Not sure what this is all used for...
+        treeLvl: treeLvl,       //Influences row coloring
         type: 'intRcrd',        //Not sure what this is all used for...
         updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
         updatedBy: intRcrd.updatedBy === 'Sarah' ? null : intRcrd.updatedBy,  
-        year: intRcrd.source.year       //When filtering interactions by publication date
+        year: getEntityData('source', 'year')       //When filtering interactions by publication date
     };
+
     if (intRcrd.location) { getLocationData(intRcrd.location); }  //Table & csv export data
     return rowData;
     /** Adds to 'rowData' any location properties present in the intRcrd. */
@@ -308,7 +329,8 @@ function buildIntRowData(intRcrd, treeLvl, idx){
                 lat: 'latitude',            lng: 'longitude',
             };
             for (var p in props) {
-               if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
+                rowData[p] = locObj[props[p]] ? locObj[props[p]] : 
+                    !Object.keys(locObj).length ? '[ Loading... ]' : '';
             }
         }
         /** Adds relational location data. Skips 'unspecified' regions. */
@@ -317,12 +339,20 @@ function buildIntRowData(intRcrd, treeLvl, idx){
                 country: 'country', region: 'region', habitat: 'habitatType'          
             };
             for (let p in props) {
-                if (!locObj[props[p]] || ifUnspecifiedRegion(p)) { continue; }
-                rowData[p] = locObj[props[p]].displayName;
+                rowData[p] = ifDataAvailable(p) ? locObj[props[p]].displayName : 
+                    !Object.keys(locObj).length ? '[ Loading... ]' : '';
             }                
+            function ifDataAvailable(p) {
+                return locObj[props[p]] && !ifUnspecifiedRegion(p);
+            }
             function ifUnspecifiedRegion(p) {
                 return p === 'region' && locObj[props[p]].displayName === 'Unspecified';
             }
         }
     } /* End getLocationData */
+    function getEntityData(entity, prop, intProp) {
+        const rcrdKey = intProp || entity;
+        return prop in intRcrd[rcrdKey] ? intRcrd[rcrdKey][prop] : 
+            !Object.keys(intRcrd[rcrdKey]).length ? '[ Loading... ]' : '';
+    }
 } /* End buildIntRowData */

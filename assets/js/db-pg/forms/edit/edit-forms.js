@@ -18,7 +18,7 @@
 import * as _f from '../forms-main.js';
 
 /** Shows the entity's edit form in a pop-up window on the search page. */
-export default function editEntity(id, entity) {                                console.log("       //showEntityEditForm [%s] [%s]", entity, id);                  console.log("Editing [%s] [%s]", entity, id);  
+export default function editEntity(id, entity) {                                console.log("       //showEntityEditForm [%s] [%s]", entity, id);
     initEditForm(id, entity)
     .then(() => _f.forms('finishEditFormInit', [entity, id]))
 }
@@ -89,7 +89,7 @@ function fillEntityData(ent, id) {
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
         'interaction': fillIntData };
-    const rcrd = _f.state('getRcrd', [ent, id]);                                 console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    const rcrd = _f.state('getRcrd', [ent, id]);                                 console.log("      --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     return Promise.resolve(hndlrs[ent](ent, id, rcrd));
 }
 function updateEditDetailMemory(detailId) {
@@ -206,7 +206,7 @@ function fillTaxonData(entity, id, rcrd) {                                      
 function checkFieldsAndToggleSubmit() {
     _f.elems('checkReqFieldsAndToggleSubmitBttn', ['top']);
 }
-function fillFields(rcrd, fields) {                                             console.log('       --fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
+function fillFields(rcrd, fields) {                                             console.log('           --fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
         'text': setText, 'textArea': setTextArea, 'select': setSelect, 
         'fullTextArea': setTextArea, 'multiSelect': setMultiSelect,

@@ -122,7 +122,7 @@ function createDrawLocBttn() {
         button = L.DomUtil.create('input', className + '-icon', container);
     button.type = 'button';
     
-    $(button).attr('disabled', 'disabled').css('opacity', '.666');
+    $(button).attr('disabled', 'disabled').css('opacity', '.3');
     $(container).attr('title', "Draw new location boundary on map").append(button);
     return container;
 }

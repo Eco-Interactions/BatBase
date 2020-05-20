@@ -120,7 +120,7 @@ class Location
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc", fetch="EXTRA_LAZY")
      * @ORM\OrderBy({
      *     "description"="ASC"
      * })
@@ -138,14 +138,15 @@ class Location
     /**
      * @var \AppBundle\Entity\GeoJson
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", mappedBy="location", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", cascade={"persist"})
+     * @ORM\JoinColumn(name="geo_json", referencedColumnName="id", nullable=true)
      */
     private $geoJson;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location", fetch="EXTRA_LAZY")
      */
     private $interactions;
 

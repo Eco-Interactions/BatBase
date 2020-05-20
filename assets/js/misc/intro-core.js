@@ -127,27 +127,44 @@ function getSavedListSteps() {
     ];
 }
 /* ------------ SAVE MODALS ------------ */
-export function showSaveModal(text, elem, dir, submitCb, cancelCb, bttnText) {  //console.log('showing modal')
+/**
+ * Shows the save modal. Possible configuration are:
+ * > Required config: html, elem, dir
+ * > Optional: submit, cancel, bttn
+ */
+export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bttnText) {  //console.log('showing modal')
     if (intro) { return; }
-    const subFunc = !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
+    if ($('#data-help')[0]) { $('#data-help').css('z-index', 1); }
+    window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
+}
+function initModal(confg) {
     intro = require('../libs/intro.js').introJs();   
-    intro.oncomplete(subFunc);
-    intro.onexit(exitModal.bind(null, cancelCb));
-    intro.setOptions(getModalOptions(text, elem, dir, bttnText));
+    intro.oncomplete(getSubmitFunc(confg.submit, confg.cancel));
+    intro.onexit(getExitFunc(confg.cancel));
+    intro.setOptions(getModalOptions(confg));
+    if (confg.onLoad) { intro.onafterchange(confg.onLoad); }
     intro.start();
 }
-export function exitModal(cancelCb) {
-    intro = null;
-    if (cancelCb) { cancelCb(); }
+function getSubmitFunc(submitCb, cancelCb) {
+    return !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
 }
-function getModalOptions(text, elem, direction, bttnText) {                                   
+function getExitFunc(cancelCb) {
+    return cancelCb ? exitModal.bind(null, cancelCb) : exitModal;
+}
+export function exitModal(cancelCb) {  
+    if (intro) { intro.exit(); }
+    if (cancelCb) { cancelCb(); }
+    intro = null;
+    if ($('#data-help')[0]) { $('#data-help').css('z-index', 10000000000); }
+}
+function getModalOptions(confg) {                                   
     return {
         showStepNumbers: false,
         showBullets: false,
         skipLabel: 'Cancel',
-        doneLabel: bttnText,
+        doneLabel: confg.bttn ? confg.bttn : 'Close',
         tooltipClass: 'modal-msg',
-        steps: getSlideConfg(text, elem, direction)
+        steps: getSlideConfg(confg.html, confg.elem, confg.dir)
     }; 
 }
 function getSlideConfg(text, elem, dir) {

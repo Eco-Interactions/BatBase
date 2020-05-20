@@ -35,14 +35,15 @@ export function updateUserNamedList() {
     return _sync.updateUserNamedList(...arguments);
 }
 /* -------------------------- DATA INIT ------------------------------------- */
-/** When there is an error while storing data, all data is redownloaded. */
-export function resetStoredData() {
-    _pg.ui('showLoadingDataPopUp');
-    _idb.downloadFullDb(true);
+export function resetStoredData(reset) {
+    _idb.downloadFullDb(reset);
 }
 export function resetLocalDb() {
-    const msg = 'Are you sure you want to reset all local data?';
-    showSaveModal(msg, '#rst-data', 'left', resetDb, Function.prototype, 'Yes');
+    const confg = {
+        html: '<center>Click "Reset" to redownload all data.</center>',
+        elem: '#data-help', dir: 'left', submit: resetDb, bttn: 'Reset'
+    }
+    showSaveModal(confg); 
 
     function resetDb() {
         exitModal();
@@ -53,10 +54,10 @@ export function resetLocalDb() {
 export function pg(funcName, params = []) {                                     //console.log('func = [%s], agrs = %O', funcName, params);
     return _pg[funcName](...params);
 }
-export function fetchServerData(url, options = {}, n = 3) {                     console.log('           --fetchServerData [%s] with params = %O', url, Object.keys(options).length ? options : null);
+export function fetchServerData(url, options = {}, n = 9) {                     console.log('       *-fetchServerData [%s] with params = %O', url, Object.keys(options).length ? options : null);
     return fetch('fetch/'+url, options).then(response => {
         if (!!response.ok) { return response.json(); }
-        if (n === 1) { return alertFetchIssue(use, response.json()); }
+        if (n === 1) { return alertFetchIssue(url, response.json()); }
         return fetchServerData(url, options, n - 1);
     });
 };
@@ -66,9 +67,6 @@ function alertFetchIssue(url, responseText) {
 }
 export function getAllStoredData() {
     return _idb.getAllStoredData();
-}
-export function downloadFullDb(reset) {
-    return _idb.downloadFullDb(reset);
 }
 /* -------------------------- DATA SYNC ------------------------------------- */
 export function syncLocalDbWithServer(lclDataUpdatedAt) {

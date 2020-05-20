@@ -41,7 +41,8 @@ export function initFilterPanel() {
 }
 export function addFilterPanelEvents() {  
     window.addEventListener('resize', resizeFilterPanelTab);
-    $('#filter').click(toggleFilterPanel);                                      
+    $('#filter').click(toggleFilterPanel);             
+    $('button[name="reset-tbl"]').click(buildTable.bind(null, false, false));
     $('#shw-chngd').change(db_filters.toggleTimeFilter.bind(null, null, null, null));
     $('#delete-filter').click(showCnfrmDeleteBttns);
     $('#apply-filter').click(applyFilterSet);
@@ -116,7 +117,7 @@ function getLeftSplitPos() {
 }
 export function resetStoredFiltersUi() {
     if (!$('#selSavedFilters')[0].selectize) { return; }
-    $('#selSavedFilters')[0].selectize.clear();
+    $('#selSavedFilters')[0].selectize.clear('silent');
     $('#stored-filters input, #stored-filters textarea').val('');
 }
 /** Adds the focus to the filter panel header, "[Focus] and Time Filters" */
@@ -287,11 +288,14 @@ function applyFilterSet() {
     app.fltr.active = true; 
     reloadTableThenApplyFilters(filters, app.fltr.id);
 }
-function reloadTableThenApplyFilters(filters, id) { 
-    _u.setSelVal('Focus', filters.focus, 'silent'); 
-    setView(filters);
+export function reloadTableThenApplyFilters(filters, id) { 
+    if (id) { setSavedFilterFocusAndView(filters); } //If no id, reapplying filters after form closed.
     buildTable(filters.focus, filters.view)
     .then(onTableReloadComplete.bind(null, filters, id));     
+}
+function setSavedFilterFocusAndView(filters) { 
+    _u.setSelVal('Focus', filters.focus, 'silent'); 
+    setView(filters);
 }
 function setView(filters) {
     if (filters.view == tState().get('curView')) { return; }
@@ -299,8 +303,8 @@ function setView(filters) {
     _u.setData('curView', view); 
     _u.setSelVal('View', filters.view, 'silent'); 
 }
-function onTableReloadComplete(filters, id) {                       /*temp-log*/console.log('   --onTableReloadComplete. filters = %O', filters);
-    _u.setSelVal('Saved Filter Set', id); 
+function onTableReloadComplete(filters, id) {                       /*debg-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
+    if (id) { _u.setSelVal('Saved Filter Set', id);  }  //If no id, reapplying filters after form closed.
     setFiltersThatResetTableThenApplyRemaining(filters);
 }
 function setFiltersThatResetTableThenApplyRemaining(filters) {
@@ -309,28 +313,31 @@ function setFiltersThatResetTableThenApplyRemaining(filters) {
     .then(applyRemainingFilters.bind(null, filters));
 }
 function setComboboxFilter(filter) {                                
-    const name = Object.keys(filter)[0];                            /*debg-log*/console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
+    const name = Object.keys(filter)[0];                            /*debg-log*///console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
     return _u.triggerComboChangeReturnPromise(name, filter[name].value);
 }
-function applyRemainingFilters(filters) {                           /*temp-log*/console.log('       --applyRemainingFilters = %O', filters);
+function applyRemainingFilters(filters) {                           /*debg-log*///console.log('       --applyRemainingFilters = %O', filters);
     setNameSearchFilter(filters.panel.name);
     setTimeUpdatedFilter(filters.panel.time);
     applyColumnFilters(filters.table);
+    if (!app.fltr) { return; } //reapplying filters after form closed.
     $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
-function setNameSearchFilter(text) {                                /*debg-log*///console.log('setNameSearchFilter. text = %s', text);
+function setNameSearchFilter(text) {                                /*debg-log*///console.log('setNameSearchFilter. text = [%s]', text);
     if (!text) { return; }
-    $('#focus-filters input').val(text);
+    text = text.replace(/['"]+/g, '');
+    $('#focus-filters input[type="text"]').val(text).change();
 }
 function setTimeUpdatedFilter(time) {                               /*debg-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     if (!time) { return; } 
     _u.setSelVal('Time Filter', time.type);
     if (time.date) { db_filters.toggleTimeFilter(true, time.date); }
 }
-function applyColumnFilters(filters) {                              /*temp-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
+function applyColumnFilters(filters) {                              /*debg-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
-    for (let name in filters) {  
+    for (let name in filters) {
+        if (filters[name] === null) { continue; }  
         const colName = Object.keys(filters[name])[0];              /*debg-log*///console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
@@ -346,11 +353,12 @@ function addActiveFilterToMemory(set) {
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 function showSaveFilterModal(success) {
     if (!$('.filter-set-details input').val()) { return $('.filter-set-details input').focus(); }
-    let readyToSave = true;  
-    const modalHtml = buildModalHtml();
-    const succFunc = readyToSave ? success : false;
-    const bttnText = readyToSave ? 'Submit' : 'Cancel';
-    showSaveModal(modalHtml, '#save-filter', 'right', succFunc, Function.prototype, bttnText);
+    let saveReady = true;  
+    const confg = {
+        html: buildModalHtml(), elem: '#save-filter', dir: 'right', 
+        submit: saveReady ? success : false, bttn: saveReady ? 'Submit' : 'Cancel'
+    };
+    showSaveModal(confg); 
     
     function buildModalHtml() {
         const hdr = '<h2> Saving Filter Set: </h2>';

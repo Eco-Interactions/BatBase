@@ -190,11 +190,12 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     function getParentTaxon(lvl) {
         const lvls = _fs.forms.realmData.realmLvls;
         const parentLvl = lvls[lvls.indexOf(lvl)+1]; 
-        if (ifParentIsRealmTaxon(lvl, parentLvl)) { 
+        if (ifParentIsRootTaxon(lvl, parentLvl)) { 
             return _fs.forms.realmData.realmTaxon.id; 
         }
         return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
-        function ifParentIsRealmTaxon(lvl, parentLvl) {
+        
+        function ifParentIsRootTaxon(lvl, parentLvl) {
             return lvl === _fs.forms.realmData.rootLvl || !parentLvl;
         }
     }

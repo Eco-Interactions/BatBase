@@ -28,7 +28,7 @@ function addCloseButton() {
         <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
     $('#close-tos-bttn').click(closeTosWindow)
 }
-function showTosWindow() {  console.log("showTosWindow called")
+function showTosWindow() {      
     $("#b-overlay-popup").html(getTosHtml);
     $("#b-overlay-popup").addClass("tos-popup");
     bindEscEvents();
@@ -53,10 +53,10 @@ function unbindEscEvents() {
 }
 function removeTosStyles() {
     $("#b-overlay-popup").removeClass("tos-popup");
-    $("#b-overlay").removeClass("flex-col");
+    // $("#b-overlay").removeClass("flex-col");
     $("#b-overlay-popup").empty();
 }
-function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
+function addRegistrationTosElems() { 
     var acceptDiv = document.createElement("div");
     acceptDiv.id = "accept-tos-cntnr";
     acceptDiv.className = "flex-col";
@@ -81,7 +81,7 @@ function getTosHtml() {
     return `<div id="terms-div">
 <h3>Privacy Policy</h3>
 <br>
-<p>- We don't use cookies.<br>- We won't sell, rent or share our users' names and emails with anyone.<br>- We do use some of the local storage available in your browser to store interaction data, so you don't have to wait for it to download every time you visit the site.<br>- We do send out emails occasionally to let users know about major updates to the site. If this privacy policy ever changes, we'll email to let you know that. The same applies to our Terms of Use.<br>- We also use your email when verifying your new account and if you need to reset your password.<br>- If you have questions, please contact us at <a href="mailto:info@batplant.org" target="_top">info@batplant.org.</a><br></p>
+<p>- We don't use cookies.<br>- We won't sell, rent or share our users' names and emails with anyone.<br>- We do use some of the local storage available in your browser to store interaction data, so you don't have to wait for it to download every time you visit the site.<br>- We do send out emails occasionally to let users know about major updates to the site. If this privacy policy ever changes, we'll email to let you know that. The same applies to our Terms of Use.<br>- We also use your email when verifying your new account and if you need to reset your password.<br>- If you have questions, please contact us at <a href="mailto:info@batplant.org" target="_top">info@batbase.org.</a><br></p>
 <br>
 <h3>Terms of Use</h3>
 <br>
@@ -104,11 +104,11 @@ function getTosHtml() {
 <span class="lbl">Citations</span>
 <p>You are welcome to include information from Bat Eco-Interactions in your own printed and online material for non-commercial use only. However, when you publish these data or works based on Bat Eco-Interactions data, we request that you cite Bat Eco-Interactions within the text of the publication and include a reference to it in your reference list.</p>
 <p>The source of origin and the date of the version of the information must be given when the material is used. Please follow the following citation format:</p>
-<p><i>Geiselman, Cullen K. and Tuli I. Defex. 2015. Bat Eco-Interactions Database. www.batplant.org, version (date accessed).</i></p>
+<p><i>Geiselman, Cullen K. & Sarah Younger. 2020. Bat Eco-Interactions Database. www.batbase.org, version (date accessed).</i></p>
 <p>Photos and drawings belong to the indicated persons or organizations and have their own copyright statements.</p>
 <br>
 <span class="lbl">Confidentiality of Codes, Passwords and Information</span>
-<p>The user agrees to treat as strictly private and confidential any code, username, user ID, or password linked to Bat Eco-Interactions, and all information to which you have access through password-protected areas at batplant.org. You will not cause or permit any such information to be communicated, copied or otherwise divulged to any other person.</p>
+<p>The user agrees to treat as strictly private and confidential any code, username, user ID, or password linked to Bat Eco-Interactions, and all information to which you have access through password-protected areas at batbase.org. You will not cause or permit any such information to be communicated, copied or otherwise divulged to any other person.</p>
 <br>
 <span class="lbl">Links and Marks</span>
 <p>Bat Eco-Interactions is not necessarily affiliated with websites that may be linked to this website and is not responsible for their content. The linked sites are for the user’s convenience only and you access them at your own discretion. Links to other websites or references to information or publications do not imply the endorsement or approval of such websites, information or publications by Bat Eco-Interactions.</p>

@@ -98,6 +98,7 @@ function buildAndShowMap(loadFunc, mapId, type) {                               
 }
 function getMapInstance(mapId) {
     if (app.map) { app.map.remove(); }
+    $(mapId).empty();
     app.popups = {};
     return L.map(mapId); 
 }
@@ -436,7 +437,7 @@ function addIntMarkersToMap(focus, data) {                                      
     }
 }
 function buildAndAddIntMarker(focus, geoId, data) {  
-    const latLng = getCoords(geoId);
+    const latLng = getCoords(geoId, data);  
     const intCnt = data.ttl;
     const MapMarker = buildIntMarker(focus, intCnt, latLng, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
     app.map.addLayer(MapMarker.layer);
@@ -448,8 +449,8 @@ function buildIntMarker(focus, intCnt, latLng, intData) {
      return intCnt > 1 ? 
         new MM.IntCluster(app.map, intCnt, params) : new MM.IntMarker(params);
 }
-function getCoords(geoId) {
-    return getLatLngObj(null, app.data.geo[geoId]);
+function getCoords(geoId, intData) {
+    return getLatLngObj(intData.locs[0], app.data.geo[geoId]);
 }
 function zoomIfAllInSameRegion(data) {  
     let region, latLng;

@@ -2,20 +2,20 @@
  * Handles UI related to the database search page.
  *
  * Exports:                         Imported by:
- *     addDomEventListeners             db_page
+ *     addDomEventListeners             _pg
  *     collapseTree                     csv-export
  *     expandTreeByOne                  csv-export
  *     fadeTable                        db-page
- *     init                             db_page
- *     initLocSearchUi                  db_page
- *     initSrcSearchUi                  db_page
- *     initTaxonSearchUi                db_page
+ *     init                             _pg
+ *     initLocSearchUi                  _pg
+ *     initSrcSearchUi                  _pg
+ *     initTaxonSearchUi                _pg
  *     loadLocFilterPanelElems          db-page, db-filters
  *     loadSrcFilterPanelElems          db-page, db-filters
  *     loadTxnFilterPanelElems          db-page, db-filters     
- *     resetToggleTreeBttn              db_page, init-table
+ *     resetToggleTreeBttn              _pg, init-table
  *     selectInitialSearchFocus         db-page
- *     showLoadingDataPopUp             util
+ *     updateUiForDatabaseInit             util
  *     showTips                         intro
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
@@ -24,21 +24,21 @@ import * as _pg from '../db-main.js';
 import * as _u from '../util/util.js';
 import exportCsvData from '../table/export/csv-export.js';
 import { initNewDataForm } from '../forms/forms-main.js';
-import * as db_page from '../db-main.js';
 import * as db_filters from '../table/filters/filters-main.js';
 import { showInts } from '../map/map-main.js';
 import { enableListReset, toggleSaveIntsPanel } from '../pg-ui/panels/int-list-panel.js';
 import { addPanelEventsAndStyles, closeOpenPanels } from '../pg-ui/panels/panels-main.js';
-import { updateFilterPanelHeader } from '../pg-ui/panels/filter-panel.js';
+import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 
 
 const app = {
     userRole: $('body').data("user-role"),
-    enabledSelectors: ''
+    enabledSelectors: false
 };
 const tState = _pg.accessTableState;
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
+    _u.initComboboxes(['Focus', 'View']);
     showPopUpMsg('Loading...');
     addDomEventListeners();
     authDependentInit();
@@ -48,16 +48,9 @@ function addDomEventListeners() {
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-    $('button[name="reset-tbl"]').click(db_page.buildTable.bind(null, false, false));
     addPanelEventsAndStyles(app.userRole);
 }
-/** Shows a loading popup message for the inital data-download wait. */
-export function showLoadingDataPopUp(type) {
-    const msgs = { 'user': 'Downloading all user-specific data.' };
-    const msg = msgs[type] || `Downloading and caching all interaction records. 
-        Please allow for a ~45 second download.`;
-    showPopUpMsg(msg);   
-}
+/* --------------------- Auth-Dependent Init -------------------------------- */
 function authDependentInit() {
     const initMap = {
         visitor: disableUserFeatures, user: initUserFeatures,
@@ -67,48 +60,78 @@ function authDependentInit() {
     initMap[app.userRole]();
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
-    $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #rst-data, 
+    $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #data-help,
         #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
         #stored-filters input, #stored-filters textarea`)
-        .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
-        .prop('title', "Please register to use these features.");
-    app.enabledSelectors = '#filter';
+        .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
+        .prop('title', 'Please register to use these features.');
+    $('#data-help').fadeTo('fast', .1)
+    app.enabledSelectors = false;
 }
-function initUserFeatures() {                                                 //console.log('enableUserFeatures')
+function initUserFeatures() {                                                   //console.log('enableUserFeatures')
     initUserButtons();
-    $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This feature is only available to editors.');
-    $('#rst-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This feature is only available to editors.');
-    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This feature is only available to admins.');
-    app.enabledSelectors = `#filter, button[name="csv"], #lists`;
+    $('#data-help, #new-data, #rvw-data').css('cursor', 'not-allowed' )
+        .prop('title', 'This feature is only available to editors.').fadeTo('fast', .5);
+    app.enabledSelectors = `button[name="csv"], #lists`;
 }
-function initEditorFeatures() {                                               //console.log('enableEditorFeatures')
+function initEditorFeatures() {                                                 //console.log('enableEditorFeatures')
     initUserButtons();                                              
     initEditorButtons();
     app.enabledSelectors = '.map-dsbl';
-    // app.enabledSelectors = `#filter, button[name="csv"], #lists, 
-    //     #new-data, #rvw-data`;
 }
-// function initAdminFeatures() {                                                //console.log('enableAdminFeatures')
-//     initUserButtons();                                              
-//     initEditorButtons();
-//     app.enabledSelectors = '.map-dsbl';
-// }
 function initUserButtons() {
     $('#lists').click(toggleSaveIntsPanel);
     $('button[name="csv"]').click(exportCsvData);  
 }
 function initEditorButtons() {
-    $('#rst-data').addClass('adminbttn').click(_pg.resetLocalDb);
+    $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
 }
+/* --------------------- Database-Init UI ----------------------------------- */
+/** Shows a loading popup message for the inital data-download wait. */
+/** While the database is being initialized, the Map Interactions feature is disabled. */
+export function updateUiForDatabaseInit(type) {
+    app.dbInitializing = true;
+    showDataInitLoadingStatus();
+    toggleSearchOptions('disable');
+    $('#shw-map').data('loaded', false);
+}
+function showDataInitLoadingStatus() {
+    const status = '[ Database initializing... Table will reset once complete, ~45 seconds. ]';
+    $('#filter-status').text(status).css('color', 'teal').data('loading', true);
+    showPopUpMsg();
+}
+function toggleSearchOptions(toggleKey) {
+    handleButtons(toggleKey);
+    $('#search-focus')[0].selectize[toggleKey](); 
+}
+function handleButtons(toggleKey) {
+    const opac = toggleKey === 'enable' ? 1 : .5;
+    const disabled = toggleKey === 'disable';
+    const cursor = toggleKey === 'enable' ? 'pointer' : 'wait';
+    $('.ico-bttn').css('cursor', cursor).prop('disabled', disabled).fadeTo('fast', opac);
+    toggleMapButton(toggleKey, disabled);
+}
+function toggleMapButton(toggleKey, disabled) {
+    if (toggleKey === 'enable' && !$('#shw-map').data('loaded')) { 
+        $('#shw-map').prop('disabled', disabled).fadeTo('fast', .5); 
+    }
+}
+/** 
+ * Once db init complete, the page features are enabled after a delay so the table  
+ * finishes reloading before the feature buttons fades in.
+ */
+function updateUiAfterDatabaseInit() {
+    toggleSearchOptions('enable');
+    $('#filter-status').css('color', 'black').data('loading', false);
+    if (app.userRole === 'visitor') { disableUserFeatures(); }
+    delete app.dbInitializing;
+}
+/* --------------------- Init Table Focus ----------------------------------- */
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-export function selectInitialSearchFocus(f, resettingData = false) {            //console.log('--------------selectInitialSearchFocus [%s]', f);
+export function selectInitialSearchFocus(f) {                                   //console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
-    _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
 }
@@ -130,7 +153,7 @@ export function resetToggleTreeBttn(xpanded) {
     $('#xpand-all').data("xpanded", xpanded);
 }
 function toggleExpandTree() {                                                   //console.log("toggleExpandTree")
-    const tblApi = db_page.accessTableState().get('api');
+    const tblApi = _pg.accessTableState().get('api');
     const expanded = $('#xpand-all').data('xpanded');
     $('#xpand-all').data("xpanded", !expanded);
     return expanded ? collapseTree(tblApi) : expandTree(tblApi);
@@ -155,12 +178,12 @@ function collapseTreeByOne() {
  * rows left after updating, the toggle tree button is updated to 'Collapse All'. 
  */
 function toggleTreeByOneLvl(opening) {
-    const tblApi = db_page.accessTableState().get('api');
-    const tblModel = tblApi.getModel();                                         //console.log("tblModel = %O", tblModel);
+    const tblApi = _pg.accessTableState().get('api');
+    const tblModel = tblApi.getModel();                                  
     const bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
-    tblModel.rowsToDisplay.forEach(function(row) {                              //console.log("rowToDisplay = %O", row)
+    tblModel.rowsToDisplay.forEach(row => {                             
         if (!opening && !isNextOpenLeafRow(row)) { return; }
         row.expanded = opening;
         row.data.open = opening;
@@ -183,7 +206,7 @@ function toggleTreeByOneLvl(opening) {
 } /* End toggleTreeByOneLvl */
 function getCurTreeRowCount(tblApi) {
     let cnt = 0;
-    tblApi.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
+    tblApi.forEachNodeAfterFilter(node => cnt += 1); 
     return cnt;
 }
 /**
@@ -191,43 +214,44 @@ function getCurTreeRowCount(tblApi) {
  */
 function isNextOpenLeafRow(node) {                                              //console.log("node = %O", node);
     if (node.childrenAfterFilter) {
-        return node.childrenAfterFilter.every(function(childNode){
-            return !childNode.expanded;
-        });
+        return node.childrenAfterFilter.every(childNode => !childNode.expanded);
     } 
     return true;
 }     
 /* ====================== DATABASE ENTITY VIEW UI =================================================================== */
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTaxonSearchUi(curView) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
+export function initTaxonSearchUi(curView, reset) {                             //console.log("initTaxonSearchUi. realms = %O", realms);
     _u.getData('realm').then( realms => {                                       //console.log('--initTaxonSearchUi. realms = %O', realms)
-        loadTxnViewOpts(realms);
+        loadTxnViewOpts(realms, reset);
         setTaxonView(curView); 
     });
 }
-function loadTxnViewOpts(realms) {
-    if ($('#sel-view').data('focus') === 'taxa') { return; }
+function loadTxnViewOpts(realms, reset) {
+    if ($('#sel-view').data('focus') === 'taxa' && !reset) { return; }
     buildAndLoadTxnOpts(realms);
 }
 function buildAndLoadTxnOpts(realms) {
     const opts = getViewOpts(realms);
-    _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
+    _u.replaceSelOpts('#sel-view', opts, _pg.onTxnViewChange);
     $('#sel-view').data('focus', 'taxa');
 }
 function getViewOpts(realms) { 
     const taxa = tState().get('rcrdsById');
     const optsAry = [];
-    for (let id in realms) {
-        if (!taxonHasInteractions(realms[id].taxon)) { continue; }
-        optsAry.push({ value: realms[id].taxon, text: realms[id].pluralName });
-    }
+    Object.keys(realms).forEach(buildRealmOpt);
     return optsAry;
     
-    function taxonHasInteractions(id) {
-        const taxon = taxa[id];  
+    function buildRealmOpt(id) {  
+        const rootTxn = taxa[realms[id].taxon];  
+        const val = rootTxn ? rootTxn.id : id+'temp';                           //console.log('realm = %O rootTxn = %O', realms[id], rootTxn);
+        if (Number.isInteger(val) && !ifTxnHasInts(rootTxn.id)) { return; }
+        optsAry.push({ value: val, text: realms[id].pluralName });
+    }
+    function ifTxnHasInts(id) {
+        const taxon = taxa[id];
         const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
-        return hasInts || taxon.children.find(taxonHasInteractions);
+        return hasInts || taxon.children.find(ifTxnHasInts);
     }
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */
@@ -327,7 +351,7 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
         return elems;
     }
 }
-function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
+function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O, levels = %O, tState = %O", lvlOptsObj, levels, tState)          
     levels.forEach(level => {                                            
         _u.replaceSelOpts('#sel'+level, lvlOptsObj[level], null, level);
     });
@@ -355,7 +379,7 @@ function loadLocationViewOpts(argument) {
     if ($('#sel-view').data('focus') === 'locs') { return; }
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
-    _u.replaceSelOpts('#sel-view', opts, db_page.onLocViewChange);
+    _u.replaceSelOpts('#sel-view', opts, _pg.onLocViewChange);
     $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
@@ -511,12 +535,12 @@ function loadSourceViewOpts() {
     const opts = [{ value: "auths", text: "Authors" },
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
-    _u.replaceSelOpts('#sel-view', opts, db_page.onSrcViewChange);
+    _u.replaceSelOpts('#sel-view', opts, _pg.onSrcViewChange);
     $('#sel-view').data('focus', 'srcs');
 } 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView(view) {
-    db_page.accessTableState().set({'curView': view});
+    _pg.accessTableState().set({'curView': view});
     if (!_u.getSelVal('View')) { _u.setSelVal('View', view, 'silent'); } 
 }
 /* ------------------------- SOURCE FILTER UI ------------------------------- */
@@ -552,17 +576,21 @@ function loadPubSearchElems(pubTypeOpts) {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u.initCombobox('Publication Type');
-    _u.setSelVal('Publication Type', 'all', 'silent');
+    $('#selPubType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
 }         
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
     const span = _u.buildElem('span', { text: 'Type:' });
-    const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+    const sel = newSelEl(addAllOpt(opts), '', 'selPubType', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';
     $(sel).css('width', '177px');
     $(lbl).css('width', lblW).append([span, sel]);
     return lbl;
+}
+function addAllOpt(opts) {
+    opts.unshift({value: 'all', text: '- All -'});
+    return opts;
 }
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
@@ -586,7 +614,7 @@ export function updateUiForTableView() {
     updateBttnToShowRcrdsOnMap(); 
 }
 function showTableRecordsOnMap() {                                              console.log('       +--showTableRecordsOnMap');
-    const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
+    const tblState = _pg.accessTableState().get(null, ['curFocus', 'rcrdsById']);
     $('#search-tbl').fadeTo('fast', 0.3, () => {
         updateUiForMapView();
         getLocRcrds().then( rcrds => {
@@ -601,11 +629,13 @@ function showTableRecordsOnMap() {                                              
 }
 function updateBttnToReturnRcrdsToTable() {
     $('#shw-map').text('Return to Table');
-    $('#shw-map').off('click').on('click', returnRcrdsToTable);
+    $('#shw-map').off('click').on('click', returnRcrdsToTable)
+        .prop('title', 'Close map and reopen records in table.');
 }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Map Interactions');
-    $('#shw-map').off('click').on('click', showTableRecordsOnMap);
+    $('#shw-map').off('click').on('click', showTableRecordsOnMap)
+        .prop('title', 'Show interactions on a map.');
 }
 function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
     updateUiForTableView();
@@ -685,21 +715,165 @@ function getSearchTipsHtml() {
         data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
     `.replace(/\n\s+/g, '');
 }
+/* ====================== EDITOR HELP ======================================= */
+/* --------------------- HELP MODAL ----------------------------------------- */
+function showEditorHelpModal() {
+    const confg = {
+        html: getHelpHtml(), elem: '#data-help', dir: 'left', onLoad: setBttnEvents
+    }
+    showSaveModal(confg);
+}
+function getHelpHtml() {
+    return `<center><h3>Experiencing issues?</h3></center><br><br>
+    ${getModalBttn('Reset Local Data')}${getModalBttn('Report A Bug')}<br>`
+}
+function getModalBttn(text) {
+    return `<button class="intro-bttn">${text}</button>`;
+}
+function setBttnEvents() {
+    const map = {
+        'Reset Local Data': _pg.resetLocalDb.bind(null, true),
+        'Report A Bug': showBugReportPopup
+    }
+    $('.intro-bttn').each((i, elem) => { 
+        $(elem).click(() => { exitModal(map[elem.innerText]); }
+    )});
+}
+/* --------------------- BUG REPORT POPUP ----------------------------------- */
+function showBugReportPopup() {
+    $("#b-overlay-popup").html(getBugReportHtml());
+    $("#b-overlay-popup").addClass("bugs-popup flex-row");
+    bindEscEvents();
+    $('#b-overlay, #b-overlay-popup').fadeIn(500, () => $('.bug-rprt-input')[0].focus());
+
+    function bindEscEvents() {
+        $(document).on('keyup',function(evt) {
+            if (evt.keyCode == 27) { closeBugReportPopup(); }
+        });
+        $("#b-overlay").click(closeBugReportPopup);
+        $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
+    }
+} 
+/* -------------- REPORT HTML --------------------------- */
+function getBugReportHtml() {
+    const hdr = '<h3><center>New Issue Report</center></h3><br>'
+    const prompts = getReportPrompts();
+    const bttns = getReportBttns();
+    return [hdr, ...prompts, bttns];
+}
+/* ------ PROMPTS ----------------- */
+function getReportPrompts() {     
+    const p1 = buildRprtPrompt('Summarize the issue you are experiencing:', true);
+    const p2 = buildRprtPrompt('Describe the steps necessary to reproduce the issue:', true);
+    const p3 = buildRprtPrompt('Please provide any additional helpful information:');
+    return [p1, p2, p3];
+}
+function buildRprtPrompt(text, isRequired) {
+    const lbl = buildPromptContainer(isRequired); 
+    const span = _u.buildElem('span', { text: text, class: 'bug-span' });
+    const txt = _u.buildElem('textarea', { class: 'bug-rprt-input' });
+    $(lbl).append([span, txt]);
+    return lbl;
+}
+function buildPromptContainer(isRequired) {
+    const classes = 'bug-prompt' + (isRequired ? ' required' : '');  
+    return _u.buildElem('label', { class: classes });
+}
+/* ------ BUTTONS ----------------- */
+function getReportBttns() {
+    const cntnr = _u.buildElem('div', { class: 'flex-row' });
+    const spacer = _u.buildElem('div', { class: 'flex-grow' });
+    const sub = buildFormButton('Submit', submitBugRprt);
+    const cncl = buildFormButton('Cancel', closeBugReportPopup);
+    $(cntnr).append([spacer, sub, cncl]);
+    return cntnr;
+}
+/** Returns a (submit or cancel) button */
+function buildFormButton(action, onClick) {
+    const attr = { id: 'rprt-'+action, class: 'ag-fresh', type: 'button', value: action}
+    const bttn = _u.buildElem('input', attr);
+    $(bttn).click(onClick);
+    return bttn;
+}
+/* -------- SUBMIT REPORT -------------------- */
+function submitBugRprt() {                                                      
+    const ready = checkRequiredBugReportFields($('.bug-prompt.required'));
+    if (!ready) { showReportStatus('Please fill all required fields.', 'red'); 
+    } else { submitNewSentryIssue(); }
+}
+function checkRequiredBugReportFields($fields) { 
+    let ready = true; 
+    $fields.each((i, f) => { if (!$(f.children[1]).val()) { ready = false; } })
+    return ready;
+}
+function submitNewSentryIssue() {
+    const data = {
+        summary: $('.bug-rprt-input')[0].value,
+        steps: $('.bug-rprt-input')[1].value,
+        etc: $('.bug-rprt-input')[0].value,
+    };
+    _pg.alertIssue('editorReport', data);
+    updateBugReportUiAfterSubmit();
+}
+function updateBugReportUiAfterSubmit() {
+    $('#rprt-Cancel').val('Close');
+    $('#rprt-Submit, .bug-rprt-input').css({'opacity': .5, 'pointer': 'not-allowed'}).attr('disabled', true);
+    showReportStatus('Thank you for helping improve the database!', 'green');
+}
+function showReportStatus(msg, color) {
+    if ($('.rprt-status')[0]) { $('.rprt-status').remove(); }
+    $('.bugs-popup h3').after(buildReportStatus(msg, color));
+}
+function buildReportStatus(text, color) {
+    const msg = _u.buildElem('div', { class: 'rprt-status', text: text});
+    $(msg).css({'color': color, 'margin-top': '1em'});
+    return msg;
+}
+/* ------------- CLOSE REPORT POPUP ----------------- */
+function closeBugReportPopup() {
+    $("#b-overlay").fadeTo('fast', 0, () => {
+        $("#b-overlay").css({'display': 'none', 'opacity': 1});
+        unbindEscEvents();
+        removeReportStyles();
+    });
+}
+function unbindEscEvents() {
+    $(document).on('keyup',function(){});
+    $("#b-overlay").click(function(){});
+}
+function removeReportStyles() {
+    $("#b-overlay-popup").removeClass("bugs-popup");
+    $("#b-overlay").removeClass("flex-col");
+    $("#b-overlay-popup").empty();
+}
 /* ========================== UTILITY =============================================================================== */
 function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
     const elem = _u.buildSelectElem(opts, { class: c, id: i });
     $(elem).data('field', field);
     return elem;
 }
-export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
-    $('.tbl-tools button, .tbl-tools input, #focus-opts, ' + app.enabledSelectors)
+export function enableTableButtons(allDataAvailable) {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
+    if (app.dbInitializing && allDataAvailable || testingDbInit()) { updateUiAfterDatabaseInit() }
+    if (app.dbInitializing === true) { return enableToggleTreeButtons(); }
+    $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts'))
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools, ' + app.enabledSelectors).fadeTo('slow', 1);
+    $(getAllSelectors('.tbl-tools')).fadeTo('slow', 1);
     enableListReset();
     db_filters.enableClearFiltersButton();
 }
-export function disableTableButtons() {
+function testingDbInit() {
+    return app.dbInitializing && $('body').data('env') === 'test';
+}
+function enableToggleTreeButtons() {
+    $('#xpand-tree, #xpand-tree button').attr('disabled', false).css('cursor', 'pointer')
+        .fadeTo('slow', 1);
+    app.dbInitializing = 'complete';
+}
+function getAllSelectors(selectors) {
+    return app.enabledSelectors ? selectors += ', '+ app.enabledSelectors : selectors;
+}
+function disableTableButtons() {
     $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 
     $(`.tbl-tools button, .tbl-tools input, .map-dsbl`)
         .attr('disabled', 'disabled').css('cursor', 'default');

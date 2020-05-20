@@ -46,27 +46,32 @@ class FetchController extends Controller
         ));
         return $response;
     }
+/* ===================== FETCH TAXON DATA =================================== */
     /**
-     * Returns serialized data objects for the Realm, Level, and Taxon entities.
+     * Returns data necessary to load the  taxon tree. This is the first batch
+     * downloaded when local data is initialized. 
      *
      * @Route("/taxon", name="app_serialize_taxon")
-     */
-    public function serializeTaxonData(Request $request) 
+     */ 
+    public function serializeTaxonData(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+        $em->getConnection()->getConfiguration()->setSQLLogger(null);
         $serializer = $this->container->get('jms_serializer');
 
-        $realm = $this->serializeEntity('Realm', $serializer, $em);
-        $level = $this->serializeEntity('Level', $serializer, $em);
-        $taxon = $this->serializeEntity('Taxon', $serializer, $em);
+        $level = $this->serializeEntityRecords('Level', $serializer, $em);
+        $realm = $this->serializeEntityRecords('Realm', $serializer, $em);
+        $realmRoot = $this->serializeEntityRecords('RealmRoot', $serializer, $em);
+        $taxa = $this->serializeEntityRecords('Taxon', $serializer, $em);
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'realm' => $realm,    'level' => $level,
-            'taxon' => $taxon            
+            'level' => $level,  'realm' => $realm,  'realmRoot' => $realmRoot,    
+            'taxon' => $taxa            
         )); 
         return $response;
     }
+/* =================== FETCH LOCATION DATA ================================== */
     /**
      * Returns serialized data objects for Habitat Type, Location Type, and Location. 
      *
@@ -77,18 +82,36 @@ class FetchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $geoJson = $this->serializeEntity('GeoJson', $serializer, $em);
-        $habitatType = $this->serializeEntity('HabitatType', $serializer, $em);
-        $location = $this->serializeEntity('Location', $serializer, $em);
-        $locType = $this->serializeEntity('LocationType', $serializer, $em);
+        $habitatType = $this->serializeEntityRecords('HabitatType', $serializer, $em);
+        $location = $this->serializeEntityRecords('Location', $serializer, $em);
+        $locType = $this->serializeEntityRecords('LocationType', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
             'location' => $location,    'habitatType' => $habitatType,   
-            'locationType' => $locType, 'geoJson' => $geoJson
+            'locationType' => $locType
         )); 
         return $response;
     }
+    /**
+     * Returns serialized data objects for Habitat Type, Location Type, and Location. 
+     *
+     * @Route("/geoJson", name="app_serialize_geojson")
+     */
+    public function serializeGeoJsonData(Request $request) 
+    {
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->container->get('jms_serializer');
+
+        $geoJson = $this->serializeEntityRecords('GeoJson', $serializer, $em);
+
+        $response = new JsonResponse();
+        $response->setData(array( 
+            'geoJson' => $geoJson
+        )); 
+        return $response;
+    }
+/* =================== FETCH SOURCE DATA ==================================== */
     /**
     /**
      * Returns serialized data objects for all entities related to Source. 
@@ -100,14 +123,14 @@ class FetchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $author = $this->serializeEntity('Author', $serializer, $em);
-        $citation = $this->serializeEntity('Citation', $serializer, $em);
-        $citType = $this->serializeEntity('CitationType', $serializer, $em);
-        $publication = $this->serializeEntity('Publication', $serializer, $em);
-        $pubType = $this->serializeEntity('PublicationType', $serializer, $em);
-        $publisher = $this->serializeEntity('Publisher', $serializer, $em);
-        $source = $this->serializeEntity('Source', $serializer, $em);
-        $srcType = $this->serializeEntity('SourceType', $serializer, $em);
+        $author = $this->serializeEntityRecords('Author', $serializer, $em);
+        $citation = $this->serializeEntityRecords('Citation', $serializer, $em);
+        $citType = $this->serializeEntityRecords('CitationType', $serializer, $em);
+        $publication = $this->serializeEntityRecords('Publication', $serializer, $em);
+        $pubType = $this->serializeEntityRecords('PublicationType', $serializer, $em);
+        $publisher = $this->serializeEntityRecords('Publisher', $serializer, $em);
+        $source = $this->serializeEntityRecords('Source', $serializer, $em);
+        $srcType = $this->serializeEntityRecords('SourceType', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
@@ -128,9 +151,9 @@ class FetchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $interaction = $this->serializeEntity('Interaction', $serializer, $em);
-        $intType = $this->serializeEntity('InteractionType', $serializer, $em);
-        $tag = $this->serializeEntity('Tag', $serializer, $em);
+        $interaction = $this->serializeEntityRecords('Interaction', $serializer, $em);
+        $intType = $this->serializeEntityRecords('InteractionType', $serializer, $em);
+        $tag = $this->serializeEntityRecords('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array(
@@ -166,17 +189,23 @@ class FetchController extends Controller
         return $response;
     }
     /** Returns serialized Entity data. */
-    private function serializeEntity($entity, $serializer, $em)
+    private function serializeEntityRecords($entity, $serializer, $em)
     {
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
-        $data = new \stdClass;  
-
-        for ($i=0; $i < count($entities); $i++) { 
-            $entity = $entities[$i];
-            $id = $entity->getId();                                             //print('id = '.$id."\n"); 
+        $data = $this->serializeEntities($entities, $serializer, $em);
+        $em->clear();
+        return $data;
+    }
+    private function serializeEntities($entities, $serializer, $em)
+    {
+        $data = new \stdClass;  //print("\n total entities = ".count($entities));
+        $count = 0;
+        foreach ($entities as $entity) {
+            $id = $entity->getId();
             $jsonData = $this->serializeRcrd($entity, $serializer);
-            if (!$jsonData) { continue; }
-            $data->$id = $jsonData;
+            if ($jsonData) { $data->$id = $jsonData; }
+            if ($count < 3000) { ++$count; 
+            } else { $em->clear(); $count = 0; }
         }
         return $data;
     }
@@ -186,10 +215,10 @@ class FetchController extends Controller
         $rcrd = false;
         try {
             $rcrd = $serializer->serialize($entity, 'json');
-        } catch (\Throwable $e) {
-            $this->get('logger')->error($e->getMessage());
-        } catch (\Exception $e) {
-            $this->get('logger')->error($e->getMessage());
+        } catch (\Throwable $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        } catch (\Exception $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n\n");
+            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         return $rcrd;
     }

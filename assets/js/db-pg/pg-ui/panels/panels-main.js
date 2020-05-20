@@ -66,7 +66,7 @@ function cssOpenPanel(panel) {
     $(panel.bttn).addClass('panel-open-toggle');
     $(panel.id).removeClass('closed');  
     $(panel.tab).addClass('shw-col-borders ' + panel.tabClass);
-    window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 500);  
+    window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 1000);  
 }
 function compatiblePanelOpened(opened, panel) {
     return panel.key === 'review' ? false : opened.every(k => ['filter', 'lists'].indexOf(k) >= 0);

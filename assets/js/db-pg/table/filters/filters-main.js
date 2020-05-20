@@ -21,7 +21,7 @@
 import * as _u from '../../util/util.js';
 import { accessTableState as tState, resetDataTable, rebuildLocTable, rebuildTxnTable } from '../../db-main.js';
 import * as db_ui from '../../pg-ui/ui-main.js';
-import { resetStoredFiltersUi, savedFilterSetActive } from '../../pg-ui/panels/filter-panel.js';
+import { resetStoredFiltersUi, savedFilterSetActive, reloadTableThenApplyFilters } from '../../pg-ui/panels/filter-panel.js';
 import { savedIntListLoaded } from '../../pg-ui/panels/int-list-panel.js';
 /** 
  * Filter Params
@@ -56,30 +56,35 @@ export function getFilterState() {
         table: getTableFilterModels()
     };
 }
+export function reloadTableAndApplyFilters(filters) {
+    reloadTableThenApplyFilters(filters);
+}
 export function enableClearFiltersButton() {
-    if (!filtersActive()) { 
-        $('button[name="reset-tbl"]')
-            .attr('disabled', true).css({'opacity': .5, cursor: 'inherit'}); 
-    } else {  
-        $('button[name="reset-tbl"]')
-            .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
-    }
+    const noFilters = !filtersActive();
+    const opac = noFilters ? .5 : 1;
+    const cursor = noFilters ? 'inherit' : 'pointer';
+    $('button[name="reset-tbl"]')
+        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('slow', opac); 
 }
 function filtersActive() {
     const tbl = Object.keys(getTableFilters([])).length > 0;
     const pnl = Object.keys(fPs.pnlFltrs).length > 0;
     return tbl || pnl;
 }
-export function clearFilters() {
+export function clearFilters() { 
+    if ($('#filter-status').data('loading')) { return; } //DB initializing status displayed.
     resetFilterUi();
     resetStoredFiltersUi();
     resetFilterParams();
 }
-function resetFilterUi(focus) {
-    $('#filter-status').text('No Active Filters.');
+function resetFilterUi() {  
+    resetFilterStatus();
     $('#focus-filters input').val('');
-    updateTaxonFilterViewMsg('');
     if ($('#shw-chngd').prop('checked')) { resetDataTimeFilter(); }
+}
+function resetFilterStatus() { 
+    $('#filter-status').text('No Active Filters.');
+    updateTaxonFilterViewMsg('');
 }
 function resetDataTimeFilter() {
     $('#shw-chngd').prop('checked', false);
@@ -95,8 +100,8 @@ export function updateTaxonFilterViewMsg(view) {
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called."); 
-    tblState = tState().get(null, ['api', 'intSet']);
-    if (!tblState.api) { return; }
+    tblState = tState().get(['api', 'intSet', 'flags']);
+    if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
     setFilterStatus(getActiveFilters());
     enableClearFiltersButton();
 }
@@ -191,6 +196,7 @@ function setStatus(status) {                                                    
     $('#filter-status').text(status);
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
+/** Change event for the time-filter-type combobox. */
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
     fPs.pnlFltrs.time.type = val;
@@ -443,13 +449,13 @@ export function buildTreeSearchHtml(entity) {
     const func = onTextFilterChange.bind(null, entity);  
     const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
     const span = _u.buildElem('span', { text: 'Name:' });
-    const input = _u.buildElem('input', { 
-        name: 'sel'+entity, type: 'text', placeholder: entity+' Name (Press Enter to Filter)'  });
-    const bttn = _u.buildElem('button', { text: 'Search', 
-        name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
+    const input = _u.buildElem('input', { type: 'text', name: 'sel'+entity, 
+        placeholder: entity+' Name (Press Enter to Filter)' });
+    const bttn = _u.buildElem('button', { text: 'Search', class: 'ag-fresh', 
+        name: 'sel'+entity+'_submit' });
     addInputClass(entity, input);
     addLblClass(entity, lbl);
-    $(input).onEnter(func);
+    $(input).change(func);
     $(lbl).append([span, input]);
     return lbl;
 }
@@ -507,43 +513,43 @@ function nonSrcRowHasChildren(row) {
     return row.children && row.children.length > 0;
 }
 /*------------------ Location Filter Updates -----------------------------*/
-function filterLocs(text) {  
-    const selType = getSelectedLocType();  
-    if (selType) { return updateLocSearch(selected[selType], selType); }
+function filterLocs(text) { 
+    const selVal = getSelectedLoc();  
+    if (selVal) { return updateLocSearch(selVal); }
     filterTableByText(text);
 }
-function getSelectedLocType() {
-    const selected = tState().get('selectedOpts');
-    return getSelectedLocVal(selected);                         
+/* --- Get selected location data --- */
+function getSelectedLoc() {
+    const selObj = tState().get('selectedOpts');
+    const selType = getSelectedLocType(selObj);
+    return selObj[selType];
 }
-function getSelectedLocVal(selected) {
+function getSelectedLocType(selected) {
     const sels = Object.keys(selected);
-    return !sels.length ? checkLocElems() : (sels.length == 1 ? 'Region' : 'Country');
+    return !sels.length ? getLocTypeFromElems() : (sels.length == 1 ? 'Region' : 'Country');
 }
-function checkLocElems() {
-    const locType = ['Country', 'Region'].filter(type => $('#sel'+type).val());
+function getLocTypeFromElems() {
+    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
     return locType.length == 1 ? locType[0] : null;
 }
+function hasSelVal(val) {
+    return val && val !== 'all';
+}
+/* ----------- Apply location filters ------------------------ */
 export function updateLocSearch(val, selType) {                                 
     if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); 
-    const locType = selType ? selType : getLocType(val, this);                  
-    const root = getNewLocRoot(val, locType);    
+    const locType = selType ? selType : getLocTypeFromElems();     
+    const root = getNewLocRoot(val, locType);  
     const txt = getTreeFilterTextVal('Location');  
     updateLocFilterMemory(root, locType);
     updateNameFilterMemory(txt);
     db_ui.resetToggleTreeBttn(false);
     return rebuildLocTable(root, txt)
-    .then(() => {
-        if ($('#shw-chngd')[0].checked) { 
-            reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
-    });
+        .then(() => {
+            if ($('#shw-chngd')[0].checked) { 
+                reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
+        });
 } 
-function getLocType(val, that) {        
-    if (that == undefined) { return getSelectedLocType(); }                             
-    const selTypes = { selCountry: 'Country', selRegion: 'Region' };
-    const type = selTypes[that.$input[0].id];
-    return val !== 'all' ? type : (type == 'Country' ? 'Region' : false);
-}
 function getNewLocRoot(val, locType) {
     return val == 'all' ? getParentId(locType) : [parseInt(val)];
 }
@@ -553,7 +559,7 @@ function getParentId(locType) {
 function getTopRegions() {
     return Object.values(tState().get('data')['topRegionNames']);      
 }
-function updateLocFilterMemory(loc, locType) {
+function updateLocFilterMemory(loc, locType) { 
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
@@ -650,10 +656,11 @@ function getSelectedTaxonLvl(selected) {
  */
 export function updateTaxonSearch(val, selLvl) {                                        
     if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
-    const taxonRcrds = tState().get('rcrdsById');  
-    const rcrd = getRootTaxonRcrd(val, taxonRcrds);
+    tblState = tState().get(['rcrdsById', 'flags']);  
+    if (!tblState.flags.allDataAvailable) { return; }
+    const rcrd = getRootTaxonRcrd(val, tblState.rcrdsById);
     const txt = getTreeFilterTextVal('Taxon');                                  //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
-    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
+    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});   //console.log("selectedVals = %O", tParams.selectedVals);
     addToFilterMemory();
     return rebuildTxnTable(rcrd, 'filtering', txt);
 
@@ -686,16 +693,14 @@ function getPreviouslySelectedTaxonId(that) {
 }
 /** The selected taxon's ancestors will be selected in their levels combobox. */
 function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
-    const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
     const selected = {};                                                        //console.log("selected = %O", selected)
     selectAncestorTaxa(selTaxonObj);
     return selected;
     /** Adds parent taxa to selected object, until the realm parent. */
     function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
-        if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-            selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
-            selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
-        }
+        if (taxon.isRoot) { return; }
+        selected[taxon.level.displayName] = taxon.id;                           
+        selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
     }
 } /* End getRelatedTaxaToSelect */
 /* ========================== FILTER UTILITY METHODS ================================================================ */

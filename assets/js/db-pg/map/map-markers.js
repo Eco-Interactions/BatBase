@@ -446,7 +446,7 @@ function getSelectLocationBttn(loc, editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
     const onClick = editing ? Function.prototype : _form.bind(null, 'selectIntLoc');
     const bttn = _u.buildElem('input', {type: 'button',
-        class:'ag-fresh tbl-bttn popup-bttn', value: text});
+        class:'ag-fresh popup-bttn', value: text});
     $(bttn).click(onClick.bind(null, [loc.id]));
     $(bttn).css({'margin-top': '.5em'});
     if (editing) { $(bttn).attr('disabled', 'disabled').css('opacity', '.666'); }
@@ -601,7 +601,7 @@ function finishLocTop3ReportString(str, ttl, tabs) {
 /** --- Button to show interactions in the data-table --- */
 function buildToTableButton(loc) {
     const bttn = _u.buildElem('input', {type: 'button',
-        class:'ag-fresh tbl-bttn', value: 'Show Interactions In Data-Table'});
+        class:'ag-fresh', value: 'Show Interactions In Data-Table'});
     $(bttn).click(showLocTableView.bind(null, loc));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
@@ -699,7 +699,7 @@ function getNewLocText(loc, editing) {
 /** Click event added in location-form. */
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button', id: 'new-gps-loc',
-        class:'ag-fresh tbl-bttn', value: 'Create Location'});
+        class:'ag-fresh', value: 'Create Location'});
     $(bttn).click(_form.bind(null, 'addNewLocationWithGps', []));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;

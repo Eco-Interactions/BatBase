@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * CitationType.
  *
  * @ORM\Table(name="citation_type")
- * @ORM\Entity
+ * @ORM\Entity(readOnly=true)
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -52,7 +52,7 @@ class CitationType
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="citationType")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="citationType", fetch="EXTRA_LAZY")
      */
     private $citations;
 

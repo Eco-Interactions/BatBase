@@ -75,8 +75,8 @@ fos_user:
     firewall_name: main
     user_class: AppBundle\Entity\User
     from_email:
-        address: noreply@batplant.org
-        sender_name: BatPlant.org
+        address: noreply@batbase.org
+        sender_name: BatBase.org
     registration:
         confirmation:
             enabled: true

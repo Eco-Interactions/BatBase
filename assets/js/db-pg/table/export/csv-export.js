@@ -74,7 +74,7 @@ function fillInteractionsWithExportData(rcrds) {
             addKnownTaxonAncestry(role, txnData.prnt, taxa[txnData.prnt]);
         }
         function discoverAndAddTaxonAncestry(role, txn) {                       
-            const pTxn = txn.isRealm ? false : entityRcrds.taxon[txn.parent];
+            const pTxn = txn.isRoot ? false : entityRcrds.taxon[txn.parent];
             addToRowDataAndDiscoveredTaxa();
             if (!pTxn) { return; }
             discoverAndAddTaxonAncestry(role, pTxn);

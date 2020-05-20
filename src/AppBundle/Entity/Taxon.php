@@ -51,6 +51,16 @@ class Taxon
     private $name;
 
     /**
+     * True if the taxon is the root of the realm's taxon tree.
+     * @var bool
+     *
+     * @ORM\Column(name="is_root", type="boolean", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("isRoot")
+     */
+    private $isRoot;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
@@ -87,18 +97,9 @@ class Taxon
     private $linkUrl;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="is_realm", type="boolean")
-     * @JMS\Expose
-     * @JMS\SerializedName("isRealm")
-     */
-    private $isRealm = false;
-
-    /**
      * @var \AppBundle\Entity\Realm
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Realm", mappedBy="taxon")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RealmRoot", mappedBy="taxon", cascade={"persist", "remove"})
      */
     private $realm;
 
@@ -128,7 +129,7 @@ class Taxon
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Taxon", mappedBy="parentTaxon")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Taxon", mappedBy="parentTaxon", fetch="EXTRA_LAZY")
      * @ORM\OrderBy({
      *     "displayName"="ASC"
      * })
@@ -145,14 +146,14 @@ class Taxon
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="subject")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="subject", fetch="EXTRA_LAZY")
      */
     private $subjectRoles;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="object")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="object", fetch="EXTRA_LAZY")
      */
     private $objectRoles;
 
@@ -292,6 +293,30 @@ class Taxon
     }
 
     /**
+     * Set isRoot.
+     *
+     * @param bool $isRoot
+     *
+     * @return Taxon
+     */
+    public function setIsRoot($isRoot = false)
+    {
+        $this->isRoot = $isRoot;
+
+        return $this;
+    }
+
+    /**
+     * Get isRoot.
+     *
+     * @return bool
+     */
+    public function getIsRoot()
+    {
+        return $this->isRoot;
+    }
+
+    /**
      * Set defaultGuid.
      *
      * @param string $defaultGuid
@@ -388,37 +413,13 @@ class Taxon
     }
 
     /**
-     * Set isRealm.
+     * Set Realm.
      *
-     * @param bool $isRealm
-     *
-     * @return Taxon
-     */
-    public function setIsRealm($isRealm)
-    {
-        $this->isRealm = $isRealm;
-
-        return $this;
-    }
-
-    /**
-     * Get isRealm.
-     *
-     * @return bool
-     */
-    public function getIsRealm()
-    {
-        return $this->isRealm;
-    }
-
-    /**
-     * Set realm.
-     *
-     * @param \AppBundle\Entity\Realm $realm
+     * @param \AppBundle\Entity\RealmRoot $realm
      *
      * @return Taxon
      */
-    public function setRealm(\AppBundle\Entity\Realm $realm = null)
+    public function setRealm(\AppBundle\Entity\RealmRoot $realm)
     {
         $this->realm = $realm;
 
@@ -426,23 +427,21 @@ class Taxon
     }
 
     /**
-     * Get realm.
+     * Get Realm.
      *
      * @return \AppBundle\Entity\Realm
      */
     public function getRealm()
     {
-        return $this->realm;
+        return $this->realm ? $this->realm->getRealm() : null;
     }
-
+    
     /**
      * Get id.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("realm")
      *
      * @return int
      */
-    public function serializeRealm()
+    public function getTaxonRealm()
     {
         return $this->findRealmAndReturnObj($this);
     }
@@ -451,19 +450,10 @@ class Taxon
     {
         if ($taxon->getSlug() === 'animalia') { return []; } 
         $realm = $taxon->getRealm();
-        if ($realm) { return $this->buildRealmObj($realm); }
+        if ($realm) { return $realm; }
         $parent = $taxon->getParentTaxon();
         if (!$parent) { return []; }
         return $this->findRealmAndReturnObj($parent);
-    }
-
-    private function buildRealmObj($realm)
-    {
-        return [ 
-            'id' => $realm->getId(), 
-            'displayName' => $realm->getDisplayName(),
-            'pluralName' => $realm->getPluralName() 
-        ];
     }
 
     /**
@@ -614,13 +604,13 @@ class Taxon
      */
     public function getChildTaxonIds()
     {
-        if ($this->childTaxa) {
+        // if ($this->childTaxa) {
             $childIds = [];
             foreach ($this->childTaxa as $child) {
                 array_push($childIds, $child->getId());
             }
             return $childIds;
-        }
+        // }
     }
 
     /**
@@ -748,14 +738,14 @@ class Taxon
         $interactions = $this->objectRoles;
         return $this->getInteractionids($interactions);
     }
-    // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
-    public function getInteractions()
-    {
-        $subj = $this->getSubjectRoles();  
-        $obj = $this->getObjectRoles();     
+    // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
+    // public function getInteractions()
+    // {
+    //     $subj = $this->getSubjectRoles();  
+    //     $obj = $this->getObjectRoles();     
 
-        return count($subj) > 0 ? $subj : $obj;
-    }
+    //     return count($subj) > 0 ? $subj : $obj;
+    // }
 
     /**
      * Returns an array of ids for all passed interactions. 
@@ -879,9 +869,6 @@ class Taxon
      */
     public function __toString()
     {
-        if ($this->getDisplayName()) {
-            return $this->getDisplayName();
-        }
-        return 'Unnamed Taxon';
+        return $this->getDisplayName();
     }
 }

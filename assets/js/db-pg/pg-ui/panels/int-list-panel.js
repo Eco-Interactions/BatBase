@@ -80,10 +80,10 @@ function buildAndShowIntPanel() {                                   /*perm-log*/
 export function enableListReset() {  
     if (!app.listLoaded) { 
         $('button[name="clear-list"]')
-            .attr('disabled', true).css({'opacity': .5, cursor: 'inherit'}); 
-    } else {  
+            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5); 
+    } else {
         $('button[name="clear-list"]')
-            .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
+            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('slow', 1); 
     }
 }
 /* --------------- Toggle Panel Vertically or Horizontally ------------------ */
@@ -242,7 +242,7 @@ function updateRelatedListUi() {
 function syncFilterUi(focus) {
     syncViewFiltersAndUi(focus);
     if ($('#selSavedFilters')[0].selectize) { 
-        $('#selSavedFilters')[0].selectize.clear() 
+        $('#selSavedFilters')[0].selectize.clear('silent') 
     }
 }
 function updateListLoadButton(text, clickFunc) {

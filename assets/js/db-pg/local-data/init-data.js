@@ -3,6 +3,10 @@
  *
  * TOC:
  *     DOWNLOAD DATA
+ *         INIT BASE TABLE
+ *         DOWNLOAD REMAINING TABLE DATA
+ *         DOWNLOAD REMAINING DATA
+ *         HELPERS
  *     DERIVE DATA
  *         TAXON DATA
  *         LOCATION DATA
@@ -13,12 +17,11 @@
  */
 import * as _db from './local-data-main.js';
 
-const localData = {};
 /* ======================= DOWNLOAD DATA ==================================== */
 /**
  * The first time a browser visits the search page all entity data is downloaded
  * from the server and stored locally @storeEntityData. Database search page 
- * table build begins @initSearchState.
+ * table build begins @initSearchStateAndTable.
  * Entities downloaded with each ajax call:
  *   /taxon - Taxon, Realm, Level 
  *   /location - HabitatType, Location, LocationType, GeoJson
@@ -26,34 +29,43 @@ const localData = {};
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
-export default function (reset) {                                               console.log("   +-initLocalData");
+export default function (reset) {                                               console.log("   *-initLocalData");
     return _db.fetchServerData('data-state')
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
-        .then(downloadBatchedServerData)
-        .then(_db.setUpdatedDataInLocalDb)
-        .then(loadDatabaseTable);
-
-    function loadDatabaseTable() {
-        if (reset) { _db.pg('resetDataTable', ['taxa']); 
-        } else { _db.pg('initSearchState'); }
-    }
+        .then(() => initTaxonDataAndLoadTable(reset))
+        .then(downloadRemainingTableData)
+        .then(downloadRemainingDataAndEnableMap)
+        .then(_db.clearTempMmry);
 }
-function downloadBatchedServerData() {                                          //console.log('       --downloading Taxon and Source Data');
-    return $.when(getData('taxon'), getData('lists'))
-        .then(() => getData('source'))
-        .then(() => getData('location'))
-        .then(() => getData('interaction'));
+/* ---------------- INIT BASE TABLE ----------------------------------------- */
+function initTaxonDataAndLoadTable(reset) {
+    return getAndSetData('taxon')
+        .then(() => _db.setUpdatedDataInLocalDb())
+        .then(() => _db.pg('initSearchStateAndTable', ['taxa', false]));
 }
-function getData(url) {
-    return _db.fetchServerData(url).then(setData.bind(null, url));
+/* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
+function downloadRemainingTableData() {
+    return $.when(...['source', 'location'].map(url => getAndSetData(url)))
+        .then(() => getAndSetData('interaction'))
+        .then(() => _db.setUpdatedDataInLocalDb())
+        .then(() => _db.pg('initSearchStateAndTable'));
 }
-function setData(url, data) {                                                   console.log('               --storing [%s] data = %O', url, data);
-    const setDataFunc = {
+/* ------------------- DOWNLOAD MAP DATA ------------------------------------ */
+function downloadRemainingDataAndEnableMap() {
+    return $.when(...['lists', 'geoJson'].map(url => getAndSetData(url)))
+        .then(() => _db.setUpdatedDataInLocalDb())
+        .then(_db.pg('enableMap'));
+}
+/* -------------------------- HELPERS --------------------------------------- */
+function getAndSetData(url) {
+    return _db.fetchServerData(url).then(setData.bind(null, url))
+}
+function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
+    const setDataFunc = { 
         'interaction': deriveInteractionData, 'lists': deriveUserData, 
         'location': deriveLocationData,       'source': deriveSourceData,
-        'taxon': deriveTaxonData
+        'taxon': deriveTaxonData,             'geoJson': Function.prototype,
     };
-    if (!data) { return console.log('!data'); }
     storeServerData(data);
     setDataFunc[url](data);
 }
@@ -63,7 +75,13 @@ function setData(url, data) {                                                   
  */
 function storeServerData(data) {                                                //console.log("data received = %O", data);
     for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, data[entity]);
-        _db.setDataInMemory(entity, parseData(data[entity]));
+        let eData = entity === 'taxon' ? mergeTaxonData() : parseData(data[entity]);
+        _db.setDataInMemory(entity, eData);
+    }
+
+    function mergeTaxonData() {
+        const bats = _db.getMmryData('taxon') || {};
+        return Object.assign(bats, parseData(data.taxon));
     }
 }
 /**
@@ -86,9 +104,10 @@ function parseData(data) {  //shared. refact
 /** Stores an object of taxon names and ids for each level in each realm. */
 function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
     _db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
-    storeTaxaByLevelAndRealm(data.taxon);
-    modifyRealmData(data.realm);
+    storeTaxaByLevelAndRealm(data.taxon, data.realm, data.realmRoot);
+    modifyRealmData(data.realm, data.level);
     storeLevelData(data.level);
+    _db.deleteMmryData('realmRoot');
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
@@ -107,41 +126,51 @@ function storeLevelData(levelData) {
     }
 }
 /* --------- Taxa by Realm & Level ------------- */
-function storeTaxaByLevelAndRealm(taxa) {
-    const realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym realmData = %O", realmData);
-    for (let realm in realmData) {  
-        storeTaxaByLvl(realm, realmData[realm]);
+function storeTaxaByLevelAndRealm(taxa, realms, roots) {  
+    for (let rootId in roots) { 
+        const root = roots[rootId];  
+        const realm = realms[root.realm];
+        const taxon = taxa[root.taxon];
+        realm.taxon = root.taxon;
+        addRealmDataToTaxon(taxon, realm);
+        separateAndStoreRealmTaxa(taxon, realm);
     }
+    _db.setDataInMemory('realm', realms);
+
+    function separateAndStoreRealmTaxa(taxon, realm) { 
+        const data = {};
+        separateRealmTaxaByLevel(taxon.children, data, realm, taxa); 
+        storeTaxaByLvl(realm.displayName, data);
+    }
+}
+function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {  
+    taxa.forEach(separateTaxonAndChildren);
+    return data;
+
+    function separateTaxonAndChildren(id) {
+        const taxon = rcrds[id];
+        addToRealmLevel(taxon, taxon.level.displayName);
+        addRealmDataToTaxon(taxon, realm);
+        taxon.children.forEach(separateTaxonAndChildren);
+    }
+    function addToRealmLevel(taxon, level) {
+        if (!data[level]) { data[level] = {}; }; 
+        data[level][taxon.name] = taxon.id;
+    }
+}
+function addRealmDataToTaxon(taxon, realm) {
+    taxon.realm = {
+        id: realm.id, displayName: realm.displayName, pluralName: realm.pluralName
+    };
 }
 function storeTaxaByLvl(realm, taxonObj) {
     for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
         _db.setDataInMemory(realm+level+'Names', taxonObj[level]);
+        //TODO: Check for previously sorted taxa for realms with multiple roots
     }
 }
-/** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
-function separateTaxaByLevelAndRealm(taxa) {
-    const data = {};
-    Object.keys(taxa).forEach(id => addTaxonData(taxa[id], id));
-    return data;
-    /** Adds the taxon's name (k) and id to it's level's obj. */
-    function addTaxonData(taxon, id) {  
-        if (taxon.name === 'Animalia') { return delete taxa[id]; } //not shown anywhere
-        const realmObj = getRealmObj(taxon);
-        const level = taxon.level.displayName;  
-        addToRealmLevel(taxon, realmObj, level);
-    }
-    function addToRealmLevel(taxon, realmObj, level) {
-        if (!realmObj[level]) { realmObj[level] = {}; }; 
-        realmObj[level][taxon.name] = taxon.id;
-    }
-    function getRealmObj(taxon) {
-        const realm = taxon.realm.displayName
-        if (!data[realm]) { data[realm] = {}; }
-        return data[realm];
-    }
-} /* End separateTaxaByLevelAndRealm */
 /* ---------- Modify Realm Data -------------- */
-function modifyRealmData(realms) {                                              //console.log('realms = %O', realms);
+function modifyRealmData(realms, levels) {                                              //console.log('realms = %O', realms);
     modifyRealms(Object.keys(realms));
     _db.setDataInMemory('realm', realms);  
     
@@ -152,7 +181,6 @@ function modifyRealmData(realms) {                                              
         });
     }
     function fillLevelNames(lvlAry) {
-        const levels = _db.getMmryData('level');
         return lvlAry.map(id => levels[id].displayName);
     }
 }
@@ -233,13 +261,13 @@ function deriveInteractionData(data) {
 /** Returns an object with a record (value) for each id (key) in passed array.*/
 function getEntityRcrds(ids, rcrds) {
     const data = {};
-    ids.forEach(function(id) { data[id] = rcrds[id]; });        
+    ids.forEach(id => data[id] = rcrds[id]);        
     return data;
 }
 /** Returns an object with each entity record's displayName (key) and id. */
 function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
     const data = {};
-    ids.forEach(function(id) { data[rcrds[id].displayName] = id; });            //console.log("nameDataObj = %O", data);
+    ids.forEach(id => data[rcrds[id].displayName] = id);            //console.log("nameDataObj = %O", data);
     return data;
 }
 /** Returns an object with each entity types's displayName (key) and id. */
@@ -277,7 +305,7 @@ export function deriveUserData(data) {                                          
     _db.setDataInMemory('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
     _db.setDataInMemory('dataLists', int_sets);
     _db.setDataInMemory('dataListNames', getNameDataObj(int_setIds, int_sets));
-    _db.setDataInMemory('user', $('body').data('user-name'));
+    _db.setDataInMemory('user', getUserName());
 
     function addToDataObjs(l) {
         const entities = l.type == 'filter' ? filters : int_sets;
@@ -285,6 +313,9 @@ export function deriveUserData(data) {                                          
         entities[l.id] = l;
         idAry.push(l.id);
     }
+}
+function getUserName() {
+    return $('body').data('user-name') ? $('body').data('user-name') : 'visitor'; 
 }
 function getFilterOptionGroupObj(ids, filters) {                                //console.log('getFilterOptionGroupObj ids = %O, filters = %O', ids, filters);
     const data = {};
