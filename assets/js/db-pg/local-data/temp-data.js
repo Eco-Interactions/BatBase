@@ -1,12 +1,11 @@
 /**
- *
+ * Stores data temporarily while updating to reduce async db calls.
  *
  * Exports:
  *     setUpdatedDataInLocalDb
  *     setDataInMemory
  *     clearTempMmry
  */
-/** Stores entity data while updating to reduce async db calls. */
 import { setData } from './local-data-main.js';
 
 let mmryData;

@@ -177,16 +177,19 @@ export function updateTaxonFilterViewMsg(view) {
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called."); 
     const tblState = tState().get(['api', 'intSet', 'flags']);
     if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
-    setFilterStatus(_filter('getActiveFilterText'));
+    setFilterStatus(_filter('getActiveFilterText'), tblState.intSet);
     enableClearFiltersButton();
 }
 
-function setFilterStatus(filters) {  
-    if (filters.length > 0 || _ui('isSavedIntListLoaded')) { setStatus(getStatus(filters)); 
-    } else { resetFilterUi() }
+function setFilterStatus(filters, intSet) {  
+    if (filters.length > 0 || intSet) { 
+        setStatus(getStatus(filters, intSet)); 
+    } else { 
+        resetFilterUi() 
+    }
 }
-function getStatus(filters) {                                                   
-    const list = _ui('isSavedIntListLoaded') ? '(LIST)' : ''; 
+function getStatus(filters, intSet) {                                                   
+    const list = intSet ? '(LIST)' : ''; 
     const set = fSets.isFilterSetActive() ? '(SET)' : '';
     const loaded = [list, set].filter(f=>f).join(' '); 
     const fltrs = filters.join(', ');

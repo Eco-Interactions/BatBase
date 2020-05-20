@@ -7,7 +7,6 @@
  */
 export function toggleTree(tApi, xpand, byOne) {
     byOne ? toggleTreeByOneLvl(tApi, xpand) : toggleTreeRows(tApi, xpand);
-    setTreeToggleData(state);
 }
 /**
  * Resets button based on passed boolean xpanded state. True for fully 
@@ -19,6 +18,7 @@ export function setTreeToggleData(xpanded) {
     $('#xpand-all').data("xpanded", xpanded);
 }
 function toggleTreeRows(tApi, xpand) {
+    setTreeToggleData(xpand);
     xpand ? tApi.expandAll() : tApi.collapseAll(); 
 }
 /**

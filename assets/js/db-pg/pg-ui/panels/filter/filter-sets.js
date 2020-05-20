@@ -21,7 +21,7 @@
  *          RESET & ENABLE/DISABLE UI
  */
 import * as pM from '../panels-main.js';
-import { _filter, _modal, _ui, _u } from '../../../db-main.js';
+import { buildTable, _filter, _modal, _ui, _u, accessTableState as tState } from '../../../db-main.js';
 /* Holds selected filter data and table state. */
 let app = {};
 
@@ -35,7 +35,7 @@ export function setFilterSetEventListeners() {
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
 }
-export function updateFilterSetSel(filterOpts) {                    /*dbug-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
+export function updateFilterSetSel(filterOpts) {                    /*dbug-log*///console.log('updateFilterSetSel. filterNames = %O', filterNames);
     const opts = getSavedFilterOpts(filterOpts);     
     const optGroups = buildOptGroups(opts);                         /*dbug-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
@@ -43,7 +43,7 @@ export function updateFilterSetSel(filterOpts) {                    /*dbug-log*/
 
     function getSpecialOpts() { 
         return {
-            create: newFilterSet,
+            add: newFilterSet,
             options: opts,
             optgroups: optGroups, 
             optgroupField: 'group',
@@ -124,7 +124,7 @@ function buildFilterData() {
  * filter panel and the table column headers.
  */
 function getFilterSetJson(tState) {                                             
-    const fState = _filter.getFilterState();
+    const fState = _filter('getFilterState');
     const filters = {
         focus: tState.curFocus, panel: fState.panel,
         table: getColumnHeaderFilters(fState.table), view: tState.curView
@@ -212,7 +212,7 @@ function setNameSearchFilter(text) {                                /*dbug-log*/
 function setTimeUpdatedFilter(time) {                               /*dbug-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     if (!time) { return; } 
     _u('setSelVal', ['Date Filter', time.type]);
-    if (time.date) { _filter.toggleDateFilter(true, time.date); }
+    if (time.date) { _filter('toggleDateFilter', [true, time.date]); }
 }
 function applyColumnFilters(filters) {                              /*dbug-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
@@ -248,7 +248,7 @@ function showSaveFilterModal(success) {
     }
 }
 function getActiveFilters(statusMsg) {
-    const pieces = statusMsg.split(')');
+    const pieces = statusMsg.split(') , ');
     if (pieces.length > 1) { pieces.shift(); }
     return pieces.join('');
 }
@@ -257,13 +257,13 @@ function submitFilterSet(data, action, successFunc) {
     _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action)]);
 }
 function onFilterSubmitComplete(action, results) {
-    addActiveFilterToMemory(JSON.parse(results.list.entity));                     /*dbug-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
+    addActiveFilterToMemory(JSON.parse(results.list.entity));       /*dbug-log*///console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
     pM.updateUserNamedList(results.list, action)
     .then(onUpdateSuccessUpdateFilterUi.bind(null, app.fltr.id));
 }
 function onUpdateSuccessUpdateFilterUi(id) {
     _u('getOptsFromStoredData', ['savedFilterNames'])
-    .then(updateFilterSel)
+    .then(updateFilterSetSel)
     .then(() => {
         $('#selSavedFilters')[0].selectize.addItem(id);
         addSetToFilterStatus();
@@ -287,7 +287,7 @@ function onFilterDeleteComplete(results) {                          /*dbug-log*/
 }
 function onDeleteSuccessUpdateFilterUi() {
     resetFilterUi();
-    _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSel);
+    _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
     $('#selSavedFilters')[0].selectize.open();
 }
 function showSavedMsg() {

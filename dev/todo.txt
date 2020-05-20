@@ -7,7 +7,6 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
-    - Init Download previously: 30-45 seconds (~34 Locally), now reduced ~5-15 seconds
 
 QUESTIONS:
 
@@ -30,19 +29,12 @@ QUESTIONS:
                             - submit, restoring the deleted record.
                         - and to indicate they are creating a distinct record 
                             - submit, append '-deleted' to deleted record to eliminate conflict. 
-    - Batch downloads? Built in doctrine tools? serialize?
     - Create model of local storage
         - of entity relations
-
-
-
-    -
 
 STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
-
-
 
 
 > ==== MEETING NOTES ==== 
@@ -50,8 +42,6 @@ Prep:
     Changes:
     Questions:
     Notes:
-            Virus people having meeting by end of march
-                - goal to have virus data in.
 Feedback:
 Next/future rounds:
     Possible:

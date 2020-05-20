@@ -12,18 +12,22 @@
  */
 import * as _pg from '../db-main.js';
 
+/** Active Selectize configuration objects. Field name (k): confg (v)  */
+const confgs = {};
+
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initCombobox(field, change, options) {                          console.log("initCombobox [%s] args = %O", field, arguments);
-    const confg = getSelConfgObj(field); 
+export function initCombobox(field, change, options) {                          //console.log("initCombobox [%s] args = %O", field, arguments);
+    const confg = getBaseConfgObj(field, change);
+    confgs[field] = confg;
     initSelectCombobox(confg, options, change);  
-} /* End initComboboxes */
+}
 export function initComboboxes(fields) {                                        //console.log('initComboboxes = %O', fields);
     Object.keys(fields).forEach(field => initCombobox(field, fields[field]));
 }
-function getSelConfgObj(field, onChange) {  
+function getBaseConfgObj(field, onChange) {  
     const confgs = { 
         // Search Page Database Options Bar Comboboxes
         'Focus' : { name: field, id: '#search-focus', change: onChange, blur: true },
@@ -49,12 +53,13 @@ function getSelConfgObj(field, onChange) {
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
  * that allow users to search by typing.
  */
-function initSelectCombobox(confg, opts, change) {                              //console.log("initSelectCombobox. CONFG = %O", confg)
+function initSelectCombobox(confg, opts, change) {                              //console.log("initSelectCombobox. args = %O", arguments);
+    const create = opts ? opts.add : false; 
     const options = {
-        create: confg.add || false,
+        create: create,
         onChange: change || confg.change,
         onBlur: confg.blur ? saveOrRestoreSelection : null,
-        placeholder: getPlaceholer(confg.id, confg.name, confg.add)
+        placeholder: getPlaceholer(confg.id, confg.name, create)
     };
     if (opts) { addAdditionalOptions(); }                                       //console.log('options = %O', options);
     $(confg.id).selectize(options);  
@@ -71,18 +76,18 @@ function getPlaceholer(id, name, add, empty) {
     return optCnt || add ? placeholder : '- None -';
 }
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
-    const selId = getSelConfgObj(field).id;                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
+    const selId = getBaseConfgObj(field).id;                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false; 
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
     return $selApi.getValue();  
 }
 // function getSelTxt(field) {
-//     const confg = getSelConfgObj(field);
+//     const confg = getBaseConfgObj(field);
 //     const $selApi = $(confg.id)[0].selectize; 
 //     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
 // }
 export function setSelVal(field, val, silent) {                                 //console.log('setSelVal [%s] = [%s]', field, val);
-    const selId = getSelConfgObj(field).id;
+    const selId = getBaseConfgObj(field).id;
     const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false; 
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
     $selApi.addItem(val, silent); 
@@ -137,9 +142,9 @@ function clearCombobox($selApi) {
     $selApi.clearOptions();
 }
 export function triggerComboChangeReturnPromise(field, val) {                   //console.log('triggerComboChange [%s] = [%s]', field, val);
-    const confg = getSelConfgObj(field);
+    const confg = getBaseConfgObj(field);
     const $selApi = $(confg.id)[0].selectize; 
-    const change = confg.change;
+    const change = confgs[field].change;
     $selApi.addItem(val, 'silent');
     return change(val);
 }

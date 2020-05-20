@@ -6,17 +6,17 @@
  *   updateUiForMapView
  *   updateUiForTableView
  */
-import * as uM from './ui-main.js';
-import { accessTableState as tState } from '../db-main.js';
+import { updateUiForTableView, updateUiForMapView } from './ui-main.js';
+import { _u, accessTableState as tState } from '../db-main.js';
 import { showInts } from '../map/map-main.js';
 
-export function updateUiForMapView() {
+export function updateMapUiForMapView() {
     updateBttnToReturnRcrdsToTable();
     $('#tool-bar').fadeTo('fast', 1);
     $('#search-tbl').hide();  
     $('#map').show(); 
 }
-export function updateUiForTableView() {
+export function updateMapUiForTableView() {
     $('#search-tbl').fadeTo('fast', 1);
     $('#map, #filter-in-tbl-msg').hide();
     updateBttnToShowRcrdsOnMap(); 
@@ -32,7 +32,7 @@ export function showTableRecordsOnMap() {                                       
 
     function getLocRcrds() {
         return Promise.resolve(tblState.curFocus !== 'locs' ? 
-            _u.getData('location') : tblState.rcrdsById);  
+            _u('getData', ['location']) : tblState.rcrdsById);  
     }
 }
 function updateBttnToReturnRcrdsToTable() {
@@ -46,6 +46,6 @@ function updateBttnToShowRcrdsOnMap() {
         .prop('title', 'Show interactions on a map.');
 }
 function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
-    uM.updateUiForTableView();
-    if (_u.getSelVal('View') === 'map') { _u.setSelVal('View', 'tree'); }
+    updateUiForTableView();
+    if (_u('getSelVal', ['View']) === 'map') { _u('setSelVal', ['View', 'tree']); }
 }

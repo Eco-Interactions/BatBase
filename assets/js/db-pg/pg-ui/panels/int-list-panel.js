@@ -7,7 +7,7 @@
  *     isSavedIntListLoaded 
  *     selIntList           
  *     toggleListPanelOrientation
- *     enableListReset           
+ *     enableListResetBttn           
  *
  * TOC:
  *     SHOW/HIDE LIST PANEL
@@ -198,6 +198,7 @@ function deleteInteractionList() {
 function confmDelete() {                                            /*perm-log*/console.log('           --Deleted Interaction List');
     resetDeleteButton();
     pM.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
+    resetListUi();
     delete app.rowSelMode;
 }
 function cancelDelete() {
@@ -230,7 +231,7 @@ function updateRelatedListUi() {
     hideSavedMsg();
     enableModUi('rmv');
     _ui('updateFilterStatusMsg');
-    enableListReset();
+    enableListResetBttn();
     updateDetailHdr('Loaded');
     delete app.tblState;
 }
@@ -283,7 +284,7 @@ function hideSavedMsg() {
 }
 /* =============================== UI ======================================= */
 function initListCombobox() {
-    _u('initCombobox', ['Int-lists', selIntList, {create: newIntList}]);   
+    _u('initCombobox', ['Int-lists', selIntList, {add: newIntList}]);   
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
         disableInputs();

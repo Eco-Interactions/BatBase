@@ -18,8 +18,8 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { _form, _ui } from '../db-main.js';
-import { enableClearFiltersButton, enableListResetBttn } from './ui-main.js';
+import { _form } from '../db-main.js';
+import { enableClearFiltersButton, enableListResetBttn, showPopUpMsg } from './ui-main.js';
 import exportCsvData from '../table/export/csv-export.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
@@ -120,10 +120,10 @@ function updateUiAfterDatabaseInit() {
 export function enableTableButtons(allDataAvailable) {                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing && allDataAvailable || testingDbInit()) { updateUiAfterDatabaseInit() }
     if (app.dbInitializing === true) { return enableToggleTreeButtons(); }
-    $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts'))
+    $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts, #help-opts button'))
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $(getAllSelectors('.tbl-tools')).fadeTo('slow', 1);
+    $(getAllSelectors('.tbl-tools, #help-opts button')).fadeTo('slow', 1);
     enableListResetBttn();
     enableClearFiltersButton();
 }
@@ -139,7 +139,7 @@ function getAllSelectors(selectors) {
     return app.enabledSelectors ? selectors += ', '+ app.enabledSelectors : selectors;
 }
 export function disableTableButtons() {
-    $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 
-    $(`.tbl-tools button, .tbl-tools input, .map-dsbl`)
+    $('.tbl-tools, .map-dsbl, #help-opts button').fadeTo('slow', .3); 
+    $(`.tbl-tools button, .tbl-tools input, .map-dsbl, #help-opts button`)
         .attr('disabled', 'disabled').css('cursor', 'default');
 }

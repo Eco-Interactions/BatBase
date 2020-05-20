@@ -145,7 +145,7 @@ export function applyTxnFilter(val, text) {
         const curLevel = rcrd.level.displayName;
         if (!rcrd.parent || rcrd.parent == 1) { return fM.setPanelFilterState('combo', false); }
         const filter = {};
-        filter[curLevel] = { text: rcrd.name, value: val };
+        filter[curLevel] = { text: rcrd.displayName, value: val };
         fM.setPanelFilterState('combo', filter);;
     }
 }

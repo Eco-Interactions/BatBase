@@ -76,11 +76,14 @@ export function collapseTree() {
 function toggleTreeRows(xpand, byOne) {
     rowToggle.toggleTree(getTblApi(), xpand, byOne);
 }
+function toggleAllRows() {
+    toggleTreeRows(!$("#xpand-all").data('xpanded'));
+}
 function getTblApi() {
-    return pg.accessTableState().get('api');
+    return tState().get('api');
 }
 function setRowToggleEvents() {
-    $('button[name="xpand-all"]').click(toggleTreeRows.bind(null, true)); 
+    $('button[name="xpand-all"]').click(toggleAllRows); 
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(toggleTreeRows.bind(null, false, true));
 }
@@ -121,15 +124,16 @@ export function initSrcViewOpts(view) {
     views.initSrcViewOpts(view);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =================== */
-export function updateUiForMapView() {
+export function updateUiForMapView(noPopup) {
     bttns.disableTableButtons();
-    mapUi.updateUiForMapView();
-    showPopUpMsg();
+    mapUi.updateMapUiForMapView();
     pM.closeOpenPanels();
+    if (noPopup) { return; }
+    showPopUpMsg();
 }
 export function updateUiForTableView() {
     bttns.enableTableButtons();
-    mapUi.updateUiForTableView(); 
+    mapUi.updateMapUiForTableView(); 
 }
 /* ==================== UTILITY ============================================= */
 export function enableTableButtons(allDataAvailable) { 
