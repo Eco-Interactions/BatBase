@@ -103,7 +103,7 @@ function getErrMsgForUserRole() {
     return msgs[userRole] ? msgs[userRole]() : getEditorErrMsg();
 }
 function getVisitorErrMsg() {
-    return `contact us at info@batplant.org and let us know about the issue you are experiencing.`;
+    return `contact us at info@batbase.org and let us know about the issue you are experiencing.`;
 }
 function getUserErrMsg() {
     return `contact us by Leaving Feedback on this page (in your user menu) and let us know about the issue you are experiencing.`;

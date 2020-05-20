@@ -296,7 +296,7 @@ function getSteps() {
         },
         {
             element: 'button[name="csv"]',
-            intro: `<center><b>As a member of batplant.org, data displayed in 
+            intro: `<center><b>As a member of batbase.org, data displayed in 
                 the table can be exported in csv format.</b></center><br>The 
                 columns are exported in the order they are displayed in the table 
                 below.<br><br>For an explanation of the csv format and how to 
@@ -374,7 +374,7 @@ function getSteps() {
             element: '#list-opts',
             intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
                 Studying specific countries in Africa, data from specific publishers or authors, 
-                or a perhaps few habitats in particular? <br><br>As a member of batplant.org, 
+                or a perhaps few habitats in particular? <br><br>As a member of batbase.org, 
                 you can save interactions as a list and use the filters and features 
                 to explore them as a group.<br><br>`,
             position: 'right',
