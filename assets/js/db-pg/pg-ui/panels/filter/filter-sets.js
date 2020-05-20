@@ -1,3 +1,4 @@
+        $('#save-filter').html('Update'); 
 /*
  * Handles the right section of the filter panel, saved filter set managment. 
  * 
