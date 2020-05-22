@@ -117,7 +117,7 @@ class Source
      * @var \AppBundle\Entity\SourceType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\SourceType", inversedBy="sources")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false)
      */
     private $sourceType;
 

@@ -50,7 +50,7 @@ class Contribution
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="contributors")
-     * @ORM\JoinColumn(name="work_src_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="work_src_id", referencedColumnName="id", nullable=false)
      *
      * Refers to a single work source record.
      */
@@ -60,7 +60,7 @@ class Contribution
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="contributions")
-     * @ORM\JoinColumn(name="auth_src_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="auth_src_id", referencedColumnName="id", nullable=false)
      *
      * Refers to a single author source record.
      */

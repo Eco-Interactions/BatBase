@@ -35,7 +35,7 @@ class Author
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -62,7 +62,7 @@ class Author
     /**
      * @var string
      *
-     * @ORM\Column(name="last_name", type="string", length=255)
+     * @ORM\Column(name="last_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("lastName")
      */
@@ -90,7 +90,7 @@ class Author
      * @var \AppBundle\Entity\Source
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="author")
-     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;
 
