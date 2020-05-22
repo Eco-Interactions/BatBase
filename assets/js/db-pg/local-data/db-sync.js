@@ -125,9 +125,9 @@ function processUpdatedEntityData(data) {
 function logBasedOnEnv(entity, entityData) {
     const env = $('body').data('env');
     if (env === 'prod') {
-        console.log("       --processUpdatedEntityData [%s][%s]", Object.keys(data[entity]).length, entity); 
+        console.log("       --processUpdatedEntityData [%s][%s]", Object.keys(entityData).length, entity); 
     } else {
-        console.log("       --processUpdatedEntityData [%s][%s] = %O", Object.keys(data[entity]).length, entity, data[entity]); 
+        console.log("       --processUpdatedEntityData [%s][%s] = %O", Object.keys(entityData).length, entity, entityData); 
     }
 }
 /**

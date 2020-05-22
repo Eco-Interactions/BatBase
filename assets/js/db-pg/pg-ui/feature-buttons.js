@@ -74,7 +74,7 @@ function initUserButtons() {
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
-    $('#new-data').addClass('adminbttn').click(_form.bind(null, 'initNewDataForm'));
+    $('#new-data').addClass('adminbttn').click(_form.bind(null, 'initNewDataForm', []));
     $('#rvw-data').addClass('adminbttn');
 }
 /* ===================== DATABASE INIT UI =================================== */

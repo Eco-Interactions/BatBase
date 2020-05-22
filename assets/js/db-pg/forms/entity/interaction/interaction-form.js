@@ -403,6 +403,8 @@ function onRealmSelection(val) {                                                
         $('#Realm_row').after(rows);
         _f.state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
+        $('#select-realm').off('click');
+        $('#select-realm').click(selectRoleTaxon.bind(null, getRealmData('realmTaxon')));
     }
 }
 function clearPreviousRealmLevelCombos() {
@@ -434,10 +436,23 @@ function addNewFormState(role) {
  * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
  */
 function finishTaxonSelectBuild(role) {
+    addSelectRealmBttn();
     customizeElemsForTaxonSelectForm(role);
-    selectInitTaxonOrFocusFirstCombo(role);
     _f.util('replaceSelOpts', ['#'+role+'-sel', []]);
+    selectInitTaxonOrFocusFirstCombo(role);
 }
+/* --------- SELECT UNSPECIFIED BUTTON -------------- */
+function addSelectRealmBttn() {
+    const bttn = buildSelectUnspecifedBttn();
+    $('#sub-form .bttn-cntnr').prepend(bttn);
+}
+function buildSelectUnspecifedBttn() {
+    const attr = { id: 'select-realm', class: 'ag-fresh', type: 'button', value: 'Select Unspecified' }
+    const bttn = _f.util('buildElem', ['input', attr]);
+    $(bttn).click(selectRoleTaxon.bind(null, getRealmData('realmTaxon')));
+    return bttn;
+}
+/* --------- SELECT PREVIOUS TAXON OR FOCUS COMBO -------------- */
 /**
  * Restores a previously selected taxon on initial load, or when reseting the select
  * form. When the select form loads without a previous selection or when the realm 
@@ -460,6 +475,7 @@ function appendTxnFormAndInitCombos(role, form) {
     $('#'+role+'_row').append(form);
     initFormCombos('taxon', 'sub');
 }
+/* --------- CUSTOMIZE ELEMS FOR TAXON SELECT FORM -------------- */
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
 function customizeElemsForTaxonSelectForm(role) {
     $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
@@ -692,17 +708,17 @@ function resetPlaceholer(lvl) {
 }
 /* ------- selectRoleTaxon --------- */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
-function selectRoleTaxon() {  
+function selectRoleTaxon(realmTaxon) {  
     const role = getRealmData('realmName') === 'Bat' ? 'Subject' : 'Object';
-    const opt = getSelectedTaxonOption();
+    const opt = getSelectedTaxonOption(realmTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
     _f.cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
     _f.cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
 }
 /** Returns an option object for the most specific taxon selected. */
-function getSelectedTaxonOption() {
-    const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
+function getSelectedTaxonOption(realmTaxon) {
+    const taxon = realmTaxon || getSelectedTaxon();                             //console.log("selected Taxon = %O", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
     return { value: taxon.id, text:taxon.displayName };
 }

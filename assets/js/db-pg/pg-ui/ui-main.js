@@ -47,7 +47,7 @@ export function updateFilterStatusMsg() {
     pM.updateFilterStatusMsg();
 }
 export function reloadTableThenApplyFilters(filters) {
-    fM.reloadTableThenApplyFilters(filters);
+    pM.reloadTableThenApplyFilters(filters);
 }
 /* -------------------- DATA LISTS ------------------------------------------- */
 export function isSavedIntListLoaded() {
