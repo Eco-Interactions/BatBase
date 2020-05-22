@@ -32,7 +32,7 @@ let failed = { data: [], retryQueue: {}};
  * On a browser's first visit to the page, all data is downloaded and the 
  * search page ui is initialized @initStoredData.
  */
-export function syncLocalDbWithServer(lclUpdtdAt) {                             console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt);
+export function syncLocalDbWithServer(lclUpdtdAt) {                             if ($('body').data('env') !== 'prod') { console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt); } else { console.log("   /--syncLocalDbWithServer"); }
     _db.fetchServerData('data-state').then(checkAgainstLocalDataState);
     _db.getData('user').then(checkUserData);
     
@@ -119,8 +119,16 @@ function processUpdatedData(data) {                                             
 } 
 /** Parses and sends the returned data to @storeUpdatedData. */ 
 function processUpdatedEntityData(data) {                                       
-    const entity = Object.keys(data)[0];                                        console.log("       --processUpdatedEntityData [%s][%s] = %O", Object.keys(data[entity]).length, entity, data[entity]); 
+    const entity = Object.keys(data)[0];                                        logBasedOnEnv(entity, data[entity]);
     return storeUpdatedData(parseData(data[entity]), entity); 
+}
+function logBasedOnEnv(entity, entityData) {
+    const env = $('body').data('env');
+    if (env === 'prod') {
+        console.log("       --processUpdatedEntityData [%s][%s]", Object.keys(data[entity]).length, entity); 
+    } else {
+        console.log("       --processUpdatedEntityData [%s][%s] = %O", Object.keys(data[entity]).length, entity, data[entity]); 
+    }
 }
 /**
  * Loops through the passed data object to parse the nested objects. This is 

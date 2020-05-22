@@ -409,7 +409,7 @@ function addMrkrsInSet(tree) {                                                  
 }
 /**----------------- Show Interaction Sets on Map --------------------------- */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. focus [%s], viewRcrds [%O], locRcrds = [%O]', focus, viewRcrds, app.data.locRcrds);
+export function showInts(focus, viewRcrds, locRcrds) {              /*perm-log*/console.log('----------- showIntsOnMap. focus [%s], viewRcrds [%O], locRcrds = [%O]', focus, viewRcrds, app.data.locRcrds);
     app.data.locs = locRcrds;
     downloadDataAndBuildMap(showIntsOnMap, 'map');            
     

@@ -19,8 +19,10 @@ import * as _temp from './temp-data.js';
 import * as _init from './init-data.js';
 import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 
-_idb.initDb();
 /* ========================== FACADE ======================================== */
+export function initDb(argument) {
+    _idb.initDb();
+}
 export function setData(prop, data) {
     _idb.setData(prop, data);
 }

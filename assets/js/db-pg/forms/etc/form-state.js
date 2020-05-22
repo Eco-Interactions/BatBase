@@ -185,7 +185,12 @@ export function getRcrd(entity, id) {
         _f.alertIssue('noRcrdFound', {id: id, entity: entity });
 }
 /* ---------------------------- Setters ------------------------------------- */
+/**
+ * Edge case: After form submit, the updated data is fetched and stored here, but
+ * if the form is closed before the data is stored, cancel storing the data.
+ */
 export function addEntityRecords(entity, rcrds) {
+    if (!formState.records) { return; } //See comment for explanation
     formState.records[entity] = rcrds;
 }
 export function addRequiredFieldInput(fLvl, input) {  

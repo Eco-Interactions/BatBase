@@ -79,6 +79,8 @@ class DataEntryController extends Controller
         
         $returnData = new \stdClass; 
         $returnData->core = $coreName;
+        $returnData->coreId = $coreEntity->getId();
+        $returnData->coreName = $coreEntity->getDisplayName();
         $returnData->coreEntity = $coreEntity;
         $returnData->coreEdits = $this->getEditsObj($formData->ids->core); 
         $returnData->detailEdits = $this->getEditsObj($formData->ids->detail);
@@ -117,6 +119,7 @@ class DataEntryController extends Controller
 
         $returnData = new \stdClass; 
         $returnData->core = 'source';
+        $returnData->coreId = $src->getId();
         $returnData->coreEntity = $src;
         $returnData->detail = 'citation';
         $returnData->detailEntity = $cit;
@@ -439,13 +442,18 @@ class DataEntryController extends Controller
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        if (!strpos($e->getMessage(), 'Duplicate Entry')) {
+        if (ifNotDuplicateEntityError($e)) {
             $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData($e->getMessage());
         return $response;
+    }
+    private function ifNotDuplicateEntityError($e)
+    {
+        return !strpos($e->getMessage(), 'Duplicate Entry') ||
+            !strpos($e->getTraceAsString(), 'Duplicate Entry');
     }
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($entityData)

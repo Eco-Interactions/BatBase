@@ -105,6 +105,7 @@ function initDbPage () {
     requireJs();
     ui.init();
     u.initComboboxes({'Focus': buildTable, 'View': Function.prototype});
+    db.initDb();
     //The idb-util.initDb will call @initSearchStateAndTable once local database is ready.
 }
 /** Loads css files used on the search database page, using Encore webpack. */
