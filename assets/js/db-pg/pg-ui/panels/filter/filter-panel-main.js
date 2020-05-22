@@ -1,4 +1,3 @@
-function setFilterStatus(filters) {  
 /**
  * Left column: Contains all custom filters: Tree Text, Date Updated/Published, and
  *     Focus specific filters (Loc: Region/Country, Src: Pub Type, Txn: Rank Taxa )

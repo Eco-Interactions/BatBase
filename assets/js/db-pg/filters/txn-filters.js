@@ -1,4 +1,3 @@
-    return lvls.reverse().find(lvl => selected[lvl]);
 /*
  * Filters interactions a taxon and their children selected from the comboboxes 
  * in the filter panel.  Synchronizes the tree-text filter and the combobox filter. 

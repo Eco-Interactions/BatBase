@@ -17,13 +17,16 @@ export function buildFormRow() {
  */
 export function buildFormRows(entity, fVals, fLvl, params) {                    //console.log('buildFormRows. args = %O', arguments)
     return getFormFieldRows(entity, fVals, fLvl)
-        .then(returnFinishedRows.bind(null, entity, params));
-}
-function returnFinishedRows(entity, params, rows) {
-    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap'};
-    const rowCntnr = _f.util('buildElem', ['div', attr]);
-    $(rowCntnr).append(rows);
-    return rowCntnr;
+        .then(returnFinishedRows);
+    
+    function returnFinishedRows(rows) {
+        let id = entity+'_Rows';
+        if ($('#'+id).length) { id = id+'_'+fLvl;  }
+        const attr = { id: id, class: 'flex-row flex-wrap'};
+        const rowCntnr = _f.util('buildElem', ['div', attr]);
+        $(rowCntnr).append(rows);
+        return rowCntnr;
+    }
 }
 /**
  * Returns rows for the entity form fields. If the form is a source-type, 

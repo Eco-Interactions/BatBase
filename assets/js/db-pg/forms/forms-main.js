@@ -10,7 +10,7 @@
  */
 import * as _confg from './etc/form-config.js';
 import editEntity from './edit/edit-forms.js';
-import * as _forms from './base/base-main.js';
+import * as _forms from './entity/entity-main.js';
 import * as _state from './etc/form-state.js';
 import * as _submit from './submit/submit-main.js';
 import * as _elems from './elems/elems-main.js';
