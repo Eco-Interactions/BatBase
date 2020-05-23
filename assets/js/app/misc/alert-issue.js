@@ -22,6 +22,7 @@ export function reportErr(e) {
  * IssueTags {errDataKeys}:
  *     invalidDataKeyType {key, type}
  *     dataSyncFailure {fails} (no browser alert)
+ *     facadeErr {module, caller, called, error(toString), errMsg}
  *     editorReport {summary, steps, etc} (no browser alert)
  *     expectedDataNotFound {key}
  *     fetchIssue {url, responseText}
@@ -77,6 +78,7 @@ class SentryError extends Error {
  *     dataSyncFailure: (handled in form validation code)
  *     editorReport: (handled in bug report form)
  *     expectedDataNotFound: showGeneralAlert
+ *     facadeErr: showGeneralAlert
  *     fetchIssue: showGeneralAlert
  *     invalidDataKeyType: showGeneralAlert
  *     noRcrdFound: (handled at relevant points through the code)

@@ -30,20 +30,30 @@ import * as form from './forms/forms-main.js';
 import startWalkthrough from './tutorial/db-tutorial.js';
 
 /** ==================== FACADE ============================================= */
-export function _u(funcName, params = []) {                         /*dbug-log*///console.log('_ui args = %O', arguments);
-    return u[funcName](...params);
+function moduleMethod(funcName, mod, modName, params = []) {
+    try {
+        return mod[funcName](...params);
+    } catch(e) {
+        alertIssue('facadeErr', {module: modName, caller: 'db-main', called: funcName, error: e.toString(), errMsg: e.message});
+        if ($('body').data('env') === 'prod') { return; }
+        console.log('[%s] module call [%s] failed.  params = %O, err = %O', modName, funcName, params, e);
+    }
 }
-export function _ui(funcName, params = []) {                        /*dbug-log*///console.log('_ui args = %O', arguments);
-    return ui[funcName](...params);
+export function _u(funcName, params = []) {
+    return moduleMethod(funcName, u, 'util', params);
 }
-export function _modal(funcName, params = []) {                     /*dbug-log*///console.log('_ui args = %O', arguments);
-    return modal[funcName](...params);
+export function _ui(funcName, params = []) {
+    return moduleMethod(funcName, ui, 'ui', params);
 }
-export function _filter(funcName, params = []) {                    /*dbug-log*///console.log('_filter args = %O', arguments);  
-    return filter[funcName](...params);
+export function _modal(funcName, params = []) {
+    return moduleMethod(funcName, modal, 'modal', params);
 }
-export function _form(funcName, params = []) {                      /*dbug-log*///console.log('_ui args = %O', arguments);
-    return form[funcName](...params);
+export function _filter(funcName, params = []) {
+    return moduleMethod(funcName, filter, 'filter', params);
+}
+export function _form(funcName, params = []) {  
+    return moduleMethod(funcName, form, 'form', params);
+}
 export function openDataEntryForm() {
     ui.showPopupMsg();
     form.initNewDataForm()
