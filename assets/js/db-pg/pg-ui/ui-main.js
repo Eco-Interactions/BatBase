@@ -145,7 +145,7 @@ export function fadeTable() {
 export function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 }
-export function showPopupMsg(msg) {                                             console.log("showPopupMsg. msg = ", msg)
+export function showPopupMsg(msg) {                                             //console.log("showPopupMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
     $('#db-popup').text(popUpMsg);
     $('#db-popup').addClass('loading'); //used in testing

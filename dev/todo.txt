@@ -7,11 +7,19 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
+    - Prevented genus taxa created without family
+    - added 'select unspecified' option to taxon select forms to select the realm taxon
+    - Updated the issue reporting feature with a field to paste in the logs.
+        - Updated error message to editors and above to prompt them to fill out report
+    - Fixed bugs caught by sentry
+
 
 QUESTIONS:
 
 >==== CURRENT ====
     - disable CSV button until all data loaded. 
+    - add question marks to complicated fields
+        - issue report form: how to copy logs
 
 >Next
     - Refactor Source data 

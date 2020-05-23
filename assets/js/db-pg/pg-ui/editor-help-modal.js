@@ -54,8 +54,9 @@ function getBugReportHtml() {
 function getReportPrompts() {     
     const p1 = buildRprtPrompt('Summarize the issue you are experiencing:', true);
     const p2 = buildRprtPrompt('Describe the steps necessary to reproduce the issue:', true);
-    const p3 = buildRprtPrompt('Please provide any additional helpful information:');
-    return [p1, p2, p3];
+    const p3 = buildRprtPrompt('Please paste in the logs from your browser console:');
+    const p4 = buildRprtPrompt('Please provide any additional helpful information:');
+    return [p1, p2, p3, p4];
 }
 function buildRprtPrompt(text, isRequired) {
     const lbl = buildPromptContainer(isRequired); 

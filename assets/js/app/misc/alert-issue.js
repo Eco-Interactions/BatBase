@@ -111,6 +111,6 @@ function getUserErrMsg() {
 function getEditorErrMsg() {
     return `send debug information: 
 > Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
-> Once the panel loads and the "console" tab is displayed, right click and save the log file.
-> Email a description of the steps to reproduce this error and any additional information or screenshots that might help. Thanks!`;
+> Once the panel loads and the "console" tab is displayed, select all log text and copy.
+> Submit an Issue Report by clicking the far right blue button on the page options bar. Thank you!`;
 }
