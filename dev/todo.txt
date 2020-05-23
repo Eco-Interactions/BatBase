@@ -8,10 +8,12 @@
 #       
 Change Log:
     - Prevented genus taxa created without family
+    - Added (m) to Elevation label and field only allows numbers now.
     - added 'select unspecified' option to taxon select forms to select the realm taxon
     - Updated the issue reporting feature with a field to paste in the logs.
         - Updated error message to editors and above to prompt them to fill out report
     - Fixed bugs caught by sentry
+    - Improved new data form load.
 
 
 QUESTIONS:
