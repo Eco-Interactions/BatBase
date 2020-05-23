@@ -19,7 +19,9 @@ Change Log:
 QUESTIONS:
 
 >==== CURRENT ====
-    - disable CSV button until all data loaded. 
+    - Sarah to add field or announcement to remind that something has been added. Will show last person who viewed the submission
+    
+    - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
 

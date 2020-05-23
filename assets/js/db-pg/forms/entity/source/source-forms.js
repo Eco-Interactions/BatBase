@@ -324,9 +324,11 @@ export function handleCitText(formLvl) {                                        
         const fLvl = formLvl || _f.getSubFormLvl('sub');
         const $elem = $('#CitationText_row textarea');
         if (!$elem.val()) { initializeCitField($elem); } 
+        const reqFieldsFilled = _f.elems('ifAllRequiredFieldsFilled', [fLvl]);
         
-        return getCitationFieldText($elem, fLvl)
+        return getCitationFieldText($elem, fLvl, reqFieldsFilled)
             .then(citText => updateCitField(citText, $elem))
+            .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl, reqFieldsFilled))
             .then(() => {timeout = null;});
     }
 } 
@@ -338,19 +340,36 @@ function initializeCitField($elem) {
     $elem.prop('disabled', true).unbind('change').css({height: '6.6em'});
 }
 /** Returns the citation field text or false if there are no updates. */
-function getCitationFieldText($elem, fLvl) {  
+function getCitationFieldText($elem, fLvl, reqFieldsFilled) {  
     const dfault = 'The citation will display here once all required fields '+
         'are filled.';
     return Promise.resolve(getCitationText());
 
     function getCitationText() { 
-        return ifNoChildFormOpen(fLvl) && _f.elems('ifAllRequiredFieldsFilled', [fLvl]) ? 
+        return ifNoChildFormOpen(fLvl) && reqFieldsFilled ? 
            _f.forms('getCitationText', [fLvl]) : 
            ($elem.val() === dfault ? false : dfault);
     }
 }
 function ifNoChildFormOpen(fLvl) {  
-    return $('#'+_f.getNextFormLevel('child', fLvl)+'-form').length == 0; 
+   return $('#'+_f.getNextFormLevel('child', fLvl)+'-form').length == 0; 
+}
+function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl, reqFieldsFilled) {
+    if (!reqFieldsFilled) { return; }
+    $('#citation_Rows div.field-row').each(hightlightIfEmpty);
+    if ($('.warn-msg').length) { return; }
+    $('#'+fLvl+'-submit').before('<div class="warn-msg">Please add highlighted data if available.</div>')
+}
+function hightlightIfEmpty(i, el) {console.log('el = %O', el);
+    const input = el.children[1]; 
+    if ($(input).val() || input.id.includes('sel-cntnr')) { return; }
+    $(el).css('background-color', 'yellow');
+    $(el.children[1]).change(removeHighlightWhenFilled);
+}
+function removeHighlightWhenFilled(val) {
+    if (!val) { return; }
+    $(this).css('background-color', 'none');
+    $(this).off('change', removeHighlightWhenFilled);
 }
 /** ============= SHARED PUBLICATION AND CITATION HELPERS =================== */
 /**
