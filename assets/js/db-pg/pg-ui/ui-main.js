@@ -91,7 +91,7 @@ function setRowToggleEvents() {
 /** Shows a loading popup message for the inital data-download wait. */
 export function init() {
     const userRole = $('body').data("user-role");    
-    showPopUpMsg('Loading...');
+    showPopupMsg('Loading...');
     setRowToggleEvents();
     pM.addPanelEventsAndStyles(userRole);
     bttns.initFeatureButtons(userRole);
@@ -129,7 +129,7 @@ export function updateUiForMapView(noPopup) {
     mapUi.updateMapUiForMapView();
     pM.closeOpenPanels();
     if (noPopup) { return; }
-    showPopUpMsg();
+    showPopupMsg();
 }
 export function updateUiForTableView() {
     bttns.enableTableButtons();
@@ -145,10 +145,15 @@ export function fadeTable() {
 export function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 }
-export function showPopUpMsg(msg) {                                             //console.log("showPopUpMsg. msg = ", msg)
+export function showPopupMsg(msg) {                                             console.log("showPopupMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
     $('#db-popup').text(popUpMsg);
     $('#db-popup').addClass('loading'); //used in testing
     $('#db-popup, #db-overlay').show();
     fadeTable();
+}
+export function hidePopupMsg() {
+    $('#db-popup, #db-overlay').hide();
+    $('#db-popup').removeClass('loading'); //used in testing
+    showTable();
 }

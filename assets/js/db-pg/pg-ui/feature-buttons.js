@@ -18,8 +18,8 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { _form } from '../db-main.js';
-import { enableClearFiltersButton, enableListResetBttn, showPopUpMsg } from './ui-main.js';
+import { openDataEntryForm } from '../db-main.js';
+import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
 import exportCsvData from '../table/export/csv-export.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
@@ -74,7 +74,7 @@ function initUserButtons() {
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
-    $('#new-data').addClass('adminbttn').click(_form.bind(null, 'initNewDataForm', []));
+    $('#new-data').addClass('adminbttn').click(openDataEntryForm);
     $('#rvw-data').addClass('adminbttn');
 }
 /* ===================== DATABASE INIT UI =================================== */
@@ -88,7 +88,7 @@ export function updateUiForDatabaseInit() {
 function showDataInitLoadingStatus() {
     const status = '[ Database initializing... Table will reset once complete, ~45 seconds. ]';
     $('#filter-status').text(status).css('color', 'teal').data('loading', true);
-    showPopUpMsg();
+    showPopupMsg();
 }
 function toggleSearchOptions(toggleKey) {
     handleButtons(toggleKey);

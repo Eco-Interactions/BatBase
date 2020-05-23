@@ -39,11 +39,11 @@ import * as _f from '../../forms-main.js';
  */
 export function initCreateForm(entity) {                                        console.log('   //Building New Interaction Form');
     if (_f.state('getFormState')) { return; } //Form is already opened. 
-    _f.state('initFormState', ['create', 'interaction'])
+    return _f.state('initFormState', ['create', 'interaction'])
     .then(getInteractionFormFields)
     .then(fields => _f.elems('buildAndAppendForm', [fields]))
     .then(finishInteractionFormBuild)
-    .then(() => _f.state('setOnFormCloseHandler', ['top', resetInteractionForm]))
+    .then(() => _f.state('setOnFormCloseHandler', ['top', resetInteractionForm]));
 }
 /** Builds and returns all interaction-form elements. */
 function getInteractionFormFields() {  

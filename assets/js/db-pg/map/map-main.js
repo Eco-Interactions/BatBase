@@ -11,7 +11,7 @@
  *   showInts                   db_page, db_ui
  *   showLoc                    db_page
  */
-import { accessTableState as tState, _db, _u} from '../db-main.js';
+import { accessTableState as tState, _db, _u, _ui} from '../db-main.js';
 import * as MM from './map-markers.js'; 
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
@@ -225,7 +225,7 @@ function ifCntryResult(address) {
 function buildSrchPgMap() {
     addMarkerLegend();
     addIntCountLegend();
-    hidePopUpMsg();
+    _ui('hidePopupMsg');
 }
 function addMarkerLegend() {
     const legend = L.control({position: 'bottomright'});
@@ -515,26 +515,7 @@ function addMarkerForEachInteraction(intCnt, latLng, loc) {                     
         new MM.LocCluster(app.map, intCnt, params) : new MM.LocMarker(params);
     app.popups[loc.displayName] = MapMarker.popup;  
     app.map.addLayer(MapMarker.layer);
-} /* End addMarkerForEachInteraction */
-/* --- Table Popup --- */
-// function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
-//     const popUpMsg = msg || 'Loading...';
-//     $('#db-popup').text(popUpMsg);
-//     $('#db-popup').addClass('loading'); //used in testing
-//     $('#db-popup, #db-overlay').show();
-//     fadeTable();
-// }
-function hidePopUpMsg() {
-    $('#db-popup, #db-overlay').hide();
-    $('#db-popup').removeClass('loading'); //used in testing
-    showTable();
-}
-// function fadeTable() {
-//     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, .3);
-// }
-function showTable() {
-    $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
-}
+} 
 /*===================== Location Form Methods ================================*/
 /** Shows all location in containing country and selects the country in the form. */
 function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);

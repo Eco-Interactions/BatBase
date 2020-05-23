@@ -44,6 +44,10 @@ export function _filter(funcName, params = []) {                    /*dbug-log*/
 }
 export function _form(funcName, params = []) {                      /*dbug-log*///console.log('_ui args = %O', arguments);
     return form[funcName](...params);
+export function openDataEntryForm() {
+    ui.showPopupMsg();
+    form.initNewDataForm()
+    .then(ui.hidePopupMsg);
 }
 /* ------------------- LOCAL DATA ------------------------------------------- */
 export function _db(funcName, params = []) {                        /*dbug-log*///console.log('_ui args = %O', arguments);

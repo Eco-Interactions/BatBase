@@ -354,7 +354,7 @@ function updateTableState(tblOpts, rowData) {
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
 }
 function onTableInitComplete(rowData) {
-    hidePopUpMsg();
+    _ui('hidePopupMsg');
     _ui('enableTableButtons', [tblState.flags.allDataAvailable]);
     hideUnusedColFilterMenus();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
@@ -364,11 +364,6 @@ function updateDisplayForShowingInteractionSet(rowData) {
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
     tblState.api.expandAll(); 
     _ui('setTreeToggleData', [true]);
-}
-function hidePopUpMsg() {
-    $('#db-popup, #db-overlay').hide();
-    $('#db-popup').removeClass('loading'); //used in testing
-    _ui('showTable');
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
