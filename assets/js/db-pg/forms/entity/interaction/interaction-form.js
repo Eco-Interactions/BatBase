@@ -565,6 +565,8 @@ function openTaxonCreateForm(selElem, fLvl) {
     const level = selElem.id.split('-sel')[0];
     if (level === 'Species' && !$('#Genus-sel').val()) {
         return _f.val('formInitErr', [level, 'noGenus', fLvl]);
+    } else if (level === 'Genus' && !$('#Family-sel').val()) {
+        return _f.val('formInitErr', [level, 'noFamily', fLvl]);
     }
     selElem.selectize.createItem('create');
 }
