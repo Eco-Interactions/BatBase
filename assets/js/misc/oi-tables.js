@@ -1,7 +1,7 @@
 /**
  * Initializes the Data Table library and table on certain pages.  
  */
-import 'datatables';
+import 'datatables.net';
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import 'datatables.net-buttons';
 import 'datatables.net-buttons-dt/css/buttons.dataTables.css';

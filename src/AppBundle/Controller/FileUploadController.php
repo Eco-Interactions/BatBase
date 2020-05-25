@@ -4,18 +4,17 @@ namespace AppBundle\Controller;
 
 use AppBundle\Form\FileUploadType;
 use AppBundle\Entity\FileUpload;
-use AppBundle\Form\ImageUploadType;
-use AppBundle\Entity\ImageUpload;
+// use AppBundle\Form\ImageUploadType;  NOT USED CURRENTLY. DON'T DELETE.
+// use AppBundle\Entity\ImageUpload;   NOT USED CURRENTLY. DON'T DELETE.
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-// use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-// use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-// use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Security;
 /**
  * Image Upload controller.
  *
@@ -23,6 +22,15 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class FileUploadController extends Controller
 {
+    /**
+     * @var Security
+     */
+    private $security;
+
+    public function __construct(Security $security)
+    {
+       $this->security = $security;
+    }
     /** ==================== FILE UPLOADS =================================== */
     /**
      * Lists all Image Upload entities.
@@ -58,13 +66,13 @@ class FileUploadController extends Controller
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             // this is needed to safely include the file name as part of the URL
             $safeFilename = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
-            $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+            $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
             // Move the file to the directory where publication PDFs are stored
             try {
                 $file->move(
                     $this->getParameter('publication_file_dir'),
-                    $newFilename
+                    $fileName
                 );
             } catch (FileException $e) { 
                 return $this->render('Uploads/submit_file.html.twig', [
@@ -74,7 +82,7 @@ class FileUploadController extends Controller
                 ]);
             }
             // stores the PDF file name instead of its contents
-            $entity->setFileName($newFilename);
+            $entity->setFileName($fileName);
             $entity->setPath($this->getParameter('publication_file_dir'));
             $entity->setMimeType('application/pdf');
             $entity->setStatus();
@@ -116,155 +124,29 @@ class FileUploadController extends Controller
         
         return new Response();
     }
-    /** ==================== IMAGE UPLOADS ================================== */
-    // /**
-    //  * Lists all Image Upload entities.
-    //  *
-    //  * @Route("/", name="app_image_upload")
-    //  */
-    // public function indexAction()
-    // {
-    //     $em = $this->getDoctrine()->getManager();
 
-    //     $entities = $em->getRepository('AppBundle:ImageUpload')->findAll();
-
-    //     return $this->render('ImageUpload/index.html.twig', array(
-    //         'entities' => $entities,
-    //     ));
-    // }
-    // /**
-    //  * Creates a new Image Upload entity.
-    //  *
-    //  * @Route("/create", name="app_image_upload_create")
-    //  * @Method({"POST"})
-    //  */
-    // public function createAction(Request $request)
-    // {
-    //     $entity = new ImageUpload();
-    //     $form = $this->createCreateForm($entity);
-    //     $form->handleRequest($request);
-
-    //     if ($form->isSubmitted()) {
-    //         $em = $this->getDoctrine()->getManager();
-    //         if ($entity->upload()) {
-    //             $em->persist($entity);
-    //             $em->flush();
-    //         }
-
-    //         return $this->redirect($this->generateUrl('app_image_upload'));
-    //     }
-
-    //     return $this->render('ImageUpload/new.html.twig', array(
-    //         'entity' => $entity,
-    //         'form' => $form->createView(),
-    //     ));
-    // }
-
-    // /**
-    //  * Creates a form to create a Image Upload entity.
-    //  *
-    //  * @param ImageUpload $entity The entity
-    //  *
-    //  * @return \Symfony\Component\Form\Form The form
-    //  */
-    // private function createCreateForm(ImageUpload $entity)
-    // {
-    //     $form = $this->createForm(new ImageUploadType(), $entity, array(
-    //         'action' => $this->generateUrl('app_image_upload_create'),
-    //         'method' => 'POST',
-    //     ));
-
-    //     $form->add('submit', 'submit', array('label' => 'Create'));
-
-    //     return $form;
-    // }
-
-    // /**
-    //  * Displays a form to create a new ImageUpload entity.
-    //  *
-    //  * @Route("/new", name="app_image_upload_new")
-    //  */
-    // public function newAction()
-    // {
-    //     $entity = new ImageUpload();
-    //     $form = $this->createCreateForm($entity);
-
-    //     return $this->render('ImageUpload/new.html.twig', array(
-    //         'entity' => $entity,
-    //         'form' => $form->createView(),
-    //     ));
-    // }
-
-    // *
-    //  * Displays a form to edit an existing Image Upload entity.
-    //  *
-    //  * @Route("/{id}/edit", name="app_image_upload_edit")
-     
-    // public function editAction($id)
-    // {
-    //     $em = $this->getDoctrine()->getManager();
-
-    //     $entity = $em->getRepository('AppBundle:ImageUpload')->find($id);
-
-    //     if (!$entity) {
-    //         throw $this->createNotFoundException('Unable to find Image Upload entity.');
-    //     }
-
-    //     $editForm = $this->createEditForm($entity);
-
-    //     return $this->render('ImageUpload/edit.html.twig', array(
-    //         'entity' => $entity,
-    //         'edit_form' => $editForm->createView(),
-    //     ));
-    // }
-
-    // /**
-    //  * Creates a form to edit a Image Upload entity.
-    //  *
-    //  * @param ImageUpload $entity The entity
-    //  *
-    //  * @return \Symfony\Component\Form\Form The form
-    //  */
-    // private function createEditForm(ImageUpload $entity)
-    // {
-    //     $form = $this->createForm(new ImageUploadType(), $entity, array(
-    //         'action' => $this->generateUrl('app_image_upload_update', array('id' => $entity->getId())),
-    //         'method' => 'PUT',
-    //     ));
-
-    //     $form->add('submit', 'submit', array('label' => 'Update'));
-
-    //     return $form;
-    // }
-    // /**
-    //  * Edits an existing Image Upload entity.
-    //  *
-    //  * @Route("/{id}/update", name="app_image_upload_update")
-    //  * @Method({"PUT", "POST"})
-    //  */
-    // public function updateAction(Request $request, $id)
-    // {
-    //     $em = $this->getDoctrine()->getManager();
-
-    //     $entity = $em->getRepository('AppBundle:ImageUpload')->find($id);
-
-    //     if (!$entity) {
-    //         throw $this->createNotFoundException('Unable to find Image Upload entity.');
-    //     }
-
-    //     $editForm = $this->createEditForm($entity);
-    //     $editForm->handleRequest($request);
-
-    //     if ($editForm->isSubmitted()) {
-    //         $entity->upload();
-    //         $em->flush();
-
-    //         return $this->redirect($this->generateUrl('app_image_upload_edit', array('id' => $id)));
-    //     }
-
-    //     return $this->render('ImageUpload/edit.html.twig', array(
-    //         'entity' => $entity,
-    //         'edit_form' => $editForm->createView(),
-    //     ));
-    // }
+    /**
+     * Updates the file. This tracks who viewed the pdf last.
+     *
+     * @Route("/pub/{id}/update", name="app_update_pub")
+     */
+    public function updateAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('AppBundle:FileUpload')->find($id);
+        
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find File Upload entity.');
+        }
+        $user = $this->security->getUser(); 
+        $entity->setUpdatedBy($user);
+        $entity->setUpdated(new \DateTime('now'));
+        $em->persist($entity);
+        $em->flush();
+        
+        $userName = $user->getFirstName() . ' ' . substr($user->getLastName(), 0, 1);
+        $response = new JsonResponse();
+        $response->setData($userName);
+        return $response;
+    }
 }
