@@ -20,6 +20,7 @@ class FileUploadType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('title', TextType::class)
             ->add('file', FileType::class, [
                 'label' => 'Submit PDF',
                 // unmapped means that this field is not associated to any entity property

@@ -29,34 +29,41 @@ class FileUpload
     private $file;
 
     /**
-     * @ORM\Column(name="filename", type="string")
+     * @ORM\Column(name="filename", type="string", nullable=false)
      */
     private $fileName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="desctiption", type="string", length=255)
+     * @ORM\Column(name="title", type="string", length=255, nullable=false)
+     */
+    private $title;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="desctiption", type="text", nullable=false)
      */
     private $description;
 
     /**
-     * @ORM\Column(name="path", type="string")
+     * @ORM\Column(name="path", type="string", nullable=false)
      */
     private $path;
 
     /**
-     * @ORM\Column(name="mime_type", type="string")
+     * @ORM\Column(name="mime_type", type="string", nullable=false)
      */
     private $mimeType;
 
     /**
-     * @ORM\Column(name="status", type="integer")
+     * @ORM\Column(name="status", type="integer", nullable=false)
      */
     private $status;
 
     /**
-     * @ORM\Column(name="size", type="decimal")
+     * @ORM\Column(name="size", type="decimal", nullable=false)
      */
     private $size;
 
@@ -134,7 +141,7 @@ class FileUpload
     }
 
     /**
-     * Get name.
+     * Get fileName.
      *
      * @return string
      */
@@ -153,6 +160,52 @@ class FileUpload
         $this->fileName = $fileName;
 
         return $this;
+    }
+
+    /**
+     * Get title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set title.
+     *
+     * @return FileUpload
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return FileUpload
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 
     /**
@@ -249,30 +302,6 @@ class FileUpload
         return $this->size;
     }
 
-    /**
-     * Set description.
-     *
-     * @param string $description
-     *
-     * @return FileUpload
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * Get description.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
-    }
-
     public function getAbsolutePath()
     {
         return null === $this->path
@@ -362,6 +391,16 @@ class FileUpload
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Set last updated datetime.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdated(\DateTime $updatedAt)
+    {
+        $this->updated = $updatedAt;
     }
 
     /**
