@@ -102,6 +102,7 @@ Sort:
     - REFACTOR - map-markers
     - REFACTOR - get tag names for the tags column filter menu from stored data rather than hard coded.
     - replace ucfirst and lcfirst with built in 'toUpperCase'
+    - add input type, ie number, to form field confgs
 
 TODOs:
 ##(Category){priority}[difficulty]##

@@ -40,8 +40,8 @@ const panels = {
 
 /* ************************* FACADE ***************************************** */
 /* ======================== FILTER PANEL ==================================== */
-export function updateFilterPanelHeader() {
-    fM.updateFilterPanelHeader();
+export function updateFilterPanelHeader(focus) {
+    fM.updateFilterPanelHeader(focus);
 }
 export function enableClearFiltersButton() {
     fM.enableClearFiltersButton();

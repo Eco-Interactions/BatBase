@@ -12,6 +12,8 @@ import * as pM from '../panels-main.js';
 import { buildTable, _filter, _ui, _u, accessTableState as tState } from '../../../db-main.js';
 import * as fSets from './filter-sets.js';
 
+let timeout;
+
 /* ========================= FILTER SETS ==================================== */
 export function isFilterSetActive() {  
     return fSets.isFilterSetActive();
@@ -44,10 +46,10 @@ export function addFilterPanelEvents() {
 /* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
 function resizeFilterPanelTab() {
     if ($('#filter-pnl').hasClass('closed')) { return; }
-    if (fState.timeout) { return; }
-    fState.timeout = window.setTimeout(() => {
+    if (timeout) { return; }
+    timeout = window.setTimeout(() => {
         sizeFilterPanelTab()
-        fState.timeout = false;
+        timeout = false;
     }, 500);
 }
 /**
@@ -101,7 +103,7 @@ function getLeftSplitPos() {
     return pnlL > (tabL - 2) ? pnlL : tabL;
 }
 /** Adds the focus to the filter panel header, "[Focus] and Date Filters" */
-export function updateFilterPanelHeader(focus) {  
+export function updateFilterPanelHeader(focus) { 
     const map = {
         locs: 'Location', srcs: 'Source', taxa: 'Taxon'
     };
@@ -177,7 +179,7 @@ export function updateTaxonFilterViewMsg(view) {
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called."); 
     const tblState = tState().get(['api', 'intSet', 'flags']);
     if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
-    setFilterStatus(_filter('getActiveFilterText'), tblState.intSet);
+    setFilterStatus(_filter('getActiveFilterVals'), tblState.intSet);
     enableClearFiltersButton();
 }
 
@@ -188,11 +190,11 @@ function setFilterStatus(filters, intSet) {
         resetFilterUi() 
     }
 }
-function getStatus(filters, intSet) {                                                   
+function getStatus(filters, intSet) {
     const list = intSet ? '(LIST)' : ''; 
     const set = fSets.isFilterSetActive() ? '(SET)' : '';
     const loaded = [list, set].filter(f=>f).join(' '); 
-    const fltrs = filters.join(', ');
+    const fltrs = filters.join(', ');  
     return loaded !== '' & fltrs !== '' ? `${loaded} ${fltrs}.` :
         loaded ? loaded : fltrs+'.';
 }

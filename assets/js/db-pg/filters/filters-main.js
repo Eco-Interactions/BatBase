@@ -98,6 +98,6 @@ export function isFilterActive() {
     return fState.isFilterActive();
 }
 /* ___________________ FILTER STATUS TEXT ___________________________________ */
-export function getActiveFilterText() { 
-    return fState.getActiveFilterText();
+export function getActiveFilterVals() { 
+    return fState.getActiveFilterVals();
 }

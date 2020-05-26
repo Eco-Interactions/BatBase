@@ -128,23 +128,9 @@ function getFilterSetJson(tState) {
     const fState = _filter('getFilterState');
     const filters = {
         focus: tState.curFocus, panel: fState.panel,
-        table: getColumnHeaderFilters(fState.table), view: tState.curView
+        table: fState.table, view: tState.curView
     };
     return JSON.stringify(filters);
-}
-/** Returns an obj with the ag-grid filter models. */
-function getColumnHeaderFilters(models) {
-    const colTitles = Object.keys(models);
-    return getActiveTableFilters();
-    
-    function getActiveTableFilters() {
-        const filters = {};
-        colTitles.forEach(col => { 
-            if (!models[col]) { return; }  
-            filters[col] = models[col];
-        });                                                                     
-        return filters;
-    }
 }
 /* ============================== DELETE ==================================== */
 function showCnfrmDeleteBttns() {                                   /*dbug-log*///console.log('deleteInteractionList')
@@ -199,7 +185,7 @@ function setComboboxFilter(filter) {
 }
 function applyRemainingFilters(filters) {                           /*dbug-log*///console.log('       --applyRemainingFilters = %O', filters);
     setNameSearchFilter(filters.panel.name);
-    setTimeUpdatedFilter(filters.panel.time);
+    setDateUpdatedFilter(filters.panel.date);
     applyColumnFilters(filters.table);
     if (!app.fltr) { return; } //reapplying filters after form closed.
     $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
@@ -210,10 +196,10 @@ function setNameSearchFilter(text) {                                /*dbug-log*/
     text = text.replace(/['"]+/g, '');
     $('#focus-filters input[type="text"]').val(text).change();
 }
-function setTimeUpdatedFilter(time) {                               /*dbug-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
-    if (!time) { return; } 
-    _u('setSelVal', ['Date Filter', time.type]);
-    if (time.date) { _filter('toggleDateFilter', [true, time.date]); }
+function setDateUpdatedFilter(date) {                               /*dbug-log*///console.log('setDateUpdatedFilter. time = %s. today = %s', time, new Date().today());
+    if (!date) { return; } 
+    _u('setSelVal', ['Date Filter', date.type]);
+    if (date.time) { _filter('toggleDateFilter', [true, date.time]); }
 }
 function applyColumnFilters(filters) {                              /*dbug-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
@@ -244,12 +230,12 @@ function showSaveFilterModal(success) {
     function buildModalHtml() {
         const hdr = '<h2> Saving Filter Set: </h2>';
         const fltrs = getActiveFilters($('#filter-status').html());
-        if (fltrs.includes('No Active')) { readyToSave = false; }
+        if (fltrs.includes('No Active')) { saveReady = false; }
         return hdr + '<br>' + fltrs;
     }
 }
 function getActiveFilters(statusMsg) {
-    const pieces = statusMsg.split(') , ');
+    const pieces = statusMsg.split(') ');
     if (pieces.length > 1) { pieces.shift(); }
     return pieces.join('');
 }

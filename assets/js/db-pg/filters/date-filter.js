@@ -26,7 +26,7 @@
  *          TREE-TEXT
  */
 import * as fM from './filters-main.js';
-import { _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
+import { resetDataTable, _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
 let tblState;
 /* 
  * {obj} cal    Stores the flatpickr calendar instance.  
@@ -165,7 +165,7 @@ function showUpdatesAfterTableLoad() {
  * since the datetime specified by the user.
  * Note: Params 1-3 sent by calendar
  */
-function filterByTime(dates, dateTime, instance, skipSync) {
+function filterByTime(dates, dateTime, instance, skipSync = true) {
     const time = updateMemoryAndReturnTime(dateTime);
     filterInteractionsByTime(time, app.date.type);
     updateUiAfterTimeFilterChange(dateTime, skipSync);
@@ -204,6 +204,7 @@ function getRowsAfterTime(filterTime, type) {
 } /* End getRowsAfterTime */
 function updateUiAfterTimeFilterChange(dateTime, skipSync) {
     $('.flatpickr-input').val(dateTime);
+    _ui('updateFilterStatusMsg')
     if (skipSync) { return; } //console.log('skipping filter sync');
     syncFiltersAndUi(dateTime);
 }
@@ -231,7 +232,7 @@ function resetDateFilter(skipSync) {                                            
 function syncFiltersAndUi(dateTime) {                              /*debug-log*///console.log('           --syncFiltersAndUi [%s]', dateTime);
     _ui('setTreeToggleData', [false]);
     if (dateTime != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
-    _ui('updateFilterStatusMsg')
+    // _ui('updateFilterStatusMsg')
 }
 export function syncViewFiltersAndUi(focus) {
     tblState = tState().get();

@@ -26,8 +26,8 @@ export function setPanelFilterState(key, value) {
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
 export function resetFilterState() {
-    const prevDateFilter = fState.active.date;
-    fState = { active: { date: prevDateFilter }};
+    const state = fState.active.date ? { date: fState.active.date } : {}; 
+    fState = { active: state };
 }
 /* =========================== GET ========================================== */
 export function getFilterStateKey(key) {
@@ -35,17 +35,21 @@ export function getFilterStateKey(key) {
 }
 export function getFilterState() {
     return {
-        panel: fState.active,
-        table: getTableFilterModels()
+        panel: getPanelFilters(Object.assign({}, fState.active)),
+        table: getActiveTableFilterObj()
     };
+}
+function getPanelFilters(filters) {
+    if (!fState.fRowData) { delete filters.date; }
+    return filters;
 }
 /** If table is filtered by an external filter, the rows are stored in fRowData. */
 export function getCurRowData() {                                                    
     return fState.fRowData ? fState.fRowData : tState().get('rowData');
 } 
 export function isFilterActive() {
-    const tbl = Object.keys(getTableFilters([])).length > 0;
-    const pnl = Object.keys(fState.active).length > 0;
+    const tbl = getTblFilterNames().length > 0;
+    const pnl = getPanelFilterVals().length > 0;
     return tbl || pnl;
 }
 /* =================== FILTER STATUS TEXT =================================== */
@@ -54,22 +58,27 @@ export function isFilterActive() {
  * If a saved filter set is applied filters are read from the set. Otherwise, the
  * active filters in the panel and table are checked and returned.
  */
-export function getActiveFilterText() {   
+export function getActiveFilterVals() {   
     const set = _ui('isFilterSetActive'); 
-    return set ? getSavedFilterStatus(set) : getTableFilters(addExternalFilters());
+    return set ? getSavedFilterStatus(set) : getPageActiveFilters();
 }
+/* ------------------- FILTER SET STATUS ------------------------------------ */
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = getPanelFilters(set.panel);
+    const pnlFltrs = getSetPanelFilterVals(set.panel);  
     return pnlFltrs.concat(tblFltrs);
 }
-function getPanelFilters(filters) {
+function getSetPanelFilterVals(filters) {
     return Object.keys(filters).map(type => {  
         return type === 'date' ? 
             getDateFltrString(filters[type]) : Object.keys(filters[type])[0]
-    });
+    }).filter(v => v);
 }
-function addExternalFilters() {  
+/* ----------------- ACTIVE PAGE FILTERS ------------------------------------ */
+function getPageActiveFilters (argument) {
+    return getTblFilterNames().concat(getPanelFilterVals());
+}
+function getPanelFilterVals() {  
     const map = { combo: addComboValue, name: addName, date: getDateFltrString };
     return getFocusFilterDisplayVals();
 
@@ -94,19 +103,17 @@ function getDateFltrString(date) {
     const type = date.type === 'cited' ? 'Published' : 'Updated';
     return 'Date '+ type;
 }
-function getTableFilters(filters) {
-    const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 
-    const columns = Object.keys(filterModels);        
-    for (let i=0; i < columns.length; i++) {
-        if (filterModels[columns[i]] !== null) { 
-            filters.push(columns[i]); }
-    }
-    return filters;
+function getTblFilterNames() {
+    return Object.keys(getActiveTableFilterObj());
 }
 /** Returns an obj with the ag-grid filter models. */
-function getTableFilterModels() {  
+function getActiveTableFilterObj() {  
     const tblApi = tState().get('api');
     if (!tblApi) { return {}; }
+    const models = getColFilterModels(tblApi);
+    return getActiveTblFilters(models);
+}
+function getColFilterModels (tblApi) {
     const filters = Object.keys(tblApi.filterManager.allFilters);
     return {
         'Subject Taxon': getColumnFilterApi('subject'),
@@ -120,8 +127,16 @@ function getTableFilterModels() {
         'Citation': getColumnFilterApi('citation'),
         'Note': getColumnFilterApi('note') 
     };  
-    function getColumnFilterApi(colName) {
+    function getColumnFilterApi (colName) {
         return filters.indexOf(colName) === -1 ? null : 
             tblApi.getFilterApi(colName).getModel()
     }
+}
+function getActiveTblFilters (models) {
+    const filters = {};
+    Object.keys(models).forEach(col => { 
+        if (!models[col]) { return; }  
+        filters[col] = models[col];
+    });                                                                     
+    return filters;
 }

@@ -275,7 +275,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iFilterTheTableToInteractionsCreatedToday()
     {
         $this->iToggleTheFilterPanel('open');
-        $this->iSetTheTimeFilterTo('updated', 'today');
+        $this->iSetTheDateFilterTo('updated', 'today');
         $this->iToggleTheFilterPanel('close');
         
         $this->spin(function() {
@@ -856,29 +856,29 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @When I uncheck the time-updated filter
+     * @When I uncheck the date-updated filter
      */
-    public function iUncheckTheTimeUpdatedFilter()
+    public function iUncheckTheDateUpdatedFilter()
     {
         $this->iToggleTheFilterPanel('open');
         $this->toggleTheDateFilter(false);
         $this->iToggleTheFilterPanel('close');
     }
     /**
-     * @Given I set the time :type filter to :date
+     * @Given I set the date :type filter to :date
      */
-    public function iSetTheTimeFilterTo($type, $date)
+    public function iSetTheDateFilterTo($type, $date)
     {
         $initialCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
-        $this->setTimeFilterDefault($date);
+        $this->setDateFilterDefault($date);
         $this->toggleTheDateFilter(true);
-        $this->iSelectFromTheDropdown($type, 'Time Filter');
+        $this->iSelectFromTheDropdown($type, 'Date Filter');
         $this->clickOnPageElement('#filter-col1');
         $this->spin(function() use ($initialCount) {
             $postCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
             return $postCount !== $initialCount && $postCount > 0;
-            }, "Time filter did not update as expected. type = [$type]. date = [$date]. initial [$initialCount]. (After can't be zero)");
-        $this->setTimeFilterDefault($date, 'remove');
+            }, "Date did not update as expected. type = [$type]. date = [$date]. initial [$initialCount]. (After can't be zero)");
+        $this->setDateFilterDefault($date, 'remove');
     }
 
     /**
@@ -1208,15 +1208,15 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * There doesn't seem to be a way to set the date on the flatpickr calendar
      * from these tests. Adding a data property to the calendar elem that will be
-     * read on calendar load and set that time as the default for the calendar. 
+     * read on calendar load and set that date as the default for the calendar. 
      * Doesn't quite test the user's input, but should test the filter functionality.
      */
-    private function setTimeFilterDefault($date, $reset = false)
+    private function setDateFilterDefault($date, $reset = false)
     {  
         if ($reset) {
-            $this->getUserSession()->executeScript("$('#selTimeFilter').data('default', false);");    
+            $this->getUserSession()->executeScript("$('#selDateFilter').data('default', false);");    
         } else {
-            $this->getUserSession()->executeScript("$('#selTimeFilter').data('default', '$date');");
+            $this->getUserSession()->executeScript("$('#selDateFilter').data('default', '$date');");
         }
     }
 
@@ -1228,7 +1228,7 @@ class FeatureContext extends RawMinkContext implements Context
                 if ($state) { $checkbox->check(); } else { $checkbox->uncheck(); }
                 return $checkbox->isSelected() == $state;
             } catch (Exception $e) { return; }            
-        }, 'Time filter not ['.($state ? 'en' : 'dis').'abled].');
+        }, 'Date filter not ['.($state ? 'en' : 'dis').'abled].');
     }
 /** ---------------------- Get From Page -------------------------------------*/
     private function getTableRow($text)
@@ -1502,7 +1502,7 @@ class FeatureContext extends RawMinkContext implements Context
     {   
         $editor = 'editor' . $cnt;
         $this->curUser = $this->$editor; 
-        $this->iUncheckTheTimeUpdatedFilter();
+        $this->iUncheckTheDateUpdatedFilter();
         $this->iToggleTheFilterPanel('close');
         if ($cnt == 1) {
             $this->editorChangesLocationData();
@@ -1675,7 +1675,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->curUser->getPage()->pressButton('Update Interaction');
         $this->iWaitForTheFormToClose('top');
         $this->theDatabaseTableIsInFocus('Location'); 
-        $this->iUncheckTheTimeUpdatedFilter();
+        $this->iUncheckTheDateUpdatedFilter();
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iShouldSeeInteractionsUnder('2', 'Unspecified Costa Rica Interactions');
@@ -1706,7 +1706,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iWaitForTheFormToClose('sub');
         $this->curUser->getPage()->pressButton('Update Interaction');
         $this->iWaitForTheFormToClose('top');
-        $this->iUncheckTheTimeUpdatedFilter();
+        $this->iUncheckTheDateUpdatedFilter();
         $this->theDatabaseTableIsInFocus('Taxon');
         $this->iGroupInteractionsBy('Arthropoda');
         $this->iExpandInTheDataTree('Order Lepidoptera');
