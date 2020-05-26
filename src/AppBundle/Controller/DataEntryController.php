@@ -77,13 +77,7 @@ class DataEntryController extends Controller
         $coreEntity = $em->getRepository('AppBundle:'.ucfirst($coreName))
             ->findOneBy(['id' => $formData->ids->core ]);
         
-        $returnData = new \stdClass; 
-        $returnData->core = $coreName;
-        $returnData->coreId = $coreEntity->getId();
-        $returnData->coreName = $coreEntity->getDisplayName();
-        $returnData->coreEntity = $coreEntity;
-        $returnData->coreEdits = $this->getEditsObj($formData->ids->core); 
-        $returnData->detailEdits = $this->getEditsObj($formData->ids->detail);
+        $returnData = $this->buildReturnDataObj($coreName, $coreEntity, $formData);
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -92,6 +86,19 @@ class DataEntryController extends Controller
         );
         $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
+    }
+    private function buildReturnDataObj($coreName, $coreEntity, $formData)
+    {
+        $data = new \stdClass; 
+        $data->core = $coreName;
+        $data->coreId = $coreEntity->getId();
+        $data->coreEntity = $coreEntity;
+        $data->coreEdits = $this->getEditsObj($formData->ids->core); 
+        $data->detailEdits = $this->getEditsObj($formData->ids->detail);
+        if ($coreName !== 'interaction') {
+            $data->coreName = $coreEntity->getDisplayName();
+        }
+        return $data;
     }
     /*--------------------- Update Citation Text -----------------------------*/
     /**
