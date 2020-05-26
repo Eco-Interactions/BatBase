@@ -192,10 +192,18 @@ function loadCitTypeFields(typeId) {                                            
 
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(elem, fLvl);
+        updateNumberInputTypes();
         handleCitText(fLvl);
         setCitationFormRowStyles(fLvl);
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
+}
+function updateNumberInputTypes () {
+    const fields = ['Issue', 'Pages', 'Volume', 'Year'];
+    fields.forEach(setInputType);
+}
+function setInputType (fieldName) {
+    $('#'+fieldName+'-lbl + input').attr('type', 'number');
 }
 function setCitationFormRowStyles(fLvl) {
     _f.elems('setCoreRowStyles', ['#citation_Rows', '.'+fLvl+'-row']);
@@ -356,15 +364,19 @@ function ifNoChildFormOpen(fLvl) {
 }
 function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl, reqFieldsFilled) {
     if (!reqFieldsFilled) { return; }
-    $('#citation_Rows div.field-row').each(hightlightIfEmpty);
+    $('#citation_Rows div.field-row').each(hightlightIfEmptyAndImportant);
     if ($('.warn-msg').length) { return; }
     $('#'+fLvl+'-submit').before('<div class="warn-msg">Please add highlighted data if available.</div>')
 }
-function hightlightIfEmpty(i, el) {console.log('el = %O', el);
+function hightlightIfEmptyAndImportant(i, el) {                                 
     const input = el.children[1]; 
-    if ($(input).val() || input.id.includes('sel-cntnr')) { return; }
-    $(el).css('background-color', 'yellow');
+    if (ifFieldShouldBeSkipped(...el.children)) { return; }
+    $(el).css('background-color', 'rgba(255, 255, 0, .3)');
     $(el.children[1]).change(removeHighlightWhenFilled);
+}
+function ifFieldShouldBeSkipped (label, input) {
+    const ignore = ['Authors', 'Doi', 'LinkDisplay', 'LinkUrl'];
+    return $(input).val() || ignore.indexOf(label.id.split('-')[0]) !== -1;
 }
 function removeHighlightWhenFilled(val) {
     if (!val) { return; }
