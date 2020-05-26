@@ -207,7 +207,7 @@ function getSelectedLocVal(locType, selectedOpts) {
     return selectedOpts[getLocType(null, selectedOpts)];
 }
 function getLocType(that, selectedOpts) {
-    return that.hasOwnProperty('$input') ? 
+    return that && that.hasOwnProperty('$input') ? 
         that.$input[0].id.split('sel')[1] : getSelectedLocType(selectedOpts) 
 }
 function getSelectedLocType(selectedOpts) {

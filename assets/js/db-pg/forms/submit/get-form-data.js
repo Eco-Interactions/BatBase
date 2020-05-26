@@ -42,8 +42,11 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         }
     }
     function getInputFieldNameFromCntnr(cntnr) {
-        const field = cntnr.children[0];
-        return _f.util('lcfirst', [field.innerText.trim().split(" ").join("")]); 
+        let field = cntnr.children[0].innerText.split(' (m)')[0];
+        return _f.util('lcfirst', [field.trim().split(" ").join("")]);
+    }
+    function isElevationField (field) {
+        return field.innerText.includes('(m)');
     }
     function getMultiFieldRowData(cntnr) {
         cntnr.children.forEach(fieldElem => getInputData(fieldElem));

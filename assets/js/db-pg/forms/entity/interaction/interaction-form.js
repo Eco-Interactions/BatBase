@@ -404,7 +404,7 @@ function onRealmSelection(val) {                                                
         _f.state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
         $('#select-realm').off('click');
-        $('#select-realm').click(selectRoleTaxon.bind(null, getRealmData('realmTaxon')));
+        $('#select-realm').click(selectRoleTaxon.bind(null, null, getRealmData('realmTaxon')));
     }
 }
 function clearPreviousRealmLevelCombos() {
@@ -438,8 +438,8 @@ function addNewFormState(role) {
 function finishTaxonSelectBuild(role) {
     addSelectRealmBttn();
     customizeElemsForTaxonSelectForm(role);
-    _f.util('replaceSelOpts', ['#'+role+'-sel', []]);
     selectInitTaxonOrFocusFirstCombo(role);
+    _f.util('replaceSelOpts', ['#'+role+'-sel', []]);
 }
 /* --------- SELECT UNSPECIFIED BUTTON -------------- */
 function addSelectRealmBttn() {
@@ -710,7 +710,7 @@ function resetPlaceholer(lvl) {
 }
 /* ------- selectRoleTaxon --------- */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
-function selectRoleTaxon(realmTaxon) {  
+function selectRoleTaxon(e, realmTaxon) {  
     const role = getRealmData('realmName') === 'Bat' ? 'Subject' : 'Object';
     const opt = getSelectedTaxonOption(realmTaxon);
     $('#sub-form').remove();

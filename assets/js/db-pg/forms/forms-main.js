@@ -50,6 +50,12 @@ export function alertIssue() {
 export function forms(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface
     return _forms[funcName](...getParams(params));
 }
+export function selectIntLoc(id) {
+    _forms.selectIntLoc(id);
+}
+export function addNewLocationWithGps() {
+    _forms.addNewLocationWithGps();
+}
 export function create(entity, name) {
     return _forms.createEntity(entity, name);
 }
