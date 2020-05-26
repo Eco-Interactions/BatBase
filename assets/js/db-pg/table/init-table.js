@@ -250,7 +250,7 @@ function uneditableEntityRow(params) {                                          
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
-    const path = require('../../../images/icons/eif.pencil.svg');
+    const path = require('../../../images/icons/eif.pencil.svg').default; 
     var editPencil = `<img src=${path} id="edit${entity}${id}"
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
@@ -271,7 +271,7 @@ function addMapIcon(params) {                                                   
     return getMapIcon(id);
 }
 function getMapIcon(id) {
-    const path = require('../../../images/icons/marker-icon.png');
+    const path = require('../../../images/icons/marker-icon.png').default;
     return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'  
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
