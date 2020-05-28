@@ -19,7 +19,11 @@
  *             SHARED EDIT & CREATE FUNCS
  *             TYPE-SPECIFIC UPDATES
  *             AUTO-GENERATE CITATION
+ *             HIGHTLIGHT EMPTY CITATION FIELDS
  *          SHARED PUBLICATION AND CITATION HELPERS
+ *              GET SOURCE-TYPE ROWS
+ *              UPDATE FIELD LABELS
+ *              UPDATE NUMBER INPUTS
  *          AUTHOR
  *              AUTHOR SELECTION
  *              AUTHOR CREATE
@@ -192,18 +196,10 @@ function loadCitTypeFields(typeId) {                                            
 
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(elem, fLvl);
-        updateNumberInputTypes();
         handleCitText(fLvl);
         setCitationFormRowStyles(fLvl);
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
-}
-function updateNumberInputTypes () {
-    const fields = ['Issue', 'Pages', 'Volume', 'Year'];
-    fields.forEach(setInputType);
-}
-function setInputType (fieldName) {
-    $('#'+fieldName+'-lbl + input').attr('type', 'number');
 }
 function setCitationFormRowStyles(fLvl) {
     _f.elems('setCoreRowStyles', ['#citation_Rows', '.'+fLvl+'-row']);
@@ -362,26 +358,29 @@ function getCitationFieldText($elem, fLvl, reqFieldsFilled) {
 function ifNoChildFormOpen(fLvl) {  
    return $('#'+_f.getNextFormLevel('child', fLvl)+'-form').length == 0; 
 }
+/* ---------------- HIGHTLIGHT EMPTY CITATION FIELDS ------------------------ */
+/**
+ * Highlights field continer if citation field is empty once all required fields 
+ * are filled. Removes hightlights when filled.
+ */
 function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl, reqFieldsFilled) {
     if (!reqFieldsFilled) { return; }
-    $('#citation_Rows div.field-row').each(hightlightIfEmptyAndImportant);
+    const empty = $('#citation_Rows div.field-row').filter(hightlightIfEmpty);
+    if (!empty.length && $('.warn-msg').length) { return $('.warn-msg').remove(); }
     if ($('.warn-msg').length) { return; }
-    $('#'+fLvl+'-submit').before('<div class="warn-msg">Please add highlighted data if available.</div>')
+    $('#'+fLvl+'-submit').before('<div class="warn-msg warn">Please add highlighted data if available.</div>')
 }
-function hightlightIfEmptyAndImportant(i, el) {                                 
+function hightlightIfEmpty(i, el) {
     const input = el.children[1]; 
-    if (ifFieldShouldBeSkipped(...el.children)) { return; }
-    $(el).css('background-color', 'rgba(255, 255, 0, .3)');
-    $(el.children[1]).change(removeHighlightWhenFilled);
+    if (ifFieldShouldBeSkipped(el, ...el.children)) { return false; }
+    $(el).addClass('warn');
+    return true;
 }
-function ifFieldShouldBeSkipped (label, input) {
-    const ignore = ['Authors', 'Doi', 'LinkDisplay', 'LinkUrl'];
-    return $(input).val() || ignore.indexOf(label.id.split('-')[0]) !== -1;
-}
-function removeHighlightWhenFilled(val) {
-    if (!val) { return; }
-    $(this).css('background-color', 'none');
-    $(this).off('change', removeHighlightWhenFilled);
+function ifFieldShouldBeSkipped (el, label, input) { 
+    const ignore = ['Authors'];
+    const skip = $(input).val() || ignore.indexOf(label.id.split('-')[0]) !== -1;
+    if (skip && el.className.includes('warn')) { $(el).removeClass('warn'); }
+    return skip;
 }
 /** ============= SHARED PUBLICATION AND CITATION HELPERS =================== */
 /**
@@ -401,8 +400,9 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
         initFormCombos(entity, fLvl);
         _f.elems('fillComplexFormFields', [fLvl]);
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
-        updateFieldLabelsForType(entity, fLvl);
+        updateFieldsForSourceType(entity, fLvl)
         $('#Title_row input').focus();
+        $('.top-pin').hide(); //edit-forms show pins after type change otherwise.
     }
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {  
@@ -411,6 +411,7 @@ function resetOnFormTypeChange(entity, typeId, fLvl) {
     _f.state('setFormProp', [fLvl, 'reqElems', []]);
     _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]); 
 }
+/* ----------------- GET SOURCE-TYPE ROWS ----------------------------------- */ 
 /**
  * Builds and return the form-field rows for the selected source type.
  * @return {ary} Form-field rows ordered according to the form config.
@@ -435,6 +436,12 @@ function getSourceTypeFromCombo(entity) {
     const typeElemId = '#'+_f.util('ucfirst', [entity])+'Type-sel'; 
     return _f.cmbx('getSelTxt', [typeElemId]);
 }
+/* ----------------- UPDATE SOURCE-TYPE FIELDS ------------------------------ */ 
+function updateFieldsForSourceType (entity, fLvl) {
+    updateFieldLabelsForType(entity, fLvl);
+    updateInputTypes();
+}
+/* ------------------ LABELS -------------------- */ 
 /**
  * Changes form-field labels to more specific and user-friendly labels for 
  * the selected type. 
@@ -481,12 +488,19 @@ function updatePlaceholderText(elem, newTxt) {
     elem.selectize.settings.placeholder = 'Select ' + newTxt;
     elem.selectize.updatePlaceholder();
 }
-// function focusFieldInput(type) {
-//     if (!$('#Title_row input').val()) { $('#Title_row input').focus() 
-//     } else {
-//         _f.cmbx('focusCombobox', ['#'+_f.util('ucfirst', [type])+'Type-sel', true]);
-//     }
-// }
+/* ----------------- INPUTS ----------------------------------- */ 
+function updateInputTypes () {
+    setNumberInputs();
+    setInputType('LinkUrl', 'url');
+}
+function setNumberInputs () {
+    const fields = ['Edition', 'Issue', 'Pages', 'Volume', 'Year'];
+    fields.forEach(f => setInputType(f, 'number'));
+}
+function setInputType (fieldName, type) {                                    
+    if (!$('#'+fieldName+'-lbl + input').length) { return; }                 
+    $('#'+fieldName+'-lbl + input').attr('type', type);
+}
 /* ========================== PUBLISHER ===================================== */
 function onPublSelection(val) {
     if (val === 'create') { return initPublisherForm(val); }        
@@ -683,7 +697,7 @@ export function finishSourceToggleAllFields(entity, fVals, fLvl) {
         handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
         handleCitText(fLvl);
     }
-    updateFieldLabelsForType(entity, fLvl);
+    updateFieldsForSourceType(entity, fLvl);
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
