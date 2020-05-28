@@ -35,7 +35,7 @@ class Publication
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -53,7 +53,7 @@ class Publication
      * @var \AppBundle\Entity\PublicationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublicationType", inversedBy="publications")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false)
      */
     private $publicationType;
 
@@ -61,7 +61,7 @@ class Publication
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publication")
-     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;
 

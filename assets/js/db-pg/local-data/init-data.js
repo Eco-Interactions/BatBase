@@ -45,14 +45,16 @@ function initTaxonDataAndLoadTable(reset) {
 }
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
 function downloadRemainingTableData() {
-    return $.when(...['source', 'location'].map(url => getAndSetData(url)))
+    return getAndSetData('source')
+        .then(() => getAndSetData('location'))        
         .then(() => getAndSetData('interaction'))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable'));
 }
 /* ------------------- DOWNLOAD MAP DATA ------------------------------------ */
 function downloadRemainingDataAndEnableMap() {
-    return $.when(...['lists', 'geoJson'].map(url => getAndSetData(url)))
+    return getAndSetData('geoJson')
+        .then(() => getAndSetData('lists'))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(_db.pg('enableMap'));
 }

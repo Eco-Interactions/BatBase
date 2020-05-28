@@ -77,11 +77,7 @@ class DataEntryController extends Controller
         $coreEntity = $em->getRepository('AppBundle:'.ucfirst($coreName))
             ->findOneBy(['id' => $formData->ids->core ]);
         
-        $returnData = new \stdClass; 
-        $returnData->core = $coreName;
-        $returnData->coreEntity = $coreEntity;
-        $returnData->coreEdits = $this->getEditsObj($formData->ids->core); 
-        $returnData->detailEdits = $this->getEditsObj($formData->ids->detail);
+        $returnData = $this->buildReturnDataObj($coreName, $coreEntity, $formData);
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -90,6 +86,19 @@ class DataEntryController extends Controller
         );
         $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
+    }
+    private function buildReturnDataObj($coreName, $coreEntity, $formData)
+    {
+        $data = new \stdClass; 
+        $data->core = $coreName;
+        $data->coreId = $coreEntity->getId();
+        $data->coreEntity = $coreEntity;
+        $data->coreEdits = $this->getEditsObj($formData->ids->core); 
+        $data->detailEdits = $this->getEditsObj($formData->ids->detail);
+        if ($coreName !== 'interaction') {
+            $data->coreName = $coreEntity->getDisplayName();
+        }
+        return $data;
     }
     /*--------------------- Update Citation Text -----------------------------*/
     /**
@@ -117,6 +126,7 @@ class DataEntryController extends Controller
 
         $returnData = new \stdClass; 
         $returnData->core = 'source';
+        $returnData->coreId = $src->getId();
         $returnData->coreEntity = $src;
         $returnData->detail = 'citation';
         $returnData->detailEntity = $cit;
@@ -439,13 +449,18 @@ class DataEntryController extends Controller
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        if (!strpos($e->getMessage(), 'Duplicate Entry')) {
+        if (ifNotDuplicateEntityError($e)) {
             $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData($e->getMessage());
         return $response;
+    }
+    private function ifNotDuplicateEntityError($e)
+    {
+        return !strpos($e->getMessage(), 'Duplicate Entry') ||
+            !strpos($e->getTraceAsString(), 'Duplicate Entry');
     }
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($entityData)

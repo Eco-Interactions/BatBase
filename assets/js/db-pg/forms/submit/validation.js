@@ -1,19 +1,36 @@
 /**
  *
- * Exports:             Imported by:
- *     errUpdatingData          db-forms
- *     formInitErr              db-forms
- *     formSubmitError          db-forms
- *     openSubFormErr           db-forms
- *     clearErrElemAndEnableSubmit      edit-forms
- *     clrNeedsHigherLvl        edit-forms
- *     clrContribFieldErr       db-forms
+ * Exports:             
+ *     errUpdatingData  
+ *     formInitErr      
+ *     formSubmitError  
+ *     openSubFormErr   
+ *     clearErrElemAndEnableSubmit      
+ *     clrNeedsHigherLvl        
+ *     clrContribFieldErr       
+ *     
+ * TOC:
+ *      FORM-SUBMIT ERROR
+ *      DATA-STORAGE ERROR
+ *      FORM-FIELD ERRORS
+ *          DUPLICATE AUTHOR
+ *          MUST STAY GENUS RANK
+ *          INVALID COORDINATES
+ *          INCORRECT BINOMIAL
+ *          MUST HAVE GENUS PARENT
+ *          NEEDS FAMILY
+ *          NEEDS GENUS
+ *          PARENT MUST BE HIGHER RANK
+ *          LOCATION REQUIRED-FIELD EMPTY
+ *          NEEDS NAME
+ *          SUB-FORM ALREADY OPEN
+ *          BLANKS IN AUTHOR ORDER
+ *     ERROR ELEMENTS
  */
 import * as _f from '../forms-main.js';
 
 let _fs;
-/*------------------- Form Error Handlers --------------------------------*/
-/**------------- Form Submit-Errors --------------*/
+/* ====================== FORM SUBMIT ERRORS ================================ */
 /** Builds and appends an error elem that displays the error to the user. */
 export function formSubmitError(jqXHR, textStatus) {                            console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
     const fLvl = _f.state('getStateProp', ['submit']).fLvl;         
@@ -44,7 +61,7 @@ function getFormErrMsg(errTag) {
     };
     return '<span>' + msg[errTag] + '</span>'; 
 }
-/**------------- Data Storage Errors --------------*/
+/* ===================== DATA STORAGE ERRORS ================================ */
 export function errUpdatingData(errTag) {                                       console.log('           !!!errUpdatingData [%s]', errTag);
     const cntnr = _f.util('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
     $(cntnr).append([buildErrMsg(), buildResetDataButton()]);
@@ -89,6 +106,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
     window.setTimeout(function() {_f.cmbx('clearCombobox', [selId])}, 10);
     return { 'value': '', 'text': 'Select ' + field };
 }
+/* =================== FORM-FIELD ERRORS ==================================== */
 /**
  * Shows the user an error message above the field row. The user can clear the 
  * error manually with the close button, or automatically by resolving the error.
@@ -107,13 +125,14 @@ export function reportFormFieldErr(fieldName, errTag, fLvl) {                   
         'needsHigherLvl': handleNeedsHigherLvl,
         'needsLocData': handleNeedsLocData,
         'needsName': handleNeedsName,
+        'noFamily': handleNoFamily,
         'noGenus': handleNoGenus,
         'openSubForm': handleOpenSubForm,
     };
     const errElem = getFieldErrElem(fieldName, fLvl);
     errMsgMap[errTag](errElem, errTag, fLvl, fieldName);
 }
-/* ----------- Field-Error Handlers --------------------------------------*/
+/* --------------- DUPLICATE AUTHOR ----------------------------------------- */
 function handleDupAuth(elem, errTag, fLvl, fieldName) {  
     const msg = `<span>An author with this name already exists in the database.\n
         If you are sure this is a new author, add initials or modify their name 
@@ -123,6 +142,7 @@ function handleDupAuth(elem, errTag, fLvl, fieldName) {
 function clrDupAuth(elem, fLvl, e) { 
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
+/* ---------------- MUST STAY GENUS RANK ------------------------------------ */
 /** Note: error for the edit-taxon form. */
 function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {  
     const msg = "<span>Genus' with species children must remain at genus.</span>";
@@ -132,6 +152,7 @@ function clrIsGenusPrnt(elem, fLvl, e) {
     _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
+/* ----------------- INVALID COORDINATES ------------------------------------ */
 /** Note: error used for the location form. */
 function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
     const msg = `<span>Invalid coordinate format.</span>`;
@@ -144,6 +165,7 @@ function clrInvalidCoords(elem, fLvl, e, fieldName) {
     clearErrElemAndEnableSubmit(elem, fLvl);
     if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
 }
+/* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
     const genus = _f.cmbx('getSelTxt', ['#Genus-sel']);
     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
@@ -154,6 +176,7 @@ function clrNeedsGenusName(elem, fLvl, e) {
     // $('#DisplayName_row input')[0].value = '';
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
+/* ---------------- MUST HAVE GENUS PARENT ---------------------------------- */
 /** Note: error for the edit-taxon form. */
 function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {  
     const msg = '<span>Please select a genus parent for the species taxon.</span>';
@@ -163,6 +186,22 @@ function clrNeedsGenusPrntErr(elem, fLvl, e) {
     _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
+/* ------------------- NEEDS FAMILY ----------------------------------------- */
+/** Note: error for the create-taxon form. */
+function handleNoFamily(elem, errTag, fLvl, fieldName) {  
+    const msg = '<span>Please select a family before creating a genus.</span>';
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    // $('#'+fieldName+'-sel')[0].selectize.refreshItems();
+    $('#Family-sel').change(onChangeClearFamilyErr.bind(null, elem, fLvl));
+}
+function onChangeClearFamilyErr(elem, fLvl, e){
+    if (e.target.value) { clrNoFamilyErr(elem, fLvl); }
+}
+function clrNoFamilyErr(elem, fLvl, e) {                                            
+    $('#Family-sel').off('change', onChangeClearFamilyErr);
+    clearErrElemAndEnableSubmit(elem, fLvl);
+}
+/* ----------------------- NEEDS GENUS -------------------------------------- */
 /** Note: error for the create-taxon form. */
 function handleNoGenus(elem, errTag, fLvl, fieldName) {  
     const msg = '<span>Please select a genus before creating a species.</span>';
@@ -177,6 +216,7 @@ function clrNoGenusErr(elem, fLvl, e) {
     $('#Genus-sel').off('change', onChangeClearNoGenusErr);
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
+/* -------------- PARENT MUST BE HIGHER RANK -------------------------------- */
 /** Note: error for the edit-taxon form. */
 function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) { 
     const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
@@ -209,6 +249,7 @@ function enableChngPrntBtttn() {
     if ($('#sub-form').length ) { return; }
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
 }
+/* ----------- LOCATION REQUIRED FIELD EMPTY -------------------------------- */
 /** Note: error used for the location form when selecting new location from map. */
 function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
     const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
@@ -219,6 +260,7 @@ function clrNeedsLocData(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, fLvl);
     $('.new-loc-popup #err').remove();
 }
+/* --------------------- NEEDS NAME ----------------------------------------- */
 function handleNeedsName(elem, errTag, fLvl, fieldName) {
     const msg = `<span>Please fill required fields and submit again.</span>`;
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
@@ -226,6 +268,7 @@ function handleNeedsName(elem, errTag, fLvl, fieldName) {
 function clrNeedsName(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, fLvl, 'enable');
 }
+/* ----------------- SUB-FORM ALREADY OPEN ---------------------------------- */
 /** Note: error used for the publication form. */
 function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
     var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
@@ -233,6 +276,7 @@ function handleOpenSubForm(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
+/* --------------- BLANKS IN AUTHOR ORDER ----------------------------------- */
 /** Note: error used for the publication/citation form. */
 function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
     var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
@@ -252,13 +296,13 @@ export function clrContribFieldErr(field, fLvl) {                               
     clearErrElemAndEnableSubmit(elem, fLvl);
     _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
-/* ----------- Error-Elem Methods -------------- */
 function setOnFormCloseListenerToClearErr(elem, fLvl) {
     $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem, fLvl));
 }
 function clrOpenSubForm(elem, fLvl) {   
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
+/* ================ ERROR ELEMENTS ========================================== */
 /** Returns the error div for the passed field. */
 function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
     var field = fieldName.split(' ').join('');

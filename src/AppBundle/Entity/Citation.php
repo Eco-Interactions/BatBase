@@ -29,7 +29,7 @@ class Citation
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=false, unique=true)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")    
      */
@@ -38,7 +38,7 @@ class Citation
     /**
      * @var string
      *
-     * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     * @ORM\Column(name="title", type="string", length=255, nullable=false)
      * @JMS\Expose
      */
     private $title;
@@ -46,7 +46,7 @@ class Citation
     /**
      * @var string
      *
-     * @ORM\Column(name="full_text", type="text")
+     * @ORM\Column(name="full_text", type="text", nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("fullText")
      */
@@ -92,7 +92,7 @@ class Citation
      * @var \AppBundle\Entity\CitationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CitationType", inversedBy="publication")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false)
      */
     private $citationType;
 
@@ -100,7 +100,7 @@ class Citation
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citation")
-     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;
 

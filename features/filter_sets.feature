@@ -23,15 +23,16 @@ Feature: Save and manage custom sets of filters
     @javascript
     Scenario:  I should be able to CREATE a set of filters.
         Given the database table is in "Location" view
+        And I break "Open console"
         And I toggle "open" the filter panel
         And I select "Costa Rica" from the "Country" dropdown
-        And I set the time "cited" filter to "January 1, 1977"
+        And I set the date "cited" filter to "January 1, 1977"
         When I enter "Test Filter Set" in the "Saved Filters" dropdown
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
         And I press the "Save" button
-        And I should see "Country, Time Published." in the save modal
+        And I should see "Date Published, Country." in the save modal
         And I press the "Submit" button
-        Then I should see "(SET) Country, Time Published." in the filter status bar
+        Then I should see "(SET) Date Published, Country." in the filter status bar
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
 
 ## --------------- EDIT --------------- ##
@@ -43,13 +44,13 @@ Feature: Save and manage custom sets of filters
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
         And I press the "Apply" button
         Then I should see the table displayed in "Location" view
-        And I should see "(SET) Country, Time Published." in the filter status bar
+        And I should see "(SET) Country, Date Published." in the filter status bar
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
         When I select "all" from the "Country" dropdown
         And I press the "Update" button
-        And I should see "Region, Time Published." in the save modal
+        And I should see "Date Published, Region." in the save modal
         And I press the "Submit" button
-        Then I should see "(SET) Region, Time Published." in the filter status bar
+        Then I should see "(SET) Date Published, Region." in the filter status bar
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
 
 ## --------------- DELETE  --------------- ##

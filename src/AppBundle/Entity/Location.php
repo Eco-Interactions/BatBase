@@ -29,7 +29,7 @@ class Location
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -131,7 +131,7 @@ class Location
      * @var \AppBundle\Entity\LocationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\LocationType", inversedBy="locations")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false)
      */
     private $locationType;
 

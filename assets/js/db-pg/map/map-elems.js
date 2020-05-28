@@ -8,7 +8,7 @@
  *     addClickToCreateLocBttn
  *     addDrawNewLocBoundaryBttn
  */
-import * as _u from '../util/util.js';
+import { _u } from '../db-main.js';
 import { getMapState, setMapState } from './map-main.js';
 import { create as _create } from '../forms/forms-main.js';
 
@@ -19,7 +19,7 @@ export function addLocCountLegend(map) {
     legend.addTo(map);
 }
 function addLocCountHtml() {
-    return _u.buildElem('div', { id: 'cnt-legend', class: 'info legend flex-col'});
+    return _u('buildElem', ['div', { id: 'cnt-legend', class: 'info legend flex-col'}]);
 }
 export function addCountToLegend(ttlLocs, noGpsDataCnt, prnt) {
     const noGpsDataHtml = noGpsDataCnt === 0 ? null : 

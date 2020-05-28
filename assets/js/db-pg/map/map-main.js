@@ -11,11 +11,10 @@
  *   showInts                   db_page, db_ui
  *   showLoc                    db_page
  */
+import { accessTableState as tState, _db, _u, _ui} from '../db-main.js';
 import * as MM from './map-markers.js'; 
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
-import * as _u from '../util/util.js';
-import { accessTableState as tState } from '../db-main.js';
 
 let app;
 
@@ -70,15 +69,15 @@ function requireCss() {
 function fixLeafletBug() {
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-      iconUrl: require('leaflet/dist/images/marker-icon.png'),
-      shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+      iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
+      iconUrl: require('leaflet/dist/images/marker-icon.png').default,
+      shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
     });
 }
 /*=========================== Shared Methods =================================*/
 function downloadDataAndBuildMap(loadFunc, mapId, type) {
     const map = { geoJson: 'geo', interaction: 'ints', taxon: 'taxa' };
-    _u.getData(Object.keys(map)).then(data => {
+    _db('getData', [Object.keys(map)]).then(data => {
         Object.keys(data).forEach(k => {app.data[map[k]] = data[k]});
         buildAndShowMap(loadFunc, mapId, type);
     });                                   
@@ -156,7 +155,8 @@ function addTipsLegend() {
     legend.addTo(app.map);
 }
 function addViewTips(map) {
-    const div = _u.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
+    const attr = { id: 'tips-legend', class: 'info legend flex-col'};
+    const div = _u('buildElem', ['div', attr]);
     div.innerHTML = getDefaultTipTxt();
     $(div).click(toggleTips)
     return div;
@@ -225,7 +225,7 @@ function ifCntryResult(address) {
 function buildSrchPgMap() {
     addMarkerLegend();
     addIntCountLegend();
-    hidePopUpMsg();
+    _ui('hidePopupMsg');
 }
 function addMarkerLegend() {
     const legend = L.control({position: 'bottomright'});
@@ -233,7 +233,7 @@ function addMarkerLegend() {
     legend.addTo(app.map);
 }
 function addMarkerLegendHtml(map) {
-    const div = _u.buildElem('div', { class: 'info legend flex-col'});
+    const div = _u('buildElem', ['div', { class: 'info legend flex-col'}]);
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
@@ -255,7 +255,8 @@ function addIntCountLegend() {
     legend.addTo(app.map);
 }
 function addIntCntLegendHtml(map) {
-    const div = _u.buildElem('div', { id: 'int-legend', class: 'info legend flex-col'});
+    const attr = { id: 'int-legend', class: 'info legend flex-col'};
+    const div = _u('buildElem', ['div', attr]);
     return div;
 }
 function fillIntCntLegend(shown, notShown) {
@@ -335,7 +336,7 @@ function addAllIntMrkrsToMap() {
     }
 }
 function getRegionLocs() {
-    return Promise.resolve(_u.getData('topRegionNames').then(data => {  
+    return Promise.resolve(_db('getData', ['topRegionNames']).then(data => {  
         return Object.values(data).map(id => app.data.locs[id]);
     }));
 }
@@ -408,7 +409,7 @@ function addMrkrsInSet(tree) {                                                  
 }
 /**----------------- Show Interaction Sets on Map --------------------------- */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. focus [%s], viewRcrds [%O], locRcrds = [%O]', focus, viewRcrds, app.data.locRcrds);
+export function showInts(focus, viewRcrds, locRcrds) {              /*perm-log*/console.log('----------- showIntsOnMap. focus [%s], viewRcrds [%O], locRcrds = [%O]', focus, viewRcrds, app.data.locRcrds);
     app.data.locs = locRcrds;
     downloadDataAndBuildMap(showIntsOnMap, 'map');            
     
@@ -514,26 +515,7 @@ function addMarkerForEachInteraction(intCnt, latLng, loc) {                     
         new MM.LocCluster(app.map, intCnt, params) : new MM.LocMarker(params);
     app.popups[loc.displayName] = MapMarker.popup;  
     app.map.addLayer(MapMarker.layer);
-} /* End addMarkerForEachInteraction */
-/* --- Table Popup --- */
-// function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
-//     const popUpMsg = msg || 'Loading...';
-//     $('#db-popup').text(popUpMsg);
-//     $('#db-popup').addClass('loading'); //used in testing
-//     $('#db-popup, #db-overlay').show();
-//     fadeTable();
-// }
-function hidePopUpMsg() {
-    $('#db-popup, #db-overlay').hide();
-    $('#db-popup').removeClass('loading'); //used in testing
-    showTable();
-}
-// function fadeTable() {
-//     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, .3);
-// }
-function showTable() {
-    $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
-}
+} 
 /*===================== Location Form Methods ================================*/
 /** Shows all location in containing country and selects the country in the form. */
 function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);
@@ -541,7 +523,7 @@ function showNearbyLocationsAndUpdateForm(results) {                            
     const cntryCode = results.address.country_code ? 
         results.address.country_code.toUpperCase() : null;
     if (!cntryCode) { return; } //console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); 
-    _u.getData('countryCodes').then(codes => loadCountryAndSubLocs(codes[cntryCode]));
+    _db('getData', ['countryCodes']).then(codes => loadCountryAndSubLocs(codes[cntryCode]));
 }
 function loadCountryAndSubLocs(cntryId) {
     app.volatile.prnt = cntryId; 
@@ -581,12 +563,13 @@ function fillCoordFields(latLng) {                                              
  * and adds a map pin for the entered coodinates. 
  */
 function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('           --updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+    if (!app.map) { return; } //form cloesd before geocode results returned.
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
     updateMapPin(latLng, results[0], zoomFlag); 
 }
 function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
-    _u.getData('countryCodes').then(cntrys => {
+    _db('getData', ['countryCodes']).then(cntrys => {
         const loc = results ? buildLocData(results, cntrys) : null;
         replaceMapPin(latLng, loc, zoomFlag);  
         $('#'+app.map._container.id).css('cursor', 'default');

@@ -36,7 +36,7 @@ class Publisher
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -70,7 +70,7 @@ class Publisher
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publisher")
-     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;
 

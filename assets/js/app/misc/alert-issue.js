@@ -22,6 +22,7 @@ export function reportErr(e) {
  * IssueTags {errDataKeys}:
  *     invalidDataKeyType {key, type}
  *     dataSyncFailure {fails} (no browser alert)
+ *     facadeErr {module, caller, called, error(toString), errMsg}
  *     editorReport {summary, steps, etc} (no browser alert)
  *     expectedDataNotFound {key}
  *     fetchIssue {url, responseText}
@@ -77,6 +78,7 @@ class SentryError extends Error {
  *     dataSyncFailure: (handled in form validation code)
  *     editorReport: (handled in bug report form)
  *     expectedDataNotFound: showGeneralAlert
+ *     facadeErr: showGeneralAlert
  *     fetchIssue: showGeneralAlert
  *     invalidDataKeyType: showGeneralAlert
  *     noRcrdFound: (handled at relevant points through the code)
@@ -111,6 +113,6 @@ function getUserErrMsg() {
 function getEditorErrMsg() {
     return `send debug information: 
 > Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
-> Once the panel loads and the "console" tab is displayed, right click and save the log file.
-> Email a description of the steps to reproduce this error and any additional information or screenshots that might help. Thanks!`;
+> Once the panel loads and the "console" tab is displayed, select all log text and copy.
+> Submit an Issue Report by clicking the far right blue button on the page options bar. Thank you!`;
 }

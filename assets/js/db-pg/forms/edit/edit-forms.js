@@ -133,8 +133,8 @@ function fillLocData(entity, id, rcrd) {
         delete fields.Latitude;
         delete fields.Longitude;
         delete fields.Country;
-        $('#Latitude_row input').val(rcrd.latitude);
-        $('#Longitude_row input').val(rcrd.longitude);
+        $('#Latitude_row input').val(parseInt(rcrd.latitude));
+        $('#Longitude_row input').val(parseInt(rcrd.longitude));
         _f.cmbx('setSelVal', ['#Country-sel', rcrd.country.id, 'silent']);
     }
     function handleGeoJsonFill(geoId) {
@@ -176,6 +176,7 @@ function setAdditionalFields(entity, srcRcrd, detail) {
     if (["publication", "citation"].indexOf(entity) === -1) { return; }
     setTitleField(entity, srcRcrd);
     setPublisherField(entity, srcRcrd);
+    setDoiField(srcRcrd);
     setCitationEdgeCaseFields(entity, detail);
 }
 function setTitleField(entity, srcRcrd) {                                       //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
@@ -191,12 +192,15 @@ function setPublisherField(entity, srcRcrd) {
     if (!_f.elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }    
     _f.cmbx('setSelVal', ['#Publisher-sel', srcRcrd.parent]);
 }
+function setDoiField (srcRcrd) {
+    $('#Doi_row input[type="text"]').val(srcRcrd.doi);
+}
 function setCitationEdgeCaseFields(entity, citRcrd) {
     if (entity !== 'citation') { return; }
     $('#CitationText_row textarea').val(citRcrd.fullText);
-    $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
-    $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
-    $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
+    $('#Issue_row input[type="number"]').val(parseInt(citRcrd.publicationIssue));
+    $('#Pages_row input[type="number"]').val(citRcrd.publicationPages);
+    $('#Volume_row input[type="number"]').val(parseInt(citRcrd.publicationVolume));
 }
 /* ------------- TAXON ----------------- */
 function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
@@ -234,7 +238,8 @@ function setMultiSelect(fieldId, prop, rcrd) {                                  
     _f.forms('selectExistingAuthors', [ucProp, rcrd[prop], 'top']);
 }
 function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-    $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
+    const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);
+    $('#'+fieldId+'_row input').val(val).change();   
 }
 function setTextArea(fieldId, prop, rcrd) {
     $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();   

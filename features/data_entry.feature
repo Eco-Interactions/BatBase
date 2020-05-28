@@ -27,6 +27,7 @@ Feature: Add new data to the database
     @javascript
     Scenario:  I enter all previous data to jump to this section #COMBO STEP
         Given I press the "New" button
+        And I break "Open console"
         And I see "New Interaction"
         ## Publication Book ##
         And I enter "Test Book" in the "Publication" form dropdown

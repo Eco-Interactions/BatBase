@@ -7,11 +7,30 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
-    - Init Download previously: 30-45 seconds (~34 Locally), now reduced ~5-15 seconds
+    - Prevented genus taxa created without family
+    - Added (m) to Elevation label and field only allows numbers now.
+    - added 'select unspecified' option to taxon select forms to select the realm taxon
+    - Updated the issue reporting feature with a field to paste in the logs.
+        - Updated error message to editors and above to prompt them to fill out report
+    - Fixed bugs caught by sentry
+    - Improved new data form load.
+    - Updated the publication submission page with the new 'last viewed by'
+        column. I also added a title field for publications, as it seemed useful.
+
+
+    BUGS
+        - EXITING OUT OF AUTHOR SELECT (PUB->BOOK) LEAVES EDITOR FIEL DISABLED
+        - Missing subject for interaction 10153
+
 
 QUESTIONS:
 
 >==== CURRENT ====
+    - Sarah to add field or announcement to remind that something has been added. Will show last person who viewed the submission
+    
+    - add to form confg input type. (handle all number inputs)
+    - add question marks to complicated fields
+        - issue report form: how to copy logs
 
 >Next
     - Refactor Source data 
@@ -29,19 +48,12 @@ QUESTIONS:
                             - submit, restoring the deleted record.
                         - and to indicate they are creating a distinct record 
                             - submit, append '-deleted' to deleted record to eliminate conflict. 
-    - Batch downloads? Built in doctrine tools? serialize?
     - Create model of local storage
         - of entity relations
 
-
-
-    -
-
 STANDARDS:
-    - append '_' before imported file, without it for the access method.
+    - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
-
-
 
 
 > ==== MEETING NOTES ==== 
@@ -49,8 +61,6 @@ Prep:
     Changes:
     Questions:
     Notes:
-            Virus people having meeting by end of march
-                - goal to have virus data in.
 Feedback:
 Next/future rounds:
     Possible:
@@ -99,6 +109,7 @@ Sort:
     - REFACTOR - map-markers
     - REFACTOR - get tag names for the tags column filter menu from stored data rather than hard coded.
     - replace ucfirst and lcfirst with built in 'toUpperCase'
+    - add input type, ie number, to form field confgs
 
 TODOs:
 ##(Category){priority}[difficulty]##

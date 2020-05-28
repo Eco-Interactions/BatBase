@@ -100,20 +100,20 @@ function getBlockContainerId(editId) {
  * any div with class 'wysiwyg', on the page.
  */
 function addEditPencils() {     
-    var editIcoSrc = ($('body').data('env') === "dev" ? '../../' : '../') + 'build/images/eif.pencil.svg';  
-    var contentBlocks = $('.wysiwyg');  //console.log("contentBlocks = %O", contentBlocks);
+    const icoSrc = require('../../../images/icons/eif.pencil.svg').default;
+    var contentBlocks = $('.wysiwyg');  
     
     for (var i = 0; i < contentBlocks.length; i++) {
         var blkId = contentBlocks[i].id;  //console.log("blkId = ", blkId);
         var blkEditId = blkId + '-edit';
-        $('#' + blkId).append('<img src="' + editIcoSrc + '" ' + 'id="' + blkEditId + '" ' +
-        'class="wsywigEdit" title="Edit Content" alt="Edit Content">');
+        $('#' + blkId).append(`<img src="${icoSrc}" id="${blkEditId}" class="wsywigEdit" 
+            title="Edit Content" alt="Edit Content">`);
         addButtons(blkEditId, blkId);
     }
     $('.wsywigEdit').click(startWysiwyg);
     /** Starts the wysiwyg editor. If 'super' admin, includes additional buttons. */
-    function startWysiwyg(e) { //console.log("starting! e.parent = %O", e.target)
-        var containerElemId = getBlockContainerId(e.target.id); //console.log("containerElemId = ", containerElemId)
+    function startWysiwyg(e) { 
+        var containerElemId = getBlockContainerId(e.target.id);
         var bttns = [
             ['formatting'],
             'btnGrp-semantic',
@@ -138,7 +138,7 @@ function addEditPencils() {
                     id: containerElemId
                 }
             },
-            svgPath: require('../../../libs/wysiwyg/ui/icons.svg')
+            svgPath: require('../../../libs/wysiwyg/ui/icons.svg').default
         });
     }
 } /* End addEditPencils */

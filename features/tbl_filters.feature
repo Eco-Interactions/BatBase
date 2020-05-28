@@ -18,11 +18,12 @@ Feature: Filtering the data displayed in the database table
     @javascript
     Scenario:  I should be able to filter the data by date published.
       Given the database table is in "Location" view
+      And I break "Open console"
       And I toggle "open" the filter panel
-      And I set the time "cited" filter to "Januray 1, 1990"
+      And I set the date "cited" filter to "Januray 1, 1990"
       Then I should see "3" rows in the table data tree
       And I should see "6" interactions in the table
-      And I should see "Time Published." in the filter status bar
+      And I should see "Date Published." in the filter status bar
 
       # TODO: Edit fixture update at time so this filter has something to show
     # @javascript

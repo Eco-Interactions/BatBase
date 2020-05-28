@@ -21,7 +21,7 @@ export function buildLocRowData(tree, tblState) {
     return removeLocsWithoutInteractions(finalRowData);
 }
 /** Returns a row data object for the passed location and it's children.  */
-function getLocRowData(locRcrd, treeLvl, tblState) {                /*debg-log*///console.log("--getLocRowData called for %s = %O, tblState = %O", locRcrd.displayName, locRcrd, tblState);
+function getLocRowData(locRcrd, treeLvl, tblState) {                /*dbug-log*///console.log("--getLocRowData called for %s = %O, tblState = %O", locRcrd.displayName, locRcrd, tblState);
     return {
         id: locRcrd.id,
         entity: "Location",
@@ -49,7 +49,7 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                /*debg-log*/
      * grouped under the first child row as "Unspecified [locName] Interactions", 
      * otherwise interaction rows are added directly beneath the taxon.
      */
-    function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {       /*debg-log*///console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
+    function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {       /*dbug-log*///console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
         let childRows = [];
         const locType = locRcrd.locationType.displayName; 
         if (locType === "Region" || locType === "Country") {
@@ -115,7 +115,7 @@ export function buildSrcRowData(tree, tblState) {
     }
     return finalRowData;  
 }
-function getSrcRowData(src, treeLvl, idx, tblState) {               /*debg-log*///console.log("getSrcRowData. source = %O", src);
+function getSrcRowData(src, treeLvl, idx, tblState) {               /*dbug-log*///console.log("getSrcRowData. source = %O", src);
     const entity = src.sourceType.displayName;
     const pubType =  entity === "Publication" ? src.publication.publicationType.id : null;  
     const displayName = src.displayName.includes('(citation)') ? 
@@ -167,7 +167,7 @@ export function buildTxnRowData(tree, tblState) {
  * Recurses through each taxon's 'children' property and returns a row data obj 
  * for each taxon in the tree.
  */
-function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*///console.log("taxonRowData. taxon = %O, tblState = %O", taxon, tblState);
+function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*///console.log("taxonRowData. taxon = %O, tblState = %O", taxon, tblState);
     const intCount = getIntCount(taxon); 
     return {
         id: taxon.id,
@@ -246,7 +246,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
         });
     }
 } /* End getTaxonAndChildTaxaRowData */
-function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
+function getTaxonIntRows(taxon, treeLvl, tblState) {                /*dbug-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
     const ints = [];
     ['sub', 'ob'].forEach(prfx => taxon[prfx+'jectRoles'].forEach(buildTxnIntRow));
     return ints;

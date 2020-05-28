@@ -76,7 +76,8 @@ function addDirectFormFieldData(entity, formVals, pEntity, data) {
 }
 function addAllRemainingData(entity, formVals, data) { 
     const addEntityData = {
-        'location': addGeoJson, 'taxon': addTaxonDisplayName
+        'location': addGeoJson, 'taxon': addTaxonDisplayName, 
+        'interaction': ifNoLocationAssignedToUnspecified
     };
     return addEntityData[entity] ? addEntityData[entity]() : {};
     /**
@@ -109,6 +110,9 @@ function addAllRemainingData(entity, formVals, data) {
         const isSpecies = formVals.level == 'Species';
         data.taxon.flat.displayName = isSpecies ? formVals.displayName : 
             formVals.level + ' ' + formVals.displayName;
+    }
+    function ifNoLocationAssignedToUnspecified() {
+        formVals.location = formVals.location || 439; //Unspecified region
     }
 }
 /** Returns an array of the parent entity's field names. */

@@ -62,7 +62,7 @@ function buildMainForm(fields) {
 }
 /* ------------------ HEADER --------------------------------- */
 function getHeader() {
-    const title = (action == 'New' ? 'New ' : 'Editing ') + 
+    const title = (action == 'create' ? 'New ' : 'Editing ') + 
         _f.util('ucfirst', [entity]);    
     return _f.util('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }

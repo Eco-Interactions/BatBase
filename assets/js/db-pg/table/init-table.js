@@ -1,14 +1,9 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
+import { _form, _ui, _u, showLocOnMap, accessTableState as tState } from '../db-main.js';
 import * as agGrid from '../../../libs/grid/ag-grid.js';
-import * as _forms from '../forms/forms-main.js';
-import { updateFilterStatusMsg } from './filters/filters-main.js';
-import unqVals from './filters/ag-grid-unique-filter.js';
-import { lcfirst, getData } from '../util/util.js';
-import { enableTableButtons, resetToggleTreeBttn, showTable } from '../pg-ui/ui-main.js';
-import { accessTableState as tState, showLocOnMap } from '../db-main.js';
-
+import unqVals from './ag-grid-unique-filter.js';
 let tblState;
 
 /**
@@ -59,7 +54,7 @@ function getBaseTableConfg(viewTitle) {
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    updateFilterStatusMsg();    
+    _ui('updateFilterStatusMsg');    
 } 
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
@@ -95,7 +90,7 @@ function softRefresh() { tblState.api.refreshView(); }
  */
 function getColumnDefs(mainCol) { 
     const realm = tblState.curRealm || false;  
-    return getData('tagNames', true).then(buildColDefs);
+    return _u('getData', ['tagNames', true]).then(buildColDefs);
 
     function buildColDefs(tags) { 
 
@@ -243,7 +238,7 @@ function isNotEditor() {
 /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
 function addEditPencil(params) {   
     if (uneditableEntityRow(params)) { return "<span>"; }                     
-    return getPencilHtml(params.data.id, params.data.entity, _forms.edit);
+    return getPencilHtml(params.data.id, params.data.entity, _form.edit);
 }
 function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tblState.curFocus, params);
     const uneditables = [
@@ -255,12 +250,12 @@ function uneditableEntityRow(params) {                                          
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
-    const path = require('../../../images/icons/eif.pencil.svg');
+    const path = require('../../../images/icons/eif.pencil.svg').default; 
     var editPencil = `<img src=${path} id="edit${entity}${id}"
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
-    $('#search-tbl').on(
-        'click', '#edit'+entity+id, _forms.edit.bind(null, id, lcfirst(entity)));
+    $('#search-tbl').on('click', '#edit'+entity+id, 
+        _form.bind(null, 'edit', [id, _u('lcfirst', [entity])]));
     return editPencil;
 }
 /** -------- Map Column ---------- */
@@ -276,7 +271,7 @@ function addMapIcon(params) {                                                   
     return getMapIcon(id);
 }
 function getMapIcon(id) {
-    const path = require('../../../images/icons/marker-icon.png');
+    const path = require('../../../images/icons/marker-icon.png').default;
     return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'  
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
@@ -359,21 +354,16 @@ function updateTableState(tblOpts, rowData) {
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
 }
 function onTableInitComplete(rowData) {
-    hidePopUpMsg();
-    enableTableButtons(tblState.flags.allDataAvailable);
+    _ui('hidePopupMsg');
+    _ui('enableTableButtons', [tblState.flags.allDataAvailable]);
     hideUnusedColFilterMenus();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
-    updateFilterStatusMsg();
+    _ui('updateFilterStatusMsg');    
 } 
 function updateDisplayForShowingInteractionSet(rowData) {
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
     tblState.api.expandAll(); 
-    resetToggleTreeBttn(true);
-}
-function hidePopUpMsg() {
-    $('#db-popup, #db-overlay').hide();
-    $('#db-popup').removeClass('loading'); //used in testing
-    showTable();
+    _ui('setTreeToggleData', [true]);
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 

@@ -10,45 +10,51 @@
  */
 import * as _confg from './etc/form-config.js';
 import editEntity from './edit/edit-forms.js';
-import * as _forms from './base/base-main.js';
+import * as _forms from './entity/entity-main.js';
 import * as _state from './etc/form-state.js';
 import * as _submit from './submit/submit-main.js';
 import * as _elems from './elems/elems-main.js';
 // REFACTOR
 import * as _map from '../map/map-main.js';
-import * as _pg from '../db-main.js';
+import * as pg from '../db-main.js';
 
 function getParams(params) {
     return Array.isArray(params) ? params : [params];
 }
 /** =================== DATABASE PAGE FACADE ================================ */
 export function util(funcName, params) {  
-    return _pg._util(funcName, params);
+    return pg._u(funcName, params);
 }
 export function map(funcName, params = []) {
     return _map[funcName](...params);
 }
 export function loadDataTableAfterFormClose() {
-    _pg.reloadTableWithCurrentFilters();
+    pg.reloadTableWithCurrentFilters();
 }
 export function showTodaysUpdates(focus) {
-    _pg.showTodaysUpdates(focus);
+    pg.showTodaysUpdates(focus);
 }
 export function initNewDataForm() {
-    _forms.createEntity('interaction');
+    return _forms.createEntity('interaction');
 }
 export function updateLocalDb() {
-    return _pg.db('updateLocalDb', [...arguments]);
+    return pg._db('updateLocalDb', [...arguments]);
 }
 export function resetStoredData() {
-    _pg.db('resetStoredData');
+    pg._db('resetStoredData');
 }
 export function alertIssue() {
-    return _pg.alertIssue(...arguments);
+    return pg._alert('alertIssue', [...arguments]);
 }
 /** ====================== FORMS FACADE ===================================== */
 export function forms(funcName, params = []) {                                 //console.log('entity func = %O', arguments);//entity form interface
     return _forms[funcName](...getParams(params));
+}
+export function selectIntLoc(id) {
+    _forms.selectIntLoc(id);
+}
+export function addNewLocationWithGps() {
+    _forms.addNewLocationWithGps();
 }
 export function create(entity, name) {
     return _forms.createEntity(entity, name);

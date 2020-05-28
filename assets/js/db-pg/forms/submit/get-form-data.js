@@ -15,7 +15,7 @@ let _fs; //form state
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
     _fs = _f.state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
-    const elems = $('#'+entity+'_Rows')[0].children;                            
+    const elems = getFormFieldElems(entity, fLvl);
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
     if (formVals.displayName) { formVals.displayName = _f.util('ucfirst', [formVals.displayName]) }
@@ -42,8 +42,11 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         }
     }
     function getInputFieldNameFromCntnr(cntnr) {
-        const field = cntnr.children[0];
-        return _f.util('lcfirst', [field.innerText.trim().split(" ").join("")]); 
+        let field = cntnr.children[0].innerText.split(' (m)')[0];
+        return _f.util('lcfirst', [field.trim().split(" ").join("")]);
+    }
+    function isElevationField (field) {
+        return field.innerText.includes('(m)');
     }
     function getMultiFieldRowData(cntnr) {
         cntnr.children.forEach(fieldElem => getInputData(fieldElem));
@@ -200,6 +203,12 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         }
     }
 } 
+/** Taxon edit forms can potentially have nested create forms. */ 
+function getFormFieldElems(entity, fLvl) {
+    let id = '#' + entity + '_Rows';
+    if ($(id+'_'+fLvl).length) { id = id + '_' + fLvl; }
+    return $(id)[0].children;
+}
 // function checkForErrors(entity, formVals, fLvl) {
 //     const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
 //     if (!errs[entity]) { return; }

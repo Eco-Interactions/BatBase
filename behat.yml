@@ -13,7 +13,7 @@ default:
                     marionette: true
                     extra_capabilities: 
                         chromeOptions: 
-                            args: ['--disable-gpu', '--window-size=1220,1000']
+                            args: ['--disable-gpu', '--window-size=1660,1000']
                 # capabilities: { "browser": "chrome", "version": "*", "marionette": true, "extra_capabilities": { "chromeOptions": { "w3c": false } }, 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']} }
     suites:
         default:

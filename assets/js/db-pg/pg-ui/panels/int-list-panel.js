@@ -1,14 +1,13 @@
 /**
  * Handles the saving, editing, and display of saved lists of interactions.
  *
- * Exports:                 Imported By:
- *     addListPanelEvents           panels-main
- *     newIntList                   util
- *     savedIntListLoaded           db-filters, filter-panel
- *     selIntList                   util
- *     toggleListPanelOrientation   panels-main
- *     toggleSaveIntsPanel          db-ui
- *     enableListReset              db-ui
+ * Exports:                 
+ *     addListPanelEvents   
+ *     newIntList           
+ *     isSavedIntListLoaded 
+ *     selIntList           
+ *     toggleListPanelOrientation
+ *     enableListResetBttn           
  *
  * TOC:
  *     SHOW/HIDE LIST PANEL
@@ -25,13 +24,8 @@
  *             Reset & Enable/Disable UI
  *             Table Methods         
  */
-import * as _u from '../../util/util.js';
-import * as _uPnl from './panels-main.js';
-import { updateUserNamedList } from '../../local-data/db-sync.js';
-import { accessTableState as tState, resetDataTable } from '../../db-main.js';
-import { resetToggleTreeBttn } from '../../pg-ui/ui-main.js';
-import { updateFilterStatusMsg, syncViewFiltersAndUi, resetFilterParams } from '../../table/filters/filters-main.js';
-import { showHelpModal } from '../../../misc/intro-core.js';
+import * as pM from './panels-main.js';
+import { _u, _filter, _ui, resetDataTable, accessTableState as tState } from '../../db-main.js';
 /**
  * list - List open in panel
  * listLoaded - List loaded in table
@@ -44,15 +38,17 @@ import { showHelpModal } from '../../../misc/intro-core.js';
  */
 let app = {};
 
-export function savedIntListLoaded() {                                          
+export function isSavedIntListLoaded() {                                          
     return app.listLoaded;
 }
 export function initListPanel() {
+    if ($('body').data('user-role') === 'visitor') { return; }
     require('../../../../styles/db/panels/lists.styl');  
     addListPanelEvents();
 }
 function addListPanelEvents() {
     window.addEventListener('resize', resizeIntPanelTab);
+    $('#lists').click(toggleSaveIntsPanel);
     $('button[name="clear-list"]').click(resetTable);
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#unsel-rows').click(deselectAllRows);
@@ -61,23 +57,22 @@ function addListPanelEvents() {
     $('#delete-list').click(deleteInteractionList);
     $('#confm-list-delete').click(confmDelete);
     $('#cncl-list-delete').click(cancelDelete);
-    $('#svd-list-hlp').click(showHelpModal.bind(null, 'saved-lists'));
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
-export function toggleSaveIntsPanel() {                                         
+function toggleSaveIntsPanel() {                                         
     if ($('#list-pnl').hasClass('closed')) { 
         buildAndShowIntPanel(); 
         sizeIntPanelTab();
-    } else { _uPnl.togglePanel('lists', 'close'); }
+    } else { pM.togglePanel('lists', 'close'); }
 }
 function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')         
-    _uPnl.togglePanel('lists', 'open');
+    pM.togglePanel('lists', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();
     }
 }
-export function enableListReset() {  
+export function enableListResetBttn() {  
     if (!app.listLoaded) { 
         $('button[name="clear-list"]')
             .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5); 
@@ -115,8 +110,8 @@ function filtersApplied() {
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
-export function newIntList(val) {                                   /*debg-log*///console.log('           --New Interaction List');
-    _uPnl.updateSubmitEvent('#submit-list', createDataList);
+export function newIntList(val) {                                   /*dbug-log*///console.log('           --New Interaction List');
+    pM.updateSubmitEvent('#submit-list', createDataList);
     updateUiForListCreate();
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
@@ -143,7 +138,7 @@ export function selIntList(val) {
     if (val === 'new'|| (!val && app.submitting)) { return; } // New list typed into combobox or mid edit-submit
     fillListData(val);
     resetPrevListUiState();
-    _uPnl.updateSubmitEvent('#submit-list', editDataList);
+    pM.updateSubmitEvent('#submit-list', editDataList);
     enableInputs();
     enableModUi('add');
     updateDetailHdr('Selected');
@@ -152,12 +147,12 @@ function editDataList() {
     if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
-    data.id = _u.getSelVal('Int-lists');
+    data.id = _u('getSelVal', ['Int-lists']);
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
-    _u.getData('dataLists').then(lists => {
-        const list = addActiveListToMemory(lists[id]);              /*debg-log*///console.log('activeList = %O', list);                                                 
+    _u('getData', ['dataLists']).then(lists => {
+        const list = addActiveListToMemory(lists[id]);              /*dbug-log*///console.log('activeList = %O', list);                                                 
         fillListDataFields(
             list.displayName, list.description, list.details.length);  
     });
@@ -165,7 +160,7 @@ function fillListData(id) {
 /* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {
     const data = {
-        displayName: _u.ucfirst($('#list-details input').val()),
+        displayName: _u('ucfirst', [$('#list-details input').val()]),
         type: 'interaction',
         description: $('#list-details textarea').val(),
         details: JSON.stringify(getInteractions()),
@@ -181,7 +176,7 @@ function getInteractions() {
 function getAllIntsInTable(mode) {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
-    resetToggleTreeBttn(true);
+    _ui('setTreeToggleData', [true]);
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, true));           
     return getUpdatedIntSet(mode);
 }
@@ -202,7 +197,8 @@ function deleteInteractionList() {
 }
 function confmDelete() {                                            /*perm-log*/console.log('           --Deleted Interaction List');
     resetDeleteButton();
-    _uPnl.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
+    pM.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
+    resetListUi();
     delete app.rowSelMode;
 }
 function cancelDelete() {
@@ -229,18 +225,18 @@ function prepareMemoryForTableLoad() {
 }
 function updateRelatedListUi() {
     app.tblState.api.expandAll();
-    resetToggleTreeBttn(true);
+    _ui('setTreeToggleData', [true]);
     syncFilterUi(app.tblState.curFocus);
     updateListLoadButton('Reset to All Interactions', resetTable);
     hideSavedMsg();
     enableModUi('rmv');
-    updateFilterStatusMsg();
-    enableListReset();
+    _ui('updateFilterStatusMsg');
+    enableListResetBttn();
     updateDetailHdr('Loaded');
     delete app.tblState;
 }
 function syncFilterUi(focus) {
-    syncViewFiltersAndUi(focus);
+    _filter('syncViewFiltersAndUi', [focus]);
     if ($('#selSavedFilters')[0].selectize) { 
         $('#selSavedFilters')[0].selectize.clear('silent') 
     }
@@ -251,18 +247,18 @@ function updateListLoadButton(text, clickFunc) {
 }
 /* ====================== UTILITY =========================================== */
 function addActiveListToMemory(list) {
-    app.list = _uPnl.parseUserNamed(list); 
+    app.list = pM.parseUserNamed(list); 
     return app.list;
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 /** Submit new or edited interaction list. */
 function submitDataList(data, action, hndlr) {
     app.submitting = app.modMode; //Flag tells various event handlers how to handle submit
-    _uPnl.submitUpdates(data, action, hndlr);
+    pM.submitUpdates(data, action, hndlr);
 }
 function onListSubmitComplete(action, results) {                                      
     const list = JSON.parse(results.list.entity);                   /*temp-log*///console.log('listSubmitComplete results = %O, list = %O', results, list)
-    updateUserNamedList(results.list, action)
+    pM.updateUserNamedList(results.list, action)
     .then(updateListComboboxOptions)
     .then(updateUiAfterListSubmit.bind(null, list));
 }
@@ -275,7 +271,7 @@ function updateUiAfterListSubmit(list) {
     $('#submit-list').data('submitting', false);
 }
 function onListDeleteComplete(results) {                            /*temp-log*///console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete')
+    pM.updateUserNamedList(results.list, 'delete')
     .then(updateListComboboxOptions)
     .then(() => $('#selIntList')[0].selectize.open());
 }
@@ -288,7 +284,7 @@ function hideSavedMsg() {
 }
 /* =============================== UI ======================================= */
 function initListCombobox() {
-    _u.initCombobox('Int-lists');   
+    _u('initCombobox', ['Int-lists', selIntList, {add: newIntList}]);   
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
         disableInputs();
@@ -319,7 +315,7 @@ function sizeIntPanelTab() {
 function getPseudoStyle() {
     const panelT = $('#list-pnl').position().top;
     const tabW = $('#list-opts').innerWidth();  
-    const tabL = $('#list-opts').position().left + 1;               /*debg-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    const tabL = $('#list-opts').position().left + 1;               /*dbug-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-int-bttm-border:before { 
         position: absolute;
         content: '';
@@ -408,10 +404,10 @@ function updateDetailHdr(type) {
     $('#list-details>span').html(type + ' List Details');
 }
 function updateListComboboxOptions() {
-    return Promise.resolve(_u.getOptsFromStoredData('dataListNames').then(
+    return Promise.resolve(_u('getOptsFromStoredData', ['dataListNames']).then(
         opts => { 
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
-            _u.replaceSelOpts('#selIntList', opts);
+            _u('replaceSelOpts', ['#selIntList', opts]);
     }));
 }
 function resetPrevListUiState() {
@@ -438,7 +434,7 @@ function updateUiAfterTableReset() {
 function expandAllTableRows() {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
-    resetToggleTreeBttn(true);
+    _ui('setTreeToggleData', [true]);
 }
 function deselectAllRows() {                                                    
     app.tblApi = tState().get('api');
