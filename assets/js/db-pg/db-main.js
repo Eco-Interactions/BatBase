@@ -130,9 +130,9 @@ function requireCss() {
     require('../../styles/css/lib/selectize.default.css');
     require('../../styles/css/search_db.css');  
     require('../../styles/css/moz-styles.css');
-    require('../../styles/db/db.styl');  
-    require('../../styles/db/map.styl');  
-    require('../../styles/db/forms.styl');  
+    require('../../styles/pages/db/db.styl');  
+    require('../../styles/pages/db/map.styl');  
+    require('../../styles/pages/db/forms.styl');  
 }
 function requireJs() {
     require('leaflet-control-geocoder');
