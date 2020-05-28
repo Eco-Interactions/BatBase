@@ -299,7 +299,7 @@ class Contribution
         if (!is_null($citedAs)) {
             return $citedAs;
         } else {
-            $desc_str = $this->getAuthor().' - '.$this->getSource();
+            $desc_str = $this->getAuthorSource().' - '.$this->getWorkSource();
             return $desc_str;
         }
     }

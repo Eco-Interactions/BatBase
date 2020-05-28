@@ -41,11 +41,12 @@ class ShowEntityController extends Controller
             throw $this->createNotFoundException("Unable to find Interaction [$id].");
         }
 
-        $citation = $this->getCitationData($interaction->getSource());
-        $location = $this->getLocationData($interaction->getLocation());
+        $cit = $this->getCitationData($interaction->getSource());
+        $loc = $this->getLocationData($interaction->getLocation());
+        $int = $this->getInteractionData($interaction);
 
         return $this->render('Entity/interaction.html.twig', array(
-            'interaction' => $interaction, 'citation' => $citation , 'loc' => $location
+            'int' => $int, 'cit' => $cit , 'loc' => $loc
         ));
     }
     private function getCitationData($source)
@@ -63,22 +64,38 @@ class ShowEntityController extends Controller
         $name = $location->getDisplayName();
         $country = $location->getCountryData()['displayName'];
         $region = $location->getRegionData()['displayName'];
-        $habitat = $location->getHabitatTypeData()['displayName'];
-        $isCountryOrRegionHabType = $name == $name . '- ' . $habitat &&
-            ($name == $country || $name == $region);  print('isCountryOrRegionHabType = ['.$isCountryOrRegionHabType."]\n");
+        $habitat = $location->getHabitatTypeData()? 
+            $location->getHabitatTypeData()['displayName'] : null;
+        $isLocHabType = $name == $name . '- ' . $habitat &&
+            (strpos($name, $country) !== false || strpos($name, $region) !== false);  
 
         return [
             'description' => $location->getDescription(),
             'elev' => $location->getElevation(),
             'elevMax' => $location->getElevationMax(),
-            'country' => $isCountryOrRegionHabType ? null : $country,
+            'country' => $country,
             'habitat' => $habitat,
-            'isCountryOrRegionHabType' => $isCountryOrRegionHabType,
+            'isCountryOrRegionHabType' => $isLocHabType,
+            'habLocType' => $isLocHabType ? (strpos($name, $country) !== false ?
+                'Country' : 'Region') : null,
             'lat' => $location->getLatitude(),
             'lng' => $location->getLongitude(),
             'name' => $name,
-            'region' => $isCountryOrRegionHabType ? null : $region,
+            'region' => $region,
             'type' => $location->getLocationTypeData()['displayName'],
+        ];
+    }
+    private function getInteractionData($interaction)
+    {
+        return [
+            'id' => $interaction->getId(),
+            'note' => $interaction->getNote(),
+            'object' => $interaction->getObject()->getDisplayName(),
+            'oRealm' => $interaction->getObject()->getTaxonRealm()->getDisplayName(),
+            'subject' => $interaction->getSubject()->getDisplayName(),
+            'sRealm' => $interaction->getSubject()->getTaxonRealm()->getDisplayName(),
+            'type' => $interaction->getInteractionTypeData()['displayName'],
+            'tags' => $interaction->getTagNames(),
         ];
     }
 }
