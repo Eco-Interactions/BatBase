@@ -475,6 +475,21 @@ class Interaction
         }
         return $tagIds;
     }
+
+    /**
+     * Get comma separated tag names.
+     *
+     * @return array 
+     */
+    public function getTagNames()
+    {
+        if (!$this->tags) { return null; }
+        $names = [];
+        if ($this->tags) { 
+            foreach ($this->tags as $tag) { array_push($names, $tag->getDisplayName()); }
+        }
+        return join(', ', $names);
+    }
     
     /**
      * Set createdBy user.

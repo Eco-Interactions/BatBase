@@ -875,13 +875,18 @@ class Source
 
     /**
      * Get Author Names
+     * NOTE: Used for Interaction show pages
      *
      * @return array
      */
     public function getAuthorNames()
     { 
-        $contribs = $this->getContributorsArray($this->contributors, 'DisplayName');
-        return !$contribs ? null : $this->buildAuthorNamesString($contribs);
+        $contribs = strpos($this->displayName, '(citation)') ? 
+            $this->parentSource->getContributors() : $this->contributors; 
+
+        $contribAry = $this->getContributorsArray($contribs, 'DisplayName');
+
+        return !$contribAry ? null : $this->buildAuthorNamesString($contribAry);
     }
     private function buildAuthorNamesString($authors)
     {
