@@ -53,7 +53,8 @@ class ShowEntityController extends Controller
         return [
             'fullText' => $citationDetails->getFullText(),
             'abstract' => $citationDetails->getAbstract(),
-            'authors' => $source->getAuthorNames()
+            'authors' => $source->getAuthorNames(),
+            'title' => $citationDetails->getTitle()
         ];
     }
 }
