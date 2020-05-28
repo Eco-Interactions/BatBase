@@ -14,6 +14,13 @@ Change Log:
         - Updated error message to editors and above to prompt them to fill out report
     - Fixed bugs caught by sentry
     - Improved new data form load.
+    - Updated the publication submission page with the new 'last viewed by'
+        column. I also added a title field for publications, as it seemed useful.
+
+
+    BUGS
+        - EXITING OUT OF AUTHOR SELECT (PUB->BOOK) LEAVES EDITOR FIEL DISABLED
+        - Missing subject for interaction 10153
 
 
 QUESTIONS:
