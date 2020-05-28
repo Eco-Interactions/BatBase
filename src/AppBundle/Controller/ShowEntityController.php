@@ -41,20 +41,44 @@ class ShowEntityController extends Controller
             throw $this->createNotFoundException("Unable to find Interaction [$id].");
         }
 
-        $citation = $this->getCitation($interaction->getSource());
+        $citation = $this->getCitationData($interaction->getSource());
+        $location = $this->getLocationData($interaction->getLocation());
 
         return $this->render('Entity/interaction.html.twig', array(
-            'interaction' => $interaction, 'citation' => $citation 
+            'interaction' => $interaction, 'citation' => $citation , 'loc' => $location
         ));
     }
-    private function getCitation($source)
+    private function getCitationData($source)
     {
         $citationDetails = $source->getCitation();
         return [
-            'fullText' => $citationDetails->getFullText(),
             'abstract' => $citationDetails->getAbstract(),
             'authors' => $source->getAuthorNames(),
+            'fullText' => $citationDetails->getFullText(),
             'title' => $citationDetails->getTitle()
+        ];
+    }
+    private function getLocationData($location)
+    {
+        $name = $location->getDisplayName();
+        $country = $location->getCountryData()['displayName'];
+        $region = $location->getRegionData()['displayName'];
+        $habitat = $location->getHabitatTypeData()['displayName'];
+        $isCountryOrRegionHabType = $name == $name . '- ' . $habitat &&
+            ($name == $country || $name == $region);  print('isCountryOrRegionHabType = ['.$isCountryOrRegionHabType."]\n");
+
+        return [
+            'description' => $location->getDescription(),
+            'elev' => $location->getElevation(),
+            'elevMax' => $location->getElevationMax(),
+            'country' => $isCountryOrRegionHabType ? null : $country,
+            'habitat' => $habitat,
+            'isCountryOrRegionHabType' => $isCountryOrRegionHabType,
+            'lat' => $location->getLatitude(),
+            'lng' => $location->getLongitude(),
+            'name' => $name,
+            'region' => $isCountryOrRegionHabType ? null : $region,
+            'type' => $location->getLocationTypeData()['displayName'],
         ];
     }
 }
