@@ -37,7 +37,7 @@ function submitFormData(data, fLvl, entity) {                                   
     _f.util('sendAjaxQuery', [data, url, onSuccess, _val.formSubmitError]);
 }
 function getEntityAjaxUrl(action) { 
-    const path = $('body').data('ajax-target-url');  
+    const path = $('body').data('base-url');  
     return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity) {  
