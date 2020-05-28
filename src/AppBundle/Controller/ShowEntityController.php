@@ -18,8 +18,6 @@ class ShowEntityController extends Controller
 
     private $em;
 
-
-
     private function getEntity($className, $val, $prop = 'id')
     {
         return $this->em->getRepository('AppBundle:'.$className)
