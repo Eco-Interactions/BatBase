@@ -6,6 +6,7 @@ Feature: Local Data Storage updates with changes made by other editors
     @javascript
     Scenario: Two editors make changes to the data and their local databases sync
         Given an editor logs into the website
+        And I break "Open console"
         And editor "1" creates two interactions
         And editor "1" edits some sub-entity data
         And a second editor logs into the website

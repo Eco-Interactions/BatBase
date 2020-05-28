@@ -23,6 +23,7 @@ Feature: Save and manage custom sets of filters
     @javascript
     Scenario:  I should be able to CREATE a set of filters.
         Given the database table is in "Location" view
+        And I break "Open console"
         And I toggle "open" the filter panel
         And I select "Costa Rica" from the "Country" dropdown
         And I set the date "cited" filter to "January 1, 1977"

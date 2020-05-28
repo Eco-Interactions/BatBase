@@ -25,6 +25,7 @@ Feature: Edit data in the database
     @javascript
     Scenario:  I should be able to change an interaction's location
         Given the database table is in "Location" view
+        And I break "Open console"
         And I expand "Central America" in the data tree
         And I expand "Panama" in the data tree
         And I click on the edit pencil for the first interaction of "Summit Experimental Gardens"
@@ -32,7 +33,7 @@ Feature: Edit data in the database
         When I change the "Location" form dropdown to "Panama"
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
-        And I uncheck the time-updated filter
+        And I uncheck the date-updated filter
         And I expand "Central America" in the data tree
         And I expand "Panama" in the data tree
         Then I should see "3" interactions under "Unspecified Panama Interactions"
@@ -52,7 +53,7 @@ Feature: Edit data in the database
         And I press the "Select Taxon" button
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
-        And I uncheck the time-updated filter
+        And I uncheck the date-updated filter
         And I expand "Family Phyllostomidae" in the data tree
         And I expand "Genus Artibeus" in the data tree
         Then I should see "2" interactions under "Artibeus lituratus"
@@ -72,7 +73,7 @@ Feature: Edit data in the database
         And I press the "Select Taxon" button
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
-        And I uncheck the time-updated filter
+        And I uncheck the date-updated filter
         And I expand "Family Araceae" in the data tree
         And I expand "Genus Philodendron" in the data tree
         Then I should see "2" interactions under "Philodendron sphalerum"
@@ -111,7 +112,7 @@ Feature: Edit data in the database
     #   And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
     #   And I press the "Update Interaction" button
     #     And I wait for the "top" form to close
-    #   And I uncheck the time-updated filter
+    #   And I uncheck the date-updated filter
     #   And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
     #   And I expand "Book of Mammalogy" in the data tree
     #   Then I should see "3" interactions under "Observations on the life histories of Panama bats"
@@ -278,7 +279,7 @@ Feature: Edit data in the database
         And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
-        And I uncheck the time-updated filter
+        And I uncheck the date-updated filter
         And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
         And I expand "Journal of Mammalogy" in the data tree
         Then I should see "3" interactions under "Observations on the life histories of Panama bats"

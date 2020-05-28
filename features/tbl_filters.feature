@@ -18,6 +18,7 @@ Feature: Filtering the data displayed in the database table
     @javascript
     Scenario:  I should be able to filter the data by date published.
       Given the database table is in "Location" view
+      And I break "Open console"
       And I toggle "open" the filter panel
       And I set the date "cited" filter to "Januray 1, 1990"
       Then I should see "3" rows in the table data tree

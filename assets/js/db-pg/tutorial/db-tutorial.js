@@ -82,8 +82,7 @@ function waitForDbLoad() {
 }
 function addDbLoadNotice() {  
     $('.introjs-tooltiptext').html(`
-        <br><center><b>Please wait for the data to finish downloading before 
-        continuing.`);
+        <br><center><b>Please wait for the table to load before continuing.`);
 }
 function isAllDataAvailable() {
     const flags = tState().get('flags');

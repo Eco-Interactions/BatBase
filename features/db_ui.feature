@@ -23,6 +23,7 @@
     @javascript
     Scenario:  I should be able to expand the data tree completely
         Given I see "2" rows in the table data tree
+        And I break "Open console"
         When I press "Expand All"
         Then I should see "10" interactions in the table
         Then I should see "22" rows in the table data tree

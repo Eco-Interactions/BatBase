@@ -1,8 +1,0 @@
-	{% set subjectRoleCnt = taxon.subjectRoles | length %}
-	{% set objectRoleCnt = taxon.objectRoles | length %}
-	{% if subjectRoleCnt > 0 %}
-		{{ include('taxon/role_list.html.twig',{ 'roles': taxon.subjectRoles, 'roleCnt': subjectRoleCnt, 'ofby' : 'of' }) }}
-	{% endif %}
-	{% if objectRoleCnt > 0 %}
-		{{ include('taxon/role_list.html.twig',{ 'roles': taxon.objectRoles, 'roleCnt': objectRoleCnt, 'ofby' : 'by'}) }}
-	{% endif %}

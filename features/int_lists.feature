@@ -24,6 +24,7 @@ Feature: Save and manage custom Lists of interaction data
     @javascript
     Scenario:  I should be able to CREATE a list, add interactions, save, and view list.
         Given I toggle "open" the data lists panel
+        And I break "Open console"
         And the database table is in "Location" view
         When I enter "Test Interaction List" in the "Int List" dropdown
         And I should see "Test Interaction List" in the "Int List" dropdown
