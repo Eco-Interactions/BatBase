@@ -56,6 +56,24 @@ function afterFilterChanged() {}                                                
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
     _ui('updateFilterStatusMsg');    
 } 
+/** ------------------------ BEFORE SORT CHANGE ----------------------------- */
+/** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
+function onBeforeSortChanged() {                                            
+    if (tblState.curFocus !== "taxa") { return; }                       
+    var sortModel = tblState.api.getSortModel();                             //console.log("model obj = %O", sortModel)
+    if (!sortModel.length) { return tblState.api.setSortModel([{colId: "name", sort: "asc"}]); }
+    ifNameUnsorted(sortModel);        
+}
+/** Sorts the tree column if it is not sorted. */
+function ifNameUnsorted(model) {
+    var nameSorted = model.some(function(colModel){
+        return colModel.colId === "name";
+    });
+    if (!nameSorted) { 
+        model.push({colId: "name", sort: "asc"}); 
+        tblState.api.setSortModel(model);
+    }
+}
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
     if ($('#list-pnl').hasClass('closed') || $('#submit-list').data('submitting')) { return; }  
@@ -95,7 +113,7 @@ function getColumnDefs(mainCol) {
     function buildColDefs(tags) { 
 
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-                    cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
+                    cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 }, 
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
                 {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
                 {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
@@ -150,11 +168,26 @@ function addTitle(params) {
     var value = params.value || null;
     return value === null ? null : '<span title="'+value+'">'+value+'</span>';
 }
-/** --------- Tree Column ---------------------- */
-/** Adds tooltip to Tree cells */
-function addToolTipToTree(params) {      
-    var name = params.data.name || null;                                        //console.log("params in cell renderer = %O", params)         
-    return name === null ? null : '<span title="'+name+'">'+name+'</span>';
+/** ------------------------------- Tree Column ----------------------------- */
+function handleTreeRowRender (params) { 
+    const rowName = params.data.name || null;
+    return rowName ? addToolTipToCell(rowName) : addIntShowIcon(params.data.id);
+}
+function addToolTipToCell(name) {      
+    return '<span title="'+name+'">'+name+'</span>';
+}
+function addIntShowIcon (id) {                                          
+    const icon = getShowIconHtml();
+    return `<span style="width:90%"></span><a href="${getShowLink(id)}" target="_blank">${icon}</a>`
+
+    function getShowLink (id) {
+        return $('body').data('base-url') + 'interaction/' + id;
+    }
+}
+function getShowIconHtml () {
+    const path = require('../../../images/icons/search.svg').default; 
+    return`<img src=${path} class="tree-show" title="Show Interaction Details" 
+        alt="Show Interaction Details">`;
 }
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() { 
@@ -162,23 +195,7 @@ function getTreeWidth() {
     if (tblState.curFocus === 'locs') { offset = offset + 66; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
-/** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
-function onBeforeSortChanged() {                                            
-    if (tblState.curFocus !== "taxa") { return; }                       
-    var sortModel = tblState.api.getSortModel();                             //console.log("model obj = %O", sortModel)
-    if (!sortModel.length) { return tblState.api.setSortModel([{colId: "name", sort: "asc"}]); }
-    ifNameUnsorted(sortModel);        
-}
-/** Sorts the tree column if it is not sorted. */
-function ifNameUnsorted(model) {
-    var nameSorted = model.some(function(colModel){
-        return colModel.colId === "name";
-    });
-    if (!nameSorted) { 
-        model.push({colId: "name", sort: "asc"}); 
-        tblState.api.setSortModel(model);
-    }
-}
+/* ----------- SORT TAXON TREE AND COLUMNS --------------- */
 /**
  * Sorts the tree column alphabetically for all views. If in Taxon view, the 
  * rows are sorted first by rank and then alphabetized by name @sortTaxonRows. 
@@ -231,14 +248,14 @@ function sortTaxonRows(a, b) {
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
 }  /* End sortTaxonRows */
-/** ------ Edit(or) Column(s) ---------- */
+/** -------------------------- Edit(or) Column(s) --------------------------- */
 function isNotEditor() {  
     return ['admin', 'editor', 'super'].indexOf(tblState.userRole) === -1;
 }
 /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
 function addEditPencil(params) {   
     if (uneditableEntityRow(params)) { return "<span>"; }                     
-    return getPencilHtml(params.data.id, params.data.entity, _form.edit);
+    return getPencilHtml(params.data.id, params.data.entity);
 }
 function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tblState.curFocus, params);
     const uneditables = [
@@ -249,7 +266,7 @@ function uneditableEntityRow(params) {                                          
         tblState.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
     return uneditables.some(test => test);
 }
-function getPencilHtml(id, entity, editFunc) {
+function getPencilHtml(id, entity) {
     const path = require('../../../images/icons/eif.pencil.svg').default; 
     var editPencil = `<img src=${path} id="edit${entity}${id}"
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;

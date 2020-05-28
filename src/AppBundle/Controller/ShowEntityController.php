@@ -61,13 +61,15 @@ class ShowEntityController extends Controller
     }
     private function getLocationData($location)
     {
-        $name = $location->getDisplayName();
+        $name = $location->getDisplayName(); 
         $country = $location->getCountryData()['displayName'];
-        $region = $location->getRegionData()['displayName'];
+        $region = $location->getRegionData()['displayName'];  
+        $type = $location->getLocationTypeData()['displayName'];
         $habitat = $location->getHabitatTypeData()? 
             $location->getHabitatTypeData()['displayName'] : null;
-        $isLocHabType = $name == $name . '- ' . $habitat &&
-            (strpos($name, $country) !== false || strpos($name, $region) !== false);  
+        $isLocHabType = ($name == $name . '- ' . $habitat &&
+            (strpos($name, $country) !== false || strpos($name, $region) !== false))
+            || $type === 'habitat' ;   
 
         return [
             'description' => $location->getDescription(),
