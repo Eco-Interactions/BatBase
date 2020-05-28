@@ -1,0 +1,29 @@
+{% extends "layout.html.twig" %}
+
+{% set interaction = entity %}
+
+{% block headline %}
+    Interaction {{ interaction.id }}
+{% endblock headline %}
+
+{% block detail %}
+    <div id='entity-show' class="flex-col">
+        <a href="{{ baseurl }}search"><<< Browse Database</a>
+        <div id='int-src'>
+            <div id="int-src-cit"></div>
+            <div id="int-src-abstract"></div>
+        </div>
+        <div id='int-loc'>
+            <div id="int-src-cit"></div>
+            <div id="int-src-abstract"></div>
+        </div>
+        <div id='int-txn'>
+            <div id="int-src-cit"></div>
+            <div id="int-src-abstract"></div>
+        </div>
+        <div id='int-misc'>
+            <div id="int-src-cit"></div>
+            <div id="int-src-abstract"></div>
+        </div>
+    </div>
+{% endblock detail %}
