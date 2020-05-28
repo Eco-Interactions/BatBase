@@ -11,16 +11,16 @@
 // --lighter-g = #77cab8
 // --lightest-g = #a2dadd
 /* ---------- ROOT ELEM & UTIL ------------- */
-@import "root-util"
+@import "base/util"
 /* ----------- PAGE STRUCTURE -------------- */
 $content-width
     max-width: 100vw   
     width 1330px
     @media screen and (min-width: 1500px)
-            max-width: 1500px 
-            width 1500px      
+        max-width: 1500px 
+        width 1500px        
     @media screen and (max-width: 1500px) and (min-width: 1330px)
-            max-width: 1330px
+        max-width: 1330px
             
 #pg-container
     @extend $content-width
@@ -63,12 +63,12 @@ $content-width
 #footer span
     margin .5em
 /*------------ IMAGE SLIDER ---------------- */
-@import "img-slider"
+@import "base/header/img-slider"
 /* -------- HEADER & NAVIGATION ------------ */
-@import "nav"
+@import "base/header/nav"
 /* ------- OVERLAY & POPUP WINDOWS ---------- */
-@import "popups"
+@import "base/popups"
 /* ------- WYSIWYG / DATATABLES / MISC ------ */
-@import "misc"
+@import "base/misc"
 /* ----------- PAGE SPECIFIC ---------------- */
-@import "pages"
+@import "pages/pages"

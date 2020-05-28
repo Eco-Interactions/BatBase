@@ -2,7 +2,6 @@
 <html lang="en">
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
     {% set eifusername = app.user.username %}
-    {% set baseurl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
     {% if is_granted('ROLE_SUPER_ADMIN') %}
         {% set eifrole = 'super' %}
     {% elseif is_granted('ROLE_ADMIN') %}
@@ -18,6 +17,8 @@
     {% set eifusername = '' %}
     {% set eifrole = 'visitor' %}
 {% endif %}
+
+{% set baseurl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
 
 <html {% block pagedata %}{% endblock %}>

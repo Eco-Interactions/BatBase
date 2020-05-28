@@ -18,8 +18,8 @@ function initSentryIssueTracking() {
 }
 /* ==================== STYLES & SCRIPTS ==================================== */
 function requireStyles() {
-    require('../../styles/base/ei-reset.styl');   
-    require('../../styles/base/oi.styl');    
+    require('../../styles/base/reset.styl');   
+    require('../../styles/oi.styl');    
     require('../../styles/css/lib/introjs.min.css');  
 }
 function setGlobalJquery() { 

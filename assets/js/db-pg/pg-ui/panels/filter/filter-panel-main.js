@@ -32,7 +32,7 @@ export function reloadTableThenApplyFilters(filters, id) {
 }
 /* ================================ Init ==================================== */
 export function initFilterPanel() {
-    require('../../../../../styles/db/panels/filters.styl');  
+    require('../../../../../styles/pages/db/panels/filters.styl');  
     addFilterPanelEvents();
     _filter('initDateFilterUi');
     fSets.disableFilterSetInputs();

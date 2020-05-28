@@ -76,7 +76,7 @@ export function updateUserNamedList(data, action) {
 /* ********************* MAIN CODE ****************************************** */
 /* ======================= EVENTS =========================================== */
 export function addPanelEventsAndStyles(userRole) {
-    require('../../../../styles/db/panels/panel.styl');  
+    require('../../../../styles/pages/db/panels/panel.styl');  
     setInfoButtonClickEvents();
     fM.initFilterPanel();
     iM.initListPanel();

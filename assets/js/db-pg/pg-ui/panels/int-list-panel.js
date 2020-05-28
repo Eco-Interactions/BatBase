@@ -43,7 +43,7 @@ export function isSavedIntListLoaded() {
 }
 export function initListPanel() {
     if ($('body').data('user-role') === 'visitor') { return; }
-    require('../../../../styles/db/panels/lists.styl');  
+    require('../../../../styles/pages/db/panels/lists.styl');  
     addListPanelEvents();
 }
 function addListPanelEvents() {
