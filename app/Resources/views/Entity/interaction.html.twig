@@ -38,10 +38,86 @@
                 </div>
             {% endif %}
         </div>
-        <div id='int-loc'>
-            <div id="int-src-cit"></div>
-            <div id="int-src-abstract"></div>
-        </div>
+        <div class='flex-col data-sect'>                                    <!-- loc -->
+            <h3><strong>Location</strong></h3>
+            <div class='flex-row sect-row'>
+                <div class='flex-row int-data' style="min-width:333px;">
+                    <label><strong>
+                        {% if  loc.name == loc.country and loc.isCountryOrRegionHabType == false %}
+                            Country:
+                        {% else %}
+                            Name:
+                        {% endif %}
+                    </strong></label>
+                    <div>{{ loc.name }}</div>
+                </div>
+                {% if loc.isCountryOrRegionHabType %}
+                    <div class='flex-row int-data'>
+                        <label><strong>Habitat:</strong></label>
+                        <div>{{ loc.habitat }}</div>
+                    </div>
+                </div>
+                {% elseif loc.name == loc.country %}
+                    <div class='flex-row int-data'>
+                        <label><strong>Region:</strong></label>
+                        <div>{{ loc.region }}</div>
+                    </div>
+                </div>
+                {% elseif loc.name == loc.region %}
+                </div>
+                {% elseif loc.habitat and loc.description %}
+                    <div class='flex-row int-data'>
+                        <label><strong>Habitat:</strong></label>
+                        <div>{{ loc.habitat }}</div>
+                    </div>
+                    <div class='flex-row int-data'>
+                        <label><strong>Description:</strong></label>
+                        <div>{{ loc.description }}</div>
+                    </div>
+                </div>
+                {% elseif loc.description %}
+                    <div class='flex-row int-data'>
+                        <label><strong>Description:</strong></label>
+                        <div>{{ loc.description }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+            {% if loc.type == 'Area' or loc.type == 'Point' %}
+                <div class='flex-row sect-row'>
+                    <div class='flex-row int-data'>
+                        <label><strong>Country:</strong></label>
+                        <div>{{ loc.country }}</div>
+                    </div>
+                    <div class='flex-row int-data'>
+                        <label><strong>Region:</strong></label>
+                        <div>{{ loc.region }}</div>
+                    </div>
+                    {% if loc.elev %}
+                        <div class='flex-row int-data'>
+                            <label><strong>Elevation(m):</strong></label>
+                            <div>
+                                {% if loc.elevMax %}
+                                    {{ loc.elev }} - {{ loc.elevMax }}
+                                {% else %}
+                                    {{ loc.elev }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if loc.type == 'Point' %}
+                        <div class='flex-row int-data'>
+                            <label><strong>Latitude:</strong></label>
+                            <div>{{ loc.lat }}</div>
+                        </div>
+                        <div class='flex-row int-data'>
+                            <label><strong>Longitude:</strong></label>
+                            <div>{{ loc.lng }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
         <div id='int-txn'>
             <div id="int-src-cit"></div>
             <div id="int-src-abstract"></div>
