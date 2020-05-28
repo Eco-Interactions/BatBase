@@ -1,17 +1,38 @@
 {% extends "layout.html.twig" %}
 
-{% set interaction = entity %}
+{# Entity data: interaction, citation  #}
 
 {% block headline %}
     Interaction {{ interaction.id }}
 {% endblock headline %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/show.css') }}" />
+{% endblock stylesheets %}
+
 {% block detail %}
-    <div id='entity-show' class="flex-col">
+    <div id='entity-show' class='flex-col'>
         <a href="{{ baseurl }}search"><<< Browse Database</a>
-        <div id='int-src'>
-            <div id="int-src-cit"></div>
-            <div id="int-src-abstract"></div>
+        <br>
+        <div class='flex-col data-sect'>                                    <!-- SOURCE -->
+            <h3><strong><u>Source</u></strong></h3>
+            <div class='flex-row'>
+                <div class='flex-row'>
+                    <label><strong>Citation:</strong></label>
+                    <div class='int-data'>{{ citation.fullText }}</div>
+                </div>
+                <div class='flex-row' style='width: 555px;'>
+                    <label><strong>Authors:</strong></label>
+                    <div class='int-data'>{{ citation.authors }}</div>
+                </div>
+            </div>
+            {% if (citation.abstract) %}
+                <div class='flex-row'>
+                    <label><strong>Abstract:</strong></label>
+                    <div class='int-data'>{{ citation.abstract }}</div>
+                </div>
+            {% endif %}
         </div>
         <div id='int-loc'>
             <div id="int-src-cit"></div>
@@ -27,3 +48,8 @@
         </div>
     </div>
 {% endblock detail %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('show') }} 
+{% endblock javascripts %}  
