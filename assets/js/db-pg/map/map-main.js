@@ -563,6 +563,7 @@ function fillCoordFields(latLng) {                                              
  * and adds a map pin for the entered coodinates. 
  */
 function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('           --updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+    if (!app.map) { return; } //form cloesd before geocode results returned.
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
     updateMapPin(latLng, results[0], zoomFlag); 
 }

@@ -1194,7 +1194,7 @@ class FeatureContext extends RawMinkContext implements Context
             $input->setValue($text);
             $this->getUserSession()->executeScript("$('$selector').change();");        
             return $input->getValue() == $text;
-        }, "Could set [$text] in [$selector]");
+        }, "Could not set [$text] in [$selector]");
     }
     private function selectValueInCombobox($selId, $text)
     {                                                                           //fwrite(STDOUT, "\n            selectValueInCombobox - [$text] in [$selId]\n");           

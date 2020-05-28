@@ -337,6 +337,7 @@ function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {             
     let athrs = '';
     for (let ord in auths) {  
         let name = getFormattedName(ord, auths[ord]); 
+        if (!name) { continue; }
         athrs += (ord == 1 ? name : (ord == Object.keys(auths).length ?
             ' & '+ name : ', '+ name));                 
     }
@@ -347,6 +348,7 @@ function getFormattedAuthorNames(auths, eds, authRcrds, srcRcrds) {             
         return name +', et al';
     }
     function getFormattedName(i, srcId) {                                       //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
+        if (srcId === 'create') { return false; }
         const src = getEntityRcrd(srcRcrds, srcId, 'source');
         const athrId = src[_f.util('lcfirst', [src.sourceType.displayName])];  
         const athr = getEntityRcrd(authRcrds, athrId, 'author');

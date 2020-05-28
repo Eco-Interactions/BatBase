@@ -10,6 +10,7 @@ Feature: Search Page Database Initialization
         Given I am on "/search"
         And the database has loaded
         Then I exit the tutorial
+        And I break "Open console"
 
     ###----------------------- Taxon View -----------------------------------###
     @javascript

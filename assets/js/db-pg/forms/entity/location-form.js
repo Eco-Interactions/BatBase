@@ -45,7 +45,7 @@ function onLocFormLoadComplete() {
     addMapToLocForm($('#location_Rows'), 'create');
     addNotesToForm();
     addListenerToGpsFields('sub');
-    handleElevFields();
+    handleElevFieldsAndNumberInputs();
     scrollToLocFormWindow();
 }
 function disableTopFormLocNote() {
@@ -74,9 +74,10 @@ function getHowToCreateLocWithoutGpsDataNote() {
         in available data and click "Create without GPS data" at the bottom of 
         the form.</p>`;
 }
-function handleElevFields() {
+function handleElevFieldsAndNumberInputs() {
     $('#Elevation-lbl').text('Elevation (m)');
-    $('#Elevation_row input, #ElevationMax_row input').attr('type', 'number');
+    $('#Elevation_row input, #ElevationMax_row input, #Latitude_row input, #Longitude_row input')
+        .attr('type', 'number');
 
 }
 /**

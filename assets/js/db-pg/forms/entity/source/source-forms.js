@@ -492,9 +492,10 @@ function updatePlaceholderText(elem, newTxt) {
 function updateInputTypes () {
     setNumberInputs();
     setInputType('LinkUrl', 'url');
+    // $('#Pages-lbl + input').attr('pattern', "[0-9]+([-\,][0-9]+)?");
 }
 function setNumberInputs () {
-    const fields = ['Edition', 'Issue', 'Pages', 'Volume', 'Year'];
+    const fields = ['Edition', 'Issue', 'Volume', 'Year'];
     fields.forEach(f => setInputType(f, 'number'));
 }
 function setInputType (fieldName, type) {                                    
@@ -555,26 +556,29 @@ function selectAuthor(cnt, authId, field, fLvl) {                               
  * the last author combobox, unless the last is empty. The total count of 
  * authors is added to the new id.
  */
-function onAuthSelection(val) {                                                 
-    handleAuthSelect(val);
+function onAuthSelection(val) {
+    handleAuthSelect(val, null, this.$input[0].id.substr(-1));
 }
 function onEdSelection(val) {                                                   
-    handleAuthSelect(val, 'editor');
+    handleAuthSelect(val, 'editor', this.$input[0].id.substr(-1));
 }
-function handleAuthSelect(val, ed) {                                            
+/** Note: If create form selected from dropdown, the count of that combo is used. */
+function handleAuthSelect(val, ed, selCnt) {               
     const authType = ed ? 'Editors' : 'Authors';                                
     let cnt = $('#'+authType+'-sel-cntnr').data('cnt');   
     if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     const fLvl = _f.getSubFormLvl('sub');
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }                       
-    if (val === 'create') { return handleNewAuthForm(cnt, val, authType); } 
+    if (val === 'create') { return handleNewAuthForm(selCnt, val, authType); } 
     if (lastAuthComboEmpty(cnt, authType)) { return; }
     buildNewAuthorSelect(cnt+1, val, fLvl, authType);
-}
-function handleFieldCleared(authType, cnt) {  
-    syncWithOtherAuthorTypeSelect(authType);
-    if ($('#'+authType+'-sel'+(cnt-1)).val() === '') {  
-        removeFinalEmptySelectField(authType, cnt);
+    
+    function handleFieldCleared(authType, cnt) { 
+        syncWithOtherAuthorTypeSelect(authType);
+        handleCitText(fLvl);
+        if ($('#'+authType+'-sel'+(cnt-1)).val() === '') {  
+            removeFinalEmptySelectField(authType, cnt);
+        }
     }
 }
 function syncWithOtherAuthorTypeSelect(authType) { 
@@ -632,9 +636,9 @@ function initEdForm(selCnt, val) {                                              
  * this level , a message will be shown telling the user to complete the open 
  * form and the form init will be canceled.
  */
-function handleNewAuthForm(authCnt, value, authType) {                          console.log('           /--handleNewAuthForm [%s][%s] - [%s]', authType, authCnt, value); 
+function handleNewAuthForm(authCnt, value, authType) {                          //console.log('           /--handleNewAuthForm [%s][%s] - [%s]', authType, authCnt, value); 
     const pId = '#'+authType+'-sel'+authCnt; 
-    const fLvl = 'sub2';
+    const fLvl = _f.getSubFormLvl('sub2');
     if ($('#'+fLvl+'-form').length !== 0) { 
         return _f.val('openSubFormErr', [authType, pId, fLvl]); 
     }
@@ -646,6 +650,7 @@ function handleNewAuthForm(authCnt, value, authType) {                          
     function appendAuthFormAndFinishBuild(form) {        
         $('#'+authType+'_row').append(form);
         handleSubmitBttns();
+        $('#'+fLvl+'-cancel').click(_f.cmbx.bind(null, 'clearCombobox', ['#'+authType+'-sel'+authCnt]))
         $('#FirstName_row input').focus();
     }
     function handleSubmitBttns() {
