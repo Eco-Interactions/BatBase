@@ -69,9 +69,9 @@
         </div>
 <!-------------------- LOCATION ----------------------------------------------->
         <div class='flex-col data-sect'>                                    
-            <h3><strong>Location</strong></h3>
+            <h3><strong>{% if loc.region == 'Unspecified' %} No {% endif %}Location</strong></h3>
         <!---------- COUNTRY||REGION AND HABITAT DATA ONLY  ------------>
-            {% if loc. name == loc.country or loc.habLocType == 'Country' %} <!--     COUNTRY      -->
+            {% if loc.name == loc.country or loc.habLocType == 'Country' %} <!--     COUNTRY      -->
                 <div class='flex-row sect-row'>
                     <div class='flex-row int-data' style="min-width:333px;">
                         <label><strong>Country:</strong></label>
@@ -87,18 +87,27 @@
                         <div>{{ loc.habitat }}</div>
                     </div>
                 {% endif %}
-                {% if loc.name == loc.region or loc.habLocType == 'Region'  %}        <!--     REGION      -->
+                </div>
+            {% elseif loc.name == loc.region or loc.habLocType == 'Region'  %}        <!--     REGION      -->
+                {% if loc.region != 'Unspecified' %}
                     <div class='flex-row int-data'>
                         <label><strong>Region:</strong></label>
                         <div>{{ loc.region }}</div>
                     </div>
-                    {% if loc.isCountryOrRegionHabType %}      <!--     ...WITH HABITAT      -->
-                        <div class='flex-row int-data'>
-                            <label><strong>Habitat:</strong></label>
-                            <div>{{ loc.habitat }}</div>
-                        </div>
-                    {% endif %}
                 {% endif %}
+                {% if loc.habitat %}      <!--     ...WITH HABITAT      -->
+                    <div class='flex-row int-data'>
+                        <label><strong>Habitat:</strong></label>
+                        <div>{{ loc.habitat }}</div>
+                    </div>
+                {% endif %}
+                </div>
+            {% endif %}
+        <!---------- HABITAT DATA ONLY  ------------>
+            {% if loc.region == 'Unspecified' and loc.type == 'Habitat' %}     <!--   ONLY HABITAT      -->
+                <div class='flex-row int-data'>
+                    <label><strong>Habitat:</strong></label>
+                    <div>{{ loc.habitat }}</div>
                 </div>
             {% endif %}
         <!---------- AREA||POINT LOCATIONS  ------------>
