@@ -16,21 +16,25 @@
         <a href="{{ baseurl }}search"><<< Browse Database</a>
         <br>
         <div class='flex-col data-sect'>                                    <!-- SOURCE -->
-            <h3><strong><u>Source</u></strong></h3>
-            <div class='flex-row'>
-                <div class='flex-row'>
-                    <label><strong>Citation:</strong></label>
-                    <div class='int-data'>{{ citation.fullText }}</div>
+            <h3><strong>Source</strong></h3>
+            <div class='flex-row sect-row'>
+                <div class='flex-row int-data'>
+                    <label><strong>Title:</strong></label>
+                    <div>{{ citation.title }}</div>
                 </div>
-                <div class='flex-row' style='width: 555px;'>
+                <div class='flex-row int-data'>
+                    <label><strong>Citation:</strong></label>
+                    <div>{{ citation.fullText }}</div>
+                </div>
+                <div class='flex-row int-data'>
                     <label><strong>Authors:</strong></label>
-                    <div class='int-data'>{{ citation.authors }}</div>
+                    <div>{{ citation.authors }}</div>
                 </div>
             </div>
             {% if (citation.abstract) %}
-                <div class='flex-row'>
+                <div class='flex-row int-data'>
                     <label><strong>Abstract:</strong></label>
-                    <div class='int-data'>{{ citation.abstract }}</div>
+                    <div>{{ citation.abstract }}</div>
                 </div>
             {% endif %}
         </div>
