@@ -874,6 +874,38 @@ class Source
     }
 
     /**
+     * Get Author Names
+     *
+     * @return array
+     */
+    public function getAuthorNames()
+    { 
+        $contribs = $this->getContributorsArray($this->contributors, 'DisplayName');
+        return !$contribs ? null : $this->buildAuthorNamesString($contribs);
+    }
+    private function buildAuthorNamesString($authors)
+    {
+        $names = [];
+        foreach ($authors as $ord => $name) {
+            array_push($names, $name);
+        }
+        return join('; ', $names);
+    }
+
+    private function getContributorsArray($contributors, $field)
+    {
+        $getField = 'get'.$field;
+        $contribs = [];
+
+        foreach ($contributors as $contributor) {
+            if ($contributor->getIsEditor()) { continue; }  
+            $data = $contributor->getAuthorSource()->$getField();
+            $ord = $contributor->getOrd();
+            $contribs = $contribs + [$ord => $data]; 
+        }
+        return count($contribs) > 0 ? $contribs : null;
+    }
+    /**
      * Get Author Ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("authors")
@@ -882,14 +914,7 @@ class Source
      */
     public function getAuthorIds()
     { 
-        $contribs = [];
-        foreach ($this->contributors as $contributor) {
-            if ($contributor->getIsEditor()) { continue; }  
-            $id = $contributor->getAuthorSource()->getId();
-            $ord = $contributor->getOrd();
-            $contribs = $contribs + [$ord => $id]; 
-        }
-        return count($contribs) > 0 ? $contribs : null;
+        return $this->getContributorsArray($this->contributors, 'Id');
     }
 
     /**

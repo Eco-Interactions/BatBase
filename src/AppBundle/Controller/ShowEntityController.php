@@ -15,8 +15,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
  */
 class ShowEntityController extends Controller
 {
-/*------------------------------ CREATE --------------------------------------*/
 
+    private $em;
+
+
+
+    private function getEntity($className, $val, $prop = 'id')
+    {
+        return $this->em->getRepository('AppBundle:'.$className)
+            ->findOneBy([$prop => $val]);
+    }
+/* ----------------------------- INTERACTION -------------------------------- */
     /**
      * Oopens the Interaction show page.
      *
@@ -24,15 +33,27 @@ class ShowEntityController extends Controller
      */
     public function showInteractionAction($id)
     {
-        $em = $this->getDoctrine()->getManager();
+        $this->em = $this->getDoctrine()->getManager();
 
-        $entity = $em->getRepository('AppBundle:Interaction')
-                ->findOneBy(['id' => $id]);
+        $interaction = $this->getEntity('Interaction', $id);
 
-        if (!$entity) {
+        if (!$interaction) {
             throw $this->createNotFoundException("Unable to find Interaction [$id].");
         }
 
-        return $this->render('Entity/interaction.html.twig', array('entity' => $entity));
+        $citation = $this->getCitation($interaction->getSource());
+
+        return $this->render('Entity/interaction.html.twig', array(
+            'interaction' => $interaction, 'citation' => $citation 
+        ));
+    }
+    private function getCitation($source)
+    {
+        $citationDetails = $source->getCitation();
+        return [
+            'fullText' => $citationDetails->getFullText(),
+            'abstract' => $citationDetails->getAbstract(),
+            'authors' => $source->getAuthorNames()
+        ];
     }
 }
