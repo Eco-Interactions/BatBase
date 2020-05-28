@@ -240,7 +240,7 @@ function getActiveFilters(statusMsg) {
     return pieces.join('');
 }
 function submitFilterSet(data, action, successFunc) {
-    const envUrl = $('body').data("ajax-target-url");
+    const envUrl = $('body').data("base-url");
     _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action)]);
 }
 function onFilterSubmitComplete(action, results) {

@@ -6,7 +6,7 @@ var maxContentChars = 500;
 var submitDisabled = true;
 var $body = $('body');
 var $masthead = $('#hdrmenu');
-var feedbackUrl = $body.data('ajax-target-url') + 'feedback/post';
+var feedbackUrl = $body.data('base-url') + 'feedback/post';
 var thisUrl = $body.data('this-url');
     
 /** Creates the "Leave Feedback" menu option for all registered users. */

@@ -2,6 +2,7 @@
 <html lang="en">
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
     {% set eifusername = app.user.username %}
+    {% set baseurl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
     {% if is_granted('ROLE_SUPER_ADMIN') %}
         {% set eifrole = 'super' %}
     {% elseif is_granted('ROLE_ADMIN') %}
@@ -16,11 +17,6 @@
 {% else %}
     {% set eifusername = '' %}
     {% set eifrole = 'visitor' %}
-{% endif %}
-{% if is_granted("ROLE_USER") %}
-    {% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
-{% else %}
-    {% set targeturl = "false" %}
 {% endif %}
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
 
@@ -42,7 +38,7 @@
         <!-- Javascript at end of body. -->
     </head>
 
-    <body data-env="{{ app.environment }}" data-ajax-target-url="{{ targeturl }}"
+    <body data-env="{{ app.environment }}" data-base-url="{{ baseurl }}"
         data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" 
         data-user-name="{{ eifusername }}">
         {% block body %}
