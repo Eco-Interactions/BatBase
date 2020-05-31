@@ -90,6 +90,7 @@ function appendPubFormAndFinishBuild(form) {
     initFormCombos('publication', 'sub');
     $('#Title_row input').focus();
     _f.elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
+    $('#PublicationType-lbl').css('min-width', '125px');
 }
 /**
  * Loads the deafult fields for the selected Publication Type. Clears any 
@@ -101,6 +102,7 @@ function loadPubTypeFields(typeId) {                                            
         .then(finishPubTypeFields);
 
     function finishPubTypeFields() {
+        $('#PublicationType-lbl').css('min-width', '125px');
         ifBookAddAuthEdNote();
         _f.elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
     }
@@ -683,12 +685,16 @@ function getSrcRcrd(pubId) {
     const rcrd = _f.state('getRcrd', ['source', _f.state('getStateProp', '[editing]').core]);
     return _f.state('getRcrd', ['source', rcrd.parent]);
 }
-/** Note: Only citation forms use this. */
+/** Note: Only citation & publication forms use this. */
 export function finishEditFormBuild(entity) {                                   //console.log('---finishEditFormBuild')
     initFormCombos(entity, 'top');
     $('.all-fields-cntnr').hide();
-    handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
-    finishSourceToggleAllFields('citation', {}, 'top');
+    if (entity === 'citation') {
+        handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
+    } else {
+        $('#PublicationType-lbl').css('min-width', '125px');
+    }
+    finishSourceToggleAllFields(entity, {}, 'top');
 }
 export function setSrcEditRowStyle() {
     _f.elems('setCoreRowStyles', ['#form-main', '.top-row']);

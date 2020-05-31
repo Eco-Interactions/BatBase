@@ -4,7 +4,7 @@
  * Exports:             Imported by:
  *     getFormConfg             db-forms, edit-forms
  *     getCoreFieldDefs         db-forms, edit-forms
- *     getParentEntity          db-forms, edit-forms
+ *     getCoreEntity          db-forms, edit-forms
  *     getFieldTranslations     validate-data
  *     getCoreFormEntity        validate-data
  *
@@ -316,9 +316,9 @@ export function getCoreFormEntity(entity) {
     };
     return coreEntities[entity];
 }
-export function getParentEntity(entity) {                                          
+export function getCoreEntity(entity) {                                          
     const details = ['author', 'citation', 'publication', 'publisher'];         //console.log('hasParentEntity? [%s]. Entity = %s', details.indexOf(entity) !== -1, entity);
-    return details.indexOf(entity) !== -1 ? 'source' : false;
+    return details.indexOf(entity) !== -1 ? 'source' : entity;
 }
 /* *********************** SERVER FIELD CONFG ******************************* */
 /**
