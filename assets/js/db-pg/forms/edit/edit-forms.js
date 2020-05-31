@@ -57,7 +57,7 @@ function getEditFields(entity, id) {
 /* ----------------------- FINISH FORM INIT --------------------------------- */
 function finishEditFormBuild(entity) {
     $('.top-pin').addClass('invis'); //hides field checkboxes used in create forms
-    const cmplx = ['citation', 'interaction', 'location', 'taxon'];
+    const cmplx = ['citation', 'interaction', 'location', 'publication', 'taxon'];
     return cmplx.indexOf(entity) > -1 ? finishCmplxForm() : finishEditForm(entity);
 
     function finishCmplxForm() {
@@ -71,26 +71,24 @@ function finishEditForm(entity) {
 }
 /* =================== FILL CURRENT ENTITY DATA ============================= */
 function fillFormWithEntityData(entity, id) {
-    addDisplayNameToForm(entity, id);
-    fillEntityData(entity, id)
+    const cEntity =  _f.confg('getCoreEntity', [entity]);
+    addDisplayNameToForm(cEntity, id, entity);
+    fillEntityData(cEntity, id, entity)
     .then(checkFieldsAndToggleSubmit);
 }
-function addDisplayNameToForm(ent, id) {
-    if (ent === 'interaction') { return; }
-    const prnt = _f.confg('getParentEntity', [ent]);
-    const entity = prnt || ent;
-    const rcrd = _f.state('getRcrd', [entity, id]);                                           
+function addDisplayNameToForm(cEntity, id, entity) {
+    if (entity === 'interaction') { return; }
+    const rcrd = _f.state('getRcrd', [cEntity, id]);                                           
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
-    $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
+    $('#det-cnt-cntnr span')[0].innerText = 'This ' + entity + ' is referenced by:';
 }
 /** Note: Source types will get their record data at fillSrcData. */
-function fillEntityData(ent, id) {  
-    const hndlrs = { 'author': fillSrcData, 'citation': fillSrcData,
-        'location': fillLocData, 'publication': fillSrcData, 
-        'publisher': fillSrcData, 'taxon': fillTaxonData, 
-        'interaction': fillIntData };
-    const rcrd = _f.state('getRcrd', [ent, id]);                                 console.log("      --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
-    return Promise.resolve(hndlrs[ent](ent, id, rcrd));
+function fillEntityData(cEntity, id, entity) {  
+    const hndlrs = {
+        'interaction': fillIntData, 'location': fillLocData, 
+        'source': fillSrcData,      'taxon': fillTaxonData  };
+    const rcrd = _f.state('getRcrd', [cEntity, id]);                            console.log("      --fillEntityData [%s] [%s] = %O", cEntity, id, rcrd);
+    return Promise.resolve(hndlrs[cEntity](cEntity, id, rcrd, entity));
 }
 function updateEditDetailMemory(detailId) {
     const editObj = _f.state('getStateProp', ['editing']);
@@ -98,7 +96,7 @@ function updateEditDetailMemory(detailId) {
     _f.state('setStateProp', ['editing', editObj]);
 }
 /* ------------- INTERACTION ----------------- */
-function fillIntData(entity, id, rcrd) {  
+function fillIntData(entity, id, rcrd, dEntity) {  
     const fields = getInteractionFieldFillTypes();  
     fillFields(rcrd, fields, true);
 }
@@ -121,7 +119,7 @@ function addSource(fieldId, prop, rcrd) {
     _f.cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
 }
 /* ------------- LOCATION ----------------- */
-function fillLocData(entity, id, rcrd) {
+function fillLocData(entity, id, rcrd, dEntity) {
     const fields = _f.confg('getCoreFieldDefs', [entity]);  
     handleLatLongFields();
     fillFields(rcrd, fields);
@@ -148,20 +146,19 @@ function fillLocData(entity, id, rcrd) {
 } /* End fillLocData */
 /* ------------- SOURCE ----------------- */
 /** Fills all data for the source-type entity.  */
-function fillSrcData(entity, id, rcrd) { 
-    const src = _f.state('getRcrd', ['source', id]);
-    const detail = _f.state('getRcrd', [entity, src[entity]]);                     //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
-    const fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
+function fillSrcData(entity, id, src, dEntity) { 
+    const detail = _f.state('getRcrd', [dEntity, src[dEntity]]);                //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+    const fields = getSourceFields(dEntity);                                     
     setSrcData();
     setDetailData();
     
     function setSrcData() {
         fillFields(src, fields.core);
-        _f.panel('fillRelationalDataInPanel', [entity, src]);            
+        _f.panel('fillRelationalDataInPanel', [dEntity, src]);            
     }
     function setDetailData() {
         fillFields(detail, fields.detail);
-        setAdditionalFields(entity, src, detail);
+        setAdditionalFields(dEntity, src, detail);
         updateEditDetailMemory(detail.id);
     }
 } 
@@ -203,7 +200,7 @@ function setCitationEdgeCaseFields(entity, citRcrd) {
     $('#Volume_row input[type="number"]').val(parseInt(citRcrd.publicationVolume));
 }
 /* ------------- TAXON ----------------- */
-function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
+function fillTaxonData(entity, id, rcrd, dEntity) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
     _f.panel('fillRelationalDataInPanel', [entity, rcrd]);
 }
 /** -------------------- FILL FORM-FIELD HELPERS ---------------------------- */

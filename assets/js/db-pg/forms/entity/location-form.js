@@ -103,6 +103,7 @@ export function finishEditFormBuild(entity) {
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']))
     $('.all-fields-cntnr').hide();
+    $('#DisplayName-lbl, #ElevationMax-lbl').css('min-width', '106px');
 }
 function updateCountryChangeMethod() {
     $('#Country-sel')[0].selectize.off('change');

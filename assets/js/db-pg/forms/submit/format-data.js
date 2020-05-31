@@ -14,15 +14,15 @@ export default function(entity, fLvl, formVals) {
  * which are grouped into flat data and related-entity data objects. 
  */
 function buildFormData(entity, formVals, fLvl) { 
-    const pEntity = _f.confg('getParentEntity', [entity]);                                  
+    const cEntity = _f.confg('getCoreEntity', [entity]);                                  
     const data = buildBaseFormDataObj({});
-    if (pEntity === "source") { addDetailTypeData(); }                      //console.log("formData = %O", data);
-    addDirectFormFieldData(entity, formVals, pEntity, data);
+    if (cEntity !== entity) { addDetailTypeData(); }                      //console.log("formData = %O", data);
+    addDirectFormFieldData(entity, formVals, cEntity, data);
     addAllRemainingData(entity, formVals, data);
     return data;
 
     function buildBaseFormDataObj(data) {
-        data[pEntity] = { flat: {}, rel: {} };
+        data[cEntity] = { flat: {}, rel: {} };
         data[entity] = { flat: {}, rel: {} };
         return data;
     }
@@ -33,16 +33,14 @@ function buildFormData(entity, formVals, fLvl) {
      * Note: currently, only sources have detail entities.
      */
     function addDetailTypeData() { 
-        if (pEntity) {
-            data[pEntity].rel[pEntity+'Type'] = entity; 
-            data[pEntity].hasDetail = true;
-        } 
+        data[cEntity].rel[cEntity+'Type'] = entity; 
+        data[cEntity].hasDetail = true;
     }
 } /* End buildFormData */
-function addDirectFormFieldData(entity, formVals, pEntity, data) {
+function addDirectFormFieldData(entity, formVals, cEntity, data) {
     const fieldTrans = _f.confg('getFieldTranslations', [entity]); 
     const rels = _f.confg('getRelationshipFields', [entity]);
-    const parentFields = !pEntity || getParentFields(entity);                     //console.log("buildFormDataObj. [%s] pEntity = %s, formVals = %O, parentFields = %O", entity, pEntity, formVals, parentFields);
+    const parentFields = !cEntity || getParentFields(entity);                     //console.log("buildFormDataObj. [%s] cEntity = %s, formVals = %O, parentFields = %O", entity, cEntity, formVals, parentFields);
     for (let field in formVals) { getFormFieldData(field, formVals[field]); }
     
     /** 
@@ -69,7 +67,7 @@ function addDirectFormFieldData(entity, formVals, pEntity, data) {
         }
         /** Adds the field and value to the appropriate entity data-type object. */
         function addFieldData() { 
-            const ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
+            const ent = (cEntity && parentFields.indexOf(field) !== -1) ? cEntity : entity;
             data[ent][dataGroup][field] = val;
         }
     } /* End getFormFieldData */
