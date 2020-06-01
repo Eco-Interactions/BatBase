@@ -2,10 +2,9 @@
 
 namespace AppBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 
 /**
@@ -25,7 +24,7 @@ class ShowEntityController extends Controller
     }
 /* ----------------------------- INTERACTION -------------------------------- */
     /**
-     * Oopens the Interaction show page.
+     * Opens the Interaction show page.
      *
      * @Route("interaction/{id}", name="app_interaction_show")
      */
