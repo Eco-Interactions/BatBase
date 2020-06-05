@@ -2,7 +2,7 @@
  * Handles displaying the 'help' modal for editors and above with options to either
  * reset the local database or submit a bug report.
  */
-import { resetLocalDb, _modal, _u } from '../db-main.js';
+import { alertIssue, resetLocalDb, _modal, _u } from '../db-main.js';
 
 /* ====================== EDITOR HELP ======================================= */
 /* --------------------- HELP MODAL ----------------------------------------- */
@@ -102,7 +102,7 @@ function submitNewSentryIssue() {
         steps: $('.bug-rprt-input')[1].value,
         etc: $('.bug-rprt-input')[0].value,
     };
-    pg.alertIssue('editorReport', data);
+    alertIssue('editorReport', data);
     updateBugReportUiAfterSubmit();
 }
 function updateBugReportUiAfterSubmit() {
