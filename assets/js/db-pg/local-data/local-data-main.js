@@ -17,7 +17,6 @@ import * as _idb from './idb-util.js';
 import * as _sync from './db-sync.js';
 import * as _temp from './temp-data.js';
 import * as _init from './init-data.js';
-import { exitModal, showSaveModal } from '../../misc/intro-core.js';
 
 /* ========================== FACADE ======================================== */
 export function initDb(argument) {
@@ -45,10 +44,10 @@ export function resetLocalDb() {
         html: '<center>Click "Reset" to redownload all data.</center>',
         elem: '#data-help', dir: 'left', submit: resetDb, bttn: 'Reset'
     }
-    showSaveModal(confg); 
+    _pg._modal('showSaveModal', [confg]);
 
     function resetDb() {
-        exitModal();
+        _pg._modal('exitModal');
         _idb.downloadFullDb(true);
     }
 }

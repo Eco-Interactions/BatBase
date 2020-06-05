@@ -6,7 +6,7 @@
  *    OPEN
  *    AJAX
  */
-import { exitModal, showSaveModal } from '../misc/intro-core.js';
+import { exitModal, showSaveModal } from '../misc/intro-modals.js';
 
 if (window.location.pathname.includes('pdfs')) {
     addPdfEvents();
