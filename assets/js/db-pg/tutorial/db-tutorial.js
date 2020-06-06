@@ -61,7 +61,6 @@ function setTableState() {
     $('#db-view').css("height", "444px");
     $('#search-focus')[0].selectize.disable();
     $('#sel-view')[0].selectize.disable();
-    $('#data-help').css('z-index', '1');
     setDbLoadDependentState();
 }
 function setDbLoadDependentState() {
@@ -162,7 +161,6 @@ function resetUi() {                                                            
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
     $('#search-focus')[0].selectize.enable();
     $('#sel-view')[0].selectize.enable();
-    $('#data-help').css('z-index', '10000000000');
 }
 /* =================== TUTORIAL STEP CONFIG ================================= */
 function getSteps() {

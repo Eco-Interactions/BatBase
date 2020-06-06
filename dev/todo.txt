@@ -7,27 +7,21 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
-    - Prevented genus taxa created without family
-    - Added (m) to Elevation label and field only allows numbers now.
-    - added 'select unspecified' option to taxon select forms to select the realm taxon
-    - Updated the issue reporting feature with a field to paste in the logs.
-        - Updated error message to editors and above to prompt them to fill out report
-    - Fixed bugs caught by sentry
-    - Improved new data form load.
-    - Updated the publication submission page with the new 'last viewed by'
-        column. I also added a title field for publications, as it seemed useful.
-
+    - Added Interaction show page
 
     BUGS
         - EXITING OUT OF AUTHOR SELECT (PUB->BOOK) LEAVES EDITOR FIEL DISABLED
-        - Missing subject for interaction 10153
+        - Subject realm not being selected 
 
 
 QUESTIONS:
 
 >==== CURRENT ====
-    - Sarah to add field or announcement to remind that something has been added. Will show last person who viewed the submission
-    
+    - add captcha to login page and remove fake users 
+        - create user list/set examples *after* account confirmed/first login
+    - Build interaction and taxon show pages 
+    - Add multiple realm root functionality
+    - Send email when publication or feedback is submitted
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
@@ -110,6 +104,8 @@ Sort:
     - REFACTOR - get tag names for the tags column filter menu from stored data rather than hard coded.
     - replace ucfirst and lcfirst with built in 'toUpperCase'
     - add input type, ie number, to form field confgs
+    - when attempting to use the database in FF incognito mode, which does not allow idb. Ignoring for now, will add notice to users at some point.
+    Database doesn't work with IE.
 
 TODOs:
 ##(Category){priority}[difficulty]##
