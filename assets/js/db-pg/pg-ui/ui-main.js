@@ -137,6 +137,7 @@ export function updateUiForTableView() {
 }
 /* ==================== UTILITY ============================================= */
 export function enableTableButtons(allDataAvailable) { 
+    if (!allDataAvailable) { return; }
     bttns.enableTableButtons(allDataAvailable);
 }
 export function fadeTable() {  

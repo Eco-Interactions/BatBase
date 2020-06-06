@@ -25,9 +25,9 @@ import * as _map from './map/map-main.js';
 import * as ui from './pg-ui/ui-main.js';
 import * as db from './local-data/local-data-main.js';
 import * as format from './table/format-data/aggrid-format.js'; 
-import * as modal from '../misc/intro-core.js';
+import * as modal from '../misc/intro-modals.js';
 import * as form from './forms/forms-main.js';
-import startWalkthrough from './tutorial/db-tutorial.js';
+import * as tutorial from './tutorial/db-tutorial.js';
 
 /** ==================== FACADE ============================================= */
 function moduleMethod(funcName, mod, modName, params = []) {
@@ -47,6 +47,9 @@ export function _ui(funcName, params = []) {
 }
 export function _modal(funcName, params = []) {
     return moduleMethod(funcName, modal, 'modal', params);
+}
+export function _tutorial(funcName, params = []) {
+    return moduleMethod(funcName, tutorial, 'tutorial', params);
 }
 export function _filter(funcName, params = []) {
     return moduleMethod(funcName, filter, 'filter', params);
@@ -111,7 +114,9 @@ export function getCurrentFilterState() {
     }
 }
 /** ==================== PAGE INIT ========================================== */
-initDbPage();
+if (window.location.pathname.includes('search')) {
+    initDbPage();
+}
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () { 
     if ($(window).width() < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js
@@ -147,7 +152,7 @@ export function showIntroAndLoadingMsg(resettingData) {
     ui.updateUiForDatabaseInit();
     ui.selectInitialSearchFocus('taxa', resettingData);
     if (resettingData) { return $('#sel-view')[0].selectize.clear('silent'); }
-    startWalkthrough('taxa');
+    tutorial.startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
 export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = true) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s], allDataAvailable ? [%s]', focus, isAllDataAvailable);
