@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * GeoJson.
@@ -31,6 +32,7 @@ class GeoJson
      * @ORM\Column(name="type", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("type")
+     * @Groups({"normalized", "flattened"})
      */
     private $type;
 
@@ -40,6 +42,7 @@ class GeoJson
      *
      * @ORM\Column(name="coordinates", type="text", nullable=false)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $coordinates;
 
@@ -48,6 +51,9 @@ class GeoJson
      * String array of coordinates - [ long, lat ] (GeoJson format)
      *
      * @ORM\Column(name="display_point", type="string", length=255, nullable=false)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayPoint")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayPoint;
 
@@ -75,6 +81,7 @@ class GeoJson
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized"})
      */
     private $updated;
 
@@ -99,6 +106,7 @@ class GeoJson
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -171,8 +179,6 @@ class GeoJson
 
     /**
      * Get displayPoint.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("displayPoint")
      *
      * @return text
      */

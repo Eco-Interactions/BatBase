@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Publication.
@@ -38,6 +39,7 @@ class Publication
      * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
 
@@ -46,6 +48,7 @@ class Publication
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $description;
 
@@ -89,6 +92,7 @@ class Publication
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized"})
      */
     private $updated;
 
@@ -110,6 +114,7 @@ class Publication
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -216,6 +221,7 @@ class Publication
      * Get the Publication Type id and displayName.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publicationType")
+     * @Groups({"normalized", "flattened"})
      */
     public function getPublicationTypeData()
     {
@@ -255,6 +261,7 @@ class Publication
      * Get the Source id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
+     * @Groups({"normalized"})
      */
     public function getSourceId()
     {

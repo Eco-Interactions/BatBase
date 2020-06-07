@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Publisher.
@@ -29,7 +30,6 @@ class Publisher
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
-     * @JMS\Expose
      */
     private $slug;
     
@@ -39,6 +39,7 @@ class Publisher
      * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
 
@@ -47,6 +48,7 @@ class Publisher
      *
      * @ORM\Column(name="city", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $city;
 
@@ -55,6 +57,7 @@ class Publisher
      *
      * @ORM\Column(name="country", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $country;
 
@@ -63,6 +66,7 @@ class Publisher
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $description;
 
@@ -98,6 +102,7 @@ class Publisher
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized"})
      */
     private $updated;
 
@@ -273,6 +278,7 @@ class Publisher
      * Get the Source id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
+     * @Groups({"normalized"})
      */
     public function getSourceId()
     {

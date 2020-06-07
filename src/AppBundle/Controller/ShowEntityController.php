@@ -2,10 +2,10 @@
 
 namespace AppBundle\Controller;
 
+use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-
 
 /**
  * Handles individual entity (interaction and taxon) show pages.
@@ -22,6 +22,24 @@ class ShowEntityController extends Controller
         return $this->em->getRepository('AppBundle:'.$className)
             ->findOneBy([$prop => $val]);
     }
+/* --------------- SERIALIZE --------------- */
+    private function serializeEntity($entity)
+    {
+        $serializer = $this->container->get('jms_serializer');
+
+        try {
+            return $serializer->serialize($entity, 'json', 
+                SerializationContext::create()->setGroups(array('flattened')));
+        } catch (\Throwable $e) {
+            return $this->logError($e);
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e);
+        }
+    }
+    private function logError($e)
+    {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+    }
 /* ----------------------------- INTERACTION -------------------------------- */
     /**
      * Opens the Interaction show page.
@@ -33,68 +51,15 @@ class ShowEntityController extends Controller
         $this->em = $this->getDoctrine()->getManager();
 
         $interaction = $this->getEntity('Interaction', $id);
-
         if (!$interaction) {
             throw $this->createNotFoundException("Unable to find Interaction [$id].");
         }
 
-        $cit = $this->getCitationData($interaction->getSource());
-        $loc = $this->getLocationData($interaction->getLocation());
-        $int = $this->getInteractionData($interaction);
+        $jsonEntity = $this->serializeEntity($interaction);
 
         return $this->render('Entity/interaction.html.twig', array(
-            'int' => $int, 'cit' => $cit , 'loc' => $loc
+            'id' => $id, 'int' => $jsonEntity
         ));
     }
-    private function getCitationData($source)
-    {
-        $citationDetails = $source->getCitation();
-        return [
-            'abstract' => $citationDetails->getAbstract(),
-            'authors' => $source->getAuthorNames(),
-            'fullText' => $citationDetails->getFullText(),
-            'title' => $citationDetails->getTitle()
-        ];
-    }
-    private function getLocationData($location)
-    {
-        $name = $location->getDisplayName(); 
-        $country = $location->getCountryData()['displayName'];
-        $region = $location->getRegionData()['displayName'];  
-        $type = $location->getLocationTypeData()['displayName'];
-        $habitat = $location->getHabitatTypeData()? 
-            $location->getHabitatTypeData()['displayName'] : null;
-        $isLocHabType = ($name == $name . '- ' . $habitat &&
-            (strpos($name, $country) !== false || strpos($name, $region) !== false))
-            || $type === 'habitat' ;   
 
-        return [
-            'description' => $location->getDescription(),
-            'elev' => $location->getElevation(),
-            'elevMax' => $location->getElevationMax(),
-            'country' => $country,
-            'habitat' => $habitat,
-            'isCountryOrRegionHabType' => $isLocHabType,
-            'habLocType' => $isLocHabType ? (strpos($name, $country) !== false ?
-                'Country' : 'Region') : null,
-            'lat' => $location->getLatitude(),
-            'lng' => $location->getLongitude(),
-            'name' => $name,
-            'region' => $region,
-            'type' => $location->getLocationTypeData()['displayName'],
-        ];
-    }
-    private function getInteractionData($interaction)
-    {
-        return [
-            'id' => $interaction->getId(),
-            'note' => $interaction->getNote(),
-            'object' => $interaction->getObject()->getDisplayName(),
-            'oRealm' => $interaction->getObject()->getTaxonRealm()->getDisplayName(),
-            'subject' => $interaction->getSubject()->getDisplayName(),
-            'sRealm' => $interaction->getSubject()->getTaxonRealm()->getDisplayName(),
-            'type' => $interaction->getInteractionTypeData()['displayName'],
-            'tags' => $interaction->getTagNames(),
-        ];
-    }
 }

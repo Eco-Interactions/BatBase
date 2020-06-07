@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Author.
@@ -38,6 +39,7 @@ class Author
      * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
 
@@ -47,6 +49,7 @@ class Author
      * @ORM\Column(name="first_name", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("firstName")
+     * @Groups({"normalized", "flattened"})
      */
     private $firstName;
 
@@ -56,6 +59,7 @@ class Author
      * @ORM\Column(name="middle_name", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("middleName")
+     * @Groups({"normalized", "flattened"})
      */
     private $middleName;
 
@@ -65,6 +69,7 @@ class Author
      * @ORM\Column(name="last_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("lastName")
+     * @Groups({"normalized", "flattened"})
      */
     private $lastName;
 
@@ -74,6 +79,7 @@ class Author
      * @ORM\Column(name="suffix", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("suffix")
+     * @Groups({"normalized", "flattened"})
      */
     private $suffix;
 
@@ -83,6 +89,7 @@ class Author
      * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("fullName")
+     * @Groups({"normalized", "flattened"})
      */
     private $fullName;
 
@@ -118,6 +125,7 @@ class Author
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized"})
      */
     private $updated;
 
@@ -342,6 +350,7 @@ class Author
      * Get the Source id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
+     * @Groups({"normalized"})
      */
     public function getSourceId()
     {
