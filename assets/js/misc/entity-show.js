@@ -51,7 +51,7 @@ function getDetailsFirstRow (subject, object, type, tags) {
 function getTypeAndTagDataCol (type, tags) {
     const typeData = getDataCell('Type:', type.displayName);
     const tagData = getDataCell('Tags:', getTagData(tags));
-    return buildRowColSect([typeData, tagData]);
+    return getRowGroupSect([typeData, tagData]);
 }
 function getTagData (tags) { 
     if (!tags.length) { return null; }
@@ -69,40 +69,43 @@ function getTaxonHierarchyDataHtml (data) {
 function getIntSourceHtml (data) {                                              console.log('getIntSourceHtml data = %O', data);
     const row1 = getSourceFirstRow(data);
     const row2 = getSourceSecondRow(data);
-    const row3 = getFullRow('Abstract:', data.abstract);
-    return getDataSect('Source', [row1, row2, row3]);
+    const row3 = getFullRow('Citation:', data.citation.fullText);
+    const row4 = getFullRow('Abstract:', data.abstract);
+    return getDataSect('Source', [row1, row2, row3, row4]);t
 }
 /* ........................ FIRST ROW ....................................... */
 // Publication: title, (Type: name, DOI:, website) Publisher: name (city/country)
 function getSourceFirstRow (data) {
-    const pubData = getPubDataCol(data.parent)
-    const details = getPubDetailsCol(data.parent);
+    const pubData = getPubDataRow(data.parent)
     const descAndEditors = getDescAndEditors(data.parent);
-    return buildDataRow([pubData, details, descAndEditors]);
+    return buildDataRow([pubData, descAndEditors]);
+}
+function getPubType (pubSrc) {
+    return pubSrc.publication.publicationType.displayName;
 }
 function getPubDataCol (pubSrc) {
     const title = getDataCell('Publication:', pubSrc.displayName);
-    const type = getDataCell('Publication Type:', pubSrc.publication.publicationType.displayName);
+    const typeAndPublisher = getTypeAndDoi(pubSrc);
+    const details = getSrcDetailsCol(pubSrc);
+    return getRowGroupSect([title, typeAndPublisher, details]);
+}
+function getTypeAndDoi (pubSrc) {
+    const type = getDataCell('Publication Type:', getPubType(pubSrc));
     const publisher = getDataCell('Publisher:', getPublisherData(pubSrc.parent));
-    return buildRowColSect([title, type, publisher]);
+    return getRowGroupSect([type, publisher], 'row');
 }
 function getPublisherData (pSrc) {
+    if (!pSrc) { return null; }
     const loc = [pSrc.publisher.city, pSrc.publisher.country].join(', ');
-    return pSrc.displayName + (!!loc ? (', ' + loc) : '');
-}
-function getPubDetailsCol (publication) {
-    const yearCell = getDataCell('Year:', publication.year);
-    const doiCell = getDataCell('DOI:', publication.doi);
-    const link = getDataCell('Website:', null);
-    return buildRowColSect([yearCell, doiCell, link]);
+    return pSrc.displayName + (!!loc ? ('<br>' + loc) : '');
 }
 function getDescAndEditors (pubSrc) {
-    const contributors = getPubContributors(pubSrc.contributors);
+    const contributors = getContributorDataCell(pubSrc.contributors);
     const description = getDataCell('Description:', pubSrc.description);
-    return buildRowColSect([contributors, description].filter(e => e));
+    return getRowGroupSect([contributors, description].filter(e => e));
 }
-function getPubContributors (contribs) {  
-    if (!Object.keys(contribs).length) { return null; }
+function getContributorDataCell (contribs) {  
+    if (!contribs || !Object.keys(contribs).length) { return null; }
     let type;
     const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
     return getDataCell(util.ucfirst(type)+'s:', names);
@@ -112,11 +115,35 @@ function getPubContributors (contribs) {
         return contribs[ord][type];
     }
 }
+/* ....................... SECOND ROW ....................................... */
 //Citation-type: title, (year:, pages) (Vol, Issue) 
-function getSourceSecondRow (data) {
-    // body... 
+function getSourceSecondRow (citSrc) {
+    const pubData = getCitDataCol(citSrc)
+    const misc = getMiscCitData(citSrc);
+    const contributors = getContributorDataCell(citSrc.contributors);
+    return buildDataRow([pubData, misc, contributors]);
 }
-/* ........................ FIRST ROW ....................................... */
+function getCitDataCol (citSrc) {
+    const title = getDataCell(getCitType(citSrc)+':', citSrc.displayName);
+    const details = getSrcDetailsCol(citSrc);
+    return getRowGroupSect([title, details]);
+}
+function getMiscCitData (citSrc) {
+    const volume = getDataCell('Volume:', citSrc.publicationVolume);
+    const issue = getDataCell('Issue:', citSrc.publicationIssue);
+    const pages = getDataCell('Pages:', citSrc.publicationPages);
+    return getRowGroupSect([volume, issue, pages]);
+}
+function getCitType (citSrc) {
+    return citSrc.citation.citationType.displayName;
+}
+/* ---------- SHARED ----------------- */
+function getSrcDetailsCol (src) {
+    const year = src.year ? getDataCell('Year:', src.year) : null;
+    const doi = getDataCell('DOI:', src.doi);
+    const link = getDataCell('Website:', null);
+    return getRowGroupSect([year, doi, link], 'row');
+}
 /* """""""""""""""""""" INTERACTION LOCATION """""""""""""""""""""""""""""""" */ 
 function getIntLocationHtml (data) {
     // body... 
@@ -142,8 +169,8 @@ function getFullRow (label, content) {
     const rowData = getDataCell(label, content);
     return buildDataRow(rowData);
 }
-function buildRowColSect (colCells) {
-    return getDivWithContent('flex-col', colCells);
+function getRowGroupSect (colCells, dir = 'col') {
+    return getDivWithContent('flex-'+dir, colCells);
 }
 function getDataCell (label, fieldHTML) {                           
     const lbl = util.getLabel(label);
