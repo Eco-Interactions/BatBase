@@ -35,38 +35,40 @@ function buildIntShowPage (data) {
 }
 /* --------------------- INTERACTION DETAILS -------------------------------- */ 
 function getIntDetailsHtml (data) {
-    const sect = getDataSect('Details');
-    const row1 = getDetailsFirstRow(data.subject, data.object, data.type, data.tags);
+    const sect = getDataSect('Interaction Details');
+    const row1 = getDetailsFirstRow(
+        data.subject, data.object, data.interactionType, data.tags);
     const row2 = getNoteRow(data.note);
     $(sect).append([row1, row2].filter(r => r));
     return sect;
 }
 /* ........................ FIRST ROW ....................................... */
 function getDetailsFirstRow (subject, object, type, tags) {
-    const row = getDataRow();
+    const typeAndTags = getTypeAndTagDataCol(type, tags);
     const subj = getTaxonDataCell('Subject', subject);
     const obj = getTaxonDataCell('Object', object);
-    const typeAndTags = getTypeAndTagDataCell(type, tags);
-    $(row).append([subj, obj]);
+    return buildDataRow([typeAndTags, subj, obj]);
+    const row = getDataRow();
+    $(row).append();
     return row;
+}
+/* ------------ INTERACTION TYPE AND TAGS ---------------- */
+function getTypeAndTagDataCol (type, tags) {
+    const typeData = getDataCell('Type', type.displayName);
+    const tagData = getDataCell('Tags', getTagData(tags));
+    return buildRowColSect([typeData, tagData]);
+}
+function getTagData (tags) { 
+    if (!tags.length) { return 'None'; }
+    return tags.map(t => t.displayName).join(', ');
 }
 /* -------------- SUBJECT AND OBJECT --------------------- */
 function getTaxonDataCell (role, data) {
-    const cell = getRowCell();
-    const lbl = util.getLabel(role);
     const taxonAndParents = getTaxonHierarchyDataHtml(data);
-    $(cell).append([lbl, taxonAndParents]);
-    return cell;
+    return getDataCell(role, taxonAndParents);
 }
 function getTaxonHierarchyDataHtml (data) {
-    const div = util.getDiv();
-    const content = JSON.stringify(data).substr(0, 200);
-    $(div).append(content);
-    return div;
-}
-/* ------------ INTERACTION TYPE AND TAGS ---------------- */
-function getTypeAndTagDataCell (type, tags) {
-    // body... 
+    return JSON.stringify(data).substr(0, 200);
 }
 /* ....................... SECOND ROW ....................................... */
 function getNoteRow (note, row) {
@@ -89,16 +91,25 @@ function buildTxnShowPage (data) {
 
 /* ====================== HTML BUILDERS ===================================== */
 function getDataSect (title) {
-    const sectCntnr = util.getElem('div', { class: 'flex-col data-sect' });
     const hdr = util.getElem('h3', { text: title });
-    $(sectCntnr).append(hdr);
-    return sectCntnr;
+    return getDivWithContent ('flex-col data-sect', hdr);
 }
-function getDataRow () {
-    return util.getElem('div', { class: 'flex-row sect-row' });
+function buildDataRow (rowCells) {
+    return getDivWithContent ('flex-row sect-row', rowCells);
 }
-function getRowCell () {
-    return util.getElem('div', { class: 'flex-row cell-data' });
+function buildRowColSect (colCells) {
+    return getDivWithContent ('flex-col', colCells);
+}
+function getDataCell (label, fieldHTML) {                                       //console.log('getDataCell [%s] = [%s]', label, fieldHTML)
+    const lbl = util.getLabel(label);
+    const div = util.getDiv({html: fieldHTML });
+    return getDivWithContent ('flex-row cell-data', [lbl, div]);
+}
+/* ------------ base ------------------- */
+function getDivWithContent (classes, content) {
+    const div = util.getElem('div', { class: classes });
+    $(div).append(content);
+    return div;
 }
 
 /* ======================== SHOW PAGE STYLES ================================ */

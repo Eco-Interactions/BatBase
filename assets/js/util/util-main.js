@@ -12,11 +12,11 @@ import * as elems from './elems/elems-main.js';
 
 /* =========================== ELEMS ======================================== */
 export function getDiv() {  
-    return elems.getDiv();
+    return elems.getDiv(...arguments);
 }
-export function getElem(tag, attrs) {  
-    return elems.getElem(tag, attrs);
+export function getElem() {  
+    return elems.getElem(...arguments);
 }
-export function getLabel (text) {
-    return elems.getLabel(text);
+export function getLabel () {
+    return elems.getLabel(...arguments);
 }
