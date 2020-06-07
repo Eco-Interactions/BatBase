@@ -28,11 +28,30 @@ function getShowPageBuilder (entity) {
 }
 /* ========================= SHOW INTERACTION =============================== */
 function buildIntShowPage (data) {
-    const details = getIntDetailsHtml(data);
-    const source = getIntSourceHtml(data.source);
-    const location = getIntLocationHtml(data.location);
-    $('#entity-show').append([details, source, location].filter(e => e));
+    const confg = getEntityShowBuildConfig('interaction', data);
+    const sections = confg.map(buildDataSection);
+    $('#entity-show').append(sections.filter(e => e));
 }
+function buildDataSection (confg) {
+    return getDataSect(confg.section, confg.rows.map(getSectionRow));
+}
+function getSectionRow (row) {
+    return buildDataRow(row.map(getRowCell));
+}
+function getRowCell (cell) {
+    if (cell.length == 1) { return getDataCell(cell[0]); }
+    return getRowGroupSect(cell.pop(), cell.map(getDataCell));
+}
+function getDataCell (data) {
+    return buildDataCell(data.field, data.content);
+}
+
+// function buildIntShowPage (data) {
+//     const details = getIntDetailsHtml(data);
+//     const source = getIntSourceHtml(data.source);
+//     const location = getIntLocationHtml(data.location);
+//     $('#entity-show').append([details, source, location].filter(e => e));
+// }
 /* """"""""""""""""""""" INTERACTION DETAILS """""""""""""""""""""""""""""""" */ 
 function getIntDetailsHtml (data) {
     const row1 = getDetailsFirstRow(
@@ -49,8 +68,8 @@ function getDetailsFirstRow (subject, object, type, tags) {
 }
 /* ------------ INTERACTION TYPE AND TAGS ---------------- */
 function getTypeAndTagDataCol (type, tags) {
-    const typeData = getDataCell('Type:', type.displayName);
-    const tagData = getDataCell('Tags:', getTagData(tags));
+    const typeData = buildDataCell('Type:', type.displayName);
+    const tagData = buildDataCell('Tags:', getTagData(tags));
     return getRowGroupSect([typeData, tagData]);
 }
 function getTagData (tags) { 
@@ -60,9 +79,9 @@ function getTagData (tags) {
 /* -------------- SUBJECT AND OBJECT --------------------- */
 function getTaxonDataCell (role, data) {
     const taxonAndParents = getTaxonHierarchyDataHtml(data);
-    return getDataCell(role, taxonAndParents);
+    return buildDataCell(role, taxonAndParents);
 }
-function getTaxonHierarchyDataHtml (data) {
+function getTaxonHierarchyDataHtml (data) {  console.log('data = %O', data)
     return JSON.stringify(data).substr(0, 200);
 }
 /* """""""""""""""""""""" INTERACTION SOURCE """""""""""""""""""""""""""""""" */ 
@@ -84,14 +103,14 @@ function getPubType (pubSrc) {
     return pubSrc.publication.publicationType.displayName;
 }
 function getPubDataCol (pubSrc) {
-    const title = getDataCell('Publication:', pubSrc.displayName);
+    const title = buildDataCell('Publication:', pubSrc.displayName);
     const typeAndPublisher = getTypeAndDoi(pubSrc);
     const details = getSrcDetailsCol(pubSrc);
     return getRowGroupSect([title, typeAndPublisher, details]);
 }
 function getTypeAndDoi (pubSrc) {
-    const type = getDataCell('Publication Type:', getPubType(pubSrc));
-    const publisher = getDataCell('Publisher:', getPublisherData(pubSrc.parent));
+    const type = buildDataCell('Publication Type:', getPubType(pubSrc));
+    const publisher = buildDataCell('Publisher:', getPublisherData(pubSrc.parent));
     return getRowGroupSect([type, publisher], 'row');
 }
 function getPublisherData (pSrc) {
@@ -101,14 +120,14 @@ function getPublisherData (pSrc) {
 }
 function getDescAndEditors (pubSrc) {
     const contributors = getContributorDataCell(pubSrc.contributors);
-    const description = getDataCell('Description:', pubSrc.description);
+    const description = buildDataCell('Description:', pubSrc.description);
     return getRowGroupSect([contributors, description].filter(e => e));
 }
 function getContributorDataCell (contribs) {  
     if (!contribs || !Object.keys(contribs).length) { return null; }
     let type;
     const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
-    return getDataCell(util.ucfirst(type)+'s:', names);
+    return buildDataCell(util.ucfirst(type)+'s:', names);
     
     function storeTypeAndReturnName (ord) {
         type = Object.keys(contribs[ord])[0]; 
@@ -124,14 +143,14 @@ function getSourceSecondRow (citSrc) {
     return buildDataRow([pubData, misc, contributors]);
 }
 function getCitDataCol (citSrc) {
-    const title = getDataCell(getCitType(citSrc)+':', citSrc.displayName);
+    const title = buildDataCell(getCitType(citSrc)+':', citSrc.displayName);
     const details = getSrcDetailsCol(citSrc);
     return getRowGroupSect([title, details]);
 }
 function getMiscCitData (citSrc) {
-    const volume = getDataCell('Volume:', citSrc.publicationVolume);
-    const issue = getDataCell('Issue:', citSrc.publicationIssue);
-    const pages = getDataCell('Pages:', citSrc.publicationPages);
+    const volume = buildDataCell('Volume:', citSrc.publicationVolume);
+    const issue = buildDataCell('Issue:', citSrc.publicationIssue);
+    const pages = buildDataCell('Pages:', citSrc.publicationPages);
     return getRowGroupSect([volume, issue, pages]);
 }
 function getCitType (citSrc) {
@@ -139,9 +158,9 @@ function getCitType (citSrc) {
 }
 /* ---------- SHARED ----------------- */
 function getSrcDetailsCol (src) {
-    const year = src.year ? getDataCell('Year:', src.year) : null;
-    const doi = getDataCell('DOI:', src.doi);
-    const link = getDataCell('Website:', null);
+    const year = src.year ? buildDataCell('Year:', src.year) : null;
+    const doi = buildDataCell('DOI:', src.doi);
+    const link = buildDataCell('Website:', null);
     return getRowGroupSect([year, doi, link], 'row');
 }
 /* """""""""""""""""""" INTERACTION LOCATION """""""""""""""""""""""""""""""" */ 
@@ -154,31 +173,61 @@ function getIntLocationHtml (data) {
 function buildTxnShowPage (data) {
 
 }
-
-
+/* =================== ENTITY-SHOW CONFIG =================================== */
+/* [ Data-section, Row Array -> [ rowCellsArray -> [ single, [multi, cell, dir]  ] } */
+function getEntityShowBuildConfig (entity, data) {
+    const confg = {
+        interaction: [
+            {
+                section:  'Interaction Details', 
+                rows: [
+                   [  //row 1
+                        [ //cell 1
+                            { field: 'Type', content: data.interactionType.displayName },
+                            { field: 'Tag', content: getTagData(data.tags) },
+                            'col'
+                        ],[  //cell 2
+                            { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
+                        ],[  //cell 3
+                            { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
+                        ]
+                    ],[ //row 2
+                        [  //cell 1
+                            { field: 'Note', content: data.note }
+                        ]
+                    ]
+                ]
+            },{
+                section:  'Source', 
+                rows: []
+            }
+        ]
+    };
+    return confg[entity].map(c => c); //detach obj
+}
 
 /* ====================== HTML BUILDERS ===================================== */
-function getDataSect (title, rows) {
+function getDataSect (title, rows) {                                /*dbug-log*/console.log('getDataSect [%s] = [%O]', title, rows);
     const hdr = util.getElem('h3', { text: title });
     return getDivWithContent('flex-col data-sect', [hdr, ...rows]);
 }
-function buildDataRow (rowCells) {
+function buildDataRow (rowCells) {                                  /*dbug-log*/console.log('   buildDataRow [%O]', rowCells);
     return getDivWithContent('flex-row sect-row', rowCells);
 }
-function getFullRow (label, content) {
-    const rowData = getDataCell(label, content);
-    return buildDataRow(rowData);
-}
-function getRowGroupSect (colCells, dir = 'col') {
+// function getFullRow (label, content) {
+//     const rowData = buildDataCell(label, content);
+//     return buildDataRow(rowData);
+// }
+function getRowGroupSect (dir, colCells) {                          /*dbug-log*/console.log('       getRowGroupSect dir = %s, cells = %O', dir, colCells)
     return getDivWithContent('flex-'+dir, colCells);
 }
-function getDataCell (label, fieldHTML) {                           
+function buildDataCell (label, fieldHTML) {                         /*dbug-log*/console.log('           buildDataCell [%s] = [%O]', label, fieldHTML); 
     const lbl = util.getLabel(label);
     const data = getDivWithContent('', fieldHTML);
     return getDivWithContent('flex-row cell-data', [lbl, data]);
 }
 /* ------------ base ------------------- */
-function getDivWithContent (classes, content) {                     /*dbug-log*///console.log('getDivWithContent [%s] = [%O]', classes, content);
+function getDivWithContent (classes, content) {                     /*dbug-log*/console.log('               getDivWithContent [%s] = [%O]', classes, content);
     const div = util.getElem('div', { class: classes });
     const html = !!content ? content : '[ NONE ]';
     $(div).append(html);
