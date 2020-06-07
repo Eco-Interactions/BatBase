@@ -105,7 +105,8 @@ Sort:
     - replace ucfirst and lcfirst with built in 'toUpperCase'
     - add input type, ie number, to form field confgs
     - when attempting to use the database in FF incognito mode, which does not allow idb. Ignoring for now, will add notice to users at some point.
-    Database doesn't work with IE.
+    - Database doesn't work with IE. Notify user. 
+    - move db-pg util elem builders to js/util/elems
 
 TODOs:
 ##(Category){priority}[difficulty]##

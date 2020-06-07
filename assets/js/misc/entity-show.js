@@ -4,13 +4,14 @@
  * TOC:
  * 
  */                                                                        
+import * as util from '../util/util-main.js';
 
 initShowPage();
-/* ========================== INIT SHOW PAGE ================================ */
+/* __________________________ INIT SHOW PAGE ________________________________ */
 function initShowPage () {                                          
     require('../../styles/pages/entity-show.styl');
     buildShowPage($('body').data('this-url'), $('#entity-show').data('entity'))
-    setColumnSizes();
+    // setColumnSizes();
 }
 function buildShowPage (url, entityData) {
     const entity = getShowEntity(url);                              /*Perm-log*/console.log('   *//init[%s]ShowPage = %O', entity, entityData);
@@ -25,32 +26,80 @@ function getShowPageBuilder (entity) {
         'interaction': buildIntShowPage, 'taxon': buildTxnShowPage
     }[entity];
 }
-/* ------------------------- SHOW INTERACTION ------------------------------- */
-function buildIntShowPage (intData) {
-    const dtlHtml = buildIntDetailsHtml(intData);
-    const srcHtml = buildIntSourceHtml(intData);
-    const locHtml = buildIntLocationHtml(intData);
-    $('#entity-show').append([dtlHtml, srcHtml, locHtml].filter(h => h));
+/* ========================= SHOW INTERACTION =============================== */
+function buildIntShowPage (data) {
+    const details = getIntDetailsHtml(data);
+    const source = getIntSourceHtml(data);
+    const location = getIntLocationHtml(data);
+    $('#entity-show').append([details, source, location].filter(e => e));
 }
-function buildIntDetailsHtml (intData) {
-    return 'test'
+/* --------------------- INTERACTION DETAILS -------------------------------- */ 
+function getIntDetailsHtml (data) {
+    const sect = getDataSect('Details');
+    const row1 = getDetailsFirstRow(data.subject, data.object, data.type, data.tags);
+    const row2 = getNoteRow(data.note);
+    $(sect).append([row1, row2].filter(r => r));
+    return sect;
 }
-function buildIntSourceHtml (intData) {
+/* ........................ FIRST ROW ....................................... */
+function getDetailsFirstRow (subject, object, type, tags) {
+    const row = getDataRow();
+    const subj = getTaxonDataCell('Subject', subject);
+    const obj = getTaxonDataCell('Object', object);
+    const typeAndTags = getTypeAndTagDataCell(type, tags);
+    $(row).append([subj, obj]);
+    return row;
+}
+/* -------------- SUBJECT AND OBJECT --------------------- */
+function getTaxonDataCell (role, data) {
+    const cell = getRowCell();
+    const lbl = util.getLabel(role);
+    const taxonAndParents = getTaxonHierarchyDataHtml(data);
+    $(cell).append([lbl, taxonAndParents]);
+    return cell;
+}
+function getTaxonHierarchyDataHtml (data) {
+    const div = util.getDiv();
+    const content = JSON.stringify(data).substr(0, 200);
+    $(div).append(content);
+    return div;
+}
+/* ------------ INTERACTION TYPE AND TAGS ---------------- */
+function getTypeAndTagDataCell (type, tags) {
     // body... 
 }
-function buildIntLocationHtml (intData) {
+/* ....................... SECOND ROW ....................................... */
+function getNoteRow (note, row) {
+    if (!note) { return }
+}
+/* ---------------------- INTERACTION SOURCE -------------------------------- */ 
+function getIntSourceHtml (data) {
     // body... 
 }
-/* --------------------------- SHOW TAXON ----------------------------------- */
-function buildTxnShowPage (txnData) {
+/* -------------------- INTERACTION LOCATION -------------------------------- */ 
+function getIntLocationHtml (data) {
+    // body... 
+}
+/* =========================== SHOW TAXON =================================== */
+function buildTxnShowPage (data) {
 
 }
 
 
 
-
-
-
+/* ====================== HTML BUILDERS ===================================== */
+function getDataSect (title) {
+    const sectCntnr = util.getElem('div', { class: 'flex-col data-sect' });
+    const hdr = util.getElem('h3', { text: title });
+    $(sectCntnr).append(hdr);
+    return sectCntnr;
+}
+function getDataRow () {
+    return util.getElem('div', { class: 'flex-row sect-row' });
+}
+function getRowCell () {
+    return util.getElem('div', { class: 'flex-row cell-data' });
+}
 
 /* ======================== SHOW PAGE STYLES ================================ */
 /* ------------------------- SET ROW COLUMN WIDTHS -------------------------- */
