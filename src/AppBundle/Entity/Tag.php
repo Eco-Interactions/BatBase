@@ -418,6 +418,6 @@ class Tag
      */
     public function __toString()
     {
-        return $this->getTag();
+        return $this->getDisplayName();
     }
 }

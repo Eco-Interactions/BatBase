@@ -5,6 +5,9 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\MaxDepth;
+
 
 /**
  * Taxon.
@@ -38,6 +41,7 @@ class Taxon
      * @ORM\Column(name="display_name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
 
@@ -47,6 +51,7 @@ class Taxon
      * @ORM\Column(name="name", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("name")
+     * @Groups({"normalized", "flattened"})
      */
     private $name;
 
@@ -57,6 +62,7 @@ class Taxon
      * @ORM\Column(name="is_root", type="boolean", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("isRoot")
+     * @Groups({"normalized", "flattened"})
      */
     private $isRoot;
 
@@ -66,6 +72,7 @@ class Taxon
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("defaultGuid")
+     * @Groups({"normalized", "flattened"})
      */
     private $defaultGuid;
 
@@ -75,6 +82,7 @@ class Taxon
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("isOldWorld")
+     * @Groups({"normalized", "flattened"})
      */
     private $isOldWorld;
 
@@ -84,6 +92,7 @@ class Taxon
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("linkDisplay")
+     * @Groups({"normalized", "flattened"})
      */
     private $linkDisplay;
 
@@ -93,6 +102,7 @@ class Taxon
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("linkUrl")
+     * @Groups({"normalized", "flattened"})
      */
     private $linkUrl;
 
@@ -123,6 +133,9 @@ class Taxon
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="childTaxa")
      * @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
+     * @JMS\Expose
+     * @JMS\SerializedName("parentTaxon")
+     * @Groups({"flattened"})
      */
     private $parentTaxon;
 
@@ -133,6 +146,10 @@ class Taxon
      * @ORM\OrderBy({
      *     "displayName"="ASC"
      * })
+     * @JMS\Expose
+     * @JMS\SerializedName("childTaxa")
+     * @MaxDepth(1)
+     * @Groups({"flattened"})
      */
     private $childTaxa;
 
@@ -181,6 +198,7 @@ class Taxon
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized", "flattened"})
      */
     private $updated;
 
@@ -214,6 +232,7 @@ class Taxon
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -435,6 +454,25 @@ class Taxon
     {
         return $this->realm ? $this->realm->getRealm() : null;
     }
+
+    /**
+     * Get Realm data.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("realm")
+     * @Groups({"flattened"})
+     *
+     * @return \AppBundle\Entity\Realm
+     */
+    public function getRealmData()
+    {
+        $realm = $this->getTaxonRealm();
+        if (!$realm) { return null; }
+        return [
+            'id' => $realm->getId(), 
+            'displayName' => $realm->getDisplayName(),
+            'pluralName' => $realm->getPluralName()
+        ];
+    }
     
     /**
      * Get id.
@@ -448,11 +486,11 @@ class Taxon
     
     private function findRealmAndReturnObj($taxon)
     {
-        if ($taxon->getSlug() === 'animalia') { return []; } 
+        if ($taxon->getSlug() === 'animalia') { return false; } 
         $realm = $taxon->getRealm();
         if ($realm) { return $realm; }
         $parent = $taxon->getParentTaxon();
-        if (!$parent) { return []; }
+        if (!$parent) { return false; }
         return $this->findRealmAndReturnObj($parent);
     }
 
@@ -484,6 +522,7 @@ class Taxon
      * Get level id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("level")
+     * @Groups({"normalized", "flattened"})
      */
     public function getLevelData()
     {
@@ -555,6 +594,7 @@ class Taxon
      * Get the Parent Taxon's id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
+     * @Groups({"normalized"})
      */
     public function getParentTaxonId()
     {
@@ -599,6 +639,7 @@ class Taxon
      * Get an array of child Taxon ids.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
+     * @Groups({"normalized"})
      *
      * @return array
      */
@@ -686,6 +727,7 @@ class Taxon
      * Returns an array of ids for all interactions where the taxon was the subject. 
      * @JMS\VirtualProperty
      * @JMS\SerializedName("subjectRoles")     
+     * @Groups({"normalized", "flattened"})
      */
     public function getSubjectRoleIds()
     {
@@ -732,6 +774,7 @@ class Taxon
      * Returns an array of ids for all interactions where the taxon was the object. 
      * @JMS\VirtualProperty
      * @JMS\SerializedName("objectRoles")
+     * @Groups({"normalized", "flattened"})
      */
     public function getObjectRoleIds()
     {
@@ -827,6 +870,7 @@ class Taxon
      * Note: Returns null for records developer (ID = 6) modified
      * @JMS\VirtualProperty
      * @JMS\SerializedName("updatedBy")
+     * @Groups({"normalized", "flattened"})
      *
      * @return string
      */
@@ -837,7 +881,7 @@ class Taxon
         $user = $this->updatedBy ? 
             ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
 
-        return !$user ? null : $user->getFirstName();
+        return !$user ? null : $user->getUsername();
     }
 
     /**

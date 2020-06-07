@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Source.
@@ -32,6 +33,7 @@ class Source
      * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
 
@@ -41,6 +43,7 @@ class Source
      * @ORM\Column(name="name", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("name")
+     * @Groups({"normalized", "flattened"})
      */
     private $name;
 
@@ -49,6 +52,7 @@ class Source
      *
      * @ORM\Column(name="description", type="text", nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $description;
 
@@ -57,6 +61,7 @@ class Source
      *
      * @ORM\Column(name="year", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $year;
 
@@ -65,6 +70,7 @@ class Source
      *
      * @ORM\Column(name="doi", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $doi;
 
@@ -74,6 +80,7 @@ class Source
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("linkDisplay")
+     * @Groups({"normalized", "flattened"})
      */
     private $linkDisplay;
 
@@ -83,6 +90,7 @@ class Source
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("linkUrl")
+     * @Groups({"normalized", "flattened"})
      */
     private $linkUrl;
 
@@ -92,6 +100,7 @@ class Source
      * @ORM\Column(name="is_direct", type="boolean", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("isDirect")
+     * @Groups({"normalized", "flattened"})
      */
     private $isDirect;
 
@@ -138,6 +147,8 @@ class Source
      * @var \AppBundle\Entity\Author
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Author", mappedBy="source")
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $author;
 
@@ -145,6 +156,8 @@ class Source
      * @var \AppBundle\Entity\Citation
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Citation", mappedBy="source")
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $citation;
 
@@ -152,6 +165,8 @@ class Source
      * @var \AppBundle\Entity\Publication
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", mappedBy="source")
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $publication;
 
@@ -159,6 +174,8 @@ class Source
      * @var \AppBundle\Entity\Publisher
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publisher", mappedBy="source")
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $publisher;
 
@@ -206,6 +223,7 @@ class Source
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized", "flattened"})
      */
     private $updated;
 
@@ -248,6 +266,7 @@ class Source
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -476,6 +495,7 @@ class Source
      * Get the parent Source's id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
+     * @Groups({"normalized"})
      */
     public function getParentSourceId()
     {
@@ -521,6 +541,7 @@ class Source
      * Get an array of child Source ids.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
+     * @Groups({"normalized", "flattened"})
      *
      * @return array
      */
@@ -563,6 +584,7 @@ class Source
      * Get Source Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("sourceType")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -612,6 +634,7 @@ class Source
      * Get an array of tag ids and displayNames.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("tags")
+     * @Groups({"normalized", "flattened"})
      *
      * @return array 
      */
@@ -681,6 +704,7 @@ class Source
      * Returns an array of interactions ids. 
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions")
+     * @Groups({"normalized"})
      */
     public function getInteractionids()
     {
@@ -719,6 +743,7 @@ class Source
      * If this is an Author Source, get the Author id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("author")
+     * @Groups({"normalized"})
      */
     public function getAuthorId()
     {
@@ -753,6 +778,7 @@ class Source
      * If this is a Citation Source, get the Citation id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("citation")
+     * @Groups({"normalized"})
      */
     public function getCitationId()
     {
@@ -799,6 +825,7 @@ class Source
      * If this is a Publication Source, get the Publication id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publication")
+     * @Groups({"normalized"})
      */
     public function getPublicationId()
     {
@@ -833,6 +860,7 @@ class Source
      * If this is a Publisher Source, get the Publisher id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publisher")
+     * @Groups({"normalized"})
      */
     public function getPublisherId()
     {
@@ -876,6 +904,9 @@ class Source
     /**
      * Get Author Names
      * NOTE: Used for Interaction show pages
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("contributors")
+     * @Groups({"flattened"})
      *
      * @return array
      */
@@ -884,61 +915,53 @@ class Source
         $contribs = strpos($this->displayName, '(citation)') ? 
             $this->parentSource->getContributors() : $this->contributors; 
 
-        $contribAry = $this->getContributorsArray($contribs, 'DisplayName');
-
-        return !$contribAry ? null : $this->buildAuthorNamesString($contribAry);
+        return $this->getContributorsArray($contribs, 'DisplayName', 'all');
     }
-    private function buildAuthorNamesString($authors)
-    {
-        $names = [];
-        foreach ($authors as $ord => $name) {
-            array_push($names, $name);
-        }
-        return join('; ', $names);
-    }
-
-    private function getContributorsArray($contributors, $field)
-    {
-        $getField = 'get'.$field;
-        $contribs = [];
-
-        foreach ($contributors as $contributor) {
-            if ($contributor->getIsEditor()) { continue; }  
-            $data = $contributor->getAuthorSource()->$getField();
-            $ord = $contributor->getOrd();
-            $contribs = $contribs + [$ord => $data]; 
-        }
-        return count($contribs) > 0 ? $contribs : null;
-    }
+    
     /**
      * Get Author Ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("authors")
+     * @Groups({"normalized"})
      *
      * @return array
      */
     public function getAuthorIds()
     { 
-        return $this->getContributorsArray($this->contributors, 'Id');
+        return $this->getContributorsArray($this->contributors, 'Id', 'author');
     }
 
     /**
      * Get Editor Ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("editors")
+     * @Groups({"normalized"})
      *
      * @return array     
      */     
     public function getEditorIds()
     {
+        return $this->getContributorsArray($this->contributors, 'Id', 'editor');
+
+    }
+
+    private function getContributorsArray($contributors, $field, $types)
+    {
+        $getField = 'get'.$field;
         $contribs = [];
-        foreach ($this->contributors as $contributor) {
-            if (!$contributor->getIsEditor()) { continue; }
-            $id = $contributor->getAuthorSource()->getId();
+
+        foreach ($contributors as $contributor) {
+            $type = $contributor->getIsEditor() ? 'editor' : 'author';
+            if ($types !== 'all' && $type !== $types) { continue; }  
+            $data = $contributor->getAuthorSource()->$getField();
             $ord = $contributor->getOrd();
-            $contribs = $contribs + [$ord => $id]; 
+            $contribs = $contribs + [$ord => $this->getContribData($data, $types, $type)]; 
         }
         return count($contribs) > 0 ? $contribs : null;
+    }
+    private function getContribData($data, $types, $type)
+    {
+        return $types === 'all' ? [$type => $data] : $data;
     }
 
     /**
@@ -946,6 +969,7 @@ class Source
      *
      * @JMS\VirtualProperty
      * @JMS\SerializedName("contributors")
+     * @Groups({"normalized"})
      * @return array
      */
     public function getContributorData()
@@ -1000,6 +1024,7 @@ class Source
      * Get Contribution Ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("contributions")
+     * @Groups({"normalized"})
      *
      * @return array
      */
@@ -1085,6 +1110,7 @@ class Source
      * Note: Returns null for records developer (ID = 6) modified
      * @JMS\VirtualProperty
      * @JMS\SerializedName("updatedBy")
+     * @Groups({"normalized", "flattened"})
      *
      * @return string
      */

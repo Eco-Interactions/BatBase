@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use JMS\Serializer\SerializationContext;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -24,6 +25,9 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  */
 class FetchController extends Controller
 {
+    private $em;
+    private $serializer;
+
     /**
      * Returns an object with the lastUpdated datetime for the system and for 
      * each entity.
@@ -55,14 +59,14 @@ class FetchController extends Controller
      */ 
     public function serializeTaxonData(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $em->getConnection()->getConfiguration()->setSQLLogger(null);
-        $serializer = $this->container->get('jms_serializer');
+        $this->em = $this->getDoctrine()->getManager();
+        $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
+        $this->serializer = $this->container->get('jms_serializer');
 
-        $level = $this->serializeEntityRecords('Level', $serializer, $em);
-        $realm = $this->serializeEntityRecords('Realm', $serializer, $em);
-        $realmRoot = $this->serializeEntityRecords('RealmRoot', $serializer, $em);
-        $taxa = $this->serializeEntityRecords('Taxon', $serializer, $em);
+        $level = $this->serializeEntityRecords('Level');
+        $realm = $this->serializeEntityRecords('Realm');
+        $realmRoot = $this->serializeEntityRecords('RealmRoot');
+        $taxa = $this->serializeEntityRecords('Taxon', 'normalized');
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
@@ -79,12 +83,12 @@ class FetchController extends Controller
      */
     public function serializeLocationData(Request $request) 
     {
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
+        $this->em = $this->getDoctrine()->getManager();
+        $this->serializer = $this->container->get('jms_serializer');
 
-        $habitatType = $this->serializeEntityRecords('HabitatType', $serializer, $em);
-        $location = $this->serializeEntityRecords('Location', $serializer, $em);
-        $locType = $this->serializeEntityRecords('LocationType', $serializer, $em);
+        $habitatType = $this->serializeEntityRecords('HabitatType');
+        $location = $this->serializeEntityRecords('Location', 'normalized');
+        $locType = $this->serializeEntityRecords('LocationType');
 
         $response = new JsonResponse();
         $response->setData(array( 
@@ -100,10 +104,10 @@ class FetchController extends Controller
      */
     public function serializeGeoJsonData(Request $request) 
     {
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
+        $this->em = $this->getDoctrine()->getManager();
+        $this->serializer = $this->container->get('jms_serializer');
 
-        $geoJson = $this->serializeEntityRecords('GeoJson', $serializer, $em);
+        $geoJson = $this->serializeEntityRecords('GeoJson', 'normalized');
 
         $response = new JsonResponse();
         $response->setData(array( 
@@ -120,17 +124,17 @@ class FetchController extends Controller
      */
     public function serializeSourceData(Request $request) 
     {
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
+        $this->em = $this->getDoctrine()->getManager();
+        $this->serializer = $this->container->get('jms_serializer');
 
-        $author = $this->serializeEntityRecords('Author', $serializer, $em);
-        $citation = $this->serializeEntityRecords('Citation', $serializer, $em);
-        $citType = $this->serializeEntityRecords('CitationType', $serializer, $em);
-        $publication = $this->serializeEntityRecords('Publication', $serializer, $em);
-        $pubType = $this->serializeEntityRecords('PublicationType', $serializer, $em);
-        $publisher = $this->serializeEntityRecords('Publisher', $serializer, $em);
-        $source = $this->serializeEntityRecords('Source', $serializer, $em);
-        $srcType = $this->serializeEntityRecords('SourceType', $serializer, $em);
+        $author = $this->serializeEntityRecords('Author', 'normalized');
+        $citation = $this->serializeEntityRecords('Citation', 'normalized');
+        $citType = $this->serializeEntityRecords('CitationType');
+        $publication = $this->serializeEntityRecords('Publication', 'normalized');
+        $pubType = $this->serializeEntityRecords('PublicationType');
+        $publisher = $this->serializeEntityRecords('Publisher', 'normalized');
+        $source = $this->serializeEntityRecords('Source', 'normalized');
+        $srcType = $this->serializeEntityRecords('SourceType');
 
         $response = new JsonResponse();
         $response->setData(array( 
@@ -148,12 +152,12 @@ class FetchController extends Controller
      */
     public function serializeInteractionData(Request $request) 
     {
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
+        $this->em = $this->getDoctrine()->getManager();
+        $this->serializer = $this->container->get('jms_serializer');
 
-        $interaction = $this->serializeEntityRecords('Interaction', $serializer, $em);
-        $intType = $this->serializeEntityRecords('InteractionType', $serializer, $em);
-        $tag = $this->serializeEntityRecords('Tag', $serializer, $em);
+        $interaction = $this->serializeEntityRecords('Interaction', 'normalized');
+        $intType = $this->serializeEntityRecords('InteractionType');
+        $tag = $this->serializeEntityRecords('Tag');
 
         $response = new JsonResponse();
         $response->setData(array(
@@ -168,16 +172,16 @@ class FetchController extends Controller
      */
     public function serializeUserListData(Request $request)
     {      
-        $em = $this->getDoctrine()->getManager();
-        $serializer = $this->container->get('jms_serializer');
+        $this->em = $this->getDoctrine()->getManager();
+        $this->serializer = $this->container->get('jms_serializer');
 
-        $lists = $em->getRepository('AppBundle:UserNamed')
+        $lists = $this->em->getRepository('AppBundle:UserNamed')
             ->findBy(['createdBy' => $this->getUser()]);
 
         $returnData = [];
 
         foreach ($lists as $list) {
-            $json = $this->serializeRcrd($list, $serializer);
+            $json = $this->serializeRcrd($list);
             if (!$json) { continue; }
             array_push($returnData, $json);
         }
@@ -189,38 +193,43 @@ class FetchController extends Controller
         return $response;
     }
     /** Returns serialized Entity data. */
-    private function serializeEntityRecords($entity, $serializer, $em)
+    private function serializeEntityRecords($entity, $group = false)
     {
-        $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
-        $data = $this->serializeEntities($entities, $serializer, $em);
-        $em->clear();
+        $entities = $this->em->getRepository('AppBundle:'.$entity)->findAll();
+        $data = $this->serializeEntities($entities, $group);
+        $this->em->clear();
         return $data;
     }
-    private function serializeEntities($entities, $serializer, $em)
+    private function serializeEntities($entities, $group)
     {
         $data = new \stdClass;  //print("\n total entities = ".count($entities));
         $count = 0;
         foreach ($entities as $entity) {
             $id = $entity->getId();
-            $jsonData = $this->serializeRcrd($entity, $serializer);
+            $jsonData = $this->serializeRcrd($entity, $group);
             if ($jsonData) { $data->$id = $jsonData; }
             if ($count < 3000) { ++$count; 
-            } else { $em->clear(); $count = 0; }
+            } else { $this->em->clear(); $count = 0; }
         }
         return $data;
     }
 
-    private function serializeRcrd($entity, $serializer)
+    private function serializeRcrd($entity, $group = false)
     {
         $rcrd = false;
         try {
-            $rcrd = $serializer->serialize($entity, 'json');
+            $rcrd = $this->serializer->serialize($entity, 'json', $this->setGroups($group));
         } catch (\Throwable $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
             $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         } catch (\Exception $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n\n");
             $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         return $rcrd;
+    }
+    private function setGroups($group)
+    {
+        if (!$group) { return null; }
+        return SerializationContext::create()->setGroups(array($group));
     }
     /**
      * Serializes and returns all entities of the passed class that have been 
@@ -230,13 +239,13 @@ class FetchController extends Controller
      */
     public function getUpdatedEntityData(Request $request)
     {
-        $em = $this->getDoctrine()->getManager(); 
+        $this->em = $this->getDoctrine()->getManager(); 
 
         $pushedData = json_decode($request->getContent());
         $entity = $pushedData->entity;                                          //print("getAllUpdatedData for ".$coreEntity);
         $lastUpdatedAt = $pushedData->updatedAt;
 
-        $data = $this->getAllUpdatedData($entity, $lastUpdatedAt, $em);
+        $data = $this->getAllUpdatedData($entity, $lastUpdatedAt);
 
         $response = new JsonResponse(); 
         $response->setData(array( $entity => $data )); 
@@ -246,25 +255,25 @@ class FetchController extends Controller
      * All entities updated since the lastUpdatedAt time are serialized and 
      * returned in a data object keyed by id.  
      */
-    private function getAllUpdatedData($entityType, $lastUpdatedAt, &$em)
+    private function getAllUpdatedData($entityType, $lastUpdatedAt)
     {    
-        $serializer = $this->container->get('jms_serializer');
+        $this->serializer = $this->container->get('jms_serializer');
         $data = new \stdClass;
 
-        $entities = $this->getEntitiesWithUpdates($entityType, $lastUpdatedAt, $em);
+        $entities = $this->getEntitiesWithUpdates($entityType, $lastUpdatedAt);
 
         foreach ($entities as $entity) {   
             $id = $entity->getId();    
-            $json = $this->serializeRcrd($entity, $serializer);
+            $json = $this->serializeRcrd($entity);
             if (!$json) { continue; }
             $data->$id = $json;
         }
         return $data;
     }
     /** Queries for all entities updated since the lastUpdatedAt time. */
-    private function getEntitiesWithUpdates($entity, $lastUpdatedAt, &$em)
+    private function getEntitiesWithUpdates($entity, $lastUpdatedAt)
     {
-        $repo = $em->getRepository('AppBundle:'.$entity);
+        $repo = $this->em->getRepository('AppBundle:'.$entity);
         $query = $repo->createQueryBuilder('e')
             ->where('e.updated > :lastUpdated')
             ->setParameter('lastUpdated', $lastUpdatedAt)

@@ -7,8 +7,9 @@ use AppBundle\Entity\Interaction;
 use AppBundle\Entity\Location;
 use AppBundle\Entity\Source;
 use AppBundle\Entity\Taxon;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use JMS\Serializer\SerializationContext;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -471,7 +472,9 @@ class DataEntryController extends Controller
         foreach ($serialize as $prop) {
             if (!$entityData->$prop) { continue; }
             try {
-                $entityData->$prop = $serializer->serialize($entityData->$prop, 'json');
+                $entityData->$prop = $serializer->serialize(
+                    $entityData->$prop, 'json', 
+                    SerializationContext::create()->setGroups(array('normalized')));
             } catch (\Throwable $e) {
                 return $this->sendErrorResponse($e);
             } catch (\Exception $e) {
