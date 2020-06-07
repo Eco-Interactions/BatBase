@@ -37,7 +37,7 @@ function buildIntShowPage (data) {
 function getIntDetailsHtml (data) {
     const row1 = getDetailsFirstRow(
         data.subject, data.object, data.interactionType, data.tags);
-    const row2 = getNoteRow(data.note);
+    const row2 = getFullRow ('Note:', data.note);
     return getDataSect('Interaction Details', [row1, row2]);
 }
 /* ........................ FIRST ROW ....................................... */
@@ -54,7 +54,7 @@ function getTypeAndTagDataCol (type, tags) {
     return buildRowColSect([typeData, tagData]);
 }
 function getTagData (tags) { 
-    if (!tags.length) { return '[ None ]'; }
+    if (!tags.length) { return null; }
     return tags.map(t => t.displayName).join(', ');
 }
 /* -------------- SUBJECT AND OBJECT --------------------- */
@@ -65,20 +65,64 @@ function getTaxonDataCell (role, data) {
 function getTaxonHierarchyDataHtml (data) {
     return JSON.stringify(data).substr(0, 200);
 }
-/* ....................... SECOND ROW ....................................... */
-function getNoteRow (note) {
-    const text = note || '[ None ]';
-    const noteData = getDataCell('Note:', text);
-    return buildDataRow(noteData);
+/* """""""""""""""""""""" INTERACTION SOURCE """""""""""""""""""""""""""""""" */ 
+function getIntSourceHtml (data) {                                              console.log('getIntSourceHtml data = %O', data);
+    const row1 = getSourceFirstRow(data);
+    const row2 = getSourceSecondRow(data);
+    const row3 = getFullRow('Abstract:', data.abstract);
+    return getDataSect('Source', [row1, row2, row3]);
 }
-/* ---------------------- INTERACTION SOURCE -------------------------------- */ 
-function getIntSourceHtml (data) {
+/* ........................ FIRST ROW ....................................... */
+// Publication: title, (Type: name, DOI:, website) Publisher: name (city/country)
+function getSourceFirstRow (data) {
+    const pubData = getPubDataCol(data.parent)
+    const details = getPubDetailsCol(data.parent);
+    const descAndEditors = getDescAndEditors(data.parent);
+    return buildDataRow([pubData, details, descAndEditors]);
+}
+function getPubDataCol (pubSrc) {
+    const title = getDataCell('Publication:', pubSrc.displayName);
+    const type = getDataCell('Publication Type:', pubSrc.publication.publicationType.displayName);
+    const publisher = getDataCell('Publisher:', getPublisherData(pubSrc.parent));
+    return buildRowColSect([title, type, publisher]);
+}
+function getPublisherData (pSrc) {
+    const loc = [pSrc.publisher.city, pSrc.publisher.country].join(', ');
+    return pSrc.displayName + (!!loc ? (', ' + loc) : '');
+}
+function getPubDetailsCol (publication) {
+    const yearCell = getDataCell('Year:', publication.year);
+    const doiCell = getDataCell('DOI:', publication.doi);
+    const link = getDataCell('Website:', null);
+    return buildRowColSect([yearCell, doiCell, link]);
+}
+function getDescAndEditors (pubSrc) {
+    const contributors = getPubContributors(pubSrc.contributors);
+    const description = getDataCell('Description:', pubSrc.description);
+    return buildRowColSect([contributors, description].filter(e => e));
+}
+function getPubContributors (contribs) {  
+    if (!Object.keys(contribs).length) { return null; }
+    let type;
+    const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
+    return getDataCell(util.ucfirst(type)+'s:', names);
+    
+    function storeTypeAndReturnName (ord) {
+        type = Object.keys(contribs[ord])[0]; 
+        return contribs[ord][type];
+    }
+}
+//Citation-type: title, (year:, pages) (Vol, Issue) 
+function getSourceSecondRow (data) {
     // body... 
 }
-/* -------------------- INTERACTION LOCATION -------------------------------- */ 
+/* ........................ FIRST ROW ....................................... */
+/* """""""""""""""""""" INTERACTION LOCATION """""""""""""""""""""""""""""""" */ 
 function getIntLocationHtml (data) {
     // body... 
 }
+/* ........................ FIRST ROW ....................................... */
+
 /* =========================== SHOW TAXON =================================== */
 function buildTxnShowPage (data) {
 
@@ -89,25 +133,28 @@ function buildTxnShowPage (data) {
 /* ====================== HTML BUILDERS ===================================== */
 function getDataSect (title, rows) {
     const hdr = util.getElem('h3', { text: title });
-    const sect = getDivWithContent('flex-col data-sect', hdr);
-    $(sect).append(rows);
-    return sect;
+    return getDivWithContent('flex-col data-sect', [hdr, ...rows]);
 }
 function buildDataRow (rowCells) {
     return getDivWithContent('flex-row sect-row', rowCells);
 }
+function getFullRow (label, content) {
+    const rowData = getDataCell(label, content);
+    return buildDataRow(rowData);
+}
 function buildRowColSect (colCells) {
     return getDivWithContent('flex-col', colCells);
 }
-function getDataCell (label, fieldHTML) {                                       //console.log('getDataCell [%s] = [%s]', label, fieldHTML)
+function getDataCell (label, fieldHTML) {                           
     const lbl = util.getLabel(label);
-    const div = util.getDiv({html: fieldHTML });
-    return getDivWithContent('flex-row cell-data', [lbl, div]);
+    const data = getDivWithContent('', fieldHTML);
+    return getDivWithContent('flex-row cell-data', [lbl, data]);
 }
 /* ------------ base ------------------- */
-function getDivWithContent (classes, content) {
+function getDivWithContent (classes, content) {                     /*dbug-log*///console.log('getDivWithContent [%s] = [%O]', classes, content);
     const div = util.getElem('div', { class: classes });
-    $(div).append(content);
+    const html = !!content ? content : '[ NONE ]';
+    $(div).append(html);
     return div;
 }
 

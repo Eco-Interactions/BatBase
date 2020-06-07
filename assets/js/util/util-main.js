@@ -20,3 +20,8 @@ export function getElem() {
 export function getLabel () {
     return elems.getLabel(...arguments);
 }
+
+
+export function ucfirst(str) { 
+    return str.charAt(0).toUpperCase() + str.slice(1); 
+}

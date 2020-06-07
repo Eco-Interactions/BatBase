@@ -109,6 +109,9 @@ class Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="childSources")
      * @ORM\JoinColumn(name="parent_src_id", referencedColumnName="id", onDelete="SET NULL")
+     * @JMS\Expose
+     * @JMS\SerializedName("parent")
+     * @Groups({"flattened"})
      */
     private $parentSource;
 
