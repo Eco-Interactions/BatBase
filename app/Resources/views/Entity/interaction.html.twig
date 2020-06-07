@@ -1,9 +1,7 @@
 {% extends "layout.html.twig" %}
 
-{# Entity data: interaction (int), citation (cit), location (loc)  #}
-
 {% block headline %}
-    Interaction {{ int.id }}
+    Interaction {{ id }}
 {% endblock headline %}
 
 {% block stylesheets %}
@@ -12,177 +10,14 @@
 {% endblock stylesheets %}
 
 {% block detail %}
-    <div id='entity-show' class='flex-col'>
-        <a href="{{ baseurl }}search"><<< Browse Database</a>
+    <div id='entity-show' class='flex-col' data-entity='{{ entity }}'>
+        <a href="{{ baseurl }}search">Browse Database</a>
         <br>
-        <div class='flex-col data-sect'>                                    <!-- TAXON -->
-            <h3><strong>Details</strong></h3>
-            <div class='flex-row sect-row'>
-                <div class='flex-row int-data'>
-                    <label><strong>Subject ({{ int.sRealm}}): </strong></label>
-                    <div>{{ int.subject }}</div>
-                </div>
-                <div class='flex-row int-data'>
-                    <label><strong>Object ({{ int.oRealm}}):</strong></label>
-                    <div>{{ int.object }}</div>
-                </div>
-                <div class='flex-row int-data'>
-                    <label><strong>Type:</strong></label>
-                    <div>{{ int.type }}</div>
-                </div>
-                {% if int.tags %}
-                    <div class='flex-row int-data'>
-                        <label><strong>Tags:</strong></label>
-                        <div>{{ int.tags }}</div>
-                    </div>
-                {% endif %}
-            </div>
-            {% if int.note %}
-                <div class='flex-row int-data'>
-                    <label><strong>Note:</strong></label>
-                    <div>{{ int.note }}</div>
-                </div>
-                {% endif %}
-        </div>
-        <div class='flex-col data-sect'>                                    <!-- SOURCE -->
-            <h3><strong>Source</strong></h3>
-            <div class='flex-row sect-row'>
-                <div class='flex-row int-data'>
-                    <label><strong>Title:</strong></label>
-                    <div>{{ cit.title }}</div>
-                </div>
-                <div class='flex-row int-data'>
-                    <label><strong>Citation:</strong></label>
-                    <div>{{ cit.fullText }}</div>
-                </div>
-                <div class='flex-row int-data'>
-                    <label><strong>Authors:</strong></label>
-                    <div>{{ cit.authors }}</div>
-                </div>
-            </div>
-            {% if (cit.abstract) %}
-                <div class='flex-row int-data'>
-                    <label><strong>Abstract:</strong></label>
-                    <div>{{ cit.abstract }}</div>
-                </div>
-            {% endif %}
-        </div>
-<!-------------------- LOCATION ----------------------------------------------->
-        <div class='flex-col data-sect'>                                    
-            <h3><strong>{% if loc.region == 'Unspecified' %} No {% endif %}Location</strong></h3>
-        <!---------- COUNTRY||REGION AND HABITAT DATA ONLY  ------------>
-            {% if loc.name == loc.country or loc.habLocType == 'Country' %} <!--     COUNTRY      -->
-                <div class='flex-row sect-row'>
-                    <div class='flex-row int-data' style="min-width:333px;">
-                        <label><strong>Country:</strong></label>
-                        <div>{{ loc.name }}</div>
-                    </div>
-                    <div class='flex-row int-data' style="min-width:333px;">
-                        <label><strong>Region:</strong></label>
-                        <div>{{ loc.region }}</div>
-                    </div>
-                {% if loc.isCountryOrRegionHabType %}      <!--     ...WITH HABITAT      -->
-                    <div class='flex-row int-data'>
-                        <label><strong>Habitat:</strong></label>
-                        <div>{{ loc.habitat }}</div>
-                    </div>
-                {% endif %}
-                </div>
-            {% elseif loc.name == loc.region or loc.habLocType == 'Region'  %}        <!--     REGION      -->
-                {% if loc.region != 'Unspecified' %}
-                    <div class='flex-row int-data'>
-                        <label><strong>Region:</strong></label>
-                        <div>{{ loc.region }}</div>
-                    </div>
-                {% endif %}
-                {% if loc.habitat %}      <!--     ...WITH HABITAT      -->
-                    <div class='flex-row int-data'>
-                        <label><strong>Habitat:</strong></label>
-                        <div>{{ loc.habitat }}</div>
-                    </div>
-                {% endif %}
-                </div>
-            {% endif %}
-        <!---------- HABITAT DATA ONLY  ------------>
-            {% if loc.region == 'Unspecified' and loc.type == 'Habitat' %}     <!--   ONLY HABITAT      -->
-                <div class='flex-row int-data'>
-                    <label><strong>Habitat:</strong></label>
-                    <div>{{ loc.habitat }}</div>
-                </div>
-            {% endif %}
-        <!---------- AREA||POINT LOCATIONS  ------------>
-            {% if loc.type == 'Area' or loc.type == 'Point'  %}
-                {% set habitatDisplayed = false %}
-                <div class='flex-row sect-row'>
-                    <div class='flex-row int-data' style="min-width:333px;">
-                        <label><strong>Name:</strong></label>
-                        <div>{{ loc.name }}</div>
-                    </div>
-                    <div class='flex-row int-data'>
-                        <label><strong>Country:</strong></label>
-                        <div title="{{ loc.country }}">
-                            {{ loc.country|split('[')[0] }} ({{ loc.region }})</div>
-                    </div>
-                    {% if loc.elev %}
-                        <div class='flex-row int-data'>      <!--  WITH ELEVATION   -->
-                            <label><strong>Elevation(m):</strong></label>
-                            <div>
-                                {% if loc.elevMax %}
-                                    {{ loc.elev }} - {{ loc.elevMax }}
-                                {% else %}
-                                    {{ loc.elev }}
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% if loc.type == 'Point' %} <!--  ELEV PLUS COORDINATES -->
-                            <div class='flex-row int-data'>      
-                                <label><strong>Coordinates:</strong></label>
-                                <div>{{ loc.lat|trim(0) }}, {{ loc.lng|trim(0) }}</div>
-                            </div>
-                        {% elseif loc.habitat %} <!--  ELEV PLUS HABITAT -->
-                            {% set habitatDisplayed = true %}
-                            <div class='flex-row int-data'>
-                                <label><strong>Habitat:</strong></label>
-                                <div>{{ loc.habitat }}</div>
-                            </div>
-                        {% endif %}
-                    {% elseif loc.type == 'Point' %} <!--  COORDINATES (NO ELEVATION) -->
-                            <div class='flex-row int-data'>      
-                                <label><strong>Coordinates:</strong></label>
-                                <div>{{ loc.lat|trim(0) }}, {{ loc.lng|trim(0) }}</div>
-                            </div>
-                            {% if loc.habitat %} <!--  COORDS PLUS HABITAT -->
-                                {% set habitatDisplayed = true %}
-                                <div class='flex-row int-data'>
-                                    <label><strong>Habitat:</strong></label>
-                                    <div>{{ loc.habitat }}</div>
-                                </div>
-                            {% endif %}
-                    {% elseif loc.habitat %}        <!--  HABITAT (NO ELEV OR COORDS) -->
-                        {% set habitatDisplayed = true %}
-                        <div class='flex-row int-data'>
-                            <label><strong>Habitat:</strong></label>
-                            <div>{{ loc.habitat }}</div>
-                        </div>
-                    {% endif %}
-
-                </div>
-                <div class='flex-row sect-row'>
-                    {% if loc.habitat and habitatDisplayed == false %}   <!--  HABITAT (ELEV AND COORD AVAILABLE)   -->
-                        <div class='flex-row int-data'>
-                            <label><strong>Habitat:</strong></label>
-                            <div>{{ loc.habitat }}</div>
-                        </div>
-                    {% endif %}
-                    {% if loc.description %}               <!--  DESCRIPTION   -->
-                        <div class='flex-row int-data'>
-                            <label><strong>Description:</strong></label>
-                            <div>{{ loc.description }}</div>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endif %}
     </div>
+
+
+
+
 {% endblock detail %}
 
 {% block javascripts %}

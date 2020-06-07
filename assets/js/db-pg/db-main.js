@@ -29,6 +29,9 @@ import * as modal from '../misc/intro-modals.js';
 import * as form from './forms/forms-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
+if (window.location.pathname.includes('search')) {
+    initDbPage();
+}
 /** ==================== FACADE ============================================= */
 function moduleMethod(funcName, mod, modName, params = []) {
     try {
@@ -114,9 +117,7 @@ export function getCurrentFilterState() {
     }
 }
 /** ==================== PAGE INIT ========================================== */
-if (window.location.pathname.includes('search')) {
-    initDbPage();
-}
+
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () { 
     if ($(window).width() < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js

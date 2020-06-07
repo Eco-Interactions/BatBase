@@ -24,6 +24,13 @@
 ## ======================= DEPLOYMENT STEPS ================================= ##
 
 >STEPS TO DEPLOY TO SERVER
+
+IF THERE ARE NEW CLASSES OR COMPOSER MODULES:
+    - backup (rename) current vendor folder 
+    - $ composer dump-autoload --no-dev --classmap-authoritative
+    - upload the new vendor folder to server
+
+
 NOTIFY SENTRY OF NEW RELEASE:  
     - run ./sentry_release.sh
     - copy the release name <YYYMMDD_BEI> 
@@ -90,6 +97,7 @@ Run Tests:
     - php composer.phar update
         - Memory limit issues:
             - $ php -d memory_limit=-1 composer.phar install
+                - $ php -d memory_limit=-1 ($ which composer = /usr/local/bin/composer)
 - Set file permissions:
     - Mac (10.14)
         - https://symfony.com/doc/3.4/setup/file_permissions.html

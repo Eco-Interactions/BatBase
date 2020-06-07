@@ -58,7 +58,7 @@ class ShowEntityController extends Controller
         $jsonEntity = $this->serializeEntity($interaction);
 
         return $this->render('Entity/interaction.html.twig', array(
-            'id' => $id, 'int' => $jsonEntity
+            'id' => $id, 'entity' => $jsonEntity
         ));
     }
 

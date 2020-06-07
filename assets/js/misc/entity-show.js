@@ -3,15 +3,56 @@
  * 
  * TOC:
  * 
- */
-
+ */                                                                        
 
 initShowPage();
-
-function initShowPage () {
-    require('../../styles/pages/entity-show.styl');  
+/* ========================== INIT SHOW PAGE ================================ */
+function initShowPage () {                                          
+    require('../../styles/pages/entity-show.styl');
+    buildShowPage($('body').data('this-url'), $('#entity-show').data('entity'))
     setColumnSizes();
 }
+function buildShowPage (url, entityData) {
+    const entity = getShowEntity(url);                              /*Perm-log*/console.log('   *//init[%s]ShowPage = %O', entity, entityData);
+    const builder = getShowPageBuilder(entity);
+    builder(entityData);
+}
+function getShowEntity (url) {
+    return url.split('/').splice(-2, 1)[0];
+}
+function getShowPageBuilder (entity) {
+    return {
+        'interaction': buildIntShowPage, 'taxon': buildTxnShowPage
+    }[entity];
+}
+/* ------------------------- SHOW INTERACTION ------------------------------- */
+function buildIntShowPage (intData) {
+    const dtlHtml = buildIntDetailsHtml(intData);
+    const srcHtml = buildIntSourceHtml(intData);
+    const locHtml = buildIntLocationHtml(intData);
+    $('#entity-show').append([dtlHtml, srcHtml, locHtml].filter(h => h));
+}
+function buildIntDetailsHtml (intData) {
+    return 'test'
+}
+function buildIntSourceHtml (intData) {
+    // body... 
+}
+function buildIntLocationHtml (intData) {
+    // body... 
+}
+/* --------------------------- SHOW TAXON ----------------------------------- */
+function buildTxnShowPage (txnData) {
+
+}
+
+
+
+
+
+
+
+/* ======================== SHOW PAGE STYLES ================================ */
 /* ------------------------- SET ROW COLUMN WIDTHS -------------------------- */
 /**
  * Sets column flex-grow based on the percentage of the field value character count
