@@ -14,6 +14,7 @@ function initShowPage () {
     require('../../styles/pages/entity-show.styl');
     const entity = getEntity($('body').data('this-url'));
     buildEntityShowPage(entity, $('#entity-show').data('entity'));
+    $('#entity-show').data('entity', null);
 }
 function getEntity (url) {
     return url.split('/').splice(-2, 1)[0];
@@ -27,8 +28,8 @@ function buildEntityShowPage (entity, data) {                       /*Perm-log*/
 function buildDataSection (confg) {
     return getDataSect(confg.section, confg.rows.map(getSectionRow).filter(r => r));
 }
-function getSectionRow (row) {
-    return buildDataRow(row.map(getRowCell).filter(c => c));
+function getSectionRow (row, i) {
+    return buildDataRow(++i, row.map(getRowCell).filter(c => c));
 }
 function getRowCell (cell) {
     if (cell.length == 1) { return getDataCell(cell[0]); }
@@ -41,23 +42,25 @@ function getDataCell (data) {
 /* ------------------------- HTML BUILDERS ---------------------------------- */
 function getDataSect (title, rows) {                                /*dbug-log*/console.log('getDataSect [%s] = [%O]', title, rows);
     const hdr = util.getElem('h3', { text: title });
-    return getDivWithContent('flex-col data-sect', [hdr, ...rows]);
+    const id = title.replace(/ /g,'') + '-data-sect';
+    return getDivWithContent(id, 'flex-col data-sect', [hdr, ...rows]);
 }
-function buildDataRow (rowCells) {                                  /*dbug-log*/console.log('   buildDataRow [%O]', rowCells);
-    return getDivWithContent('flex-row sect-row', rowCells);
+function buildDataRow (cnt, rowCells) {                             /*dbug-log*/console.log('   buildDataRow [%O]', rowCells);
+    return getDivWithContent('sect-row'+cnt, 'flex-row sect-row', rowCells);
 }
 function getRowGroupSect (dir, colCells) {                          /*dbug-log*/console.log('       getRowGroupSect dir = %s, cells = %O', dir, colCells)
     const classes = `group-${dir} flex-${dir}`;
-    return getDivWithContent(classes, colCells);
+    return getDivWithContent('', classes, colCells);
 }
-function buildDataCell (label, fieldHTML, classes = '') {           /*dbug-log*/console.log('           buildDataCell [%s] = [%O]', label, fieldHTML); 
+function buildDataCell (label, fieldHTML, c = '') {                 /*dbug-log*/console.log('           buildDataCell [%s] = [%O]', label, fieldHTML); 
     const lbl = util.getLabel(label+':');
-    const data = getDivWithContent('', fieldHTML);
-    return getDivWithContent('flex-row cell-data '+classes, [lbl, data]);
+    const data = getDivWithContent(label+'-data', '', fieldHTML);
+    const classes = 'flex-row cell-data ' + c;
+    return getDivWithContent(label+'-cell', classes, [lbl, data]);
 }
 /* ------------ base ------------------- */
-function getDivWithContent (classes, content) {                     /*dbug-log*/console.log('               getDivWithContent [%s] = [%O]', classes, content);
-    const div = util.getElem('div', { class: classes });
+function getDivWithContent (id, classes, content) {                 /*dbug-log*/console.log('               getDivWithContent [%s] = [%O]', classes, content);
+    const div = util.getElem('div', { class: classes, id: id });
     const html = !!content ? content : '[ NONE ]';
     $(div).append(html);
     return div;

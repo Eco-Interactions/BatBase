@@ -25,7 +25,9 @@ export default function getEntityShowData (entity, data, u) {
                             { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
                         ],[  //cell 3
                             { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
-                        ], [  //cell 4
+                        ], 
+                    ], [ //row 2
+                        [  //cell 1
                             { field: 'Note', content: data.note }
                         ]
                     ]
@@ -35,49 +37,31 @@ export default function getEntityShowData (entity, data, u) {
                 rows: [
                    [  //row 1
                         [ 
-                            { field: 'Publication', content: data.source.parent.displayName },
-                            { field: 'Publication Type', content: data.source.parent.publication.publicationType.displayName },
-                            'col'
-                        ], [
-                            getContributorFieldData(data.source.parent.contributors),
-                        ], [
-                            { field: 'Publisher', content: getPublisherData(data.source.parent.parent) },
-                            { field: 'Description', content: data.source.parent.description },
-                            'col'
-                        ], [ 
-                            // { field: 'Year', content: data.source.parent.year },
-                            { field: 'DOI', content: data.source.parent.doi },
-                            { field: 'Website', content: null },
-                            'col'
-                        ],
-                    ], [//row 2
-                        [ 
-                            getCitationTypeAndTitleFieldData(data.source.citation)
-                        ], [
-                            { field: 'Year', content: data.source.year },
-                            { field: 'Pages', content: data.source.citation.publicationPages },
-                            'col'
-                        ], [
-                            { field: 'Volume', content: data.source.citation.publicationVolume },
-                            { field: 'Issue', content: data.source.citation.publicationIssue },
-                            'col'
-                        ], [
+                            // { field: 'Publication', content: data.source.parent.displayName },
+                            { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
                             { field: 'DOI', content: data.source.doi },
                             { field: 'Website', content: null },
                             'col'
+                        ], [
+                            getContributorFieldData(data.source.contributors)
+                        ], [
+                            { field: 'Citation', content: data.source.description },
                         ]
-                    ], [//row 3
-                        [ 
-                            getContributorFieldData(data.source.contributors),
-                            { field: 'Citation', content: data.source.description, classes: 'w333' },
-                            'row'
-                        ],
-                    ], [//row 4
+                    ], [
                         [
                             { field: 'Abstract', content: data.source.citation.abstract }
-                        ],
-
-                    ]
+                        ]
+                    ] 
+                            // { field: 'Publisher', content: getPublisherData(data.source.parent.parent) },
+                            // { field: 'Description', content: data.source.parent.description },
+                            // { field: 'Year', content: data.source.parent.year },
+                            // { field: 'DOI', content: data.source.parent.doi },
+                            // { field: 'Website', content: null },
+                            // getCitationTypeAndTitleFieldData(data.source.citation)
+                            // { field: 'Year', content: data.source.year },
+                            // { field: 'Pages', content: data.source.citation.publicationPages },
+                            // { field: 'Volume', content: data.source.citation.publicationVolume },
+                            // { field: 'Issue', content: data.source.citation.publicationIssue },
                 ]
             },{
                 section:  'Location', 
@@ -133,8 +117,8 @@ function getContributorFieldData (contribs) {
     }
 }
 function getPublisherData (pSrc) {
-    if (!pSrc) { return null; }
-    const loc = [pSrc.publisher.city, pSrc.publisher.country].join(', ');
+    if (!pSrc) { return null; } 
+    const loc = [pSrc.publisher.city, pSrc.publisher.country].filter(c => c).join(', '); 
     return pSrc.displayName + (!!loc ? ('<br>' + loc) : '');
 }
 function getCitationTypeAndTitleFieldData (citation) {
@@ -142,8 +126,9 @@ function getCitationTypeAndTitleFieldData (citation) {
 }
 /* ---------------------------- LOCATION ------------------------------------ */
 function getElevRange (location) {
-    return location.elevationMax ? 
-        (location.elevation + ' - ' + location.elevationMax) : location.elevation;
+    return location.elevationMax && location.elevation ? 
+        (location.elevation + ' - ' + location.elevationMax) : 
+        (location.elevation || location.elevationMax); //Some locations have a max but not the base of the range. Will fix in data soon.
 }
 function getCoordinates (location) {
     return location.latitude ? 
