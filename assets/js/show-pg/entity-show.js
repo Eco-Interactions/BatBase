@@ -19,8 +19,8 @@ function getEntity (url) {
     return url.split('/').splice(-2, 1)[0];
 }
 /* ==================== CORE SHOW PAGE BUILDER ============================== */
-function buildEntityShowPage (entity, data) {                       /*Perm-log*/console.log('   *//init[%s]ShowPage = %O', entity, entityData);
-    const confg = getEntityShowBuildConfig(entity, data);
+function buildEntityShowPage (entity, data) {                       /*Perm-log*/console.log('   *//init[%s]ShowPage = %O', entity, data);
+    const confg = getEntityShowData(entity, data, util);
     const sections = confg.map(buildDataSection);
     $('#entity-show').append(sections.filter(s => s));
 }

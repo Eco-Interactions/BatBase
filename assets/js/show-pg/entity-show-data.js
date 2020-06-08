@@ -7,8 +7,10 @@
  *    ENTITY-SHOW CONFG
  *    FIELD-DATA HANDLERS
  */
+ let util;
 /* =================== ENTITY-SHOW CONFIG =================================== */
-export default function getEntityShowData (entity, data) {
+export default function getEntityShowData (entity, data, u) {
+    util = u;
     const confg = {
         interaction: [
             {
@@ -79,19 +81,43 @@ export default function getEntityShowData (entity, data) {
 
                     ]
                 ]
+            },{
+                section:  'Location', 
+                rows: [
+                   [  //row 1
+                        [ 
+                            { field: 'Name', content: data.location.displayName },
+                            { field: 'Coordinates', content: getCoordinates(data.location), classes: 'max-cntnt'},
+                            'col'
+                        ], [
+                            { field: 'Country', content: data.location.country.displayName },
+                            { field: 'Region', content: data.location.region.displayName, classes: 'max-cntnt' },
+                            'col'
+                        ], [
+                            { field: 'Habitat', content: data.location.habitatType.displayName },
+                            { field: 'Elevation(m)', content: getElevRange(data.location) },
+                            'col'
+                        ], [
+                            { field: 'Description', content: data.location.description },
+                        ]
+                    ]
+                ]
             }
         ]
     };
+    util = null;
     return confg[entity].map(c => c); //detach obj
 }
-/* ------------------- FIELD-DATA HANDLERS ---------------------------------- */
+/* ================== FIELD-DATA HANDLERS =================================== */
 function getTagData (tags) { 
     if (!tags.length) { return null; }
     return tags.map(t => t.displayName).join(', ');
 }
+/* ------------------------------- TAXON ------------------------------------ */
 function getTaxonHierarchyDataHtml (data) { 
     return JSON.stringify(data).substr(0, 200);
 }
+/* ---------------------------- SOURCE -------------------------------------- */
 function getContributorFieldData (contribs) {
     if (!contribs || !Object.keys(contribs).length) { return null; }
     let type;
@@ -110,4 +136,13 @@ function getPublisherData (pSrc) {
 }
 function getCitationTypeAndTitleFieldData (citation) {
     return { field: citation.citationType.displayName, content: citation.displayName };
+}
+/* ---------------------------- LOCATION ------------------------------------ */
+function getElevRange (location) {
+    return location.elevationMax ? 
+        (location.elevation + ' - ' + location.elevationMax) : location.elevation;
+}
+function getCoordinates (location) {
+    return location.latitude ? 
+        (location.latitude.toString() + ', ' + location.longitude.toString()) : null;
 }

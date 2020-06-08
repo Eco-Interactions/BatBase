@@ -793,7 +793,8 @@ class Location
                 "id" => $this->habitatType->getId(), 
                 "displayName" => $this->habitatType->getDisplayName() 
             ];
-        }
+        } 
+        return [];
     }
 
     public function getPlural()
