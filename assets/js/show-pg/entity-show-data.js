@@ -25,9 +25,7 @@ export default function getEntityShowData (entity, data, u) {
                             { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
                         ],[  //cell 3
                             { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
-                        ]
-                    ],[ //row 2
-                        [  //cell 1
+                        ], [  //cell 4
                             { field: 'Note', content: data.note }
                         ]
                     ]
@@ -114,8 +112,13 @@ function getTagData (tags) {
     return tags.map(t => t.displayName).join(', ');
 }
 /* ------------------------------- TAXON ------------------------------------ */
-function getTaxonHierarchyDataHtml (data) { 
-    return JSON.stringify(data).substr(0, 200);
+function getTaxonHierarchyDataHtml (taxon) { 
+    return `<strong>${taxon.displayName}</strong>` + getParentTaxaNames(taxon.parentTaxon);
+}
+function getParentTaxaNames (pTaxon, lvl = 1) {
+    const indent = '&emsp;'.repeat(lvl);
+    return `<br>${indent}${String.fromCharCode(8627)}&nbsp${pTaxon.displayName}`
+        + (pTaxon.isRoot ? '' : getParentTaxaNames(pTaxon.parentTaxon, ++lvl));
 }
 /* ---------------------------- SOURCE -------------------------------------- */
 function getContributorFieldData (contribs) {
