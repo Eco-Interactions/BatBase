@@ -5,7 +5,7 @@
  *    DATA SECTION
  *    DATA-ROW CELL
  */
-/* ------------- DATA SECTION ------------------------- */
+/* --------------------------- DATA SECTION --------------------------------- */
 .data-sect
     margin: 1em
     
@@ -15,9 +15,10 @@
 .data-sect > *
     margin-bottom: 1em
     justify-content: space-between
+    width: 100%
     
-.sect-row .flex-col
-    justify-content: space-between
+.sect-row > .group-row
+    width: 100%
 /* ------------- DATA-ROW CELL ------------------------- */
 .data-sect label
     font-weight: 600
@@ -34,3 +35,6 @@
     
 .cell-data > div
     min-width: 122px
+    
+.max-cntnt
+    width: max-content
