@@ -37,7 +37,6 @@ export default function getEntityShowData (entity, data, u) {
                 rows: [
                    [  //row 1
                         [ 
-                            // { field: 'Publication', content: data.source.parent.displayName },
                             { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
                             { field: 'DOI', content: data.source.doi },
                             { field: 'Website', content: null },
@@ -52,6 +51,7 @@ export default function getEntityShowData (entity, data, u) {
                             { field: 'Abstract', content: data.source.citation.abstract }
                         ]
                     ] 
+                            // { field: 'Publication', content: data.source.parent.displayName },
                             // { field: 'Publisher', content: getPublisherData(data.source.parent.parent) },
                             // { field: 'Description', content: data.source.parent.description },
                             // { field: 'Year', content: data.source.parent.year },
