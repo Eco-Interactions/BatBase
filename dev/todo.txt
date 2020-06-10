@@ -45,9 +45,16 @@ QUESTIONS:
     - Create model of local storage
         - of entity relations
 
+>DATA CLEANUP
+    - forms - Add 'trim' to all values before submitting
+        - Check for elevation field val when elev-max value entered. 
+    - db migration - Loop through all entities that could have random spaces in fields
+    - 
+
 STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
+
 
 
 > ==== MEETING NOTES ==== 
@@ -107,6 +114,7 @@ Sort:
     - when attempting to use the database in FF incognito mode, which does not allow idb. Ignoring for now, will add notice to users at some point.
     - Database doesn't work with IE. Notify user. 
     - move db-pg util elem builders to js/util/elems
+    - Add responsive styling testing 
 
 TODOs:
 ##(Category){priority}[difficulty]##

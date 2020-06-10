@@ -3,10 +3,13 @@
  *
  * TOC:
  *    DATA SECTION
- *    DATA-ROW CELL
+ *      DATA-ROW CELL
+ *    RESPONSIVE STYLES
  */
-/* --------------------------- DATA SECTION --------------------------------- */
+@import '../util/*' 
+/* =========================== DATA SECTION ================================= */
 .data-sect
+    @extend .flex-col
     margin: 1em
     
 .data-sect h3
@@ -16,10 +19,13 @@
     margin-bottom: 1em
     justify-content: space-between
     width: 100%
+/* -------------------------- SECTION ROW ----------------------------------- */
+.sect-row
+    @extend .flex-row
     
 .sect-row > .group-row
     width: 100%
-/* ------------- DATA-ROW CELL ------------------------- */
+/* ----------------------------- ROW CELL ----------------------------------- */
 .data-sect label
     font-weight: 600
     
@@ -35,18 +41,23 @@
     
 .cell-data > div
     min-width: 122px
-    
+/* --------------------------- UTIL CLASSES --------------------------------- */
 .max-cntnt
     width: max-content
-
-#Citation-cell
-    max-width: 42vw
-    
 .r-mgn2
     margin-right: 2em
+/* ------------- UTIL CLASSES ------------------------- */
+#Citation-cell
+    max-width: 42vw
     
 #InteractionDetails-data-sect #sect-row1
     justify-content: flex-start
     
 #InteractionDetails-data-sect #sect-row1 > div
     margin-right: 5em
+
+
+@media $mqPhone
+    .sect-row
+        flex-direction: column 
+        

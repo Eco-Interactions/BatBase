@@ -137,7 +137,7 @@ function authDependentInit() {
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
     if (userRole === 'visitor') { return; }
     initFeedbackUi();     
-    if (userRole === 'admin' && window.innerWidth > 550 || userRole === 'super') { 
+    if (userRole === 'admin' && window.outerWidth > 550 || userRole === 'super') { 
         initEditContentUi(); 
     } 
     

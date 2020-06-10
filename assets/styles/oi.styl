@@ -1,26 +1,16 @@
-/*
- * Main style sheet for batbase.org
- */
-/* ----------- VARIABLES ------------------ */
-/* greens-pallete */
-// --darkest-g = #1b3b1b
-// --darker-g = #245A37
---dark-g = #2D7853
-// --med-g = #36976F
-// --light-g = #3fb58b
-// --lighter-g = #77cab8
-// --lightest-g = #a2dadd
-/* ---------- ROOT ELEM & UTIL ------------- */
-@import "base/util"
+/* ==========================================================================
+   ----------------------- MAIN STYLESHEET ----------------------------------
+   ========================================================================== */
+/* Functions, mixins, variables, etc. */
+@import 'util/*'
 /* ----------- PAGE STRUCTURE -------------- */
 $content-width
-    max-width: 100vw   
-    width 1330px
     @media screen and (min-width: 1500px)
         max-width: 1500px 
         width 1500px        
-    @media screen and (max-width: 1500px) and (min-width: 1330px)
-        max-width: 1330px
+    @media screen and (max-width: 1500px)
+        max-width: 100vw
+    
             
 #pg-container
     @extend $content-width
@@ -50,7 +40,7 @@ $content-width
     font-size 1.15em
 
 #footer 
-    width: 100%
+    @extend $content-width
     padding: 1em 0 3em 0
     border-top: 1px solid #000
     justify-content: space-between
@@ -62,13 +52,9 @@ $content-width
     
 #footer span
     margin .5em
-/*------------ IMAGE SLIDER ---------------- */
-@import "base/header/img-slider"
-/* -------- HEADER & NAVIGATION ------------ */
-@import "base/header/nav"
-/* ------- OVERLAY & POPUP WINDOWS ---------- */
-@import "base/popups"
-/* ------- WYSIWYG / DATATABLES / MISC ------ */
-@import "base/misc"
-/* ----------- PAGE SPECIFIC ---------------- */
-@import "pages/pages"
+/* Popups, datatables/wysiwyg/wtc. */
+@import 'base/*'
+/* Image slider, site header/nav */
+@import 'base/header/*'
+/* Search page, entity pages, top-pages.  */
+@import 'pages/*'

@@ -43,10 +43,10 @@ function getDataCell (data) {
 function getDataSect (title, rows) {                                /*dbug-log*/console.log('getDataSect [%s] = [%O]', title, rows);
     const hdr = util.getElem('h3', { text: title });
     const id = title.replace(/ /g,'') + '-data-sect';
-    return getDivWithContent(id, 'flex-col data-sect', [hdr, ...rows]);
+    return getDivWithContent(id, 'data-sect', [hdr, ...rows]);
 }
 function buildDataRow (cnt, rowCells) {                             /*dbug-log*/console.log('   buildDataRow [%O]', rowCells);
-    return getDivWithContent('sect-row'+cnt, 'flex-row sect-row', rowCells);
+    return getDivWithContent('sect-row'+cnt, 'sect-row', rowCells);
 }
 function getRowGroupSect (dir, colCells) {                          /*dbug-log*/console.log('       getRowGroupSect dir = %s, cells = %O', dir, colCells)
     const classes = `group-${dir} flex-${dir}`;

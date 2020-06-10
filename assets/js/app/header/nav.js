@@ -10,15 +10,15 @@
  * timeout - present when window is being resized.
  */
 const app = {
-    breakpoint: 575
+    breakpoint: 748
 };
 
-export function initMenu() {                                                    //console.log('Initializing menu');
+export function initMenu() {                                                    //console.log('Initializing menu for screen width = [%s]', window.outerWidth);
     addEvents();
-    if (window.innerWidth < app.breakpoint) { initResponsiveNav(); }
+    if (window.outerWidth < app.breakpoint) { initResponsiveNav(); }
 }
 function addEvents() {
-    const hndlr = window.innerWidth > app.breakpoint ? collapseNav : expandNav;
+    const hndlr = window.outerWidth > app.breakpoint ? collapseNav : expandNav;
     window.addEventListener('resize', hndlr);
     window.addEventListener("orientationchange", hndlr);
 }

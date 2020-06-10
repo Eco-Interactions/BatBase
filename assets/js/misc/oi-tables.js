@@ -16,7 +16,7 @@ export function init(tableName) {
     };
     const params = tables[tableName];
     initOiDataTable([0], params[1], tableName);
-    if (window.innerWidth < 1280 && tableName !== 'biblio_tbl') { return; } //Popup is displayed directing users to view page on computer.
+    if (window.outerWidth < 1280 && tableName !== 'biblio_tbl') { return; } //Popup is displayed directing users to view page on computer.
     relocCtrls(tableName);
 } 
 function initOiDataTable(lastExptCol, dataLngth, tblName) {
@@ -63,7 +63,7 @@ function relocCtrls(tableName) {
     $btnDiv.append($filterDiv).detach();
     addPgLengthIf(tableName, $btnDiv, $pgLngthDiv);
     if ($('#online_users_tbl_wrapper').length) { return; }
-    if (window.innerWidth < 750) { 
+    if (window.outerWidth < 750) { 
         $('#content-detail').prepend($btnDiv);
     } else {
         $('#hdr-right').append($btnDiv);
@@ -71,6 +71,6 @@ function relocCtrls(tableName) {
 };
 /* If not viewing the bibliography table on a screen smaller than 1220 pixels wide. */
 function addPgLengthIf(tableName, $btnDiv, $pgLngthDiv) {
-    if (tableName == 'biblio_tbl' && window.innerWidth < 1220) { return; }
+    if (tableName == 'biblio_tbl' && window.outerWidth < 1220) { return; }
     $btnDiv.prepend($pgLngthDiv);
 }
