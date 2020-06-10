@@ -2,37 +2,67 @@
    Contains all the functions, mixins, variables, etc.
    
    TOC:
+      ROOT ELEMS
       STYLE CLASSES
         FLEX
         LISTS
       VARIABLES
     ========================================================================= */
-
+/* ========================================================================== 
+   ------------------------- ROOT ELEMS ------------------------------------ */
+*
+    box-sizing border-box
+body
+    min-width 100vw
+button 
+    border: 1px solid     
+    border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186)
+    border-radius: 4px
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+    color: #222
+    margin: 0 .3em 0 .2em
+    line-height: 1.4;
+    background: linear-gradient(#fff, #d3d3d3)
+    cursor: pointer;
+form input, form select, form textarea 
+    font-size: 1em
+    padding: .2em
+    margin: .5em .5em .5em 0
+    border 1px solid rgba(128, 128, 128, .4)
+    max-width 90vw
+form label
+    margin-right: .5em
+h2
+    font-size: 1.4em;
+h3
+    font-size: 1.3em;
+input[type='button']
+    @extend button
+input[type='submit']
+    @extend button
 /* ==========================================================================
    ------------------------- STYLE CLASSES ---------------------------------- */
+label.required:before 
+    content: "*"
+span.lbl
+    font-weight: bold
 .top-em-mrg 
     margin-top: 1em
-    
 .em-mrg
     margin: 1em
-
 .invis  // Used in data entry forms
     visibility: hidden
-
 .waiting 
     cursor: wait
 /*------------- Flex ------------------*/
 .flex-row 
     display: flex
     flex-direction: row
-
 .flex-col 
     display: flex
     flex-direction: column
-    
 .flex-wrap 
     flex-wrap: wrap
-    
 .flex-grow
     flex-grow 1
 /*------------ Lists -------------*/
@@ -40,41 +70,31 @@ $list-styles
     list-style-position: outside;
     display: list-item;
     padding: .25em .75em .25em 0 
-    
 ol>li 
     @extends $list-styles
     list-style: decimal;
-
 .disc-list>li 
     @extends $list-styles
     list-style: disc
-    
 .circle-list>li 
     @extends $list-styles
     list-style: circle
-
 .disc-list, .circle-list
     padding-inline-start: 1.5em
     padding-top .5em
 /* ==========================================================================
    ----------------------------- FUNCTIONS ---------------------------------- */
-
-    
-//     @media (max-width: 555px)
-//         @extend .flex-{mDir}
 /* ==========================================================================
    ----------------------------- VARIABLES ---------------------------------- */
 /* greens-pallete */
 // --darkest-g = #1b3b1b
 // --darker-g = #245A37
---dark-g = #2D7853
+// --dark-g = #2D7853
 // --med-g = #36976F
 // --light-g = #3fb58b
 // --lighter-g = #77cab8
 // --lightest-g = #a2dadd
-
 $phoneWidth = 748px
 $tabletWidth = 1012px
-
 $mqPhone = "only screen and (max-width: " + $phoneWidth + ")"
 $mqTablet = "only screen and (max-width: " + $tabletWidth + ")"
