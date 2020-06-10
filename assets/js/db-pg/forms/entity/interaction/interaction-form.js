@@ -403,6 +403,7 @@ function onRealmSelection(val) {                                                
         $('#Realm_row').after(rows);
         _f.state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
+        /* Binds the current realm to the 'Select Unspecified' button */
         $('#select-realm').off('click');
         $('#select-realm').click(selectRoleTaxon.bind(null, null, getRealmData('realmTaxon')));
     }
@@ -449,7 +450,7 @@ function addSelectRealmBttn() {
 function buildSelectUnspecifedBttn() {
     const attr = { id: 'select-realm', class: 'ag-fresh', type: 'button', value: 'Select Unspecified' }
     const bttn = _f.util('buildElem', ['input', attr]);
-    $(bttn).click(selectRoleTaxon.bind(null, getRealmData('realmTaxon')));
+    $(bttn).click(selectRoleTaxon.bind(null, null, getRealmData('realmTaxon')));
     return bttn;
 }
 /* --------- SELECT PREVIOUS TAXON OR FOCUS COMBO -------------- */
