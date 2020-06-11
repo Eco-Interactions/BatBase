@@ -176,6 +176,7 @@ function finishComboboxInit() {
     _f.cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
     _f.cmbx('enableCombobox', ['#InteractionTags-sel', false]);
+    focusPubFieldIfNewRecord();
 }
 /** Inits comboboxes for the interaction form and the Subject/Object select forms. */
 export function initFormCombos(entity, fLvl) {

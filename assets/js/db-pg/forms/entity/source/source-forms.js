@@ -151,7 +151,7 @@ function initCitSubForm(val) {
     return _f.elems('initSubForm', 
         ['sub', 'med-sub-form', {'Title': val}, '#CitationTitle-sel']); 
 }
-function appendCitFormAndFinishBuild(form) {                              //console.log('           --appendCitFormAndFinishBuild');
+function appendCitFormAndFinishBuild(form) {                                    //console.log('           --appendCitFormAndFinishBuild');
     $('#CitationTitle_row')[0].parentNode.after(form);
     initFormCombos('citation', 'sub');
     selectDefaultCitType()
@@ -189,7 +189,7 @@ function setPubInMemory(pubSrc, pub, fLvl) {
  * loading the default fields for the selected Citation Type. If this is an 
  * edit form, skip loading pub data... 
  */
-function loadCitTypeFields(typeId) {                                            console.log('           /--loadCitTypeFields');
+function loadCitTypeFields(typeId) {                                            //console.log('           /--loadCitTypeFields');
     const fLvl = _f.getSubFormLvl('sub');
     const elem = this.$input[0];
     if (!_f.state('isEditForm')) { addPubData(typeId, elem, fLvl); }
@@ -211,12 +211,13 @@ function setCitationFormRowStyles(fLvl) {
  * Shows/hides the author field depending on whether the publication has authors 
  * already. Disables title field for citations that don't allow sub-titles.
  */
-function handleSpecialCaseTypeUpdates(elem, fLvl) {                      //console.log('handleSpecialCaseTypeUpdates')
-    const type = elem.innerText;    
+function handleSpecialCaseTypeUpdates(elem, fLvl) {                      
+    const type = elem.innerText;                                                //console.log('handleSpecialCaseTypeUpdates [%s]', type)
     const hndlrs = { 
         'Book': updateBookFields, 'Chapter': updateBookFields,
         "Master's Thesis": disableTitleField, 'Other': disableFilledFields,
-        'Ph.D. Dissertation': disableTitleField };
+        'Ph.D. Dissertation': disableTitleField, 'Museum record': disableFilledFields,
+        'Report': disableFilledFields };
         if (Object.keys(hndlrs).indexOf(type) === -1) { return; }
     hndlrs[type](type, fLvl);
 
@@ -259,8 +260,8 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {                      //conso
         $('#Year_row input').prop('disabled', true);
         disableAuthorField();
     }
-    function disableAuthorField() {
-        if ($('#Authors-sel-cntnr')[0].children > 1) {
+    function disableAuthorField() {                                             
+        if ($('#Authors-sel-cntnr')[0].children.length > 1) {
             $('#Authors-sel-cntnr')[0].lastChild.remove();
         }
         _f.cmbx('enableComboboxes', [$('#Authors-sel-cntnr select'), false]);
@@ -302,7 +303,7 @@ function addPubValues(fLvl, addValues, type) {
         fieldData.Year = {};
         fieldData.Year.val = addYear ? rcrds.src.year : '';
     }
-    function addAuthorsToCitation(addAuths, fLvl, type) { 
+    function addAuthorsToCitation(addAuths, fLvl, type) {            
         const pubAuths = rcrds.src.authors;  
         if (addAuths && pubAuths) { return addExistingPubContribs(fLvl, pubAuths); }
     }
@@ -400,7 +401,10 @@ export function loadSrcTypeFields(entity, typeId, elem, typeName) {             
     function finishSrcTypeFormBuild(rows) {                                     //console.log('rows = %O', rows)
         $('#'+entity+'_Rows').append(rows);
         initFormCombos(entity, fLvl);
-        _f.elems('fillComplexFormFields', [fLvl]);
+        return _f.elems('fillComplexFormFields', [fLvl])
+        .then(afterComplexFieldsFilled);
+    }
+    function afterComplexFieldsFilled () { 
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         updateFieldsForSourceType(entity, fLvl)
         $('#Title_row input').focus();
@@ -431,7 +435,7 @@ function getFilledSrcVals(entity, typeId, fLvl) {
 }
 /** Update form state for the selected source type. */
 function setSourceType(entity, fLvl, tName) {
-    const type = tName || getSourceTypeFromCombo(entity);                       console.log('               --type = [%s]', type);
+    const type = tName || getSourceTypeFromCombo(entity);                       //console.log('               --type = [%s]', type);
     _f.state('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
@@ -549,7 +553,7 @@ function ifFieldNotShownOrNoValToSelect(field, authObj) {
 }
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {                               //console.log('selectAuthor. args = %O', arguments)
-    if (!$('#'+field+'-sel'+ cnt).length) { return; } //field hidden for certain citation types
+    if (!$('#'+field+'-sel'+ cnt).length) { return Promise.resolve(); } //field hidden for certain citation types
     _f.cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }

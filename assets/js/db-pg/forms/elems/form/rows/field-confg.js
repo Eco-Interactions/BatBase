@@ -5,7 +5,7 @@ import * as _f from '../../../forms-main.js';
  *               .required Ary of required fields
  */
 export default function getFieldConfgs(entity, fLvl) {                                        
-    const confg = getFormConfgData(entity, fLvl);
+    const confg = getFormConfgData(entity, fLvl);                               //console.log('[%s] get[%s]FieldConfg = %O', fLvl, entity, confg);
     return {
         fields: getIncludedFields(confg),
         order: getFieldOrder(confg),

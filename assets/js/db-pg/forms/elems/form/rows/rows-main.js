@@ -37,7 +37,7 @@ export function getFormFieldRows(entity, fVals, fLvl) {
     return buildRows(fObj, entity, fVals, fLvl);
 }
 /** @return {ary} Rows for each field in the entity field obj. */
-function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
+function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. [%s][%s] fields = [%O]", entity, fLvl, fieldObj);
     return Promise.all(fieldObj.order.map(f => {
         return Array.isArray(f) ? buildMultiFieldRow(f) : buildSingleFieldRow(f);
     }));
