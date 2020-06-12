@@ -93,6 +93,7 @@ Next/future rounds:
         - Added mapping to location forms
     - Ability to save set of filters and lists of interactions
     - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
+    - Added Interaction show page
 
     Upcoming: 
         - Data review features

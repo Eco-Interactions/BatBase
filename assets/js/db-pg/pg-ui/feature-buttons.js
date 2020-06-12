@@ -70,6 +70,7 @@ function initEditorFeatures() {                                                 
     return '.map-dsbl';
 }
 function initUserButtons() {
+    $('button[name="csv"]').click(exportCsvData);  
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
