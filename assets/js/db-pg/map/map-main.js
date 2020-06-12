@@ -538,7 +538,7 @@ export function addVolatileMapPin(val, type, cntryId) {                         
     } else { addNewLocPinAndFillCoordFields(latLng); }
     $('#cnt-legend').html('');
 }
-function getMapPinCoords() {
+function getMapPinCoords() {                                                    //console.log('Lat: [%s], Lng: [%s]', $('#Latitude_row input').val(), $('#Longitude_row input').val())
     return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
 }
 function addEditFormMapData(latLng, locId, cntryId) {

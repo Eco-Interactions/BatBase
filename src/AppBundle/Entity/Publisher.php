@@ -124,6 +124,7 @@ class Publisher
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */

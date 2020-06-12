@@ -147,6 +147,7 @@ class Author
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */

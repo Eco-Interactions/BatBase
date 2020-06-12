@@ -41,7 +41,7 @@ function buildAddFieldsCheckbox(entity, level) {
 }
 function ifEntityHasOptionalFields(entity) {
     const fConfg = _f.confg('getFormConfg', [entity]);
-    return fConfg ? fConfg.order.opt !== false : false;
+    return fConfg && fConfg.order.opt !== false;
 }
 function getCheckbox(level, entity) {
     const chkbx = buildChkbxInput(level);

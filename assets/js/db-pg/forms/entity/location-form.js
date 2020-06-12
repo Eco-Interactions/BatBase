@@ -40,13 +40,16 @@ function buildLocForm(val) {
         $('#Latitude_row input').focus();
     }
 }
-function onLocFormLoadComplete() {
+function onCreateFormLoadComplete () {
     disableTopFormLocNote();
     addMapToLocForm($('#location_Rows'), 'create');
-    addNotesToForm();
     addListenerToGpsFields('sub');
-    handleElevFieldsAndNumberInputs();
     scrollToLocFormWindow();
+    onLocFormLoadComplete();
+}
+function onLocFormLoadComplete() {
+    addNotesToForm();
+    handleElevFieldsAndNumberInputs();
 }
 function disableTopFormLocNote() {
     $('#loc-note').fadeTo(400, .3);
@@ -101,9 +104,10 @@ function locCoordErr(field) {
 export function finishEditFormBuild(entity) {  
     initFormCombos('Location', 'top'); 
     updateCountryChangeMethod();
-    addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']))
+    addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
     $('#DisplayName-lbl, #ElevationMax-lbl').css('min-width', '106px');
+    onLocFormLoadComplete();
 }
 function updateCountryChangeMethod() {
     $('#Country-sel')[0].selectize.off('change');

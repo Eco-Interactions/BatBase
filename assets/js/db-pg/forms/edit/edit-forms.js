@@ -18,7 +18,7 @@
 import * as _f from '../forms-main.js';
 
 /** Shows the entity's edit form in a pop-up window on the search page. */
-export default function editEntity(id, entity) {                                console.log("       //showEntityEditForm [%s] [%s]", entity, id);
+export default function editEntity(id, entity) {                                console.log("       //editEntity [%s] [%s]", entity, id);
     initEditForm(id, entity)
     .then(() => _f.forms('finishEditFormInit', [entity, id]))
 }
@@ -56,7 +56,7 @@ function getEditFields(entity, id) {
 }
 /* ----------------------- FINISH FORM INIT --------------------------------- */
 function finishEditFormBuild(entity) {
-    $('.top-pin').addClass('invis'); //hides field checkboxes used in create forms
+    $('.top-pin').remove(); //removes checkboxes used in interaction create forms
     const cmplx = ['citation', 'interaction', 'location', 'publication', 'taxon'];
     return cmplx.indexOf(entity) > -1 ? finishCmplxForm() : finishEditForm(entity);
 
@@ -131,8 +131,8 @@ function fillLocData(entity, id, rcrd, dEntity) {
         delete fields.Latitude;
         delete fields.Longitude;
         delete fields.Country;
-        $('#Latitude_row input').val(parseInt(rcrd.latitude));
-        $('#Longitude_row input').val(parseInt(rcrd.longitude));
+        $('#Latitude_row input').val(parseFloat(rcrd.latitude));
+        $('#Longitude_row input').val(parseFloat(rcrd.longitude));
         _f.cmbx('setSelVal', ['#Country-sel', rcrd.country.id, 'silent']);
     }
     function handleGeoJsonFill(geoId) {

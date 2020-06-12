@@ -663,6 +663,7 @@ function handleNewAuthForm(authCnt, value, authType) {                          
         const prntLvl = _f.getNextFormLevel('parent', fLvl);
         _f.elems('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+        $('#'+fLvl+'-cancel').click(toggleOtherAuthorTypeSelect.bind(null, authType, true));
     }
 }
 /* *************************** EDIT FORMS *********************************** */

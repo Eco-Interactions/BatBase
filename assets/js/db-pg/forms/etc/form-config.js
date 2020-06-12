@@ -76,8 +76,9 @@ function getEntityConfg(entity) {
             'suggested': ['CitationText', 'Abstract', 'Doi', 'LinkDisplay', 'LinkUrl'], 
             'optional': [],
             'order': {
-                'sug': ['CitationText', 'Abstract', ['Title', 'CitationType']]},  
+                'sug': ['CitationText', 'Abstract', ['Title', 'CitationType']],  
                 'opt': false, 
+            },
             'types': {
                 'Article': {                        
                     'name': 'Article',
@@ -92,11 +93,11 @@ function getEntityConfg(entity) {
                 'Book': {
                     'name': 'Book',
                     'required': ['Authors'],
-                    'suggested': ['Volume', 'Pages'],
+                    'suggested': ['Volume'],
                     'optional': [],
                     'order': {
                         'sug': [['Volume', 'Doi'], ['LinkDisplay', 'LinkUrl'], 
-                            ['Pages', 'Authors']]},
+                            ['Authors']]},
                         'opt': false,
                 },
                 'Chapter': {
@@ -302,7 +303,7 @@ export function getCoreFieldDefs(entity) {
             'Genus': 'select', 'Species': 'select'
         },
         'taxon': { 'DisplayName': 'text' }
-    };                                                                          console.log('---------getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
+    };                                                                          //console.log('---------getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
     return fields[coreEntityMap[entity]];
 }    
 

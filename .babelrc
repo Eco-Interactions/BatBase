@@ -2,7 +2,7 @@
   "presets": [
     ["@babel/env", {
       "forceAllTransforms": true,
-      "modules": auto,
+      "modules": "auto",
       "useBuiltIns": "usage",
       "corejs": { 
         "version": 3, 

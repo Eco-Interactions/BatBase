@@ -59,8 +59,13 @@ function getFieldOrder(cfg) {
 }
 /** <type> eg: publication - book, jounrnal, thesis, record, and other 'types'. */
 function getExpandedOrder(cfg) {
-    return cfg.type ? cfg.form.order.opt.concat(cfg.type.order.opt) : 
-        cfg.form.order.opt ? cfg.form.order.opt : cfg.form.order.sug;
+    return cfg.type ? getCoreAndTypeRows(cfg) :  
+        (cfg.form.order.opt ? cfg.form.order.opt : cfg.form.order.sug);
+}
+function getCoreAndTypeRows (cfg) {
+    return cfg.form.order.opt && cfg.type.order.opt ?         
+        cfg.form.order.opt.concat(cfg.type.order.opt) : 
+        cfg.form.order.sug.concat(cfg.type.order.sug);
 }
 function getDefaultOrder(cfg) {
     return cfg.type ? cfg.form.order.sug.concat(cfg.type.order.sug) : cfg.form.order.sug;
