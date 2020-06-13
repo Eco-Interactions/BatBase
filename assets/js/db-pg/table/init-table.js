@@ -169,31 +169,32 @@ function addTitle(params) {
     return value === null ? null : '<span title="'+value+'">'+value+'</span>';
 }
 /** ------------------------------- Tree Column ----------------------------- */
+/** Returns the initial width of the tree column according to role and screen size. */
+function getTreeWidth() { 
+    var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
+    if (tblState.curFocus === 'locs') { offset = offset + 66; }
+    return ($(window).width() > 1500 ? 340 : 273) - offset;
+}
 function handleTreeRowRender (params) { 
     const rowName = params.data.name || null;
     return rowName ? addToolTipToCell(rowName) : addIntShowIcon(params.data.id);
 }
+/* ----------- TOOL TIP ------------- */
 function addToolTipToCell(name) {      
     return '<span title="'+name+'">'+name+'</span>';
 }
+/* ----------- INT-SHOW ICON ------------- */
 function addIntShowIcon (id) {                                          
     const icon = getShowIconHtml();
-    return `<span style="width:90%"></span><a href="${getShowLink(id)}" target="_blank">${icon}</a>`
-
-    function getShowLink (id) {
-        return $('body').data('base-url') + 'interaction/' + id;
-    }
+    return `<a href="${getShowLink(id)}">${icon}</a>`;
 }
 function getShowIconHtml () {
     const path = require('../../../images/icons/search.svg').default; 
     return`<img src=${path} class="tree-show" title="Show Interaction Details" 
         alt="Show Interaction Details">`;
 }
-/** Returns the initial width of the tree column according to role and screen size. */
-function getTreeWidth() { 
-    var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
-    if (tblState.curFocus === 'locs') { offset = offset + 66; }
-    return ($(window).width() > 1500 ? 340 : 273) - offset;
+function getShowLink (id) {
+    return $('body').data('base-url') + 'interaction/' + id;
 }
 /* ----------- SORT TAXON TREE AND COLUMNS --------------- */
 /**
