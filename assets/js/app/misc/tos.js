@@ -1,47 +1,41 @@
 /*
  * Code related to the Terms of Service & Privacy Notice popup.
+ * Registration page: hides the submit button and captcha until after user 
+ * accepts the TOS. 
  * 
- * Exports:         Imported by: 
- *     initTos              oi
+ * Exports:
+ *     initTos
  */
-export function initTos() {
+
+export default function initTosPopup() {
     $('#reg-tos, #footer-tos, .tos-trigger').click(showTos);
-    hideRegistrationSubmit();
+    ifRegistrationPageHideSubmitAndCaptcha();
 }
-/** If this is the registration page, disable the submit button. */
-function hideRegistrationSubmit() {
-    if ($("#reg-submit")) { replaceWithAcceptTosBttn(); }
-}
-function replaceWithAcceptTosBttn() {
-    $('#reg-submit').hide()
-}
-/** Show the ToS. On the registration page, show the 'accept' elements */
+/* ==================== ToS POPUP =========================================== */
 function showTos() {  
-    if ($(this)[0].id === "reg-tos") { 
-        showTosWindow();
-        addRegistrationTosElems();
-    } else { showTosWindow(); }
+    showTosPopup();
     addCloseButton();
+}
+/* --------------------- SHOW POPUP ----------------------------------------- */
+function showTosPopup() {      
+    $("#b-overlay-popup").html(getTosHtml);
+    $("#b-overlay-popup").addClass("tos-popup");
+    bindEscEvents();
+    $('#b-overlay, #b-overlay-popup').fadeIn(500);
+}
+function bindEscEvents() {
+    $(document).on('keyup',function(evt) {
+        if (evt.keyCode == 27) { closeTosWindow(); }
+    });
+    $("#b-overlay").click(closeTosWindow);
+    $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
 }
 function addCloseButton() {
     $("#b-overlay-popup").append(`
         <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
     $('#close-tos-bttn').click(closeTosWindow)
 }
-function showTosWindow() {      
-    $("#b-overlay-popup").html(getTosHtml);
-    $("#b-overlay-popup").addClass("tos-popup");
-    bindEscEvents();
-    $('#b-overlay, #b-overlay-popup').fadeIn(500);
-
-    function bindEscEvents() {
-        $(document).on('keyup',function(evt) {
-            if (evt.keyCode == 27) { closeTosWindow(); }
-        });
-        $("#b-overlay").click(closeTosWindow);
-        $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
-    }
-} /* End showTosWindow */
+/* --------------------- HIDE POPUP ----------------------------------------- */
 function closeTosWindow() {
     $("#b-overlay").css({ "display": "none" });
     unbindEscEvents();
@@ -56,27 +50,7 @@ function removeTosStyles() {
     // $("#b-overlay").removeClass("flex-col");
     $("#b-overlay-popup").empty();
 }
-function addRegistrationTosElems() { 
-    var acceptDiv = document.createElement("div");
-    acceptDiv.id = "accept-tos-cntnr";
-    acceptDiv.className = "flex-col";
-    $(acceptDiv).append(acceptTosHtml());
-    $("#b-overlay-popup").append(acceptDiv);
-
-    $("#accept-tos").click(acceptTos);
-}
-function acceptTosHtml() {
-    return `
-        <span>These Terms of Use are always available in bottom right of any page on this website.</span>
-        <label id="accept-tos" class="top-em-mrg">
-            <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
-        </label>`;
-}
-function acceptTos() {
-    $('#reg-tos').hide();
-    $('#reg-submit').show();
-}
-
+/* ---------------------- POPUP HTML ---------------------------------------- */
 function getTosHtml() {
     return `<div id="terms-div">
 <h3>Privacy Policy</h3>
@@ -119,4 +93,31 @@ function getTosHtml() {
 <span class="lbl">Changes to the Terms of Use</span>
 <p>Bat Eco-Interactions may alter these Terms of Use at any time or apply different Terms of Use to certain material. These Terms of Use will not be altered retrospectively.</p>
 </div>`;
+}
+/* ==================== REGISTRATION PAGE =================================== */
+/** 
+ * If this is the registration page, hide the disabled submit button and the 
+ * captcha element until after the user accepts the ToS. 
+ */
+function ifRegistrationPageHideSubmitAndCaptcha() {
+    if (!$("#reg-submit")) { return; }
+    $('#reg-submit, .g-recaptcha').hide();
+    $('#reg-tos').click(addRegistrationTosElems);
+}
+function addRegistrationTosElems() { 
+    const div = $('<div/>', {id: 'accept-tos-cntnr', class: 'flex-col'});
+    $(div).append(acceptTosHtml());
+    $("#close-tos-bttn").before(div);
+    $("#accept-tos").click(acceptTos);
+}
+function acceptTosHtml() {
+    return `<br><br>
+        <span>These Terms of Use are always available in bottom right of any page on this website.</span>
+        <label id="accept-tos" class="top-em-mrg">
+            <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
+        </label><br>`;
+}
+function acceptTos() {
+    $('#reg-tos').hide();
+    $('#reg-submit, .g-recaptcha').show();
 }

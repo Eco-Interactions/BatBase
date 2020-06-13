@@ -20,6 +20,7 @@
 ## Composer Memory Limit ##
     - $ which composer (returns path to composer)
     - $ php -d memory_limit=-1 [path] [command]
+        - php -d memory_limit=-1 /usr/local/bin/composer [command]
 
 ## ======================= DEPLOYMENT STEPS ================================= ##
 

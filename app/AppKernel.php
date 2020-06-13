@@ -24,6 +24,7 @@ class AppKernel extends Kernel
             new \Symfony\WebpackEncoreBundle\WebpackEncoreBundle(),
             new SunCat\MobileDetectBundle\MobileDetectBundle(),
             new Sentry\SentryBundle\SentryBundle(),
+            new EWZ\Bundle\RecaptchaBundle\EWZRecaptchaBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
