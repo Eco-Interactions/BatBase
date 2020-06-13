@@ -9,14 +9,16 @@
 Change Log:
     - Added Interaction show page
 
-    BUGS
-        - EXITING OUT OF AUTHOR SELECT (PUB->BOOK) LEAVES EDITOR FIEL DISABLED
-        - Subject realm not being selected 
-
 
 QUESTIONS:
 
 >==== CURRENT ====
+    - fix interaction view link alignment
+        - not showing in location view at all?
+    - testing
+        - add interaction show page to tests
+        - test all validation 'error' handlers
+        - csv
     - add captcha to login page and remove fake users 
         - create user list/set examples *after* account confirmed/first login
     - Build interaction and taxon show pages 
@@ -25,6 +27,11 @@ QUESTIONS:
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
+    - DB migration
+        - remove user lists for fake users
+        - delete fake users
+        - remove parent taxon from deleted taxa
+
 
 >Next
     - Refactor Source data 
