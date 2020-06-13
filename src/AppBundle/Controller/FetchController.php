@@ -264,7 +264,7 @@ class FetchController extends Controller
 
         foreach ($entities as $entity) {   
             $id = $entity->getId();    
-            $json = $this->serializeRcrd($entity);
+            $json = $this->serializeRcrd($entity, 'normalized');
             if (!$json) { continue; }
             $data->$id = $json;
         }

@@ -166,7 +166,7 @@ function getInfoLinkTextToOpenMap(argument) {
 function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
     if ($('#form-map').length) { return; }
     const pElem = $('#Location_row')[0].parentNode;
-    _f.forms('addMapToLocForm', [$(pElem), 'int']);
+    _f.forms('addMapToLocForm', ['int', $(pElem)]);
     if (_f.cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
     _f.cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }

@@ -33,7 +33,7 @@
 import * as _f from '../../forms-main.js'; 
 
 let timeout = null; //Prevents citation text being generated multiple times.
-const rmvdAuthField = {};
+let rmvdAuthField = {};
 
 /** Inits comboboxes for the source forms. */
 export function initFormCombos(entity, fLvl) {
@@ -122,6 +122,7 @@ function ifBookAddAuthEdNote() {
 function initCitForm(v) {                                                       console.log("       /--initCitForm [%s]", v);
     const val = v === 'create' ? '' : v;
     timeout = null;
+    rmvdAuthField = {};
     _f.util('getData', [['author', 'publication']])
     .then(data => initCitFormMemory(data))
     .then(() => buildAndAppendCitForm(val));

@@ -68,8 +68,8 @@ function syncDb(entities, dataUpdatedAt) {
     .then(() => downloadAndStoreNewData(entities))
     .then(_db.setUpdatedDataInLocalDb)
     .then(() => _db.setData('lclDataUpdtdAt', dataUpdatedAt))
-    .then(clearMemory)
-    .then(initSearchPage);
+    .then(initSearchPage)
+    .then(clearMemory);
 }
 function trackTimeUpdated(entity, rcrd) {
     _db.getData('lclDataUpdtdAt').then(stateObj => {
