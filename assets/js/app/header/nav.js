@@ -1,10 +1,9 @@
 /*
  * Responsive site navigation.
  *
- * Exports:          Imported by:
- *     initMenu             oi
+ * Exports: 
+ *     initSiteNav
  */
-
 /*
  * breakpoint - between collapsed and expanded navigation
  * timeout - present when window is being resized.
@@ -12,8 +11,7 @@
 const app = {
     breakpoint: 748
 };
-
-export function initMenu() {                                                    //console.log('Initializing menu for screen width = [%s]', window.outerWidth);
+export default function initSiteNav() {                                                    //console.log('Initializing menu for screen width = [%s]', window.outerWidth);
     addEvents();
     if (window.outerWidth < app.breakpoint) { initResponsiveNav(); }
 }

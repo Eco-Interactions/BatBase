@@ -13,8 +13,11 @@
  *      SUBMIT PDF
  *      PAGES THAT DON'T WORK ON MOBILE DEVICES
  *    BROWSER SPECIFIC
- *      
  */
+import initTosPopup from './misc/tos.js';
+import initSiteNav from './header/nav.js';
+import initSlider from './header/img-slider.js';
+
 initSentryIssueTracking();
 requireStyles();
 setGlobalJquery();
@@ -48,16 +51,16 @@ function initUi() {
 /* -------------------- HEADER AND MAIN NAV --------------------------------- */
 function initHeaderAndNav() {
     handleBrowserSpecificLoad();
-    initNavMenu();
+    initNav();
     initImageSlider();
     initStickyHeader(); //Must load after image slider and the nav menus
     $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
 }
-function initNavMenu() {
-    require('./header/nav.js').initMenu();
+function initNav() {
+    initSiteNav();
 }
 function initImageSlider() {    
-    require('./header/img-slider.js').initSlider();
+    initSlider();
 }
 /* Header sticks when image header scrolls off screen. */
 function initStickyHeader() {
@@ -74,7 +77,7 @@ function handleStickyNav(hdrHeight) {
     }
 }/* -------------------------- TOS ------------------------------------------ */
 function initTos() {
-    require('./misc/tos.js').initTos();
+    initTosPopup();
 }
 /* ------------------- AUTH-DEPENDENT INIT ---------------------------------- */
 function authDependentInit() { 
@@ -86,8 +89,8 @@ function authDependentInit() {
     } 
     
     function initEditContentUi() {
-        const wysiwyg = require('./misc/wysiwyg.js');
-        wysiwyg.init(userRole);
+        const wysiwyg = require('./misc/wysiwyg.js').default;
+        wysiwyg(userRole);
     }
 }  /* End authDependentInit */
 function initFeedbackUi() {
