@@ -709,7 +709,7 @@ class Source
      * @JMS\SerializedName("interactions")
      * @Groups({"normalized"})
      */
-    public function getInteractionids()
+    public function getInteractionIds()
     {
         $intIds = [];
         foreach ($this->interactions as $interaction) {

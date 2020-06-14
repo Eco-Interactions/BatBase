@@ -229,7 +229,7 @@ class InteractionType
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions")
      */
-    public function getInteractionids()
+    public function getInteractionIds()
     {
         $allIntIds = [];
         foreach ($this->interactions as $interaction) {

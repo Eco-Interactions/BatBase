@@ -239,7 +239,7 @@ class Tag
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions")
      */
-    public function getInteractionids()
+    public function getInteractionIds()
     {
         $intIds = [];
         foreach ($this->interactions as $interaction) {

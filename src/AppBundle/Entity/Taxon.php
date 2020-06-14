@@ -732,7 +732,7 @@ class Taxon
     public function getSubjectRoleIds()
     {
         $interactions = $this->subjectRoles;
-        return $this->getInteractionids($interactions);
+        return $this->getInteractionIds($interactions);
     }
 
     /**
@@ -779,7 +779,7 @@ class Taxon
     public function getObjectRoleIds()
     {
         $interactions = $this->objectRoles;
-        return $this->getInteractionids($interactions);
+        return $this->getInteractionIds($interactions);
     }
     // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
     // public function getInteractions()
@@ -793,7 +793,7 @@ class Taxon
     /**
      * Returns an array of ids for all passed interactions. 
      */
-    public function getInteractionids($interactions)
+    public function getInteractionIds($interactions)
     {
         $allIntIds = [];
 
@@ -801,6 +801,11 @@ class Taxon
             array_push($allIntIds, $interaction->getId());
         }
         return $allIntIds;
+    }
+    /* Used in DB MIGRATION */
+    public function getAllInteractionIds()
+    {
+        return array_merge($this->getObjectRoleIds(), $this->getSubjectRoleIds());
     }
 
     /**

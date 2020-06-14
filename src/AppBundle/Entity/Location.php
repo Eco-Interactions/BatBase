@@ -483,7 +483,7 @@ class Location
      *
      * @return Location
      */
-    public function setParentLoc(\AppBundle\Entity\Location $parentLoc)
+    public function setParentLoc(\AppBundle\Entity\Location $parentLoc = null)
     {
         $this->parentLoc = $parentLoc;
 
@@ -747,7 +747,7 @@ class Location
      * @JMS\SerializedName("interactions") 
      * @Groups({"normalized"})
      */
-    public function getInteractionids()
+    public function getInteractionIds()
     {
         $allIntIds = [];
         foreach ($this->interactions as $interaction) {
