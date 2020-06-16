@@ -1,25 +1,38 @@
-// CODE SECTIONS:
-//  TOP CALLS
-//  STYLES & SCRIPTS
-//  UI INIT
-//  PAGE SPECIFIC
-//  BROWSER SPECIFIC
-/* ======================== TOP CALLS ======================================= */
+/**
+ * Main entry point for the core js used throughout the site.
+ * 
+ * TOC:
+ *    SENTRY ERROR TRACKING
+ *    STYLES AND GLOBAL JQUERY
+ *    UI INIT
+ *      HEADER AND MAIN NAV
+ *      TOS
+ *      AUTH-DEPENDENT INIT
+ *    PAGE SPECIFIC
+ *      DATATABLES
+ *      SUBMIT PDF
+ *      PAGES THAT DON'T WORK ON MOBILE DEVICES
+ *    BROWSER SPECIFIC
+ */
+import initTosPopup from './misc/tos.js';
+import initSiteNav from './header/nav.js';
+import initSlider from './header/img-slider.js';
+
 initSentryIssueTracking();
 requireStyles();
 setGlobalJquery();
 initUi();
-
+/* ================= SENTRY ERROR TRACKING ================================== */
 function initSentryIssueTracking() {  
     if ($('body').data('env') !== 'prod') { return; } 
     Sentry.init({ 
         dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194'
     });
 }
-/* ==================== STYLES & SCRIPTS ==================================== */
+/* ==================== STYLES & GLOBAL JQUERY ============================== */
 function requireStyles() {
-    require('../../styles/base/ei-reset.styl');   
-    require('../../styles/base/oi.styl');    
+    require('../../styles/base/reset.styl');   
+    require('../../styles/oi.styl');    
     require('../../styles/css/lib/introjs.min.css');  
 }
 function setGlobalJquery() { 
@@ -35,18 +48,19 @@ function initUi() {
     $('#b-overlay').hide(); // Hides loading overlay on mobile
     $('.popup').show();
 }
+/* -------------------- HEADER AND MAIN NAV --------------------------------- */
 function initHeaderAndNav() {
     handleBrowserSpecificLoad();
-    initNavMenu();
+    initNav();
     initImageSlider();
     initStickyHeader(); //Must load after image slider and the nav menus
     $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
 }
-function initNavMenu() {
-    require('./header/nav.js').initMenu();
+function initNav() {
+    initSiteNav();
 }
 function initImageSlider() {    
-    require('./header/img-slider.js').initSlider();
+    initSlider();
 }
 /* Header sticks when image header scrolls off screen. */
 function initStickyHeader() {
@@ -61,9 +75,27 @@ function handleStickyNav(hdrHeight) {
     } else {
         $('#sticky-hdr').removeClass("top-sticky");
     }
-}
+}/* -------------------------- TOS ------------------------------------------ */
 function initTos() {
-    require('./misc/tos.js').initTos();
+    initTosPopup();
+}
+/* ------------------- AUTH-DEPENDENT INIT ---------------------------------- */
+function authDependentInit() { 
+    const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
+    if (userRole === 'visitor') { return; }
+    initFeedbackUi();     
+    if (userRole === 'admin' && window.outerWidth > 550 || userRole === 'super') { 
+        initEditContentUi(); 
+    } 
+    
+    function initEditContentUi() {
+        const wysiwyg = require('./misc/wysiwyg.js').default;
+        wysiwyg(userRole);
+    }
+}  /* End authDependentInit */
+function initFeedbackUi() {
+    const feedback = require('./feedback/feedback.js');
+    feedback.init();
 }
 /* ========================== PAGE SPECIFIC ================================= */
 function handlePageSpecificUiInit() {
@@ -71,21 +103,24 @@ function handlePageSpecificUiInit() {
     clearFieldForPdfSubmissions();
     showOverlayOnMobile();
 }
+/* ----------------------- DATATABLES --------------------------------------- */
 /**
  * Initiates tables and rearranges related UI. 
- * Used on the feedback, pdf submission, and bilio pages.
+ * Used on the feedback, pdf submission, and bibliography pages.
  */ 
 function initPageTable() { 
     const tableName = $('#pg-container').data("dt"); 
     if (tableName === false) { return; } 
     require('../misc/oi-tables.js').init(tableName);  
 } 
+/* ------------------- SUBMIT PDF ------------------------------------------- */
 /** Not quite sure how to show a success message and reload form, will loop back when there's more time. */
 function clearFieldForPdfSubmissions() {
     if (window.location.pathname.includes('upload/publication')) {
         $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
     }
 }
+/* ------------ PAGES THAT DON'T WORK ON MOBILE DEVICES --------------------- */
 /*
  * For pages that are not able to be used on mobile devices, show a popup directing
  * users to view page on a computer.
@@ -131,24 +166,6 @@ function showMobilePopupMsg(mblMsg) {
     $(overlay).append(popup);
     $('#detail-block').prepend(overlay);
     $('#b-overlay-popup').fadeIn(500);
-}
-/* ========================= AUTH DEPENDENT ================================= */
-function authDependentInit() { 
-    const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
-    if (userRole === 'visitor') { return; }
-    initFeedbackUi();     
-    if (userRole === 'admin' && window.innerWidth > 550 || userRole === 'super') { 
-        initEditContentUi(); 
-    } 
-    
-    function initEditContentUi() {
-        const wysiwyg = require('./misc/wysiwyg.js');
-        wysiwyg.init(userRole);
-    }
-}  /* End authDependentInit */
-function initFeedbackUi() {
-    const feedback = require('./feedback/feedback.js');
-    feedback.init();
 }
 /* ======================= BROWSER SPECIFIC ================================= */
 function handleBrowserSpecificLoad() {

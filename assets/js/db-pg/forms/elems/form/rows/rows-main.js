@@ -7,6 +7,7 @@
  *     getFormFieldRows 
  */
 import * as _f from '../../../forms-main.js';
+import getFieldConfgs from './field-confg.js';
 
 export function buildFormRow() {
     return require('./single-row.js').default(...arguments);
@@ -32,12 +33,12 @@ export function buildFormRows(entity, fVals, fLvl, params) {                    
  * Returns rows for the entity form fields. If the form is a source-type, 
  * the type-entity form config is used. 
  */
-export function getFormFieldRows(entity, fVals, fLvl) {
-    const fObj = require('./field-confg.js').default(_f.util('lcfirst', [entity]), fLvl);
+export function getFormFieldRows(entity, fVals, fLvl) {  
+    const fObj = getFieldConfgs(_f.util('lcfirst', [entity]), fLvl);            //console.log('getFormFieldRows [%s] = %O', entity, fObj);
     return buildRows(fObj, entity, fVals, fLvl);
 }
 /** @return {ary} Rows for each field in the entity field obj. */
-function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
+function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. [%s][%s] fields = [%O]", entity, fLvl, fieldObj);
     return Promise.all(fieldObj.order.map(f => {
         return Array.isArray(f) ? buildMultiFieldRow(f) : buildSingleFieldRow(f);
     }));

@@ -3,7 +3,8 @@
     @extend $content-width
     
 #sticky-hdr.mobile
-    width 100vw
+    @media $mqTablet
+        width: 100vw
 
 .top-sticky 
     z-index: 1002 

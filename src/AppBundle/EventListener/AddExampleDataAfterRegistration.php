@@ -116,7 +116,7 @@ class AddExampleDataAfterRegistration implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            FOSUserEvents::REGISTRATION_COMPLETED => 'addDataOnRegistration'
+            FOSUserEvents::REGISTRATION_CONFIRMED => 'addDataOnRegistration'
         ];
     }
 }

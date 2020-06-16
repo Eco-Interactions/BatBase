@@ -2,24 +2,23 @@
 $slider-height
     height: 375px
     max-height 423px
-    @media screen and (max-width: 500px)
+    @media $mqPhone
         height: 27vh
 
 #slider-logo 
-    content url('../../images/logos/logo_vert_pale_txt.svg')
+    content url('../images/logos/logo_vert_pale_txt.svg')
     position: absolute
     top: 15%
     left: 5%
-    z-index: 5
+    z-index: 11
     max-height 225px
-
-#slider-logo.mobile-hdr
-    position relative
-    background-color Black
-    height 27vh
-    padding: 22px
-    width: 100vw
-    left 0px
+    @media $mqPhone
+        position relative
+        background-color Black
+        height 27vh
+        padding: 22px
+        width: 100vw
+        left 0px
 
 #slider-logo.overlay  //non-chrome browser warning msg
     position relative

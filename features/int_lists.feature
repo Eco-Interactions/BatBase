@@ -46,7 +46,7 @@ Feature: Save and manage custom Lists of interaction data
         And I select "Panama" from the "Country" dropdown
         When I select "add" "All Shown" from the list modification panel
         And I press the "Save List" button
-        And I break "Press the save button and continue."
+        # And I break "Press the save button and continue."
         Then I should see "6" interactions in the list
         And I should see "Test Interaction List" in the "Int List" dropdown
 
@@ -56,7 +56,7 @@ Feature: Save and manage custom Lists of interaction data
         And I select "Test Interaction List" from the "Int List" dropdown
         And I should see "Test Interaction List" in the "Int List" dropdown
         And I press the "Load Interaction List in Table" button
-        And I break "Click the 'Load List' button."
+        # And I break "Click the 'Load List' button."
         And I should see "6" interactions in the table
         And I toggle "open" the filter panel
         And I select "Panama" from the "Country" dropdown

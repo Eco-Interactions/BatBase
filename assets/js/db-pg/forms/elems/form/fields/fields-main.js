@@ -36,7 +36,7 @@ export function getLocationOpts() {
     return _combos.getLocationOpts();
 }
 /* ====================== BUILD BASIC FIELD INPUTS ========================== */
-export function buildFieldInput(field, entity, fLvl) {                          //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
+export function buildFieldInput(field, entity, fLvl) {                          //console.log('buildFieldInput. [%s] field = %O, lvl [%s]', entity, field, fLvl);
     return Promise.resolve(getFieldInput())
         .then(finishFieldBuild)
 

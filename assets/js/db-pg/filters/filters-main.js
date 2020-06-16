@@ -45,8 +45,8 @@ export function reapplyDateFilterIfActive() {
     const time = fState.getFilterStateKey('date').time;
     fDate.reapplyPreviousDateFilter(time, 'skip'); 
 }
-export function toggleDateFilter(state) {
-    fDate.toggleDateFilter(state);
+export function toggleDateFilter() {
+    fDate.toggleDateFilter(...arguments);
 }
 export function showTodaysUpdates(focus) {
     fDate.showTodaysUpdates(focus);

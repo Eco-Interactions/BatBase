@@ -10,26 +10,26 @@ Feature: Search Page Database Initialization
         Given I am on "/search"
         And the database has loaded
         Then I exit the tutorial
-        And I break "Open console"
 
     ###----------------------- Taxon View -----------------------------------###
     @javascript
     Scenario:  There should be 10 initial bat interactions in the database table.
-        And I group interactions by "Bats"
+        Given I group interactions by "Bats"
+        And I break "Open console"
         Then I see "Order Chiroptera"
         And the count column should show "10" interactions
         And data in the interaction rows
 
     @javascript
     Scenario:  There should be 7 initial plant interactions in the database table.
-        And I group interactions by "Plants"
+        Given I group interactions by "Plants"
         Then I see "Kingdom Plantae"
         And the count column should show "7" interactions
         And data in the interaction rows
 
     @javascript
     Scenario:  There should be 3 initial arthropod interactions in the database table.
-        And I group interactions by "Arthropoda"
+        Given I group interactions by "Arthropoda"
         Then I see "Phylum Arthropoda"
         And the count column should show "3" interactions
         And data in the interaction rows

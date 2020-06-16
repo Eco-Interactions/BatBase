@@ -13,7 +13,6 @@
     "require": {
         "symfony/symfony": "3.4.*",
         "php": ">=5.5.9",
-        "symfony/intl": "^5.0",
         "doctrine/orm": "^2.5",
         "doctrine/dbal": "^2.5",
         "doctrine/doctrine-bundle": "^1.6",
@@ -33,7 +32,9 @@
         "symfony/webpack-encore-bundle": "^1.7",
         "jms/serializer-bundle": "^3.4",
         "suncat/mobile-detect-bundle": "1.0.*",
-        "sentry/sentry-symfony": "^3.4"
+        "sentry/sentry-symfony": "^3.4",
+        "excelwebzone/recaptcha-bundle": "^1.5",
+        "google/recaptcha": "~1.1"
     },
     "require-dev": {
         "hautelook/alice-bundle": "^1.4",

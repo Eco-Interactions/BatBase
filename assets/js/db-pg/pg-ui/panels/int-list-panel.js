@@ -43,7 +43,7 @@ export function isSavedIntListLoaded() {
 }
 export function initListPanel() {
     if ($('body').data('user-role') === 'visitor') { return; }
-    require('../../../../styles/db/panels/lists.styl');  
+    require('../../../../styles/pages/db/panels/lists.styl');  
     addListPanelEvents();
 }
 function addListPanelEvents() {
@@ -92,7 +92,7 @@ function stackIntListPanel() {
     $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).addClass('vert');
     stackListElems();
-    if (window.innerWidth < 1313) { $('#load-list-cntnr div').text('(Filters reset)'); }
+    if (window.outerWidth < 1313) { $('#load-list-cntnr div').text('(Filters reset)'); }
 }
 function stackListElems() {
     $('#top-details').append($('#list-count').detach());

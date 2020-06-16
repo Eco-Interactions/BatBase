@@ -33,3 +33,12 @@
 		</div>
 	</div>
 {% endblock fos_user_content %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript">
+	    function onReCaptchaSuccess() {
+	        $('#reg-submit').attr('disabled', false).fadeTo('fast', 1);
+	    }; 
+	</script>
+{% endblock javascripts %}  

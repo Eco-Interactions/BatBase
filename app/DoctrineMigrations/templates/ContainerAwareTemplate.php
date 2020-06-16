@@ -12,7 +12,7 @@ use AppBundle\Entity\InteractionType;
 
 /**
  * Template for doctrine migrations where the entity manager is necessary.
- * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
+ * Note: The 'created/updatedBy' admin is hardcoded to 6, Sarah.
  */
 class ContainerAwareTemplate extends AbstractMigration implements ContainerAwareInterface
 {

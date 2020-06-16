@@ -44,7 +44,6 @@ function getHelpSteps(key) {
  */
 export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bttnText) {  //console.log('showing modal')
     if (intro) { return; }
-    if ($('#data-help')[0]) { $('#data-help').css('z-index', 1); }
     window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
 }
 function initModal(confg) {
@@ -65,7 +64,6 @@ export function exitModal(cancelCb) {
     if (intro) { intro.exit(); }
     if (cancelCb) { cancelCb(); }
     intro = null;
-    if ($('#data-help')[0]) { $('#data-help').css('z-index', 10000000000); }
 }
 function getModalOptions(confg) {                                   
     return {

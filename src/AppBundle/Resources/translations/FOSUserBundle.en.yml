@@ -46,14 +46,14 @@ registration:
     flash:
         user_created: The user has been created successfully
     email:
-        subject: Welcome to Batplant.org %username%!
+        subject: Welcome to BatBase.org %username%!
         message: |
             Hello %username%!
 
             Welcome! To finish activating your account - please visit %confirmationUrl%
 
             Regards,
-            The Batplant.org Team.
+            The BatBase.org Team.
 
 # Password resetting
 resetting:

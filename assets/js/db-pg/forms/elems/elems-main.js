@@ -191,8 +191,8 @@ function toggleShowAllFields(entity, fLvl) {                                    
     function appendAndFinishRebuild(rows) {
         $('#'+entity+'_Rows').append(rows);
         _f.forms('initFormCombos', [_f.util('lcfirst', [entity]), fLvl]);
-        fillComplexFormFields(fLvl);
-        finishComplexForms();
+        fillComplexFormFields(fLvl)
+        .then(finishComplexForms);
     }
     function finishComplexForms() {
         if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }

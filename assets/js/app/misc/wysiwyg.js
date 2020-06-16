@@ -1,25 +1,26 @@
 /**
- * Handles all wysiwyg related code.
+ * Handles all wysiwyg related code. If user is editor or above, an 'edit content' 
+ * button is added to the top of any page with editable content blocks.
+ * 
+ * Exports:
+ *     initWysiwyg
  */
-require('../../../libs/wysiwyg/trumbowyg.min.js');
-require('../../../libs/wysiwyg/ui/trumbowyg.min.css');
 
-let userRole;                                        
-/**
- *  Adds edit content button to the top of any page with editable content blocks.
- */
-export function init(role) {
-    userRole = role;
-    var contentBlocks = $('.wysiwyg');                                          //console.log("contentBlocks = %O", contentBlocks);
-    if (contentBlocks.length > 0) { addEditContentButton(); }
-} /* End initWysiwyg */
-function addEditContentButton() {
-    var button = $('<button/>', {
+export default function initWysiwyg(role) {
+    requireStyles();
+    if ($('.wysiwyg').length > 0) { addEditContentButton(role); }
+} 
+function requireStyles () {
+    require('../../../libs/wysiwyg/trumbowyg.min.js');
+    require('../../../libs/wysiwyg/ui/trumbowyg.min.css');
+}
+function addEditContentButton(userRole) {
+    const button = $('<button/>', {
         text: "Edit Content", 
         id: 'editContentBttn',
         class: 'adminbttn',
         title: 'Edit Content',
-        click: toggleContentBlockEditing
+        click: toggleContentBlockEditing.bind(null, userRole)
     });  //console.log("button = %O", button)
     button.css({
         position: "absolute",
@@ -32,13 +33,13 @@ function addEditContentButton() {
 /**
  * Manages init and exit 'edit states' and related ui on the page.
  */
-function toggleContentBlockEditing() { 
+function toggleContentBlockEditing(userRole) { 
     var editorElem = $('#editContentBttn').data('editing');                     //console.log("toggling.  editorElem = %O", editorElem)
     if (editorElem !== false) {
         $('#editContentBttn').text("Refreshing...");
         location.reload(true);
     } else {
-        addEditPencils();
+        addEditPencils(userRole);
         $('#editContentBttn').data('editing', true)
         $('#editContentBttn').text("Cancel Edit");
     }
@@ -99,7 +100,7 @@ function getBlockContainerId(editId) {
  * Adds edit pencil icons to the top left of every content block container,
  * any div with class 'wysiwyg', on the page.
  */
-function addEditPencils() {     
+function addEditPencils(userRole) {     
     const icoSrc = require('../../../images/icons/eif.pencil.svg').default;
     var contentBlocks = $('.wysiwyg');  
     

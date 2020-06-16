@@ -7,30 +7,31 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
-    - Prevented genus taxa created without family
-    - Added (m) to Elevation label and field only allows numbers now.
-    - added 'select unspecified' option to taxon select forms to select the realm taxon
-    - Updated the issue reporting feature with a field to paste in the logs.
-        - Updated error message to editors and above to prompt them to fill out report
-    - Fixed bugs caught by sentry
-    - Improved new data form load.
-    - Updated the publication submission page with the new 'last viewed by'
-        column. I also added a title field for publications, as it seemed useful.
-
-
-    BUGS
-        - EXITING OUT OF AUTHOR SELECT (PUB->BOOK) LEAVES EDITOR FIEL DISABLED
-        - Missing subject for interaction 10153
+    - Added Interaction show page
 
 
 QUESTIONS:
 
 >==== CURRENT ====
-    - Sarah to add field or announcement to remind that something has been added. Will show last person who viewed the submission
-    
+    - fix interaction view link alignment
+        - not showing in location view at all?
+    - testing
+        - add interaction show page to tests
+        - test all validation 'error' handlers
+        - csv
+    - add captcha to login page and remove fake users 
+        - create user list/set examples *after* account confirmed/first login
+    - Build interaction and taxon show pages 
+    - Add multiple realm root functionality
+    - Send email when publication or feedback is submitted
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
+    - DB migration
+        - remove user lists for fake users
+        - delete fake users
+        - remove parent taxon from deleted taxa
+
 
 >Next
     - Refactor Source data 
@@ -51,9 +52,16 @@ QUESTIONS:
     - Create model of local storage
         - of entity relations
 
+>DATA CLEANUP
+    - forms - Add 'trim' to all values before submitting
+        - Check for elevation field val when elev-max value entered. 
+    - db migration - Loop through all entities that could have random spaces in fields
+    - 
+
 STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
+
 
 
 > ==== MEETING NOTES ==== 
@@ -92,6 +100,7 @@ Next/future rounds:
         - Added mapping to location forms
     - Ability to save set of filters and lists of interactions
     - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
+    - Added Interaction show page
 
     Upcoming: 
         - Data review features
@@ -110,6 +119,10 @@ Sort:
     - REFACTOR - get tag names for the tags column filter menu from stored data rather than hard coded.
     - replace ucfirst and lcfirst with built in 'toUpperCase'
     - add input type, ie number, to form field confgs
+    - when attempting to use the database in FF incognito mode, which does not allow idb. Ignoring for now, will add notice to users at some point.
+    - Database doesn't work with IE. Notify user. 
+    - move db-pg util elem builders to js/util/elems
+    - Add responsive styling testing 
 
 TODOs:
 ##(Category){priority}[difficulty]##

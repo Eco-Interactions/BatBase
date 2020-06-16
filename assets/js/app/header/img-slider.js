@@ -1,13 +1,13 @@
 /*
  * Code related to the image slider site header. 
  *
- * Exports:         Imported by: 
- *     initSlider           oi
+ * Exports: 
+ *     initSlider
  */
 /* Present during window resizing. */
 let timeout;
 
-export function initSlider() {    
+export default function initSlider() {    
     setSliderContainerStyles();
     setSlideInterval();
     window.addEventListener('resize', resetSliderHeight);

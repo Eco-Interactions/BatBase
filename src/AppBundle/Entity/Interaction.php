@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Interaction.
@@ -31,6 +32,7 @@ class Interaction
      *
      * @ORM\Column(name="note", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $note;
 
@@ -40,6 +42,7 @@ class Interaction
      * @ORM\Column(name="is_likely", type="boolean", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("isLikely")
+     * @Groups({"normalized", "flattened"})
      */
     private $isLikely;
 
@@ -49,6 +52,7 @@ class Interaction
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("isOldWorld")
+     * @Groups({"normalized", "flattened"})
      */
     private $isOldWorld;
 
@@ -57,6 +61,8 @@ class Interaction
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="interactions")
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", nullable=false)
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $source;
 
@@ -73,6 +79,8 @@ class Interaction
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="interactions")
      * @ORM\JoinColumn(name="location_id", referencedColumnName="id", nullable=false)
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $location;
 
@@ -81,6 +89,8 @@ class Interaction
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="subjectRoles")
      * @ORM\JoinColumn(name="subject_taxon_id", referencedColumnName="id", nullable=false)
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $subject;
 
@@ -89,6 +99,8 @@ class Interaction
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="objectRoles")
      * @ORM\JoinColumn(name="object_taxon_id", referencedColumnName="id", nullable=false)
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $object;
 
@@ -122,6 +134,7 @@ class Interaction
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized", "flattened"})
      */
     private $updated;
 
@@ -151,6 +164,7 @@ class Interaction
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -259,6 +273,7 @@ class Interaction
      * Get the Source id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
+     * @Groups({"normalized"})
      */
     public function getSourceId()
     {
@@ -293,6 +308,7 @@ class Interaction
      * Get the Interaction Type id and displayName.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactionType")
+     * @Groups({"normalized", "flattened"})
      */
     public function getInteractionTypeData()
     {
@@ -333,6 +349,7 @@ class Interaction
      * Get the Location id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("location")
+     * @Groups({"normalized"})
      */
     public function getLocationId()
     {
@@ -368,6 +385,7 @@ class Interaction
      * Get the Subject id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("subject")
+     * @Groups({"normalized"})
      */
     public function getSubjectId()
     {
@@ -403,6 +421,7 @@ class Interaction
      * Get the Object id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("object")
+     * @Groups({"normalized"})
      */
     public function getObjectId()
     {
@@ -447,6 +466,7 @@ class Interaction
      * Get an array of tag ids and displayNames.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("tags")
+     * @Groups({"normalized", "flattened"})
      */
     public function getTagData()
     {
@@ -474,6 +494,21 @@ class Interaction
             foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
         }
         return $tagIds;
+    }
+
+    /**
+     * Get comma separated tag names.
+     *
+     * @return array 
+     */
+    public function getTagNames()
+    {
+        if (!$this->tags) { return null; }
+        $names = [];
+        if ($this->tags) { 
+            foreach ($this->tags as $tag) { array_push($names, $tag->getDisplayName()); }
+        }
+        return join(', ', $names);
     }
     
     /**
@@ -542,6 +577,7 @@ class Interaction
      * Get updated by user name.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("updatedBy")
+     * @Groups({"normalized", "flattened"})
      *
      * @return string
      */

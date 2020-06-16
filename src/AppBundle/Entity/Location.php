@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Location.
@@ -32,6 +33,7 @@ class Location
      * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
 
@@ -40,6 +42,7 @@ class Location
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $description;
 
@@ -56,6 +59,7 @@ class Location
      *
      * @ORM\Column(name="elevation", type="integer", nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $elevation;
 
@@ -65,6 +69,7 @@ class Location
      * @ORM\Column(name="elevation_max", type="integer", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("elevationMax")
+     * @Groups({"normalized", "flattened"})
      */
     private $elevationMax;
 
@@ -74,6 +79,7 @@ class Location
      * @ORM\Column(name="elev_unit_abbrv", type="string", length=3, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("elevUnitAbbrv")
+     * @Groups({"normalized", "flattened"})
      */
     private $elevUnitAbbrv;
 
@@ -83,6 +89,7 @@ class Location
      * @ORM\Column(name="gps_data", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("gpsData")
+     * @Groups({"normalized", "flattened"})
      */
     private $gpsData;
 
@@ -91,6 +98,7 @@ class Location
      *
      * @ORM\Column(name="latitude", type="decimal", precision=18, scale=14, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $latitude;
 
@@ -99,6 +107,7 @@ class Location
      *
      * @ORM\Column(name="longitude", type="decimal", precision=18, scale=14, nullable=true)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $longitude;
 
@@ -140,6 +149,8 @@ class Location
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", cascade={"persist"})
      * @ORM\JoinColumn(name="geo_json", referencedColumnName="id", nullable=true)
+     * @JMS\Expose
+     * @Groups({"flattened"})
      */
     private $geoJson;
 
@@ -182,6 +193,7 @@ class Location
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized", "flattened"})
      */
     private $updated;
 
@@ -212,6 +224,7 @@ class Location
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -286,6 +299,7 @@ class Location
      * Get isoCode.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("isoCode")
+     * @Groups({"normalized", "flattened"})
      *
      * @return string
      */
@@ -469,7 +483,7 @@ class Location
      *
      * @return Location
      */
-    public function setParentLoc(\AppBundle\Entity\Location $parentLoc)
+    public function setParentLoc(\AppBundle\Entity\Location $parentLoc = null)
     {
         $this->parentLoc = $parentLoc;
 
@@ -490,6 +504,7 @@ class Location
      * Get the parent Location's id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
+     * @Groups({"normalized"})
      */
     public function getParentLocId()
     {
@@ -535,6 +550,7 @@ class Location
      * Get an array of child Location ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
+     * @Groups({"normalized"})
      */
     public function getChildLocIds()
     {
@@ -575,6 +591,7 @@ class Location
      * Get locationType id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("locationType")
+     * @Groups({"normalized", "flattened"})
      */
     public function getLocationTypeData()
     {   
@@ -588,6 +605,7 @@ class Location
      * Get the Region of this Location.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("region")
+     * @Groups({"normalized", "flattened"})
      */
     public function getRegionData()
     {   
@@ -600,6 +618,7 @@ class Location
      * Get the Country of this Location.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("country")
+     * @Groups({"normalized", "flattened"})
      */
     public function getCountryData()
     {   
@@ -666,6 +685,7 @@ class Location
      * Get geoJson ID.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("geoJsonId")
+     * @Groups({"normalized"})
      *
      * @return integer
      */
@@ -725,8 +745,9 @@ class Location
      * Returns an array of interaction ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions") 
+     * @Groups({"normalized"})
      */
-    public function getInteractionids()
+    public function getInteractionIds()
     {
         $allIntIds = [];
         foreach ($this->interactions as $interaction) {
@@ -763,6 +784,7 @@ class Location
      * Get habitatType id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("habitatType")
+     * @Groups({"normalized", "flattened"})
      */
     public function getHabitatTypeData()
     {
@@ -771,7 +793,8 @@ class Location
                 "id" => $this->habitatType->getId(), 
                 "displayName" => $this->habitatType->getDisplayName() 
             ];
-        }
+        } 
+        return [];
     }
 
     public function getPlural()
@@ -846,6 +869,7 @@ class Location
      * Note: Returns null for records developer (ID = 6) modified
      * @JMS\VirtualProperty
      * @JMS\SerializedName("updatedBy")
+     * @Groups({"normalized", "flattened"})
      *
      * @return string
      */

@@ -89,7 +89,6 @@ Feature: Add new data to the database
         And I type "Test Title for Chapter" in the "Title" field "input"
         And I type "666-999" in the "Pages" field "input"
         And I select "Cockle, Anya" from the "Authors" dynamic dropdown
-        And I check the "Show all fields" box
         And I type "Test Abstract Text" in the "Abstract" field "textarea"
         And I see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, ed.). pp. 666-999. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
@@ -104,7 +103,6 @@ Feature: Add new data to the database
         And I should see "Article" in the "Citation Type" form dropdown
         And I type "1990" in the "Year" field "input"
         And I type "Test Title for Article" in the "Title" field "input"
-        And I check the "Show all fields" box
         And I type "666-999" in the "Pages" field "input"
         And I type "4" in the "Volume" field "input"
         And I type "1" in the "Issue" field "input"
@@ -128,7 +126,6 @@ Feature: Add new data to the database
         And I press the "Create Publication" button
         ## Dissertation Citation ##
         And I see "New Citation"
-        And I check the "Show all fields" box
         And I should see "Ph.D. Dissertation" in the "Citation Type" form dropdown
         And I see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
@@ -148,7 +145,6 @@ Feature: Add new data to the database
         And I press the "Create Publication" button
         ## Other Citation ##
         And I see "New Citation"
-        And I check the "Show all fields" box
         And I should see "Other" in the "Citation Type" form dropdown
         And I see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button

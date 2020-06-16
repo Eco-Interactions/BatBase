@@ -99,12 +99,8 @@ button[name="csv"]:before {
     content: url(../../images/icons/globe-africa.svg);
     width: 17px;
 }
-#data-help {
-    z-index: 10000000000;
-}
 #data-help:before {
     content: url(../../images/icons/life-ring.svg);
-    z-index: 10000000001;
     width: 18px;
     margin-right: 1px;
 }

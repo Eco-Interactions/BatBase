@@ -76,7 +76,7 @@ export function updateUserNamedList(data, action) {
 /* ********************* MAIN CODE ****************************************** */
 /* ======================= EVENTS =========================================== */
 export function addPanelEventsAndStyles(userRole) {
-    require('../../../../styles/db/panels/panel.styl');  
+    require('../../../../styles/pages/db/panels/panel.styl');  
     setInfoButtonClickEvents();
     fM.initFilterPanel();
     iM.initListPanel();
@@ -155,7 +155,7 @@ function getOpenPanels() {
 }
 /* ================ SUBMIT AND SUCCESS METHODS ============================== */
 export function submitUpdates(data, action, successFunc) {
-    const envUrl = $('body').data("ajax-target-url");
+    const envUrl = $('body').data("base-url");
     _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, successFunc]);
 }
 /* ================= MISC =================================================== */

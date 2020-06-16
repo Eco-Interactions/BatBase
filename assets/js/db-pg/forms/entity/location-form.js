@@ -19,7 +19,7 @@ import * as _f from '../forms-main.js';
 export function initCreateForm(entity, val) {                                   console.log("       --initLocForm [%s]", val);
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
     buildLocForm(val)
-    .then(onLocFormLoadComplete);
+    .then(onCreateFormLoadComplete);
 }
 function buildLocForm(val) {
     const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
@@ -40,13 +40,16 @@ function buildLocForm(val) {
         $('#Latitude_row input').focus();
     }
 }
-function onLocFormLoadComplete() {
+function onCreateFormLoadComplete() {
     disableTopFormLocNote();
-    addMapToLocForm($('#location_Rows'), 'create');
-    addNotesToForm();
+    addMapToLocForm('create');
     addListenerToGpsFields('sub');
-    handleElevFieldsAndNumberInputs();
     scrollToLocFormWindow();
+    onLocFormLoadComplete();
+}
+function onLocFormLoadComplete() {
+    addNotesToForm();
+    handleElevFieldsAndNumberInputs();
 }
 function disableTopFormLocNote() {
     $('#loc-note').fadeTo(400, .3);
@@ -101,8 +104,10 @@ function locCoordErr(field) {
 export function finishEditFormBuild(entity) {  
     initFormCombos('Location', 'top'); 
     updateCountryChangeMethod();
-    addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']))
+    addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
+    $('#DisplayName-lbl, #ElevationMax-lbl').css('min-width', '106px');
+    onLocFormLoadComplete();
 }
 function updateCountryChangeMethod() {
     $('#Country-sel')[0].selectize.off('change');
@@ -113,7 +118,7 @@ function addGpsListenerToEditForm(id) {
     addListenerToGpsFields('top', [id, 'edit', false]);
 }
 export function addMapToLocationEditForm(id) {
-    addMapToLocForm($('#location_Rows'), 'edit');
+    addMapToLocForm('edit');
     afterMapLoads(finishEditForm, id);
 }
 function finishEditForm(id) {
@@ -138,9 +143,9 @@ export function initFormCombos(entity, fLvl) {
     _f.cmbx('initFormCombos', ['location', fLvl, events]);
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
-export function addMapToLocForm($elem, type) {                                  //console.log('           --addMapToLocForm. $elem = %O', $elem);
-    const map = _f.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]); 
-    $elem.after(map);
+export function addMapToLocForm(type, $formElem = $('#location_Rows')) {
+    const mapContainer = _f.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
+    $formElem.after(mapContainer);
     initLocFormMap(type);
 }
 function initLocFormMap(type) {

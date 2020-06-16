@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 class UserController extends Controller
 {
     /**
-     * Lists all users active online in the last 10 minutes.
+     * Lists all users active online in the last 24 hours.
      *
      * @Route("/online", name="admin_user_online")
      */

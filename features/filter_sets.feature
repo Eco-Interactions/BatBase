@@ -44,7 +44,7 @@ Feature: Save and manage custom sets of filters
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
         And I press the "Apply" button
         Then I should see the table displayed in "Location" view
-        And I should see "(SET) Country, Date Published." in the filter status bar
+        And I should see "(SET) Date Published, Country." in the filter status bar
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
         When I select "all" from the "Country" dropdown
         And I press the "Update" button

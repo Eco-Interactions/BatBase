@@ -14,7 +14,7 @@ import { accessTableState as tState } from '../../../db-main.js';
 // import * as pM from '../panels-main.js';
 
 export function initReviewPanel() {
-    require('../../../../../styles/db/panels/rvw-data.styl');  
+    require('../../../../../styles/pages/db/panels/rvw-data.styl');  
     $('#rvw-data').click(toggleEditorColumn);
 }
 

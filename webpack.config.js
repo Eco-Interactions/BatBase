@@ -13,7 +13,7 @@ Encore
     // .setPublicPath('/build')
     /* Sends source maps to Sentry for bug/issue tracking. */
     // .addPlugin(new SentryWebpackPlugin({
-    //     include: '.', test: [/\.js$/], release: '20200606_BEI', 
+    //     include: '.', test: [/\.js$/], release: '20200616_BB',
     //     debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',  
     //         'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
     // }))
@@ -59,6 +59,7 @@ Encore
     .addEntry('db', './assets/js/db-pg/db-main.js')
     .addEntry('feedback', './assets/js/app/feedback/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
+    .addEntry('show', './assets/js/show-pg/entity-show.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
     // Optimizes code by breaking files into the smallest size needed to run the page (builds lots of files)

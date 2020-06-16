@@ -56,7 +56,6 @@ function disableUserFeatures() {                                                
         #stored-filters input, #stored-filters textarea`)
         .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
         .prop('title', 'Please register to use these features.');
-    $('#data-help').fadeTo('fast', .1)
     return false;
 }
 function initUserFeatures() {                                                   //console.log('enableUserFeatures')
@@ -71,6 +70,7 @@ function initEditorFeatures() {                                                 
     return '.map-dsbl';
 }
 function initUserButtons() {
+    $('button[name="csv"]').click(exportCsvData);  
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);

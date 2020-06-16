@@ -161,7 +161,7 @@ function setSelectedLocVals(selected) {                                         
 export function applyLocFilter(val, text) {            
     if (!val && text === undefined) { return; }             
     const selectedOpts = tState().get('selectedOpts');    
-    const locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text); 
+    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text); 
     const root = getNewLocRoot();  
     const txt = text || fM.getTreeFilterVal('Location');  
     updateLocFilterMemory(root, locType);
@@ -170,10 +170,15 @@ export function applyLocFilter(val, text) {
         .then(() => fM.reapplyDateFilterIfActive());
     
     function getNewLocRoot() {
-        return isNaN(parseInt(val)) ? getParentId(locType) : [parseInt(val)];
+        return isNaN(parseInt(val)) ? 
+            getRegionIdAndUpdateType(locType) : [parseInt(val)];
     }
-    function getParentId(locType) {                                                   
-        return (!locType || locType === 'Region' && val === 'all') ? 
+    function getRegionIdAndUpdateType (comboType) {
+        locType = 'Region';
+        return getRegionId(comboType);
+    }
+    function getRegionId(comboType) {                                         
+        return (!comboType || comboType === 'Region' && val === 'all') ? 
             Object.values(tState().get('data')['topRegionNames']) : 
             [selectedOpts['Region']];
     }

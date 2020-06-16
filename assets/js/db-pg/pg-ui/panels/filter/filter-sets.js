@@ -196,7 +196,7 @@ function setNameSearchFilter(text) {                                /*dbug-log*/
     text = text.replace(/['"]+/g, '');
     $('#focus-filters input[type="text"]').val(text).change();
 }
-function setDateUpdatedFilter(date) {                               /*dbug-log*///console.log('setDateUpdatedFilter. time = %s. today = %s', time, new Date().today());
+function setDateUpdatedFilter(date) {                               /*dbug-log*///console.log('setDateUpdatedFilter. time = %s. today = %s', date.time, new Date().today());
     if (!date) { return; } 
     _u('setSelVal', ['Date Filter', date.type]);
     if (date.time) { _filter('toggleDateFilter', [true, date.time]); }
@@ -240,7 +240,7 @@ function getActiveFilters(statusMsg) {
     return pieces.join('');
 }
 function submitFilterSet(data, action, successFunc) {
-    const envUrl = $('body').data("ajax-target-url");
+    const envUrl = $('body').data("base-url");
     _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action)]);
 }
 function onFilterSubmitComplete(action, results) {

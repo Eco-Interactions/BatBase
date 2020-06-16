@@ -17,11 +17,8 @@
     {% set eifusername = '' %}
     {% set eifrole = 'visitor' %}
 {% endif %}
-{% if is_granted("ROLE_USER") %}
-    {% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
-{% else %}
-    {% set targeturl = "false" %}
-{% endif %}
+
+{% set baseurl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
 
 <html {% block pagedata %}{% endblock %}>
@@ -42,7 +39,7 @@
         <!-- Javascript at end of body. -->
     </head>
 
-    <body data-env="{{ app.environment }}" data-ajax-target-url="{{ targeturl }}"
+    <body data-env="{{ app.environment }}" data-base-url="{{ baseurl }}"
         data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" 
         data-user-name="{{ eifusername }}">
         {% block body %}

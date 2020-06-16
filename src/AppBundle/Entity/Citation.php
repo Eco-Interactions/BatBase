@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Citation.
@@ -31,7 +32,8 @@ class Citation
      *
      * @ORM\Column(name="display_name", type="string", length=255, nullable=false, unique=true)
      * @JMS\Expose
-     * @JMS\SerializedName("displayName")    
+     * @JMS\SerializedName("displayName")   
+     * @Groups({"normalized", "flattened"}) 
      */
     private $displayName;
     
@@ -40,6 +42,7 @@ class Citation
      *
      * @ORM\Column(name="title", type="string", length=255, nullable=false)
      * @JMS\Expose
+     * @Groups({"normalized", "flattened"})
      */
     private $title;
 
@@ -49,6 +52,7 @@ class Citation
      * @ORM\Column(name="full_text", type="text", nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("fullText")
+     * @Groups({"normalized", "flattened"})
      */
     private $fullText;
 
@@ -58,6 +62,7 @@ class Citation
      * @ORM\Column(name="abstract", type="text", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("abstract")
+     * @Groups({"normalized", "flattened"})
      */
     private $abstract;
 
@@ -67,6 +72,7 @@ class Citation
      * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("publicationVolume")
+     * @Groups({"normalized", "flattened"})
      */
     private $publicationVolume;
 
@@ -76,6 +82,7 @@ class Citation
      * @ORM\Column(name="publication_issue", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("publicationIssue")
+     * @Groups({"normalized", "flattened"})
      */
     private $publicationIssue;
 
@@ -85,6 +92,7 @@ class Citation
      * @ORM\Column(name="publication_pages", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("publicationPages")
+     * @Groups({"normalized", "flattened"})
      */
     private $publicationPages;
 
@@ -128,6 +136,7 @@ class Citation
      * @ORM\Column(type="datetime")
      * @JMS\Expose
      * @JMS\SerializedName("serverUpdatedAt")
+     * @Groups({"normalized"})
      */
     private $updated;
 
@@ -157,6 +166,7 @@ class Citation
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
+     * @Groups({"normalized", "flattened"})
      *
      * @return int
      */
@@ -361,6 +371,7 @@ class Citation
      * Get the Citation Type id and displayName.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("citationType")
+     * @Groups({"normalized", "flattened"})
      */
     public function getCitationTypeData()
     {
@@ -401,6 +412,7 @@ class Citation
      * Get the Source id.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
+     * @Groups({"normalized"})
      */
     public function getSourceId()
     {
