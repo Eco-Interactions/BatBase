@@ -13,7 +13,7 @@ Encore
     // .setPublicPath('/build')
     /* Sends source maps to Sentry for bug/issue tracking. */
     // .addPlugin(new SentryWebpackPlugin({
-    //     include: '.', test: [/\.js$/], release: '20200607_BEI',
+    //     include: '.', test: [/\.js$/], release: '20200616_BB',
     //     debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',  
     //         'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
     // }))
