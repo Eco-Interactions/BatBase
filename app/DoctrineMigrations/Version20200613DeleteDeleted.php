@@ -74,15 +74,15 @@ class Version20200613DeleteDeleted extends AbstractMigration implements Containe
         $loc->setParentLoc(null);
         if ($loc->getChildLocs()) {
             $this->handleDeletedLocChildren($loc->getChildLocs());
-        }  print("\n Deleting location ".$loc->getId());
-        $this->em->remove($loc);  //Is it really removed now? 
+        }                                                                       print("\n Deleting location ".$loc->getId());
+        $this->em->remove($loc);
         $this->em->flush();
     }
     private function handleDeletedLocChildren($childLocs)
     {
         foreach ($childLocs as $loc) {
             if (!$loc->getInteractionIds()) { $this->handleLocFinalDelete($loc); continue; }
-            print("\n     Interactions = "); print_r($loc->getInteractionIds());
+                                                                                print("\n     Interactions = "); print_r($loc->getInteractionIds());
         }
     }
     private function fullyDeleteDeletedTaxa($taxa)
@@ -97,10 +97,10 @@ class Version20200613DeleteDeleted extends AbstractMigration implements Containe
         $taxon->setParentTaxon(null);
         if ($taxon->getChildTaxa()) {
             $this->handleDeletedChildren($taxon->getChildTaxa());
-        }  print("\n Deleting ".$taxon->getId());
-        $this->em->remove($taxon);  //Is it really removed now? 
+        }                                                                       print("\n Deleting ".$taxon->getId());
+        $this->em->remove($taxon);
         $this->em->flush();
-        $this->em->remove($taxon);  //Is it really removed now? 
+        $this->em->remove($taxon);
         $this->em->flush();
     }
     private function handleDeletedChildren($childTaxa)
@@ -111,14 +111,14 @@ class Version20200613DeleteDeleted extends AbstractMigration implements Containe
         }
     }
     private function handleUndeletedChild($taxon)
-    {       print("\nUndeleted child = ".$taxon->getId());
+    {                                                                           print("\nUndeleted child = ".$taxon->getId());
         $interactions = $taxon->getAllInteractionIds(); 
         if (!count($interactions)) { return $this->handleTaxonFinalDelete($taxon); }
-        print("\n     Interactions = "); print_r($taxon->getAllInteractionIds());
+                                                                                print("\n     Interactions = "); print_r($taxon->getAllInteractionIds());
         foreach ($interactions as $id) {
             $int = $this->getEntity('Interaction', $id);
             if (!$int->getDeletedAt()) { print("\n--- UNDELETED INTERACTION = ". $int->getId()); }
-            $this->em->remove($int);  //Is it really removed now? 
+            $this->em->remove($int);
             $this->em->flush();
         }
         $this->handleTaxonFinalDelete($taxon);
