@@ -79,6 +79,9 @@ class Version20200614FakeUsers extends AbstractMigration implements ContainerAwa
     {
         $this->deleteUserLists($user);
         $this->em->remove($user);
+        $this->em->flush();
+        $this->em->remove($user);
+        $this->em->flush();
     }
     private function deleteUserLists($user)
     {
@@ -87,8 +90,10 @@ class Version20200614FakeUsers extends AbstractMigration implements ContainerAwa
 
         foreach ($lists as $list) {
             $this->em->remove($list);
+            $this->em->flush();
+            $this->em->remove($list);
+            $this->em->flush();
         }
-        $this->em->flush();
     }
     private function isFlaggedForRemoval($username)
     {
@@ -159,7 +164,19 @@ class Version20200614FakeUsers extends AbstractMigration implements ContainerAwa
         'HBYMdXOr', 'FAcNLlYispqEnzVH', 'nOPlXsTVHrIveQ', 'gYpHVLOTKiDBqs', 'odUjNePhfYwZQM', 
         'jkWLurvYVGX', 'IfSaYPHAZDJEQx', 'xWpEKfHPuhzsknSX', 'LuevrBXcw', 'adSfjPKcO', 
         'YagqsGucBWTQ', 'GOjmRtoqX', 'SZmvtGpiOqujVhK', 'MGpXINtyuVEShO', 'CAykNRTzcaZbH', 
-        'ACMJimxl', 'rlESaKmIQXY', 'bLUVZBShJqTPFpD', 'lbXLUhBpeMkD'];
+        'ACMJimxl', 'rlESaKmIQXY', 'bLUVZBShJqTPFpD', 'lbXLUhBpeMkD', 'AGvKaLTgMlUFikW', 
+        'YCSPUKJnVNOt', 'HneryjosKSOgiEQv', 'FtLdRcBurWX', 'TkUXIhLRtY', 'AGeHEpUi', 
+        'scZqClaPSg', 'MIKPxLWTeQXREzJ', 'RdnfhoevKXyQaN', 'fjsll', 'JRzLXSTH', 'CFomsWxaDZ', 
+        'ZuFLgtHORCrmjByE', 'BwTxbVeRLafiHnX', 'vJjcbaIHshEMVeu', 'fYKQEMBlgxy', 'NHQXZmKahUbAc', 
+        'pCPfAQDeZqMNbzRl', 'rNvCKZbiYGmLz', 'exRwfGFtZIjPamB', 'CmtZiuLR', 'bSyKQTsuxXzpEw', 
+        'VhdXmxbHR', 'xEMghiYfQzop', 'mYZNIaRUFJPHOcge', 'VcXvyJUpZsltr', 'ltFdegokUTVO', 
+        'sNlyuvgeVqUcktiQ', 'dKSucIUfFjrOb', 'ZPsgVDEoX', 'ordFIjzaLWQ', 'BewgVHtpLACanPXb', 
+        'pmYiqMISGwyBFov', 'yxlpaeoYiLstDN', 'XIvGDlYh', 'kBYxFKcIUpShOLs', 'VfxzBwHan', 
+        'HXkCutPBKpGbc', 'wYhWCydcRVsrJ', 'KbVMIDWjlvSomF', 'rfSbLyEmOz', 'pTiznRZcYE', 
+        'TjxYqUzOB', 'hOaRckYtsVFnxZrJ', 'ryLmoQlbxI', 'nSbCVYhWywGvA', 'VwgJOTkicEpAHYIz', 
+        'KYIOWADcXfxJHRZh', 'eKGcZpFr', 'VMHfEFIhnuo', 'QmJERCbnziS', 'hOQXsdJZpB', 
+        'NsZSvQhDlROcJC', 'dGFKRsraiXDq', 'FvSMbZkVznymPo', 'xUBzTYwjSLu', 'WDZOfCuHaSQ', 
+        'MZOQgcrXzw', 'NeriKAhdnx', 'IFTPumlZXiAzhN', 'dbtDTqWoIf'];
         return in_array($username, $remove);
     }
 /* ======================== down ============================================ */

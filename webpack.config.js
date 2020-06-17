@@ -7,7 +7,7 @@ const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' 
 Encore
 /* ======== DEV ======= */
     /* During rebuilds, all webpack assets that are not used will be removed. */
-    .setPublicPath('/batplant/web/build')
+    .setPublicPath('/BatBase/web/build')
 /* ========= PROD ======= */ 
     /* the public path used by the web server to access the previous directory */
     // .setPublicPath('/build')

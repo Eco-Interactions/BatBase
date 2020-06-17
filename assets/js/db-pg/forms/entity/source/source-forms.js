@@ -136,6 +136,7 @@ function initCitFormMemory(data) {
 }
 function addSourceDataToMemory(data) {
     const records = _f.state('getStateProp', ['records']);
+    if (!records) { return; } //form was closed.
     Object.keys(data).forEach(k => records[k] = data[k]);
     _f.state('setStateProp', ['records', records]);
 }

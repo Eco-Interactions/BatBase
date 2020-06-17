@@ -197,6 +197,7 @@ export function addRequiredFieldInput(fLvl, input) {
     formState.forms[fLvl].reqElems.push(input);
 }
 export function addComboToFormState(fLvl, field) {                              //console.log('addComboTo[%s]Memory [%s]', fLvl, field);
+    if (!formState.forms) { return; } //form was closed.
     formState.forms[fLvl].selElems.push(field);    
 }
 export function setStateProp(prop, val) {

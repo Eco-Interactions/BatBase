@@ -13,16 +13,14 @@ Change Log:
 QUESTIONS:
 
 >==== CURRENT ====
-    - fix interaction view link alignment
-        - not showing in location view at all?
+    - fix cronjob to clean up hourly backups
+    - optimize data sync downloads. It takes almost as long as full download, 
+        depending on how much needs to be updated
     - testing
         - add interaction show page to tests
         - test all validation 'error' handlers
         - csv
-    - add captcha to login page and remove fake users 
-        - create user list/set examples *after* account confirmed/first login
-    - Build interaction and taxon show pages 
-    - Add multiple realm root functionality
+        - wysiwyg
     - Send email when publication or feedback is submitted
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
@@ -31,6 +29,7 @@ QUESTIONS:
         - remove user lists for fake users
         - delete fake users
         - remove parent taxon from deleted taxa
+    - Add multiple realm root functionality
 
 
 >Next
@@ -123,6 +122,7 @@ Sort:
     - Database doesn't work with IE. Notify user. 
     - move db-pg util elem builders to js/util/elems
     - Add responsive styling testing 
+    - FOS registration email is not using the template found in src/appbundle/resources/translations/*
 
 TODOs:
 ##(Category){priority}[difficulty]##
