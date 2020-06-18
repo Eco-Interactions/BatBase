@@ -164,8 +164,8 @@ function getEntityConfg(entity) {
             'add': { 'FirstName': 'text', 'MiddleName': 'text', 
                 'LastName': 'text', 'Suffix': 'text'}, 
             'required': ['LastName'], 
-            'suggested': ['FirstName', 'MiddleName'],
-            'optional': ['Suffix', 'LinkUrl', 'LinkDisplay'],
+            'suggested': ['FirstName', 'MiddleName', 'Suffix'],
+            'optional': ['LinkUrl', 'LinkDisplay'],
             'order': {
                 'sug': ['FirstName', 'MiddleName', 'LastName', 'Suffix'],
                 'opt': ['FirstName', 'MiddleName', 'LastName', 'Suffix', 
