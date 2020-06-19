@@ -4,15 +4,31 @@
  *
  * EXPORTS:
  *     alertIssue
- *     showAlert
+ *     initSentry
  *     getErrMsgForUserRole
+ *     showAlert
  *
  * TOC:
+ *     INIT SENTRY
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
 import { accessTableState as tState, getCurrentFilterState } from '../../db-pg/db-main.js';
+import { ExtraErrorData } from '@sentry/integrations';
 
+/* --------------------- INIT SENTRY ---------------------------------------- */
+export function initSentry () {
+    Sentry.init({ 
+        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
+        integrations: [new ExtraErrorData()]
+    });
+    configureSentryUserData($('body').data('user-name'), $('body').data('user-role'));
+}
+function configureSentryUserData (userName, userRole) {
+    Sentry.configureScope(scope => {
+        scope.setUser({ username: userName, role: userRole });
+    })
+}
 /* ------------------- CREATE SENTRY EVENT ---------------------------------- */
 /** Sends Error object to Sentry, issue tracker. */
 export function reportErr(e) {
@@ -30,31 +46,24 @@ export function reportErr(e) {
  *     TestIssue null (no browser alert)
  *     undefiendDataKey {key}
  */
-export function alertIssue(tag, errData = {}) {                                      
+export function alertIssue(tag, errData = {}) {
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
-    const debugData = buildDebugData(errData, tag);
-    const err = new SentryError(tag, debugData);
-    Sentry.captureException(err); 
+    setSentryDebugContext(errData);
+    Sentry.captureException(new SentryError(tag, errData)); 
     handleUserAlert(tag);
 }
-function buildDebugData(errData, tag) {
-    const data = buildBasicStateData();
-    data.error = buildErrObj(errData, tag);
-    return JSON.stringify(data, null, 4);
+function setSentryDebugContext(errData) {
+    setBasicStateContext();
+    setErrorContext(errData);
 }
-function buildBasicStateData() {
-    const data = { user: $('body').data('user-name') };
-    if ($('body').data('this-url') !== '/search') { return data; }
+function setBasicStateContext() {
+    if ($('body').data('this-url') !== '/search') { return; }
     const state = tState().get();
-    return Object.assign(data, { 
-        focus: state.curFocus, view: state.curView, userRole: state.userRole,
-        filters: getCurrentFilterState()
-    });
+    const base = {focus: state.curFocus, view: state.curView}; 
+    Sentry.setContext('filter_state', Object.assign(base, getCurrentFilterState()));
 }
-function buildErrObj(errData, tag) {
-    const obj = {};
-    Object.keys(errData).forEach(key => obj[key] = errData[key]);
-    return obj;
+function setErrorContext (errData) {
+    Sentry.setContext('error_tags', errData);
 }
 /* ------------------------ Sentry Error Object ----------------------------- */
 /** Extends the Error object to add debug data for the error.  */
@@ -67,7 +76,7 @@ class SentryError extends Error {
     // Custom debugging information
     this.name = tag
     // this.tag = tag;
-    this.message = debugData;
+    this.message = JSON.stringify(debugData); 
   }
 }
 /* ------------------- ALERT USER ------------------------------------------- */

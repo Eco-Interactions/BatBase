@@ -91,7 +91,7 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
     return _f.util('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
-        const rcrds = _f.state('addEntityRecords', [entity, data]);
+        _f.state('addEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }

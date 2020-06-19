@@ -44,6 +44,7 @@ export function resetStoredData() {
     pg._db('resetStoredData');
 }
 export function alertIssue() {
+    if (!_state.getFormState()) { return; } //form closed
     return pg._alert('alertIssue', [...arguments]);
 }
 /** ====================== FORMS FACADE ===================================== */
