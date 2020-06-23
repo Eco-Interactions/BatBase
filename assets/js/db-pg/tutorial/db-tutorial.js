@@ -47,7 +47,7 @@ function buildIntro() {
 } 
 function getIntroOptions() {
     return {
-        showStepNumbers: false,
+        showStepNumbers: true,
         showBullets: true,
         skipLabel: 'Exit',
         doneLabel: "I'm done.",
@@ -119,7 +119,7 @@ function addBttnEvents() {
     }, 400);
 }
 function enableMapTutorialIfDataAvailable(elem) {  
-    $(elem).attr('disabled', !isAllDataAvailable)
+    $(elem).attr('disabled', !isAllDataAvailable())
         .css({'opacity': .3, 'cursor': 'wait'});
 }
 function showTutorial(tutKey) {  
@@ -207,7 +207,7 @@ function getSteps() {
             intro: `<h4><center>All interactions with plants are displayed 
                 and available for further sorting and filtering.</center></h4>
                 <br>Columns can be resized by dragging the column header dividers 
-                and rearranged by dragging the header iteself.<br><br>Hovering 
+                and rearranged by dragging the header itself.<br><br>Hovering 
                 over a column header reveals the filter menu for that column.<br><br>
                 Some columns can be filtered by text, others by selecting or 
                 deselecting values in that column.<br>`,
@@ -218,7 +218,7 @@ function getSteps() {
             intro: `<h3><center>Column definitions</h3></center><br>
                 <b>"Subject Taxon"</b> shows the bat taxon that each interaction is 
                 attributed to.<br><br>
-                <b>"Object Taxon"</b>, shows the taxon interacted with.
+                <b>"Object Taxon"</b> shows the taxon interacted with.
                 <br><br>Note on Taxon names: Aside from genus species binomials, 
                 names at all other taxonomic levels begin with the level (e.g., 
                 Family Acanthaceae for the plant family Acanthaceae).`,
@@ -228,13 +228,11 @@ function getSteps() {
             element: '#search-tbl',
             intro: `<b>"Cnt"</b> (count) shows the number of interactions attributed 
                 to each Taxon, Location, or Source.<br><br>
-                <b>“Type”</b> refers to the type of interaction, including visitation, 
-                consumption, pollination, seed dispersal, host, roost, and transport. For a 
-                list of definitions, see the <a href="definitions">Definitions</a> 
+                <b>“Type”</b> refers to the type of interaction. For a 
+                list of definitions, see the <a href="definitions" target="_blank">Definitions</a> 
                 page.<br><br>
                 <b>“Tags”</b> refer to the part of the Object Taxon being 
-                interacted with, including flower, fruit, seed, leaf, and arthropod. 
-                The “Secondary” tag refers to an interaction that the author did 
+                interacted with. The “Secondary” tag refers to an interaction that the author did 
                 not witness directly, but instead is citing from another publication.`,
             position: 'top'
         },
@@ -254,8 +252,8 @@ function getSteps() {
             element: '#filter-col1',
             intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns 
                 show all taxa in the selected realm present in the table.</b><br><br>
-                 - Select a specific taxon from a dropdown and the Tree will update to show 
-                the selected taxon as the top the of the data tree. The other dropdowns will 
+                 - Select a specific taxon from the dropdown menu and the table will 
+                update to show it at the top of the data tree. The other dropdowns will 
                 populate with related taxa.`, 
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
@@ -264,7 +262,7 @@ function getSteps() {
             element: '#filter-col1',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 <b>Locations</b> can be filtered by region, country, and display name.<br><br>
-                <b>Sources</b> can be filtered by name and by the type of publication.`, 
+                <b>Sources</b> can be filtered by author, publisher, and by the type of publication.`, 
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -278,9 +276,9 @@ function getSteps() {
         },
         {
             element: '#stored-filters',
-            intro: `<h4><center>Filters can be saved and applied as a set.</center></h4><br>
-                Saved sets include the grouping and view of the data and all applied filters from
-                the panel and the table columns.<br><br>For example, a set could show all journal 
+            intro: `<h4><center>Filters can be saved and reapplied later as a set.</center></h4><br>
+                After filtering data using the Filter menu and table columns, save the set to 
+                run the same search later.<br><br>For example, a set could show all journal 
                 articles tagged with "flower" in a "forest" habitat or all African "consumption" interactions in
                 a "desert" habitat.<br><br><center><b>Register and log in to use these features.</b></center>`,
             position: 'left',
@@ -319,7 +317,8 @@ function getSteps() {
                 Taxon/Location/Source filtered to, the count of their interactions, 
                 and the top 3 most reported bats in the set of interactions.<br>
                 <br><center><b>Click on a marker to keep its popup open.</b><br><br>
-                Hover over truncated(...) text to show full text.`,
+                Hover over truncated(...) text to show full text. Only the first 4 
+                interactions at a location are `,
             position: 'top',
             setUpFunc: loadIntsOnMap
         },
@@ -394,7 +393,7 @@ export function getFilterPanelSteps() {
     return [{
         element: '#filter-col1',
         intro: `<h3><center>Dynamic filters</center></h3><br><b>Location:</b> Region, country,
-            and name filters.<br><br><b>Source:</b> Name and publication type filters.
+            and name filters.<br><br><b>Source:</b> Author, publication, and publisher filters.
             <br><br><b>Taxon:</b> Name and taxonomic rank filters.<br>
              - The dropdowns show all taxa in the Taxon Tree<br>
              - Select a specific taxon and the Tree will update to show interactions
@@ -431,11 +430,11 @@ export function getFilterPanelSteps() {
 export function getSavedFilterSteps() {
     return [{
         element: '#stored-filters',
-        intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
-            Saved sets include the grouping and view of the data and all applied filters from
-            the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
-            in a "forest" habitat or all African "consumption" interactions in a "desert" habitat.<br><br>
-            New users have preloaded examples to help demonstrate this feature.`,
+        intro: `<h4><center>Filters can be saved and reapplied later as a set.</center></h4><br>
+            After filtering data using the Filter menu and table columns, save the set to 
+            run the same search later.<br><br>For example, a set could show all journal 
+            articles tagged with "flower" in a "forest" habitat or all African "consumption" interactions in
+            a "desert" habitat.<br><br><center><b>Register and log in to use these features.</b></center>`,
         position: 'left'
     }];
 }
