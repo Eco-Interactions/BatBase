@@ -87,11 +87,11 @@ function showNoChangesMessage() {
     _f.elems('showSuccessMsg', ['No changes detected.', 'red']); 
 }
 /** Updates the core records in the global form params object. */
-function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
+function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s])', entity, detailEntity);
     return _f.util('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
-        const rcrds = _f.state('addEntityRecords', [entity, data]);
+        _f.state('addEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }

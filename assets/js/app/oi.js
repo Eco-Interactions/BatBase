@@ -17,6 +17,7 @@
 import initTosPopup from './misc/tos.js';
 import initSiteNav from './header/nav.js';
 import initSlider from './header/img-slider.js';
+import { initSentry } from './misc/alert-issue.js';
 
 initSentryIssueTracking();
 requireStyles();
@@ -25,9 +26,7 @@ initUi();
 /* ================= SENTRY ERROR TRACKING ================================== */
 function initSentryIssueTracking() {  
     if ($('body').data('env') !== 'prod') { return; } 
-    Sentry.init({ 
-        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194'
-    });
+    initSentry();
 }
 /* ==================== STYLES & GLOBAL JQUERY ============================== */
 function requireStyles() {

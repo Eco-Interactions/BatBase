@@ -2,7 +2,7 @@ default:
     extensions:
         Behat\Symfony2Extension: ~
         Behat\MinkExtension:
-            base_url: http://localhost/batplant/web/app_test.php
+            base_url: http://localhost/BatBase/web/app_test.php
             browser_name: chrome
             goutte: ~
             javascript_session: selenium2

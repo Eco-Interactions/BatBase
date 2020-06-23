@@ -544,14 +544,9 @@ function addFltrdBats(ints, allBats) {
     ints.forEach(int => trackBatInteraction(int.subject, allBats));
 }
 function trackBatInteraction(bat, allBats) {                                    //console.log('bat = %O', bat);
-    let name = buildBatName(bat);
+    let name = bat.displayName;
     if (Object.keys(allBats).indexOf(name) === -1) { allBats[name] = 0; }
     ++allBats[name];
-}
-function buildBatName(bat) {
-    let name = '';
-    if (bat.level.displayName !== 'Species') { name += bat.level.displayName + ' '; }
-    return name + bat.displayName;
 }
 /** ---- Habitat and Bat Helper ---- */
 

@@ -44,11 +44,7 @@ class DataEntryController extends Controller
         $coreEntity = new $coreClass();
         $coreFormData = $formData->$coreName;
 
-        $returnData = new \stdClass; 
-        $returnData->core = $coreName;
-        $returnData->coreEntity = $coreEntity;
-        $returnData->coreEdits = $this->getEditsObj(false); 
-        $returnData->detailEdits = $this->getEditsObj(false); 
+        $returnData = $this->buildReturnDataObj($coreName, $coreEntity, $formData);
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -92,10 +88,10 @@ class DataEntryController extends Controller
     {
         $data = new \stdClass; 
         $data->core = $coreName;
-        $data->coreId = $coreEntity->getId();
+        $data->coreId = $coreEntity->getId();  //Created entities have ids added before returning
         $data->coreEntity = $coreEntity;
-        $data->coreEdits = $this->getEditsObj($formData->ids->core); 
-        $data->detailEdits = $this->getEditsObj($formData->ids->detail);
+        $data->coreEdits = $this->getEditsObj($formData, 'core'); 
+        $data->detailEdits = $this->getEditsObj($formData, 'detail');
         if ($coreName !== 'interaction') {
             $data->coreName = $coreEntity->getDisplayName();
         }
@@ -139,10 +135,11 @@ class DataEntryController extends Controller
      * Builds and returns an object that will track any edits made to the entity. 
      * The editing prop holds the id of the entity being edited, or false if creating.
      */
-    private function getEditsObj($editing)
+    private function getEditsObj($formData, $type)
     {
         $edits = new \stdClass;
-        $edits->editing = $editing;
+        $edits->editing = property_exists($formData, 'ids') ? 
+            $formData->ids->$type : false;
         return $edits;
     }
     private function removeEditingFlag($coreObj, $detailObj)
@@ -450,7 +447,7 @@ class DataEntryController extends Controller
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        if (ifNotDuplicateEntityError($e)) {
+        if ($this->ifNotDuplicateEntityError($e)) {
             $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         $response = new JsonResponse();
@@ -467,11 +464,14 @@ class DataEntryController extends Controller
     private function sendDataAndResponse($entityData)
     {
         $serializer = $this->container->get('jms_serializer');
-        $serialize = ['coreEntity', 'detailEntity'];
+        $serialize = ['core', 'detail'];
 
-        foreach ($serialize as $prop) {
+        foreach ($serialize as $p) {
+            $prop = $p.'Entity';
+            $id = $p.'Id';
             if (!$entityData->$prop) { continue; }
             try {
+                $entityData->$id = $entityData->$prop->getId();
                 $entityData->$prop = $serializer->serialize(
                     $entityData->$prop, 'json', 
                     SerializationContext::create()->setGroups(array('normalized')));
