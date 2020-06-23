@@ -142,6 +142,7 @@ function modifyFormDisplay() {
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     $('.all-fields-cntnr').hide();
+    $('#Subject-lbl').text('Subject (Bat)');
     _f.elems('setCoreRowStyles', ['#form-main', '.top-row']);
 }
 /** Adds a message above the location fields in interaction forms. */
