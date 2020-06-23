@@ -696,8 +696,12 @@ function reportDataSyncFailures(obj) {
     const data = obj || {};
     addFailedUpdatesToObj(data);
     if (!data.fails) { return data; }                                           console.log('           !!Reporting failures = %O', data.fails)
-    _db.pg('alertIssue', ['dataSyncFailure', { fails: JSON.stringify(data.fails) }]);
+    _db.pg('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
     return data
+}
+function getFailureReport (failures) {
+    const data = failures.map(f => { return { err: f.errMsg, tag: f.tag}});
+    return JSON.stringify(data);
 }
 function addFailedUpdatesToObj(data) {
     data.fails = failed.data.length ? failed.data : null;

@@ -93,12 +93,12 @@ mobile_detect:
     redirect:
         full:
             is_enabled: true            # default false
-            # host: https://batplant.com       # with scheme (http|https), default null, url validate
+            # host: https://batbase.com       # with scheme (http|https), default null, url validate
             # status_code: 301            # default 302
             action: no_redirect           # redirect (default), no_redirect, redirect_without_path
         mobile:
             is_enabled: true            # default false
-            # host: https://m.batplant.com     # with scheme (http|https), default null, url validate
+            # host: https://m.batbase.com     # with scheme (http|https), default null, url validate
             # status_code: 301            # default 302
             action: no_redirect            # redirect, no_redirect, redirect_without_path
         tablet:

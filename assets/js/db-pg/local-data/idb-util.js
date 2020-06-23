@@ -15,7 +15,7 @@
 import * as _db from './local-data-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
-const db_v = '.46'; //prod: .46
+const db_v = '.48'; //prod: .46
 /** ----------------------- INIT -------------------------------------------- */
 /** 
  * Checks whether the dataKey exists in indexDB cache and downloads full DB if not.

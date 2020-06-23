@@ -20,7 +20,8 @@ import { ExtraErrorData } from '@sentry/integrations';
 export function initSentry () {
     Sentry.init({ 
         dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
-        integrations: [new ExtraErrorData()]
+        integrations: [new ExtraErrorData()],
+        blacklistUrls: ['copy.batbase.org', 'dev.batbase.org']
     });
     configureSentryUserData($('body').data('user-name'), $('body').data('user-role'));
 }
