@@ -432,9 +432,13 @@ function getDescHtml(loc, strLngth) {
 function getHabTypeHtml(loc, leaveBlank) {  
     if (isRegionOrCountry(loc)) { return getAllHabitatsWithin(loc); }
     if (!loc.habitatType) { return leaveBlank ? '' : false; }
-    const name = loc.habitatType.displayName.includes('Caves') ? 
-        'Caves & Subterranean' : loc.habitatType.displayName;
+    const name = getHabitatName(loc) || '';
     return `Habitat: <b>${name}</b>`;
+}
+function getHabitatName (loc) {
+    return !loc.habitatType.displayName ? null : 
+        loc.habitatType.displayName.includes('Caves') ? 
+            'Caves & Subterranean' : loc.habitatType.displayName;
 }
 function getCoordsHtml(loc) { 
     const geoData = data.geo[loc.geoJsonId];                                    //console.log('geoJson = %O', geoData); 
@@ -509,9 +513,8 @@ function getAllHabitatsWithin(loc) {                                            
         if (loc.children.length) { loc.children.forEach(addHabitatsForLocAndChildren); }        
     }
     function addLocHabitat(loc) {
-        if (!loc.habitatType) { return; }
-        const name = loc.habitatType.displayName.includes('Caves') ? 
-            'Caves & Subterranean' : loc.habitatType.displayName;
+        const name = getHabitatName(loc);
+        if (!name) { return; }
         if (!habitats[name]) { habitats[name] = 0; }
         ++habitats[name];
     }
