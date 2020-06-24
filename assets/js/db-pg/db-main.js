@@ -170,7 +170,11 @@ function setTableInitState(isAllDataAvailable) {
     // if ($('#shw-chngd')[0].checked) { filter.toggleDateFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable; 
 }
-export function enableMap() {
+export function onDataDownloadComplete () {
+    $('.tree-show').fadeTo('fast', 1);
+    enableMapFeatures();
+}
+function enableMapFeatures() {
     $('#shw-map').data('loaded', true).prop('disabled', false).fadeTo('fast', 1);
     $('.map-ico').fadeTo('fast', 1);
 }

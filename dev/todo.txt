@@ -47,10 +47,6 @@ QUESTIONS:
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
-    - DB migration
-        - remove user lists for fake users
-        - delete fake users
-        - remove parent taxon from deleted taxa
     - Add multiple realm root functionality
 
 

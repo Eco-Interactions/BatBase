@@ -34,7 +34,7 @@ export default function (reset) {                                               
         .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initTaxonDataAndLoadTable(reset))
         .then(downloadRemainingTableData)
-        .then(downloadRemainingDataAndEnableMap)
+        .then(downloadRemainingDataAndFullyEnableDb)
         .then(_db.clearTempMmry);
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
@@ -52,11 +52,11 @@ function downloadRemainingTableData() {
         .then(() => _db.pg('initSearchStateAndTable'));
 }
 /* ------------------- DOWNLOAD MAP DATA ------------------------------------ */
-function downloadRemainingDataAndEnableMap() {
+function downloadRemainingDataAndFullyEnableDb() {
     return getAndSetData('geoJson')
         .then(() => getAndSetData('lists'))
         .then(() => _db.setUpdatedDataInLocalDb())
-        .then(_db.pg('enableMap'));
+        .then(_db.pg('onDataDownloadComplete'));
 }
 /* -------------------------- HELPERS --------------------------------------- */
 function getAndSetData(url) {

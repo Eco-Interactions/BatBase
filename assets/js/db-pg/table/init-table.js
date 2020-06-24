@@ -190,8 +190,9 @@ function addIntShowIcon (id) {
 }
 function getShowIconHtml () {
     const path = require('../../../images/icons/search.svg').default; 
+    const opac = tblState.flags.allDataAvailable ? 1 : 0;
     return`<img src=${path} class="tree-show" title="Show Interaction Details" 
-        alt="Show Interaction Details">`;
+        alt="Show Interaction Details" style="opacity:${opac}">`;
 }
 function getShowLink (id) {
     return $('body').data('base-url') + 'interaction/' + id;
