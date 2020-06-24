@@ -1,4 +1,5 @@
 {% extends '::base.html.twig' %}
+{% set menu = knp_menu_get('main', [], {'usrrole': "{{ eifrole }}", 'usrname': "{{ eifusername }}" }) %}
 
 {% block masthead %}
     {% if is_full_view() or is_tablet_view() %}
@@ -27,7 +28,7 @@
                     <span class="toggle">☰ Menu</span>
                     <div class="site-name">batbase.org</div>
                 </div>
-                {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
+              {{ knp_menu_render(menu) }}
             </nav>
             <div id="site-name">batbase.org</div>
         </div>

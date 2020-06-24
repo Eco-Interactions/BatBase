@@ -2,17 +2,28 @@
 namespace AppBundle\Menu;
 
 use Knp\Menu\FactoryInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+// use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+// use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class Builder implements ContainerAwareInterface
+class MenuBuilder
 {
-    use ContainerAwareTrait;
+    private $factory;
+
+    /**
+     * @param FactoryInterface $factory
+     *
+     * Add any other dependency you need
+     */
+    public function __construct(FactoryInterface $factory)
+    {
+        $this->factory = $factory;
+    }
+    // use ContainerAwareTrait;
     
-    public function mainMenu(FactoryInterface $factory, array $options)
+    public function createMainMenu(array $options)
     {
         $user_name = $options['usrname'];
-        $menu = $factory->createItem('root');
+        $menu = $this->factory->createItem('root');
         $menu->setChildrenAttributes(array('id' => 'oimenu'));
         $menu->addChild('Home', array('route' => 'app_home'));
         $menu->addChild('About', array('uri' => '#'));

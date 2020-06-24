@@ -19,7 +19,6 @@
 {% endif %}
 
 {% set baseurl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
-{% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
 
 <html {% block pagedata %}{% endblock %}>
     <head>
