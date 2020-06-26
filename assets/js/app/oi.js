@@ -116,7 +116,7 @@ function initPageTable() {
 /** Not quite sure how to show a success message and reload form, will loop back when there's more time. */
 function clearFieldForPdfSubmissions() {
     if (window.location.pathname.includes('upload/publication')) {
-        $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
+        $('textarea#app_file_upload_description').val(''); //Clears field after form submit. 
     }
 }
 /* ------------ PAGES THAT DON'T WORK ON MOBILE DEVICES --------------------- */

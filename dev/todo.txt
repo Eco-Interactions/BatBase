@@ -7,29 +7,30 @@
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
 #       
 Change Log:
-    - Updated all site links
-    - Added 'Bat' to the subject field label in interaction forms
-    - wrote definitions draft
-        - I see it is written that bats can consume other bats. That is not currently available
-        - I will not be making the pdf with the advanced and detailed definitions. 
-            My understanding was that already exists and is what this page was deafted from?
-    - Fixed duplicated bat ranks in map popups
-    - Tutorial:
-        - Map button enabling correctly
-        - Deifnitions link opens in new tab
-        - Data entry is never enabled because we have not created this yet
-        - Slide 10: added author and publisher
-        - Slide 16: This is addressed in the sentence in the middle "The summary shows details from up to 4 
-                interaction sets at the location." How can this be made more clear?
-        - Added slide numbering
-    - Can someone write breif definitions of the taxon realms? 
-    - Do we want the confirmation popups for all create forms? Or just citation, interaction, and location?
+    - upgraded to symfony 4.4
+
+
 
 QUESTIONS:
 
 >==== CURRENT ====
+    - 4.4 upgrade:
+        - custom error pages: https://symfony.com/doc/4.4/controller/error_pages.html
+
+    - When updating server
+        - add env.local to root with db url 
+
+    - Interaction page
+        - Where to add list of related interactions from source
+        - Display globi link? 
     - Create Taxon show page
+        - Display taxon page
+            - heirarchy
+            - related interactions?
+                - group by interaction type
     - Add interaction type verbs
+        - Use active verbs on interaction show page header
+        - "" in form detail panel
     - Add confirmation popup to citation and location forms
     - Add form hints
     - Add object realm and name filters to bat filter panel
@@ -47,10 +48,6 @@ QUESTIONS:
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
-    - DB migration
-        - remove user lists for fake users
-        - delete fake users
-        - remove parent taxon from deleted taxa
     - Add multiple realm root functionality
 
 

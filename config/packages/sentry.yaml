@@ -1,0 +1,14 @@
+sentry:
+    dsn: '%env(SENTRY_DSN)%'
+
+    register_error_listener: false # Disables the ErrorListener
+    monolog:
+        error_handler:
+            enabled: true
+            level: error
+    options:
+        environment: '%env(APP_ENV)%'
+        release: '%app.sentry.release%'
+        excluded_exceptions: #exclude validation errors
+            - App\Exception\UserNotFoundException
+            - Symfony\Component\Security\Core\Exception\AccessDeniedException

@@ -1,0 +1,58 @@
+{
+  "entrypoints": {
+    "app": {
+      "js": [
+        "/BatBase/web/build/runtime.af564480.js",
+        "/BatBase/web/build/0.7bd49c1d.js",
+        "/BatBase/web/build/1.f035d8e6.js",
+        "/BatBase/web/build/app.0a6b7fc3.js"
+      ],
+      "css": [
+        "/BatBase/web/build/app.dc00c8a7.css"
+      ]
+    },
+    "db": {
+      "js": [
+        "/BatBase/web/build/runtime.af564480.js",
+        "/BatBase/web/build/0.7bd49c1d.js",
+        "/BatBase/web/build/1.f035d8e6.js",
+        "/BatBase/web/build/db.48bab950.js"
+      ],
+      "css": [
+        "/BatBase/web/build/db.18484696.css"
+      ]
+    },
+    "feedback": {
+      "js": [
+        "/BatBase/web/build/runtime.af564480.js",
+        "/BatBase/web/build/0.7bd49c1d.js",
+        "/BatBase/web/build/feedback.167375b8.js"
+      ],
+      "css": [
+        "/BatBase/web/build/feedback.f372fdde.css"
+      ]
+    },
+    "pdfs": {
+      "js": [
+        "/BatBase/web/build/runtime.af564480.js",
+        "/BatBase/web/build/0.7bd49c1d.js",
+        "/BatBase/web/build/1.f035d8e6.js",
+        "/BatBase/web/build/pdfs.2e9a1e32.js"
+      ],
+      "css": [
+        "/BatBase/web/build/pdfs.18484696.css"
+      ]
+    },
+    "show": {
+      "js": [
+        "/BatBase/web/build/runtime.af564480.js",
+        "/BatBase/web/build/0.7bd49c1d.js",
+        "/BatBase/web/build/1.f035d8e6.js",
+        "/BatBase/web/build/show.06a9d751.js"
+      ],
+      "css": [
+        "/BatBase/web/build/show.ca3c50b9.css"
+      ]
+    }
+  }
+}

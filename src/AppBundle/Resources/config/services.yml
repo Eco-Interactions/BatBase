@@ -1,7 +1,0 @@
-parameters:
-
-services:
-    app.form.type.registration:
-        class: AppBundle\Form\RegistrationFormType
-        tags:
-            - { name: form.type, alias: appbundle_registration }

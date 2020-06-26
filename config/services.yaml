@@ -1,0 +1,61 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+    publication_file_dir: '%kernel.project_dir%/public/uploads/publications'
+    app.sentry.release: '20200626_BB'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    App\Form\RegistrationFormType:
+        tags:
+            - { name: form.type, alias: app_user_registration }
+
+    App\Form\ProfileFormType:
+        tags:
+            - { name: form.type, alias: App_profile }
+
+    App\EventListener\ActivityListener:
+        arguments:
+            - '@security.token_storage'
+            - '@doctrine'
+        tags:
+            - { name: kernel.event_listener, 
+                event: kernel.controller,
+                method: onCoreController }
+
+    app.add_example_data:
+        class: App\EventListener\AddExampleDataAfterRegistration
+        tags:
+            - { name: kernel.event_subscriber }
+
+    app.menu_builder:
+        class: App\Menu\MenuBuilder
+        arguments: ["@knp_menu.factory"]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: main } # The alias is what is used to retrieve the menu
+
+    Monolog\Processor\PsrLogMessageProcessor:
+        tags: { name: monolog.processor, handler: sentry }

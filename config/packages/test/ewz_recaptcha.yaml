@@ -1,0 +1,2 @@
+imports:
+    - { resource: ../dev/ewz_recaptcha.yaml }

@@ -1,0 +1,3 @@
+webpack_encore:
+    # Throw an exception if the entrypoints.json file is missing or an entry is missing from the data
+    strict_mode: true

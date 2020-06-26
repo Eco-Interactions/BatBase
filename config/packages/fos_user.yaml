@@ -1,0 +1,19 @@
+fos_user:
+    db_driver: orm # other valid values are 'mongodb' and 'couchdb'
+    firewall_name: main
+    user_class: App\Entity\User
+    from_email:
+        address: noreply@batbase.org
+        sender_name: BatBase.org
+    registration:
+        confirmation:
+            enabled: true
+            # template:   email/confirm_registration.email.twig
+        form:
+            type: App\Form\RegistrationType
+    profile:
+        form:
+            type: App\Form\ProfileType
+    resetting:
+        email:
+            # template:   email/password_resetting.email.twig

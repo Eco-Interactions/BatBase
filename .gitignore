@@ -3,37 +3,24 @@
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
-!/var/logs
-/var/logs/*
-!var/logs/.gitkeep
+!/var/log
+/var/log/*
+!var/log/.gitkeep
 !/var/sessions
 /var/sessions/*
 !var/sessions/.gitkeep
-!var/SymfonyRequirements.php
-
-# Parameters 
-/app/config/parameters_prod.yml
-/app/config/parameters.yml
-/app/config/parameters.ini
  
 # Managed by Composer
-/var/bootstrap.php.cache
 /bin/*
 !bin/console
 /vendor/
-/web/config.php
-
-# Assets and user uploads
-/web/bundles/*
-!/web/bundles/app
-/web/uploads/taxon/*
 
 # Node modules
 /node_modules/
 /yarn-error.log
 
 # Generated assets
-/web/build/*
+/public/build/*
 
 # PHPUnit
 /app/phpunit.xml
@@ -48,9 +35,36 @@
 composer.lock
 
 # Local Files
-/web/uploads/publications/*
+/public/uploads/publications/*
 /dev/local/*
 *.sublime-project
 *.sublime-workspace
 *.DS_Store
 .DS_Store
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###
+
+###> behat/symfony2-extension ###
+behat.yml
+###< behat/symfony2-extension ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
