@@ -1,5 +1,5 @@
-{% extends '::layout.html.twig' %}
+{% extends '@FOSUserBundle/layout.html.twig' %}
 
-{% block detail %}
+{% block fos_user_content %}
 	{{ block('fos_user_content') }}
-{% endblock detail %}
+{% endblock fos_user_content %}

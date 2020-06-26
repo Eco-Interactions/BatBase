@@ -1,0 +1,32 @@
+{% extends "bundles/FOSUserBundle/layout.html.twig" %}
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block headline %}Edit Profile{% endblock %}
+
+{% block fos_user_content %}
+    <div id="reg-form-container">
+        <form action="{{ path('fos_user_profile_edit') }}" method="POST" 
+            class="fos_user_profile_edit recaptcha-form">
+
+            {{ form_start(form) }}
+            
+            <span style="color: red;"><b>{{ form_errors(form) }}</b></span>
+
+            {% embed 'two_cols_sect.html.twig' %}
+                {% block firstcol %}
+                    {{ form_row(form.username) }}
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.current_password) }}
+                {% endblock firstcol %}
+                
+                {% block secondcol %}
+                    {{ form_row(form.first_name) }}
+                    {{ form_row(form.last_name) }}
+                    {{ form_row(form.about_me) }}
+                {% endblock secondcol %}
+            {% endembed %}
+
+            {{ form_end(form) }}
+        </form>
+    </div>
+{% endblock fos_user_content %}

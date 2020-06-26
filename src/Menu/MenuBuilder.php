@@ -50,7 +50,7 @@ class MenuBuilder
                 $menu[$user_name]['Online Users']->setAttribute('class', 'super-admin-menu');
                 $menu[$user_name]['Content Blocks']->setAttribute('class', 'super-admin-menu');
             }
-            $menu[$user_name]->addChild('Change Password', array('route' => 'fos_user_change_password'));
+            $menu[$user_name]->addChild('View Profile', array('route' => 'fos_user_profile_show'));
             $menu[$user_name]->addChild('Log Out', array('route' => 'fos_user_security_logout'));
         } else {
             $menu->addChild('Login', array('route' => 'fos_user_security_login'));

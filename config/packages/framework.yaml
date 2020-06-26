@@ -1,7 +1,7 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
-    error_controller: 'Symfony\Component\HttpKernel\Controller\ErrorController'
+    # error_controller: '@Symfony\Component\HttpKernel\Controller\ErrorController'
     # validation: { enable_annotations: true }
     templating:
         engines: ['twig']

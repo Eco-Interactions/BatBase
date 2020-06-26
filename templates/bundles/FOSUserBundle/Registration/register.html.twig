@@ -1,4 +1,4 @@
-{% extends "FOSUserBundle::layout.html.twig" %}
+{% extends "bundles/FOSUserBundle/layout.html.twig" %}
 
 {% block headline %}Join BatBase.org{% endblock %}
 
@@ -28,7 +28,7 @@
 		</div>
 		<div class="second-col">
 			<div id="reg-form-container">
-				{% include "FOSUserBundle:Registration:register_content.html.twig" %}
+				{% include "bundles/FOSUserBundle/Registration/register_form.html.twig" %}
 			</div>
 		</div>
 	</div>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "72622b112afa3530c5267e42895437cc",
+    "content-hash": "5a490d043d27c83fbebf667fe790abf1",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -519,12 +519,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "0743e04ea7abdafc89b9c3634ca9434fc0e921d3"
+                "reference": "1c42543c2caffdbfce4802ad9f0138fb68ae7e9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/0743e04ea7abdafc89b9c3634ca9434fc0e921d3",
-                "reference": "0743e04ea7abdafc89b9c3634ca9434fc0e921d3",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/1c42543c2caffdbfce4802ad9f0138fb68ae7e9b",
+                "reference": "1c42543c2caffdbfce4802ad9f0138fb68ae7e9b",
                 "shasum": ""
             },
             "require": {
@@ -620,7 +620,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-06-25T21:26:41+00:00"
+            "time": "2020-06-26T20:39:54+00:00"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -825,12 +825,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineMigrationsBundle.git",
-                "reference": "d0aaf9e19d1683afa4b2de3cbd82e782e68da960"
+                "reference": "df81395f61775dbdc005efc8a0928b8dd940a90a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrineMigrationsBundle/zipball/d0aaf9e19d1683afa4b2de3cbd82e782e68da960",
-                "reference": "d0aaf9e19d1683afa4b2de3cbd82e782e68da960",
+                "url": "https://api.github.com/repos/doctrine/DoctrineMigrationsBundle/zipball/df81395f61775dbdc005efc8a0928b8dd940a90a",
+                "reference": "df81395f61775dbdc005efc8a0928b8dd940a90a",
                 "shasum": ""
             },
             "require": {
@@ -901,7 +901,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-06-17T20:44:15+00:00"
+            "time": "2020-06-26T07:17:58+00:00"
         },
         {
             "name": "doctrine/event-manager",
@@ -1762,65 +1762,69 @@
         },
         {
             "name": "friendsofsymfony/rest-bundle",
-            "version": "dev-error_listener",
+            "version": "3.x-dev",
             "source": {
                 "type": "git",
-                "url": "https://github.com/yceruto/FOSRestBundle.git",
-                "reference": "66c80ba2d969b93a8be3957df1a9771871008c12"
+                "url": "https://github.com/FriendsOfSymfony/FOSRestBundle.git",
+                "reference": "d2bc04a4b0a396ef977d0d1a0baf7da3914a91b3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/d2bc04a4b0a396ef977d0d1a0baf7da3914a91b3",
+                "reference": "d2bc04a4b0a396ef977d0d1a0baf7da3914a91b3",
+                "shasum": ""
             },
             "require": {
-                "doctrine/inflector": "^1.0",
-                "php": "^7.1",
+                "php": "^7.2",
                 "psr/log": "^1.0",
-                "symfony/config": "^3.4|^4.3",
-                "symfony/debug": "^3.4|^4.3",
-                "symfony/dependency-injection": "^3.4|^4.3",
-                "symfony/event-dispatcher": "^3.4|^4.3",
-                "symfony/finder": "^3.4|^4.3",
-                "symfony/framework-bundle": "^3.4|^4.3",
-                "symfony/http-foundation": "^3.4|^4.3",
-                "symfony/http-kernel": "^3.4|^4.3",
-                "symfony/routing": "^3.4|^4.3",
-                "symfony/security-core": "^3.4|^4.3",
+                "symfony/config": "^4.4|^5.0",
+                "symfony/dependency-injection": "^4.4|^5.0",
+                "symfony/event-dispatcher": "^4.4|^5.0",
+                "symfony/framework-bundle": "^4.4.1|^5.0",
+                "symfony/http-foundation": "^4.4|^5.0",
+                "symfony/http-kernel": "^4.4|^5.0",
+                "symfony/security-core": "^3.4|^4.3|^5.0",
                 "willdurand/jsonp-callback-validator": "^1.0",
                 "willdurand/negotiation": "^2.0"
             },
             "conflict": {
+                "doctrine/inflector": "1.4.0",
                 "jms/serializer": "<1.13.0",
-                "jms/serializer-bundle": "<2.0.0",
-                "sensio/framework-extra-bundle": "<3.0.13"
+                "jms/serializer-bundle": "<2.4.3|3.0.0",
+                "sensio/framework-extra-bundle": "<5.2.3",
+                "symfony/error-handler": "<4.4.1"
             },
             "require-dev": {
-                "jms/serializer": "^1.13|^2.0",
-                "jms/serializer-bundle": "^2.3.1|^3.0",
+                "friendsofphp/php-cs-fixer": "^2.0",
+                "jms/serializer": "^1.13|^2.0|^3.0",
+                "jms/serializer-bundle": "^2.4.3|^3.0.1",
                 "phpoption/phpoption": "^1.1",
                 "psr/http-message": "^1.0",
-                "sensio/framework-extra-bundle": "^3.0.13|^4.0|^5.0",
-                "symfony/asset": "^3.4|^4.3",
-                "symfony/browser-kit": "^3.4|^4.3",
-                "symfony/css-selector": "^3.4|^4.3",
-                "symfony/expression-language": "^3.4|^4.3",
-                "symfony/form": "^3.4|^4.3",
-                "symfony/phpunit-bridge": "^4.1.8",
-                "symfony/security-bundle": "^3.4|^4.3",
-                "symfony/serializer": "^3.4|^4.3",
-                "symfony/templating": "^3.4|^4.3",
-                "symfony/twig-bundle": "^3.4|^4.3",
-                "symfony/validator": "^3.4|^4.3",
-                "symfony/web-profiler-bundle": "^3.4|^4.3",
-                "symfony/yaml": "^3.4|^4.3"
+                "sensio/framework-extra-bundle": "^5.2.3",
+                "symfony/asset": "^4.4|^5.0",
+                "symfony/browser-kit": "^4.4|^5.0",
+                "symfony/css-selector": "^4.4|^5.0",
+                "symfony/expression-language": "^4.4|^5.0",
+                "symfony/form": "^4.4|^5.0",
+                "symfony/mime": "^4.4|^5.0",
+                "symfony/phpunit-bridge": "^4.1.8|^5.0",
+                "symfony/security-bundle": "^4.4|^5.0",
+                "symfony/serializer": "^4.4|^5.0",
+                "symfony/twig-bundle": "^4.4|^5.0",
+                "symfony/validator": "^4.4|^5.0",
+                "symfony/web-profiler-bundle": "^4.4|^5.0",
+                "symfony/yaml": "^4.4|^5.0"
             },
             "suggest": {
                 "jms/serializer-bundle": "Add support for advanced serialization capabilities, recommended, requires ^2.0|^3.0",
                 "sensio/framework-extra-bundle": "Add support for the request body converter and the view response listener, requires ^3.0",
-                "symfony/expression-language": "Add support for using the expression language in the routing, requires ^2.7|^3.0",
                 "symfony/serializer": "Add support for basic serialization capabilities and xml decoding, requires ^2.7|^3.0",
                 "symfony/validator": "Add support for validation capabilities in the ParamFetcher, requires ^2.7|^3.0"
             },
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.7-dev"
+                    "3.x-dev": "3.1-dev"
                 }
             },
             "autoload": {
@@ -1828,9 +1832,11 @@
                     "FOS\\RestBundle\\": ""
                 },
                 "exclude-from-classmap": [
+                    "Resources/",
                     "Tests/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1853,7 +1859,7 @@
             "keywords": [
                 "rest"
             ],
-            "time": "2020-01-19T18:03:47+00:00"
+            "time": "2020-06-16T12:21:59+00:00"
         },
         {
             "name": "friendsofsymfony/user-bundle",
@@ -8120,6 +8126,34 @@
             "time": "2020-05-20T08:37:50+00:00"
         },
         {
+            "name": "symfony/twig-pack",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/twig-pack.git",
+                "reference": "93b57cbdd1e6107c641779de7137bb5ee3add98e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/twig-pack/zipball/93b57cbdd1e6107c641779de7137bb5ee3add98e",
+                "reference": "93b57cbdd1e6107c641779de7137bb5ee3add98e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0",
+                "symfony/twig-bundle": "*",
+                "twig/extra-bundle": "^2.12|^3.0",
+                "twig/twig": "^2.12|^3.0"
+            },
+            "type": "symfony-pack",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A Twig pack for Symfony projects",
+            "time": "2020-02-11T16:23:24+00:00"
+        },
+        {
             "name": "symfony/validator",
             "version": "4.4.x-dev",
             "source": {
@@ -8516,6 +8550,87 @@
                 }
             ],
             "time": "2020-05-20T08:37:50+00:00"
+        },
+        {
+            "name": "twig/extra-bundle",
+            "version": "3.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twigphp/twig-extra-bundle.git",
+                "reference": "a7c5799cf742ab0827f5d32df37528ee8bf5a233"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twigphp/twig-extra-bundle/zipball/a7c5799cf742ab0827f5d32df37528ee8bf5a233",
+                "reference": "a7c5799cf742ab0827f5d32df37528ee8bf5a233",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3|^8.0",
+                "symfony/framework-bundle": "^4.3|^5.0",
+                "symfony/twig-bundle": "^4.3|^5.0",
+                "twig/twig": "^2.4|^3.0"
+            },
+            "require-dev": {
+                "twig/cssinliner-extra": "^2.12|^3.0",
+                "twig/html-extra": "^2.12|^3.0",
+                "twig/inky-extra": "^2.12|^3.0",
+                "twig/intl-extra": "^2.12|^3.0",
+                "twig/markdown-extra": "^2.12|^3.0"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Twig\\Extra\\TwigExtraBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "A Symfony bundle for extra Twig extensions",
+            "homepage": "https://twig.symfony.com",
+            "keywords": [
+                "bundle",
+                "extra",
+                "twig"
+            ],
+            "funding": [
+                {
+                    "url": "https://certification.symfony.com/",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://live.symfony.com/",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://symfony.com/cloud/",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/twig/twig",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-05-21T09:56:39+00:00"
         },
         {
             "name": "twig/twig",
@@ -9820,16 +9935,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "17daefe9ff4a2bcc9ea8fa977c5df42d505d3f27"
+                "reference": "dcc580eadfaa4e7f9d2cf9ae1922134ea962e14f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/17daefe9ff4a2bcc9ea8fa977c5df42d505d3f27",
-                "reference": "17daefe9ff4a2bcc9ea8fa977c5df42d505d3f27",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/dcc580eadfaa4e7f9d2cf9ae1922134ea962e14f",
+                "reference": "dcc580eadfaa4e7f9d2cf9ae1922134ea962e14f",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3",
+                "php": "^7.3 || ^8.0",
                 "sebastian/diff": "^4.0",
                 "sebastian/exporter": "^4.0"
             },
@@ -9882,7 +9997,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-24T04:55:27+00:00"
+            "time": "2020-06-26T12:05:46+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -9890,12 +10005,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/diff.git",
-                "reference": "e17215289a100c5d9df1296a217caa027d85ad93"
+                "reference": "bb5ddad4d94c34ec1ab03ff9ba1f3ffdbeaebc8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/e17215289a100c5d9df1296a217caa027d85ad93",
-                "reference": "e17215289a100c5d9df1296a217caa027d85ad93",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/bb5ddad4d94c34ec1ab03ff9ba1f3ffdbeaebc8e",
+                "reference": "bb5ddad4d94c34ec1ab03ff9ba1f3ffdbeaebc8e",
                 "shasum": ""
             },
             "require": {
@@ -9944,7 +10059,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-24T04:55:36+00:00"
+            "time": "2020-06-26T07:31:42+00:00"
         },
         {
             "name": "sebastian/exporter",
@@ -9952,16 +10067,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/exporter.git",
-                "reference": "2f871a126b129f03cfb213decd91670db46ac176"
+                "reference": "571d721db4aec847a0e59690b954af33ebf9f023"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/2f871a126b129f03cfb213decd91670db46ac176",
-                "reference": "2f871a126b129f03cfb213decd91670db46ac176",
+                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/571d721db4aec847a0e59690b954af33ebf9f023",
+                "reference": "571d721db4aec847a0e59690b954af33ebf9f023",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3",
+                "php": "^7.3 || ^8.0",
                 "sebastian/recursion-context": "^4.0"
             },
             "require-dev": {
@@ -10017,7 +10132,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-24T04:55:54+00:00"
+            "time": "2020-06-26T12:08:55+00:00"
         },
         {
             "name": "sebastian/recursion-context",
@@ -10025,16 +10140,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/recursion-context.git",
-                "reference": "8b3e0ba293d41f0093274462efb44cd24e38cc4b"
+                "reference": "062231bf61d2b9448c4fa5a7643b5e1829c11d63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/8b3e0ba293d41f0093274462efb44cd24e38cc4b",
-                "reference": "8b3e0ba293d41f0093274462efb44cd24e38cc4b",
+                "url": "https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/062231bf61d2b9448c4fa5a7643b5e1829c11d63",
+                "reference": "062231bf61d2b9448c4fa5a7643b5e1829c11d63",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3"
+                "php": "^7.3 || ^8.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "^9.0"
@@ -10076,7 +10191,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-24T04:57:07+00:00"
+            "time": "2020-06-26T12:14:17+00:00"
         },
         {
             "name": "symfony/browser-kit",
@@ -10543,11 +10658,11 @@
     "stability-flags": {
         "doctrine/annotations": 20,
         "excelwebzone/recaptcha-bundle": 20,
-        "friendsofsymfony/rest-bundle": 20,
         "friendsofsymfony/user-bundle": 20,
         "suncat/mobile-detect-bundle": 20,
         "symfony/apache-pack": 20,
-        "symfony/flex": 20
+        "symfony/flex": 20,
+        "symfony/twig-pack": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -11,6 +11,7 @@ fos_user:
             # template:   email/confirm_registration.email.twig
         form:
             type: App\Form\RegistrationType
+            name: app_user_registration
     profile:
         form:
             type: App\Form\ProfileType

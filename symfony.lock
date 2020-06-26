@@ -670,6 +670,9 @@
             "templates/base.html.twig"
         ]
     },
+    "symfony/twig-pack": {
+        "version": "dev-master"
+    },
     "symfony/validator": {
         "version": "4.3",
         "recipe": {
@@ -733,6 +736,9 @@
             "version": "1.0",
             "ref": "fe5a50faf580eb58f08ada2abe8afbd2d4941e05"
         }
+    },
+    "twig/extra-bundle": {
+        "version": "3.x-dev"
     },
     "twig/twig": {
         "version": "3.x-dev"

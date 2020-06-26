@@ -1,0 +1,15 @@
+{% extends "bundles/FOSUserBundle/layout.html.twig" %}
+
+{% block headline %}User Profile{% endblock %}
+
+{% block fos_user_content %}
+    <div class="fos_user_user_show">
+        <p style="margin: 0 1em 1em 1em">{{ 'profile.show.email'|trans({}, 'FOSUserBundle') }}: {{ user.email }}</p>
+        <p class="em-mrg">{{ 'profile.show.username'|trans({}, 'FOSUserBundle') }}: {{ user.username }}</p>
+        <p class="em-mrg">First Name: {{ user.firstname }}</p>
+        <p class="em-mrg">Last Name: {{ user.lastname }}</p>
+        <p class="em-mrg">About Me: {{ user.aboutMe }}</p>
+        <a style="margin-right: 1em;" href="{{ path('fos_user_profile_edit') }}">Edit Profile</a> | 
+        <a  class="em-mrg"href="{{ path('fos_user_change_password') }}">Change Password</a>
+    </div>
+{% endblock fos_user_content %}

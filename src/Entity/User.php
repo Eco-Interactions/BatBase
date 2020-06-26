@@ -25,14 +25,14 @@ class User extends BaseUser implements AdvancedUserInterface
 
     /**
      * @var string
-     * @ORM\Column(type="text")
+     * @ORM\Column(name="aboutMe", type="text")
      *
      * @Assert\NotBlank(message="Tell us about your interest in bat eco-interactions")
      * @Assert\Length(
      *     min=2,
      *     max="255",
      *     minMessage="Tell us more about your interest in bat eco-interactions",
-     *     maxMessage="Limit of 255 characters exceded",
+     *     maxMessage="Limit of 255 characters exceded"
      * )
      */
     protected $aboutMe;

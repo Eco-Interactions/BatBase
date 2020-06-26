@@ -29,13 +29,13 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    App\Form\RegistrationFormType:
+    App\Form\RegistrationType:
         tags:
             - { name: form.type, alias: app_user_registration }
 
-    App\Form\ProfileFormType:
+    App\Form\ProfileType:
         tags:
-            - { name: form.type, alias: App_profile }
+            - { name: form.type, alias: app_user_profile }
 
     App\EventListener\ActivityListener:
         arguments:
