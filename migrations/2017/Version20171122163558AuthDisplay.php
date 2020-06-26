@@ -26,7 +26,7 @@ class Version20171122163558AuthDisplay extends AbstractMigration implements Cont
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => 6]);
         
         $this->updateDisplayNames($admin, $em);
         
@@ -35,7 +35,7 @@ class Version20171122163558AuthDisplay extends AbstractMigration implements Cont
     }
     private function updateDisplayNames(&$admin, &$em)
     {
-        $authrs = $em->getRepository('AppBundle:Author')->findAll();
+        $authrs = $em->getRepository('App:Author')->findAll();
         
         foreach ($authrs as $auth) {
             $dispName = $this->getDisplayName($auth);

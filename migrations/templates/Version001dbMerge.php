@@ -32,7 +32,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
         $this->allData = $this->getJsonData();
 
         $this->mergeEntityData($this->allData["interaction"]);
@@ -104,7 +104,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     {
         $mutable = ['author', 'citation', 'interaction', 'location', 'publication', 
             'source', 'taxon' ];
-        $idEntity = $this->em->getRepository('AppBundle:'.ucfirst($entType))
+        $idEntity = $this->em->getRepository('App:'.ucfirst($entType))
             ->findOneBy(['id' => $id]);
         if (!in_array($entType, $mutable)) { return $idEntity; }
         return $this->checkDisplayNameForCorrectEntity($idEntity, $entType, $id);
@@ -117,7 +117,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     private function checkDisplayNameForCorrectEntity($idEntity, $entType, $id)
     {
         $newEntData = $this->getEntityData($entType, $id, false);
-        $nameEntity = $entity = $this->em->getRepository('AppBundle:'.ucfirst($entType))
+        $nameEntity = $entity = $this->em->getRepository('App:'.ucfirst($entType))
             ->findOneBy(['displayName' => $newEntData['displayName']]);
         if ($idEntity && strpos($idEntity->getDisplayName(), $newEntData['displayName']) !== false) {
             return $nameEntity;            
@@ -169,7 +169,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     /** Creates the source-type entity and sets it in the source. */
     private function setSrcTypeEntity(&$srcEntity, $entData)
     {   //print("\n      Setting source type entity");
-        $srcType = $this->em->getRepository('AppBundle:SourceType')
+        $srcType = $this->em->getRepository('App:SourceType')
             ->findOneBy(['id' => $entData["sourceType"]])->getSlug(); 
         $typeEntity = $this->getNewEntity($srcType);
         $entityData = $this->getEntityData($srcType, false, $entData["displayName"]); 
@@ -193,7 +193,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     private function addInteractionTag(&$int, $intData)
     {  
         $tagId = $this->getInteractionTag($intData); 
-        $tag = $this->em->getRepository('AppBundle:Tag')
+        $tag = $this->em->getRepository('App:Tag')
             ->findOneBy(['id' => $tagId]);
         $int->addTag($tag);
     }
@@ -207,7 +207,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     /** ----------- Helpers --------------------------------------------------*/
     private function getNewEntity($entityType)
     {
-        $typeClass = 'AppBundle\\Entity\\'.ucfirst($entityType); 
+        $typeClass = 'App\\Entity\\'.ucfirst($entityType); 
         return new $typeClass();
     }
     private function getEntityData($entityType, $id, $dispName)

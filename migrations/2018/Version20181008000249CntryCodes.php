@@ -6,8 +6,8 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\Location;
-use AppBundle\Entity\GeoJson;
+use App\Entity\Location;
+use App\Entity\GeoJson;
 
 /**
  * Adds iso codes for all countries.
@@ -30,7 +30,7 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $data = json_decode($this->getJsonData(), true); 
 
@@ -58,9 +58,9 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
     {
         $loc = new Location();
         $loc->setDisplayName($name);
-        $loc->setParentLoc($pLoc ? $pLoc : $this->em->getRepository('AppBundle:Location')
+        $loc->setParentLoc($pLoc ? $pLoc : $this->em->getRepository('App:Location')
             ->findOneBy(['id' => $data['parent']]));
-        $loc->setLocationType($this->em->getRepository('AppBundle:LocationType')
+        $loc->setLocationType($this->em->getRepository('App:LocationType')
             ->findOneBy(['displayName' => $data['locType']]));
         $loc->setCreatedBy($this->admin);
         if ($habType) { $loc->setHabitatType($habType); }
@@ -88,7 +88,7 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
     }
     private function addHabitatCntryComboLocs($loc, $locName)
     {
-        $habTypes = $this->em->getRepository('AppBundle:HabitatType')->findAll();
+        $habTypes = $this->em->getRepository('App:HabitatType')->findAll();
         $data = [
             'locType' => 'Habitat',
             'coords' => false
@@ -103,7 +103,7 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
     private function setCntryCodes($data)
     {
         foreach ($data as $cntry) {        
-            $entity = $this->em->getRepository('AppBundle:Location')->findoneBy(
+            $entity = $this->em->getRepository('App:Location')->findoneBy(
                 ['displayName' => $cntry['name']]);
             if (!$entity) { print($cntry['name']."\n"); continue; }
             $entity->setIsoCode($cntry['alpha-2']);
@@ -119,7 +119,7 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
         ];
 
         foreach ($cases as $name => $code) {
-            $loc = $this->em->getRepository('AppBundle:Location')
+            $loc = $this->em->getRepository('App:Location')
                 ->findOneBy(['displayName' => $name]);
             $loc->setIsoCode($code);
             $this->em->persist($loc);
@@ -134,7 +134,7 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
         ];
 
         foreach ($locs as $id => $name) {
-            $loc = $this->em->getRepository('AppBundle:Location')->findOneBy(['id' => $id]);
+            $loc = $this->em->getRepository('App:Location')->findOneBy(['id' => $id]);
             $loc->setDisplayName($name);
             $this->em->persist($loc);
 
@@ -152,8 +152,8 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
         $locs = [ 430 => 3229, 91 => 364 ];
 
         foreach ($locs as $oldId => $newId) {  print('old id = '.$oldId."\n");
-            $new = $this->em->getRepository('AppBundle:Location')->findOneBy(['id' => $newId]);
-            $old = $this->em->getRepository('AppBundle:Location')->findOneBy(['id' => $oldId]);
+            $new = $this->em->getRepository('App:Location')->findOneBy(['id' => $newId]);
+            $old = $this->em->getRepository('App:Location')->findOneBy(['id' => $oldId]);
 
             $old->setDisplayName($old->getDisplayName().'-removed');
             // GeoJson Transfer
@@ -190,7 +190,7 @@ class Version20181008000249CntryCodes extends AbstractMigration implements Conta
                     $ints = $childLoc->getInteractions();
                     if ($ints) {
                         $habName = $childLoc->getHabitatType()->getDisplayName();
-                        $newChild = $this->em->getRepository('AppBundle:Location')->
+                        $newChild = $this->em->getRepository('App:Location')->
                             findOneBy(['displayName' => $new->getDisplayName().'-'.$habName]);
 
                         foreach ($ints as $int) {

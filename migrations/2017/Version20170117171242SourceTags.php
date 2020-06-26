@@ -7,7 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-// use AppBundle\Entity\HabitatType;
+// use App\Entity\HabitatType;
 
 /**
  * @up Moves all citation tags to their source entity's tags collection.
@@ -31,7 +31,7 @@ class Version20170117171242SourceTags extends AbstractMigration implements Conta
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
 
-        $citations = $em->getRepository('AppBundle:Citation')->findAll();
+        $citations = $em->getRepository('App:Citation')->findAll();
 
         foreach ($citations as $citation) {
             $tags = $citation->getTags();

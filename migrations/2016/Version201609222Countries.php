@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
+use App\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -32,7 +32,7 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
        
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $countries = $em->getRepository('AppBundle:Country')->findAll();
+        $countries = $em->getRepository('App:Country')->findAll();
 
         foreach ($countries as $country) {
             $curLoc = null;
@@ -47,7 +47,7 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
                 $findByName = $edgeCases[$cntryName];
             }
             $locDesc = $cntryName.'-Unspecified';    
-            $locEntity = $em->getRepository('AppBundle:Location')
+            $locEntity = $em->getRepository('App:Location')
                 ->findOneBy(array('description' => $locDesc));
 
             if ($locEntity === null) {                                              
@@ -60,13 +60,13 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
     private function UpdateLocEntity($locEntity, $country, $cntryName, $em)
     {
         $locEntity->setDescription($cntryName);
-        $locEntity->setLocationType($em->getRepository('AppBundle:LocationType')
+        $locEntity->setLocationType($em->getRepository('App:LocationType')
             ->findOneBy(array('id' => 2)));
-        $locEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+        $locEntity->setUpdatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));
 
         $parentDesc = $country->getRegion()->getDescription();
-        $parent = $em->getRepository('AppBundle:Location')
+        $parent = $em->getRepository('App:Location')
             ->findOneBy(array('description' => $parentDesc)); 
         $locEntity->setParentLoc($parent);
 
@@ -77,13 +77,13 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
     {
         $entity = new Location();
         $entity->setDescription($cntryName);
-        $entity->setCreatedBy($em->getRepository('AppBundle:User')
+        $entity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));  //Sarah
-        $entity->setLocationType($em->getRepository('AppBundle:LocationType')
+        $entity->setLocationType($em->getRepository('App:LocationType')
             ->findOneBy(array('id' => 2))); 
 
         $parentDesc = $country->getRegion()->getDescription();
-        $parent = $em->getRepository('AppBundle:Location')
+        $parent = $em->getRepository('App:Location')
             ->findOneBy(array('description' => $parentDesc)); 
 
         $entity->setParentLoc($parent);

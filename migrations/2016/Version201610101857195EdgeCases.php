@@ -2,9 +2,9 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Contribution;
-use AppBundle\Entity\Publication;
-use AppBundle\Entity\Source;
+use App\Entity\Contribution;
+use App\Entity\Publication;
+use App\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 
 use Doctrine\DBAL\Schema\Schema;
@@ -35,7 +35,7 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
         $this->handleDups($citDelete, $em);
 
         foreach ($citDelete as $citId) {
-            $citEntity = $em->getRepository('AppBundle:Citation')
+            $citEntity = $em->getRepository('App:Citation')
                 ->findOneBy(array('id' => $citId));
             $em->remove($citEntity);
         }
@@ -46,9 +46,9 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
         $dupCits = [[10,248], [11,249], [12,251], [42, 254], [242,263], [209,262], [165,261], 
             [151,260], [122,259], [101,258], [45,255], [29,253], [21,252]];
         foreach ($dupCits as $citPair) {
-            $srcEntity = $em->getRepository("AppBundle:Citation")
+            $srcEntity = $em->getRepository("App:Citation")
                 ->findOneBy(array('id' => $citPair[0]))->getSource();           //print("\nSource for citation ".$citPair[0]);
-            $dupCitEntity =  $em->getRepository("AppBundle:Citation")
+            $dupCitEntity =  $em->getRepository("App:Citation")
                 ->findOneBy(array('id' => $citPair[1]));                        
             $this->transferInteractions($dupCitEntity, $srcEntity, $em);
             $this->transferAuthors($dupCitEntity, $srcEntity, $em);
@@ -91,7 +91,7 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
             $contribEntity = new Contribution();
             $contribEntity->setAuthorSource($attribAuthSrc);
             $contribEntity->setWorkSource($srcEntity);
-            $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
+            $contribEntity->setCreatedBy($em->getRepository('App:User')
                 ->findOneBy(array('id' => '6'))); 
 
             $em->persist($contribEntity);

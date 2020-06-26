@@ -2,9 +2,9 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Contribution;
-use AppBundle\Entity\Publication;
-use AppBundle\Entity\Source;
+use App\Entity\Contribution;
+use App\Entity\Publication;
+use App\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 
 use Doctrine\DBAL\Schema\Schema;
@@ -32,7 +32,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $citations = $em->getRepository('AppBundle:Citation')->findAll();
+        $citations = $em->getRepository('App:Citation')->findAll();
         $duplicateCit = [248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
 
         foreach ($citations as $citEntity) {  
@@ -58,17 +58,17 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
     {
         $citEntity->setDisplayName($citEntity->getTitle());
         $citEntity->setSource($srcEntity);
-        $citEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+        $citEntity->setUpdatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));  
         $em->persist($citEntity);  
     }
     private function buildPubEntity($citEntity, &$em)
     {
         $pubEntity = new Publication();
-        $pubEntity->setCreatedBy($em->getRepository('AppBundle:User')
+        $pubEntity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6'))); 
         $pubEntity->setDisplayName($citEntity->getTitle());
-        $pubEntity->setPublicationType($em->getRepository("AppBundle:PublicationType")
+        $pubEntity->setPublicationType($em->getRepository("App:PublicationType")
             ->findOneBy(array("displayName" => "Article")));
         $em->persist($pubEntity);
         return $pubEntity;
@@ -81,9 +81,9 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
         $srcEntity->setDescription($citEntity->getFullText());   
         $srcEntity->setYear($citEntity->getYear());
         $srcEntity->setIsCitation(true);
-        $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
+        $srcEntity->setSourceType($em->getRepository('App:SourceType')
             ->findOneBy(array('id'=> 2)));  
-        $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
+        $srcEntity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6'))); 
 
         $this->transferInteractions($citEntity, $srcEntity, $em);              //print("\n    Interaction-- records transfered to new Source citation.");
@@ -115,7 +115,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
 
             $contribEntity->setAuthorSource($attribution->getAuthor()->getSource());
             $contribEntity->setWorkSource($srcEntity);
-            $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
+            $contribEntity->setCreatedBy($em->getRepository('App:User')
                 ->findOneBy(array('id' => '6'))); 
 
             $em->persist($contribEntity);
@@ -271,18 +271,18 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
     private function addPubType(&$pubEntity, $value, &$em)
     {
         $pubType = $pubEntity->setPublicationType(
-            $em->getRepository('AppBundle:PublicationType')
+            $em->getRepository('App:PublicationType')
                 ->findOneBy(array('displayName'=> $value)));
         $em->persist($pubEntity);  
     }
     private function setParentSource($prntSrcName, &$citEntity, &$srcEntity, &$em) {  print("\n    prntSrcName = ".$prntSrcName);
         $parent = null;
         if (is_int($prntSrcName)) {
-            $parent = $em->getRepository("AppBundle:Publication")
+            $parent = $em->getRepository("App:Publication")
                 ->findOneBy(array('id' => $prntSrcName))
                 ->getSource();
         } else {
-            $parent = $em->getRepository("AppBundle:Source")
+            $parent = $em->getRepository("App:Source")
                 ->findOneBy(array('displayName' => $prntSrcName));
         }
         $srcEntity->setParentSource($parent);

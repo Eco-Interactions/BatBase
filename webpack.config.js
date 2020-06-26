@@ -7,7 +7,7 @@ const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' 
 Encore
 /* ======== DEV ======= */
     /* During rebuilds, all webpack assets that are not used will be removed. */
-    .setPublicPath('/BatBase/web/build')
+    .setPublicPath('/BatBase/public/build')
 /* ========= PROD ======= */ 
     /* the public path used by the web server to access the previous directory */
     // .setPublicPath('/build')
@@ -19,7 +19,7 @@ Encore
     // }))
 /* ======== ALL =========== */
     // the project directory where all compiled assets will be stored
-    .setOutputPath('web/build')
+    .setOutputPath('public/build')
     /** The prefix isn't being recognized for some reason */
     .setManifestKeyPrefix('build')
     // allow legacy applications to use $/jQuery as an app variable 

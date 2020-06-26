@@ -27,7 +27,7 @@ class Version20170120233642Author extends AbstractMigration implements Container
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
 
-        $authors = $em->getRepository('AppBundle:Author')->findAll();
+        $authors = $em->getRepository('App:Author')->findAll();
         foreach ($authors as $author) {
             $source = $author->getSource();  
             $source->setDisplayName($author->getDisplayName());            

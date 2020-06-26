@@ -34,9 +34,9 @@ class Version20180225004259Srcs extends AbstractMigration implements ContainerAw
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
         
-        $srcs = $this->em->getRepository('AppBundle:Source')->findAll();
+        $srcs = $this->em->getRepository('App:Source')->findAll();
 
         $this->addOrdToContributors($srcs);
         $this->updateCitationDisplayNames($srcs);

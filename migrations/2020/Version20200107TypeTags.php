@@ -7,8 +7,8 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\InteractionType;
-use AppBundle\Entity\Tag;
+use App\Entity\InteractionType;
+use App\Entity\Tag;
 
 /**
  * Restricts Tags to specific Interaction Types, also adds new and updates tags and types.
@@ -103,7 +103,7 @@ class Version20200107TypeTags extends AbstractMigration implements ContainerAwar
 
     private function getEntity($className, $prop, $val)
     {
-        return $this->em->getRepository('AppBundle:'.$className)
+        return $this->em->getRepository('App:'.$className)
             ->findOneBy([$prop => $val]);
     }
 

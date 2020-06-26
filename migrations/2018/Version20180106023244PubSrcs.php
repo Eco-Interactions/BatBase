@@ -2,8 +2,8 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Publisher;
-use AppBundle\Entity\PublisherType;
+use App\Entity\Publisher;
+use App\Entity\PublisherType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -34,7 +34,7 @@ class Version20180106023244PubSrcs extends AbstractMigration implements Containe
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')
+        $this->admin = $this->em->getRepository('App:User')
             ->findOneBy(array('id' => '6'));
 
         // $this->createPublisherTypes();
@@ -43,7 +43,7 @@ class Version20180106023244PubSrcs extends AbstractMigration implements Containe
     }
     private function createPublisherSources()
     {
-        $sources = $this->em->getRepository('AppBundle:Source')
+        $sources = $this->em->getRepository('App:Source')
             ->findBy([ 'sourceType' => 1 ]);                                    //print(count($sources)); print(" publishers\n");
 
         foreach ($sources as $pSrc) { 
@@ -69,7 +69,7 @@ class Version20180106023244PubSrcs extends AbstractMigration implements Containe
     // {
     //     $isUniversity = $this->isLikelyUniversity($pSrc);
     //     $pubTypeName = $isUniversity ? 'University' : 'Other';
-    //     $pubType = $this->em->getRepository('AppBundle:PublisherType')
+    //     $pubType = $this->em->getRepository('App:PublisherType')
     //         ->findOneBy([ 'displayName' => $pubTypeName ]);
     //     $publ->setPublisherType($pubType);
     // }

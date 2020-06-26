@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-// use AppBundle\Entity\User;
+// use App\Entity\User;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -29,7 +29,7 @@ class Version20190714164720AddExmplData extends AbstractMigration implements Con
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $addData = $this->container->get('app.add_example_data');
-        $users = $this->em->getRepository('AppBundle:User')->findAll();
+        $users = $this->em->getRepository('App:User')->findAll();
 
         foreach ($users as $user) { 
             $addData->addExampleDataToUser($user);

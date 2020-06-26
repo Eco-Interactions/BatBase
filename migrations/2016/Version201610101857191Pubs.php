@@ -2,9 +2,9 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\PublicationType;
-use AppBundle\Entity\Source;
-use AppBundle\Entity\SourceType;
+use App\Entity\PublicationType;
+use App\Entity\Source;
+use App\Entity\SourceType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -47,7 +47,7 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
             $entity = new SourceType();
             $entity->setDisplayName($srcType);
             $entity->setOrdinal($ordinal);
-            $entity->setCreatedBy($em->getRepository('AppBundle:User')
+            $entity->setCreatedBy($em->getRepository('App:User')
                 ->findOneBy(array('id' => '6'))); 
             $em->persist($entity);
         }
@@ -59,7 +59,7 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
         foreach ($pubTypes as $pubType) {   
             $entity = new PublicationType();
             $entity->setDisplayName($pubType);
-            $entity->setCreatedBy($em->getRepository('AppBundle:User')
+            $entity->setCreatedBy($em->getRepository('App:User')
                 ->findOneBy(array('id' => '6'))); 
             $em->persist($entity);
         }
@@ -74,7 +74,7 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $publications = $em->getRepository('AppBundle:Publication')->findAll();
+        $publications = $em->getRepository('App:Publication')->findAll();
 
         foreach ($publications as $pubEntity) { 
             $this->buildSourceEntity($pubEntity, $em); 
@@ -87,13 +87,13 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
         $srcEntity = new Source();                                    
 
         $srcEntity->setDisplayName($pubName);
-        $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
+        $srcEntity->setSourceType($em->getRepository('App:SourceType')
             ->findOneBy(array('id'=> 3))); 
-        $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
+        $srcEntity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6'))); 
 
         $pubEntity->setSource($srcEntity);
-        $pubEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+        $pubEntity->setUpdatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));  
 
         $em->persist($srcEntity); 
@@ -103,7 +103,7 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
     private function updateSourceType($pubEntity, &$em)
     {
         $src = $pubEntity->getSource();  print("\npub = ". $pubEntity. " src = ". $src);
-        $src->setSourceType($em->getRepository('AppBundle:SourceType')
+        $src->setSourceType($em->getRepository('App:SourceType')
             ->findOneBy(array('id'=> 2))); 
 
         $em->persist($src); 

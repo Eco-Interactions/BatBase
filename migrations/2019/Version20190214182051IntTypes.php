@@ -6,7 +6,7 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\InteractionType;
+use App\Entity\InteractionType;
 
 
 /**
@@ -31,7 +31,7 @@ class Version20190214182051IntTypes extends AbstractMigration implements Contain
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
         $this->addInteractionTypes();
         $this->em->flush();
     }
@@ -45,7 +45,7 @@ class Version20190214182051IntTypes extends AbstractMigration implements Contain
             $IntType->setDisplayName(ucfirst($type)); 
             $IntType->setCreatedBy($this->admin);
 
-            $Tag = $this->em->getRepository('AppBundle:Tag')->findOneBy(['displayName' => $tagName]);
+            $Tag = $this->em->getRepository('App:Tag')->findOneBy(['displayName' => $tagName]);
             $IntType->addValidTag($Tag);
 
             $this->em->persist($IntType);

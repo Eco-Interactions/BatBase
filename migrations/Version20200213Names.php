@@ -23,13 +23,13 @@ class Version20200213Names extends AbstractMigration implements ContainerAwareIn
 
     private function getEntity($className, $val, $prop = 'id')
     {
-        return $this->em->getRepository('AppBundle:'.$className)
+        return $this->em->getRepository('App:'.$className)
             ->findOneBy([$prop => $val]);
     }
 
     private function getEntities($className)
     {
-        return $this->em->getRepository('AppBundle:'.$className)->findAll();
+        return $this->em->getRepository('App:'.$className)->findAll();
     }
 
     private function persistEntity($entity, $creating = false)

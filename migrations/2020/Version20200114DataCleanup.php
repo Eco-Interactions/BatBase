@@ -25,7 +25,7 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
 
     private function getEntity($className, $val, $prop = 'id')
     {
-        return $this->em->getRepository('AppBundle:'.$className)->findOneBy([$prop => $val]);
+        return $this->em->getRepository('App:'.$className)->findOneBy([$prop => $val]);
     }
 
     private function persistEntity($entity, $creating = false)
@@ -41,7 +41,7 @@ class Version20200114DataCleanup extends AbstractMigration implements ContainerA
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
     
         $this->cleanupTaxaData();
         $this->cleanupSrcData();

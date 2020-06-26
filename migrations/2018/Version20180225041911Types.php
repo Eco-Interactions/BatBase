@@ -28,7 +28,7 @@ class Version20180225041911Types extends AbstractMigration implements ContainerA
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->updateCitationTypes();
         $this->updatePublicationTypes();
@@ -52,7 +52,7 @@ class Version20180225041911Types extends AbstractMigration implements ContainerA
     private function updateTypes($ary, $entity)
     {
         foreach ($ary as $curName => $newName) {
-            $type = $this->em->getRepository('AppBundle:'.$entity)
+            $type = $this->em->getRepository('App:'.$entity)
                 ->findOneBy(['displayName' => $curName]);
             $type->setDisplayName($newName);
             $type->setUpdatedBy($this->admin);

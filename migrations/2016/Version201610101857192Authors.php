@@ -2,8 +2,8 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Source;
-use AppBundle\Entity\SourceType;
+use App\Entity\Source;
+use App\Entity\SourceType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -30,7 +30,7 @@ class Version201610101857192Authors extends AbstractMigration implements Contain
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $authors = $em->getRepository('AppBundle:Author')->findAll();
+        $authors = $em->getRepository('App:Author')->findAll();
 
         foreach ($authors as $authEntity) { 
             $this->buildSourceEntity($authEntity, $em); 
@@ -40,13 +40,13 @@ class Version201610101857192Authors extends AbstractMigration implements Contain
     {
         $srcEntity = new Source();                                 
         $srcEntity->setDisplayName($authEntity->getFullName());  
-        $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
+        $srcEntity->setSourceType($em->getRepository('App:SourceType')
             ->findOneBy(array('id'=> 3)));  
-        $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
+        $srcEntity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6'))); 
 
         $authEntity->setSource($srcEntity);
-        $authEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+        $authEntity->setUpdatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6'))); 
 
         $em->persist($srcEntity); 

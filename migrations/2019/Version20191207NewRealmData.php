@@ -7,9 +7,9 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\Level;
-use AppBundle\Entity\Realm;
-use AppBundle\Entity\Taxon;
+use App\Entity\Level;
+use App\Entity\Realm;
+use App\Entity\Taxon;
 
 
 /**
@@ -49,7 +49,7 @@ class Version20191207NewRealmData extends AbstractMigration implements Container
 
     private function getEntity($className, $prop, $val)
     {
-        return $this->em->getRepository('AppBundle:'.$className)
+        return $this->em->getRepository('App:'.$className)
             ->findOneBy([$prop => $val]);
     }
 

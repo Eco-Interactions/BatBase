@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\SystemDate;
+use App\Entity\SystemDate;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -27,7 +27,7 @@ class Version20170203170024SystemDate extends AbstractMigration implements Conta
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => '6']);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => '6']);
         $entities = ["System", "Author", "Authority", "Citation", "CitationType", "ContentBlock",
             "Contribution", "Domain", "Feedback", "HabitatType", "ImageUpload", 
             "Interaction", "InteractionType", "Level", "Location", "LocationType", 
@@ -49,7 +49,7 @@ class Version20170203170024SystemDate extends AbstractMigration implements Conta
     /** Removes any entities created in previous testing rounds.  */
     private function removeTestEntities($em)
     {
-        $entities = $em->getRepository('AppBundle:SystemDate')->findAll();
+        $entities = $em->getRepository('App:SystemDate')->findAll();
 
         foreach ($entities as $entity) {
             $em->remove($entity);

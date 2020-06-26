@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
+use App\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -31,15 +31,15 @@ class Version201609223Locations extends AbstractMigration implements ContainerAw
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
        
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $locations = $em->getRepository('AppBundle:Location')->findAll();
+        $locations = $em->getRepository('App:Location')->findAll();
 
         foreach ($locations as $locEntity) {   
-            $locEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+            $locEntity->setUpdatedBy($em->getRepository('App:User')
                 ->findOneBy(array('id' => '6')));
             $locDesc = $locEntity->getDescription();
 
             if ($locDesc === "Captivity") {  
-                $locEntity->setLocationType($em->getRepository('AppBundle:LocationType')
+                $locEntity->setLocationType($em->getRepository('App:LocationType')
                     ->findOneBy(array('id' => 1)));
                 continue;
             }
@@ -60,12 +60,12 @@ class Version201609223Locations extends AbstractMigration implements ContainerAw
         $newLocName = explode('-Unspecified', $locDesc)[0]; 
 
         if (array_key_exists($newLocName, $dupLocNames)) { 
-            $finalLocEntity = $em->getRepository('AppBundle:Location')
+            $finalLocEntity = $em->getRepository('App:Location')
                 ->findOneBy(array('description' => $dupLocNames[$newLocName]));  
             $this->ConsolidateEntityData($finalLocEntity, $locEntity, $em);  
             return;
         }
-        $finalLocEntity = $em->getRepository('AppBundle:Location')
+        $finalLocEntity = $em->getRepository('App:Location')
                 ->findOneBy(array('description' => $newLocName));
         /**
          * Remove '-Unspecified' from locations records that are unique locations inside of a country or region.
@@ -103,19 +103,19 @@ class Version201609223Locations extends AbstractMigration implements ContainerAw
         if ($entity->getGpsData() === null && $entity->getLatitude() === null 
                 && $entity->getLongitude() === null) {  
             if ($entity->getHabitatType() !== null) {
-                $entity->setLocationType($em->getRepository('AppBundle:LocationType')
+                $entity->setLocationType($em->getRepository('App:LocationType')
                     ->findOneBy(array('id' => 3)));  //habitat
             } else { 
-                $entity->setLocationType($em->getRepository('AppBundle:LocationType')
+                $entity->setLocationType($em->getRepository('App:LocationType')
                     ->findOneBy(array('id' => 4)));  //area
             }
         } else {
-            $entity->setLocationType($em->getRepository('AppBundle:LocationType')
+            $entity->setLocationType($em->getRepository('App:LocationType')
                 ->findOneBy(array('id' => 5)));      //point
         }
         if ($entity->getCountry() !== null) {
             $parentDesc = $entity->getCountry()->getName();
-            $parent = $em->getRepository('AppBundle:Location')
+            $parent = $em->getRepository('App:Location')
                 ->findOneBy(array('description' => $parentDesc));
             if($parent === null) {print("NULL PARENT === ". $parentDesc); 
             } else {

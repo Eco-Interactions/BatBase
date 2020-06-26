@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
+use App\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -22,7 +22,7 @@ class Version20170405200118Countries extends AbstractMigration implements Contai
     {
         $this->container = $container;
         $this->em = $container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')
+        $this->admin = $this->em->getRepository('App:User')
             ->findOneBy(['id' => 6]);
     }
 
@@ -57,7 +57,7 @@ class Version20170405200118Countries extends AbstractMigration implements Contai
     private function getEntity($eName, $pRegion, $locTypeId)  
     {
         $entityName = str_replace("_", " ", $eName);
-        $entity = $this->em->getRepository('AppBundle:Location')
+        $entity = $this->em->getRepository('App:Location')
             ->findOneBy(['displayName' => $entityName]);
         return $entity ?: $this->createEntity($entityName, $pRegion, $locTypeId);
     }
@@ -67,7 +67,7 @@ class Version20170405200118Countries extends AbstractMigration implements Contai
         $entity->setDisplayName($entityName);
         $entity->setCreatedBy($this->admin);
         $entity->setLocationType(
-            $this->em->getRepository('AppBundle:LocationType')
+            $this->em->getRepository('App:LocationType')
                 ->findOneBy(['id' => $locTypeId]));
         if ($pRegion) { $entity->setParentLoc($pRegion); }
         $this->em->persist($entity);

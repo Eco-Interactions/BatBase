@@ -19,7 +19,7 @@ security:
             logout:       true
             anonymous:    true            
             remember_me:
-                secret: '%end(APP_SECRET)%'
+                secret: '%env(APP_SECRET)%'
     
     role_hierarchy:
         ROLE_BETA:        [ROLE_USER]

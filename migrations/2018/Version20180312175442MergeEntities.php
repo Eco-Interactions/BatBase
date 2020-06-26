@@ -36,7 +36,7 @@ class Version20180312175442MergeEntities extends AbstractMigration implements Co
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
         //[ rmvFrom, addTo ]
         $pubs = [[56, null], [25, null]];
         // $cits = [[952, null]];
@@ -75,7 +75,7 @@ class Version20180312175442MergeEntities extends AbstractMigration implements Co
     }
     private function getEntity($id, $type)
     {
-        return $this->em->getRepository('AppBundle:'.$type)->findOneBy(['id' => $id]);
+        return $this->em->getRepository('App:'.$type)->findOneBy(['id' => $id]);
     }
     private function mergeMiscData(&$rmv, &$add, $type)
     {

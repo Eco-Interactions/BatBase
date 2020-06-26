@@ -29,7 +29,7 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->editGeoJsonData();
         $this->fixVariousDisplayPoints();
@@ -39,7 +39,7 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
     /** Add location name data.  */
     private function editGeoJsonData()
     {
-        $geoJson = $this->em->getRepository('AppBundle:GeoJson')->findAll();
+        $geoJson = $this->em->getRepository('App:GeoJson')->findAll();
 
         foreach ($geoJson as $entity) {
             $loc = $entity->getLocation();
@@ -68,7 +68,7 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
         ];
 
         foreach ($points as $name => $coordinates) {  
-            $geoJson = $this->em->getRepository('AppBundle:GeoJson')
+            $geoJson = $this->em->getRepository('App:GeoJson')
                 ->findOneBy(['locationName' => $name]);
             $geoJson->setDisplayPoint(json_encode($coordinates));
 

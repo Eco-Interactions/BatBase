@@ -2,8 +2,8 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\GeoJson;
-use AppBundle\Entity\SystemDate;
+use App\Entity\GeoJson;
+use App\Entity\SystemDate;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -32,7 +32,7 @@ class Version20180522233145AddLocPoints extends AbstractMigration implements Con
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->addGeoJsonToSystemDate();
         $this->createGeoJsonEntities();
@@ -49,7 +49,7 @@ class Version20180522233145AddLocPoints extends AbstractMigration implements Con
 
     private function createGeoJsonEntities()
     {
-        $locs = $this->em->getRepository('AppBundle:Location')->findAll();
+        $locs = $this->em->getRepository('App:Location')->findAll();
 
         foreach ($locs as $loc) {
             if (!$loc->getLatitude()) { continue; }

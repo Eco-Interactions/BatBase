@@ -2,8 +2,8 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Publication;
-use AppBundle\Entity\Source;
+use App\Entity\Publication;
+use App\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -32,7 +32,7 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => 6]);
         
         $this->deleteUnusedPhDPub($admin, $em);
         $this->changePublisherType($admin, $em);
@@ -43,7 +43,7 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
     /** Deletes the unused 'Ph.D. Dissertaion' publication source. */
     private function deleteUnusedPhDPub($admin, &$em)
     {
-        $phdPub = $em->getRepository('AppBundle:Source')
+        $phdPub = $em->getRepository('App:Source')
             ->findOneBy(['id' => 24]);
         $phdPub->setUpdatedBy($admin);
         $em->remove($phdPub);        
@@ -51,8 +51,8 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
     /** Changes the 'University of Chicago' publication into a publisher. */
     private function changePublisherType($admin, &$em)
     {
-        $src = $em->getRepository('AppBundle:Source')->findOneBy(['id' => 33]);
-        $src->setSourceType($em->getRepository('AppBundle:SourceType')
+        $src = $em->getRepository('App:Source')->findOneBy(['id' => 33]);
+        $src->setSourceType($em->getRepository('App:SourceType')
                 ->findOneBy(['id' => 1]));
         $src->setUpdatedBy($admin);
         $em->persist($src);
@@ -75,7 +75,7 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
             $src = new Source();
             /** Set Publication Data */
             $pub->setDisplayName($pubData[0]);
-            $pub->setPublicationType($em->getRepository('AppBundle:PublicationType')
+            $pub->setPublicationType($em->getRepository('App:PublicationType')
                 ->findOneBy(['id' => 2])); 
             $pub->setSource($src);
             $pub->setCreatedBy($admin);
@@ -83,15 +83,15 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
             /** Set Source Data */
             $src->setDisplayName($pubData[0]);
             $src->setYear($pubData[3]);
-            $src->setParentSource($em->getRepository('AppBundle:Source')
+            $src->setParentSource($em->getRepository('App:Source')
                 ->findOneBy(['id' => $pubData[1]]));
-            $src->setSourceType($em->getRepository('AppBundle:SourceType')
+            $src->setSourceType($em->getRepository('App:SourceType')
                 ->findOneBy(['id' => 2])); 
             $src->setCreatedBy($admin);
             $src->setUpdatedBy($admin);
-            $child = $em->getRepository('AppBundle:Source')
+            $child = $em->getRepository('App:Source')
                 ->findOneBy(['id' => $pubData[2]]);
-            $child->setSourceType($em->getRepository('AppBundle:SourceType')
+            $child->setSourceType($em->getRepository('App:SourceType')
                 ->findOneBy(['id' => 4])); 
             $child->setParentSource($src);
             $child->setUpdatedBy($admin);
@@ -107,13 +107,13 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
             [745, 4, 2004, 448, 7]];
      
         foreach ($citSrcs as $data) {
-            $citSrc = $em->getRepository('AppBundle:Source')
+            $citSrc = $em->getRepository('App:Source')
                 ->findOneBy(['id' => $data[0]]);
             $pub = new Publication();
             $src = new Source();
             /** Set Publication Data */
             $pub->setDisplayName($citSrc->getDisplayName());
-            $pub->setPublicationType($em->getRepository('AppBundle:PublicationType')
+            $pub->setPublicationType($em->getRepository('App:PublicationType')
                 ->findOneBy(['id' => $data[1]])); 
             $pub->setSource($src);
             $pub->setCreatedBy($admin);
@@ -121,9 +121,9 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
             /** Set Source Data */
             $src->setDisplayName($citSrc->getDisplayName());
             $src->setYear($data[2]);
-            $src->setParentSource($em->getRepository('AppBundle:Source')
+            $src->setParentSource($em->getRepository('App:Source')
                 ->findOneBy(['id' => $data[3]]));
-            $src->setSourceType($em->getRepository('AppBundle:SourceType')
+            $src->setSourceType($em->getRepository('App:SourceType')
                 ->findOneBy(['id' => 2])); 
             $src->setCreatedBy($admin);
             $src->setUpdatedBy($admin);
@@ -131,10 +131,10 @@ class Version20170715165522SrcData extends AbstractMigration implements Containe
             $citSrc->setDisplayName($citSrc->getDisplayName().'-citation');   
             $em->persist($citSrc);
             $em->flush();  //Must flush in order to keep displaynames unique 
-            $citSrc->setSourceType($em->getRepository('AppBundle:SourceType')
+            $citSrc->setSourceType($em->getRepository('App:SourceType')
                 ->findOneBy(['id' => 4])); 
             $cit = $citSrc->getCitation();
-            $cit->setCitationType($em->getRepository('AppBundle:CitationType')
+            $cit->setCitationType($em->getRepository('App:CitationType')
                 ->findOneBy(['id' => $data[4]])); 
             $citSrc->setParentSource($src);
             $citSrc->setUpdatedBy($admin);

@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
+use App\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -42,7 +42,7 @@ class Version20170517181831UnspecifiedRegion extends AbstractMigration implement
     private function createUnspecifiedRegion(&$em)
     {
         $region = new Location();
-        $region->setLocationType($em->getRepository('AppBundle:LocationType')->
+        $region->setLocationType($em->getRepository('App:LocationType')->
             findOneBy(['displayName' => 'Region']));
         $region->setDisplayName('Unspecified');
         $em->persist($region);
@@ -50,9 +50,9 @@ class Version20170517181831UnspecifiedRegion extends AbstractMigration implement
     }
     private function createHabitatLocations($region, &$em)
     {
-        $habitatLT = $em->getRepository('AppBundle:LocationType')->
+        $habitatLT = $em->getRepository('App:LocationType')->
             findOneBy(['displayName' => 'Habitat']);
-        $habitats = $em->getRepository('AppBundle:HabitatType')->findAll(); 
+        $habitats = $em->getRepository('App:HabitatType')->findAll(); 
 
         foreach ($habitats as $habEnt) {
             $this->createHabitatLocation($habEnt, $habitatLT, $region, $em);
@@ -71,7 +71,7 @@ class Version20170517181831UnspecifiedRegion extends AbstractMigration implement
 
     private function addToUnspecifiedInteractions($region, $em)
     {
-        $ints = $em->getRepository('AppBundle:Interaction')->
+        $ints = $em->getRepository('App:Interaction')->
             findBy(['location' => null]);        print('total ints = '.count($ints)."\n");
 
         foreach ($ints as $int) {

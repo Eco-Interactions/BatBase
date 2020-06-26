@@ -2,9 +2,9 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Citation;
-use AppBundle\Entity\CitationType;
-use AppBundle\Entity\SourceType;
+use App\Entity\Citation;
+use App\Entity\CitationType;
+use App\Entity\SourceType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 
 use Doctrine\DBAL\Schema\Schema;
@@ -70,11 +70,11 @@ class Version20161216175055CitTypes extends AbstractMigration implements Contain
     private function transArticlePubsToCits()
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $articles = $em->getRepository('AppBundle:Publication')
+        $articles = $em->getRepository('App:Publication')
             ->findBy(array('publicationType' => 1));                            //print("total articles = ".count($articles));
-        $citSourceType = $em->getRepository('AppBundle:SourceType')
+        $citSourceType = $em->getRepository('App:SourceType')
             ->findOneBy(array('id' => 4));
-        $articleCitType = $em->getRepository('AppBundle:CitationType')
+        $articleCitType = $em->getRepository('App:CitationType')
             ->findOneBy(array('id' => 1));
 
         foreach ($articles as $article) {

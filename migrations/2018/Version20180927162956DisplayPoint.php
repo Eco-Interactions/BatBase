@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\GeoJson;
+use App\Entity\GeoJson;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -29,7 +29,7 @@ class Version20180927162956DisplayPoint extends AbstractMigration implements Con
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->updateLocations();
         $this->updateDisplayPoint();
@@ -42,8 +42,8 @@ class Version20180927162956DisplayPoint extends AbstractMigration implements Con
     }
     private function combineIndias($stay, $delete)
     {
-        $stayLoc = $this->em->getRepository('AppBundle:Location')->findOneBy(['id' => $stay]);
-        $delLoc = $this->em->getRepository('AppBundle:Location')->findOneBy(['id' => $delete]);
+        $stayLoc = $this->em->getRepository('App:Location')->findOneBy(['id' => $stay]);
+        $delLoc = $this->em->getRepository('App:Location')->findOneBy(['id' => $delete]);
         $newName = $delLoc->getDisplayName();
         
         $this->deleteLocs($delLoc, $newName);
@@ -95,7 +95,7 @@ class Version20180927162956DisplayPoint extends AbstractMigration implements Con
 
     private function addPointToGeoJson($name, $point)
     {
-        $loc = $this->em->getRepository('AppBundle:Location')
+        $loc = $this->em->getRepository('App:Location')
             ->findOneBy(['displayName' => $name]); print('name = '.$name."\n");
         $geoJson = $loc->getGeoJson();
         if (!$geoJson) { return $this->createGeoJson($loc, $point); }

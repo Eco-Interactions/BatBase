@@ -2,8 +2,8 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
-use AppBundle\Entity\Region;
+use App\Entity\Location;
+use App\Entity\Region;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -47,7 +47,7 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
     }
     private function addRegionsToLocs($em)
     {
-        $regions = $em->getRepository('AppBundle:Region')->findAll();
+        $regions = $em->getRepository('App:Region')->findAll();
         $regionWithSubRegions = ['Mariana Islands' => ['Oceania']];
 
         foreach ($regions as $region) {
@@ -64,7 +64,7 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
                 continue;
             }
             // Update existing location entity for this region, or create new.
-            $curLoc = $em->getRepository('AppBundle:Location')
+            $curLoc = $em->getRepository('App:Location')
                 ->findOneBy(array('description' => $regionName.'-Unspecified'));
             if ($curLoc === null) {                                         
                 $this->buildLocEntity($region, $altName, null, $em);
@@ -77,9 +77,9 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
     private function updateLocEntity($locEntity, $regionName, $em)
     {
         $locEntity->setDescription($regionName);
-        $locEntity->setLocationType($em->getRepository('AppBundle:LocationType')
+        $locEntity->setLocationType($em->getRepository('App:LocationType')
             ->findOneBy(array('id' => 1)));
-        $locEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+        $locEntity->setUpdatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));
 
         $em->persist($locEntity);
@@ -90,9 +90,9 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
         $entity = new Location();
         $regionName = $regionName ?: $region->getDescription();
         $entity->setDescription($regionName);
-        $entity->setCreatedBy($em->getRepository('AppBundle:User')
+        $entity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));
-        $entity->setLocationType($em->getRepository('AppBundle:LocationType')
+        $entity->setLocationType($em->getRepository('App:LocationType')
             ->findOneBy(array('id' => 1)));
 
         $childLocs = $region->getLocations();
@@ -107,15 +107,15 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
     private function addSubRegions($regionWithSubRegions, $em)
     {
         foreach ($regionWithSubRegions as $parentRegion => $regions) {  
-            $parentLoc = $em->getRepository('AppBundle:Location')
+            $parentLoc = $em->getRepository('App:Location')
                 ->findOneBy(array('description' => $parentRegion));
 
             foreach ($regions as $subRegion) { 
                 // If there is a current location entity for this region, update it.
-                $curLoc = $em->getRepository('AppBundle:Location')
+                $curLoc = $em->getRepository('App:Location')
                     ->findOneBy(array('description' => $subRegion.'-Unspecified'));
                 if ($curLoc === null) {                         //print("location for --SUBREGION--".$subRegion." Not found. \n");
-                    $region = $em->getRepository('AppBundle:Region')
+                    $region = $em->getRepository('App:Region')
                         ->findOneBy(array('description' => $subRegion));
                     $this->buildLocEntity($region, null, $parentLoc, $em);
                 } else {

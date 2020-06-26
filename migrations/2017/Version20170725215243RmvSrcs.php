@@ -26,7 +26,7 @@ class Version20170725215243RmvSrcs extends AbstractMigration implements Containe
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->removeSrcs($admin, $em);
     }
@@ -58,7 +58,7 @@ class Version20170725215243RmvSrcs extends AbstractMigration implements Containe
     }
     private function getEntity($id, $entity, $em)
     {
-        return $em->getRepository('AppBundle:'.$entity)->findOneBy(['id' => $id]);
+        return $em->getRepository('App:'.$entity)->findOneBy(['id' => $id]);
     }
     private function removeFromParentSrc($src, &$em)
     {                                                                           //print("removing parent\n");

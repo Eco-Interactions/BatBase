@@ -7,7 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\InteractionType;
+use App\Entity\InteractionType;
 
 
 /**
@@ -27,13 +27,13 @@ class Version20200521FixNullLocations extends AbstractMigration implements Conta
 
     private function getEntity($className, $val, $prop = 'id')
     {
-        return $this->em->getRepository('AppBundle:'.$className)
+        return $this->em->getRepository('App:'.$className)
             ->findOneBy([$prop => $val]);
     }
 
     public function getEntities($className)
     {
-        return $this->em->getRepository('AppBundle:'.$className)->findAll();
+        return $this->em->getRepository('App:'.$className)->findAll();
     }
 
     public function persistEntity($entity, $creating = false)

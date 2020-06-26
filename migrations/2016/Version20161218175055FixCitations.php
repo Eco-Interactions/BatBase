@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Source;
+use App\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -38,10 +38,10 @@ class Version20161218175055FixCitations extends AbstractMigration implements Con
     }
     private function fixCitationEntity($srcId, &$em)
     {
-        $pubSrc = $em->getRepository("AppBundle:Source")
+        $pubSrc = $em->getRepository("App:Source")
             ->findOneBy(array('id' => $srcId));                                 //print("\nSource for citation ".$citPair[0]);
         $newCitSrc = new Source();
-        $newCitSrc->setSourceType($em->getRepository("AppBundle:SourceType")
+        $newCitSrc->setSourceType($em->getRepository("App:SourceType")
             ->findOneBy(array('id' => 4)));  //Citation
         $newCitSrc->setDisplayName($pubSrc->getDisplayName()."-citation"); //What should this be??
         $newCitSrc->setDescription($pubSrc->getDescription()); 

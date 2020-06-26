@@ -30,7 +30,7 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);        
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);        
         
         $this->identifyAndRemoveDuplicates();                                   print('deleted - '.$this->delete_count."\n");
         $this->em->flush();
@@ -136,7 +136,7 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
     }
     private function getEntity($type, $id)
     {
-        return $this->em->getRepository('AppBundle:'.$type)->findOneBy(['id' => $id ]);
+        return $this->em->getRepository('App:'.$type)->findOneBy(['id' => $id ]);
 
     }
     private function moveChildrenAndInteractions($sty, $rmv)
@@ -212,7 +212,7 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
 
     private function getAllTaxaWithDuplicatedDisplayNames()
     {
-        $taxa = $this->em->getRepository('AppBundle:Taxon')->findAll();
+        $taxa = $this->em->getRepository('App:Taxon')->findAll();
         $dups = [];
 
         foreach ($taxa as $taxon) {
@@ -266,7 +266,7 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
 
     private function clearIfNoLongerDupped($taxon)
     { 
-        $taxa = $this->em->getRepository('AppBundle:Taxon')->findBy(
+        $taxa = $this->em->getRepository('App:Taxon')->findBy(
             [ 'displayName' => $taxon->getDisplayName() ]);                     
         if (count($taxa) === 1) { return true; }                                //print("\n   Matching taxa to merge = ".count($taxa));
 

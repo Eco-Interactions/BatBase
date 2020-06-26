@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
+use App\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -29,9 +29,9 @@ class Version20170713015904LocHabs extends AbstractMigration implements Containe
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
         $habitats =  $this->getHabitatNames($em);  // print('habitats = '); print_r($habitats);
-        $regions = $em->getRepository('AppBundle:Location')
+        $regions = $em->getRepository('App:Location')
             ->findBy(array('locationType' => 1));
-        $countries = $em->getRepository('AppBundle:Location')
+        $countries = $em->getRepository('App:Location')
             ->findBy(array('locationType' => 2));
 
         $this->addAllNewHabitatLocs($regions, $habitats, $em);
@@ -42,7 +42,7 @@ class Version20170713015904LocHabs extends AbstractMigration implements Containe
     /** Returns an array of all habitat type displayNames */
     private function getHabitatNames($em)
     {
-        $habs = $em->getRepository('AppBundle:HabitatType')->findAll(); 
+        $habs = $em->getRepository('App:HabitatType')->findAll(); 
         $names = [];
         foreach ($habs as $hab) {
             array_push($names, [ 
@@ -77,8 +77,8 @@ class Version20170713015904LocHabs extends AbstractMigration implements Containe
     }
     private function createNewHabLocs($loc, $newHabs, &$em)
     {
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(array('id' => 6));
-        $locType = $em->getRepository('AppBundle:LocationType')
+        $admin = $em->getRepository('App:User')->findOneBy(array('id' => 6));
+        $locType = $em->getRepository('App:LocationType')
             ->findOneBy(array('displayName' => 'Habitat'));
         foreach ($newHabs as $habAry) {                                         print('    creating - '. $loc->getDisplayName() . '-' . $habAry['name'] . "\n");
             $newLoc = new Location();

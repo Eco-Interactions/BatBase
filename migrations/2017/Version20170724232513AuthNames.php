@@ -27,7 +27,7 @@ class Version20170724232513AuthNames extends AbstractMigration implements Contai
     {
         $nulls = [];
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => 6]);
         $this->addAuthorNameData($nulls, $admin, $em);
         $em->flush();
     }
@@ -41,7 +41,7 @@ class Version20170724232513AuthNames extends AbstractMigration implements Contai
     }
     private function addMissingAuthData($athrData, &$nulls, $admin, &$em)
     {
-        $athr = $em->getRepository('AppBundle:Author')
+        $athr = $em->getRepository('App:Author')
             ->findOneBy(['displayName' => $athrData['shortName']]); 
         if (!$athr) { array_push($nulls, $athrData['shortName']); return; }
 

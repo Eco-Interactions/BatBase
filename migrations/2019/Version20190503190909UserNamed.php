@@ -26,7 +26,7 @@ final class Version20190503190909UserNamed extends AbstractMigration implements 
     public function up(Schema $schema) : void
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->admin = $this->em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->createUserNamedTable();
         $this->updateCenterPoint();
@@ -42,7 +42,7 @@ final class Version20190503190909UserNamed extends AbstractMigration implements 
     }
     private function updateCenterPoint()
     {
-        $loc = $this->em->getRepository('AppBundle:Location')
+        $loc = $this->em->getRepository('App:Location')
             ->findOneBy(['displayName' => 'Russian Federation']);
         $geoJson = $loc->getGeoJson();
         $geoJson->setDisplayPoint(json_encode([105.3188, 61.5240]));

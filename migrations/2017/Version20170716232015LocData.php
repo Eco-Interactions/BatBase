@@ -28,7 +28,7 @@ class Version20170716232015LocData extends AbstractMigration  implements Contain
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->updateCaptivityLocs($admin, $em);
         $this->changeLocTypeToArea($admin, $em);
@@ -37,10 +37,10 @@ class Version20170716232015LocData extends AbstractMigration  implements Contain
     }
     private function updateCaptivityLocs($admin, &$em)
     {
-        $loc = $em->getRepository('AppBundle:Location')->findOneBy(['id' => 24]);
-        $loc->setParentLoc($em->getRepository('AppBundle:Location')
+        $loc = $em->getRepository('App:Location')->findOneBy(['id' => 24]);
+        $loc->setParentLoc($em->getRepository('App:Location')
             ->findOneBy(['id' => 439]));
-        $loc->setLocationType($em->getRepository('AppBundle:LocationType')
+        $loc->setLocationType($em->getRepository('App:LocationType')
             ->findOneBy(['id' => 3]));
         $loc->setUpdatedBy($admin);
         $em->persist($loc);
@@ -50,7 +50,7 @@ class Version20170716232015LocData extends AbstractMigration  implements Contain
     {
         $delete = [444, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459];
         foreach ($delete as $id) {
-            $loc = $em->getRepository('AppBundle:Location')
+            $loc = $em->getRepository('App:Location')
                 ->findOneBy(['id' => $id]);
             $em->remove($loc);
         }        
@@ -59,9 +59,9 @@ class Version20170716232015LocData extends AbstractMigration  implements Contain
     {
         $ids = [ 129, 11, 77, 22, 12, 155, 145, 141, 187, 88 ];
         foreach ($ids as $id) {
-            $loc = $em->getRepository('AppBundle:Location')
+            $loc = $em->getRepository('App:Location')
                 ->findOneBy(['id' => $id]);
-            $loc->setLocationType($em->getRepository('AppBundle:LocationType')
+            $loc->setLocationType($em->getRepository('App:LocationType')
                 ->findOneBy(['id' => 4]));
             $loc->setUpdatedBy($admin);
             $em->persist($loc);

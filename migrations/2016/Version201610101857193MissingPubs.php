@@ -2,14 +2,14 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Contribution;
-use AppBundle\Entity\Publication;
-use AppBundle\Entity\Source;
+use App\Entity\Contribution;
+use App\Entity\Publication;
+use App\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-// use AppBundle\Entity\SourceType;
+// use App\Entity\SourceType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -150,12 +150,12 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
     }
     private function addPub($pubVals, &$em) {                                   print("\n    add pub ->". $pubVals[0]);
         $pubEntity = new Publication();
-        $pubEntity->setCreatedBy($em->getRepository('AppBundle:User')
+        $pubEntity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6'))); 
 
         $pubEntity->setDisplayName($pubVals[0]);
         $pubEntity->setDescription($pubVals[1]);
-        $pubEntity->setPublicationType($em->getRepository("AppBundle:PublicationType")
+        $pubEntity->setPublicationType($em->getRepository("App:PublicationType")
             ->findOneBy(array("displayName" => $pubVals[2])));
 
         $em->persist($pubEntity);
@@ -163,7 +163,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
     }
     private function addParentSource($parentName, &$srcEntity, $em) {           print("\n    addParentSource ->". $parentName);
         if ($parentName !== null) {  
-            $parentSrc = $em->getRepository("AppBundle:Source")
+            $parentSrc = $em->getRepository("App:Source")
                 ->findOneBy(array('displayName' => $parentName));
             $srcEntity->setParentSource($parentSrc);
         }
@@ -171,12 +171,12 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
     private function addContributor($authors, &$srcEntity, &$em) {              print("    addContributor ->");
         foreach ($authors as $authId) {
             $contribEntity = new Contribution();
-            $author = $em->getRepository('AppBundle:Author')
+            $author = $em->getRepository('App:Author')
                 ->findOneBy(array('id' => $authId));
 
             $contribEntity->setAuthorSource($author->getSource());
             $contribEntity->setWorkSource($srcEntity);
-            $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
+            $contribEntity->setCreatedBy($em->getRepository('App:User')
                 ->findOneBy(array('id' => '6'))); 
 
             $em->persist($contribEntity);
@@ -186,18 +186,18 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
         $srcFields = ["Year", "Doi", "ParentSource", "LinkUrl", "DisplayName","Description", "Author"];
 
         $srcEntity = new Source();
-        $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
+        $srcEntity->setCreatedBy($em->getRepository('App:User')
             ->findOneBy(array('id' => '6')));         
         /** Adds values from the pubEntity that I didn't want to copy into the pub's source array. */
         if ($sourceType === "publication") {
             $srcEntity->setDisplayName($pubEntity->getDisplayName());
             $srcEntity->setDescription($pubEntity->getDescription());
-            $srcEntity->setSourceType($em->getRepository("AppBundle:SourceType")
+            $srcEntity->setSourceType($em->getRepository("App:SourceType")
                 ->findOneBy(array('id' => 2)));
             $pubEntity->setSource($srcEntity);
             $em->persist($pubEntity);
         } else { //Publisher
-            $srcEntity->setSourceType($em->getRepository("AppBundle:SourceType")
+            $srcEntity->setSourceType($em->getRepository("App:SourceType")
                 ->findOneBy(array('id' => 1)));
         }
         for ($i=0; $i < count($valAry); $i++) {                                 print("\n  field = ".$srcFields[$i]." val = ". $valAry[$i]);

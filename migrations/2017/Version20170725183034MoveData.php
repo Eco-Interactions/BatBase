@@ -29,7 +29,7 @@ class Version20170725183034MoveData extends AbstractMigration implements Contain
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $admin = $em->getRepository('App:User')->findOneBy(['id' => 6]);
 
         $this->handleLocations($admin, $em);
         $em->flush();
@@ -53,7 +53,7 @@ class Version20170725183034MoveData extends AbstractMigration implements Contain
     }
     private function getEntity($id, $entity, $em)
     {
-        return $em->getRepository('AppBundle:'.$entity)->findOneBy(['id' => $id]);
+        return $em->getRepository('App:'.$entity)->findOneBy(['id' => $id]);
     }
     private function transferInts($rmv, $add, $prop, &$em)
     {

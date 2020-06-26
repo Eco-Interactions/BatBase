@@ -519,12 +519,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "a7c431c087dcfdeae9914cb035af3c6cd4ca1d97"
+                "reference": "0743e04ea7abdafc89b9c3634ca9434fc0e921d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/a7c431c087dcfdeae9914cb035af3c6cd4ca1d97",
-                "reference": "a7c431c087dcfdeae9914cb035af3c6cd4ca1d97",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/0743e04ea7abdafc89b9c3634ca9434fc0e921d3",
+                "reference": "0743e04ea7abdafc89b9c3634ca9434fc0e921d3",
                 "shasum": ""
             },
             "require": {
@@ -620,7 +620,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-06-24T14:32:58+00:00"
+            "time": "2020-06-25T21:26:41+00:00"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -5984,35 +5984,34 @@
         },
         {
             "name": "symfony/mime",
-            "version": "v5.1.2",
+            "version": "4.4.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
-                "reference": "c0c418f05e727606e85b482a8591519c4712cf45"
+                "reference": "c0a97379ec53a75f988daa6b007ef5af5f313bda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mime/zipball/c0c418f05e727606e85b482a8591519c4712cf45",
-                "reference": "c0c418f05e727606e85b482a8591519c4712cf45",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/c0a97379ec53a75f988daa6b007ef5af5f313bda",
+                "reference": "c0a97379ec53a75f988daa6b007ef5af5f313bda",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.2.5",
+                "php": ">=7.1.3",
                 "symfony/polyfill-intl-idn": "^1.10",
-                "symfony/polyfill-mbstring": "^1.0",
-                "symfony/polyfill-php80": "^1.15"
+                "symfony/polyfill-mbstring": "^1.0"
             },
             "conflict": {
                 "symfony/mailer": "<4.4"
             },
             "require-dev": {
                 "egulias/email-validator": "^2.1.10",
-                "symfony/dependency-injection": "^4.4|^5.0"
+                "symfony/dependency-injection": "^3.4|^4.1|^5.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "5.1-dev"
+                    "dev-master": "4.4-dev"
                 }
             },
             "autoload": {
@@ -6057,7 +6056,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-06-09T15:07:35+00:00"
+            "time": "2020-06-24T13:38:36+00:00"
         },
         {
             "name": "symfony/monolog-bridge",

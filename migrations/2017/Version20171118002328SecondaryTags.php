@@ -2,7 +2,7 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\Location;
+use App\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -29,7 +29,7 @@ class Version20171118002328SecondaryTags extends AbstractMigration implements Co
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
 
-        $tag = $em->getRepository('AppBundle:Tag')-> 
+        $tag = $em->getRepository('App:Tag')-> 
             findOneBy(['displayName' => 'Secondary']);
         $tag->setConstrainedToEntity('Interaction');
         $this->moveTagToInteractions($tag->getSources(), $tag, $em);

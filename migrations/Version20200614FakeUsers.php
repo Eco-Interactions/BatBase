@@ -25,13 +25,13 @@ class Version20200614FakeUsers extends AbstractMigration implements ContainerAwa
 
     private function getEntity($className, $val, $prop = 'id')
     {
-        return $this->em->getRepository('AppBundle:'.$className)
+        return $this->em->getRepository('App:'.$className)
             ->findOneBy([$prop => $val]);
     }
 
     public function getEntities($className)
     {
-        return $this->em->getRepository('AppBundle:'.$className)->findAll();
+        return $this->em->getRepository('App:'.$className)->findAll();
     }
 
     public function persistEntity($entity, $creating = false)
@@ -85,7 +85,7 @@ class Version20200614FakeUsers extends AbstractMigration implements ContainerAwa
     }
     private function deleteUserLists($user)
     {
-        $lists = $this->em->getRepository('AppBundle:UserNamed')
+        $lists = $this->em->getRepository('App:UserNamed')
             ->findBy(['createdBy' => $user]);
 
         foreach ($lists as $list) {

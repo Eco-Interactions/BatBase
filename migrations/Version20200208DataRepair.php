@@ -7,7 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\GeoJson;
+use App\Entity\GeoJson;
 
 
 /**
@@ -27,7 +27,7 @@ class Version20200208DataRepair extends AbstractMigration implements ContainerAw
 
     private function getEntity($className, $val, $prop = 'id')
     {
-        return $this->em->getRepository('AppBundle:'.$className)
+        return $this->em->getRepository('App:'.$className)
             ->findOneBy([$prop => $val]);
     }
 
@@ -54,7 +54,7 @@ class Version20200208DataRepair extends AbstractMigration implements ContainerAw
 
     private function findAndCreateMisingGeoJson()
     {
-        $all = $this->em->getRepository('AppBundle:Location')->findAll();
+        $all = $this->em->getRepository('App:Location')->findAll();
 
         foreach ($all as $loc) {                        
             if (!$loc->getLatitude()) { continue; }
@@ -66,7 +66,7 @@ class Version20200208DataRepair extends AbstractMigration implements ContainerAw
 
     private function checkIfLocHasGeoJson($loc)
     {
-        $geoJson = $this->em->getRepository('AppBundle:GeoJson')
+        $geoJson = $this->em->getRepository('App:GeoJson')
             ->findByLocation($loc->getId());    
         return !!$geoJson;
     }

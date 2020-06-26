@@ -2,8 +2,8 @@
 
 namespace Application\Migrations;
 
-use AppBundle\Entity\CitationType;
-use AppBundle\Entity\LocationType;
+use App\Entity\CitationType;
+use App\Entity\LocationType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -43,7 +43,7 @@ class Version20170518210100TypeAdditions extends AbstractMigration implements Co
 
     private function addOrdinals(&$em)
     {
-        $types = $em->getRepository('AppBundle:LocationType')->findAll(); 
+        $types = $em->getRepository('App:LocationType')->findAll(); 
         $ordinal = 10;
         foreach ($types as $locType) {
             $locType->setOrdinal($ordinal);
