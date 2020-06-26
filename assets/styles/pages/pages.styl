@@ -6,6 +6,11 @@
 // REGISTRAION
 // UPLOAD PDFS
 /*----- (SEARCH PAGE IN DEDICATED FILE: DB.STYL & SEARCH_DB.CSS) -------------*/
+.two-col-outer .first-col
+    flex: 2 1 420px;
+    
+.two-col-outer .second-col
+    flex: 1 1 420px;
 /*---------------- HOME ---------------------*/
 #home-pg .two-col-cntnr > div, #team .first-col, #team .second-col
     flex: 1 1 420px;
@@ -80,18 +85,12 @@
         
 form[name="app_file_upload"] textarea, form[name="app_file_upload"] input 
     width: 100%;
-/*------------- REGISTRATION -----------------*/
-.two-col-outer .first-col
-    flex: 2 1 420px;
-    
-.two-col-outer .second-col
-    flex: 1 1 420px;
-
-#reg-form-container>form div div 
-    justify-content: space-between
-
-#reg-form-container>form div div input, #reg-form-container>form div div textarea
-    width 100%
+/*------------- REGISTRATION -----------------*/    
+#reg-submit
+    opacity: .5
     
 .recaptcha-form
     height: 588px
+
+.g-recaptcha
+    margin: 1em 0

@@ -49,16 +49,30 @@ input[type="search"]
     padding: 2px 3px 1px 3px !important;
     height 25px
 /*------------- MISC STYLES -----------------*/
-#error_logo /* Logo used on error and 404 pages */
-    width: 50%   /* RESPONSIVE */
-    margin: 2% auto 0 auto
-
 .modal-msg // intro.js modal message window
     min-width: 333px !important
     
-/* ------- REGISTRATION/LOGIN FORMS --------------- */
-.g-recaptcha
-    margin: 1em 0
-    
-#reg-submit
-    opacity: .5
+/* ------- STATIC PAGE FORMS --------------- */    
+#top-form-container>form div div 
+    justify-content: space-between
+
+#top-form-container>form div div input, #top-form-container>form div div textarea
+    width 100%
+/* ---------- ERROR PAGES ------------------- */
+#error_content .three-col-outer
+    display: flex
+    flex-direction: row
+    flex-wrap: wrap
+    justify-content: space-between
+
+#error_content .first-col, #error_content .third-col
+    flex: 0 0 10px
+#error_content .second-col
+    flex: 0 1 99%
+    text-align: center
+    font-size: 2em
+    line-height: 1.2em
+
+#error_logo /* Logo used on error and 404 pages */
+    width: 50%   /* RESPONSIVE */
+    margin: 2% auto 0 auto
