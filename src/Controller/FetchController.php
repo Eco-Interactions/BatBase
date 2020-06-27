@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
@@ -9,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Psr\Log\LoggerInterface;
 
 /**
  * Ajax Data controller:
@@ -26,7 +28,15 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 class FetchController extends AbstractController
 {
     private $em;
+
     private $serializer;
+    private $logger;
+
+    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    {
+        $this->serializer = $serializer;
+        $this->logger = $logger;
+    }
 
     /**
      * Returns an object with the lastUpdated datetime for the system and for 
@@ -61,7 +71,6 @@ class FetchController extends AbstractController
     {
         $this->em = $this->getDoctrine()->getManager();
         $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
-        $this->serializer = $this->container->get('jms_serializer');
 
         $level = $this->serializeEntityRecords('Level');
         $realm = $this->serializeEntityRecords('Realm');
@@ -84,7 +93,6 @@ class FetchController extends AbstractController
     public function serializeLocationData(Request $request) 
     {
         $this->em = $this->getDoctrine()->getManager();
-        $this->serializer = $this->container->get('jms_serializer');
 
         $habitatType = $this->serializeEntityRecords('HabitatType');
         $location = $this->serializeEntityRecords('Location', 'normalized');
@@ -105,7 +113,6 @@ class FetchController extends AbstractController
     public function serializeGeoJsonData(Request $request) 
     {
         $this->em = $this->getDoctrine()->getManager();
-        $this->serializer = $this->container->get('jms_serializer');
 
         $geoJson = $this->serializeEntityRecords('GeoJson', 'normalized');
 
@@ -125,7 +132,6 @@ class FetchController extends AbstractController
     public function serializeSourceData(Request $request) 
     {
         $this->em = $this->getDoctrine()->getManager();
-        $this->serializer = $this->container->get('jms_serializer');
 
         $author = $this->serializeEntityRecords('Author', 'normalized');
         $citation = $this->serializeEntityRecords('Citation', 'normalized');
@@ -153,7 +159,6 @@ class FetchController extends AbstractController
     public function serializeInteractionData(Request $request) 
     {
         $this->em = $this->getDoctrine()->getManager();
-        $this->serializer = $this->container->get('jms_serializer');
 
         $interaction = $this->serializeEntityRecords('Interaction', 'normalized');
         $intType = $this->serializeEntityRecords('InteractionType');
@@ -173,7 +178,6 @@ class FetchController extends AbstractController
     public function serializeUserListData(Request $request)
     {      
         $this->em = $this->getDoctrine()->getManager();
-        $this->serializer = $this->container->get('jms_serializer');
 
         $lists = $this->em->getRepository('App:UserNamed')
             ->findBy(['createdBy' => $this->getUser()]);
@@ -219,10 +223,10 @@ class FetchController extends AbstractController
         $rcrd = false;
         try {
             $rcrd = $this->serializer->serialize($entity, 'json', $this->setGroups($group));
-        } catch (\Throwable $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        } catch (\Exception $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n\n");
-            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        } catch (\Throwable $e) {                                               print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+            $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        } catch (\Exception $e) {                                               print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n\n");
+            $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         return $rcrd;
     }
@@ -257,7 +261,6 @@ class FetchController extends AbstractController
      */
     private function getAllUpdatedData($entityType, $lastUpdatedAt)
     {    
-        $this->serializer = $this->container->get('jms_serializer');
         $data = new \stdClass;
 
         $entities = $this->getEntitiesWithUpdates($entityType, $lastUpdatedAt);

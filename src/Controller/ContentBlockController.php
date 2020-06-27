@@ -354,7 +354,6 @@ class ContentBlockController extends AbstractController
             throw $this->createNotFoundException('Unable to find Content Block entity.');
         }
 
-        $logger = $this->get('logger');
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent); 
         $content = $pushedData->content;

@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Psr\Log\LoggerInterface;
 
 /**
  * Handles individual entity (interaction and taxon) show pages.
@@ -15,6 +17,14 @@ class ShowEntityController extends AbstractController
 {
 
     private $em;
+    private $serializer;
+    private $logger;
+
+    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    {
+        $this->serializer = $serializer;
+        $this->logger = $logger;
+    }
 
     private function getEntity($className, $val, $prop = 'id')
     {
@@ -24,10 +34,8 @@ class ShowEntityController extends AbstractController
 /* --------------- SERIALIZE --------------- */
     private function serializeEntity($entity)
     {
-        $serializer = $this->container->get('jms_serializer');
-
         try {
-            return $serializer->serialize($entity, 'json', 
+            return $this->serializer->serialize($entity, 'json', 
                 SerializationContext::create()->setGroups(array('flattened')));
         } catch (\Throwable $e) {
             return $this->logError($e);
@@ -37,7 +45,7 @@ class ShowEntityController extends AbstractController
     }
     private function logError($e)
     {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
     }
 /* ----------------------------- INTERACTION -------------------------------- */
     /**

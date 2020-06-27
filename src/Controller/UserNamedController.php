@@ -9,7 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-
+use JMS\Serializer\SerializerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Saves and displays user specified data sets: Interactions and Filters
@@ -18,6 +19,15 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  */
 class UserNamedController extends AbstractController
 {
+    private $serializer;
+    private $logger;
+
+    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    {
+        $this->serializer = $serializer;
+        $this->logger = $logger;
+    }
+
 /*------------------------------ CREATE --------------------------------------*/
     /**
      * Saves a new set of user-named data
@@ -141,10 +151,9 @@ class UserNamedController extends AbstractController
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendListDataAndResponse($data, $delete)
     {
-        $serializer = $this->container->get('jms_serializer');
         if (!$delete) {
             try {
-                $data->entity = $serializer->serialize($data->entity, 'json');
+                $data->entity = $this->serializer->serialize($data->entity, 'json');
             } catch (\Throwable $e) {
                 return $this->sendErrorResponse($e);
             } catch (\Exception $e) {
@@ -160,7 +169,7 @@ class UserNamedController extends AbstractController
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {   
-        $this->get('logger')->error($e->getMessage());
+        $this->logger->error($e->getMessage());
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData(array(

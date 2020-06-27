@@ -8,7 +8,8 @@ use App\Entity\Location;
 use App\Entity\Source;
 use App\Entity\Taxon;
 use JMS\Serializer\SerializationContext;
-
+use JMS\Serializer\SerializerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +24,16 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  */
 class DataEntryController extends AbstractController
 {
+    private $serializer;
+
+    private $logger;
+
+    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    {
+        $this->serializer = $serializer;
+        $this->logger = $logger;
+    }
+
 /*------------------------------ CREATE --------------------------------------*/
     /**
      * Creates a new Entity, and any new detail-entities, from the form data. 
@@ -447,7 +458,7 @@ class DataEntryController extends AbstractController
     private function sendErrorResponse($e)
     {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         if ($this->ifNotDuplicateEntityError($e)) {
-            $this->get('logger')->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+            $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);
@@ -462,7 +473,6 @@ class DataEntryController extends AbstractController
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($entityData)
     {
-        $serializer = $this->container->get('jms_serializer');
         $serialize = ['core', 'detail'];
 
         foreach ($serialize as $p) {
@@ -471,7 +481,7 @@ class DataEntryController extends AbstractController
             if (!$entityData->$prop) { continue; }
             try {
                 $entityData->$id = $entityData->$prop->getId();
-                $entityData->$prop = $serializer->serialize(
+                $entityData->$prop = $this->serializer->serialize(
                     $entityData->$prop, 'json', 
                     SerializationContext::create()->setGroups(array('normalized')));
             } catch (\Throwable $e) {

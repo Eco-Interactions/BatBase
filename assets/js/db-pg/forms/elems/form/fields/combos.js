@@ -43,7 +43,7 @@ export function buildSelect(entity, field, fLvl, cnt) {                         
     return getSelectOpts(field)
         .then(finishSelectBuild);
 
-    function finishSelectBuild(opts) {  
+    function finishSelectBuild(opts) {                                          //console.log('[%s] opts = %O', field, opts);
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const attr = { id: fieldId , class: 'med-field'};
         _f.state('addComboToFormState', [fLvl, field]);
