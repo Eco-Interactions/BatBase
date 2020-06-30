@@ -1,5 +1,5 @@
 hautelook_alice:
-    fixtures_path: fixtures
+    fixtures_path: tests/fixtures
 
     # db_drivers:
     #     orm: ~          # Enable Doctrine ORM if is registered

@@ -55,39 +55,15 @@ class FileUploadController extends AbstractController
     {
         $entity = new FileUpload();
         $form = $this->createForm('App\Form\FileUploadType', $entity);
-        $form->add('submit', SubmitType::class, array('label' => 'Submit'));
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var UploadedFile $file */
-            $file = $form['file']->getData();
             
-            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            // this is needed to safely include the file name as part of the URL
-            $safeFilename = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
-            $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
-
-            // Move the file to the directory where publication PDFs are stored
-            try {
-                $file->move(
-                    $this->getParameter('publication_file_dir'),
-                    $fileName
-                );
-            } catch (FileException $e) { 
-                return $this->render('Uploads/submit_file.html.twig', [
-                    'form' => $form->createView(),
-                    'success' => false,
-                    'error' => $e->getMessage()
-                ]);
-            }
-            // stores the PDF file name instead of its contents
-            $entity->setFileName($fileName);
-            $entity->setPath($this->getParameter('publication_file_dir'));
-            $entity->setMimeType('application/pdf');
+            $entity->setMimeType($entity->getPdfFile()->getMimeType());
+            $entity->setPath("uploads/publication/");
             $entity->setStatus();
-            $entity->setSize($file->getClientSize());
-            
+
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->flush();

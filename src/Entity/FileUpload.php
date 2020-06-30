@@ -4,15 +4,21 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+// use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+
 
 /**
  * File Upload.
  *
  * @ORM\Entity
+ * @Vich\Uploadable
  * @ORM\Table(name="file_upload")
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  */
 class FileUpload
 {
@@ -24,19 +30,16 @@ class FileUpload
     private $id;
 
     /**
-     * Used as container for UploadedFile obj.
-     */
-    private $file;
-
-    /**
-     * @ORM\Column(name="filename", type="string", nullable=false)
+     * URL to image|pdf file.
+     * 
+     * @ORM\Column(name="fileName", type="string", nullable=false)
      */
     private $fileName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="title", type="string", length=255, nullable=false)
+     * @ORM\Column(name="title", type="string", unique=true, length=255, nullable=false)
      */
     private $title;
 
@@ -66,6 +69,32 @@ class FileUpload
      * @ORM\Column(name="size", type="decimal", nullable=false)
      */
     private $size;
+
+    /**
+     * Used as container for UploadedFile obj.
+     * 
+     * @Vich\UploadableField(
+     *      mapping="issue_image", 
+     *      fileNameProperty="fileName", 
+     *      size="size"
+     * )
+     * 
+     * @var File|null
+     */
+    private $issueImage;
+
+    /**
+     * Used as container for UploadedFile obj.
+     * 
+     * @Vich\UploadableField(
+     *      mapping="pdf_image", 
+     *      fileNameProperty="fileName", 
+     *      size="size"
+     * )
+     * 
+     * @var File|null
+     */
+    private $pdfFile;
 
     /**
      * @var \DateTime
@@ -100,11 +129,6 @@ class FileUpload
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
     private $updatedBy;
-
-    /**
-     * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
-     */
-    private $deletedAt;
 
     /**
      * Get id.
@@ -302,46 +326,119 @@ class FileUpload
         return $this->size;
     }
 
-    public function getAbsolutePath()
+    /**
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the update. 
+     *
+     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $issueImage
+     */
+    public function setIssueImage(?File $issueImage = null): void
     {
-        return null === $this->path
-            ? null
-            : $this->getUploadRootDir().'/'.$this->path;
-    }
+        $this->issueImage = $issueImage;
 
-    public function getWebPath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadDir().'/'.$this->path;
-    }
-
-    public function upload()
-    {
-        $validTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp');
-        $taxonImgsPath = $this->getUploadDir();
-        $mimeType = $this->getFile()->getClientMimeType();
-
-        if (in_array($mimeType, $validTypes)) {
-            $this->mimeType = $mimeType;
-            $randName = substr(sha1(rand(0, 1000)), 0, 11);
-            $extension = '.'.$this->getFile()->guessExtension();
-            $fileName = $randName.$extension;
-            $this->size = $this->getFile()->getClientSize();
-            $this->path = $taxonImgsPath.$fileName;   // set to the filename where you've saved the file
-            $this->fileName = $fileName;
-            $this->setStatus();
-
-            $this->getFile()->move(// move takes the target directory and then the
-                $this->getUploadDir(),                  // target filename to move to
-                $fileName
-            );
-        } else {
-            $this->file = null;
-            return false;
+        if (null !== $issueImage) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            $this->updatedAt = new \DateTimeImmutable();
         }
-        return true;
     }
+
+    public function getIssueImage(): ?File
+    {
+        return $this->issueImage;
+    }
+
+    /**
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the update. 
+     *
+     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $pdfFile
+     */
+    public function setPdfFile(?File $pdfFile = null): void
+    {
+        $this->pdfFile = $pdfFile;
+
+        if (null !== $pdfFile) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getPdfFile(): ?File
+    {
+        return $this->pdfFile;
+    }
+
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('pdfFile', new Assert\File([
+            'maxSize' => '1024k',
+            'mimeTypes' => [
+                'application/pdf',
+                'application/x-pdf',
+            ],
+            'mimeTypesMessage' => 'Please upload a valid PDF',
+        ]));
+        $metadata->addPropertyConstraint('issueImage', new Assert\File([
+            'maxSize' => '1024k',
+            'mimeTypes' => [ 
+                'image/jpeg', 
+                'image/gif', 
+                'image/png'
+            ],
+            'mimeTypesMessage' => 'Please upload a valid image: jpg, gif, or png.',
+        ]));
+    }
+
+
+
+
+
+
+
+
+
+    // public function getAbsolutePath()
+    // {
+    //     return null === $this->path
+    //         ? null
+    //         : $this->getUploadRootDir().'/'.$this->path;
+    // }
+
+    // public function getWebPath()
+    // {
+    //     return null === $this->path
+    //         ? null
+    //         : $this->getUploadDir().'/'.$this->path;
+    // }
+
+    // public function upload()
+    // {
+    //     $validTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp');
+    //     $taxonImgsPath = $this->getUploadDir();
+    //     $mimeType = $this->getFile()->getClientMimeType();
+
+    //     if (in_array($mimeType, $validTypes)) {
+    //         $this->mimeType = $mimeType;
+    //         $randName = substr(sha1(rand(0, 1000)), 0, 11);
+    //         $extension = '.'.$this->getFile()->guessExtension();
+    //         $fileName = $randName.$extension;
+    //         $this->size = $this->getFile()->getClientSize();
+    //         $this->path = $taxonImgsPath.$fileName;   // set to the filename where you've saved the file
+    //         $this->fileName = $fileName;
+    //         $this->setStatus();
+
+    //         $this->getFile()->move(// move takes the target directory and then the
+    //             $this->getUploadDir(),                  // target filename to move to
+    //             $fileName
+    //         );
+    //     } else {
+    //         $this->file = null;
+    //         return false;
+    //     }
+    //     return true;
+    // }
     
     /**
      * Set createdBy user.
@@ -443,17 +540,17 @@ class FileUpload
         return $this->description;
     }
 
-    protected function getUploadRootDir()
-    {
-        // the absolute directory path where uploaded
-        // documents should be saved
-        return __DIR__.'/../../../web/'.$this->getUploadDir();
-    }
+    // protected function getUploadRootDir()
+    // {
+    //     // the absolute directory path where uploaded
+    //     // documents should be saved
+    //     return __DIR__.'/../../../web/'.$this->getUploadDir();
+    // }
 
-    protected function getUploadDir()
-    {
-        // get rid of the __DIR__ so it doesn't screw up
-        // when displaying uploaded doc/image in the view.
-        return 'uploads/files/';
-    }
+    // protected function getUploadDir()
+    // {
+    //     // get rid of the __DIR__ so it doesn't screw up
+    //     // when displaying uploaded doc/image in the view.
+    //     return 'uploads/files/';
+    // }
 }

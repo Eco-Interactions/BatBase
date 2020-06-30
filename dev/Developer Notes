@@ -87,7 +87,7 @@ Run Tests:
     # - Unit Tests:
     #     $phpunit = ./vendor/bin/simple-phpunit
     #     [$phpunit] -c app/ tests   
-    #     [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+    #     [$phpunit] -c app/ tests/App/Controller/<Entity>ControllerTest.php   
 
 ## ==================== Local Installation ================================== ##
 

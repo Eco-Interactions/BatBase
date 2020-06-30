@@ -1,4 +1,4 @@
-{% form_theme form 'form/fields.html.twig' %}
+{% form_ theme form 'form/fields.html.twig' %}
 
 {% extends "layout.html.twig" %}
 
@@ -24,12 +24,13 @@
                 {% elseif success %}
                     <p style="color: green; font-weight: 600;">Thank you for your submission!</p>
                 {% endif %}
-
-                {{ form_start(form) }}
-                    {{ form_row(form.file) }}
-                    {{ form_row(form.title) }}
-                    {{ form_row(form.description) }}
-                {{ form_end(form) }}
+                <div id="top-form-container">
+                    {{ form_start(form) }}
+                        {{ form_row(form.pdfFile) }}
+                        {{ form_row(form.title) }}
+                        {{ form_row(form.description) }}
+                    {{ form_end(form) }}
+                </div>
             {% endblock firstcol %}
             {% block secondcol %}   
                 {% if is_full_view() %}         

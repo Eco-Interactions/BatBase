@@ -552,10 +552,16 @@
     "symfony/polyfill-apcu": {
         "version": "1.17-dev"
     },
+    "symfony/polyfill-intl-grapheme": {
+        "version": "1.17-dev"
+    },
     "symfony/polyfill-intl-icu": {
         "version": "1.17-dev"
     },
     "symfony/polyfill-intl-idn": {
+        "version": "1.17-dev"
+    },
+    "symfony/polyfill-intl-normalizer": {
         "version": "1.17-dev"
     },
     "symfony/polyfill-mbstring": {
@@ -619,6 +625,9 @@
     },
     "symfony/stopwatch": {
         "version": "4.4.x-dev"
+    },
+    "symfony/string": {
+        "version": "5.2-dev"
     },
     "symfony/swiftmailer-bundle": {
         "version": "2.5",
@@ -742,6 +751,18 @@
     },
     "twig/twig": {
         "version": "3.x-dev"
+    },
+    "vich/uploader-bundle": {
+        "version": "1.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.5",
+            "ref": "c4f5755b37fb65b9c6a3cbdae91205c15a137ed4"
+        },
+        "files": [
+            "config/packages/vich_uploader.yaml"
+        ]
     },
     "willdurand/jsonp-callback-validator": {
         "version": "v1.1.0"

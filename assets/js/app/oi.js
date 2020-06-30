@@ -115,8 +115,10 @@ function initPageTable() {
 /* ------------------- SUBMIT PDF ------------------------------------------- */
 /** Not quite sure how to show a success message and reload form, will loop back when there's more time. */
 function clearFieldForPdfSubmissions() {
-    if (window.location.pathname.includes('upload/publication')) {
-        $('textarea#app_file_upload_description').val(''); //Clears field after form submit. 
+    if (window.location.pathname.includes('upload/publication')) { 
+        $("form[name='App_file_upload']:first-child div").css('justify-content', 'start');
+        $('#App_file_upload_title, #App_file_upload_description').val(''); //Clears fields after form submit. 
+        $('.vich-image a').remove();
     }
 }
 /* ------------ PAGES THAT DON'T WORK ON MOBILE DEVICES --------------------- */
