@@ -207,7 +207,7 @@ class ImageUpload
      */
     public function setPath($path = 'uploads/issue_screenshots/')
     {
-        $this->path = $path . $this->fileName;
+        $this->path = $path;
 
         return $this;
     }

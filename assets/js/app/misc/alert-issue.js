@@ -1,6 +1,6 @@
 /**
  * Handles all notifications and reporting related to issues that occur throughout
- * the database search page. Submits new events to our bugb tracker, Sentry. 
+ * the database search page. Submits new events to our bugb tracker, Sentry.
  *
  * EXPORTS:
  *     alertIssue
@@ -18,7 +18,7 @@ import { ExtraErrorData } from '@sentry/integrations';
 
 /* --------------------- INIT SENTRY ---------------------------------------- */
 export function initSentry () {
-    Sentry.init({ 
+    Sentry.init({
         dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
         integrations: [new ExtraErrorData()],
         blacklistUrls: ['copy.batbase.org', 'dev.batbase.org']
@@ -30,7 +30,7 @@ function configureSentryUserData (userName, userRole) {
         scope.setUser({ username: userName, role: userRole });
     })
 }
-/* ------------------- CREATE SENTRY EVENT ---------------------------------- */
+/* =================== CREATE SENTRY EVENT ================================== */
 /** Sends Error object to Sentry, issue tracker. */
 export function reportErr(e) {
     Sentry.captureException(e);
@@ -40,7 +40,7 @@ export function reportErr(e) {
  *     invalidDataKeyType {key, type}
  *     dataSyncFailure {fails} (no browser alert)
  *     facadeErr {module, caller, called, error(toString), errMsg}
- *     editorReport {summary, steps, etc} (no browser alert)
+ *     editorReport {summary, steps, etc, screenshots} (no browser alert)
  *     expectedDataNotFound {key}
  *     fetchIssue {url, responseText}
  *     noRcrdFound {id, entity} (no browser alert)
@@ -49,22 +49,34 @@ export function reportErr(e) {
  */
 export function alertIssue(tag, errData = {}) {
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
+    if (tag == 'editorReport') { return submitEditorIssue(errData); }
     setSentryDebugContext(errData);
-    Sentry.captureException(new SentryError(tag, errData)); 
+    Sentry.captureException(new SentryError(tag, errData));
     handleUserAlert(tag);
 }
 function setSentryDebugContext(errData) {
     setBasicStateContext();
-    setErrorContext(errData);
+    setErrorContext(tag, errData);
 }
 function setBasicStateContext() {
     if ($('body').data('this-url') !== '/search') { return; }
     const state = tState().get();
-    const base = {focus: state.curFocus, view: state.curView}; 
+    const base = {focus: state.curFocus, view: state.curView};
     Sentry.setContext('filter_state', Object.assign(base, getCurrentFilterState()));
 }
-function setErrorContext (errData) {
+function setErrorContext (tag, errData) {
     Sentry.setContext('error_tags', errData);
+}
+/* ---------------- EDITOR ISSUE REPORT ------------------------------------- */
+function submitEditorIssue(data) {
+    setEditorReportContextData(data);
+    Sentry.captureException(new SentryError('editorReport', data.summary));
+}
+function setEditorReportContextData(data) {
+    Sentry.setExtra('1 Summary', data.summary);
+    Sentry.setExtra('2 Steps to Reproduce', data.steps);
+    Sentry.setExtra('3 Misc Info', data.etc);
+    Sentry.setExtra('4 Screenshots', data.screenshots);
 }
 /* ------------------------ Sentry Error Object ----------------------------- */
 /** Extends the Error object to add debug data for the error.  */
@@ -77,7 +89,7 @@ class SentryError extends Error {
     // Custom debugging information
     this.name = tag
     // this.tag = tag;
-    this.message = JSON.stringify(debugData); 
+    this.message = JSON.stringify(debugData);
   }
 }
 /* ------------------- ALERT USER ------------------------------------------- */
@@ -100,13 +112,13 @@ function handleUserAlert(tag) {
     const map = {
         'alertNoRcrdFound': noRcrdFoundInForms
     };
-    if (tag in map) { map[tag](); 
+    if (tag in map) { map[tag]();
     } else { showGeneralAlert(); }
 }
 function noRcrdFoundInForms() {
     alert(`Expected record not found. Try reloading the page or ${getEditorErrMsg()}`);
 }
-function showGeneralAlert() {                                                   
+function showGeneralAlert() {
     alert(`An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);
 }
 function getErrMsgForUserRole() {
@@ -121,7 +133,7 @@ function getUserErrMsg() {
     return `contact us by Leaving Feedback on this page (in your user menu) and let us know about the issue you are experiencing.`;
 }
 function getEditorErrMsg() {
-    return `send debug information: 
+    return `send debug information:
 > Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
 > Once the panel loads and the "console" tab is displayed, select all log text and copy.
 > Submit an Issue Report by clicking the far right blue button on the page options bar. Thank you!`;

@@ -9,7 +9,7 @@
 !/var/sessions
 /var/sessions/*
 !var/sessions/.gitkeep
- 
+
 # Managed by Composer
 /bin/*
 !bin/console
@@ -36,6 +36,7 @@ composer.lock
 
 # Local Files
 /public/uploads/publications/*
+/public/uploads/issue_screenshots/*
 /dev/local/*
 *.sublime-project
 *.sublime-workspace

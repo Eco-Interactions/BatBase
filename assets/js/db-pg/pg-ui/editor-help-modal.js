@@ -1,6 +1,17 @@
 /**
  * Handles displaying the 'help' modal for editors and above with options to either
  * reset the local database or submit a bug report.
+ *
+ * TOC:
+ *    HELP MODAL
+ *    BUG REPORT POPUP
+ *        REPORT HTML
+ *            PROMPTS
+ *            BUTTONS
+ *        SUBMIT REPORT
+ *            SERVER
+ *            SENTRY
+ *        CLOSE REPORT POPUP
  */
 import { alertIssue, resetLocalDb, _modal, _u } from '../db-main.js';
 
@@ -101,6 +112,7 @@ function checkRequiredBugReportFields($fields) {
     $fields.each((i, f) => { if (!$(f.children[1]).val()) { ready = false; } })
     return ready;
 }
+/* ----------------- SERVER ------------------ */
 function createNewIssueReport () {
     const formData = new FormData();
     formData.append('description', $('.bug-rprt-input')[0].value);
@@ -124,18 +136,19 @@ function sendAjaxFormData (formData) {
        error: reportSubmitError
     });
 }
-function reportSubmitSuccess (fileNames) {                                      console.log('reportSubmitSuccess. args = %O', arguments);
-    // body...
+function reportSubmitSuccess (data) {                                           console.log('reportSubmitSuccess. args = %O', arguments);
+    submitNewSentryIssue(data.filenames);
 }
 function reportSubmitError (jqXHR, textStatus, errorMessage) {                  console.log('IssueReportSubmitError = [%s]', errorMessage);
-    // body...
+    showReportStatus('An error occured during submission.', 'red');
 }
-
-function submitNewSentryIssue() {
+/* ----------------- SENTRY ------------------ */
+function submitNewSentryIssue(fileNames) {
     const data = {
         summary: $('.bug-rprt-input')[0].value,
         steps: $('.bug-rprt-input')[1].value,
-        etc: $('.bug-rprt-input')[0].value,
+        etc: $('.bug-rprt-input')[2].value,
+        screenshots: JSON.stringify(fileNames.map(f => '/uploads/issue_screenshots/'+f))
     };
     alertIssue('editorReport', data);
     updateBugReportUiAfterSubmit();
