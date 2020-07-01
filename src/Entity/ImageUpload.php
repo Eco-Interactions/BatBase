@@ -4,15 +4,20 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+
 
 /**
  * Image Upload.
  *
  * @ORM\Entity
+ * @Vich\Uploadable
  * @ORM\Table(name="image_upload")
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  */
 class ImageUpload
 {
@@ -24,47 +29,62 @@ class ImageUpload
     private $id;
 
     /**
-     * Used as container for UploadedFile obj.
-     */
-    private $file;
-
-    /**
-     * @ORM\Column(name="filename", type="string")
+     * URL to image|pdf file.
+     *
+     * @ORM\Column(name="file_name", type="string", nullable=false)
      */
     private $fileName;
 
     /**
-     * @ORM\Column(name="path", type="string")
+     * @var string
+     *
+     * @ORM\Column(name="title", type="string", unique=true, length=255, nullable=true)
      */
-    private $path;
-
-    /**
-     * @ORM\Column(name="mime_type", type="string")
-     */
-    private $mimeType;
-
-    /**
-     * @ORM\Column(name="status", type="integer")
-     */
-    private $status;
-
-    /**
-     * @ORM\Column(name="size", type="decimal")
-     */
-    private $size;
+    private $title;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="caption", type="string", length=255, nullable=true)
+     * @ORM\Column(name="desctiption", type="text", nullable=true)
      */
-    private $caption;
+    private $description;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Taxon")
-     * @ORM\JoinColumn(name="taxon_id", referencedColumnName="id")
+     * @ORM\Column(name="path", type="string", nullable=false)
      */
-    private $taxon;
+    private $path;
+
+    /**
+     * @ORM\Column(name="mime_type", type="string", nullable=false)
+     */
+    private $mimeType;
+
+    /**
+     * @ORM\Column(name="size", type="decimal", nullable=false)
+     */
+    private $size;
+
+    /**
+     * Used as container for UploadedFile obj.
+     *
+     * @Vich\UploadableField(
+     *      mapping="issue_image",
+     *      fileNameProperty="fileName",
+     *      size="size",
+     *      mimeType="mimeType"
+     * )
+     *
+     * @var File|null
+     */
+    private $image;
+
+    /**
+     * @var \App\Entity\IssueReport
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\IssueReport", inversedBy="screenshots")
+     * @ORM\JoinColumn(name="report_id", referencedColumnName="id", nullable=true)
+     */
+    private $issueReport;
 
     /**
      * @var \DateTime
@@ -82,7 +102,7 @@ class ImageUpload
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -101,11 +121,6 @@ class ImageUpload
     private $updatedBy;
 
     /**
-     * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
-     */
-    private $deletedAt;
-
-    /**
      * Get id.
      *
      * @return int
@@ -116,31 +131,7 @@ class ImageUpload
     }
 
     /**
-     * Get file path.
-     *
-     * @return string
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Set temporary UploadedFile obj.
-     *
-     * @param Symfony\Component\HttpFoundation\File\UploadedFile $file
-     *
-     * @return ImageUpload
-     */
-    public function setFile(UploadedFile $file)
-    {
-        $this->file = $file;
-
-        return $this;
-    }
-
-    /**
-     * Get name.
+     * Get fileName.
      *
      * @return string
      */
@@ -162,15 +153,61 @@ class ImageUpload
     }
 
     /**
+     * Get title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set title.
+     *
+     * @return ImageUpload
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return ImageUpload
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Set path.
      *
      * @param string $path
      *
-     * @return File
+     * @return ImageUpload
      */
-    public function setPath($path)
+    public function setPath($path = 'uploads/issue_screenshots/')
     {
-        $this->path = $path;
+        $this->path = $path . $this->fileName;
 
         return $this;
     }
@@ -190,7 +227,7 @@ class ImageUpload
      *
      * @param string $mimeType
      *
-     * @return File
+     * @return ImageUpload
      */
     public function setMimeType($mimeType)
     {
@@ -210,33 +247,11 @@ class ImageUpload
     }
 
     /**
-     * Set status.
-     *
-     * @return ImageUpload
-     */
-    public function setStatus($status = 1)
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    /**
-     * Get status.
-     *
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
      * Set size.
      *
      * @param string $size
      *
-     * @return File
+     * @return ImageUpload
      */
     public function setSize($size)
     {
@@ -256,94 +271,65 @@ class ImageUpload
     }
 
     /**
-     * Set caption.
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the update.
      *
-     * @param string $caption
-     *
-     * @return Taxon
+     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $image
      */
-    public function setCaption($caption)
+    public function setImage(?File $image = null): void
     {
-        $this->caption = $caption;
+        $this->image = $image;
 
-        return $this;
-    }
-
-    /**
-     * Get caption.
-     *
-     * @return string
-     */
-    public function getCaption()
-    {
-        return $this->caption;
-    }
-
-    /**
-     * Set taxon.
-     *
-     * @param \App\Entity\Taxon $taxon
-     *
-     * @return Taxon
-     */
-    public function setTaxon(\App\Entity\Taxon $taxon = null)
-    {
-        $this->taxon = $taxon;
-
-        return $this;
-    }
-
-    /**
-     * Get taxon.
-     *
-     * @return \App\Entity\Taxon
-     */
-    public function getTaxon()
-    {
-        return $this->taxon;
-    }
-
-    public function getAbsolutePath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadRootDir().'/'.$this->path;
-    }
-
-    public function getWebPath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadDir().'/'.$this->path;
-    }
-
-    public function upload()
-    {
-        $validTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp');
-        $taxonImgsPath = $this->getUploadDir();
-        $mimeType = $this->getFile()->getClientMimeType();
-
-        if (in_array($mimeType, $validTypes)) {
-            $this->mimeType = $mimeType;
-            $randName = substr(sha1(rand(0, 1000)), 0, 11);
-            $extension = '.'.$this->getFile()->guessExtension();
-            $fileName = $randName.$extension;
-            $this->size = $this->getFile()->getClientSize();
-            $this->path = $taxonImgsPath.$fileName;   // set to the filename where you've saved the file
-            $this->fileName = $fileName;
-            $this->setStatus();
-
-            $this->getFile()->move(// move takes the target directory and then the
-                $this->getUploadDir(),                  // target filename to move to
-                $fileName
-            );
-        } else {
-            $this->file = null;
-            return false;
+        if (null !== $image) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            // $this->updatedAt = new \DateTimeImmutable();
+            $this->setPath();
         }
-        return true;
     }
-    
+
+    public function getImage(): ?File
+    {
+        return $this->image;
+    }
+
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('image', new Assert\File([
+            'maxSize' => '1024k',
+            'mimeTypes' => [
+                'image/jpeg',
+                'image/gif',
+                'image/png'
+            ],
+            'mimeTypesMessage' => 'Please upload a valid image: jpg, gif, or png.',
+        ]));
+    }
+
+    /**
+     * Set issueReport.
+     *
+     * @param \App\Entity\IssueReport $issueReport
+     *
+     * @return Interaction
+     */
+    public function setIssueReport(\App\Entity\IssueReport $issueReport)
+    {
+        $this->issueReport = $issueReport;
+
+        return $this;
+    }
+
+    /**
+     * Get issueReport.
+     *
+     * @return \App\Entity\IssueReport
+     */
+    public function getIssueReport()
+    {
+        return $this->issueReport;
+    }
+
     /**
      * Set createdBy user.
      *
@@ -395,6 +381,16 @@ class ImageUpload
     }
 
     /**
+     * Set last updated datetime.
+     *
+     * @return \App\Entity\User
+     */
+    public function setUpdated(\DateTime $updatedAt)
+    {
+        $this->updated = $updatedAt;
+    }
+
+    /**
      * Get last updated by user.
      *
      * @return \App\Entity\User
@@ -431,20 +427,6 @@ class ImageUpload
      */
     public function __toString()
     {
-        return $this->caption;
-    }
-
-    protected function getUploadRootDir()
-    {
-        // the absolute directory path where uploaded
-        // documents should be saved
-        return __DIR__.'/../../../web/'.$this->getUploadDir();
-    }
-
-    protected function getUploadDir()
-    {
-        // get rid of the __DIR__ so it doesn't screw up
-        // when displaying uploaded doc/image in the view.
-        return 'uploads/taxon/';
+        return $this->description;
     }
 }

@@ -4,12 +4,10 @@ namespace App\Controller;
 
 use App\Form\FileUploadType;
 use App\Entity\FileUpload;
-// use App\Form\ImageUploadType;  NOT USED CURRENTLY. DON'T DELETE.
-// use App\Entity\ImageUpload;   NOT USED CURRENTLY. DON'T DELETE.
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+// use Symfony\Component\HttpFoundation\File\Exception\FileException;
+// use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;

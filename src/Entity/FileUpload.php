@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 
 /**
- * File Upload.
+ * PDF File Upload.
  *
  * @ORM\Entity
  * @Vich\Uploadable
@@ -59,11 +59,6 @@ class FileUpload
      * @ORM\Column(name="mime_type", type="string", nullable=false)
      */
     private $mimeType;
-
-    /**
-     * @ORM\Column(name="status", type="integer", nullable=false)
-     */
-    private $status;
 
     /**
      * @ORM\Column(name="size", type="decimal", nullable=false)
@@ -278,28 +273,6 @@ class FileUpload
     public function getMimeType()
     {
         return $this->mimeType;
-    }
-
-    /**
-     * Set status.
-     *
-     * @return FileUpload
-     */
-    public function setStatus($status = 1)
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    /**
-     * Get status.
-     *
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
     }
 
     /**
