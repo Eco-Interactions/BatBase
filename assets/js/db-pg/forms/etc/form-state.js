@@ -1,32 +1,32 @@
 /**
  * Central memory for all form-related code.
  *
- * Exports:             
- *     getFormEntity    
- *     initFormState   
- *     addEntityFormState     
+ * Exports:
+ *     getFormEntity
+ *     initFormState
+ *     addEntityFormState
  */
 import * as _f from '../forms-main.js';
 
 let formState = {}; //formState
 
-export function clearState() {  
+export function clearState() {
     formState = {};
 }
 /*--------------------- INIT FORM MEMORY -------------------------------------*/
 /**
  * -- Property descriptions:
  * > action - ie, Create, Edit.
- * > editing - Container for the id(s) of the record(s) being edited. (Detail 
+ * > editing - Container for the id(s) of the record(s) being edited. (Detail
         ids are added later). False if not editing.
- * > entity - Name of this form's entity     
- * > forms - Container for form-specific params 
+ * > entity - Name of this form's entity
+ * > forms - Container for form-specific params
  * > formLevels - An array of the form level names/tags/prefixes/etc.
- * > records - An object of all records, with id keys, for each of the 
+ * > records - An object of all records, with id keys, for each of the
  *   root entities - Location, Source and Taxa, and any sub entities as needed.
  * > submit - Data used during form submission: fLvl, entity
  */
-export function initFormState(action, entity, id) {  
+export function initFormState(action, entity, id) {
     const entities = getDataKeysForEntityForm(action, entity);
     formState.init = true; //eliminates possibility of opening form multiple times.
     return _f.util('getData', [entities]).then(data => {
@@ -48,9 +48,9 @@ export function initFormState(action, entity, id) {
     }
 }
 function getDataKeysForEntityForm(action, entity) {
-    const coreKeys = ['author', 'citation', 'interaction', 'interactionType', 
+    const coreKeys = ['author', 'citation', 'interaction', 'interactionType',
         'location', 'publication', 'publisher', 'source', 'taxon'];
-    return entity === 'interaction' ? 
+    return entity === 'interaction' ?
         getIntFormDataKeys() : getSubEntityFormDataKeys(entity, 'edit');
 
     function getIntFormDataKeys() {
@@ -82,8 +82,8 @@ function getSubEntityFormDataKeys(entity, action) {
     return map[entity][action];
 }
 /**
- * Adds the properties and confg that will be used throughout the code for 
- * generating, validating, and submitting entity sub-forms. 
+ * Adds the properties and confg that will be used throughout the code for
+ * generating, validating, and submitting entity sub-forms.
  * -- Property descriptions:
  * > action - create || edit
  * > confg - The form config object used during form building.
@@ -98,13 +98,14 @@ function getSubEntityFormDataKeys(entity, action) {
  * > selElems - Contains all selElems until they are initialized with selectize.
  * --- Misc entity specific properties
  * > Citation forms: rcrds - { src: pubSrc, pub: pub } (parent publication)
+ * > Interaction create form: unchanged - exists after form submit and before any changes
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
  * > Taxon forms: realmData - added to formState.forms (see props @initTaxonParams)
  */
-export function addEntityFormState(entity, level, pSel, action) {    
+export function addEntityFormState(entity, level, pSel, action) {
     formState.forms[entity] = level;
     formState.forms[level] = {
-        action: action, //
+        action: action,
         expanded: false,
         fieldData: {},
         entity: entity,
@@ -112,30 +113,30 @@ export function addEntityFormState(entity, level, pSel, action) {
         onFormClose: null,
         pSelId: pSel,
         reqElems: [],
-        selElems: [], 
+        selElems: [],
     };                                                                          //console.log("   /addEntityFormState. formState = %O, arguments = %O", formState, arguments)
 }
 /*------------- Taxon Params --------------------*/
-export function initRealmState(role, realmId) { 
+export function initRealmState(role, realmId) {
     return _f.util('getData', [['realm', 'realmNames', 'levelNames']])
         .then(data => setTxnState(data.realm, data.realmNames, data.levelNames));
 
-    function setTxnState(realms, realmNames, levels) {   
+    function setTxnState(realms, realmNames, levels) {
         const realm = realms[realmId];
         const taxon = formState.records.taxon[realm.taxon];
 
-        formState.forms.realmData = { 
+        formState.forms.realmData = {
             lvls: levels, //Object with each (k) level name and it's (v) id and order
-            realmLvls: realm.uiLevelsShown,  
-            realmName: realm.displayName, 
+            realmLvls: realm.uiLevelsShown,
+            realmName: realm.displayName,
             realms: realmNames,
             realmTaxon: taxon,
             role: role,
             rootLvl: taxon.level.displayName,
         };                                                                      console.log('           /--taxon params = %O', formState.forms.realmData)
-        return formState.forms.realmData; 
+        return formState.forms.realmData;
     }
-} 
+}
 /* ---------------------------- Getters ------------------------------------- */
 export function isEditForm() {
     return formState.action === 'edit';
@@ -143,25 +144,25 @@ export function isEditForm() {
 export function getEditEntityId(type) {
     return formState.editing[type];
 }
-export function getFormState() {  
+export function getFormState() {
     return Object.keys(formState).length ? formState : false;
 }
-export function getStateProp(prop) {                                            //console.log('args = %O, memory = %O', arguments, formState); 
+export function getStateProp(prop) {                                            //console.log('args = %O, memory = %O', arguments, formState);
     return formState[prop];
 }
 export function getFormLvlState(fLvl) {
     return formState.forms[fLvl] ? formState.forms[fLvl] : false;
 }
-export function getFormProp(fLvl, prop) {                                       //console.log('args = %O, memory = %O', arguments, formState); 
+export function getFormProp(fLvl, prop) {                                       //console.log('args = %O, memory = %O', arguments, formState);
     return formState.forms[fLvl] ? formState.forms[fLvl][prop] : false;
 }
-export function getFormEntity(fLvl) { 
+export function getFormEntity(fLvl) {
     return formState.forms[fLvl] ? formState.forms[fLvl].entity : false;
 }
 export function getFormParentId(fLvl) {
     return formState.forms[fLvl] ? formState.forms[fLvl].pSelId : false;
 }
-export function getTaxonProp(prop) {  
+export function getTaxonProp(prop) {
     return formState.forms.realmData ? formState.forms.realmData[prop] : false;
 }
 export function getRealmState() {
@@ -178,9 +179,9 @@ function buildRcrdsObj(entities) {
     entities.forEach(ent => { rcrds[ent] = formState.records[entity]});
     return rcrds;
 }/** Returns the record for the passed id and entity-type. */
-export function getRcrd(entity, id) {                                           
+export function getRcrd(entity, id) {
     if (!formState.records[entity]) { return; }
-    return formState.records[entity][id] ? 
+    return formState.records[entity][id] ?
         _f.util('snapshot', [formState.records[entity][id]]) :
         _f.alertIssue('noRcrdFound', {id: id, entity: entity });
 }
@@ -193,12 +194,12 @@ export function addEntityRecords(entity, rcrds) {
     if (!formState.records) { return; } //See comment for explanation
     formState.records[entity] = rcrds;
 }
-export function addRequiredFieldInput(fLvl, input) {  
+export function addRequiredFieldInput(fLvl, input) {
     formState.forms[fLvl].reqElems.push(input);
 }
 export function addComboToFormState(fLvl, field) {                              //console.log('addComboTo[%s]Memory [%s]', fLvl, field);
     if (!formState.forms) { return; } //form was closed.
-    formState.forms[fLvl].selElems.push(field);    
+    formState.forms[fLvl].selElems.push(field);
 }
 export function setStateProp(prop, val) {
     formState[prop] = val;
@@ -206,18 +207,18 @@ export function setStateProp(prop, val) {
 export function setFormProp(fLvl, prop, val) {
     formState.forms[fLvl][prop] = val;
 }
-export function setRealmProp(prop, val) {  
+export function setRealmProp(prop, val) {
     return formState.forms.realmData[prop] = val;
 }
 export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = formState.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }
-    fieldData[field].val = val;             
+    fieldData[field].val = val;
 }
 export function setFormEntityType(fLvl, type) {
     formState.forms[fLvl].entityType = type;
 }
-export function setOnFormCloseHandler(fLvl, hndlr) { 
+export function setOnFormCloseHandler(fLvl, hndlr) {
     formState.forms[fLvl].onFormClose = hndlr;
 }

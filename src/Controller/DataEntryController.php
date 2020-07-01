@@ -36,7 +36,7 @@ class DataEntryController extends AbstractController
 
 /*------------------------------ CREATE --------------------------------------*/
     /**
-     * Creates a new Entity, and any new detail-entities, from the form data. 
+     * Creates a new Entity, and any new detail-entities, from the form data.
      *
      * @Route("/entity/create", name="entity_create")
      */
@@ -48,7 +48,7 @@ class DataEntryController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
         $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        
+
         $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
         $coreClass = 'App\\Entity\\'. ucfirst($coreName);                 //print("\ncoreClass = ". $coreClass);
         $coreEntity = new $coreClass();
@@ -66,7 +66,7 @@ class DataEntryController extends AbstractController
     }
 /*------------------------------ Edit ----------------------------------------*/
     /**
-     * Updates an Entity, and any detail-entities, with the submitted form data. 
+     * Updates an Entity, and any detail-entities, with the submitted form data.
      *
      * @Route("/entity/edit", name="entity_edit")
      */
@@ -78,29 +78,31 @@ class DataEntryController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
         $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        
+
         $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
         $coreFormData = $formData->$coreName;
         $coreEntity = $em->getRepository('App:'.ucfirst($coreName))
             ->findOneBy(['id' => $formData->ids->core ]);
-        
+
         $returnData = $this->buildReturnDataObj($coreName, $coreEntity, $formData);
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
-        $returnData->detailEntity = $this->handleDetailEntity(
-            $coreFormData, $formData, $returnData, $em
-        );
+        if ($formData->coreEntity->hasDetail) {
+            $returnData->detailEntity = $this->handleDetailEntity(
+                $coreFormData, $formData, $returnData, $em
+            );
+        }
         $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
     private function buildReturnDataObj($coreName, $coreEntity, $formData)
     {
-        $data = new \stdClass; 
+        $data = new \stdClass;
         $data->core = $coreName;
         $data->coreId = $coreEntity->getId();  //Created entities have ids added before returning
         $data->coreEntity = $coreEntity;
-        $data->coreEdits = $this->getEditsObj($formData, 'core'); 
+        $data->coreEdits = $this->getEditsObj($formData, 'core');
         $data->detailEdits = $this->getEditsObj($formData, 'detail');
         if ($coreName !== 'interaction') {
             $data->coreName = $coreEntity->getDisplayName();
@@ -109,7 +111,7 @@ class DataEntryController extends AbstractController
     }
     /*--------------------- Update Citation Text -----------------------------*/
     /**
-     * Updates the Citation and Source entities with the updated citation text. 
+     * Updates the Citation and Source entities with the updated citation text.
      *
      * @Route("/citation/edit", name="citation_edit")
      */
@@ -117,11 +119,11 @@ class DataEntryController extends AbstractController
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       
+        }
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
-        $data = json_decode($requestContent); 
-        
+        $data = json_decode($requestContent);
+
         $src =  $em->getRepository('App:Source')
             ->findOneBy(['id' => $data->srcId ]);
         $src->setDescription($data->text);
@@ -131,7 +133,7 @@ class DataEntryController extends AbstractController
         $cit->setFullText($data->text);
         $em->persist($cit);
 
-        $returnData = new \stdClass; 
+        $returnData = new \stdClass;
         $returnData->core = 'source';
         $returnData->coreId = $src->getId();
         $returnData->coreEntity = $src;
@@ -142,13 +144,13 @@ class DataEntryController extends AbstractController
     }
 /*------------------------------ Shared Helpers ------------------------------*/
     /**
-     * Builds and returns an object that will track any edits made to the entity. 
+     * Builds and returns an object that will track any edits made to the entity.
      * The editing prop holds the id of the entity being edited, or false if creating.
      */
     private function getEditsObj($formData, $type)
     {
         $edits = new \stdClass;
-        $edits->editing = property_exists($formData, 'ids') ? 
+        $edits->editing = property_exists($formData, 'ids') ?
             $formData->ids->$type : false;
         return $edits;
     }
@@ -161,31 +163,30 @@ class DataEntryController extends AbstractController
     /** If the core-entity is 'Source', process any detail-entity data. */
     private function handleDetailEntity($cFormData, $formData, &$returnData, $em)
     {
-        if (property_exists($formData, "false")) { return false; }
-        return $this->setDetailEntityData($cFormData, $formData, $returnData, $em);  
+        return $this->setDetailEntityData($cFormData, $formData, $returnData, $em);
     }
     /**
-     * Sets all detail-entity data and returns the entity. 
+     * Sets all detail-entity data and returns the entity.
      * Note: Publishers are the only 'sourceType' with no detail-entity.
      */
     private function setDetailEntityData($cFormData, $formData, &$returnData, &$em)
     {
-        $dName = property_exists($cFormData->rel, "sourceType") ? 
+        $dName = property_exists($cFormData->rel, "sourceType") ?
             $cFormData->rel->sourceType : 'geoJson';                            //print('detail name = '.$dName);
         $returnData->detail = $dName;
         if (!property_exists($cFormData, "hasDetail")) { return false; }
         $dData = $formData->$dName;
-        
+
         return $this->setDetailData( $dData, $dName, $returnData, $em );
     }
     private function setDetailData($dData, $dName, &$returnData, &$em)
     {
         $dEntity = $this->getDetailEntity($dName, $returnData->detailEdits, $em);
-        if ($dName !== 'geoJson') { 
-            $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity); 
+        if ($dName !== 'geoJson') {
+            $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity);
         }
         $this->addDetailToCoreEntity($returnData->coreEntity, $dEntity, $dName, $em);
-        $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);  
+        $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);
         return $dEntity;
     }
     private function setCoreEntity($coreName, &$coreEntity, &$dEntity)
@@ -211,7 +212,7 @@ class DataEntryController extends AbstractController
     }
     /*---------- Set Entity Data ---------------------------------------------*/
     /**
-     * Calls the set method for both types of entity data, flat and relational, 
+     * Calls the set method for both types of entity data, flat and relational,
      * and persists the entity.
      */
     private function setEntityData($formData, &$entity, &$edits, &$em)
@@ -220,25 +221,25 @@ class DataEntryController extends AbstractController
         $this->setRelatedEntityData($formData->rel, $entity, $edits, $em);
         $em->persist($entity);
     }
-    /** Sets all scalar data. */ 
+    /** Sets all scalar data. */
     private function setFlatData($formData, &$entity, &$edits, &$em)
     {
         foreach ($formData as $field => $val) {
-            $this->setFlatDataAndTrackEdits($entity, $field, $val, $edits);  
+            $this->setFlatDataAndTrackEdits($entity, $field, $val, $edits);
         }
     }
     /** Sets all realtional data. */
     private function setRelatedEntityData($formData, &$entity, &$edits, &$em)
     {
         $edgeCases = [
-            "contributor" => function($ary) use (&$entity, &$edits, &$em) { 
+            "contributor" => function($ary) use (&$entity, &$edits, &$em) {
                 $this->handleContributors($ary, $entity, $edits, $em); },
-            "tags" => function($ary) use (&$entity, &$edits, &$em) { 
+            "tags" => function($ary) use (&$entity, &$edits, &$em) {
                 $this->handleTags($ary, $entity, $edits, $em); },
             "source" => function($id) use (&$entity, &$edits, &$em) {
                 $this->addInteractionToSource($id, $entity, $edits, $em); }
         ];
-        foreach ($formData as $rEntityName => $val) {  
+        foreach ($formData as $rEntityName => $val) {
             if (array_key_exists($rEntityName, $edgeCases)) {
                 call_user_func($edgeCases[$rEntityName], $val);
             } else {
@@ -251,15 +252,15 @@ class DataEntryController extends AbstractController
     private function getEntity($relField, $val, $em)
     {
         $relClass = $this->getEntityClass($relField);
-        $prop = is_numeric($val) ? 'id'  : 'displayName';                       
+        $prop = is_numeric($val) ? 'id'  : 'displayName';
         return $this->returnEntity($relClass, $prop, $val, $em);
     }
     /** Handles field name to class name translations. */
     private function getEntityClass($relField)
     {
-        $classMap = [ "parentSource" => "Source", "parentLoc" => "Location", 
+        $classMap = [ "parentSource" => "Source", "parentLoc" => "Location",
             "parentTaxon" => "Taxon", "subject" => "Taxon", "object" => "Taxon" ];
-        return array_key_exists($relField, $classMap) ? 
+        return array_key_exists($relField, $classMap) ?
             $classMap[$relField] : ucfirst($relField);
     }
     private function returnEntity($class, $prop, $val, $em)
@@ -275,21 +276,21 @@ class DataEntryController extends AbstractController
     /** Creates a new Contribution for each author/editor source in the array. */
     private function addContributors($ary, &$pubSrc, &$edits, &$em)
     {
-        $added = []; 
+        $added = [];
         $cur = $pubSrc->getContributorData();
-        foreach ($ary as $authId => $newData) { 
-            if (array_key_exists($authId, $cur) ) { 
+        foreach ($ary as $authId => $newData) {
+            if (array_key_exists($authId, $cur) ) {
                 $this->checkAuthStatus($cur[$authId], $newData, $em);
                 continue;
-            } 
+            }
             $this->addContrib($authId, $newData, $pubSrc, $em);
-        }  
+        }
     }
     /** Updates any changes to the author/editor status and/or auth/ed ord(er). */
     private function checkAuthStatus($curData, $newData, &$em)
-    {   
+    {
         $contrib = $em->getRepository('App:Contribution')
-            ->findOneBy(['id' => $curData['contribId'] ]); 
+            ->findOneBy(['id' => $curData['contribId'] ]);
         $this->updateEditorStatus($curData, $newData, $contrib);
         $this->updateOrder($curData, $newData, $contrib);
         $em->persist($contrib);
@@ -310,13 +311,13 @@ class DataEntryController extends AbstractController
         $contrib->setOrd($newOrd);
     }
     private function addContrib($id, $data, &$pubSrc, &$em)
-    {  
+    {
         $authSrc = $em->getRepository('App:Source')
             ->findOneBy(['id' => $id ]);
         $contribEntity = $this->createContrib($pubSrc, $authSrc, $data, $em);
         $pubSrc->addContributor($contribEntity);  //$pubSrc persisted later
         $authSrc->addContribution($contribEntity);
-        $em->persist($authSrc);        
+        $em->persist($authSrc);
     }
     private function createContrib($pubSrc, $authSrc, $data, &$em)
     {
@@ -326,31 +327,31 @@ class DataEntryController extends AbstractController
         $entity->setIsEditor($data->isEditor);
         $entity->setOrd($data->ord);
 
-        $em->persist($entity);  
+        $em->persist($entity);
         return $entity;
     }
     /** Removes any of the current contributors that are not in the new $authObj. */
     private function removeContributors($authObj, &$entity, &$edits, &$em)
-    { 
+    {
         $contributors = $entity->getContributors();
-        $removed = [];  
-        foreach ($contributors as $contrib) { 
+        $removed = [];
+        foreach ($contributors as $contrib) {
             $authId = $contrib->getAuthorSource()->getId();
             if (property_exists($authObj, $authId)) { continue; }
             $entity->removeContributor($contrib);
-            array_push($removed, $authId); 
+            array_push($removed, $authId);
         }
         $this->addContribEdits($edits, 'removed', $removed);
     }
     /** Add added/removed array to edits obj. */
     private function addContribEdits(&$edits, $action, $ary)
     {
-        if (count($ary)) { 
+        if (count($ary)) {
             if (!property_exists($edits, 'contributor')) { $edits->contributor = []; }
-            $edits->contributor[$action] = $ary; 
+            $edits->contributor[$action] = $ary;
         }
     }
-    /** Handles adding and removing tags from the entity. */  
+    /** Handles adding and removing tags from the entity. */
     private function handleTags($ary, &$entity, &$edits, &$em)
     {
         $curTags = $entity->getTagIds();
@@ -360,30 +361,30 @@ class DataEntryController extends AbstractController
     /** Removes any entities currently in the $coll(ection) that are not in $ary.  */
     private function removeFromCollection($field, $coll, $ary, &$entity, &$edits, $em)
     {
-        $removed = [];  
+        $removed = [];
         $removeField = 'remove'.ucfirst($field);
-        foreach ($coll as $id) { 
+        foreach ($coll as $id) {
             if (in_array($id, $ary)) { continue; }
             $collEnt = $this->getEntity($field, $id, $em);
             $entity->$removeField($collEnt);
-            array_push($removed, $id); 
+            array_push($removed, $id);
         }
         if (count($removed)) { $edits->$field = [ 'removed' => $removed ]; }
     }
     /** Adds each new entity in ary to the collection.  */
     private function addToCollection($field, $coll, $ary, &$entity, &$edits, $em)
     {
-        $added = []; 
-        $addField = 'add'.ucfirst($field);  
-        foreach ($ary as $id) { 
+        $added = [];
+        $addField = 'add'.ucfirst($field);
+        foreach ($ary as $id) {
             if (in_array($id, $coll)) { continue; }
-            array_push($added, intval($id));  
+            array_push($added, intval($id));
             $collEnt = $this->getEntity($field, $id, $em);
             $entity->$addField($collEnt);
         }
         if ($edits->editing && count($added)) {
-            $edits->$field = property_exists($edits, $field) ? 
-                array_merge($edits->$field, ['added' => $added]) : ['added' => $added]; 
+            $edits->$field = property_exists($edits, $field) ?
+                array_merge($edits->$field, ['added' => $added]) : ['added' => $added];
         }
     }
     /** If adding an interaction to a source, ensures it's 'isDirect' flag to true. */
@@ -391,21 +392,21 @@ class DataEntryController extends AbstractController
     {
         $relEntity = $this->getEntity("Source", $id, $em);
         $this->setRelDataAndTrackEdits($entity, "source", $relEntity, $edits, $em);
-        $className = $em->getClassMetadata(get_class($entity))->getName(); 
+        $className = $em->getClassMetadata(get_class($entity))->getName();
         if ($className === "App\Entity\Interaction" && !$relEntity->getIsDirect()) {
             $relEntity->setIsDirect(true);
             $em->persist($relEntity);
         }
     }
     /**
-     * Checks whether current value is equal to the passed value. If not, the 
-     * entity is updated with the new value and the field is added to the edits obj.   
+     * Checks whether current value is equal to the passed value. If not, the
+     * entity is updated with the new value and the field is added to the edits obj.
      */
-    private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits) 
-    {  
-        $setField = 'set'. ucfirst($field);                                     
-        $getField = 'get'. ucfirst($field);                                     
-        
+    private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits)
+    {
+        $setField = 'set'. ucfirst($field);
+        $getField = 'get'. ucfirst($field);
+
         $curVal = $entity->$getField();
         if ($curVal === $newVal) { return; }
 
@@ -413,24 +414,24 @@ class DataEntryController extends AbstractController
         $entity->$setField($newVal);
     }
     /**
-     * Checks whether current value is equal to the passed value. If not, the 
-     * entity is updated with the new value and the field is added to the edits obj.   
+     * Checks whether current value is equal to the passed value. If not, the
+     * entity is updated with the new value and the field is added to the edits obj.
      */
-    private function setRelDataAndTrackEdits(&$entity, $field, $newVal, &$edits, &$em) 
+    private function setRelDataAndTrackEdits(&$entity, $field, $newVal, &$edits, &$em)
     {
         $setField = 'set'. ucfirst($field);
         $getField = 'get'. ucfirst($field);
-        
+
         $oldVal = $entity->$getField() ? $entity->$getField()->getId() : null;
         $oldEntity = $entity->$getField();
 
-        if ($newVal === null) { 
+        if ($newVal === null) {
             if ($oldVal === null) { return; }
         } else if ($oldVal === $newVal->getId()) { return; }
 
-        if ($edits->editing) { 
+        if ($edits->editing) {
             $newValue = $newVal === null ? null : $newVal->getId();
-            $edits->$field = [ "old" => $oldVal, "new" => $newValue ]; 
+            $edits->$field = [ "old" => $oldVal, "new" => $newValue ];
         }
 
         $entity->$setField($newVal);
@@ -439,14 +440,14 @@ class DataEntryController extends AbstractController
     }
     /*---------- Flush and Return Data ---------------------------------------*/
     /**
-     * Attempts to flush all persisted data. If there are no errors, the created/updated 
+     * Attempts to flush all persisted data. If there are no errors, the created/updated
      * data is sent back to the crud form; otherise, an error message is sent back.
-     */                                                                                                                                     
+     */
     private function attemptFlushAndSendResponse($entityData, &$em)
-    {        
+    {
         try {
             $em->flush();
-        } catch (\DBALException $e) {                             
+        } catch (\DBALException $e) {
             return $this->sendErrorResponse($e);
         } catch (\Exception $e) {
             return $this->sendErrorResponse($e);
@@ -482,7 +483,7 @@ class DataEntryController extends AbstractController
             try {
                 $entityData->$id = $entityData->$prop->getId();
                 $entityData->$prop = $this->serializer->serialize(
-                    $entityData->$prop, 'json', 
+                    $entityData->$prop, 'json',
                     SerializationContext::create()->setGroups(array('normalized')));
             } catch (\Throwable $e) {
                 return $this->sendErrorResponse($e);
@@ -498,7 +499,7 @@ class DataEntryController extends AbstractController
     }
     /** ----------------- Set Entity/System UpdatedAt ----------------------- */
     /**
-     * Sets the updatedAt timestamp for modified entities. This will be used to 
+     * Sets the updatedAt timestamp for modified entities. This will be used to
      * ensure local data stays updated with any changes.
      */
     private function setUpdatedAtTimes($entityData, &$em)
@@ -507,7 +508,7 @@ class DataEntryController extends AbstractController
         if ($entityData->detailEntity) {
             $this->setUpdatedAt($entityData->detail, $em);
         }
-        $this->setUpdatedAt('System', $em); 
+        $this->setUpdatedAt('System', $em);
         $em->flush();
     }
     private function setUpdatedAt($name, &$em)

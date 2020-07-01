@@ -5,19 +5,19 @@
  *     INIT
  *     GETTERS
  *     SETTERS
- *         
+ *
  * Exports:             Imported by:
  *     initDb
  *     downloadFullDb       db-sync
- *     getData              util 
+ *     getData              util
  *     setData              util
  */
 import * as _db from './local-data-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
-const db_v = '.48'; //prod: .46
+const db_v = '.49'; //prod: .48
 /** ----------------------- INIT -------------------------------------------- */
-/** 
+/**
  * Checks whether the dataKey exists in indexDB cache and downloads full DB if not.
  * Note: Testing clears idb on load, except as needed for data-entry testing. @addNewDataToStorage
  */
@@ -35,26 +35,26 @@ export function downloadFullDb(reset) {                                         
     });
 }
 function clearAndDownload(reset) {
-    idb.clear();     
+    idb.clear();
     _db.initStoredData(reset).then(() => idb.set(db_v, true));
 }
 /**
- * On page load, syncs local database with sever data. 
- * If there they system data has updates more recent than the last sync, the 
+ * On page load, syncs local database with sever data.
+ * If there they system data has updates more recent than the last sync, the
  * updated data is ajaxed and stored @syncUpdatedData. Once the database is ready,
- * db_sync calls @initSearchPage. 
+ * db_sync calls @initSearchPage.
  */
 function checkForServerUpdates() {
     getData('lclDataUpdtdAt').then(_db.syncLocalDbWithServer);
     // debugUpdate();
 }
 /** ----------------------- GETTERS ----------------------------------------- */
-export function getAllStoredData() { 
+export function getAllStoredData() {
     const data = {};
     return Promise.all([idb.getAll(), idb.keys()])
         .then(dbData => {
-            const vals = dbData[0]; 
-            const keys = dbData[1];  
+            const vals = dbData[0];
+            const keys = dbData[1];
             $(keys).each((i, k) => {
                 data[k] = { value: vals[i], changed: false }
             });
@@ -63,13 +63,13 @@ export function getAllStoredData() {
 }
 /**
  * Gets data from Indexed DB for each key passed. If an array
- * is passed, an object with each prop as the key for it's data is returned. 
- * If a property is not found, false is returned. 
+ * is passed, an object with each prop as the key for it's data is returned.
+ * If a property is not found, false is returned.
  */
 export function getData(keys, returnUndefined) {                                //console.log('     GET [%O]', keys);
     if (Array.isArray(keys)) { return getStoredDataObj(keys, returnUndefined); }
     return getStoredData(keys, returnUndefined);
-    
+
 }
 function getStoredData(key, returnUndefined) {                                  //console.log('               getData = [%s]', key)
     if (!key) { return handleMissingDataKey(key); }
@@ -77,18 +77,18 @@ function getStoredData(key, returnUndefined) {                                  
     return idb.get(key).then(d => returnStoredData(d, key, returnUndefined));
 }
 function returnStoredData(data, key, returnUndefined) {                         //console.log('[%s] = %O (returnUndefined ? [%s])', key, data, returnUndefined);
-    if (data == undefined && !returnUndefined) { return handleExpectedDataNotFound(key); }  
+    if (data == undefined && !returnUndefined) { return handleExpectedDataNotFound(key); }
     return data;
 }
 function getStoredDataObj(keys, returnUndefined) {
     const promises = [];
     $(keys).each((i, key) => promises.push(getStoredData(key, returnUndefined)));
-    return Promise.all(promises).then(data => {  
+    return Promise.all(promises).then(data => {
         const obj = {};
         $(data).each((i, d) => { obj[keys[i]] = d});
         return obj;
     });
-} 
+}
 /* ----------------------- ERROR HANDLING ----------------------------------- */
 function handleMissingDataKey(key) {                                            console.log('       !!!!getData: key missing [%s]', key); console.trace();
     _db.pg('alertIssue', ['undefiendDataKey', {key: key}]);
@@ -107,7 +107,7 @@ export function setData(k, v) {                                                 
 // function removeData(k) {
 //     idb.del(k);
 // }
-// 
+//
 function debugUpdate() {
     const testDataState = {
         Author: "2019-11-11 22:53:58",
