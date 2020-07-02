@@ -31,7 +31,7 @@ class FileUpload
 
     /**
      * URL to image|pdf file.
-     * 
+     *
      * @ORM\Column(name="fileName", type="string", nullable=false)
      */
     private $fileName;
@@ -67,26 +67,26 @@ class FileUpload
 
     /**
      * Used as container for UploadedFile obj.
-     * 
+     *
      * @Vich\UploadableField(
-     *      mapping="issue_image", 
-     *      fileNameProperty="fileName", 
+     *      mapping="issue_image",
+     *      fileNameProperty="fileName",
      *      size="size"
      * )
-     * 
+     *
      * @var File|null
      */
     private $issueImage;
 
     /**
      * Used as container for UploadedFile obj.
-     * 
+     *
      * @Vich\UploadableField(
-     *      mapping="pdf_image", 
-     *      fileNameProperty="fileName", 
+     *      mapping="pdf_image",
+     *      fileNameProperty="fileName",
      *      size="size"
      * )
-     * 
+     *
      * @var File|null
      */
     private $pdfFile;
@@ -107,7 +107,7 @@ class FileUpload
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -301,7 +301,7 @@ class FileUpload
 
     /**
      * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
-     * of 'UploadedFile' is injected into this setter to trigger the update. 
+     * of 'UploadedFile' is injected into this setter to trigger the update.
      *
      * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $issueImage
      */
@@ -323,7 +323,7 @@ class FileUpload
 
     /**
      * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
-     * of 'UploadedFile' is injected into this setter to trigger the update. 
+     * of 'UploadedFile' is injected into this setter to trigger the update.
      *
      * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $pdfFile
      */
@@ -355,9 +355,9 @@ class FileUpload
         ]));
         $metadata->addPropertyConstraint('issueImage', new Assert\File([
             'maxSize' => '1024k',
-            'mimeTypes' => [ 
-                'image/jpeg', 
-                'image/gif', 
+            'mimeTypes' => [
+                'image/jpeg',
+                'image/gif',
                 'image/png'
             ],
             'mimeTypesMessage' => 'Please upload a valid image: jpg, gif, or png.',
@@ -412,7 +412,7 @@ class FileUpload
     //     }
     //     return true;
     // }
-    
+
     /**
      * Set createdBy user.
      *

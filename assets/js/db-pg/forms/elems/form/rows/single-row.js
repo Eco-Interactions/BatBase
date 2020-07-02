@@ -1,36 +1,36 @@
 import * as _f from '../../../forms-main.js';
 /**
- * Each element is built, nested, and returned as a completed row. 
+ * Each element is built, nested, and returned as a completed row.
  * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
  */
 export default function buildFormRow(field, input, fLvl, rowClss) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
-    const errorDiv = _f.util('buildElem', ['div', { id: field+'_errs'}]); 
-    const fieldCntnr = buildFieldContainer(input, field, fLvl);   
+    const errorDiv = _f.util('buildElem', ['div', { id: field+'_errs'}]);
+    const fieldCntnr = buildFieldContainer(input, field, fLvl);
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
-} 
+}
 function buildRowContainer(field, input, fLvl, rowClss) {
     const attr = { class: getRowClasses(), id: field + '_row'}
     return _f.util('buildElem', ['div', attr]);
     /** Returns the style classes for the row. */
-    function getRowClasses() { 
-        const rowClass = input.className.includes('xlrg-field') ? 
+    function getRowClasses() {
+        const rowClass = input.className.includes('xlrg-field') ?
             'full-row' : (fLvl + '-row') + (rowClss ? (' '+rowClss) : '');      //console.log("rowClass = ", rowClass)
-        return rowClass; 
+        return rowClass;
     }
 }
 function buildFieldContainer(input, field, fLvl) {
     const cntnr = _f.util('buildElem', ['div', { class: 'field-row flex-row'}]);
     const label = buildFieldLabel(input, field);
-    const pin = fLvl === 'top' ? getPinElem(field) : null;  
+    const pin = fLvl === 'top' ? getPinElem(field) : null;
     $(cntnr).append([label, input, pin]);
     return cntnr;
 }
 function buildFieldLabel(input, field) {
-    const attr = { id: field+'-lbl', class: getLabelClass(), text: getFieldName()}; 
+    const attr = { id: field+'-lbl', class: getLabelClass(), text: getFieldName()};
     return _f.util('buildElem', ['label', attr]);
-    
+
     function getLabelClass() {
         return $(input).data('fLvl') ? 'required' : '';
     }
@@ -59,7 +59,7 @@ function handledRelatedFieldPins(pin, field) {
  * If the connected field is unpinned, the dependant field is as well.
  */
 function checkConnectedFieldPin() {
-    const field = this.id.split("_pin")[0]; 
+    const field = this.id.split("_pin")[0];
     const params = {
         'CitationTitle': { checked: true, relField: 'Publication' },
         'Country-Region': { checked: false, relField: 'Location' },
@@ -75,12 +75,12 @@ function checkFieldPins(curPin, checkState, relField) {
     }
 }
 /**
- * Required field's have a 'required' class added which appends '*' to their 
+ * Required field's have a 'required' class added which appends '*' to their
  * label. Added to the input elem is a change event reponsible for enabling/
  * disabling the submit button and a form-level data property. The input elem
- * is added to the form param's reqElems property. 
+ * is added to the form param's reqElems property.
  */
 function ifRequiredFieldAddAsterisk(label, input) {
     if (!$(input).data('fLvl')) { return; }
-    $(label).addClass('required');  
+    $(label).addClass('required');
 }

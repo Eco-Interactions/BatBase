@@ -1,11 +1,11 @@
 /*
  * Filters interactions by publication type when in Source->publication view .
- * Synchronizes the tree-text filter and the combobox filter. 
- * 
+ * Synchronizes the tree-text filter and the combobox filter.
+ *
  * Exports:
  *      loadSrcFilters
  *      applyPubFilter
- *      
+ *
  * TOC:
  *      UI
  *      FILTER
@@ -15,10 +15,10 @@ import { _ui, _u,  accessTableState as tState } from '../db-main.js';
 /* ========================= UI ============================================ */
 export function loadSrcFilters(realm) {                             /*Perm-log*/console.log("       --Loading source [%s] filters.", realm);
     if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
-    const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
-        'publ':loadPublSearchHtml }; 
-    return buildUi[realm](); 
-} 
+    const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml,
+        'publ':loadPublSearchHtml };
+    return buildUi[realm]();
+}
 function clearPanelCombos(realm) {
     if (realm !== 'pubs') { return Promise.resolve(); }
     return Promise.resolve($('#selPubType')[0].selectize.clear('silent'));
@@ -39,7 +39,7 @@ function loadPubSearchElems(pubTypeOpts) {
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u('initCombobox', ['Publication Type', applyPubFilter]);
     $('#selPubType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
-}         
+}
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u('buildElem', ['label', {class: "sel-cntnr flex-row"}]);
@@ -67,12 +67,12 @@ function loadPublSearchHtml() {
  /* ===================== FILTER ============================================ */
 /**
  * When viewing by publication, interactions can be filtered by the publication type.
- * Handles synchronizing with the tree-text filter. 
+ * Handles synchronizing with the tree-text filter.
  */
-export function applyPubFilter(tId, text) {                                    
+export function applyPubFilter(tId, text) {
     if (!tId) { return; }
-    const tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
-    const typeId = tId || _u('getSelVal', ['Publication Type']); 
+    const tblState = tState().get(null, ['api', 'rowData', 'curFocus']);
+    const typeId = tId || _u('getSelVal', ['Publication Type']);
     const txt = text || fM.getTreeFilterVal('Publication');                     console.log('       +-applyPubFilter. typeId [%s], text [%s]', typeId, txt);
     const newRows = getFilteredPubRows();
     if (typeId) { setPubFilters(); }
@@ -85,18 +85,18 @@ export function applyPubFilter(tId, text) {
             : (txt === '' ? getAllPubTypeRows() : getPubTypeRows(typeId));
     }
     function getPubTypeRows(typeId) {
-        return fM.getCurRowData().filter(r => { 
+        return fM.getCurRowData().filter(r => {
             return r.type == typeId && r.name.toLowerCase().indexOf(txt) !== -1;
         });
     }
     /** Returns the rows for publications with their id in the selected type's array */
-    function getAllPubTypeRows() {     
+    function getAllPubTypeRows() {
         return fM.getCurRowData().filter(row => row.type == typeId);
     }
-    function setPubFilters() { 
+    function setPubFilters() {
         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
-        const truncTxt = txt ? 
-            (txt.length > 50 ? txt.substring(0, 50)+'...' : txt) : null; 
+        const truncTxt = txt ?
+            (txt.length > 50 ? txt.substring(0, 50)+'...' : txt) : null;
         updatePubFilterState(typeVal, typeId, truncTxt);
         _ui('updateFilterStatusMsg');
     }
@@ -109,4 +109,4 @@ export function applyPubFilter(tId, text) {
             return obj;
         }
     }
-} 
+}

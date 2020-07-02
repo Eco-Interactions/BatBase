@@ -13,7 +13,7 @@
  *         AUTHOR
  *         CITATION
  */
-import * as _f from '../forms-main.js'; 
+import * as _f from '../forms-main.js';
 import * as _int from './interaction/interaction-form.js';
 import * as _loc from './location-form.js';
 import * as _src from './source/source-forms.js';
@@ -22,13 +22,13 @@ import * as _autoCite from './source/auto-citation.js';
 
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int, 
-    'object': _int, 'species': _txn, 'genus': _txn, 'family': _txn, 'order': _txn, 
+    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int,
+    'object': _int, 'species': _txn, 'genus': _txn, 'family': _txn, 'order': _txn,
     'class': _txn
 };
 
 export function createEntity(entity, name) {                                    //console.log('createEntity. args = %O', arguments)
-    return forms[entity].initCreateForm(entity, name);    
+    return forms[entity].initCreateForm(entity, name);
 }
 export function initFormCombos(entity, fLvl) {
     forms[entity].initFormCombos(entity, fLvl);
@@ -41,9 +41,9 @@ export function finishEntityEditFormBuild(entity) {
 }
 export function finishEditFormInit(entity, id) {
     const cmplxFnshrs = {
-        'citation': _src.setSrcEditRowStyle, 
-        'publication': _src.setSrcEditRowStyle, 
-        'location': addMapToLocationEditForm, 
+        'citation': _src.setSrcEditRowStyle,
+        'publication': _src.setSrcEditRowStyle,
+        'location': addMapToLocationEditForm,
     };
     if (!cmplxFnshrs[entity]) { return Promise.resolve(); }
     return Promise.resolve(cmplxFnshrs[entity](id));

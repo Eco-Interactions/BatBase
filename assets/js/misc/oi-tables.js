@@ -1,5 +1,5 @@
 /**
- * Initializes the Data Table library and table on certain pages.  
+ * Initializes the Data Table library and table on certain pages.
  */
 import 'datatables.net';
 import 'datatables.net-dt/css/jquery.dataTables.css';
@@ -7,7 +7,7 @@ import 'datatables.net-buttons';
 import 'datatables.net-buttons-dt/css/buttons.dataTables.css';
 import 'datatables.net-buttons/js/buttons.html5.js';
 
-export function init(tableName) { 
+export function init(tableName) {
     const tables = {  /*      exportCol,  dataLngth  */
                 feedback_tbl: [     5,  'onehund'],
                 online_users_tbl:[  0,  'onehund'],
@@ -18,13 +18,13 @@ export function init(tableName) {
     initOiDataTable([0], params[1], tableName);
     if (window.outerWidth < 1280 && tableName !== 'biblio_tbl') { return; } //Popup is displayed directing users to view page on computer.
     relocCtrls(tableName);
-} 
+}
 function initOiDataTable(lastExptCol, dataLngth, tblName) {
-    const xportCols = getExportColArray(lastExptCol);  
+    const xportCols = getExportColArray(lastExptCol);
     const confg = getTblCfg(dataLngth, xportCols);                              //console.log('confg = %O', confg);
     const $tableElem = $('#' + tblName);                                        //console.log('tableElem = %O', $tableElem)
     $tableElem.DataTable(confg);
-}  
+}
 function getExportColArray(lastShownColIdx) {
     const ary = [];
     for (let i = 0; i <= lastShownColIdx; i++) {
@@ -43,17 +43,17 @@ function getTblCfg(dataLngth, xportCols) {
         lengthMenu:  pgBreaks[dataLngth],
         language: { search: 'Filter: ' },
         dom: '<"#tbl-ctrl-div"lBf>tip', //table elem display order
-        buttons: [{ 
+        buttons: [{
                 extend: 'copy',
                 className: 'dt-bttn',
                 exportOptions: { columns: xportCols }
-            },{   
+            },{
                 extend: 'csv',
                 className: 'dt-bttn',
                 exportOptions: { columns: xportCols }}]
-    };  
+    };
 }
-function relocCtrls(tableName) {   
+function relocCtrls(tableName) {
     const $filterDiv = $('#' + tableName + '_filter');
     const $pgLngthDiv = $('#' + tableName + '_length');
     const $btnDiv = $('#tbl-ctrl-div .dt-buttons');
@@ -63,7 +63,7 @@ function relocCtrls(tableName) {
     $btnDiv.append($filterDiv).detach();
     addPgLengthIf(tableName, $btnDiv, $pgLngthDiv);
     if ($('#online_users_tbl_wrapper').length) { return; }
-    if (window.outerWidth < 750) { 
+    if (window.outerWidth < 750) {
         $('#content-detail').prepend($btnDiv);
     } else {
         $('#hdr-right').append($btnDiv);

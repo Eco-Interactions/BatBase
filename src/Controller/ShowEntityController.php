@@ -35,7 +35,7 @@ class ShowEntityController extends AbstractController
     private function serializeEntity($entity)
     {
         try {
-            return $this->serializer->serialize($entity, 'json', 
+            return $this->serializer->serialize($entity, 'json',
                 SerializationContext::create()->setGroups(array('flattened')));
         } catch (\Throwable $e) {
             return $this->logError($e);

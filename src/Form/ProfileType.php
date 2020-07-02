@@ -23,7 +23,7 @@ class ProfileType extends AbstractType
             ->add('first_name', TextType::class, ['label' => 'First Name'])
             ->add('last_name', TextType::class, ['label' => 'Last Name'])
             ->add('about_me', TextareaType::class, ['label' => 'About Me'])
-            ->add('save', SubmitType::class, ['label' => 'Update'])    
+            ->add('save', SubmitType::class, ['label' => 'Update'])
         ;
     }
 

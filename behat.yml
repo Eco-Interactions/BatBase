@@ -6,13 +6,13 @@ default:
             browser_name: chrome
             goutte: ~
             javascript_session: selenium2
-            selenium2: 
+            selenium2:
                 wd_host: "http://127.0.0.1:4444/wd/hub"
-                capabilities: 
+                capabilities:
                     browser: chrome
                     marionette: true
-                    extra_capabilities: 
-                        chromeOptions: 
+                    extra_capabilities:
+                        chromeOptions:
                             args: ['--disable-gpu', '--window-size=1660,1000']
                 # capabilities: { "browser": "chrome", "version": "*", "marionette": true, "extra_capabilities": { "chromeOptions": { "w3c": false } }, 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']} }
     suites:
@@ -22,13 +22,13 @@ default:
                 - Behat\MinkExtension\Context\MinkContext
         #     paths: [ %paths.base%/features/default ]
         # dataEntry:
-        #     contexts: 
+        #     contexts:
         #         - BaseContext
         #         - DataEntryContext
         #         - Behat\MinkExtension\Context\MinkContext
         #     paths: [ %paths.base%/features/dataEntry ]
 
- 
+
 ##Chrome config:
         # Behat\MinkExtension:
         #     base_url: http://localhost/batplant/web/app_test.php
@@ -37,6 +37,6 @@ default:
         #           selenium2:
         #             capabilities: {"browserName": "chrome", "browser": "chrome", 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']}, "marionette": true}
         #     goutte: ~
-        #     selenium2: 
+        #     selenium2:
         #         wd_host: "http://127.0.0.1:4444/wd/hub"
         #     browser_name: chrome

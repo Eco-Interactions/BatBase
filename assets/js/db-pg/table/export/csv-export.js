@@ -1,7 +1,7 @@
 /**
- * Exports a csv of the interaction records displayed in the table, removing 
+ * Exports a csv of the interaction records displayed in the table, removing
  * tree rows and flattening tree data where possible: currently only taxon.
- * For taxon csv export: The relevant tree columns are shown and also exported. 
+ * For taxon csv export: The relevant tree columns are shown and also exported.
  *
  * CODE SECTIONS:
  *     FILL EXPORT DATA
@@ -9,7 +9,7 @@
  *     EXPORT
  *     RESET
  *     HELPERS
- *     
+ *
  * Export default:
  *     exportCsvData
  */
@@ -18,7 +18,7 @@ import { accessTableState as tState } from '../../db-main.js';
 import { collapseTree, expandTreeByOne, fadeTable, showTable } from '../../pg-ui/ui-main.js';
 import { buildLocTree, buildSrcTree, buildTxnTree } from '../format-data/data-tree.js';
 
-let tblState;  
+let tblState;
 
 export default function exportCsvData() {                                       console.log('       /--exportCsvData')
     fadeTable();
@@ -42,38 +42,38 @@ function fillTableWithExportOnlyData() {
     return _u.getData(['interaction', 'taxon'])
     .then(fillInteractionsWithExportData);
 }
-function fillInteractionsWithExportData(rcrds) {                                
+function fillInteractionsWithExportData(rcrds) {
     const taxa = {};
     const entityRcrds = rcrds;
     tblState.api.forEachNodeAfterFilter(fillRowExportData);
     tblState.api.refreshView();
-    
-    function fillRowExportData(row) {                                           
-        if (row.data.entity !== 'Interaction') { return; }  
-        const intRcrd = entityRcrds.interaction[row.data.id];  
+
+    function fillRowExportData(row) {
+        if (row.data.entity !== 'Interaction') { return; }
+        const intRcrd = entityRcrds.interaction[row.data.id];
         fillTaxonData('subject', row.data, intRcrd);
         fillTaxonData('object', row.data, intRcrd);
     }
     /**
-     * Will need to be rewritten to allow for taxa acting as both subject & object. 
+     * Will need to be rewritten to allow for taxa acting as both subject & object.
      */
     function fillTaxonData(role, rowData, intRcrd) {
         addTaxonToRowData(role, intRcrd[role]);
 
         function addTaxonToRowData(role, taxonId) {
-            const txn = entityRcrds.taxon[intRcrd[role]];                       
-            if (taxa[txn.name]) { 
-                addKnownTaxonAncestry(role, txn.name, taxa[txn.name]); 
+            const txn = entityRcrds.taxon[intRcrd[role]];
+            if (taxa[txn.name]) {
+                addKnownTaxonAncestry(role, txn.name, taxa[txn.name]);
             } else {
                 discoverAndAddTaxonAncestry(role, txn);
             }
         }
-        function addKnownTaxonAncestry(role, txnName, txnData) {  
+        function addKnownTaxonAncestry(role, txnName, txnData) {
             rowData[txnData.col] = txnName;
             if (!txnData.prnt) { return; }
             addKnownTaxonAncestry(role, txnData.prnt, taxa[txnData.prnt]);
         }
-        function discoverAndAddTaxonAncestry(role, txn) {                       
+        function discoverAndAddTaxonAncestry(role, txn) {
             const pTxn = txn.isRoot ? false : entityRcrds.taxon[txn.parent];
             addToRowDataAndDiscoveredTaxa();
             if (!pTxn) { return; }
@@ -107,11 +107,11 @@ function showAllExportData() {
 }
 function selectInteractionDataRowsForExport(tblApi) {
     tblApi.expandAll();
-    tblApi.forEachNodeAfterFilter(selectInteractions);                
+    tblApi.forEachNodeAfterFilter(selectInteractions);
 }
 /** An interaction row has 'interactionType' data. */
-function selectInteractions(row) { 
-    if (row.data.entity !== 'Interaction') { return; }  
+function selectInteractions(row) {
+    if (row.data.entity !== 'Interaction') { return; }
     row.setSelected(true);
 }
 /* ------------------------------ EXPORT ------------------------------------ */
@@ -130,8 +130,8 @@ function returnTableState() {
     hideExportOnlyColumns();
     toggleUiTableColumns(true);
     showTable();
-    if (tblState.curFocus === 'taxa') { 
-        expandTreeByOne(); 
+    if (tblState.curFocus === 'taxa') {
+        expandTreeByOne();
     }
 }
 function hideExportOnlyColumns() {
@@ -145,8 +145,8 @@ function toggleLocExportData(showing) {
     toggleTableColumns(cols, showing);
 }
 function toggleTxnExportData(showing) {
-    const cols = ['subjOrder', 'subjGenus', 'subjFamily', 'subjSpecies', 
-        'objDomain', 'objectKingdom', 'objPhylum', 'objClass', 'objOrder', 
+    const cols = ['subjOrder', 'subjGenus', 'subjFamily', 'subjSpecies',
+        'objDomain', 'objectKingdom', 'objPhylum', 'objClass', 'objOrder',
         'objGenus', 'objFamily', 'objSpecies'];
     // toggleTxnUiCols(!showing);
     // const cols = getCurTaxonLvlCols(tblState.taxaByLvl);

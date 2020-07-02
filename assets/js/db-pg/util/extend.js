@@ -5,15 +5,15 @@ export default function extendPrototypes() {
 }
 function extendDate() {
     /** Y-m-d  */
-    Date.prototype.today = function () { 
+    Date.prototype.today = function () {
         return this.getFullYear() +"-"+
-            (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1) +"-"+ 
+            (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1) +"-"+
             ((this.getDate() < 10)?"0":"") + this.getDate() ;
     }
     /** H:i:s */
     Date.prototype.timeNow = function () {
-        return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ 
-            ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ 
+        return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+
+            ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+
             ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
     }
 }
@@ -24,9 +24,9 @@ function extendJquery() {
 function addOnEnterEvent() {
     $.fn.onEnter = function(func) {
         this.bind('keypress', function(e) {
-            if (e.keyCode == 13) func.apply(this, [e]);    
-        });               
-        return this; 
+            if (e.keyCode == 13) func.apply(this, [e]);
+        });
+        return this;
      };
 }
 /** A 'post-remove' event listener. Use: $('.elem').bind('destroyed', cb); */

@@ -20,12 +20,12 @@ import * as _db from './local-data-main.js';
 /* ======================= DOWNLOAD DATA ==================================== */
 /**
  * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @storeEntityData. Database search page 
+ * from the server and stored locally @storeEntityData. Database search page
  * table build begins @initSearchStateAndTable.
  * Entities downloaded with each ajax call:
- *   /taxon - Taxon, Realm, Level 
+ *   /taxon - Taxon, Realm, Level
  *   /location - HabitatType, Location, LocationType, GeoJson
- *   /source - Author, Citation, CitationType, Publication, PublicationType, 
+ *   /source - Author, Citation, CitationType, Publication, PublicationType,
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
@@ -46,7 +46,7 @@ function initTaxonDataAndLoadTable(reset) {
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
 function downloadRemainingTableData() {
     return getAndSetData('source')
-        .then(() => getAndSetData('location'))        
+        .then(() => getAndSetData('location'))
         .then(() => getAndSetData('interaction'))
         .then(() => _db.setUpdatedDataInLocalDb())
         .then(() => _db.pg('initSearchStateAndTable'));
@@ -63,8 +63,8 @@ function getAndSetData(url) {
     return _db.fetchServerData(url).then(setData.bind(null, url))
 }
 function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
-    const setDataFunc = { 
-        'interaction': deriveInteractionData, 'lists': deriveUserData, 
+    const setDataFunc = {
+        'interaction': deriveInteractionData, 'lists': deriveUserData,
         'location': deriveLocationData,       'source': deriveSourceData,
         'taxon': deriveTaxonData,             'geoJson': Function.prototype,
     };
@@ -87,9 +87,9 @@ function storeServerData(data) {                                                
     }
 }
 /**
- * Loops through the passed data object to parse the nested objects. This is 
+ * Loops through the passed data object to parse the nested objects. This is
  * because the data comes back from the server having been double JSON-encoded,
- * due to the 'serialize' library and the JSONResponse object. 
+ * due to the 'serialize' library and the JSONResponse object.
  */
 function parseData(data) {  //shared. refact
     for (let k in data) { data[k] = JSON.parse(data[k]); }
@@ -97,12 +97,12 @@ function parseData(data) {  //shared. refact
 }
 /* ======================= DERIVE DATA ====================================== */
 /* -------------------------- TAXON DATA ------------------------------------ */
-/** 
+/**
  * levelNames - an object with each level name (k) and it's id and ordinal (v).
  * realmNames - an object with each realm name (k) and it's id, role, and levels (v).
  * [realm][level]Names - object with all taxa in realm at the level: name (k) id (v)
- * *realm - resaved with 'uiLevelsShown' filled with the level display names. 
- */ 
+ * *realm - resaved with 'uiLevelsShown' filled with the level display names.
+ */
 /** Stores an object of taxon names and ids for each level in each realm. */
 function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
     _db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
@@ -114,10 +114,10 @@ function deriveTaxonData(data) {                                                
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
     const levels = {};
-    const order = Object.keys(levelData).sort(orderLevels);                     
-    $(order).each(addLevelData);   
+    const order = Object.keys(levelData).sort(orderLevels);
+    $(order).each(addLevelData);
     _db.setDataInMemory('levelNames', levels);
-    
+
     function orderLevels(a, b) {
         const x = levelData[a].ordinal;
         const y = levelData[b].ordinal;
@@ -128,9 +128,9 @@ function storeLevelData(levelData) {
     }
 }
 /* --------- Taxa by Realm & Level ------------- */
-function storeTaxaByLevelAndRealm(taxa, realms, roots) {  
-    for (let rootId in roots) { 
-        const root = roots[rootId];  
+function storeTaxaByLevelAndRealm(taxa, realms, roots) {
+    for (let rootId in roots) {
+        const root = roots[rootId];
         const realm = realms[root.realm];
         const taxon = taxa[root.taxon];
         realm.taxon = root.taxon;
@@ -139,13 +139,13 @@ function storeTaxaByLevelAndRealm(taxa, realms, roots) {
     }
     _db.setDataInMemory('realm', realms);
 
-    function separateAndStoreRealmTaxa(taxon, realm) { 
+    function separateAndStoreRealmTaxa(taxon, realm) {
         const data = {};
-        separateRealmTaxaByLevel(taxon.children, data, realm, taxa); 
+        separateRealmTaxaByLevel(taxon.children, data, realm, taxa);
         storeTaxaByLvl(realm.displayName, data);
     }
 }
-function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {  
+function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {
     taxa.forEach(separateTaxonAndChildren);
     return data;
 
@@ -156,7 +156,7 @@ function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {
         taxon.children.forEach(separateTaxonAndChildren);
     }
     function addToRealmLevel(taxon, level) {
-        if (!data[level]) { data[level] = {}; }; 
+        if (!data[level]) { data[level] = {}; };
         data[level][taxon.name] = taxon.id;
     }
 }
@@ -174,8 +174,8 @@ function storeTaxaByLvl(realm, taxonObj) {
 /* ---------- Modify Realm Data -------------- */
 function modifyRealmData(realms, levels) {                                              //console.log('realms = %O', realms);
     modifyRealms(Object.keys(realms));
-    _db.setDataInMemory('realm', realms);  
-    
+    _db.setDataInMemory('realm', realms);
+
     function modifyRealms(ids) {
         ids.forEach(id => {
             let realm = realms[id]
@@ -187,9 +187,9 @@ function modifyRealmData(realms, levels) {                                      
     }
 }
 /* ----------------------- LOCATION DATA ------------------------------------ */
-/** 
+/**
  * [entity]Names - an object with each entity's displayName(k) and id.
- * *location - resaved locations with an additional data point for countries. 
+ * *location - resaved locations with an additional data point for countries.
  */
 function deriveLocationData(data) {                                             //console.log('loc data to store = %O', data);
     const regns = getTypeObj(data.locationType, 'region', 'locations');
@@ -201,30 +201,30 @@ function deriveLocationData(data) {                                             
     _db.setDataInMemory('habTypeNames', getTypeNameData(data.habitatType));
     _db.setDataInMemory('locTypeNames', getTypeNameData(data.locationType));
     _db.setDataInMemory('location', addInteractionTotalsToLocs(data.location));
-    ['locationType', 'habitatType'].forEach(k => _db.deleteMmryData(k));    
+    ['locationType', 'habitatType'].forEach(k => _db.deleteMmryData(k));
 }
 /** Return an obj with the 2-letter ISO-country-code (k) and the country id (v).*/
-function getCodeNameDataObj(ids, rcrds) { 
+function getCodeNameDataObj(ids, rcrds) {
     const data = {};
     ids.forEach(id => data[rcrds[id].isoCode] = id);                            //console.log("codeNameDataObj = %O", data);
     return data;
 }
-function getTopRegionNameData(locData, regns) {  
+function getTopRegionNameData(locData, regns) {
     const data = {};
     const rcrds = getEntityRcrds(regns, locData.location);
-    for (const id in rcrds) { 
+    for (const id in rcrds) {
         if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
     }
     return data;
 }
 /** Adds the total interaction count of the location and it's children. */
-function addInteractionTotalsToLocs(locs) {  
-    for (let id in locs) {  
+function addInteractionTotalsToLocs(locs) {
+    for (let id in locs) {
         locs[id].totalInts = getTotalInteractionCount(locs[id]);                //console.log('[%s] total = [%s]', locs[id].displayName, locs[id].totalInts);
     }
     return locs;
 
-    function getTotalInteractionCount(loc) {    
+    function getTotalInteractionCount(loc) {
         let ttl = loc.interactions.length;
         if (!loc.children.length) { return ttl; }
         loc.children.forEach(function(id) {
@@ -243,12 +243,12 @@ function addInteractionTotalsToLocs(locs) {
 function deriveSourceData(data) {                                               //console.log("source data = %O", data);
     const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
     const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
-    const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources'); 
-    _db.setDataInMemory('authSrcs', authSrcs);         
-    _db.setDataInMemory('pubSrcs', pubSrcs);              
+    const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources');
+    _db.setDataInMemory('authSrcs', authSrcs);
+    _db.setDataInMemory('pubSrcs', pubSrcs);
     _db.setDataInMemory('publSrcs', publSrcs);
-    _db.setDataInMemory('citTypeNames', getTypeNameData(data.citationType));        
-    _db.setDataInMemory('pubTypeNames', getTypeNameData(data.publicationType));  
+    _db.setDataInMemory('citTypeNames', getTypeNameData(data.citationType));
+    _db.setDataInMemory('pubTypeNames', getTypeNameData(data.publicationType));
     ['citationType', 'publicationType', 'sourceType'].forEach(k => _db.deleteMmryData(k));
 }
 /* -------------------- INTERACTION DATA ------------------------------------ */
@@ -257,13 +257,13 @@ function deriveSourceData(data) {                                               
  */
 function deriveInteractionData(data) {
     _db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
-    _db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));  
+    _db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));
     _db.deleteMmryData('tag');
-}   
+}
 /** Returns an object with a record (value) for each id (key) in passed array.*/
 function getEntityRcrds(ids, rcrds) {
     const data = {};
-    ids.forEach(id => data[id] = rcrds[id]);        
+    ids.forEach(id => data[id] = rcrds[id]);
     return data;
 }
 /** Returns an object with each entity record's displayName (key) and id. */
@@ -277,7 +277,7 @@ function getTypeNameData(typeObj) {
     const data = {};
     for (var id in typeObj) {
         data[typeObj[id].displayName] = id;
-    }  
+    }
     return data;
 }
 // --> SAVE FOR A TIME WHEN MULTIPLE ENTITIES ARE USING TAGS IN THIS WAY <---
@@ -288,11 +288,11 @@ function getTypeNameData(typeObj) {
 //         if ( tags[id].constrainedToEntity === entity ) {
 //             data[tags[id].displayName] = id;
 //         }
-//     }  
+//     }
 //     return data;
 // }
 /* ---------------------- USER LIST DATA ------------------------------------ */
-/** 
+/**
  * [type] - array of user created interaction and filter sets.
  * [type]Names - an object with each set item's displayName(k) and id.
  */
@@ -317,7 +317,7 @@ export function deriveUserData(data) {                                          
     }
 }
 function getUserName() {
-    return $('body').data('user-name') ? $('body').data('user-name') : 'visitor'; 
+    return $('body').data('user-name') ? $('body').data('user-name') : 'visitor';
 }
 function getFilterOptionGroupObj(ids, filters) {                                //console.log('getFilterOptionGroupObj ids = %O, filters = %O', ids, filters);
     const data = {};
@@ -325,8 +325,8 @@ function getFilterOptionGroupObj(ids, filters) {                                
     return data;
 
     function buildOptObj(id) {
-        return data[filters[id].displayName] = { 
-            value: id, group: getFocusAndViewOptionGroupString(filters[id]) 
+        return data[filters[id].displayName] = {
+            value: id, group: getFocusAndViewOptionGroupString(filters[id])
         }
     }
 }
@@ -336,11 +336,11 @@ function getFocusAndViewOptionGroupString(list) {  //copy. refact away
         'srcs': 'Source', 'auths': 'Author', 'pubs': 'Publication', 'publ': 'Publisher',
         'taxa': 'Taxon', '2': 'Bats', '3': 'Plants', '4': 'Arthropod'
     };
-    return list.details.focus === 'locs' ? 'Location' : 
+    return list.details.focus === 'locs' ? 'Location' :
         map[list.details.focus] + ' - ' + map[list.details.view];
 }
 /* ---------------------- HELPERS ------------------------------------------- */
-function getTypeObj(types, type, collection) { 
+function getTypeObj(types, type, collection) {
     for (let t in types) {
         if (types[t].slug === type) { return types[t][collection]; }
     }

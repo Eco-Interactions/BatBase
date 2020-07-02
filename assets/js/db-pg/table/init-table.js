@@ -7,7 +7,7 @@ import unqVals from './ag-grid-unique-filter.js';
 let tblState;
 
 /**
- * Builds the table options object and passes everyting into agGrid, which 
+ * Builds the table options object and passes everyting into agGrid, which
  * creates and shows the table.
  */
 export default function init(view, rowData, state) {                /*Perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
@@ -24,7 +24,7 @@ function initTable(view, rowData) {
         tblOpts.rowData = rowData;
         new agGrid.Grid($('#search-tbl')[0], tblOpts);
         updateTableState(tblOpts, rowData);
-        sortTreeColumnIfTaxonFocused(); 
+        sortTreeColumnIfTaxonFocused();
         onModelUpdated();
     });
 }
@@ -36,10 +36,10 @@ function getBaseTableConfg(viewTitle) {
             enableColResize: true,
             enableFilter: true,
             enableSorting: true,
-            getHeaderCellTemplate: getHeaderCellTemplate, 
+            getHeaderCellTemplate: getHeaderCellTemplate,
             getNodeChildDetails: getNodeChildDetails,
             getRowClass: getRowStyleClass,
-            onBeforeFilterChanged: beforeFilterChange, 
+            onBeforeFilterChanged: beforeFilterChange,
             onAfterFilterChanged: afterFilterChanged,
             onBeforeSortChanged: onBeforeSortChanged,
             onModelUpdated: onModelUpdated,
@@ -51,32 +51,32 @@ function getBaseTableConfg(viewTitle) {
         };
     });
 }
-function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
+function afterFilterChanged() {}                                                //console.log("afterFilterChange")
 /** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    _ui('updateFilterStatusMsg');    
-} 
+    _ui('updateFilterStatusMsg');
+}
 /** ------------------------ BEFORE SORT CHANGE ----------------------------- */
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
-function onBeforeSortChanged() {                                            
-    if (tblState.curFocus !== "taxa") { return; }                       
+function onBeforeSortChanged() {
+    if (tblState.curFocus !== "taxa") { return; }
     var sortModel = tblState.api.getSortModel();                             //console.log("model obj = %O", sortModel)
     if (!sortModel.length) { return tblState.api.setSortModel([{colId: "name", sort: "asc"}]); }
-    ifNameUnsorted(sortModel);        
+    ifNameUnsorted(sortModel);
 }
 /** Sorts the tree column if it is not sorted. */
 function ifNameUnsorted(model) {
     var nameSorted = model.some(function(colModel){
         return colModel.colId === "name";
     });
-    if (!nameSorted) { 
-        model.push({colId: "name", sort: "asc"}); 
+    if (!nameSorted) {
+        model.push({colId: "name", sort: "asc"});
         tblState.api.setSortModel(model);
     }
 }
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
-function rowSelected() {  
-    if ($('#list-pnl').hasClass('closed') || $('#submit-list').data('submitting')) { return; }  
+function rowSelected() {
+    if ($('#list-pnl').hasClass('closed') || $('#submit-list').data('submitting')) { return; }
     $('#unsel-rows').attr({'disabled': false}).fadeTo('slow', 1);
     if (!$('#mod-some-list').prop('checked')) {
         $('#mod-some-list').prop({checked: 'checked'}).change();
@@ -86,11 +86,11 @@ function rowSelected() {
  * Copied from agGrid's default template, with columnId added to create unique ID's
  * @param  {obj} params  {column, colDef, context, api}
  */
-function getHeaderCellTemplate(params) {  
-    var filterId = params.column.colId + 'ColFilterIcon';  
+function getHeaderCellTemplate(params) {
+    var filterId = params.column.colId + 'ColFilterIcon';
     return '<div class="ag-header-cell">' +
         '  <div id="agResizeBar" class="ag-header-cell-resize"></div>' +
-        '  <span id="agMenu" class="' + params.column.colId + ' ag-header-icon ag-header-cell-menu-button"></span>' + //added class here so I can hide the filter on the group column, 
+        '  <span id="agMenu" class="' + params.column.colId + ' ag-header-icon ag-header-cell-menu-button"></span>' + //added class here so I can hide the filter on the group column,
         '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +                                 //which breaks the table. The provided 'supressFilter' option doesn't work.
         '    <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
         '    <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
@@ -98,27 +98,27 @@ function getHeaderCellTemplate(params) {
         '    <a name="' + filterId + '" id="agFilter" class="anything ag-header-icon ag-filter-icon"></a>' +
         '    <span id="agText" class="ag-header-cell-text"></span>' +
         '  </div>' +
-        '</div>'; 
+        '</div>';
 }
 function softRefresh() { tblState.api.refreshView(); }
 /**
- * Tree columns are hidden until taxon export and are used for the flattened 
- * taxon-tree data. The role is set to subject for 'bats' exports, object for 
+ * Tree columns are hidden until taxon export and are used for the flattened
+ * taxon-tree data. The role is set to subject for 'bats' exports, object for
  * plants and arthropods.
  */
-function getColumnDefs(mainCol) { 
-    const realm = tblState.curRealm || false;  
+function getColumnDefs(mainCol) {
+    const realm = tblState.curRealm || false;
     return _u('getData', ['tagNames', true]).then(buildColDefs);
 
-    function buildColDefs(tags) { 
+    function buildColDefs(tags) {
 
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-                    cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 }, 
+                    cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 },
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
                 {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
                 {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
                 {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
-                {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },            
+                {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },
                 {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
                 {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
                 {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
@@ -150,17 +150,17 @@ function getColumnDefs(mainCol) {
 function respW(col) {
     const pgW = $(window).width() < 1500 ? 'sml' : 'reg';
     const map = {
-        sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 }, 
-        typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 }, 
-        hab: { sml: 90,  reg: 100 }, loc: { sml: 111, reg: 122 }, 
-        cty: { sml: 94,  reg: 102 }, reg: { sml: 90,  reg: 100 }, 
+        sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 },
+        typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 },
+        hab: { sml: 90,  reg: 100 }, loc: { sml: 111, reg: 122 },
+        cty: { sml: 94,  reg: 102 }, reg: { sml: 90,  reg: 100 },
         nt:  { sml: 100, reg: 127 }
     };
     return map[col][pgW];
 }
 function getTagColDef(tags) {
     const values = tags ? Object.keys(tags) : [];
-    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addTitle, 
+    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addTitle,
                     filter: unqVals, filterParams: {values: values}}
 }
 /** Adds tooltip to Interaction row cells */
@@ -170,27 +170,27 @@ function addTitle(params) {
 }
 /** ------------------------------- Tree Column ----------------------------- */
 /** Returns the initial width of the tree column according to role and screen size. */
-function getTreeWidth() { 
+function getTreeWidth() {
     var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
     if (tblState.curFocus === 'locs') { offset = offset + 66; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
-function handleTreeRowRender (params) { 
+function handleTreeRowRender (params) {
     const rowName = params.data.name || null;
     return rowName ? addToolTipToCell(rowName) : addIntShowIcon(params.data.id);
 }
 /* ----------- TOOL TIP ------------- */
-function addToolTipToCell(name) {      
+function addToolTipToCell(name) {
     return '<span title="'+name+'">'+name+'</span>';
 }
 /* ----------- INT-SHOW ICON ------------- */
-function addIntShowIcon (id) {                                          
+function addIntShowIcon (id) {
     const icon = getShowIconHtml();
     return `<a href="${getShowLink(id)}">${icon}</a>`;
 }
 function getShowIconHtml () {
-    const path = require('../../../images/icons/search.svg').default; 
-    return`<img src=${path} class="tree-show" title="Show Interaction Details" 
+    const path = require('../../../images/icons/search.svg').default;
+    return`<img src=${path} class="tree-show" title="Show Interaction Details"
         alt="Show Interaction Details">`;
 }
 function getShowLink (id) {
@@ -198,39 +198,39 @@ function getShowLink (id) {
 }
 /* ----------- SORT TAXON TREE AND COLUMNS --------------- */
 /**
- * Sorts the tree column alphabetically for all views. If in Taxon view, the 
- * rows are sorted first by rank and then alphabetized by name @sortTaxonRows. 
+ * Sorts the tree column alphabetically for all views. If in Taxon view, the
+ * rows are sorted first by rank and then alphabetized by name @sortTaxonRows.
  */
 function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
     if (!a) { return 0; } //Interaction rows are returned unsorted
     if (tblState.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
-} 
+}
 function alphaSortVals(a, b) {
     var x = a.toLowerCase();
     var y = b.toLowerCase();
     return x<y ? -1 : x>y ? 1 : 0;
-}  
+}
 /** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
 function sortTreeColumnIfTaxonFocused() {
     if (tblState.curFocus === 'taxa') {
         tblState.api.setSortModel([{colId: "name", sort: "asc"}]);
     }
 }
-/** 
+/**
  * Sorts each row by taxonomic rank and then alphabetizes by name.
- * "Unspecified" interaction groupings are kept at top so they remain under their 
- * source taxon. 
+ * "Unspecified" interaction groupings are kept at top so they remain under their
+ * source taxon.
  */
 function sortTaxonRows(a, b) {
     var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
     var aParts = a.split(" ");
-    var aLvl = aParts[0];   
+    var aLvl = aParts[0];
     var aName = aParts[1];
     var bParts = b.split(" ");
     var bLvl = bParts[0];
     var bName = bParts[1];
-    return  bLvl === "Unspecified" ? 1 : compareRankThenName();  
+    return  bLvl === "Unspecified" ? 1 : compareRankThenName();
 
     function compareRankThenName() {
         return sortByRank() || sortByName();
@@ -238,59 +238,59 @@ function sortTaxonRows(a, b) {
     function sortByRank() {
         if (lvls.indexOf(aLvl) === -1 || lvls.indexOf(bLvl) === -1) { return alphaSpecies(); }
         return lvls.indexOf(aLvl) === lvls.indexOf(bLvl) ? false :
-            lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1; 
+            lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1;
     }
     function sortByName() {
         return aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
     }
-    function alphaSpecies() {                                             
+    function alphaSpecies() {
         return lvls.indexOf(aLvl) !== -1 ? 1 :
             lvls.indexOf(bLvl) !== -1 ? -1 :
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
 }  /* End sortTaxonRows */
 /** -------------------------- Edit(or) Column(s) --------------------------- */
-function isNotEditor() {  
+function isNotEditor() {
     return ['admin', 'editor', 'super'].indexOf(tblState.userRole) === -1;
 }
 /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
-function addEditPencil(params) {   
-    if (uneditableEntityRow(params)) { return "<span>"; }                     
+function addEditPencil(params) {
+    if (uneditableEntityRow(params)) { return "<span>"; }
     return getPencilHtml(params.data.id, params.data.entity);
 }
 function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tblState.curFocus, params);
     const uneditables = [
-        tblState.curFocus === 'locs' && 
+        tblState.curFocus === 'locs' &&
             (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
-        tblState.curFocus === 'taxa' && //Realm Taxa 
+        tblState.curFocus === 'taxa' && //Realm Taxa
             (!params.data.parentTaxon && !params.data.interactionType),
         tblState.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity) {
-    const path = require('../../../images/icons/eif.pencil.svg').default; 
+    const path = require('../../../images/icons/eif.pencil.svg').default;
     var editPencil = `<img src=${path} id="edit${entity}${id}"
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
-    $('#search-tbl').on('click', '#edit'+entity+id, 
+    $('#search-tbl').on('click', '#edit'+entity+id,
         _form.bind(null, 'edit', [id, _u('lcfirst', [entity])]));
     return editPencil;
 }
 /** -------- Map Column ---------- */
-function ifLocView() {                                           
+function ifLocView() {
     return tblState.curFocus === 'locs';
 }
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
     const id = params.data.id;
     $('#search-tbl').off('click', '#map'+id);
-    $('#search-tbl').on('click', '#map'+id, 
+    $('#search-tbl').on('click', '#map'+id,
         showLocOnMap.bind(null, params.data.onMap, getZoomLvl(params.data)));
     return getMapIcon(id);
 }
 function getMapIcon(id) {
     const path = require('../../../images/icons/marker-icon.png').default;
-    return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'  
+    return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
 function getMapIconStyles() {
@@ -298,31 +298,31 @@ function getMapIconStyles() {
     if ($('#shw-map').data('disabled')) { styles += ' opacity: .3;' }
     return styles;
 }
-function getZoomLvl(loc) {  
-    return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;   
+function getZoomLvl(loc) {
+    return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;
 }
 /*================== Row Styling =========================================*/
 /**
- * Adds a css background-color class to interaction record rows. Source-focused 
- * interaction rows are not colored, their name rows are colored instead. 
+ * Adds a css background-color class to interaction record rows. Source-focused
+ * interaction rows are not colored, their name rows are colored instead.
  */
 function getRowStyleClass(params) {                                             //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
-    if (params.data.name !== "") { return; } 
-    return tblState.curFocus === "srcs" ? 
+    if (params.data.name !== "") { return; }
+    return tblState.curFocus === "srcs" ?
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
 }
 /**
- * Adds a background-color to cells with open child interaction rows, or cells 
- * with their grouped interactions row displayed - eg, Expanding the tree cell 
+ * Adds a background-color to cells with open child interaction rows, or cells
+ * with their grouped interactions row displayed - eg, Expanding the tree cell
  * for Africa will be highlighted, as well as the 'Unspecified Africa Interactions'
- * cell Africa's interaction record rows are still grouped within. 
+ * cell Africa's interaction record rows are still grouped within.
  */
 function getCellStyleClass(params) {                                            //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
-    if ((params.node.expanded === true && isOpenRowWithChildInts(params)) || 
+    if ((params.node.expanded === true && isOpenRowWithChildInts(params)) ||
         isNameRowforClosedGroupedInts(params)) {                                //console.log("setting style class")
-        return tblState.curFocus === "srcs" ? 
+        return tblState.curFocus === "srcs" ?
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
-    } 
+    }
 }
 function isOpenRowWithChildInts(params) {
     if (params.data.locGroupedInts) { return locHasIntsAfterFilters(params); }     //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
@@ -337,15 +337,15 @@ function txnHasIntsAfterFilters(params) {
     });
 }
 /**
- * Returns true if the location row's child interactions are present in 
+ * Returns true if the location row's child interactions are present in
  * data tree after filtering.
  */
-function locHasIntsAfterFilters(params) {  
+function locHasIntsAfterFilters(params) {
     return params.node.childrenAfterFilter.some(childRow => {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });
 }
-function isNameRowforClosedGroupedInts(params) {  
+function isNameRowforClosedGroupedInts(params) {
     return params.data.groupedInts === true;
 }
 /** Returns a color based on the tree level of the row. */
@@ -360,7 +360,7 @@ function getSrcRowColorClass(params) {
     const styleClass = 'row-' + rowColorArray[params.rowColorIdx];              //console.log("styleClass = ", styleClass);
     return styleClass;
 }
-function getNodeChildDetails(rcrd) {                                            //console.log("rcrd = %O", rcrd)  
+function getNodeChildDetails(rcrd) {                                            //console.log("rcrd = %O", rcrd)
     if (rcrd.isParent) {
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
@@ -375,16 +375,16 @@ function onTableInitComplete(rowData) {
     _ui('hidePopupMsg');
     _ui('enableTableButtons', [tblState.flags.allDataAvailable]);
     hideUnusedColFilterMenus();
-    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
-    _ui('updateFilterStatusMsg');    
-} 
+    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
+    _ui('updateFilterStatusMsg');
+}
 function updateDisplayForShowingInteractionSet(rowData) {
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
-    tblState.api.expandAll(); 
+    tblState.api.expandAll();
     _ui('setTreeToggleData', [true]);
 }
 /**
- * Hides the "tree" column's filter button. (Filtering on the group 
+ * Hides the "tree" column's filter button. (Filtering on the group
  * column only filters the leaf nodes, by design. It is not useful here.)
  * Hides the sort icons for the 'edit' and 'map' columns.
  * Hides the filter button on the 'edit' and 'count' columns.
@@ -415,22 +415,22 @@ function hideUnusedColFilterMenus() {
 }
 
 /**
- * When the table rowModel is updated, the total interaction count for each 
+ * When the table rowModel is updated, the total interaction count for each
  * tree node is updated. Interactions filtered out will not be included in the totals.
- * Updates the total interaction count displayed in the tool bar. 
+ * Updates the total interaction count displayed in the tool bar.
  */
-function onModelUpdated() {                                                     
+function onModelUpdated() {
     if (!tblState.api) { return; }
     const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);  //console.log("-----new total ints = ", ttlInts);
     updateTotalCountDisplay(ttlInts);
 }
 /**
- * Sets new interaction totals for each tree node @getChildrenCnt and then 
+ * Sets new interaction totals for each tree node @getChildrenCnt and then
  * calls the table's softRefresh method, which refreshes any rows with "volatile"
  * set "true" in the columnDefs - currently only "Count".
  */
 function updateTotalRowIntCounts(rootNode) {
-    const ttlInts = getChildrenCnt(rootNode.childrenAfterFilter);  
+    const ttlInts = getChildrenCnt(rootNode.childrenAfterFilter);
     tblState.api.softRefreshView();
     return ttlInts;
 }
@@ -445,21 +445,21 @@ function getChildrenCnt(nodeChildren) {                                         
     return ttl;
 }
 /**
- * Interaction records are identified by their lack of any children, specifically 
+ * Interaction records are identified by their lack of any children, specifically
  * their lack of a "childrenAfterFilter" property.
  */
-function addSubNodeInteractions(child) {  
+function addSubNodeInteractions(child) {
     var cnt = 0;
     if (child.childrenAfterFilter) {
         cnt += getChildrenCnt(child.childrenAfterFilter);
         if (cnt !== 0) { child.data.intCnt = cnt; }
     } else { /* Interaction record row */
         ++cnt;
-        child.data.intCnt = null; 
+        child.data.intCnt = null;
     }
     return cnt;
 }
-function updateTotalCountDisplay(cnt) {  
+function updateTotalCountDisplay(cnt) {
     $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);
 }
 

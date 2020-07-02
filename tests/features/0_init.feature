@@ -3,7 +3,7 @@ Feature: Search Page Database Initialization
     As a web visitor
     I need to be able to load the database
 
-    ### WHAT IS BEING TESTED ### 
+    ### WHAT IS BEING TESTED ###
         # INITIAL DATA LOADS, STORES, AND DISPLAYS AS EXPECTED
 
     Background:
@@ -41,7 +41,7 @@ Feature: Search Page Database Initialization
         Then I should see "3" rows in the table data tree
         And I see "Central America"
         And data in the interaction rows
-    
+
     @javascript
     Scenario:  There should be 8 interactions in the initial map view.
         Given the database table is in "Location" view

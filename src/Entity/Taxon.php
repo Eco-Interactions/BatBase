@@ -120,7 +120,7 @@ class Taxon
      * @ORM\JoinColumn(name="level_id", referencedColumnName="id", nullable=false)
      */
     private $level;
-    
+
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
@@ -190,7 +190,7 @@ class Taxon
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -468,12 +468,12 @@ class Taxon
         $realm = $this->getTaxonRealm();
         if (!$realm) { return null; }
         return [
-            'id' => $realm->getId(), 
+            'id' => $realm->getId(),
             'displayName' => $realm->getDisplayName(),
             'pluralName' => $realm->getPluralName()
         ];
     }
-    
+
     /**
      * Get id.
      *
@@ -483,10 +483,10 @@ class Taxon
     {
         return $this->findRealmAndReturnObj($this);
     }
-    
+
     private function findRealmAndReturnObj($taxon)
     {
-        if ($taxon->getSlug() === 'animalia') { return false; } 
+        if ($taxon->getSlug() === 'animalia') { return false; }
         $realm = $taxon->getRealm();
         if ($realm) { return $realm; }
         $parent = $taxon->getParentTaxon();
@@ -526,9 +526,9 @@ class Taxon
      */
     public function getLevelData()
     {
-        return [ 
-            "id" => $this->level->getId(), 
-            "displayName" => $this->level->getDisplayName() 
+        return [
+            "id" => $this->level->getId(),
+            "displayName" => $this->level->getDisplayName()
         ];
     }
 
@@ -591,7 +591,7 @@ class Taxon
     }
 
     /**
-     * Get the Parent Taxon's id.   
+     * Get the Parent Taxon's id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
      * @Groups({"normalized"})
@@ -636,7 +636,7 @@ class Taxon
     }
 
     /**
-     * Get an array of child Taxon ids.   
+     * Get an array of child Taxon ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
      * @Groups({"normalized"})
@@ -724,9 +724,9 @@ class Taxon
     }
 
     /**
-     * Returns an array of ids for all interactions where the taxon was the subject. 
+     * Returns an array of ids for all interactions where the taxon was the subject.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("subjectRoles")     
+     * @JMS\SerializedName("subjectRoles")
      * @Groups({"normalized", "flattened"})
      */
     public function getSubjectRoleIds()
@@ -771,7 +771,7 @@ class Taxon
     }
 
     /**
-     * Returns an array of ids for all interactions where the taxon was the object. 
+     * Returns an array of ids for all interactions where the taxon was the object.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("objectRoles")
      * @Groups({"normalized", "flattened"})
@@ -781,17 +781,17 @@ class Taxon
         $interactions = $this->objectRoles;
         return $this->getInteractionIds($interactions);
     }
-    // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
+    // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS
     // public function getInteractions()
     // {
-    //     $subj = $this->getSubjectRoles();  
-    //     $obj = $this->getObjectRoles();     
+    //     $subj = $this->getSubjectRoles();
+    //     $obj = $this->getObjectRoles();
 
     //     return count($subj) > 0 ? $subj : $obj;
     // }
 
     /**
-     * Returns an array of ids for all passed interactions. 
+     * Returns an array of ids for all passed interactions.
      */
     public function getInteractionIds($interactions)
     {
@@ -881,9 +881,9 @@ class Taxon
      */
     public function serializeUpdatedBy()
     {
-        $createdBy = $this->createdBy ? 
+        $createdBy = $this->createdBy ?
             ($this->createdBy->getId() == 6 ? null : $this->createdBy) : null;
-        $user = $this->updatedBy ? 
+        $user = $this->updatedBy ?
             ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
 
         return !$user ? null : $user->getUsername();

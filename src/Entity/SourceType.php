@@ -80,7 +80,7 @@ class SourceType
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -248,7 +248,7 @@ class SourceType
     }
 
     /**
-     * Returns an array of Source ids. 
+     * Returns an array of Source ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("sources")
      */

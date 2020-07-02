@@ -2,13 +2,13 @@
     In order to interact with the database
     As a web visitor
     I should be able to use the various features and controls on the search page
-    
-    ### WHAT IS BEING TESTED ### 
+
+    ### WHAT IS BEING TESTED ###
         # EXPAND AND COLLAPSE ROWS in database table
         # START TUTORIAL
         # OPEN SEARCH TIPS
         # DISPLAY INTERACTIONS IN TABLE ON THE MAP
-            # RETURN THEM TO THE TABLE 
+            # RETURN THEM TO THE TABLE
         ## TODO
         # CSV downloads
         # run through all slides in tutorial
@@ -73,7 +73,7 @@
         Then I should see "Full Tutorial"
 
     @javascript
-    Scenario:  I should be able to jump to the map section of the tutorial 
+    Scenario:  I should be able to jump to the map section of the tutorial
         When I press "Tutorial"
         And I press the "Map View" button
         Then I should see "Interactions in the table can be displayed on a map"
@@ -90,7 +90,7 @@
       And I should see "Journal of Mammalogy -" in popup
 
     @javascript
-    Scenario:  I should be able to view interactions on the map 
+    Scenario:  I should be able to view interactions on the map
         Given the database table is in "Location" view
         When I select the Location view "Map Data"
         Then I should see the map with markers
@@ -104,7 +104,7 @@
         Then I should see data in the interaction rows
 
     @javascript
-    Scenario:  I should be able to view a specific location on the map 
+    Scenario:  I should be able to view a specific location on the map
         Given the database table is in "Location" view
         When I expand "Central America" in the data tree
         And I expand "Panama" in the data tree

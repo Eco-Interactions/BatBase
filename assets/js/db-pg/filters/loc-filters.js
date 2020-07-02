@@ -1,11 +1,11 @@
 /*
- * Filters interactions by the Country or Region using comboboxes in the filter panel. 
+ * Filters interactions by the Country or Region using comboboxes in the filter panel.
  * Synchronizes the tree-text filter and the combobox filters.
- * 
+ *
  * Exports:
  *      loadLocFilters
  *      applyLocFilter
- *      
+ *
  * TOC:
  *      UI
  *      FILTER
@@ -14,7 +14,7 @@ import * as fM from './filters-main.js';
 import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../db-main.js';
  /* ========================= UI ============================================ */
 /**
- * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter. 
+ * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter.
  */
 export function loadLocFilters(tblState) {                          /*Perm-log*/console.log("       --Loading location filters.");
     if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
@@ -22,13 +22,13 @@ export function loadLocFilters(tblState) {                          /*Perm-log*/
     loadLocNameSearchElem();
 }
 function updateLocSelOptions(tblState) {
-    const opts = buildLocSelectOpts(tblState); 
-    Object.keys(opts).forEach(locType => {                                            
+    const opts = buildLocSelectOpts(tblState);
+    Object.keys(opts).forEach(locType => {
         _u('replaceSelOpts', ['#sel'+locType, opts[locType], null, locType]);
     });
     setSelectedLocVals(tblState.selectedOpts);
 }
-function loadLocNameSearchElem() {  
+function loadLocNameSearchElem() {
     const searchTreeElem = fM.getTreeTextFilterElem('Location');
     $('#focus-filters').append(searchTreeElem);
 }
@@ -36,8 +36,8 @@ function loadLocNameSearchElem() {
  * Create and append the location search comboboxes, Region and Country, and
  * set any previously 'selected' values.
  */
-function loadLocComboboxes(tblState) {  
-    const opts = buildLocSelectOpts(tblState); 
+function loadLocComboboxes(tblState) {
+    const opts = buildLocSelectOpts(tblState);
     const selElems = buildLocSelects(opts);
     $('#focus-filters').append(selElems);
     _u('initComboboxes', [{'Region': applyLocFilter, 'Country': applyLocFilter}]);
@@ -46,56 +46,56 @@ function loadLocComboboxes(tblState) {
 /** Builds arrays of options objects for the location comboboxes. */
 function buildLocSelectOpts(tblState, data) {
     const processedOpts = { Region: [], Country: [] };
-    const opts = { Region: [], Country: [] };  
+    const opts = { Region: [], Country: [] };
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     modifyOpts();
-    return opts; 
+    return opts;
     /**
-     * Recurses through the tree and builds a option object for each unique 
+     * Recurses through the tree and builds a option object for each unique
      * country and region in the current table with interactions.
      */
-    function buildLocOptsForNode(row) {                                 
-        const rowData = row.data;  
+    function buildLocOptsForNode(row) {
+        const rowData = row.data;
         if (rowData.interactionType) {return;}                                  //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
         if (rowData.type === 'Region' || rowData.type === 'Country') {
-            buildLocOpt(rowData, rowData.name, rowData.type); 
+            buildLocOpt(rowData, rowData.name, rowData.type);
         }
         if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
     }
     /** If the location has interactions an option object is built for it. */
-    function buildLocOpt(rowData, name, type) {  
+    function buildLocOpt(rowData, name, type) {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
-        const id = rowData.id;             
+        const id = rowData.id;
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
-        opts[type].push({ value: id, text: name.split('[')[0] }); 
+        opts[type].push({ value: id, text: name.split('[')[0] });
         processedOpts[type].push(name);
     }
-    function isOpenRow(id) {  
+    function isOpenRow(id) {
         return tblState.openRows.indexOf(id) !== -1
     }
     /** Handles all modification of the location options. */
-    function modifyOpts() {                                                     
-        if (opts.Region.length === 2) { rmvTopRegion(); }        
+    function modifyOpts() {
+        if (opts.Region.length === 2) { rmvTopRegion(); }
         addMissingOpts();
         sortLocOpts();
         addAllOption();
     }
-    /** 
-     * If both top & sub regions are in the table, only the sub-region opt is 
-     * included, unless the top region is the location being filtered on. 
+    /**
+     * If both top & sub regions are in the table, only the sub-region opt is
+     * included, unless the top region is the location being filtered on.
      */
     function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tblState.selectedOpts)
-        const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
+        const selLoc = tblState.rcrdsById[tblState.openRows[0]];
         if (!selLoc || !selLoc.parent) { return; }
         opts.Region = opts.Region.filter(region => {
             return region.value == tblState.selectedOpts.Region;
-        });             
+        });
     }
     /** If the Region or Country aren't in the table, they are added as options here. */
-    function addMissingOpts() {                                                 
+    function addMissingOpts() {
         if (!tblState.openRows.length && !tblState.selectedOpts) { return; }
-        const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
+        const selLoc = tblState.rcrdsById[tblState.openRows[0]];
         if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
@@ -104,10 +104,10 @@ function buildLocSelectOpts(tblState, data) {
         const val = loc && loc[type] ?  loc[type].id : false;
         const txt = loc && loc[type] ?  loc[type].displayName : false;
         if (!val) { return }
-        addToSelectedObj(val, optProp);  
+        addToSelectedObj(val, optProp);
         tblState.openRows.push(val);
         opts[optProp].push({ value: val, text: txt });
-    }         
+    }
     function addToSelectedObj(id, type) {
         const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s]', type);
         sel[type] = id;
@@ -115,10 +115,10 @@ function buildLocSelectOpts(tblState, data) {
     /** Alphabetizes the options. */
     function sortLocOpts() {
         for (let type in opts) {
-            opts[type] = opts[type].sort(alphaOptionObjs); 
+            opts[type] = opts[type].sort(alphaOptionObjs);
         }
     }
-    function addAllOption() {  
+    function addAllOption() {
         Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
             opts[type].unshift({value: 'all', text: '- All -'})
         });
@@ -128,16 +128,16 @@ function alphaOptionObjs(a, b) {
     var x = a.text.toLowerCase();
     var y = b.text.toLowerCase();
     return x<y ? -1 : x>y ? 1 : 0;
-}  
+}
 /** Builds the location select elements */
-function buildLocSelects(locOptsObj) {  
+function buildLocSelects(locOptsObj) {
     const selElems = [];
     for (let locSelName in locOptsObj) {
-        let elem = buildLocSel(_u('ucfirst', [locSelName]), locOptsObj[locSelName]); 
+        let elem = buildLocSel(_u('ucfirst', [locSelName]), locOptsObj[locSelName]);
         selElems.push(elem);
     }
     return selElems;
-    
+
     function buildLocSel(selName, opts) {
         const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
         const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
@@ -158,34 +158,34 @@ function setSelectedLocVals(selected) {                                         
     });
 }
 /* =========================== FILTER ======================================= */
-export function applyLocFilter(val, text) {            
-    if (!val && text === undefined) { return; }             
-    const selectedOpts = tState().get('selectedOpts');    
-    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text); 
-    const root = getNewLocRoot();  
-    const txt = text || fM.getTreeFilterVal('Location');  
+export function applyLocFilter(val, text) {
+    if (!val && text === undefined) { return; }
+    const selectedOpts = tState().get('selectedOpts');
+    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text);
+    const root = getNewLocRoot();
+    const txt = text || fM.getTreeFilterVal('Location');
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
     return rebuildLocTable(root, txt)
         .then(() => fM.reapplyDateFilterIfActive());
-    
+
     function getNewLocRoot() {
-        return isNaN(parseInt(val)) ? 
+        return isNaN(parseInt(val)) ?
             getRegionIdAndUpdateType(locType) : [parseInt(val)];
     }
     function getRegionIdAndUpdateType (comboType) {
         locType = 'Region';
         return getRegionId(comboType);
     }
-    function getRegionId(comboType) {                                         
-        return (!comboType || comboType === 'Region' && val === 'all') ? 
-            Object.values(tState().get('data')['topRegionNames']) : 
+    function getRegionId(comboType) {
+        return (!comboType || comboType === 'Region' && val === 'all') ?
+            Object.values(tState().get('data')['topRegionNames']) :
             [selectedOpts['Region']];
     }
-} 
-function updateLocFilterMemory(loc, locType) { 
+}
+function updateLocFilterMemory(loc, locType) {
     if (loc.length > 1) { return resetLocComboMemory(); }
-    const selVal = parseInt(loc[0]);  
+    const selVal = parseInt(loc[0]);
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
@@ -200,20 +200,20 @@ function getSelectedVals(val, type) {                                           
     const locRcrds = tState().get('rcrdsById');
     if (type === 'Country') { selectRegion(val); }
     if (val !== 'none' && val !== 'all') { selected[type] = val; }
-    return selected;  
+    return selected;
 
     function selectRegion(val) {
         const loc = _u('getDetachedRcrd', [val, locRcrds]);
         selected['Region'] = loc.region.id;
     }
-} 
+}
 /* ------------------- GET SELECTED LOCATION -------------------------------- */
 function getSelectedLocVal(locType, selectedOpts) {
     return selectedOpts[getLocType(null, selectedOpts)];
 }
 function getLocType(that, selectedOpts) {
-    return that && that.hasOwnProperty('$input') ? 
-        that.$input[0].id.split('sel')[1] : getSelectedLocType(selectedOpts) 
+    return that && that.hasOwnProperty('$input') ?
+        that.$input[0].id.split('sel')[1] : getSelectedLocType(selectedOpts)
 }
 function getSelectedLocType(selectedOpts) {
     const sels = Object.keys(selectedOpts);

@@ -92,7 +92,7 @@ class Naming
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User
      *
@@ -101,7 +101,7 @@ class Naming
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *

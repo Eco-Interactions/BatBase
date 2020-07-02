@@ -1,8 +1,8 @@
 /**
- * Returns an Array with the entity's data seperated into sections, rows, and 
+ * Returns an Array with the entity's data seperated into sections, rows, and
  * cells for each field with it's data formatted for display.
- * Eg: [{ section: 'name', rows: [ row1-[ cell1-[ { field: 'name', content: data } ], cell... ], row... ]}, { section2 }] 
- * 
+ * Eg: [{ section: 'name', rows: [ row1-[ cell1-[ { field: 'name', content: data } ], cell... ], row... ]}, { section2 }]
+ *
  * TOC:
  *    ENTITY-SHOW CONFG
  *    FIELD-DATA HANDLERS
@@ -14,7 +14,7 @@ export default function getEntityShowData (entity, data, u) {
     const confg = {
         interaction: [
             {
-                section:  'Interaction Details', 
+                section:  'Interaction Details',
                 rows: [
                    [  //row 1
                         [ //cell 1
@@ -25,7 +25,7 @@ export default function getEntityShowData (entity, data, u) {
                             { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
                         ],[  //cell 3
                             { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
-                        ], 
+                        ],
                     ], [ //row 2
                         [  //cell 1
                             { field: 'Note', content: data.note }
@@ -33,10 +33,10 @@ export default function getEntityShowData (entity, data, u) {
                     ]
                 ]
             },{
-                section:  'Source', 
+                section:  'Source',
                 rows: [
                    [  //row 1
-                        [ 
+                        [
                             { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
                             { field: 'DOI', content: data.source.doi },
                             { field: 'Website', content: null },
@@ -50,7 +50,7 @@ export default function getEntityShowData (entity, data, u) {
                         [
                             { field: 'Abstract', content: data.source.citation.abstract }
                         ]
-                    ] 
+                    ]
                             // { field: 'Publication', content: data.source.parent.displayName },
                             // { field: 'Publisher', content: getPublisherData(data.source.parent.parent) },
                             // { field: 'Description', content: data.source.parent.description },
@@ -64,10 +64,10 @@ export default function getEntityShowData (entity, data, u) {
                             // { field: 'Issue', content: data.source.citation.publicationIssue },
                 ]
             },{
-                section:  'Location', 
+                section:  'Location',
                 rows: [
                    [  //row 1
-                        [ 
+                        [
                             { field: 'Name', content: data.location.displayName },
                             { field: 'Coordinates', content: getCoordinates(data.location), classes: 'max-cntnt'},
                             'col'
@@ -91,12 +91,12 @@ export default function getEntityShowData (entity, data, u) {
     return confg[entity].map(c => c); //detach obj
 }
 /* ================== FIELD-DATA HANDLERS =================================== */
-function getTagData (tags) { 
+function getTagData (tags) {
     if (!tags.length) { return null; }
     return tags.map(t => t.displayName).join(', ');
 }
 /* ------------------------------- TAXON ------------------------------------ */
-function getTaxonHierarchyDataHtml (taxon) { 
+function getTaxonHierarchyDataHtml (taxon) {
     return `<strong>${taxon.displayName}</strong>` + getParentTaxaNames(taxon.parentTaxon);
 }
 function getParentTaxaNames (pTaxon, lvl = 1) {
@@ -110,15 +110,15 @@ function getContributorFieldData (contribs) {
     let type;
     const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
     return { field: util.ucfirst(type)+'s', content: names, classes: 'max-cntnt' };
-    
+
     function storeTypeAndReturnName (ord) {
-        type = Object.keys(contribs[ord])[0]; 
+        type = Object.keys(contribs[ord])[0];
         return contribs[ord][type];
     }
 }
 function getPublisherData (pSrc) {
-    if (!pSrc) { return null; } 
-    const loc = [pSrc.publisher.city, pSrc.publisher.country].filter(c => c).join(', '); 
+    if (!pSrc) { return null; }
+    const loc = [pSrc.publisher.city, pSrc.publisher.country].filter(c => c).join(', ');
     return pSrc.displayName + (!!loc ? ('<br>' + loc) : '');
 }
 function getCitationTypeAndTitleFieldData (citation) {
@@ -126,11 +126,11 @@ function getCitationTypeAndTitleFieldData (citation) {
 }
 /* ---------------------------- LOCATION ------------------------------------ */
 function getElevRange (location) {
-    return location.elevationMax && location.elevation ? 
-        (location.elevation + ' - ' + location.elevationMax) : 
+    return location.elevationMax && location.elevation ?
+        (location.elevation + ' - ' + location.elevationMax) :
         (location.elevation || location.elevationMax); //Some locations have a max but not the base of the range. Will fix in data soon.
 }
 function getCoordinates (location) {
-    return location.latitude ? 
+    return location.latitude ?
         (location.latitude.toString() + ', ' + location.longitude.toString()) : null;
 }

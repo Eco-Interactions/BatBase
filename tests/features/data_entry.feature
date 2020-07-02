@@ -3,14 +3,14 @@ Feature: Add new data to the database
     As an editor
     I need to be able to add new data to the database
 
-    ### WHAT IS BEING TESTED ### 
-        # INTERACTION CREATE FORM FILL, SUBMISSION, AND TABLE RELOADS 
+    ### WHAT IS BEING TESTED ###
+        # INTERACTION CREATE FORM FILL, SUBMISSION, AND TABLE RELOADS
         # ALL SUB-ENTITY CREATE FORMS
         ## TODO
         # VARIOUS SOURCE TYPE SELECTIONS and their respective UI changes
     ### NOTE
-        # SOME STEPS ARE COMBINED TO MAKE TESTING FASTER AFTER CONFIRMING EACH 
-        # SECTION WORKS AS EXPECTED.   
+        # SOME STEPS ARE COMBINED TO MAKE TESTING FASTER AFTER CONFIRMING EACH
+        # SECTION WORKS AS EXPECTED.
 
     Background:
         Given I am on "/login"
@@ -152,7 +152,7 @@ Feature: Add new data to the database
         ## ---- Location --- ##
         ## With GPS ##
         And I click on "use the map interface" link
-        And I press the "New Location" button in the map  
+        And I press the "New Location" button in the map
         And I should see "New Location"
         # And I press the "Click to select position" button in the map
         And I type "9.79026" in the "Latitude" field "input"
@@ -363,7 +363,7 @@ Feature: Add new data to the database
   #       And I should see "Test description" in the "Src" detail panel
   #       And I should see "Cockle, Anya" in the "Src" detail panel
   #       And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
-    
+
   #   ## ------------------- Journal ----------------- ##
 
   #   @javascript
@@ -407,7 +407,7 @@ Feature: Add new data to the database
   #       And I should see "Test Abstract Text" in the "Src" detail panel
   #       And I should see "1990" in the "Src" detail panel
   #       And I should see "Cockle, Anya" in the "Src" detail panel
-    
+
   #   ## ------------------- Thesis/Dissertation ----------------- ##
   #   @javascript
   #   Scenario:  I should be able to create a [Thesis/Dissertation] publication with its sub-form
@@ -501,7 +501,7 @@ Feature: Add new data to the database
   #       Given I press the "New" button
   #       And I see "New Interaction"
   #       And I click on "use the map interface" link
-  #       And I press the "New Location" button in the map  
+  #       And I press the "New Location" button in the map
   #       And I should see "New Location"
   #       When I press the "Click to select position" button in the map
   #       And I type "9.79026" in the "Latitude" field "input"
@@ -550,7 +550,7 @@ Feature: Add new data to the database
   #       And I select "Costa Rica" from the "Country-Region" form dropdown
   #       And I see the country's polygon drawn on the map
   #       And I should see "1" location markers and "1" location clusters
-  #       And I click on an existing location marker   
+  #       And I click on an existing location marker
   #       And I press the "Select Existing Location" button
   #       And the map should close
   #       And I should see "Description" in the "Location" detail panel
@@ -566,14 +566,14 @@ Feature: Add new data to the database
   #   #     Given I press the "New" button
   #       # And I see "New Interaction"
   #   #     And I click on "use the map interface" link
-  #   #     And I press the "New Location" button in the map  
+  #   #     And I press the "New Location" button in the map
   #   #     And I should see "New Location"
   #   #     When I press the "Click to select position" button in the map
   #   #     And I click on the map
   #   #     And I break "See the pin anywhere?"
   #   #     Then I see the "new" location's pin on the map
   #   #     And the coordinate fields should be filled
-  #   #     And the marker's popup should have a description of the position 
+  #   #     And the marker's popup should have a description of the position
 
     # ## -------------------------- Taxon ----------------------------------------##
     # @javascript
@@ -661,7 +661,7 @@ Feature: Add new data to the database
     #     And I enter "Object Family" in the "Family" form dropdown
     #     And I see "New Taxon Family"
     #     And I press the "Create Taxon" button
-    #     Then I should see "Object Family" in the "Family" form dropdown        
+    #     Then I should see "Object Family" in the "Family" form dropdown
     #     And I should see "Object Class" in the "Class" form dropdown
     #     And I should see "Object Order" in the "Order" form dropdown
 
@@ -676,7 +676,7 @@ Feature: Add new data to the database
     #     When I enter "OGenus" in the "Genus" form dropdown
     #     And I see "New Taxon Genus"
     #     And I press the "Create Taxon" button
-    #     Then I should see "OGenus" in the "Genus" form dropdown     
+    #     Then I should see "OGenus" in the "Genus" form dropdown
     #     And I should see "Object Family" in the "Family" form dropdown
     #     And I should see "Object Order" in the "Order" form dropdown
     #     And I should see "Object Class" in the "Class" form dropdown
@@ -693,7 +693,7 @@ Feature: Add new data to the database
     #     And I see "New Taxon Species"
     #     And I press the "Create Taxon" button
     #     Then I should see "OGenus Species" in the "Species" form dropdown
-    #     And I should see "OGenus" in the "Genus" form dropdown     
+    #     And I should see "OGenus" in the "Genus" form dropdown
     #     And I should see "Object Family" in the "Family" form dropdown
     #     And I should see "Object Order" in the "Order" form dropdown
     #     And I should see "Object Class" in the "Class" form dropdown
@@ -708,7 +708,7 @@ Feature: Add new data to the database
     #     And I select "OGenus Species" from the "Species" form dropdown
     #     When I press the "Confirm" button
     #     Then I should see "OGenus Species" in the "Object" form dropdown
-    #     
+    #
 
     ## -------------------------- Interaction ----------------------------------##
     @javascript
@@ -852,7 +852,7 @@ Feature: Add new data to the database
 
 ## ===================== AFTER INTERACTION FORM SUBMIT ====================== ##
     @javascript
-    Scenario:  The table should not change views when form closes without submitting 
+    Scenario:  The table should not change views when form closes without submitting
         Given I press the "New" button
         And I see "New Interaction"
         And the database table is in "Location" view

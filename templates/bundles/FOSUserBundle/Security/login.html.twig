@@ -5,7 +5,7 @@
 {% block fos_user_content %}
 	<p class="top-em-mrg">If you already have an account for batbase.org, you can enter your username and password below.</p>
 	<p class="top-em-mrg">If not, <a href="register">click here to register and participate.</a></p>
-	
+
 	{% if error %}
 	    <div class="top-em-mrg" style="color: red">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
 	{% endif %}

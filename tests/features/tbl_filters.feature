@@ -3,8 +3,8 @@ Feature: Filtering the data displayed in the database table
     As a web visitor
     I should be able to use the various view and filter options of the search page
 
-    ### WHAT IS BEING TESTED ### 
-        # EACH VIEW'S FILTER OPTIONS: 
+    ### WHAT IS BEING TESTED ###
+        # EACH VIEW'S FILTER OPTIONS:
           # Comboboxes: Select option and reset combobox.
           # Text filters
           # Time-published  (Time-updated needs to be worked on)
@@ -45,7 +45,7 @@ Feature: Filtering the data displayed in the database table
         When I select "Costa Rica" from the "Country" dropdown
         Then I should see "Central America" in the "Region" dropdown
         And I should see "3" rows in the table data tree
-        And data in the interaction rows  
+        And data in the interaction rows
         And I should see "Country." in the filter status bar
 
     ## -------------------------- Source -------------------------------------##

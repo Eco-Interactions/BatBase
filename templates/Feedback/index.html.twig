@@ -35,7 +35,7 @@
                     {% set routeParts = feedback.route|split('/') %}
                     {% set route = routeParts|join(' ') %}
                 {% endif %}
-                {% set trans = { 
+                {% set trans = {
                     0: 'Closed', 1: 'Follow-up', 2: 'Read', 3: 'Unread' }
                 %}
                 <tr>

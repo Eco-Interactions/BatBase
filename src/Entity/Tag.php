@@ -85,7 +85,7 @@ class Tag
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -235,7 +235,7 @@ class Tag
     }
 
     /**
-     * Returns an array of interactions ids. 
+     * Returns an array of interactions ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions")
      */
@@ -249,7 +249,7 @@ class Tag
     }
 
     /**
-     * 
+     *
      * Add intTypeConstraint.
      *
      * @param \App\Entity\InteractionType $intTypeConstraint
@@ -318,7 +318,7 @@ class Tag
     }
 
     /**
-     * Returns an array of Source ids. 
+     * Returns an array of Source ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("sources")
      */

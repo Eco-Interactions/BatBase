@@ -53,7 +53,7 @@ class RealmRoot
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -106,7 +106,7 @@ class RealmRoot
     {
         return $this->realm;
     }
-   
+
     /**
      * Get Realm Id
      * @JMS\VirtualProperty
@@ -142,7 +142,7 @@ class RealmRoot
     {
         return $this->taxon;
     }
-   
+
     /**
      * Get Taxon Id
      * @JMS\VirtualProperty

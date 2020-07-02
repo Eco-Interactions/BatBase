@@ -81,13 +81,13 @@ class ContentBlockController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $citations = $em->getRepository('App:Citation')->findAll();
-        
+
         usort($citations, function($a, $b)
         {
             return strcmp($a->getFullText(), $b->getFullText());
         });
 
-        return $this->render('Bibliography/biblio.html.twig', 
+        return $this->render('Bibliography/biblio.html.twig',
             ['citations' => $citations]);
     }
 
@@ -329,12 +329,12 @@ class ContentBlockController extends AbstractController
 
         return $form;
     }
-    
+
     /**
      * Edits an existing Content Block entity.
      *
      * @Route(
-     *      "/admin/contentblock/{slug}/update", 
+     *      "/admin/contentblock/{slug}/update",
      *      name="admin_content_block_update",
      *      methods={"PUT", "POST"}
      * )
@@ -343,7 +343,7 @@ class ContentBlockController extends AbstractController
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }  
+        }
 
         $em = $this->getDoctrine()->getManager();
 
@@ -355,7 +355,7 @@ class ContentBlockController extends AbstractController
         }
 
         $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent); 
+        $pushedData = json_decode($requestContent);
         $content = $pushedData->content;
 
         $entity->setContent($content);

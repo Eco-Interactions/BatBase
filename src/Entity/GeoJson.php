@@ -47,7 +47,7 @@ class GeoJson
     private $coordinates;
 
     /**
-     * @var string 
+     * @var string
      * String array of coordinates - [ long, lat ] (GeoJson format)
      *
      * @ORM\Column(name="display_point", type="string", length=255, nullable=false)
@@ -73,7 +73,7 @@ class GeoJson
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -186,7 +186,7 @@ class GeoJson
     {
         return $this->displayPoint;
     }
-    
+
     /**
      * Set createdBy user.
      *
@@ -248,7 +248,7 @@ class GeoJson
     {
         return $this->updatedBy;
     }
-    
+
     /**
      * Get string representation of object.
      *

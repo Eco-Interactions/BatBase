@@ -36,7 +36,7 @@ class Realm
      *
      * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
-     * @JMS\SerializedName("displayName")     
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -55,16 +55,16 @@ class Realm
      *
      * @ORM\Column(name="ui_levels", type="string", length=255, nullable=false)
      * @JMS\Expose
-     * @JMS\SerializedName("uiLevelsShown")     
+     * @JMS\SerializedName("uiLevelsShown")
      */
     private $uiLevelsShown;
-    
+
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
-     *     targetEntity="App\Entity\RealmRoot", 
-     *     mappedBy="realm", 
+     *     targetEntity="App\Entity\RealmRoot",
+     *     mappedBy="realm",
      *     cascade={"remove"},
      *     orphanRemoval=true,
      *     fetch="EXTRA_LAZY"
@@ -90,7 +90,7 @@ class Realm
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *

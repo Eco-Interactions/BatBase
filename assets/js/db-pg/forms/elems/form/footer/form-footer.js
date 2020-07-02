@@ -1,6 +1,6 @@
 /**
  * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
- * specific to their form container @getBttnEvents, and a left spacer that 
+ * specific to their form container @getBttnEvents, and a left spacer that
  * pushes the buttons to the bottom right of their form container.
  *
  * CODE SECTIONS:
@@ -11,11 +11,11 @@ import * as _f from '../../../forms-main.js';
 
 let _fs;
 /**
- * Returns row with a checkbox that will toggle optional form fields on the left 
+ * Returns row with a checkbox that will toggle optional form fields on the left
  * and the submit/cancel buttons on the right.
  */
-export default function(entity, level, action) {               
-    _fs = _f.state('getFormState').forms[level];   
+export default function(entity, level, action) {
+    _fs = _f.state('getFormState').forms[level];
     const cntnr = _f.util('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     $(cntnr).append(...buildFooterElems(entity, level, action));
     return cntnr;
@@ -27,13 +27,13 @@ function buildFooterElems(entity, level, action) {
     return [shwFields, spacer, bttns];
 }
 /* ------------------ SHOW ALL FIELDS CHECKBOX ------------------------------ */
-/** 
- * Returns the html of a checkbox labeled 'Show all fields' that toggles the 
+/**
+ * Returns the html of a checkbox labeled 'Show all fields' that toggles the
  * form fields displayed between the default fields and all available.
- * If there are no additional fields for the form, no checkbox is returned. 
+ * If there are no additional fields for the form, no checkbox is returned.
  * @return {elem} Checkbox and label that will 'Show all fields'
  */
-function buildAddFieldsCheckbox(entity, level) {                                
+function buildAddFieldsCheckbox(entity, level) {
     if (!ifEntityHasOptionalFields(entity)) { return null; }
     const cntnr = _f.util('buildElem', ['div', {class: 'all-fields-cntnr'}]);
     $(cntnr).append([getCheckbox(level, entity), getLabel(level)]);
@@ -51,7 +51,7 @@ function getCheckbox(level, entity) {
 }
 function buildChkbxInput(level) {
     const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };
-    const input = _f.util('buildElem', ['input', attr]); 
+    const input = _f.util('buildElem', ['input', attr]);
     if (_fs.expanded) { input.checked = true; }
     return input;
 }
@@ -61,15 +61,15 @@ function setToggleEvent(level, entity, chkbx) {
 }
 function getLabel(level) {
     const attr = { for: level+'-all-fields', text: 'Show all fields.' };
-    return _f.util('buildElem', ['label', attr]); 
+    return _f.util('buildElem', ['label', attr]);
 }
 /* ------------------ SUBMIT AND CANCEL BUTTONS ----------------------------- */
 
 /** Returns the buttons with the events bound. */
-function buildSubmitAndCancelBttns(level, action, entity) { 
+function buildSubmitAndCancelBttns(level, action, entity) {
     const events = getBttnEvents(entity, level);                                //console.log("events = %O", events);
     return [getSubmitBttn(), getCancelBttn()];
-    
+
     function getSubmitBttn() {
         const bttn = buildFormButton('submit', level, getSubmitText());
         $(bttn).attr("disabled", true).css("opacity", ".6").click(events.submit);
@@ -87,11 +87,11 @@ function buildSubmitAndCancelBttns(level, action, entity) {
 }
 /**
  * Returns an object with 'submit' and 'cancel' events bound to the passed level's
- * form container.  
+ * form container.
  */
 function getBttnEvents(entity, level) {                                         //console.log("getBttnEvents for [%s] @ [%s]", entity, level);
-    return { 
-        submit: getSubmitEvent(entity, level), 
+    return {
+        submit: getSubmitEvent(entity, level),
         cancel: getCancelFunc(entity, level)
     };
 
@@ -101,7 +101,7 @@ function getSubmitEvent(entity, level) {
 }
 function getCancelFunc(entity, level) {
     const onExit = _fs ? _fs.onFormClose : Function.prototype;
-    return level === 'top' ? _f.exitFormWindow : 
+    return level === 'top' ? _f.exitFormWindow :
         _f.exitFormLevel.bind(null, level, true, onExit);
 }
 /** Returns a (submit or cancel) button for the form level. */

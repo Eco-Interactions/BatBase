@@ -34,13 +34,13 @@
         <link rel="manifest" href="{{ asset('build/manifest.json') }}" />
 
         {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }} 
+            {{ encore_entry_link_tags('app') }}
         {% endblock stylesheets %}
         <!-- Javascript at end of body. -->
     </head>
 
     <body data-env="{{ app.environment }}" data-base-url="{{ baseurl }}"
-        data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" 
+        data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}"
         data-user-name="{{ eifusername }}">
         {% block body %}
             <div id="pg-container" data-dt="{% block datatable %}false{% endblock %}">
@@ -89,7 +89,7 @@
         {% endblock %}
 
         {% block javascripts %}
-            {{ encore_entry_script_tags('app') }} 
-        {% endblock javascripts %}  
+            {{ encore_entry_script_tags('app') }}
+        {% endblock javascripts %}
     </body>
 </html>

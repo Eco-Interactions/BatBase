@@ -6,15 +6,15 @@
  *      DATA-ROW CELL
  *    RESPONSIVE STYLES
  */
-@import '../util/*' 
+@import '../util/*'
 /* =========================== DATA SECTION ================================= */
 .data-sect
     @extend .flex-col
     margin: 1em
-    
+
 .data-sect h3
     font-weight: 600
-    
+
 .data-sect > *
     margin-bottom: 1em
     justify-content: space-between
@@ -22,23 +22,23 @@
 /* -------------------------- SECTION ROW ----------------------------------- */
 .sect-row
     @extend .flex-row
-    
+
 .sect-row > .group-row
     width: 100%
 /* ----------------------------- ROW CELL ----------------------------------- */
 .data-sect label
     font-weight: 600
-    
+
 .data-sect > div
     margin-left: 1em
-        
+
 .cell-data
     margin: .5em 0
     line-height: 1.4
 
 .cell-data > *
     margin: 0 .5em
-    
+
 .cell-data > div
     min-width: 122px
 /* --------------------------- UTIL CLASSES --------------------------------- */
@@ -49,24 +49,23 @@
 /* ------------- UTIL CLASSES ------------------------- */
 #Citation-cell
     max-width: 42vw
-    
+
 #InteractionDetails-data-sect #sect-row1
     justify-content: flex-start
-    
+
 #InteractionDetails-data-sect #sect-row1 > div
     margin-right: 5em
 
 
 @media $mqTablet
     .sect-row
-        flex-wrap: wrap 
-        
+        flex-wrap: wrap
+
     #Citation-cell
         max-width: unset
-        
+
     #InteractionDetails-data-sect #sect-row1 > div
         margin-right: unset
-        
+
     .max-cntnt
         width: unset
-        

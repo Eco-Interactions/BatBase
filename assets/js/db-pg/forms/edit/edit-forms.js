@@ -1,5 +1,5 @@
 /**
- * Handles individual Entity edit forms. 
+ * Handles individual Entity edit forms.
  *
  * Exports:             Imported by:
  *     editEntity           forms-main
@@ -23,11 +23,11 @@ export default function editEntity(id, entity) {                                
     .then(() => _f.forms('finishEditFormInit', [entity, id]))
 }
 /* ============================== FORM INIT ================================= */
-function initEditForm(id, entity) {  
+function initEditForm(id, entity) {
     return getEditFormFields(id, entity)
         .then(fields => buildAndAppendEditForm(fields, id, entity))
         .then(() => fillFormWithEntityData(entity, id));
-}   
+}
 function buildAndAppendEditForm(fields, id, entity) {
     return _f.elems('buildAndAppendForm', [fields, id])
         .then(() => finishEditFormBuild(entity))
@@ -37,13 +37,13 @@ function buildAndAppendEditForm(fields, id, entity) {
 function getEditFormFields(id, entity) {
     _f.state('setFormProp', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
     return buildEditFields(entity, id);
-}   
+}
 function buildEditFields(entity, id) {
-    const complxBldrs = { 
+    const complxBldrs = {
         'citation': 'getSrcTypeFields', 'publication': 'getSrcTypeFields',
-        'taxon': 'getTaxonEditFields' 
-    };  
-    return complxBldrs[entity] ? getCmplxEditFields() : getEditFields(entity, id);  
+        'taxon': 'getTaxonEditFields'
+    };
+    return complxBldrs[entity] ? getCmplxEditFields() : getEditFields(entity, id);
 
     function getCmplxEditFields() {
         return _f.forms(complxBldrs[entity], [entity, id]);
@@ -78,14 +78,14 @@ function fillFormWithEntityData(entity, id) {
 }
 function addDisplayNameToForm(cEntity, id, entity) {
     if (entity === 'interaction') { return; }
-    const rcrd = _f.state('getRcrd', [cEntity, id]);                                           
-    $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
+    const rcrd = _f.state('getRcrd', [cEntity, id]);
+    $('#top-hdr')[0].innerText += ': ' + rcrd.displayName;
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + entity + ' is referenced by:';
 }
 /** Note: Source types will get their record data at fillSrcData. */
-function fillEntityData(cEntity, id, entity) {  
+function fillEntityData(cEntity, id, entity) {
     const hndlrs = {
-        'interaction': fillIntData, 'location': fillLocData, 
+        'interaction': fillIntData, 'location': fillLocData,
         'source': fillSrcData,      'taxon': fillTaxonData  };
     const rcrd = _f.state('getRcrd', [cEntity, id]);                            console.log("      --fillEntityData [%s] [%s] = %O", cEntity, id, rcrd);
     return Promise.resolve(hndlrs[cEntity](cEntity, id, rcrd, entity));
@@ -96,8 +96,8 @@ function updateEditDetailMemory(detailId) {
     _f.state('setStateProp', ['editing', editObj]);
 }
 /* ------------- INTERACTION ----------------- */
-function fillIntData(entity, id, rcrd, dEntity) {  
-    const fields = getInteractionFieldFillTypes();  
+function fillIntData(entity, id, rcrd, dEntity) {
+    const fields = getInteractionFieldFillTypes();
     fillFields(rcrd, fields, true);
 }
 function getInteractionFieldFillTypes() {
@@ -107,25 +107,25 @@ function getInteractionFieldFillTypes() {
     fieldTypes.Source = 'source';
     return fieldTypes;
 }
-function addTaxon(fieldId, prop, rcrd) {       
+function addTaxon(fieldId, prop, rcrd) {
     const selApi = $('#'+ fieldId + '-sel')[0].selectize;
-    const taxon = _f.state('getRcrd', ['taxon', rcrd[prop]]);                          
+    const taxon = _f.state('getRcrd', ['taxon', rcrd[prop]]);
     selApi.addOption({ value: taxon.id, text: taxon.displayName });
     selApi.addItem(taxon.id);
 }
 function addSource(fieldId, prop, rcrd) {
-    const citSrc = _f.state('getRcrd', ['source', rcrd.source]) 
+    const citSrc = _f.state('getRcrd', ['source', rcrd.source])
     _f.cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
     _f.cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
 }
 /* ------------- LOCATION ----------------- */
 function fillLocData(entity, id, rcrd, dEntity) {
-    const fields = _f.confg('getCoreFieldDefs', [entity]);  
+    const fields = _f.confg('getCoreFieldDefs', [entity]);
     handleLatLongFields();
     fillFields(rcrd, fields);
     _f.panel('fillRelationalDataInPanel', [entity, rcrd]);
     if (rcrd.geoJsonId) { handleGeoJsonFill(rcrd.geoJsonId); }
-    
+
     /* Sets values without triggering each field's change method. */
     function handleLatLongFields() {
         delete fields.Latitude;
@@ -137,7 +137,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
     }
     function handleGeoJsonFill(geoId) {
         updateEditDetailMemory(geoId);
-        storeLocGeoJson(geoId); 
+        storeLocGeoJson(geoId);
     }
     function storeLocGeoJson(id) {
         return _f.util('getData', ['geoJson'])
@@ -146,26 +146,26 @@ function fillLocData(entity, id, rcrd, dEntity) {
 } /* End fillLocData */
 /* ------------- SOURCE ----------------- */
 /** Fills all data for the source-type entity.  */
-function fillSrcData(entity, id, src, dEntity) { 
+function fillSrcData(entity, id, src, dEntity) {
     const detail = _f.state('getRcrd', [dEntity, src[dEntity]]);                //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
-    const fields = getSourceFields(dEntity);                                     
+    const fields = getSourceFields(dEntity);
     setSrcData();
     setDetailData();
-    
+
     function setSrcData() {
         fillFields(src, fields.core);
-        _f.panel('fillRelationalDataInPanel', [dEntity, src]);            
+        _f.panel('fillRelationalDataInPanel', [dEntity, src]);
     }
     function setDetailData() {
         fillFields(detail, fields.detail);
         setAdditionalFields(dEntity, src, detail);
         updateEditDetailMemory(detail.id);
     }
-} 
+}
 function getSourceFields(entity) {
-    return { 
-        core: _f.confg('getCoreFieldDefs', [entity]), 
-        detail: _f.confg('getFormConfg', [entity]).add 
+    return {
+        core: _f.confg('getCoreFieldDefs', [entity]),
+        detail: _f.confg('getFormConfg', [entity]).add
     };
 }
 
@@ -177,7 +177,7 @@ function setAdditionalFields(entity, srcRcrd, detail) {
     setCitationEdgeCaseFields(entity, detail);
 }
 function setTitleField(entity, srcRcrd) {                                       //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
-    const name = entity === 'publication' ? 
+    const name = entity === 'publication' ?
         srcRcrd.displayName : getCitTitle(srcRcrd.citation);
     $('#Title_row input[type="text"]').val(name).change();
 
@@ -185,8 +185,8 @@ function setTitleField(entity, srcRcrd) {                                       
         return _f.state('getRcrd', ['citation', citId]).displayName;
     }
 } /* End setTitleField */
-function setPublisherField(entity, srcRcrd) { 
-    if (!_f.elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }    
+function setPublisherField(entity, srcRcrd) {
+    if (!_f.elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }
     _f.cmbx('setSelVal', ['#Publisher-sel', srcRcrd.parent]);
 }
 function setDoiField (srcRcrd) {
@@ -209,14 +209,14 @@ function checkFieldsAndToggleSubmit() {
 }
 function fillFields(rcrd, fields) {                                             console.log('           --fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
-        'text': setText, 'textArea': setTextArea, 'select': setSelect, 
+        'text': setText, 'textArea': setTextArea, 'select': setSelect,
         'fullTextArea': setTextArea, 'multiSelect': setMultiSelect,
-        'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
+        'tags': setTagField, 'cntry': setCntry, 'source': addSource,
         'taxon': addTaxon
     };
     for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
-    }  
+    }
 }
 function ifFieldInForm(field) {
     return _f.elems('ifFieldIsDisplayed', [field, 'top']);
@@ -236,10 +236,10 @@ function setMultiSelect(fieldId, prop, rcrd) {                                  
 }
 function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);
-    $('#'+fieldId+'_row input').val(val).change();   
+    $('#'+fieldId+'_row input').val(val).change();
 }
 function setTextArea(fieldId, prop, rcrd) {
-    $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();   
+    $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();
 }
 function setSelect(fieldId, prop, rcrd) {                                       //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     const id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
@@ -248,7 +248,7 @@ function setSelect(fieldId, prop, rcrd) {                                       
 function setTagField(fieldId, prop, rcrd) {                                     //console.log("setTagField. rcrd = %O", rcrd)
     const tags = rcrd[prop] || rcrd.tags;
     tags.forEach(tag => _f.cmbx('setSelVal', ['#'+fieldId+'-sel', tag.id]));
-}    
-function setCntry(fieldId, prop, rcrd) { 
+}
+function setCntry(fieldId, prop, rcrd) {
     _f.cmbx('setSelVal', ['#Country-sel', rcrd.country.id]);
 }

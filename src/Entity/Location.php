@@ -185,7 +185,7 @@ class Location
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -219,7 +219,7 @@ class Location
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childLocs = new \Doctrine\Common\Collections\ArrayCollection();
     }
-    
+
     /**
      * Get id.
      * @JMS\VirtualProperty
@@ -594,10 +594,10 @@ class Location
      * @Groups({"normalized", "flattened"})
      */
     public function getLocationTypeData()
-    {   
-        return [ 
-            "id" => $this->locationType->getId(),  
-            "displayName" => $this->locationType->getDisplayName() 
+    {
+        return [
+            "id" => $this->locationType->getId(),
+            "displayName" => $this->locationType->getDisplayName()
         ];
     }
 
@@ -608,7 +608,7 @@ class Location
      * @Groups({"normalized", "flattened"})
      */
     public function getRegionData()
-    {   
+    {
         $locType = $this->locationType; // print("Region loc Type = ".$locType->getId());
         if ($locType->getSlug() === 'region') { return $this->getLocObj($this); }
         return $this->findParentLocType($this, 'region');
@@ -621,21 +621,21 @@ class Location
      * @Groups({"normalized", "flattened"})
      */
     public function getCountryData()
-    {   
+    {
         $locType = $this->locationType; //print("Country loc Type = ".$locType->getId()." for ".$this->displayName);
         if ($locType->getSlug() === 'region') { return false; }
         if ($locType->getSlug() === 'country') { return $this->getLocObj($this); }
         return $this->findParentLocType($this, 'country');
     }
-    
+
     /** Get the parent location of the passed type, region or country, if it exists. */
     private function findParentLocType($loc, $typeSlug)
     {
         $parent = $loc->getParentLoc();
         if (!$parent) { return null; }
         if ($typeSlug=='country' && $this->hasRegionParent($parent)) {return null;}
-        if ($parent->getLocationType()->getSlug() === $typeSlug) { 
-            return $this->getLocObj($parent); 
+        if ($parent->getLocationType()->getSlug() === $typeSlug) {
+            return $this->getLocObj($parent);
         }
         return $this->findParentLocType($parent, $typeSlug);
     }
@@ -643,11 +643,11 @@ class Location
     {
         return $parent->getLocationType()->getSlug() == 'region';
     }
-    
+
     /** Get the Location id and displayName. */
     private function getLocObj($loc)
     {
-        return [ "id" => $loc->getId(), "displayName" => $loc->getDisplayName() ]; 
+        return [ "id" => $loc->getId(), "displayName" => $loc->getDisplayName() ];
     }
     /** ---- End Location Type Data ---- */
     /**
@@ -697,7 +697,7 @@ class Location
         }
         return $geoJson;
     }
-    
+
     private function isHabitat()
     {
         if ($this->locationType->getDisplayName() !== 'Habitat') { return false;}
@@ -744,7 +744,7 @@ class Location
     /**
      * Returns an array of interaction ids.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("interactions") 
+     * @JMS\SerializedName("interactions")
      * @Groups({"normalized"})
      */
     public function getInteractionIds()
@@ -789,11 +789,11 @@ class Location
     public function getHabitatTypeData()
     {
         if ($this->habitatType) {
-            return [ 
-                "id" => $this->habitatType->getId(), 
-                "displayName" => $this->habitatType->getDisplayName() 
+            return [
+                "id" => $this->habitatType->getId(),
+                "displayName" => $this->habitatType->getDisplayName()
             ];
-        } 
+        }
         return [];
     }
 
@@ -875,9 +875,9 @@ class Location
      */
     public function serializeUpdatedBy()
     {
-        $createdBy = $this->createdBy ? 
+        $createdBy = $this->createdBy ?
             ($this->createdBy->getId() == 6 ? null : $this->createdBy) : null;
-        $user = $this->updatedBy ? 
+        $user = $this->updatedBy ?
             ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
 
         return !$user ? null : $user->getFirstName();

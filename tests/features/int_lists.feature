@@ -2,14 +2,14 @@ Feature: Save and manage custom Lists of interaction data
     In order to have custom Lists of interacitons
     As a user
     I should be able to create, edit, and interact with the custom Lists
-    
-    ### WHAT IS BEING TESTED ###  
+
+    ### WHAT IS BEING TESTED ###
         # Create new interaction list
           # Add interactions to list
         # Edit existing interaction list
           # Load list in table
-          # Remove interactions from list  
-        # Delete interaction list 
+          # Remove interactions from list
+        # Delete interaction list
 
     Background:
         Given I am on "/login"

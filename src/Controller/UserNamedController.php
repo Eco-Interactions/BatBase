@@ -37,13 +37,13 @@ class UserNamedController extends AbstractController
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                               
+        }
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
-        $data = json_decode($requestContent);                               
+        $data = json_decode($requestContent);
         $list = new UserNamed();
-        
-        $returnData = new \stdClass; 
+
+        $returnData = new \stdClass;
         $returnData->name = $data->displayName;
         $returnData->entity = $list;
         $returnData->edits = new \stdClass;
@@ -67,13 +67,13 @@ class UserNamedController extends AbstractController
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       
+        }
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
-        $data = json_decode($requestContent);                                   
+        $data = json_decode($requestContent);
         $list = $em->getRepository('App:UserNamed')->findOneBy(['id' => $data->id]);
-        
-        $returnData = new \stdClass; 
+
+        $returnData = new \stdClass;
         $returnData->id = $data->id;
         $returnData->displayName = $list->getDisplayName();
         $returnData->type = $list->getType();
@@ -92,13 +92,13 @@ class UserNamedController extends AbstractController
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       
+        }
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
-        $data = json_decode($requestContent);                                   
+        $data = json_decode($requestContent);
         $list = $em->getRepository('App:UserNamed')->findOneBy(['id' => $data->id]);
-        
-        $returnData = new \stdClass; 
+
+        $returnData = new \stdClass;
         $returnData->name = $data->displayName;
         $returnData->entity = $list;
         $returnData->edits = new \stdClass;
@@ -113,19 +113,19 @@ class UserNamedController extends AbstractController
     private function setListData($data, &$entity, &$em, &$editing)
     {
         foreach ($data as $field => $val) {
-            $this->setDataAndTrackEdits($entity, $field, $val, $editing);  
+            $this->setDataAndTrackEdits($entity, $field, $val, $editing);
         }
     }
     /**
-     * Checks whether current value is equal to the passed value. If not, the 
-     * entity is updated with the new value and the field is added to the edits obj.   
+     * Checks whether current value is equal to the passed value. If not, the
+     * entity is updated with the new value and the field is added to the edits obj.
      */
-    private function setDataAndTrackEdits(&$entity, $field, $newVal, &$editing) 
-    {  
+    private function setDataAndTrackEdits(&$entity, $field, $newVal, &$editing)
+    {
         if ($field == 'id') { return; }
-        $setField = 'set'. ucfirst($field);                                     
-        $getField = 'get'. ucfirst($field);                                     
-        
+        $setField = 'set'. ucfirst($field);
+        $getField = 'get'. ucfirst($field);
+
         $curVal = $entity->$getField();
         if ($curVal === $newVal) { return; }
 
@@ -134,14 +134,14 @@ class UserNamedController extends AbstractController
     }
     /*---------- Flush and Return Data ---------------------------------------*/
     /**
-     * Attempts to flush all persisted data. If there are no errors, the created/updated 
+     * Attempts to flush all persisted data. If there are no errors, the created/updated
      * data is sent back to the crud form; otherise, an error message is sent back.
-     */                                                                                                                                     
+     */
     private function attemptListFlushAndSendResponse($data, &$em, $delete = false)
-    {        
+    {
         try {
             $em->flush();
-        } catch (DBALException $e) {                             
+        } catch (DBALException $e) {
             return $this->sendErrorResponse($e);
         } catch (\Exception $e) {
             return $this->sendErrorResponse($e);
@@ -168,7 +168,7 @@ class UserNamedController extends AbstractController
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
-    {   
+    {
         $this->logger->error($e->getMessage());
         $response = new JsonResponse();
         $response->setStatusCode(500);
@@ -179,7 +179,7 @@ class UserNamedController extends AbstractController
     }
     // /** ----------------- Set Entity/System UpdatedAt ----------------------- */
     // /**
-    //  * Sets the updatedAt timestamp for modified entities. This will be used to 
+    //  * Sets the updatedAt timestamp for modified entities. This will be used to
     //  * ensure local data stays updated with any changes.
     //  */
     // private function setUpdatedAtTimes($entityData, &$em)
@@ -188,7 +188,7 @@ class UserNamedController extends AbstractController
     //     if ($entityData->detailEntity) {
     //         $this->setUpdatedAt($entityData->detail, $em);
     //     }
-    //     $this->setUpdatedAt('System', $em); 
+    //     $this->setUpdatedAt('System', $em);
     //     $em->flush();
     // }
     // private function setUpdatedAt($name, &$em)

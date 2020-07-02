@@ -17,7 +17,7 @@ class GeoJsonRepository extends EntityRepository
         return $this->createQueryBuilder('g')
             ->where('g.loc_id = :id')
             ->setParameter('id', $locId)
-            ->getQuery() 
+            ->getQuery()
             ->getResult();
     }
 }

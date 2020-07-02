@@ -39,17 +39,17 @@ class FetchController extends AbstractController
     }
 
     /**
-     * Returns an object with the lastUpdated datetime for the system and for 
+     * Returns an object with the lastUpdated datetime for the system and for
      * each entity.
      *
      * @Route("/data-state", name="app_ajax_data_state")
      */
     public function getDataLastUpdatedState(Request $request)
-    { 
+    {
         $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('App:SystemDate')->findAll();
         $state = new \stdClass;
-        
+
         foreach ($entities as $entity) {
             $entityClass = $entity->getDescription();
             $state->$entityClass = $entity->getDateVal()->format('Y-m-d H:i:s');
@@ -63,10 +63,10 @@ class FetchController extends AbstractController
 /* ===================== FETCH TAXON DATA =================================== */
     /**
      * Returns data necessary to load the  taxon tree. This is the first batch
-     * downloaded when local data is initialized. 
+     * downloaded when local data is initialized.
      *
      * @Route("/taxon", name="app_serialize_taxon")
-     */ 
+     */
     public function serializeTaxonData(Request $request)
     {
         $this->em = $this->getDoctrine()->getManager();
@@ -77,20 +77,20 @@ class FetchController extends AbstractController
         $realmRoot = $this->serializeEntityRecords('RealmRoot');
         $taxa = $this->serializeEntityRecords('Taxon', 'normalized');
 
-        $response = new JsonResponse(); 
-        $response->setData(array(                                    
-            'level' => $level,  'realm' => $realm,  'realmRoot' => $realmRoot,    
-            'taxon' => $taxa            
-        )); 
+        $response = new JsonResponse();
+        $response->setData(array(
+            'level' => $level,  'realm' => $realm,  'realmRoot' => $realmRoot,
+            'taxon' => $taxa
+        ));
         return $response;
     }
 /* =================== FETCH LOCATION DATA ================================== */
     /**
-     * Returns serialized data objects for Habitat Type, Location Type, and Location. 
+     * Returns serialized data objects for Habitat Type, Location Type, and Location.
      *
      * @Route("/location", name="app_serialize_location")
      */
-    public function serializeLocationData(Request $request) 
+    public function serializeLocationData(Request $request)
     {
         $this->em = $this->getDoctrine()->getManager();
 
@@ -99,37 +99,37 @@ class FetchController extends AbstractController
         $locType = $this->serializeEntityRecords('LocationType');
 
         $response = new JsonResponse();
-        $response->setData(array( 
-            'location' => $location,    'habitatType' => $habitatType,   
+        $response->setData(array(
+            'location' => $location,    'habitatType' => $habitatType,
             'locationType' => $locType
-        )); 
+        ));
         return $response;
     }
     /**
-     * Returns serialized data objects for Habitat Type, Location Type, and Location. 
+     * Returns serialized data objects for Habitat Type, Location Type, and Location.
      *
      * @Route("/geoJson", name="app_serialize_geojson")
      */
-    public function serializeGeoJsonData(Request $request) 
+    public function serializeGeoJsonData(Request $request)
     {
         $this->em = $this->getDoctrine()->getManager();
 
         $geoJson = $this->serializeEntityRecords('GeoJson', 'normalized');
 
         $response = new JsonResponse();
-        $response->setData(array( 
+        $response->setData(array(
             'geoJson' => $geoJson
-        )); 
+        ));
         return $response;
     }
 /* =================== FETCH SOURCE DATA ==================================== */
     /**
     /**
-     * Returns serialized data objects for all entities related to Source. 
+     * Returns serialized data objects for all entities related to Source.
      *
      * @Route("/source", name="app_serialize_source")
      */
-    public function serializeSourceData(Request $request) 
+    public function serializeSourceData(Request $request)
     {
         $this->em = $this->getDoctrine()->getManager();
 
@@ -143,20 +143,20 @@ class FetchController extends AbstractController
         $srcType = $this->serializeEntityRecords('SourceType');
 
         $response = new JsonResponse();
-        $response->setData(array( 
+        $response->setData(array(
             'author' => $author,        'citation' => $citation,
-            'source' => $source,        'citationType' => $citType, 
-            'sourceType' => $srcType,   'publication' => $publication,  
+            'source' => $source,        'citationType' => $citType,
+            'sourceType' => $srcType,   'publication' => $publication,
             'publicationType' => $pubType, 'publisher' => $publisher
         ));
         return $response;
     }
     /**
-     * Returns serialized data objects for Interaction and Interaction Type. 
+     * Returns serialized data objects for Interaction and Interaction Type.
      *
      * @Route("/interaction", name="app_serialize_interactions")
      */
-    public function serializeInteractionData(Request $request) 
+    public function serializeInteractionData(Request $request)
     {
         $this->em = $this->getDoctrine()->getManager();
 
@@ -176,7 +176,7 @@ class FetchController extends AbstractController
      * @Route("/lists", name="app_serialize_user_named")
      */
     public function serializeUserListData(Request $request)
-    {      
+    {
         $this->em = $this->getDoctrine()->getManager();
 
         $lists = $this->em->getRepository('App:UserNamed')
@@ -212,7 +212,7 @@ class FetchController extends AbstractController
             $id = $entity->getId();
             $jsonData = $this->serializeRcrd($entity, $group);
             if ($jsonData) { $data->$id = $jsonData; }
-            if ($count < 3000) { ++$count; 
+            if ($count < 3000) { ++$count;
             } else { $this->em->clear(); $count = 0; }
         }
         return $data;
@@ -236,14 +236,14 @@ class FetchController extends AbstractController
         return SerializationContext::create()->setGroups(array($group));
     }
     /**
-     * Serializes and returns all entities of the passed class that have been 
+     * Serializes and returns all entities of the passed class that have been
      * updated since the passed 'lastUpdatedAt' time.
      *
      * @Route("/sync-data", name="app_ajax_sync_data")
      */
     public function getUpdatedEntityData(Request $request)
     {
-        $this->em = $this->getDoctrine()->getManager(); 
+        $this->em = $this->getDoctrine()->getManager();
 
         $pushedData = json_decode($request->getContent());
         $entity = $pushedData->entity;                                          //print("getAllUpdatedData for ".$coreEntity);
@@ -251,22 +251,22 @@ class FetchController extends AbstractController
 
         $data = $this->getAllUpdatedData($entity, $lastUpdatedAt);
 
-        $response = new JsonResponse(); 
-        $response->setData(array( $entity => $data )); 
-        return $response;        
+        $response = new JsonResponse();
+        $response->setData(array( $entity => $data ));
+        return $response;
     }
     /**
-     * All entities updated since the lastUpdatedAt time are serialized and 
-     * returned in a data object keyed by id.  
+     * All entities updated since the lastUpdatedAt time are serialized and
+     * returned in a data object keyed by id.
      */
     private function getAllUpdatedData($entityType, $lastUpdatedAt)
-    {    
+    {
         $data = new \stdClass;
 
         $entities = $this->getEntitiesWithUpdates($entityType, $lastUpdatedAt);
 
-        foreach ($entities as $entity) {   
-            $id = $entity->getId();    
+        foreach ($entities as $entity) {
+            $id = $entity->getId();
             $json = $this->serializeRcrd($entity, 'normalized');
             if (!$json) { continue; }
             $data->$id = $json;

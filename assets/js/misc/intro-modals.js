@@ -1,9 +1,9 @@
 /**
- * The intro.js walkthrough contains the tutorial for the database search page. 
+ * The intro.js walkthrough contains the tutorial for the database search page.
  * It is loaded on the first visit to the page and prompts the user to go through
- * the entire tutorial. The tutorial can later be accessed by clicking on the 
+ * the entire tutorial. The tutorial can later be accessed by clicking on the
  * tutorial button and selecting the a smaller focus of the tutorial or the entire
- * set. 
+ * set.
  * The search tips available by clicking on "Show Tips".
  *
  * Exports:             Imported by:
@@ -22,9 +22,9 @@ export function showHelpModal(key) {
     intro.onexit(() => intro = null);
     intro.oncomplete(() => intro = null);
     intro.setOptions({
-        showBullets: false, 
-        showStepNumbers: false, 
-        steps: getHelpSteps(key), 
+        showBullets: false,
+        showStepNumbers: false,
+        steps: getHelpSteps(key),
         tooltipClass: 'intro-tips'});
     intro.start();
 }
@@ -47,7 +47,7 @@ export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bt
     window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
 }
 function initModal(confg) {
-    intro = require('../libs/intro.js').introJs();   
+    intro = require('../libs/intro.js').introJs();
     intro.oncomplete(getSubmitFunc(confg.submit, confg.cancel));
     intro.onexit(getExitFunc(confg.cancel));
     intro.setOptions(getModalOptions(confg));
@@ -60,12 +60,12 @@ function getSubmitFunc(submitCb, cancelCb) {
 function getExitFunc(cancelCb) {
     return cancelCb ? exitModal.bind(null, cancelCb) : exitModal;
 }
-export function exitModal(cancelCb) {  
+export function exitModal(cancelCb) {
     if (intro) { intro.exit(); }
     if (cancelCb) { cancelCb(); }
     intro = null;
 }
-function getModalOptions(confg) {                                   
+function getModalOptions(confg) {
     return {
         showStepNumbers: false,
         showBullets: false,
@@ -73,7 +73,7 @@ function getModalOptions(confg) {
         doneLabel: confg.bttn ? confg.bttn : 'Close',
         tooltipClass: 'modal-msg',
         steps: getSlideConfg(confg.html, confg.elem, confg.dir)
-    }; 
+    };
 }
 function getSlideConfg(text, elem, dir) {
     return [{

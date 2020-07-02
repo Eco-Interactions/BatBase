@@ -1,7 +1,7 @@
 /**
  * Generalized Ajax Methods.
  *
- * Exports: 
+ * Exports:
  *     sendAjaxQuery
  *     logAjaxData
  */
@@ -20,7 +20,7 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
 }
 export function logAjaxData(dataPkg, args, sending) {
     const state = sending ? 'S' : 'R';
-    if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
+    if (['dev', 'test'].indexOf($('body').data('env') != -1)) {
         console.log("           --[%s] Ajax data =%O arguments = %O", state, dataPkg, args);
     } else { console.log("          --[%s] Ajax data =%O", state, dataPkg); }
 }

@@ -32,11 +32,11 @@ class Citation
      *
      * @ORM\Column(name="display_name", type="string", length=255, nullable=false, unique=true)
      * @JMS\Expose
-     * @JMS\SerializedName("displayName")   
-     * @Groups({"normalized", "flattened"}) 
+     * @JMS\SerializedName("displayName")
+     * @Groups({"normalized", "flattened"})
      */
     private $displayName;
-    
+
     /**
      * @var string
      *
@@ -368,7 +368,7 @@ class Citation
     }
 
     /**
-     * Get the Citation Type id and displayName.   
+     * Get the Citation Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("citationType")
      * @Groups({"normalized", "flattened"})
@@ -376,9 +376,9 @@ class Citation
     public function getCitationTypeData()
     {
         if ($this->citationType) {
-            return [ 
-                "id" => $this->citationType->getId(), 
-                "displayName" => $this->citationType->getDisplayName() 
+            return [
+                "id" => $this->citationType->getId(),
+                "displayName" => $this->citationType->getDisplayName()
             ];
         }
         return null;
@@ -409,7 +409,7 @@ class Citation
     }
 
     /**
-     * Get the Source id.   
+     * Get the Source id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
      * @Groups({"normalized"})

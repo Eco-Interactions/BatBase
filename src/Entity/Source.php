@@ -76,7 +76,7 @@ class Source
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("linkDisplay")
@@ -86,7 +86,7 @@ class Source
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("linkUrl")
@@ -186,8 +186,8 @@ class Source
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
-     *     targetEntity="App\Entity\Contribution", 
-     *     mappedBy="workSource", 
+     *     targetEntity="App\Entity\Contribution",
+     *     mappedBy="workSource",
      *     cascade={"remove"},
      *     orphanRemoval=true
      * )
@@ -200,8 +200,8 @@ class Source
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
-     *     targetEntity="App\Entity\Contribution", 
-     *     mappedBy="authorSource", 
+     *     targetEntity="App\Entity\Contribution",
+     *     mappedBy="authorSource",
      *     cascade={"remove"},
      *     orphanRemoval=true,
      *     fetch="EXTRA_LAZY"
@@ -495,7 +495,7 @@ class Source
     }
 
     /**
-     * Get the parent Source's id.   
+     * Get the parent Source's id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
      * @Groups({"normalized"})
@@ -541,7 +541,7 @@ class Source
     }
 
     /**
-     * Get an array of child Source ids.   
+     * Get an array of child Source ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
      * @Groups({"normalized", "flattened"})
@@ -593,9 +593,9 @@ class Source
      */
     public function getSourceTypeData()
     {
-        return [ 
-            "id" => $this->sourceType->getId(),  
-            "displayName" => $this->sourceType->getDisplayName() 
+        return [
+            "id" => $this->sourceType->getId(),
+            "displayName" => $this->sourceType->getDisplayName()
         ];
     }
 
@@ -639,7 +639,7 @@ class Source
      * @JMS\SerializedName("tags")
      * @Groups({"normalized", "flattened"})
      *
-     * @return array 
+     * @return array
      */
     public function getTagData()
     {
@@ -647,7 +647,7 @@ class Source
             $tagIds = [];
             foreach ($this->tags as $tag) {
                 array_push(
-                    $tagIds, 
+                    $tagIds,
                     ["id" => $tag->getId(), "displayName" => $tag->getDisplayName()]
                 );
             }
@@ -658,7 +658,7 @@ class Source
     /**
      * Get an array of tag ids.
      *
-     * @return array 
+     * @return array
      */
     public function getTagIds()
     {
@@ -704,7 +704,7 @@ class Source
     }
 
     /**
-     * Returns an array of interactions ids. 
+     * Returns an array of interactions ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions")
      * @Groups({"normalized"})
@@ -743,7 +743,7 @@ class Source
     }
 
     /**
-     * If this is an Author Source, get the Author id.   
+     * If this is an Author Source, get the Author id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("author")
      * @Groups({"normalized"})
@@ -778,7 +778,7 @@ class Source
     }
 
     /**
-     * If this is a Citation Source, get the Citation id.   
+     * If this is a Citation Source, get the Citation id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("citation")
      * @Groups({"normalized"})
@@ -825,7 +825,7 @@ class Source
     }
 
     /**
-     * If this is a Publication Source, get the Publication id.   
+     * If this is a Publication Source, get the Publication id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publication")
      * @Groups({"normalized"})
@@ -860,7 +860,7 @@ class Source
     }
 
     /**
-     * If this is a Publisher Source, get the Publisher id.   
+     * If this is a Publisher Source, get the Publisher id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publisher")
      * @Groups({"normalized"})
@@ -914,13 +914,13 @@ class Source
      * @return array
      */
     public function getAuthorNames()
-    { 
-        $contribs = strpos($this->displayName, '(citation)') ? 
-            $this->parentSource->getContributors() : $this->contributors; 
+    {
+        $contribs = strpos($this->displayName, '(citation)') ?
+            $this->parentSource->getContributors() : $this->contributors;
 
         return $this->getContributorsArray($contribs, 'DisplayName', 'all');
     }
-    
+
     /**
      * Get Author Ids.
      * @JMS\VirtualProperty
@@ -930,7 +930,7 @@ class Source
      * @return array
      */
     public function getAuthorIds()
-    { 
+    {
         return $this->getContributorsArray($this->contributors, 'Id', 'author');
     }
 
@@ -940,8 +940,8 @@ class Source
      * @JMS\SerializedName("editors")
      * @Groups({"normalized"})
      *
-     * @return array     
-     */     
+     * @return array
+     */
     public function getEditorIds()
     {
         return $this->getContributorsArray($this->contributors, 'Id', 'editor');
@@ -955,10 +955,10 @@ class Source
 
         foreach ($contributors as $contributor) {
             $type = $contributor->getIsEditor() ? 'editor' : 'author';
-            if ($types !== 'all' && $type !== $types) { continue; }  
+            if ($types !== 'all' && $type !== $types) { continue; }
             $data = $contributor->getAuthorSource()->$getField();
             $ord = $contributor->getOrd();
-            $contribs = $contribs + [$ord => $this->getContribData($data, $types, $type)]; 
+            $contribs = $contribs + [$ord => $this->getContribData($data, $types, $type)];
         }
         return count($contribs) > 0 ? $contribs : null;
     }
@@ -976,14 +976,14 @@ class Source
      * @return array
      */
     public function getContributorData()
-    { 
+    {
         $contribs = [];
-        foreach ($this->contributors as $contributor) { 
-            $contribId = $contributor->getId(); 
+        foreach ($this->contributors as $contributor) {
+            $contribId = $contributor->getId();
             $authId = $contributor->getAuthorSource()->getId();
             $isEd = $contributor->getIsEditor();
             $ord =  $contributor->getOrd();
-            $contribs = $contribs + [ $authId => [ 
+            $contribs = $contribs + [ $authId => [
                 'contribId' => $contribId, 'isEditor' => $isEd, 'ord' => $ord]];
         }
         return $contribs;
@@ -1039,7 +1039,7 @@ class Source
         }
         return $contribIds;
     }
-    
+
     /**
      * Set createdBy user.
      *
@@ -1119,9 +1119,9 @@ class Source
      */
     public function serializeUpdatedBy()
     {
-        $createdBy = $this->createdBy ? 
+        $createdBy = $this->createdBy ?
             ($this->createdBy->getId() == 6 ? null : $this->createdBy) : null;
-        $user = $this->updatedBy ? 
+        $user = $this->updatedBy ?
             ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
 
         return !$user ? null : $user->getFirstName();

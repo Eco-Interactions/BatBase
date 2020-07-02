@@ -19,7 +19,7 @@ class MenuBuilder
         $this->factory = $factory;
     }
     // use ContainerAwareTrait;
-    
+
     public function createMainMenu(array $options)
     {
         $user_name = $options['usrname'];
@@ -29,7 +29,7 @@ class MenuBuilder
         $menu->addChild('About', array('uri' => '#'));
         $menu['About']->setAttribute('class', 'closed smtrigger');
         $menu['About']->addChild('Project', array('route' => 'app_about'));
-        $menu['About']->addChild('Database', array('route' => 'app_db_top'));  
+        $menu['About']->addChild('Database', array('route' => 'app_db_top'));
         $menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
         $menu['About']->addChild('Bibliography', array('route' => 'app_biblio'));
         $menu['About']->addChild('Coming Soon', array('route' => 'app_future_dev'));

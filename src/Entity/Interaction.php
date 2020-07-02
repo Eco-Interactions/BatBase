@@ -126,7 +126,7 @@ class Interaction
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -270,7 +270,7 @@ class Interaction
     }
 
     /**
-     * Get the Source id.   
+     * Get the Source id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
      * @Groups({"normalized"})
@@ -305,7 +305,7 @@ class Interaction
     }
 
     /**
-     * Get the Interaction Type id and displayName.   
+     * Get the Interaction Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactionType")
      * @Groups({"normalized", "flattened"})
@@ -313,12 +313,12 @@ class Interaction
     public function getInteractionTypeData()
     {
         if ($this->interactionType) {
-            return [ 
-                'id' => $this->interactionType->getId(), 
-                'displayName' => $this->interactionType->getDisplayName() 
+            return [
+                'id' => $this->interactionType->getId(),
+                'displayName' => $this->interactionType->getDisplayName()
             ];
         }
-        return null;    
+        return null;
     }
 
     /**
@@ -346,7 +346,7 @@ class Interaction
     }
 
     /**
-     * Get the Location id.   
+     * Get the Location id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("location")
      * @Groups({"normalized"})
@@ -382,7 +382,7 @@ class Interaction
     }
 
     /**
-     * Get the Subject id.   
+     * Get the Subject id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("subject")
      * @Groups({"normalized"})
@@ -418,7 +418,7 @@ class Interaction
     }
 
     /**
-     * Get the Object id.   
+     * Get the Object id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("object")
      * @Groups({"normalized"})
@@ -474,7 +474,7 @@ class Interaction
             $tagIds = [];
             foreach ($this->tags as $tag) {
                 array_push(
-                    $tagIds, 
+                    $tagIds,
                     ["id" => $tag->getId(), "displayName" => $tag->getDisplayName()]
                 );
             }
@@ -485,12 +485,12 @@ class Interaction
     /**
      * Get an array of tag ids.
      *
-     * @return array 
+     * @return array
      */
     public function getTagIds()
     {
         $tagIds = [];
-        if ($this->tags) { 
+        if ($this->tags) {
             foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
         }
         return $tagIds;
@@ -499,18 +499,18 @@ class Interaction
     /**
      * Get comma separated tag names.
      *
-     * @return array 
+     * @return array
      */
     public function getTagNames()
     {
         if (!$this->tags) { return null; }
         $names = [];
-        if ($this->tags) { 
+        if ($this->tags) {
             foreach ($this->tags as $tag) { array_push($names, $tag->getDisplayName()); }
         }
         return join(', ', $names);
     }
-    
+
     /**
      * Set createdBy user.
      *

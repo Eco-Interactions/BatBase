@@ -57,7 +57,7 @@ class FileUploadController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            
+
             $entity->setMimeType($entity->getPdfFile()->getMimeType());
             $entity->setPath("uploads/publication/");
             $entity->setStatus();
@@ -88,14 +88,14 @@ class FileUploadController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('App:FileUpload')->find($id);
-        
+
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find File Upload entity.');
         }
 
         $em->remove($entity);
         $em->flush();
-        
+
         return new Response();
     }
 
@@ -108,16 +108,16 @@ class FileUploadController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('App:FileUpload')->find($id);
-        
+
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find File Upload entity.');
         }
-        $user = $this->security->getUser(); 
+        $user = $this->security->getUser();
         $entity->setUpdatedBy($user);
         $entity->setUpdated(new \DateTime('now'));
         $em->persist($entity);
         $em->flush();
-        
+
         $userName = $user->getFirstName() . ' ' . substr($user->getLastName(), 0, 1);
         $response = new JsonResponse();
         $response->setData($userName);

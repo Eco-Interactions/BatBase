@@ -117,7 +117,7 @@ class Author
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -273,7 +273,7 @@ class Author
     {
         return $this->lastName;
     }
-    
+
     /**
      * Set suffix.
      *
@@ -348,7 +348,7 @@ class Author
     }
 
     /**
-     * Get the Source id.   
+     * Get the Source id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
      * @Groups({"normalized"})

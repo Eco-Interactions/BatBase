@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityRepository;
  * repository methods below.
  */
 class TaxonRepository extends EntityRepository
-{       
+{
     public function findAllNonBatTaxa($batRealm)
     {
         return $this->createQueryBuilder('taxon')

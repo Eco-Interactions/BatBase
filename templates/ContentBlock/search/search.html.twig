@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{parent()}}
-    {{ encore_entry_link_tags('db') }} 
+    {{ encore_entry_link_tags('db') }}
 {% endblock %}
 
 {# Javascript after detail block. #}
@@ -31,9 +31,9 @@
     {% endif %}
 {% endblock detail %}
 
-{% block javascripts %} 
-    {{parent()}}   
+{% block javascripts %}
+    {{parent()}}
     {% if is_full_view() or is_tablet_view() %}
-        {{ encore_entry_script_tags('db') }} 
+        {{ encore_entry_script_tags('db') }}
     {% endif %}
 {% endblock %}

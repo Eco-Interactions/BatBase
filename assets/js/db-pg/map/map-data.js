@@ -1,6 +1,6 @@
 /**
  * Builds an object sorted by geoJsonId with all interaction data at that location.
- * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
+ * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## }
  *
  * Export defaut:        Imported by:
  *     buildMapDataObj      db_map
@@ -8,31 +8,31 @@
 import * as _u from '../util/util.js';
 import { accessTableState as tState } from '../db-main.js';
 
-export default function buildMapDataObj(viewRcrds, rcrds) { 
+export default function buildMapDataObj(viewRcrds, rcrds) {
     const tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);
-    const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
+    const mapData = { 'none': { ttl: 0, ints: {}, locs: null }};
     let curBaseNodeName; //used for Source rows
-    tblState.api.forEachNodeAfterFilter(getIntMapData);   
-    return mapData;  
-    
-    function getIntMapData(row) {                         
-        if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }                         
-        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }  
+    tblState.api.forEachNodeAfterFilter(getIntMapData);
+    return mapData;
+
+    function getIntMapData(row) {
+        if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }
+        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
         buildInteractionMapData(row, row.data, _u.getDetachedRcrd(row.data.id, viewRcrds));
     }
     function buildInteractionMapData(row, rowData, rcrd) {  //console.log('buildIntMapData row = %O rowData = %O', rowData)
         const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
         let noLocCnt = 0;
-        const data = { 
-            intCnt: 0, 
+        const data = {
+            intCnt: 0,
             name: getRowRcrdName(rowData, rcrd, curBaseNodeName),
             rcrd: rcrd
         };
         row.childrenAfterFilter.forEach(addRowData); //interactions
         addToMapDataObj(data, locs, noLocCnt);
         /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
-        function addRowData(intRow) {  
-            if (!intRow.data.location) { return ++noLocCnt; }  
+        function addRowData(intRow) {
+            if (!intRow.data.location) { return ++noLocCnt; }
             const intRcrd = _u.getDetachedRcrd(intRow.data.id, rcrds.ints);       //console.log('----intRow = %O, intRcd = %O, rcrds.locs = %O', intRow, intRcrd, rcrds.locs);
             const loc = _u.getDetachedRcrd(intRcrd.location, rcrds.locs);
             addLocAndIntData(loc, intRcrd);
@@ -43,11 +43,11 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
             locs[newLoc.id].ints.push(intRcrd);
 
             function initLocObj() {
-                locs[newLoc.id] = { loc: newLoc, ints: [] }; 
+                locs[newLoc.id] = { loc: newLoc, ints: [] };
             }
         }
     } /* End buildInteractionMapData */
-    function addToMapDataObj(entData, locs, noLocCnt) { 
+    function addToMapDataObj(entData, locs, noLocCnt) {
         mapData.none.ttl += noLocCnt;
         for (let id in locs) {
             addData(locs[id], entData);
@@ -71,23 +71,23 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
             mapData[geoId].ints[key] = mapData[geoId].ints[key].concat(locObj.ints);
         }
         /**
-         * When author interactions are displayed, they often duplicate if two 
+         * When author interactions are displayed, they often duplicate if two
          * authors attrbuted to the same work are shown. This combines the author
          * names in that case, thus showing the interaction once.
          */
-        function sanitizeAndAddInt() { 
+        function sanitizeAndAddInt() {
             const keyStr = entData.name.split(' - (')[1];
             const curAuth = entData.name.split(' - (')[0];
             const toCombine = Object.keys(mapData[geoId].ints).find(
-                key => key.includes(keyStr) && !key.includes(curAuth)); 
-            if (!toCombine) { addToIntObj(entData.name); 
+                key => key.includes(keyStr) && !key.includes(curAuth));
+            if (!toCombine) { addToIntObj(entData.name);
             } else { modifyAndCombineInt(toCombine, keyStr, curAuth); }
         }
-        function modifyAndCombineInt(keyName, work, curAuth) {  
-            let auths = keyName.split(' - (')[0]; 
-            auths += `, ${curAuth} - (${work}`; 
+        function modifyAndCombineInt(keyName, work, curAuth) {
+            let auths = keyName.split(' - (')[0];
+            auths += `, ${curAuth} - (${work}`;
             mapData[geoId].ints[auths] = mapData[geoId].ints[keyName];
-            delete mapData[geoId].ints[keyName];  
+            delete mapData[geoId].ints[keyName];
         }
     } /* End addIntData */
     function initIntDataObj(entData, geoId) {
@@ -96,8 +96,8 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
     /** Some locations share geoJson with their parent, eg habitats. */
     function addIfNewLoc(newLoc, geoId) {
         const alreadyAdded = mapData[geoId].locs.find(
-            loc => loc.displayName === newLoc.displayName); 
-        if (alreadyAdded) { return; }  
+            loc => loc.displayName === newLoc.displayName);
+        if (alreadyAdded) { return; }
         mapData[geoId].locs.push(newLoc);
     }
     function initDataObj(geoId, loc) {
@@ -111,7 +111,7 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
         return getRcrdDisplayName(rowData.name, rcrd);
     }
     /** Adds the base entity name before the name of the work, eg Author (work) */
-    function getSrcRowName(rowData, rcrd, baseNode) {  
+    function getSrcRowName(rowData, rcrd, baseNode) {
         const work = getRcrdDisplayName(rowData.name, rcrd);
         if (work == baseNode) { return baseNode; }
         return `${baseNode} - (${work})`;

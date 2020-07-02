@@ -1,13 +1,13 @@
 /**
  * Taxon form code.
  *
- * Exports:                 
+ * Exports:
  *     finishEditFormBuild
  *     getTaxonEditFields
  *     initCreateForm
  *     initFormCombos
  *     selectParentTaxon        form-errors
- *     
+ *
  * CODE SECTIONS
  *     CREATE FORM
  *     EDIT FORM
@@ -33,8 +33,8 @@ export function initCreateForm(lvl, value) {                                    
     const val = value === 'create' ? '' : value;
     const level = _f.util('ucfirst', [lvl]);
     return showNewTaxonForm(val, level);
-} 
-function showNewTaxonForm(val, level) {                                  
+}
+function showNewTaxonForm(val, level) {
     _f.state('setRealmProp', ['formTaxonLvl', level]);  //used for data validation/submit
     return buildTaxonForm()
     .then(() => _f.elems('toggleSubmitBttn', ['#sub2-submit', true]));
@@ -53,7 +53,7 @@ function showNewTaxonForm(val, level) {
         $('#DisplayName_row input').focus();
         updateTaxonSubmitBttn(level);
     }
-} 
+}
 function updateTaxonSubmitBttn(level) {
     $('#sub2-submit').off('click').click(checkTaxonymErrsAndSubmit.bind(null, level));
 }
@@ -65,9 +65,9 @@ function checkTaxonymErrsAndSubmit(level) {
 function ifEmptyNameField() {
     return !$('#DisplayName_row input').val();
 }
-function ifSpeciesErr(level) { 
+function ifSpeciesErr(level) {
     return level === 'Species' && !hasCorrectBinomialNomenclature();
-    
+
     function hasCorrectBinomialNomenclature() {
         const species = $('#DisplayName_row input')[0].value;
         const genus = _f.cmbx('getSelTxt', ['#Genus-sel']);                     //console.log('Genus = %s, Species = %s', genus, species);
@@ -80,7 +80,7 @@ function fieldErr(level, tag) {
 }
 /** ********************** EDIT FORM **************************************** */
 /**
- * Returns the elements of the edit-taxon form. 
+ * Returns the elements of the edit-taxon form.
  * <div>Parent Taxon: [Level][Display-name]</> <bttnInput>"Edit Parent"</>
  * <select>[Taxon-level]</>    <input type="text">[Taxon Display-name]</>
  *     <button>Update Taxon</> <button>Cancel</>
@@ -102,7 +102,7 @@ function setScopeTaxonMemory(taxaRcrds, realmState) {
 /** ======================== FIELDS ========================================= */
 function buildTaxonEditFields(taxon) {
     const txnElems = getEditTaxonFields(taxon);
-    const prntElems = getPrntTaxonElems(taxon);  
+    const prntElems = getPrntTaxonElems(taxon);
     return prntElems.concat(txnElems);
 }
 /** ----------------- NAME FIELD AND LEVEL COMBOBOX ------------------------- */
@@ -112,13 +112,13 @@ function getEditTaxonFields(taxon) {                                            
     return [ buildTaxonEditFormRow('Taxon', [lvlSel, input], 'top')];
 }
 /** ----------- NAME INPUT --------------- */
-function buildNameInput(name) { 
+function buildNameInput(name) {
     const attr = { id: 'txn-name', type: 'text', value: name };
     return _f.util('buildElem', ['input', attr]);
 }
 /** ------- LEVEL COMBOBOX --------------- */
 function buildLvlSel(taxon) {
-    const opts = getTaxonLvlOpts(); 
+    const opts = getTaxonLvlOpts();
     const sel = _f.util('buildSelectElem', [opts, { id: 'txn-lvl' }]);
     $(sel).data({ 'txn': taxon.id, 'lvl': getLvlVal(taxon.level.displayName) });
     return sel;
@@ -128,9 +128,9 @@ function getLvlVal(lvl) {
 }
 /** Returns an array of options for the levels in the taxon's realm. */
 function getTaxonLvlOpts() {
-    return realmData.realmLvls.reverse().map(lvl => { 
+    return realmData.realmLvls.reverse().map(lvl => {
         return { value: realmData.lvls[lvl].ord, text: lvl };
-    });  
+    });
 }
 /** ----------------- PARENT TAXON ELEMS ------------------------------------ */
 /**
@@ -138,7 +138,7 @@ function getTaxonLvlOpts() {
  * Button calls @showParentTaxonSelectForm.
  */
 function getPrntTaxonElems(taxon) {                                             //console.log("getPrntTaxonElems for %O", taxon);
-    const prnt = realmData.rcrds[taxon.parent]; 
+    const prnt = realmData.rcrds[taxon.parent];
     const elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt)];
     return [ buildTaxonEditFormRow('Parent', elems, 'top')];
 }
@@ -149,7 +149,7 @@ function buildNameElem(prnt) {
     $(div).css({'padding-top': '4px'});
     return div;
 }
-function setTaxonPrntNameElem(prnt, elem, pText) {    
+function setTaxonPrntNameElem(prnt, elem, pText) {
     const div = elem || $('#txn-prnt')[0];
     const text = pText || prnt.displayName;
     div.innerHTML = '<b>Taxon Parent</b>: <span>&nbsp ' + text + '</span>';
@@ -157,7 +157,7 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
 }
 /** ----------- CHANGE PARENT BUTTON --------------- */
 function buildEditPrntBttn(prnt) {
-    const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt', 
+    const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt',
         class: 'ag-fresh' };
     const bttn = _f.util('buildElem', ['input', attr]);
     $(bttn).click(showParentTaxonSelectForm);
@@ -170,8 +170,8 @@ function buildEditPrntBttn(prnt) {
  * Entering a taxon that does not already exists will open the 'create' form.
  * Current parent data is selected upon init.
  */
-function showParentTaxonSelectForm() {   
-    buildParentTaxonEditElems($('#txn-prnt').data('txn'))        
+function showParentTaxonSelectForm() {
+    buildParentTaxonEditElems($('#txn-prnt').data('txn'))
     .then(appendPrntFormElems)
     .then(finishSelectPrntFormBuild);
 }
@@ -187,19 +187,19 @@ function buildEditParentHdr() {
     const attr = { text: 'Select New Taxon Parent', id:'sub-hdr' };
     return _f.util('buildElem', ['h3', attr]);
 }
-function getParentEditFields(prnt) {    
-    const realm = _f.util('lcfirst', [prnt.realm.displayName]);      
+function getParentEditFields(prnt) {
+    const realm = _f.util('lcfirst', [prnt.realm.displayName]);
     _f.state('addEntityFormState', [realm, 'sub', null, 'edit']);
     return _f.elems('buildFormRows', ['subject', {}, 'sub', null])
         .then(modifyAndReturnPrntRows);
-    
-    function modifyAndReturnPrntRows(rows) {  
+
+    function modifyAndReturnPrntRows(rows) {
         const realmSelRow = getRealmLvlRow(prnt);
         return [realmSelRow, rows];
     }
 }
 /** ------- REALM DISPLAY NAME ------ */
-function getRealmLvlRow(taxon) { 
+function getRealmLvlRow(taxon) {
     const lbl = _f.util('buildElem', ['label', { text: realmData.rootLvl }]);
     const span = buildRealmNameSpan(taxon.realm.displayName);
     return buildTaxonEditFormRow(realmData.rootLvl, [lbl, span], 'sub');
@@ -218,9 +218,9 @@ function appendPrntFormElems(elems) {
 /** ------------------ FINISH SELECT FORM BUILD ----------------------------- */
 /**
  * Initializes the edit-parent form's comboboxes and selects the current parent.
- * Hides the species row. Adds styles and modifies event listeners. 
+ * Hides the species row. Adds styles and modifies event listeners.
  */
-function finishSelectPrntFormBuild() {                                          //console.log("fP = %O", fP);    
+function finishSelectPrntFormBuild() {                                          //console.log("fP = %O", fP);
     initSelectParentCombos();
     selectParentTaxon($('#txn-prnt').data('txn'));
     finishParentSelectFormUi();
@@ -241,7 +241,7 @@ function getSelectParentComboEvents() {
 function onParentLevelSelection(val) {
     _f.onLevelSelection.bind(this)(val);
 }
-export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, realmData.rcrds);                          
+export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, realmData.rcrds);
     const prntTxn = realmData.rcrds[prntId];
     if (prntTxn.isRoot) { return; }
     const prntLvl = prntTxn.level.displayName;
@@ -267,7 +267,7 @@ function updateSubmitBttns() {
     _f.elems('toggleSubmitBttn', ['#top-submit', false]);
     $('#sub-submit')[0].value = 'Select Taxon';
 }
-function selectTaxonParent() {    
+function selectTaxonParent() {
     const prnt =  _f.forms('getSelectedTaxon') || realmData.realmTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
     if (ifParentSelectErrs(getLvlVal(prnt.level.displayName))) { return; }
     exitPrntEdit(prnt);
@@ -288,7 +288,7 @@ function resetAfterEditParentClose(prnt) {
 }
 /** ------------------------ ERROR HANDLING --------------------------------- */
 /**
- * Ensures that the parent taxon has a higher taxon-level and that a species 
+ * Ensures that the parent taxon has a higher taxon-level and that a species
  * taxon being edited has a genus parent selected.
  */
 function ifParentSelectErrs(prntLvl) {
@@ -297,32 +297,32 @@ function ifParentSelectErrs(prntLvl) {
     return hasErrs;
 
 } /* End ifParentSelectErrs */
-function checkEachPossibleParentErr(prntLvl) { 
+function checkEachPossibleParentErr(prntLvl) {
     const txnLvl = $('#txn-lvl').val();                                         console.log("ifParentSelectErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
     const errs = [
         { 'needsHigherLvlPrnt': txnLvl <= prntLvl },
         { 'needsGenusPrnt': txnLvl == 8 && prntLvl != 7 }
     ];
     return !errs.every(checkForErr);                                            //console.log('hasErrs? ', hasErrs)
-    
-    function checkForErr(errObj) {                                         
-        for (let err in errObj) { 
+
+    function checkForErr(errObj) {
+        for (let err in errObj) {
             return errObj[err] ? sendTxnErrRprt(err, 'Parent', 'sub') : true;
-        }                                                                   
+        }
     }
 }
 /** ======================= ROW BUILDERS ==================================== */
 /**
- * Each element is built, nested, and returned as a completed row. 
+ * Each element is built, nested, and returned as a completed row.
  * rowDiv>(errorDiv, fieldDiv>inputElems)
  */
 function buildTaxonEditFormRow(field, inputElems, fLvl) {
     const rowDiv = buildFormRow(field, fLvl);
-    const errorDiv = _f.util('buildElem', ['div', { id: field+'_errs'}]); 
+    const errorDiv = _f.util('buildElem', ['div', { id: field+'_errs'}]);
     const fieldCntnr = buildFieldCntnr(inputElems);
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
-} 
+}
 function buildFormRow(field, fLvl) {
     const attr = { class: fLvl + '-row', id: field + '_row'};
     return _f.util('buildElem', ['div', attr]);
@@ -335,7 +335,7 @@ function buildFieldCntnr(fields) {
 /** =============== FINISH MAIN FORM BUILD ================================== */
 export function finishEditFormBuild(entity) {
     $('#top-submit').off('click').click(submitTaxonEdit);
-    initTaxonEditLevelCombo(); 
+    initTaxonEditLevelCombo();
     $('.all-fields-cntnr').hide();
 }
 function submitTaxonEdit() {
@@ -346,14 +346,14 @@ function submitTaxonEdit() {
     };                                                                          //console.log("taxon vals = %O", vals);
     _f.formatAndSubmitData('taxon', 'top', vals);
 }
-function initTaxonEditLevelCombo() {                                       
-    const options = { create: false, onChange: checkForTaxonLvlErrs, placeholder: null }; 
-    $('#txn-lvl').selectize(options);                                           
+function initTaxonEditLevelCombo() {
+    const options = { create: false, onChange: checkForTaxonLvlErrs, placeholder: null };
+    $('#txn-lvl').selectize(options);
     _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl'), 'silent']);
 }
 /** ======================= ERROR HANDLING ================================== */
 /**
- * Ensures that the new taxon-level is higher than its children, and that a 
+ * Ensures that the new taxon-level is higher than its children, and that a
  * species taxon being edited has a genus parent selected.
  */
 function checkForTaxonLvlErrs(txnLvl) {
@@ -362,7 +362,7 @@ function checkForTaxonLvlErrs(txnLvl) {
         'isGenusPrnt': isGenusPrnt(),
         'needsHigherLvl': lvlIsLowerThanKidLvls(txnLvl)
     };
-    for (let err in hasErrs) {  
+    for (let err in hasErrs) {
         if (hasErrs[err]) { return sendTxnErrRprt(err, 'Taxon', 'top'); }
     }
     clearPreviousErr('clrNeedsHigherLvl', txnLvl);
@@ -373,12 +373,12 @@ function isGenusPrnt() {
     const txnId = $('#txn-lvl').data('txn');
     return orgTxnLvl == 6 && getHighestChildLvl(txnId) < 8;
 }
-/** 
- * Returns true if the passed level is lower or equal to the highest level of 
- * the taxon-being-edited's children.  
+/**
+ * Returns true if the passed level is lower or equal to the highest level of
+ * the taxon-being-edited's children.
  */
-function lvlIsLowerThanKidLvls(txnLvl) {                                    
-    const highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));                
+function lvlIsLowerThanKidLvls(txnLvl) {
+    const highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
     return txnLvl >= highLvl;
 }
 function getHighestChildLvl(taxonId) {
@@ -392,14 +392,14 @@ function getHighestChildLvl(taxonId) {
     }
 } /* End getHighestChildLvl */
 function getSpeciesLvl() {
-    
+
 }
 function clearPreviousErr(errTag, txnLvl) {
-    if ($('.top-active-errs').length) { 
-        _f.val(errTag, [null, null, null, txnLvl]); 
+    if ($('.top-active-errs').length) {
+        _f.val(errTag, [null, null, null, txnLvl]);
     }
 }
-function sendTxnErrRprt(errTag, field, fLvl) {                                              
+function sendTxnErrRprt(errTag, field, fLvl) {
     _f.val('reportFormFieldErr', [field, errTag, fLvl]);
     _f.elems('toggleSubmitBttn', ['#top-submit', false]);
     return false;

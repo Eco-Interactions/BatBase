@@ -123,7 +123,7 @@ class SystemDate
     {
         return $this->updatedBy;
     }
-    
+
     /**
      * Get string representation of object.
      *

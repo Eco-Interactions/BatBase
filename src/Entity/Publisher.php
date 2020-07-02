@@ -32,7 +32,7 @@ class Publisher
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
-    
+
     /**
      * @var string
      *
@@ -94,7 +94,7 @@ class Publisher
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -276,7 +276,7 @@ class Publisher
     }
 
     /**
-     * Get the Source id.   
+     * Get the Source id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
      * @Groups({"normalized"})

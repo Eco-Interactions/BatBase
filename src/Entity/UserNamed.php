@@ -14,7 +14,7 @@ use JMS\Serializer\Annotation as JMS;
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  * @JMS\ExclusionPolicy("all")
- * 
+ *
  */
 class UserNamed
 {
@@ -63,7 +63,7 @@ class UserNamed
 
     /**
      * @var \DateTime
-     * 
+     *
      * @ORM\Column(name="loaded", type="datetime", nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("lastLoaded")
@@ -77,7 +77,7 @@ class UserNamed
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User
      *
@@ -86,7 +86,7 @@ class UserNamed
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -228,7 +228,7 @@ class UserNamed
 
     /**
      * Set lastLoaded.
-     * 
+     *
      * @param \DateTime $lastLoaded
      */
     public function setLastLoaded($lastLoaded)
@@ -278,7 +278,7 @@ class UserNamed
      * Get Created by User Id
      * @JMS\VirtualProperty
      * @JMS\SerializedName("user")
-     * 
+     *
      * @param int
      */
     public function getCreatedById()

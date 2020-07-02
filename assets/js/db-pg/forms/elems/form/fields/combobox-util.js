@@ -2,7 +2,7 @@
  *
  *
  * Exports:             Imported by:
- *     initFormCombos       db-forms   
+ *     initFormCombos       db-forms
  *     initSingle           db-forms
  */
 import { state as _fs } from '../../../forms-main.js';
@@ -11,7 +11,7 @@ import { state as _fs } from '../../../forms-main.js';
 /**
  * Inits the combobox, using 'selectize', according to the passed config.
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
- * that allow users to search by typing and, when configured, add new options 
+ * that allow users to search by typing and, when configured, add new options
  * not in the list by triggering a sub-form for that entity.
  */
 export function initSingle(confg, fLvl) {                                       //console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
@@ -21,14 +21,14 @@ export function initSingle(confg, fLvl) {                                       
         placeholder: 'Select ' + confg.name
     };
     if (confg.options) { addAdditionalOptions(); }
-    $(confg.id).selectize(options);  
-    /** All non-standard options are added to this 'options' prop. */ 
+    $(confg.id).selectize(options);
+    /** All non-standard options are added to this 'options' prop. */
     function addAdditionalOptions() {
         for (let opt in confg.options) {
             options[opt] = confg.options[opt];
         }
     }
-} 
+}
 export function enableCombobox(selId, enable = true) {                          //*console.log('enableCombobox [%s] ? ', selId, enable);
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
@@ -41,11 +41,11 @@ export function enableFirstCombobox(cntnrId, enable = true) {
     const firstElem = $('#'+ selElems[0].id)[0].selectize;
     return enable ? firstElem.enable() : firstElem.disable();
 }
-export function focusCombobox(selId, focus) { 
+export function focusCombobox(selId, focus) {
     if (!focus) { return $(selId)[0].selectize.blur(); }
     $(selId)[0].selectize.focus();
 }
-export function focusFirstCombobox(cntnrId, focus) {  
+export function focusFirstCombobox(cntnrId, focus) {
     const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
     focusCombobox('#'+ selElems[0].id, focus);
 }
@@ -54,19 +54,19 @@ export function clearCombobox(selId) {                                          
     selApi.clear('silent');
     selApi.updatePlaceholder();
     selApi.removeOption('');
-}    
+}
 /**
- * Clears and enables the parent combobox for the exited form. Removes any 
+ * Clears and enables the parent combobox for the exited form. Removes any
  * placeholder options and, optionally, brings it into focus.
  */
-export function resetFormCombobox(fLvl, focus) {      
-    const selId = _fs('getFormParentId', [fLvl]);  
+export function resetFormCombobox(fLvl, focus) {
+    const selId = _fs('getFormParentId', [fLvl]);
     if (!selId) { return; }
-    const combobox = $(selId)[0].selectize;   
+    const combobox = $(selId)[0].selectize;
     combobox.clear('silent');
     combobox.enable();
     combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.
-    if (focus) { combobox.focus(); 
+    if (focus) { combobox.focus();
     } else if (focus === false) { combobox.blur(); }
 }
 /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
@@ -79,14 +79,14 @@ export function updateComboboxOptions(selId, opts, focus) {
     if (focus === true) {  }
 }
 export function getSelVal(id) {                                                 //console.log('getSelVal [%s]', id);
-    return $(id)[0].selectize.getValue();  
+    return $(id)[0].selectize.getValue();
 }
 export function getSelTxt(id) {                                                 //console.log('getSelTxt. id = ', id);
     return $(id)[0].innerText;
 }
 export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
-    const $selApi = $(id)[0].selectize; 
-    $selApi.addItem(val, silent); 
+    const $selApi = $(id)[0].selectize;
+    $selApi.addItem(val, silent);
 }
 
 /**
@@ -94,7 +94,7 @@ export function setSelVal(id, val, silent) {                                    
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, comboEvents) {                     //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
-    const elems = _fs('getFormProp', [fLvl, 'selElems']);  
+    const elems = _fs('getFormProp', [fLvl, 'selElems']);
     elems.forEach(selectizeElem);
     _fs('setFormProp', [fLvl, 'selElems', []]);
 
@@ -104,7 +104,7 @@ export function initFormCombos(entity, fLvl, comboEvents) {                     
         // $(confg.id).off('change');
         initSingle(confg, fLvl);
     }
-} 
+}
 function getFieldConfg(comboEvents, fieldName) {
     const baseConfg = getBaseFieldConfg(fieldName) ;                            //console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
     const eventConfg = comboEvents[fieldName] || {};
@@ -112,11 +112,11 @@ function getFieldConfg(comboEvents, fieldName) {
 }
 function getBaseFieldConfg(fieldName) {
     const confgName = fieldName.replace(/([A-Z])/g, ' $1');
-    const confgs = { 
+    const confgs = {
         'Authors': { name: 'Authors', id: '#Authors-sel1' },
         'Editors': { name: 'Editors', id: '#Editors-sel1' },
-        'InteractionTags': { name: 'Interaction Tags', 
-            options: { delimiter: ",", maxItems: null }},         
+        'InteractionTags': { name: 'Interaction Tags',
+            options: { delimiter: ",", maxItems: null }},
     };
     return confgs[fieldName] || { name: confgName };
 }

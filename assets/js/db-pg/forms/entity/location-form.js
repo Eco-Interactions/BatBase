@@ -23,8 +23,8 @@ export function initCreateForm(entity, val) {                                   
 }
 function buildLocForm(val) {
     const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
-        'Country': $('#Country-Region-sel').val() 
-    }; 
+        'Country': $('#Country-Region-sel').val()
+    };
     _f.state('addEntityFormState', ['location', 'sub', '#Location-sel', 'create']);
     _f.state('setOnFormCloseHandler', ['sub', _f.forms.bind(null, 'enableCountryRegionField')]);
     return _f.elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
@@ -55,7 +55,7 @@ function disableTopFormLocNote() {
     $('#loc-note').fadeTo(400, .3);
 }
 function scrollToLocFormWindow() {
-    $('#form-main')[0].scrollTo(0, 150); 
+    $('#form-main')[0].scrollTo(0, 150);
 }
 function addNotesToForm() {
     addHowToCreateWithGpsNote($('#Latitude_row')[0].parentNode);
@@ -65,16 +65,16 @@ function addHowToCreateWithGpsNote(pElem) {
     $(pElem).before(getHowToCreateLocWithGpsDataNote());
 }
 function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">GPS 
-        data? Enter all data and see the added green pin's popup for name 
+    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">GPS
+        data? Enter all data and see the added green pin's popup for name
         suggestions and the "Create" button.</p>`;
 }
 function addHowToCreateWithOutGpsNote(pElem) {
     $(pElem).before(getHowToCreateLocWithoutGpsDataNote());
 }
 function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p class="loc-gps-note skipFormData">No GPS data? Fill 
-        in available data and click "Create without GPS data" at the bottom of 
+    return `<p class="loc-gps-note skipFormData">No GPS data? Fill
+        in available data and click "Create without GPS data" at the bottom of
         the form.</p>`;
 }
 function handleElevFieldsAndNumberInputs() {
@@ -101,8 +101,8 @@ function locCoordErr(field) {
     _f.val('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
 }
 /** ======================= EDIT FORM ======================================= */
-export function finishEditFormBuild(entity) {  
-    initFormCombos('Location', 'top'); 
+export function finishEditFormBuild(entity) {
+    initFormCombos('Location', 'top');
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
@@ -111,7 +111,7 @@ export function finishEditFormBuild(entity) {
 }
 function updateCountryChangeMethod() {
     $('#Country-sel')[0].selectize.off('change');
-    $('#Country-sel')[0].selectize.on('change', 
+    $('#Country-sel')[0].selectize.on('change',
         focusParentAndShowChildLocs.bind(null, 'edit'));
 }
 function addGpsListenerToEditForm(id) {
@@ -127,12 +127,12 @@ function finishEditForm(id) {
     _f.map('addVolatileMapPin', [id, 'edit', _f.cmbx('getSelVal', ['#Country-sel'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
-function afterMapLoads(onLoadFunc, id) {  
-    if ($('#form-map').data('loaded')) { 
+function afterMapLoads(onLoadFunc, id) {
+    if ($('#form-map').data('loaded')) {
         onLoadFunc(id);
         $('#form-map').removeData('loaded');
-    } else { 
-        window.setTimeout(() => afterMapLoads(onLoadFunc, id), 500); 
+    } else {
+        window.setTimeout(() => afterMapLoads(onLoadFunc, id), 500);
     }
 }
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
@@ -153,14 +153,14 @@ function initLocFormMap(type) {
     const locRcrds = _f.state('getEntityRcrds', ['location'])
     _f.map('initFormMap', [prntId, locRcrds, type]);
 }
-export function focusParentAndShowChildLocs(type, val) {                               
+export function focusParentAndShowChildLocs(type, val) {
     if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
     const locRcrds = _f.state('getEntityRcrds', ['location'])
     _f.map('initFormMap', [val, locRcrds, type]);
 }
 export function addListenerToGpsFields(fLvl, params = [true]) {
     $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
-    
+
     function toggleNoGpsSubmitBttn() {
         const coords = getCoordVals()
         _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
@@ -174,7 +174,7 @@ function ifEditingDisableSubmit(fLvl, coords) {
     _f.elems('toggleSubmitBttn', ['#top-submit', false]);
 }
 function getCoordVals() {
-    return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);  
+    return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);
 }
 function lintCoord(prefix) {
     const field = prefix+'itude';
@@ -185,5 +185,5 @@ function lintCoord(prefix) {
 function ifCoordFieldHasErr(field) {
     const coord = $(`#${field}_row input`).val();
     const max = field === 'Latitude' ? 90 : 180;
-    return isNaN(coord) ? true : coord > max ? true : false;    
+    return isNaN(coord) ? true : coord > max ? true : false;
 }

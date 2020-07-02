@@ -33,14 +33,14 @@ export class LocMarker extends Marker {
         super(params.latLng);
         this.loc = params.loc;
         this.markerType = markerType;
-        bindClassContextToMethods(this); 
+        bindClassContextToMethods(this);
         this.self = L.marker(params.latLng, getCustomIcon(markerType))
             .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'})
             .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
         this.addMarkerEvents();
     }
-    addMarkerEvents() {  
+    addMarkerEvents() {
         this.self
             .on('mouseover', this.openPopup)
             .on('mouseenter', this.openPopup)
@@ -51,14 +51,14 @@ export class LocMarker extends Marker {
         this.self.off('mouseover').off('click').off('mouseout');
     }
     /** --- Event Handlers --- */
-    openPopup(e) {            
+    openPopup(e) {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         ifLocPopupEmpty.bind(this)(this.popup.getContent(), this.markerType);
         this.self.openPopup();
     }
-    /** 
+    /**
      * Delays auto-close of popup if a nearby marker popup is opened while trying
-     * to click the location summary button. 
+     * to click the location summary button.
      */
     openAndFreezePopup(e) {                                                     //console.log('openPopupAndDelayAutoClose')
         this.self.openPopup();
@@ -69,10 +69,10 @@ export class LocMarker extends Marker {
         this.popup.options.autoClose = true;
         this.addMarkerEvents();
     }
-    closePopup() { 
+    closePopup() {
         this.self.closePopup();
     }
-    delayPopupClose(e) {  
+    delayPopupClose(e) {
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End LocMarker Class */
@@ -82,7 +82,7 @@ export class IntMarker extends Marker {
         super(params.latLng);
         this.intData = params.intData;
         this.focus = params.focus;
-        bindClassContextToMethods(this); 
+        bindClassContextToMethods(this);
         this.self = L.marker(params.latLng, getCustomIcon())
             .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'});
         this.addMarkerEvents();
@@ -97,15 +97,15 @@ export class IntMarker extends Marker {
         this.self.off('mouseover').off('click').off('mouseout');
     }
     /** --- Event Handlers --- */
-    openPopup(e) {                       
+    openPopup(e) {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        if (!this.popup.getContent()) { 
+        if (!this.popup.getContent()) {
             this.popup.setContent(getIntPopupHtml(this.focus, this.intData));
         }
         this.self.openPopup();
     }
     openAndFreezePopup(c) {
-        if (this.timeout) { clearMarkerTimeout(this.timeout); } 
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
         this.popup.options.autoClose = false;
         this.removeMarkerEvents();
         this.self.openPopup();
@@ -114,32 +114,32 @@ export class IntMarker extends Marker {
         this.popup.options.autoClose = true;
         this.addMarkerEvents();
     }
-    closePopup() { 
+    closePopup() {
         this.self.closePopup();
     }
-    delayPopupClose(e) {  
+    delayPopupClose(e) {
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End IntMarker Class */
-export class LocCluster extends Marker {  
+export class LocCluster extends Marker {
     constructor (map, intCnt, params, markerType) {                             //console.log('New LocCluster. cnt = [%s] params = %O, markerType = [%s]', intCnt, params, markerType)
         data = params.rcrds;
-        super(params.latLng);   
+        super(params.latLng);
         this.map = map;
         this.loc = params.loc;
         this.markerType = markerType;
-        bindClassContextToMethods(this); 
+        bindClassContextToMethods(this);
         this.self = L.markerClusterGroup(this.getClusterConfg(intCnt, markerType));
         this.addClusterEvents();
         this.addPopupOptions();
         this.addMarkersToCluser(intCnt);
         this.map.on('popupclose', this.closeLayerPopup);
     }
-    getClusterConfg(intCnt, markerType) { 
+    getClusterConfg(intCnt, markerType) {
         return !markerType ? null : {
-            iconCreateFunction: () => L.divIcon({ 
+            iconCreateFunction: () => L.divIcon({
                 html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32)})
-        }; 
+        };
 
     }
     addPopupOptions() {
@@ -151,18 +151,18 @@ export class LocCluster extends Marker {
         this.self.on('clustermouseover', this.openClusterPopup)
             .on('clustermouseenter', this.openClusterPopup)
             .on('clustermouseout', this.delayClusterPopupClose)
-            .on('clusterclick', this.openAndFreezePopup); 
+            .on('clusterclick', this.openAndFreezePopup);
     }
     removeClusterEvents() {
-        this.self.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
+        this.self.off('clustermouseover').off('clustermouseout').off('clusterclick');
     }
-    addMarkersToCluser(intCnt) {  
-        for (let i = 0; i < intCnt; i++) {  
-            this.self.addLayer(L.marker(this.latLng)); 
+    addMarkersToCluser(intCnt) {
+        for (let i = 0; i < intCnt; i++) {
+            this.self.addLayer(L.marker(this.latLng));
         }
     }
     setDefaultPopupHtml() {
-        const content = this.markerType ? getNoGpsLocDetailsHtml(this.loc) : 
+        const content = this.markerType ? getNoGpsLocDetailsHtml(this.loc) :
             getLocationSummaryHtml(this.loc);
         this.popup.setContent(content);
     }
@@ -172,8 +172,8 @@ export class LocCluster extends Marker {
         if (!this.popup.getContent()) { this.setDefaultPopupHtml(); }
         this.map.openPopup(this.popup);
     }
-    closeLayerPopup(e) {  
-        if (e.popup._latlng === this.latLng) { 
+    closeLayerPopup(e) {
+        if (e.popup._latlng === this.latLng) {
             this.addClusterEvents();
         }
     }
@@ -183,7 +183,7 @@ export class LocCluster extends Marker {
     delayClusterPopupClose(e) {
         this.timeout = window.setTimeout(this.closePopup.bind(this), 700);
     }
-    openAndFreezePopup(c) {  
+    openAndFreezePopup(c) {
         c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
         this.popup.options.autoClose = false;
         this.openClusterPopup(c);
@@ -194,7 +194,7 @@ export class IntCluster extends Marker {
     constructor (map, intCnt, params) {
         data = params.rcrds;
         super(params.latLng);
-        bindClassContextToMethods(this); 
+        bindClassContextToMethods(this);
         this.map = map;
         this.focus = params.focus;
         this.intData = params.intData;
@@ -210,34 +210,34 @@ export class IntCluster extends Marker {
         this.self.on('clustermouseover', this.openClusterPopup)
             .on('clustermouseenter', this.openClusterPopup)
             .on('clustermouseout', this.delayClusterPopupClose)
-            .on('clusterclick', this.openAndFreezeClusterPopup); 
+            .on('clusterclick', this.openAndFreezeClusterPopup);
     }
     removeClusterEvents() {
-        this.self.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
+        this.self.off('clustermouseover').off('clustermouseout').off('clusterclick');
     }
-    addMarkersToCluser(intCnt) {  
-        for (let i = 0; i < intCnt; i++) {  
-            this.self.addLayer(L.marker(this.latLng)); 
+    addMarkersToCluser(intCnt) {
+        for (let i = 0; i < intCnt; i++) {
+            this.self.addLayer(L.marker(this.latLng));
         }
     }
     /** --- Event Handlers --- */
     openClusterPopup(c) {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        if (!this.popup.getContent()) { 
+        if (!this.popup.getContent()) {
             this.popup.setContent(getIntPopupHtml(this.focus, this.intData));
         }
         this.map.openPopup(this.popup);
     }
     openAndFreezeClusterPopup(c) {
-        if (this.timeout) { clearMarkerTimeout(this.timeout); } 
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
         c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
         this.popup.options.autoClose = false;
         this.removeClusterEvents();
         this.map.openPopup(this.popup);
     }
     /** Event fires before popup is fully closed. Restores after closed. */
-    closeLayerPopup(e) {  
-        if (e.popup._latlng === this.latLng) { 
+    closeLayerPopup(e) {
+        if (e.popup._latlng === this.latLng) {
             this.addClusterEvents();
         }
     }
@@ -267,7 +267,7 @@ function getCustomIcon(iconType) {                                              
     if (iconType && iconType.includes('form')) { return null; } //console.log('returning custom icon');
     return getTealPinMarker();
     /** Displays single interactions on map as a green circle to match marker-clusters. */
-    function getGreenCircleMarker() {  
+    function getGreenCircleMarker() {
         const classes = iconType || 'single-marker info';
         return {
             icon: L.divIcon({
@@ -278,7 +278,7 @@ function getCustomIcon(iconType) {                                              
     }
     /** Used for the edit-location forms to display the location being edited. */
     function getTealPinMarker() {
-        return { 
+        return {
             icon:  L.icon({
                 iconUrl: require('./../../../images/icons/teal-marker-icon.png').default,
                 iconSize: [29, 43],
@@ -294,12 +294,12 @@ function getCustomIcon(iconType) {                                              
 } /* End getCustomIcon */
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
 function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
-    const locHtml = getLocNameHtml(intData.locs[0]); 
+    const locHtml = getLocNameHtml(intData.locs[0]);
     const intHtml = getIntSummaryHtml(focus, intData.ints, intData.ttl);
     return `<div>${locHtml}${intHtml}</div>`;
 }
-function getIntSummaryHtml(focus, intObj, ttl) {  
-    const bldrs = { locs: buildLocIntSummary, srcs: buildSrcIntSummary, 
+function getIntSummaryHtml(focus, intObj, ttl) {
+    const bldrs = { locs: buildLocIntSummary, srcs: buildSrcIntSummary,
         taxa: buildTaxaIntSummary };
     let summary = '';
     let intCnt = 1;
@@ -308,34 +308,34 @@ function getIntSummaryHtml(focus, intObj, ttl) {
         if (intCnt > 4) { return truncateSummary(summary, ttl); }
         summary += bldrs[focus](name, intObj[name], focus);
         intCnt++;
-    } 
+    }
 
     return summary;
 }
-function truncateSummary(summary, ttl) { 
+function truncateSummary(summary, ttl) {
     summary += `<br><b>... ${ttl} interactions total.</b>`;
     return summary;
 }
 function buildLocIntSummary(name, ints, focus) {                                //console.log('buildLocIntSummary. ints = %O', ints)
-    const batStr = getTop3CitedBats(ints);  
+    const batStr = getTop3CitedBats(ints);
     return buildIntSummary(name, batStr, ints.length);
 }
 function buildTaxaIntSummary(name, ints, focus) {                               //console.log('buildTaxaIntSummary. ints = %O', ints)
-    const batStr = getTop3CitedBats(ints);  
+    const batStr = getTop3CitedBats(ints);
     return buildIntSummary(name, batStr, ints.length);
 }
 function buildSrcIntSummary(name, ints, focus) {                                //console.log('buildSrcIntSummary. ints = %O', ints)
     if (!ints.length) { return ''; }
-    const batStr = getTop3CitedBats(ints);  
+    const batStr = getTop3CitedBats(ints);
     return buildIntSummary(name, batStr, ints.length, focus);
 }
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
-function getTop3CitedBats(ints) {    
+function getTop3CitedBats(ints) {
     const allBats = {};
     getAllBatsCited();
     const bats = getTopThreeReportStr(allBats, buildBatSummaryStr);
     return `Bat${Object.keys(allBats).length == 1 ? '' : 's'}: ${bats}`;
-    
+
     function getAllBatsCited() {
         ints.forEach(int => trackBatInteraction(data.taxa[int.subject], allBats));
     }
@@ -356,7 +356,7 @@ function concatBatNames(sorted) {
     for (let i = 1; i <= 3; i++) { str += formatBatName(sorted[i], i, sorted); }
     return str;
 }
-function formatBatName(bat, i, sorted) {  
+function formatBatName(bat, i, sorted) {
     const name = !bat.length ? '' : (i === 1 ? '' : ', ') + bat[1];
     return name;
 }
@@ -365,15 +365,15 @@ function getIntTop3ReportString(str, ttl) {
     return str;
 } /* ---- End Top 3 Cited Bats string build ---- */
 /**
- * 
+ *
  * Cnt - Name (restrict char to one line, with tooltip)
  *     subjects (objects if in bat taxa view)
  */
-function buildIntSummary(name, bats, intCnt, focus) { 
-    return `<div class="flex-row flex-wrap"title="${name}"><div><b>${intCnt} 
+function buildIntSummary(name, bats, intCnt, focus) {
+    return `<div class="flex-row flex-wrap"title="${name}"><div><b>${intCnt}
         interactions - &nbsp;</b>${getName(name, focus)}</div></div>${bats}`;
 }
-function getName(name, focus) {  
+function getName(name, focus) {
     const lngth = focus !== 'srcs' ? 30 : 77;
     let nameStr = name.length > lngth ? name.substring(0, lngth) + `...)` : name;
     const namePieces = nameStr.split(' - (');
@@ -381,70 +381,70 @@ function getName(name, focus) {
     return `<b>${namePieces.join('')}`;
 
     function modifyNameForDisplay() {
-        if (namePieces.length > 1) { modifyNameForAuthDisplay(); 
+        if (namePieces.length > 1) { modifyNameForAuthDisplay();
         } else { namePieces.push('</b>'); }
     }
     function modifyNameForAuthDisplay() {
         namePieces.splice(1, 0, '</b><i> - (');
-        namePieces.push('</i>'); 
+        namePieces.push('</i>');
     }
 }
 /** ---------------- Location Marker/Popup Helpers -------------------------- */
-function clearMarkerTimeout(timeout) { 
-    clearTimeout(timeout); 
-    timeout = null;                                                             //console.log('timout cleared')       
+function clearMarkerTimeout(timeout) {
+    clearTimeout(timeout);
+    timeout = null;                                                             //console.log('timout cleared')
 }
 /** Handles intialization of location maker popups. (this === LocMarker) */
-function ifLocPopupEmpty(content, type) { 
+function ifLocPopupEmpty(content, type) {
     if (!content) {
-        content = buildLocMarkerContent(type, this.loc);          
+        content = buildLocMarkerContent(type, this.loc);
         this.popup.setContent(content);
     }
 }
-function buildLocMarkerContent(type, loc) {    
+function buildLocMarkerContent(type, loc) {
     const map = {
-        'e-loc': getGeocodedLocHtml, 'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
-        'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getGeocodedLocHtml 
-    };         
-    const editing = type ? ifEditingReturnTrueAndUpdateType() : false;  
+        'e-loc': getGeocodedLocHtml, 'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml,
+        'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getGeocodedLocHtml
+    };
+    const editing = type ? ifEditingReturnTrueAndUpdateType() : false;
     return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc);
 
     function ifEditingReturnTrueAndUpdateType() {
         const isEditing = type.includes('edit');
-        type = isEditing ? type.split('edit')[1] : type;   
+        type = isEditing ? type.split('edit')[1] : type;
         return isEditing;
     }
 } /* End buildLocMarkerContent */
-function getLocNameHtml(loc) {  
+function getLocNameHtml(loc) {
     let parent = loc.locationType.displayName === 'Country' ? '' :
         loc.country ? loc.country.displayName : 'Region';
     const locName = loc.displayName;
-    return '<div style="font-size:1.2em;"><b>' + locName + 
+    return '<div style="font-size:1.2em;"><b>' + locName +
         '</b></div><div style="margin: 0 0 .5em 0;">'+parent+'</div>';
-} 
+}
 function getDescHtml(loc, strLngth) {
     if (!loc.description) { return; }
-    const desc = loc.description.length < strLngth ? loc.description : 
+    const desc = loc.description.length < strLngth ? loc.description :
         loc.description.substring(0, strLngth) + '...';
-    return `<span title="${loc.description.replace(/"/g, '&quot;')}">Description: 
+    return `<span title="${loc.description.replace(/"/g, '&quot;')}">Description:
         <b>${desc}</b></span>`;
 }
-function getHabTypeHtml(loc, leaveBlank) {  
+function getHabTypeHtml(loc, leaveBlank) {
     if (isRegionOrCountry(loc)) { return getAllHabitatsWithin(loc); }
     if (!loc.habitatType) { return leaveBlank ? '' : false; }
     const name = getHabitatName(loc) || '';
     return `Habitat: <b>${name}</b>`;
 }
 function getHabitatName (loc) {
-    return !loc.habitatType.displayName ? null : 
-        loc.habitatType.displayName.includes('Caves') ? 
+    return !loc.habitatType.displayName ? null :
+        loc.habitatType.displayName.includes('Caves') ?
             'Caves & Subterranean' : loc.habitatType.displayName;
 }
-function getCoordsHtml(loc) { 
-    const geoData = data.geo[loc.geoJsonId];                                    //console.log('geoJson = %O', geoData); 
+function getCoordsHtml(loc) {
+    const geoData = data.geo[loc.geoJsonId];                                    //console.log('geoJson = %O', geoData);
     if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.displayPoint)
-    coords = coords.map(c => Number(c).toFixed(6)); 
+    coords = coords.map(c => Number(c).toFixed(6));
     return 'Coordinates: <b>' + [coords[1], coords[0]].join(', ') +'</b>';
 }
 function getSelectLocationBttn(loc, editing) {
@@ -454,8 +454,8 @@ function getSelectLocationBttn(loc, editing) {
     return bttn;
 }
 function buildSelectLocBttn(editing) {
-    const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
-    const attr = {type: 'button', class:'ag-fresh popup-bttn', value: text}; 
+    const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location';
+    const attr = {type: 'button', class:'ag-fresh popup-bttn', value: text};
     return _u('buildElem', ['input', attr]);
 }
 function addSelectLocClickEvent(bttn, editing, locId) {
@@ -467,8 +467,8 @@ function styleSelectLocBttn(bttn, editing) {
     if (editing) { $(bttn).attr('disabled', 'disabled').css('opacity', '.666'); }
 }
 /** ========== Location Summary Popup ============== */
-/** 
- * Returns additional details (html) for interactions at the location. 
+/**
+ * Returns additional details (html) for interactions at the location.
  * Used when displaying interactions by location on the search page.
 */
 export function getLocationSummaryHtml(loc, rcrds) {                            //console.log('loc = %O rcrds = %O', loc, rcrds);
@@ -488,16 +488,16 @@ function buildSummaryHtml(loc) {
     const desc = getDescHtml(loc, 66);
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
-    const bats = getBatsCitedHtml(loc);  
-    return name + [cnt, desc, coords, habType, bats].filter(el => el).join('<br>');  
+    const bats = getBatsCitedHtml(loc);
+    return name + [cnt, desc, coords, habType, bats].filter(el => el).join('<br>');
 }
 function isRegionOrCountry(loc) {
-    const locType = loc.locationType.displayName;  
+    const locType = loc.locationType.displayName;
     return ['Region', 'Country'].indexOf(locType) !== -1;
 }
 function ifCountryGetIntCnt(loc) {
     const locType = loc.locationType.displayName;
-    return ['Region', 'Country'].indexOf(locType) === -1 ? false : 
+    return ['Region', 'Country'].indexOf(locType) === -1 ? false :
         `Interactions in ${locType}: <b> ${loc.totalInts}</b>`;
 }
 /** --- Habitat Types --- */
@@ -505,12 +505,12 @@ function ifCountryGetIntCnt(loc) {
 function getAllHabitatsWithin(loc) {                                            //console.log('getting habitats for = %O', loc);
     const habitats = {};
     addHabitatsForLocAndChildren(loc);
-    return Object.keys(habitats).length ? buildHabHtml() : false; 
+    return Object.keys(habitats).length ? buildHabHtml() : false;
 
-    function addHabitatsForLocAndChildren(l) {                                  
-        let loc = typeof l === 'object' ? l : data.locs[l]; 
+    function addHabitatsForLocAndChildren(l) {
+        let loc = typeof l === 'object' ? l : data.locs[l];
         if (loc.interactions.length) { addLocHabitat(loc); }
-        if (loc.children.length) { loc.children.forEach(addHabitatsForLocAndChildren); }        
+        if (loc.children.length) { loc.children.forEach(addHabitatsForLocAndChildren); }
     }
     function addLocHabitat(loc) {
         const name = getHabitatName(loc);
@@ -518,27 +518,27 @@ function getAllHabitatsWithin(loc) {                                            
         if (!habitats[name]) { habitats[name] = 0; }
         ++habitats[name];
     }
-    function buildHabHtml() {  
+    function buildHabHtml() {
         const str = getTopThreeReportStr(habitats, buildLocSummaryStr);
         return `Habitats: <b>&ensp;&nbsp; ${str}</b>`;
     }
 }
 /** --- Cited Bats --- */
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
-function getBatsCitedHtml(loc) {    
+function getBatsCitedHtml(loc) {
     const allBats = {};
-    getAllBatsWithin(loc); 
+    getAllBatsWithin(loc);
     const bats = getTopThreeReportStr(allBats, buildLocSummaryStr);
     return `Cited bats: <b>${bats}</b>`;
-    
-    function getAllBatsWithin(l) {  
+
+    function getAllBatsWithin(l) {
         const loc = typeof l == 'object' ? l : data.locs[l];
         if (loc.interactions.length) { addBats(loc.interactions); }
         if (loc.children.length) { loc.children.forEach(getAllBatsWithin); }
     }
-    function addBats(interactions) { 
+    function addBats(interactions) {
         if (typeof interactions[0] == 'object') { return addFltrdBats(interactions, allBats); }
-        const ints = interactions.map(id => data.ints[id]);  
+        const ints = interactions.map(id => data.ints[id]);
         ints.forEach(int => trackBatInteraction(data.taxa[int.subject], allBats));
     }
 } /* End getBatsCitedHtml */
@@ -555,12 +555,12 @@ function trackBatInteraction(bat, allBats) {                                    
 
 /**
  * Sorts an object with unique name keys and values with the number of time this
- * item was present in the cited records (habitats in locs or bats in interactions). 
- * Callback builds a string with the three names with the highest count, and a 
+ * item was present in the cited records (habitats in locs or bats in interactions).
+ * Callback builds a string with the three names with the highest count, and a
  * total of all items (habitats/bats) counted.
  */
 function getTopThreeReportStr(obj, cb) {
-    const ttl = Object.keys(obj).length;                                       
+    const ttl = Object.keys(obj).length;
     const sorted = { 1: [], 2: [], 3: [] };
     const posKeys = Object.keys(sorted);
     for (let name in obj) {
@@ -568,10 +568,10 @@ function getTopThreeReportStr(obj, cb) {
     }                                                                           //console.log('sorted habs = %O', sorted)
     return cb(sorted, ttl);
 
-    function sortItem(count, name) {                                             
+    function sortItem(count, name) {
         posKeys.some((pos) => {
-            if (count > sorted[pos][0] || !sorted[pos][0]) {                    
-                replacePosition(count, name, pos); 
+            if (count > sorted[pos][0] || !sorted[pos][0]) {
+                replacePosition(count, name, pos);
                 return true;
             }
         });
@@ -627,9 +627,9 @@ function buldCntryDetailsHtml(loc) {
         ${loc.displayName}</b></div>`;
 }
 function getEditLocHtml(loc, editing) {
-    const div = _u('buildElem', ['div', { class: 'flex-col' }]);    
+    const div = _u('buildElem', ['div', { class: 'flex-col' }]);
     const name = `<div style="font-size:1.1em; margin-bottom: .5em;"><b>
-        The location being edited.</b></div>`;  
+        The location being edited.</b></div>`;
     $(div).append(name);
     return div;
 }
@@ -649,13 +649,13 @@ function buildDetailsHtml(loc) {                                                
     const elev = getElevHtml(loc);
     const coords = getCoordsHtml(loc);
     const desc = getDescHtml(loc, 55);
-    $(cntnr).append([name , [habType, elev, coords, desc].filter(e => e).join('<br>')]);   
+    $(cntnr).append([name , [habType, elev, coords, desc].filter(e => e).join('<br>')]);
     return cntnr;
 }
 function getElevHtml(loc) {
     if (!loc.elevation) { return; }
     const elev = `Elevation: <b>${loc.elevation}</b>`;
-    const elevMax = loc.elevationMax ? 
+    const elevMax = loc.elevationMax ?
         `&nbsp; Elevation Max: <b>${loc.elevationMax}</b>` : null;
     return [elev, elevMax].filter(e => e);
 }
@@ -672,7 +672,7 @@ function getNoGpsHdr(cnt) {
     return `<div style="font-size:1.2em;"><b>${cnt} location with no GPS data.</b>
         </div><span>Hover over a location name to see the location data.</span><br>`;
 }
-function buildLocDetailHtml(loc, editing) {  
+function buildLocDetailHtml(loc, editing) {
     const cntnr = _u('buildElem', ['div', {class: 'info-tooltip'}]);
     const locDetails = _u('buildElem', ['div', {class: 'tip'}]);
     const bttn = getSelectLocationBttn(loc, editing);
@@ -686,7 +686,7 @@ function buildLocDetails(loc) {
     const habType = getHabTypeHtml(loc, 'leaveBlank');
     const elev = getElevHtml(loc);
     const desc = getDescHtml(loc, 55);
-    return [name, habType, elev, desc].filter(e => e).join('<br>'); 
+    return [name, habType, elev, desc].filter(e => e).join('<br>');
 }
 /* ============ New Location Popup ============== */
 /** Used when displaying a geocoded (new or edit) location on the form.  */
@@ -698,10 +698,10 @@ function getGeocodedLocHtml(loc, editing) {                                     
     return cntnr;
 }
 function getNewLocText(loc, editing) {
-    const name = !loc ? 'No geo-data found. Please double-check coordinates.' : 
+    const name = !loc ? 'No geo-data found. Please double-check coordinates.' :
         'Near: <b>'+ loc.name;
     const html = `<div style="font-size:1.1em;">${name}</b></div>`;
-    return editing ? html : `${html}After confirming that this location is unique, 
+    return editing ? html : `${html}After confirming that this location is unique,
         please fill in all available data and click "Create Location" to submit.`;
 }
 /** Click event added in location-form. */

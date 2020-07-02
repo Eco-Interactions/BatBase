@@ -33,6 +33,6 @@ export function setUpdatedDataInLocalDb() {
         return p.then(() => setData(prop, mmryData[prop].value));
     }, Promise.resolve());
 }
-export function clearTempMmry(dataUpdatedAt) {                               
+export function clearTempMmry(dataUpdatedAt) {
     mmryData = null;
 }

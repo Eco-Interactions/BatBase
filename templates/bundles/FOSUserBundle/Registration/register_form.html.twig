@@ -1,10 +1,10 @@
 {% form_theme form 'form/fields.html.twig' %}
 
-<form action="{{ path('fos_user_registration_register') }}" method="POST" 
+<form action="{{ path('fos_user_registration_register') }}" method="POST"
     class="fos_user_registration_register recaptcha-form">
 
     {{ form_start(form) }}
-    
+
     <span style="color: red;"><b>{{ form_errors(form) }}</b></span>
 
     {{ form_row(form.first_name) }}
@@ -15,12 +15,12 @@
     {{ form_row(form.plainPassword.first) }}
     {{ form_row(form.plainPassword.second) }}
     {{ form_widget(form.captcha) }}
-    
-    <input id="reg-tos" class="top-em-mrg" type="button" 
+
+    <input id="reg-tos" class="top-em-mrg" type="button"
         value="Read and Agree to our Terms of Use" />
-    <input id="reg-submit" type="submit" disabled 
+    <input id="reg-submit" type="submit" disabled
         value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
-    
+
     {{ form_end(form) }}
 
 </form>

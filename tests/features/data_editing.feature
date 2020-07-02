@@ -3,13 +3,13 @@ Feature: Edit data in the database
     As an editor
     I need to be able to edit the data in the database
 
-    ### WHAT IS BEING TESTED ### 
+    ### WHAT IS BEING TESTED ###
         # ENTITY EDITS AND RELATED UPDATES TO STORED DATA AND TABLE DISPLAY
         ## TODO
-        # Test form error handling 
+        # Test form error handling
         # Test changing an interaction's citation
-    
-    ## Todo: 
+
+    ## Todo:
     Background:
         Given the fixtures have been reloaded
         And I am on "/login"
@@ -78,7 +78,7 @@ Feature: Edit data in the database
         And I expand "Genus Philodendron" in the data tree
         Then I should see "2" interactions under "Philodendron sphalerum"
         And I should see "1" interactions under "Unspecified Araceae Interactions"
-        
+
     @javascript
     Scenario:  I should be able to change an interaction's type, tags, and notes
         Given the database table is in "Taxon" view
@@ -175,7 +175,7 @@ Feature: Edit data in the database
         And I change the "Link Display" field "input" to "Book Website"
         And I change the "Doi" field "input" to "10.1037/rmh0000008"
         And I change the "Publisher" form dropdown to "University of Paris VI"
-        And I add "Cockle, Anya" to the "Authors" dynamic dropdown 
+        And I add "Cockle, Anya" to the "Authors" dynamic dropdown
         And I press the "Update Publication" button
         And I wait for the "top" form to close
         And I select "Book" from the "Pub Type" dropdown
@@ -249,11 +249,11 @@ Feature: Edit data in the database
         And I change the "Link Display" field "input" to "Citation Website"
         And I change the "Doi" field "input" to "10.1037/rmh0000008"
         And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
-        And I add "Baker, Herbert G" to the "Authors" dynamic dropdown 
+        And I add "Baker, Herbert G" to the "Authors" dynamic dropdown
         And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I press the "Update Citation" button
         And I wait for the "top" form to close
-        And I should not see "Gardner, Alfred L" in the tree 
+        And I should not see "Gardner, Alfred L" in the tree
         And I expand "Baker, Herbert G" in the data tree
         And I click on the edit pencil for the "Feeding habits" row
         And I see "Editing Citation"

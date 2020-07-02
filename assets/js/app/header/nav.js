@@ -1,7 +1,7 @@
 /*
  * Responsive site navigation.
  *
- * Exports: 
+ * Exports:
  *     initSiteNav
  */
 /*
@@ -43,14 +43,14 @@ function toggleMenu() {                                                         
     } else { hideMobileMenu(); }
 }
 function showMobileMenu() {
-    $('#oimenu').removeClass('closed'); 
+    $('#oimenu').removeClass('closed');
     $('#content-detail').addClass('content-overlay').click(toggleMenu);
     $('#pg-hdr').css('background', 'rgba(0,0,0,.8)');
     if ($('body').data('browser') === 'Chrome') {
         $('#content-detail').css('position', 'unset');  //"fixes" bug with mobile menu in chrome
     }
 }
-function hideMobileMenu() {   
+function hideMobileMenu() {
     $('#oimenu').addClass('closed');
     $('#content-detail').removeClass('content-overlay').off('click', toggleMenu);
     $('#pg-hdr').css('background', '#fff');
@@ -60,15 +60,15 @@ function hideMobileMenu() {
 }
 function toggleSubMenu(e) {                                                     //console.log('this ? %O. e = %O', this, e);
     event.preventDefault();
-    if ($(this).hasClass('closed')) {                                   
+    if ($(this).hasClass('closed')) {
         $('li.smtrigger').addClass('closed'); // closes all open sub-menus
-        $(this).removeClass('closed');                                
+        $(this).removeClass('closed');
         this.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
     } else {
         $(this).addClass('closed');
     }
 }
-function collapseNav() {  
+function collapseNav() {
     if (window.innerWidth > app.breakpoint || app.timeout) { return; }          //console.log('collapseNav')
     app.timeout = window.setTimeout(() => {
         initResponsiveNav();
@@ -77,7 +77,7 @@ function collapseNav() {
         app.timeout = false;
     }, 500);
 }
-function expandNav() {  
+function expandNav() {
     if (window.innerWidth < app.breakpoint || app.timeout) { return; }          //console.log('expandNav')
     app.timeout = window.setTimeout(() => {
         removeResponsiveNav()

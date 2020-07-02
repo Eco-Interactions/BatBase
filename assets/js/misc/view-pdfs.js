@@ -1,6 +1,6 @@
 /**
  * Submitted Publications' Page: Manage submitted publication pdfs. [Admin+]
- * 
+ *
  * TOC:
  *    DELETE
  *    OPEN
@@ -21,7 +21,7 @@ function handleDeletePdf() {
     const confg = {
         html: '<center><h2>Are you sure you want to delete?</h2><br>',
         elem: 'input[data-id="'+id+'"]', dir: 'left', bttn: 'Confirm',
-        submit: deletePdf.bind(null, id) 
+        submit: deletePdf.bind(null, id)
     }
     showSaveModal(confg);
 }
@@ -33,8 +33,8 @@ function deletePdf(id) {
  * Clones hidden pdf object element and adds to the hidden page-popup elem. Then
  * the PDF is loaded in the iframe.
  * Note: Couldn't figure out how to get webpack to work with files users upload
- * on the server, so using twig to create the elems, rather than dynamically 
- * building them here. There is probably a better way to do this. 
+ * on the server, so using twig to create the elems, rather than dynamically
+ * building them here. There is probably a better way to do this.
  */
 function handleOpenPdf () {
     const fileName = $(this).attr('data-filename'); //attr must be used to load the pdf
@@ -75,17 +75,17 @@ function removePdfStyles() {
     $("#b-overlay-popup").empty();
 }
 /* -------------------- UPDATE LAST VIEWED BY ------------------------------- */
-function updateLastViewedBy(id) { 
-    sendAjax('pub/'+id+'/update', updateTableViewedBy.bind(null, id));   
+function updateLastViewedBy(id) {
+    sendAjax('pub/'+id+'/update', updateTableViewedBy.bind(null, id));
 }
 function updateTableViewedBy(id, username) {
-    $('#'+id+'-viewed').text(username) 
+    $('#'+id+'-viewed').text(username)
 }
 /* ====================== AJAX ============================================== */
 function sendAjax(url, onSuccess) {
     $.ajax({
         method: "POST",
-        url: url, 
+        url: url,
         success: onSuccess,
         error: ajaxError
     });

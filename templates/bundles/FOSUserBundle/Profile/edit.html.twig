@@ -5,11 +5,11 @@
 
 {% block fos_user_content %}
     <div id="top-form-container">
-        <form action="{{ path('fos_user_profile_edit') }}" method="POST" 
+        <form action="{{ path('fos_user_profile_edit') }}" method="POST"
             class="fos_user_profile_edit recaptcha-form">
 
             {{ form_start(form) }}
-            
+
             <span style="color: red;"><b>{{ form_errors(form) }}</b></span>
 
             {% embed 'two_cols_sect.html.twig' %}
@@ -18,7 +18,7 @@
                     {{ form_row(form.email) }}
                     {{ form_row(form.current_password) }}
                 {% endblock firstcol %}
-                
+
                 {% block secondcol %}
                     {{ form_row(form.first_name) }}
                     {{ form_row(form.last_name) }}

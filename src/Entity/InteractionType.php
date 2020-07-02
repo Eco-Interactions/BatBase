@@ -53,8 +53,8 @@ class InteractionType
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
-     *      targetEntity="App\Entity\Interaction", 
-     *      mappedBy="interactionType", 
+     *      targetEntity="App\Entity\Interaction",
+     *      mappedBy="interactionType",
      *      fetch="EXTRA_LAZY" )
      */
     private $interactions;
@@ -81,7 +81,7 @@ class InteractionType
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -225,7 +225,7 @@ class InteractionType
     }
 
     /**
-     * Returns an array of interactions ids. 
+     * Returns an array of interactions ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactions")
      */
@@ -281,12 +281,12 @@ class InteractionType
      */
     public function serializeValidTags()
     {
-        $tags = []; 
+        $tags = [];
 
-        foreach ($this->validTags as $tag) {  
-            array_push($tags, [ 
-                'id' => $tag->getId(), 
-                'displayName' => $tag->getDisplayName() 
+        foreach ($this->validTags as $tag) {
+            array_push($tags, [
+                'id' => $tag->getId(),
+                'displayName' => $tag->getDisplayName()
             ]);
         }
 

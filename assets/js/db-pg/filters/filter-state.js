@@ -1,6 +1,6 @@
 /**
  * Handles tracking and reporting of the filter state.
- * 
+ *
  * TOC:
  *      SET
  *      GET
@@ -12,7 +12,7 @@
  * {obj} active
  *      combo: obj with combo-label(k): obj with text and value(v) with their respective values
  *      name: name filter string
- *      date: obj with the datetime(v) and filter type(k), date published or added/updated 
+ *      date: obj with the datetime(v) and filter type(k), date published or added/updated
  */
 import { _ui, accessTableState as tState } from '../db-main.js';
 let fState = { active: {}};
@@ -21,12 +21,12 @@ export function setCurrentRowData(data) {
     fState.fRowData = data;
 }
 export function setPanelFilterState(key, value) {
-    if (value === false) { delete fState.active[key]; 
+    if (value === false) { delete fState.active[key];
     } else { fState.active[key] = value; }
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
 export function resetFilterState() {
-    const state = fState.active.date ? { date: fState.active.date } : {}; 
+    const state = fState.active.date ? { date: fState.active.date } : {};
     fState = { active: state };
 }
 /* =========================== GET ========================================== */
@@ -44,9 +44,9 @@ function getPanelFilters(filters) {
     return filters;
 }
 /** If table is filtered by an external filter, the rows are stored in fRowData. */
-export function getCurRowData() {                                                    
+export function getCurRowData() {
     return fState.fRowData ? fState.fRowData : tState().get('rowData');
-} 
+}
 export function isFilterActive() {
     const tbl = getTblFilterNames().length > 0;
     const pnl = getPanelFilterVals().length > 0;
@@ -54,23 +54,23 @@ export function isFilterActive() {
 }
 /* =================== FILTER STATUS TEXT =================================== */
 /**
- * Returns the display names of all active filters in an array. 
+ * Returns the display names of all active filters in an array.
  * If a saved filter set is applied filters are read from the set. Otherwise, the
  * active filters in the panel and table are checked and returned.
  */
-export function getActiveFilterVals() {   
-    const set = _ui('isFilterSetActive'); 
+export function getActiveFilterVals() {
+    const set = _ui('isFilterSetActive');
     return set ? getSavedFilterStatus(set) : getPageActiveFilters();
 }
 /* ------------------- FILTER SET STATUS ------------------------------------ */
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = getSetPanelFilterVals(set.panel);  
+    const pnlFltrs = getSetPanelFilterVals(set.panel);
     return pnlFltrs.concat(tblFltrs);
 }
 function getSetPanelFilterVals(filters) {
-    return Object.keys(filters).map(type => {  
-        return type === 'date' ? 
+    return Object.keys(filters).map(type => {
+        return type === 'date' ?
             getDateFltrString(filters[type]) : Object.keys(filters[type])[0]
     }).filter(v => v);
 }
@@ -78,7 +78,7 @@ function getSetPanelFilterVals(filters) {
 function getPageActiveFilters (argument) {
     return getTblFilterNames().concat(getPanelFilterVals());
 }
-function getPanelFilterVals() {  
+function getPanelFilterVals() {
     const map = { combo: addComboValue, name: addName, date: getDateFltrString };
     return getFocusFilterDisplayVals();
 
@@ -86,8 +86,8 @@ function getPanelFilterVals() {
         const filters = [];
         Object.keys(fState.active).forEach(type => {                             //console.log('filter [%s] = %O', type, fPs.pnlFltrs[type]);
             filters.push(map[type](fState.active[type]));
-        });  
-        return filters.filter(f => f); 
+        });
+        return filters.filter(f => f);
     }
 }
 /** Stores the most recent combobox selection. */
@@ -107,7 +107,7 @@ function getTblFilterNames() {
     return Object.keys(getActiveTableFilterObj());
 }
 /** Returns an obj with the ag-grid filter models. */
-function getActiveTableFilterObj() {  
+function getActiveTableFilterObj() {
     const tblApi = tState().get('api');
     if (!tblApi) { return {}; }
     const models = getColFilterModels(tblApi);
@@ -125,18 +125,18 @@ function getColFilterModels (tblApi) {
         'Region': getColumnFilterApi('region'),
         'Location Desc.': getColumnFilterApi('location'),
         'Citation': getColumnFilterApi('citation'),
-        'Note': getColumnFilterApi('note') 
-    };  
+        'Note': getColumnFilterApi('note')
+    };
     function getColumnFilterApi (colName) {
-        return filters.indexOf(colName) === -1 ? null : 
+        return filters.indexOf(colName) === -1 ? null :
             tblApi.getFilterApi(colName).getModel()
     }
 }
 function getActiveTblFilters (models) {
     const filters = {};
-    Object.keys(models).forEach(col => { 
-        if (!models[col]) { return; }  
+    Object.keys(models).forEach(col => {
+        if (!models[col]) { return; }
         filters[col] = models[col];
-    });                                                                     
+    });
     return filters;
 }

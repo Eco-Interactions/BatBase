@@ -1,7 +1,7 @@
 /**
  * Initiates and appends the main entity form.
- * 
- * Exports:                     
+ *
+ * Exports:
  *     buildAndAppendRootForm       elems-main
  *     getExitButton                form-errs, interaction-form
  *
@@ -18,10 +18,10 @@ import * as _f from '../../forms-main.js';
 let entity;
 let action;
 
-export function buildAndAppendRootForm(fields, id) { 
+export function buildAndAppendRootForm(fields, id) {
     setScopeParams(_f.state('getFormState'));
     const form = buildForm(id, fields);
-    appendAndStyleForm(form, entity); 
+    appendAndStyleForm(form, entity);
     return Promise.resolve();
 }
 function setScopeParams(state) {
@@ -46,7 +46,7 @@ function getMainFormAndDetailPanelHtml(id, fields) {
 function getExitButtonRow() {
     const  row = _f.util('buildElem', ['div', { class: 'exit-row' }]);
     $(row).append(getExitButton());
-    return row;        
+    return row;
 }
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'exit-bttn', 'type': 'button', 'value': 'X' }
@@ -55,22 +55,22 @@ export function getExitButton() {
     return bttn;
 }
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
-function buildMainForm(fields) { 
+function buildMainForm(fields) {
     const formWin = _f.util('buildElem', ['div', { id: 'form-main', class: action }]);
     $(formWin).append([getHeader(), getForm(fields)]);
     return formWin;
 }
 /* ------------------ HEADER --------------------------------- */
 function getHeader() {
-    const title = (action == 'create' ? 'New ' : 'Editing ') + 
-        _f.util('ucfirst', [entity]);    
+    const title = (action == 'create' ? 'New ' : 'Editing ') +
+        _f.util('ucfirst', [entity]);
     return _f.util('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }
 /* ------------------------- FORM --------------------------------------- */
 function getForm(fields) {
-    const form = buildFormElem();  
+    const form = buildFormElem();
     $(form).append([
-        buildEntityFieldContainer(fields), 
+        buildEntityFieldContainer(fields),
         _f.elems('getFormFooter', [entity, 'top', action])
     ]);
     return form;
@@ -86,7 +86,7 @@ function buildFormElem() {
 function buildEntityFieldContainer(fields) {
     const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
     const div = _f.util('buildElem', ['div', attr]);
-    $(div).append(fields); 
+    $(div).append(fields);
     return div;
 }
 /* ======================= APPEND AND STYLE ================================= */

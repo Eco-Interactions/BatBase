@@ -5,10 +5,10 @@ var orgnlFeedback = {};
 var submitDisabled = true;
 var noteHasChanges = statusHasChanges = asgnUserHasChanges = false;
 
-requireCss();              
+requireCss();
 
 function requireCss() {
-	require('../../../styles/css/feedback-viewer.css');	
+	require('../../../styles/css/feedback-viewer.css');
 }
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
@@ -32,7 +32,7 @@ function createPopUp(feedback) {
 	$viewerPopup = $('<div id="feedback-viewer-popup"></div>');
 	var container = $('<div id="feedback-container"></div>');
 	var fromTxt = feedback.from.username + formatDate(feedback.submitted.date);
-	$asgnUsrElem = createUserSelect(feedback.users, feedback.assigned.id); 
+	$asgnUsrElem = createUserSelect(feedback.users, feedback.assigned.id);
 	$statusElem = createStatusSelect(feedback.status);
 	$adminNotesElem = $('<textarea id="admn-notes" placeholder="Add notes about this feedback here..."></textarea>').text(feedback.notes);
 

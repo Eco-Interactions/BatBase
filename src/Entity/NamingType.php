@@ -46,7 +46,7 @@ class NamingType
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -158,7 +158,7 @@ class NamingType
     {
         return $this->updatedBy;
     }
-    
+
     /**
      * Get string representation of object.
      *

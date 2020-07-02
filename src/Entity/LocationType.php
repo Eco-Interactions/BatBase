@@ -81,7 +81,7 @@ class LocationType
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -324,7 +324,7 @@ class LocationType
     {
         return $this->updatedBy;
     }
-    
+
     /**
      * Get string representation of object.
      *

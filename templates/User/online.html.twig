@@ -1,7 +1,7 @@
 {% extends "layout.html.twig" %}
 
 {% block headline %}Users Active In The Last 24 Hours (Current time: {{ "now"|date("H:i:s", 'America/Los_Angeles') }}){% endblock %}
-	
+
 {% block datatable %}online_users_tbl{% endblock datatable %}
 
 {% block detail %}

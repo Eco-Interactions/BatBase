@@ -72,7 +72,7 @@ class PublicationType
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -215,7 +215,7 @@ class PublicationType
     }
 
     /**
-     * Returns an array of Publication ids. 
+     * Returns an array of Publication ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publications")
      */

@@ -7,7 +7,7 @@ UniqueValues.prototype.init = function (params) {                               
     this.valueGetter = params.valueGetter;
     this.colDef = params.colDef;
     this.filterActive = true;
-    this.filterChangedCallback = params.filterChangedCallback; 
+    this.filterChangedCallback = params.filterChangedCallback;
     this.rowsInBodyContainer = {};
     this.eGui = document.createElement('div');
     this.eGui.innerHTML = '<div>' +
@@ -48,7 +48,7 @@ UniqueValues.prototype.doesFilterPass = function (node) {
         }
         return false;
     } else { return this.model.isValueSelected(value); }
-    
+
     return true;
 }
 UniqueValues.prototype.getApi = function () { // Not Working??
@@ -61,7 +61,7 @@ UniqueValues.prototype.createApi = function () {
         isFilterActive: function () {
             return model.isFilterActive();
         },
-        selectEverything: function () { 
+        selectEverything: function () {
             that.eSelectAll.checked = true;
             model.selectEverything();
         },
@@ -101,19 +101,19 @@ UniqueValues.prototype.createApi = function () {
             that.eSelectAll.checked = dataModel === null ? true : false;
             model.setModel(dataModel);
             that.filterChangedCallback();
-        }, 
+        },
         refreshHeader: function() {
             tblOpts.api.refreshHeader();
         }
-    };  
-}  
+    };
+}
 // optional methods
 UniqueValues.prototype.afterGuiAttached = function(params) {
     this.refreshVirtualRows();
 };
 UniqueValues.prototype.onNewRowsLoaded = function () {}
-UniqueValues.prototype.onAnyFilterChanged = function () {                   
-    var colFilterModel = this.model.getModel();       
+UniqueValues.prototype.onAnyFilterChanged = function () {
+    var colFilterModel = this.model.getModel();
     if ( colFilterModel === null ) { return; }
     var col = Object.keys(colFilterModel)[0];
     var colFilterIconName = col + 'ColFilterIcon';                              //console.log("colFilterIconName = %O", colFilterIconName)
@@ -132,7 +132,7 @@ UniqueValues.prototype.createGui = function () {
     this.eListContainer.style.height = (this.model.getUniqueValueCount() * 20) + "px";
     removeAllChildren(this.eListContainer);
     this.eSelectAll.onclick = this.onSelectAll.bind(this);
-    if (this.model.isEverythingSelected()) { this.eSelectAll.checked = true; 
+    if (this.model.isEverythingSelected()) { this.eSelectAll.checked = true;
     } else if (this.model.isNothingSelected()) { this.eSelectAll.checked = false; }
 };
 UniqueValues.prototype.onSelectAll = function () {
@@ -218,11 +218,11 @@ UniqueValues.prototype.onCheckboxClicked = function (eCheckbox, value) {
 /*------------------------UnqValsColumnFilterModel----------------------------------*/
 /** Class Function */
 function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters) { //console.log("UnqValsColumnFilterModel.prototype.init. arguments = %O", arguments);
-    this.colDef = colDef;                                                       
-    this.rowModel = rowModel;                                                   
-    this.valueGetter = valueGetter; 
-    this.doesRowPassOtherFilters = doesRowPassOtherFilters; 
-    this.filterParams = this.colDef.filterParams;  
+    this.colDef = colDef;
+    this.rowModel = rowModel;
+    this.valueGetter = valueGetter;
+    this.doesRowPassOtherFilters = doesRowPassOtherFilters;
+    this.filterParams = this.colDef.filterParams;
     this.usingProvidedSet = this.filterParams && this.filterParams.values;
     this.createAllUniqueValues();
     this.createAvailableUniqueValues();
@@ -234,18 +234,18 @@ UnqValsColumnFilterModel.prototype.createAllUniqueValues = function () {
     if (this.usingProvidedSet) {
         let uniqueValues = toStrings(this.filterParams.values);
         this.allUniqueValues = getUniqueValuesPresent.bind(this)(uniqueValues);
-    } else { 
-        this.allUniqueValues = toStrings(this.getUniqueValues()); 
-        this.allUniqueValues.sort();  
-        if (this.allUniqueValues[0] === '( Blanks )') { 
+    } else {
+        this.allUniqueValues = toStrings(this.getUniqueValues());
+        this.allUniqueValues.sort();
+        if (this.allUniqueValues[0] === '( Blanks )') {
             const blank = this.allUniqueValues.shift();
             this.allUniqueValues.push(blank);
         }
     }
-     
+
     function getUniqueValuesPresent(allValues) {
-        const tableValues = this.getUniqueValues();  
-        return allValues.filter(v => { 
+        const tableValues = this.getUniqueValues();
+        return allValues.filter(v => {
             return tableValues.find(tV => tV ? tV.includes(v) : !v ? true : false)
         });
     }
@@ -284,20 +284,20 @@ UnqValsColumnFilterModel.prototype.selectEverything = function () {
 };
 UnqValsColumnFilterModel.prototype.selectNothing = function () {
     this.selectedValuesMap = {};
-    this.selectedValuesCount = 0;  
+    this.selectedValuesCount = 0;
 };
 UnqValsColumnFilterModel.prototype.unselectValue = function (value) {
     if (this.selectedValuesMap[value] !== undefined) {
-        if (value == '( Blanks )') { 
+        if (value == '( Blanks )') {
             delete this.selectedValuesMap['null'];
         }
         delete this.selectedValuesMap[value];
         this.selectedValuesCount--;
     }
 };
-UnqValsColumnFilterModel.prototype.selectValue = function (value) {   
+UnqValsColumnFilterModel.prototype.selectValue = function (value) {
     if (this.selectedValuesMap[value] === undefined) {
-        if (value == '( Blanks )') { 
+        if (value == '( Blanks )') {
             this.selectedValuesMap['null'] = null;
         }
         this.selectedValuesMap[value] = null;
@@ -311,10 +311,10 @@ UnqValsColumnFilterModel.prototype.isNothingSelected = function () {
     return this.allUniqueValues.length === 0;
 };
 /* Returns true if a selected value is present in row node. */
-UnqValsColumnFilterModel.prototype.isValueSelected = function (value) {  
-    if (this.selectedValuesMap[value] !== undefined) { return true; }  
-    const selectedValues = Object.keys(this.selectedValuesMap); 
-    for (let i = selectedValues.length - 1; i >= 0; i--) { 
+UnqValsColumnFilterModel.prototype.isValueSelected = function (value) {
+    if (this.selectedValuesMap[value] !== undefined) { return true; }
+    const selectedValues = Object.keys(this.selectedValuesMap);
+    for (let i = selectedValues.length - 1; i >= 0; i--) {
         if (!value && !selectedValues[i]) { return true; }
         if (value && value.includes(selectedValues[i])) { return true; }
     }
@@ -329,13 +329,13 @@ UnqValsColumnFilterModel.prototype.getDisplayedValue = function (index) {
 UnqValsColumnFilterModel.prototype.isFilterActive = function () {
     return this.allUniqueValues.length !== this.selectedValuesCount;
 };
-UnqValsColumnFilterModel.prototype.getModel = function () {  
+UnqValsColumnFilterModel.prototype.getModel = function () {
     if (!this.isFilterActive()) { return null; }
     const model = {};
     const column = this.colDef.field;
     model[column] = Object.keys(this.selectedValuesMap).map( k => {
         return k == 'null' ? '( Blanks )' : k;
-    });  
+    });
     return model;
 };
 UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
@@ -345,9 +345,9 @@ UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
             if (this.allUniqueValues.indexOf(value) >= 0) {
                 this.selectValue(value);
             } else {
-                console.warn('Value [' + value + '] is not a valid value for filter'); 
+                console.warn('Value [' + value + '] is not a valid value for filter');
                 if (model.length == 1) {
-                    tState().get('api').showNoRowsOverlay(); 
+                    tState().get('api').showNoRowsOverlay();
                 }
             }
         });

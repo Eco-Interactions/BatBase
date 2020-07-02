@@ -32,7 +32,7 @@ class Publication
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
-    
+
     /**
      * @var string
      *
@@ -84,7 +84,7 @@ class Publication
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     /**
      * @var \DateTime
      *
@@ -218,7 +218,7 @@ class Publication
     }
 
     /**
-     * Get the Publication Type id and displayName.   
+     * Get the Publication Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publicationType")
      * @Groups({"normalized", "flattened"})
@@ -226,9 +226,9 @@ class Publication
     public function getPublicationTypeData()
     {
         if ($this->publicationType) {
-            return [ 
-                "id" => $this->publicationType->getId(),  
-                "displayName" => $this->publicationType->getDisplayName() 
+            return [
+                "id" => $this->publicationType->getId(),
+                "displayName" => $this->publicationType->getDisplayName()
             ];
         }
     }
@@ -258,7 +258,7 @@ class Publication
     }
 
     /**
-     * Get the Source id.   
+     * Get the Source id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("source")
      * @Groups({"normalized"})
