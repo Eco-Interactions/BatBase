@@ -36,12 +36,12 @@ export function syncLocalDbWithServer(lclUpdtdAt) {                             
     _db.fetchServerData('data-state').then(checkAgainstLocalDataState);
     _db.getData('user').then(checkUserData);
 
-    function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
+    function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkAgainstLocalDataState. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
         if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _db.resetStoredData(); }
         const entities = checkEachEntityForUpdates(srvrUpdtdAt.state);
         return entities.length ? syncDb(entities, srvrUpdtdAt.state) : initSearchPage();
     }
-    function checkEachEntityForUpdates(srvrUpdtdAt) {                           //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt.state, lclUpdtdAt);
+    function checkEachEntityForUpdates(srvrUpdtdAt) {                           //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
         return Object.keys(srvrUpdtdAt).map(entity => {                         //console.log('   --[%s] updates ? ', entity, entityHasUpdates(srvrUpdtdAt[entity], lclUpdtdAt[entity]));
             if (entity === 'System') { return false; }
             return entityHasUpdates(srvrUpdtdAt[entity], lclUpdtdAt[entity]) ?

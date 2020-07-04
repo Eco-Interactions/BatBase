@@ -77,13 +77,7 @@ function setData(url, data) {                                                   
  */
 function storeServerData(data) {                                                //console.log("data received = %O", data);
     for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, data[entity]);
-        let eData = entity === 'taxon' ? mergeTaxonData() : parseData(data[entity]);
-        _db.setDataInMemory(entity, eData);
-    }
-
-    function mergeTaxonData() {
-        const bats = _db.getMmryData('taxon') || {};
-        return Object.assign(bats, parseData(data.taxon));
+        _db.setDataInMemory(entity, parseData(data[entity]));
     }
 }
 /**
@@ -138,6 +132,7 @@ function storeTaxaByLevelAndRealm(taxa, realms, roots) {
         separateAndStoreRealmTaxa(taxon, realm);
     }
     _db.setDataInMemory('realm', realms);
+    _db.setDataInMemory('taxon', taxa);
 
     function separateAndStoreRealmTaxa(taxon, realm) {
         const data = {};

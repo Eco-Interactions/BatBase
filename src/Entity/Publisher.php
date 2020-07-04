@@ -287,13 +287,17 @@ class Publisher
     }
 
     /**
-     * Set createdBy user.
+     * Set created datetime.
      *
-     * @param \App\Entity\User $user
+     * @param \DateTime $createdAt
+     *
+     * @return Publisher
      */
-    public function setCreatedBy(\App\Entity\User $user)
+    public function setCreated(\DateTime $createdAt)
     {
-        $this->createdBy = $user;
+        $this->created = $createdAt;
+
+        return $this;
     }
 
     /**
@@ -307,6 +311,16 @@ class Publisher
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @param \App\Entity\User $user
+     */
+    public function setCreatedBy(\App\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get createdBy user.
      *
      * @return \App\Entity\User
@@ -317,13 +331,15 @@ class Publisher
     }
 
     /**
-     * Set last updated by user.
+     * Set last-updated datetime.
      *
-     * @param \App\Entity\User $user
+     * @param \DateTime $updatedAt
+     *
+     * @return Publisher
      */
-    public function setUpdatedBy(\App\Entity\User $user)
+    public function setUpdated(\DateTime $updatedAt)
     {
-        $this->updatedBy = $user;
+        $this->updated = $updatedAt;
 
         return $this;
     }
@@ -336,6 +352,18 @@ class Publisher
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @param \App\Entity\User $user
+     */
+    public function setUpdatedBy(\App\Entity\User $user)
+    {
+        $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**

@@ -20,9 +20,9 @@ App\Entity\Author:
         lastName: Gardner
         fullName: 'Alfred L Gardner'
         source: '@Source-10'  #634
-        # # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Author-2:   #315
         slug: bloedel
@@ -31,9 +31,9 @@ App\Entity\Author:
         lastName: Bloedel
         fullName: 'P Bloedel'
         source: '@Source-11'  #666
-        # # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Author-3:  #250
         slug: baker-h
@@ -43,9 +43,9 @@ App\Entity\Author:
         lastName: Baker
         fullName: 'Herbert G Baker'
         source: '@Source-12'  #110
-        # # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Author-4:  #274
         slug: cockle
@@ -54,9 +54,9 @@ App\Entity\Author:
         lastName: Cockle
         fullName: 'Anya Cockle'
         source: '@Source-13' #624
-        # # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-24 17:03:26", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\Citation:
     Citation-1: #237
@@ -67,18 +67,18 @@ App\Entity\Citation:
         publicationPages: 232-235
         citationType: '@CitationType-2'  #changed
         source: '@Source-1' #1
-        # # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
     Citation-2:  #225
         displayName: 'Observations on the life histories of Panama bats'
         title: 'Observations on the life histories of Panama bats'
         fullText: 'Will be auto-generated' #'Bloedel, P. 1955. Observations on the life histories of Panama bats. Journal of Mammalogy 36: 232-235.'
         citationType: '@CitationType-3' #
         source: '@Source-3'  #12
-        # # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
     Citation-3:   #223
         displayName: 'Two cases of bat pollination in Central America'
         title: 'Two cases of bat pollination in Central America'
@@ -87,326 +87,326 @@ App\Entity\Citation:
         publicationPages: 187-197
         citationType: '@CitationType-1' #
         source: '@Source-6' #36
-        # # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
     Citation-4:  #144
         displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
         title: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
         fullText: 'Will be auto-generated' #'Cockle, A. 1997. Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise. Ph.D. Dissertation. Université de Paris 6, Paris.'
         citationType: '@CitationType-8' #
         source: '@Source-8' #75
-        # # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\CitationType:
     CitationType-1:
         slug: article
         displayName: Article
         citations: ['@Citation-3'] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-2: #added
         slug: chapter
         displayName: Chapter
         citations: ['@Citation-1'] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-3: #added
         slug: book
         displayName: Book
         citations: ['@Citation-2'] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-4: #added
         slug: museum-record
         displayName: Museum Record
         citations: [] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-5: #added
         slug: masters-thesis
         displayName: Master's Thesis
         citations: [] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-6: #added
         slug: report
         displayName: Report
         citations: [] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-7: #added
         slug: other
         displayName: Other
         citations: [] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-8: #added
         slug: ph-d-dissertation
         displayName: Ph.D. Dissertation
         citations: ['@Citation-4'] #
-        # # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\ContentBlock:
     ContentBlock-1:
         slug: home-pg-intro
         name: 'Home Pg Intro'
         page: home
         content: "home page intro"
-        # # created: '<(new \DateTime("2016-01-08 19:54:51", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 19:54:51", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-09-14 13:59:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-14 13:59:20", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-2:
         slug: home-pg-second-col
         name: 'Home Pg Second-Col'
         page: home
         content: 'home page part 2'
-        # # created: '<(new \DateTime("2016-01-08 19:54:51", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 19:54:51", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-12-06 22:37:16", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-06 22:37:16", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-3:
         slug: about-db-data
         name: 'About Db Data'
         page: about-db
         content: 'about db'
-        # # created: '<(new \DateTime("2016-01-08 23:10:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:10:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-10-10 15:20:32", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-10-10 15:20:32", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-4:
         slug: about-db-caveats
         name: 'About Db Caveats'
         page: about-db
         content: 'db stuff'
-        # # created: '<(new \DateTime("2016-01-08 23:11:09", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:11:09", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-31 03:27:32", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-31 03:27:32", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-5:
         slug: about-db-data-map
         name: 'About Db Data Map'
         page: about-db
         content: 'data map'
-        # # created: '<(new \DateTime("2016-01-08 23:13:05", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:13:05", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 20:19:05", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 20:19:05", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-6:
         slug: definitions-interaction-types
         name: 'Definitions Interaction Types'
         page: definitions
         content: "Interaction types"
-        # # created: '<(new \DateTime("2016-01-08 23:14:21", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:14:21", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-10-10 15:24:25", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-10-10 15:24:25", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-7:
         slug: definitions-habitat-types
         name: 'Definitions Habitat Types'
         page: definitions
         content: 'habitat types'
-        # # created: '<(new \DateTime("2016-01-08 23:15:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:15:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-09-16 13:01:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-16 13:01:19", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-8:
         slug: about-pg-history
         name: 'About Pg History'
         page: about
         content: "Batbase.org history"
-        # # created: '<(new \DateTime("2016-01-08 23:17:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:17:49", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-09-15 18:07:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-15 18:07:10", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-9:
         slug: about-pg-contact
         name: 'About Pg Contact'
         page: about
         content: 'contact us'
-        # # created: '<(new \DateTime("2016-01-08 23:18:38", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:18:38", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 20:17:24", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 20:17:24", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-10:
         slug: team-cullen
         name: 'Team Cullen'
         page: about
         content: 'cullen bio'
-        # # created: '<(new \DateTime("2016-01-08 23:19:55", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:19:55", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 22:23:38", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 22:23:38", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-11:
         slug: team-tuli
         name: 'Team Tuli'
         page: about
         content: 'tuli bio'
-        # # created: '<(new \DateTime("2016-01-08 23:20:35", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:20:35", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 22:24:02", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 22:24:02", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-12:
         slug: team-taylor
         name: 'Team Taylor'
         page: about
         content: 'taylor bio'
-        # # created: '<(new \DateTime("2016-01-08 23:21:13", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-08 23:21:13", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 22:27:05", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 22:27:05", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-13:
         slug: member-welcome
         name: 'Member Welcome'
         page: home
         content: "Welcome new member"
-        # # created: '<(new \DateTime("2016-01-09 00:14:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-01-09 00:14:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-29 18:41:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-29 18:41:10", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-14:
         slug: team-sarah
         name: 'Team Sarah'
         page: about
         content: 'sarah bio'
-        # # created: '<(new \DateTime("2016-07-26 02:45:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-26 02:45:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-28 02:51:39", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-28 02:51:39", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-15:
         slug: future-developments
         name: 'Future Developments'
         content: 'future dev'
-        # # created: '<(new \DateTime("2016-07-26 18:21:38", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-26 18:21:38", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-26 18:21:38", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-26 18:21:38", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-16:
         slug: about-db-how-to-use
         name: 'About Db How To Use'
         page: about-db
         content: 'how to use db'
-        # # created: '<(new \DateTime("2016-07-27 18:58:57", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 18:58:57", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-10-09 17:33:31", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-10-09 17:33:31", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-17:
         slug: search-tips
         name: 'Search Tips'
         page: search
         content: 'search tips'
-        # # created: '<(new \DateTime("2016-07-27 19:53:06", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 19:53:06", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 19:53:06", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 19:53:06", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-18:
         slug: terms-and-conditions
         name: 'Terms and Conditions'
         content: 'toc'
-        # # created: '<(new \DateTime("2016-07-27 20:01:16", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 20:01:16", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-27 20:01:16", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-27 20:01:16", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-19:
         slug: sources-main
         name: 'Sources Main'
         page: sources
         content: 'biblio'
-        # # created: '<(new \DateTime("2016-07-27 20:57:17", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 20:57:17", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # # updated: '<(new \DateTime("2016-07-31 01:27:07", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-31 01:27:07", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-20:
         slug: about-pg-acknowledgements
         name: 'About Pg Acknowledgements'
         page: about
         content: 'acknowledgements'
-        # created: '<(new \DateTime("2016-07-27 22:11:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 22:11:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-09-15 18:06:51", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-15 18:06:51", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-21:
         slug: about-pg-future-dev
         name: 'About Pg Future Dev'
         page: about
         content: 'future dev'
-        # created: '<(new \DateTime("2016-07-27 22:21:10", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 22:21:10", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-28 02:49:30", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-28 02:49:30", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-22:
         slug: about-db-tips
         name: 'About Db Tips'
         page: about-db
         content: 'tips'
-        # created: '<(new \DateTime("2016-07-27 23:39:24", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-27 23:39:24", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-09-14 14:11:06", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-14 14:11:06", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-23:
         slug: future-developments-overview
         name: 'Future Developments Overview'
         page: future-developments
         content: "Developments are coming"
-        # created: '<(new \DateTime("2016-07-28 00:21:58", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-28 00:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-09-16 13:00:22", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-16 13:00:22", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-24:
         slug: future-developments-announcements
         name: 'Future Developments Announcements'
         page: future-developments
         content: 'future Announcements'
-        # created: '<(new \DateTime("2016-07-28 00:39:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-28 00:39:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-10-10 17:32:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-10-10 17:32:10", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-25:
         slug: about-pg-announcements
         name: 'About Pg Announcements'
         page: about
         content: 'about Announcements'
-        # created: '<(new \DateTime("2016-07-28 01:06:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-28 01:06:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-09-14 14:08:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-14 14:08:26", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-26:
         slug: future-publications-header
         name: 'Future Publications Header'
         page: future-developments
         content: 'future dev'
-        # created: '<(new \DateTime("2016-07-28 01:12:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-28 01:12:26", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-29 05:30:40", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-29 05:30:40", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     ContentBlock-27:
         slug: how-to-cite
         name: 'How To Cite'
         page: about-db
         content: 'how to cite'
-        # created: '<(new \DateTime("2016-07-31 03:06:57", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-31 03:06:57", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-09-14 14:10:46", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-09-14 14:10:46", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-28:
         slug: how-to-contribute
         name: 'How to contribute'
         page: about-db
         content: 'how to contribute'
-        # created: '<(new \DateTime("2016-10-09 17:22:44", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-10-09 17:22:44", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-10-10 15:20:44", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-10-10 15:20:44", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     ContentBlock-29:
         slug: new-data-entry
         name: 'New data entry'
         page: about-db
         content: 'data entry'
-        # created: '<(new \DateTime("2016-10-09 17:24:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-10-09 17:24:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-10-10 15:21:04", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-10-10 15:21:04", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
 App\Entity\Contribution:
     Contribution-1:  #517
@@ -414,111 +414,111 @@ App\Entity\Contribution:
         authorSource: '@Source-10'  #634
         isEditor: false  #634  ----
         ord: '1'  #634  ----
-        # created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
     Contribution-2:  #541
         workSource: '@Source-3' #12
         authorSource: '@Source-11'  #666
         isEditor: false  #634  ----
         ord: '1'  #634  ----
-        # created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
     Contribution-3:  #475
         workSource: '@Source-6'  #36
         authorSource: '@Source-12'  #110
         isEditor: false  #634  ----
         ord: '1'  #634  ----
-        # created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
     Contribution-4:  #504
         workSource: '@Source-8'  #75
         authorSource: '@Source-13' #624
         isEditor: false  #634  ----
         ord: '1'  #634  ----
-        # created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
     Contribution-5:  #541 ----
         workSource: '@Source-2' #12
         authorSource: '@Source-11'  #666
         isEditor: true  #634  ----
         ord: '1'  #634  ----
-        # created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\Feedback:
     Feedback-1:
         status: 3
         topic: Testing
         route: /publication/
         content: 'Testing: one, two, three.'
-        # created: '<(new \DateTime("2016-06-15 04:58:19", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-06-15 04:58:19", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-06-15 04:58:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-06-15 04:58:19", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Feedback-2:
         status: 3
         topic: 'Date is shown as page number'
         route: /citation/
         content: 'Muchhala et al. 2005. The date ''2005'' shows up in the page field.'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
 App\Entity\GeoJson:
     GeoJson-1:
         type: 'Point'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
         __calls:
           - setCoordinates: [<{geo1}>]
           - setDisplayPoint: [<{geo1}>]
     GeoJson-2:
         type: 'MultiPolygon'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
         __calls:
           - setCoordinates: [<{geo2_c}>]
           - setDisplayPoint: [<{geo2_d}>]
     GeoJson-3:
         type: 'Point'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
         __calls:
           - setCoordinates: [<{geo3}>]
           - setDisplayPoint: [<{geo3}>]
     GeoJson-4:
         type: 'MultiPolygon'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
         __calls:
           - setCoordinates: [<{geo4_c}>]
           - setDisplayPoint: [<{geo4_d}>]
     GeoJson-5:
         type: 'MultiPolygon'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
         __calls:
           - setCoordinates: [<{geo5_c}>]
           - setDisplayPoint: [<{geo5_d}>]
     GeoJson-6:
         type: 'Point'
-        # created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-3'
-        # updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-3'
         __calls:
           - setCoordinates: [<{geo6}>]
@@ -528,74 +528,74 @@ App\Entity\HabitatType:
         slug: forest
         displayName: Forest
         locations: ['@Location-10', '@Location-33', '@Location-35', '@Location-45', '@Location-48', '@Location-58', '@Location-61']
-        # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     HabitatType-2:
         slug: savanna
         displayName: Savanna
         locations: ['@Location-11', '@Location-22', '@Location-34', '@Location-46', '@Location-57', '@Location-62']
-        # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     HabitatType-3:
         slug: desert
         displayName: Desert
         locations: ['@Location-9', '@Location-20', '@Location-32', '@Location-44', '@Location-56', , '@Location-63']
-        # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     HabitatType-4:
         slug: shrubland
         displayName: Shrubland
         locations: ['@Location-2', '@Location-13', '@Location-25', '@Location-55', '@Location-37', '@Location-64']
-        # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     HabitatType-5:
         slug: captivity
         displayName: Captivity
         locations: ['@Location-3', '@Location-14', '@Location-26', '@Location-38', '@Location-54', '@Location-60']
-        # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     HabitatType-6:
         slug: artificial-landscape
         displayName: 'Artificial Landscape'
         locations: ['@Location-8', '@Location-19', '@Location-31', '@Location-43', '@Location-53', '@Location-65']
-        # created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     HabitatType-7:
         slug: grassland
         displayName: Grassland
         locations: ['@Location-4', '@Location-15', '@Location-27', '@Location-39', '@Location-52', '@Location-66']
-        # created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
     HabitatType-8:
         slug: wetlands
         displayName: Wetlands
         locations: ['@Location-5', '@Location-16', '@Location-28', '@Location-40', '@Location-51', '@Location-67']
-        # created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
     HabitatType-9:
         slug: rocky-areas
         displayName: 'Rocky Areas'
         locations: ['@Location-6', '@Location-17', '@Location-29', '@Location-41', '@Location-50', '@Location-68']
-        # created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
     HabitatType-10:
         slug: caves-and-subterranean-areas
         displayName: 'Caves and Subterranean Areas'
         locations: ['@Location-7', '@Location-18', '@Location-30', '@Location-42', '@Location-49', '@Location-69']
-        # created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-09 11:54:10", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\Interaction:
     Interaction-1:
         source: '@Source-1' #
@@ -604,9 +604,9 @@ App\Entity\Interaction:
         subject: '@Taxon-7' #40
         object: '@Taxon-9' #859
         tags: ['@Tag-3'] #Flower
-        # created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-2'
-        # updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-2:
         source: '@Source-1' #
         interactionType: '@InteractionType-2' #Consumption
@@ -614,9 +614,9 @@ App\Entity\Interaction:
         subject: '@Taxon-7' #40
         object: '@Taxon-11' #899
         tags: ['@Tag-2'] #Seed
-        # created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-3:
         source: '@Source-3' #
         interactionType: '@InteractionType-7' #Host
@@ -624,9 +624,9 @@ App\Entity\Interaction:
         subject: '@Taxon-13' #120
         object: '@Taxon-16'  #74
         tags: [] #
-        # created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-4:  #3121
         source: '@Source-1' #
         interactionType: '@InteractionType-5' #Transport
@@ -634,9 +634,9 @@ App\Entity\Interaction:
         subject: '@Taxon-17' #1250
         object: '@Taxon-8' #218
         tags: ['@Tag-7'] #Bryophyte Fragment
-        # created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-5:   #973
         source: '@Source-6' #36
         interactionType: '@InteractionType-8' #Roost
@@ -644,9 +644,9 @@ App\Entity\Interaction:
         subject: '@Taxon-5'  #6
         object: '@Taxon-20'  #564
         tags: ['@Tag-8'] #Wood
-        # created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-6: #56
         note: 'Coordinates for Les Nouragues are taken from Delaval et al.2005; elevation range of 40 to 100 mt is taken from Charles-Dominique 2001.'
         source: '@Source-8' #75
@@ -655,9 +655,9 @@ App\Entity\Interaction:
         subject: '@Taxon-22' #58
         object: '@Taxon-25' #528
         tags: ['@Tag-4'] #Fruit
-        # created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-7: #added
         note: 'Coordinates for Les Nouragues are taken from Delaval et al.2005; elevation range of 40 to 100 mt is taken from Charles-Dominique 2001.'
         source: '@Source-8' #75
@@ -666,9 +666,9 @@ App\Entity\Interaction:
         subject: '@Taxon-22' #58
         object: '@Taxon-8'  #218
         tags: ['@Tag-6'] #Arthropod
-        # created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-8:   #added
         source: '@Source-6' #36
         interactionType: '@InteractionType-1' #Visitation
@@ -676,9 +676,9 @@ App\Entity\Interaction:
         subject: '@Taxon-5'  #6
         object: '@Taxon-20'  #564
         tags: ['@Tag-3'] #Flower
-        # created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-9: #added
         note: 'Bat cited as Leptonycteris sanborni'
         source: '@Source-1'  #
@@ -687,9 +687,9 @@ App\Entity\Interaction:
         subject: '@Taxon-6' #
         object: '@Taxon-23'  #
         tags: ['@Tag-5'] #Leaf
-        # created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:36", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-10: #added
         note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
         source: '@Source-3'  #
@@ -698,102 +698,102 @@ App\Entity\Interaction:
         subject: '@Taxon-21' #
         object: '@Taxon-23'  #
         tags: [] #
-        # created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\InteractionType:
     InteractionType-1:
         slug: visitation
         displayName: Visitation
         validTags: ['@Tag-3']
         interactions: ['@Interaction-8']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-2:
         slug: consumption
         displayName: Consumption
         interactions: ['@Interaction-2', '@Interaction-6']
         validTags: ['@Tag-2', '@Tag-3', '@Tag-4', '@Tag-5']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-3:
         slug: seed-dispersal
         displayName: Seed Dispersal
         interactions: ['@Interaction-5']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-4:
         slug: pollination
         displayName: Pollination
         validTags: ['@Tag-3']
         interactions: ['@Interaction-1']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-5:
         slug: transport
         displayName: Transport
         interactions: ['@Interaction-4', '@Interaction-7']
         validTags: ['@Tag-6', '@Tag-7']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-6:
         slug: cohabitation
         displayName: Cohabitation
         interactions: []
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-7:
         slug: host
         displayName: Host
         interactions: ['@Interaction-3']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-8:
         slug: roost
         displayName: Roost
         interactions: ['@Interaction-5', '@Interaction-9']
         validTags: ['@Tag-5', '@Tag-8']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-9:
         slug: prey
         displayName: Prey
         interactions: ['@Interaction-10']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-10:
         slug: hematophagy
         displayName: Hematophagy
         interactions: []
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     InteractionType-11:
         slug: predation
         displayName: Predation
         interactions: []
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\Level:
     Level-1: #7
@@ -801,72 +801,72 @@ App\Entity\Level:
         ordinal: 10
         pluralName: Kingdoms
         taxa: ['@Taxon-3', '@Taxon-1']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-2: #6
         displayName: Phylum
         ordinal: 30
         pluralName: Phyla
         taxa: ['@Taxon-4'] #
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-3: #5
         displayName: Class
         ordinal: 50
         pluralName: Classes
         taxa: ['@Taxon-27'] #
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-4: #
         displayName: Order
         ordinal: 70
         pluralName: Orders
         taxa: ['@Taxon-2', '@Taxon-8']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-5: #3
         displayName: Family
         ordinal: 90
         pluralName: Families
         taxa: ['@Taxon-5', '@Taxon-9', '@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-6: #2
         displayName: Genus
         ordinal: 110
         pluralName: Genera
         taxa: ['@Taxon-6', '@Taxon-11', '@Taxon-12', '@Taxon-15', '@Taxon-19', '@Taxon-21', '@Taxon-24']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-7: #1
         displayName: Species
         ordinal: 130
         pluralName: Species
         taxa: ['@Taxon-7', '@Taxon-13', '@Taxon-16', '@Taxon-17', '@Taxon-20', '@Taxon-22', '@Taxon-25']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Level-8: #1
         displayName: Domain
         ordinal: 5
         pluralName: Domains
         taxa: ['@Taxon-26', '@Taxon-30']
-        # created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\Location:
     Location-1:
@@ -874,99 +874,99 @@ App\Entity\Location:
         childLocs: ['@Location-2', '@Location-3', '@Location-4', '@Location-5', '@Location-6', '@Location-7', '@Location-8', '@Location-9', '@Location-10', '@Location-11', '@Location-12', '@Location-24']
         locationType: '@LocationType-5'
         geoJson: '@GeoJson-1'
-        # created: '<(new \DateTime("2016-11-18 01:37:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-18 01:37:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-2:
         displayName: 'Central America-Shrubland'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-4'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-3:
         displayName: 'Central America-Captivity'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-5'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-4:
         displayName: 'Central America-Grassland'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-7'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-5:
         displayName: 'Central America-Wetlands'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-6:
         displayName: 'Central America-Rocky Areas'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-9'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-7:
         displayName: 'Central America-Caves and Subterranean Areas'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-10'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-8:
         displayName: 'Central America-Artificial Landscape'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-6'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-9:
         displayName: 'Central America-Desert'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-3'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-10:
         displayName: 'Central America-Forest'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-1'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-11:
         displayName: 'Central America-Savanna'
         parentLoc: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-2'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-12:
         displayName: Panama
@@ -976,99 +976,99 @@ App\Entity\Location:
         locationType: '@LocationType-4'
         geoJson: '@GeoJson-2'
         interactions: ['@Interaction-1', '@Interaction-2']
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-13:
         displayName: 'Panama-Shrubland'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-4'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-14:
         displayName: 'Panama-Captivity'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-5'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-15:
         displayName: 'Panama-Grassland'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-7'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-16:
         displayName: 'Panama-Wetlands'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-17:
         displayName: 'Panama-Rocky Areas'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-9'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-18:
         displayName: 'Panama-Caves and Subterranean Areas'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-10'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-19:
         displayName: 'Panama-Artificial Landscape'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-6'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-20:
         displayName: 'Panama-Desert'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-3'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-21:
         displayName: 'Panama-Forest'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-1'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-22:
         displayName: 'Panama-Savanna'
         parentLoc: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-2'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-23:
         displayName: 'Summit Experimental Gardens'
@@ -1080,9 +1080,9 @@ App\Entity\Location:
         geoJson: '@GeoJson-3'
         locationType: '@LocationType-1'
         habitatType: '@HabitatType-1'
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:27", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:27", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-24:
         displayName: 'Costa Rica'
@@ -1092,99 +1092,99 @@ App\Entity\Location:
         locationType: '@LocationType-4'
         interactions: ['@Interaction-4']
         geoJson: '@GeoJson-4'
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-25:
         displayName: 'Costa Rica-Shrubland'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-4'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-26:
         displayName: 'Costa Rica-Captivity'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-5'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-27:
         displayName: 'Costa Rica-Grassland'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-7'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-28:
         displayName: 'Costa Rica-Wetlands'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-29:
         displayName: 'Costa Rica-Rocky Areas'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-9'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-30:
         displayName: 'Costa Rica-Caves and Subterranean Areas'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-10'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-31:
         displayName: 'Costa Rica-Artificial Landscape'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-6'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-32:
         displayName: 'Costa Rica-Desert'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-3'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-33:
         displayName: 'Costa Rica-Forest'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-1'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-34:
         displayName: 'Costa Rica-Savanna'
         parentLoc: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-2'
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-35:
         displayName: 'Santa Ana-Forest'
@@ -1192,206 +1192,206 @@ App\Entity\Location:
         locationType: '@LocationType-2'
         interactions: ['@Interaction-5']
         habitatType: '@HabitatType-1'
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-16 16:38:57", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 16:38:57", new \DateTimeZone("America/Los_Angeles")))>'
     Location-36: #7
         displayName: 'South America'
         childLocs: ['@Location-37', '@Location-38', '@Location-39', '@Location-40', '@Location-41', '@Location-42', '@Location-43', '@Location-44', '@Location-45', '@Location-46', '@Location-47']
         locationType: '@LocationType-5' #
         geoJson: '@GeoJson-5'
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-37: #82
         displayName: 'South America-Shrubland'
         parentLoc: '@Location-36' #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-4' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-38:  #93
         displayName: 'South America-Captivity'
         parentLoc: '@Location-36' #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-5' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-39:  #117
         displayName: 'South America-Grassland'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-7' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-40:  #138
         displayName: 'South America-Wetlands'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-8' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-41: #161
         displayName: 'South America-Rocky Areas'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-9' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-42:  #184
         displayName: 'South America-Caves and Subterranean Areas'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-10' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-43:  #2946
         displayName: 'South America-Artificial Landscape'
         parentLoc: '@Location-36' #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-6' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-44:  #3023
         displayName: 'South America-Desert'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-3' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-45:  #3061
         displayName: 'South America-Forest'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-1' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-46:  #3073
         displayName: 'South America-Savanna'
         parentLoc: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-2' #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-47: #50
         displayName: 'French Guiana'
         parentLoc: '@Location-36'  #7
         childLocs: ['@Location-48', '@Location-49', '@Location-50', '@Location-51', '@Location-52', '@Location-53', '@Location-54', '@Location-55', '@Location-56', '@Location-57', '@Location-58']
         locationType: '@LocationType-4'  #
-        # created: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-48:  #49
         displayName: 'French Guiana-Forest'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-1'  #
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:28", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-49:  #2862
         displayName: 'French Guiana-Caves and Subterranean Areas'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-10' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-50:  #2885
         displayName: 'French Guiana-Rocky Areas'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-9' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-51:  #2914
         displayName: 'French Guiana-Wetlands'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-8' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-52:  #2940
         displayName: 'French Guiana-Grassland'
         parentLoc: '@Location-47'  #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-7' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-53:  #2969
         displayName: 'French Guiana-Artificial Landscape'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-6' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-54:  #2990
         displayName: 'French Guiana-Captivity'
         parentLoc: '@Location-47'  #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-5' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-55:  #3009
         displayName: 'French Guiana-Shrubland'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-4' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-56:  #3039
         displayName: 'French Guiana-Desert'
         parentLoc: '@Location-47' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-3' #
-        # created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-57:  #3073
         displayName: 'French Guiana-Savanna'
         parentLoc: '@Location-47'  #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-2'  #
-        # created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-58:  #51
         displayName: 'Les Nouragues'
@@ -1404,188 +1404,188 @@ App\Entity\Location:
         interactions: ['@Interaction-6'] #
         habitatType: '@HabitatType-1' #
         geoJson: '@GeoJson-6'
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-18 01:38:27", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-18 01:38:27", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-59: #added
         displayName: Unspecified
         childLocs: ['@Location-60', '@Location-61', '@Location-62', '@Location-63', '@Location-64', '@Location-65', '@Location-66', '@Location-67', '@Location-68', '@Location-69']
         locationType: '@LocationType-5' #
         interactions: ['@Interaction-10'] #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-60:  #added
         displayName: Captivity
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         interactions: ['@Interaction-9'] #
         habitatType: '@HabitatType-5' #
-        # created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2017-07-16 16:38:57", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 16:38:57", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Location-61:  #added
         displayName: Forest
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-1' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-62: #added
         displayName: Savanna
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-2' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-63: #added
         displayName: Desert
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-3' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-64: #added
         displayName: Shrubland
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-4' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-65: #added
         displayName: 'Artificial Landscape'
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-6' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-66: #added
         displayName: Grassland
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-7' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-67: #added
         displayName: Wetlands
         parentLoc: '@Location-59'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-68: #added
         displayName: 'Rocky Areas'
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-9' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-69: #added
         displayName: 'Caves and Subterranean Areas'
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-10' #
-        # created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\LocationType:
     LocationType-1:
         slug: point
         displayName: Point
         ordinal: 50
         locations: ['@Location-23', '@Location-58']
-        # created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
     LocationType-2:
         slug: area
         displayName: Area
         ordinal: 40
         locations: ['@Location-35']
-        # created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
     LocationType-3:
         slug: habitat
         displayName: Habitat
         ordinal: 30
         locations: ['@Location-2', '@Location-3', '@Location-4', '@Location-5', '@Location-6', '@Location-7', '@Location-8', '@Location-9', '@Location-10', '@Location-11', '@Location-13', '@Location-14', '@Location-15', '@Location-16', '@Location-17', '@Location-18', '@Location-19', '@Location-20', '@Location-21', '@Location-22', '@Location-25', '@Location-26', '@Location-27', '@Location-28', '@Location-29', '@Location-30', '@Location-31', '@Location-32', '@Location-33', '@Location-34', '@Location-37', '@Location-38', '@Location-39', '@Location-40', '@Location-41', '@Location-42', '@Location-43', '@Location-44', '@Location-45', '@Location-46', '@Location-48', '@Location-49', '@Location-50', '@Location-51', '@Location-52', '@Location-53', '@Location-54', '@Location-55', '@Location-56', '@Location-60', '@Location-61', '@Location-62', '@Location-63', '@Location-64', '@Location-65', '@Location-66', '@Location-67', '@Location-68', '@Location-69']
-        # created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
     LocationType-4:
         slug: country
         displayName: Country
         ordinal: 20
         locations: ['@Location-12', '@Location-24', '@Location-47']
-        # created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
     LocationType-5:
         slug: region
         displayName: Region
         ordinal: 10
         locations: ['@Location-1', '@Location-36', '@Location-59']
-        # created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\Publication:
     Publication-1:  #100
         slug: biology-of-bats-of-the-new-world-family-phyllostomatidae
         displayName: 'Biology of bats of the New World family Phyllostomatidae'
         publicationType: '@PublicationType-2' #added
         source: '@Source-2' #2
-        # # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
     Publication-2:  #97
         slug: journal-of-mammalogy
         displayName: 'Journal of Mammalogy'
         publicationType: '@PublicationType-1' #added
         source: '@Source-4' #11
-        # # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     Publication-3:  #91
         slug: revista-de-biologia-tropical
         displayName: 'Revista de Biologia Tropical'
         publicationType: '@PublicationType-1' #added
         source: '@Source-5' #35
-        # created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     Publication-4:  #22
         slug: modalites-de-dissemination-et-d-etablissement-de-lianes-cyclanthaceae-et-philodendron-en-foret-guyanaise
         displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
         publicationType: '@PublicationType-3'  #
         source: '@Source-7' #74
-        # created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\PublicationType:
     PublicationType-1: #1
         slug: journal
         displayName: Journal
         publications: ['@Publication-2', '@Publication-3'] #
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     PublicationType-2: #2
         slug: book
         displayName: Book
         publications: ['@Publication-1'] #
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     PublicationType-3: #3
         slug: thesis-dissertation
         displayName: 'Thesis/Dissertation'
         publications: ['@Publication-4'] #
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     PublicationType-4: #added
         slug: other
         displayName: Other
         publications: []
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\Publisher: #added
     Publisher-1:
         displayName: 'University of Paris VI'
@@ -1593,8 +1593,8 @@ App\Entity\Publisher: #added
         country: 'country'
         description: 'University of Paris VI (Pierre and Marie Curie University)'
         source: '@Source-9'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Publisher-2:
         displayName: 'Britanica Books'
@@ -1602,8 +1602,8 @@ App\Entity\Publisher: #added
         country: 'Britan'
         description: 'A quaint publisher house.'
         source: '@Source-14'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
 App\Entity\Realm:
     Realm-1: #1
@@ -1611,9 +1611,9 @@ App\Entity\Realm:
         displayName: Bat
         pluralName: Bats
         taxa: "[@RealmRoot-1]"
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1622,9 +1622,9 @@ App\Entity\Realm:
         displayName: Plant
         pluralName: Plants
         taxa: "[@RealmRoot-2]"
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1633,9 +1633,9 @@ App\Entity\Realm:
         displayName: Arthropod
         pluralName: Arthropods
         taxa: ['@RealmRoot-3']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{all_levels}>]
@@ -1644,9 +1644,9 @@ App\Entity\Realm:
         displayName: Bacteria
         pluralName: Bacteria
         taxa: ['@RealmRoot-4']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{all_levels}>]
@@ -1655,9 +1655,9 @@ App\Entity\Realm:
         displayName: Fish
         pluralName: Fishes
         taxa: ['@RealmRoot-5']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1666,9 +1666,9 @@ App\Entity\Realm:
         displayName: Fungi
         pluralName: Fungi
         taxa: ['@RealmRoot-6']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1677,9 +1677,9 @@ App\Entity\Realm:
         displayName: Virus
         pluralName: Viruses
         taxa: ['@RealmRoot-7']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1688,9 +1688,9 @@ App\Entity\Realm:
         displayName: Bird
         pluralName: Birds
         taxa: ['@RealmRoot-8']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1699,9 +1699,9 @@ App\Entity\Realm:
         displayName: Reptile
         pluralName: Reptiles
         taxa: ['@RealmRoot-9']  #11
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1710,9 +1710,9 @@ App\Entity\Realm:
         displayName: Amphibian
         pluralName: Amphibians
         taxa: ['@RealmRoot-10']
-        # created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
         __calls:
           - setUiLevelsShown: [<{basic_levels}>]
@@ -1720,62 +1720,62 @@ App\Entity\RealmRoot:
     RealmRoot-1:
         realm: '@Realm-1'
         taxon: '@Taxon-2'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-2:
         realm: '@Realm-2'
         taxon: '@Taxon-3'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-3:
         realm: '@Realm-3'
         taxon: '@Taxon-4'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-4:
         realm: '@Realm-4'
         taxon: '@Taxon-26'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-5:
         realm: '@Realm-5'
         taxon: '@Taxon-28'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-6:
         realm: '@Realm-6'
         taxon: '@Taxon-29'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-7:
         realm: '@Realm-7'
         taxon: '@Taxon-30'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-8:
         realm: '@Realm-8'
         taxon: '@Taxon-31'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-9:
         realm: '@Realm-9'
         taxon: '@Taxon-32'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     RealmRoot-10:
         realm: '@Realm-10'
         taxon: '@Taxon-33'
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
 App\Entity\Source:
     Source-1: #1
@@ -1789,8 +1789,8 @@ App\Entity\Source:
         interactions: ['@Interaction-1', '@Interaction-2', '@Interaction-4', '@Interaction-9']  #
         contributors: ['@Contribution-1']  #517
         citation: '@Citation-1'  #237
-        # created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-2: #2
         displayName: 'Biology of bats of the New World family Phyllostomatidae'
@@ -1800,8 +1800,8 @@ App\Entity\Source:
         publication: '@Publication-1'  #100
         parentSource: '@Source-14'  #--
         contributors: ['@Contribution-5']  #517
-        # created: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-3: #12
         displayName: 'Observations on the life histories of Panama bats'
@@ -1813,24 +1813,24 @@ App\Entity\Source:
         interactions: ['@Interaction-3', '@Interaction-10'] #
         contributors: ['@Contribution-2'] #541
         citation: '@Citation-2'  #225
-        # created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-4: #11
         displayName: 'Journal of Mammalogy'
         childSources: ['@Source-3']  #
         sourceType: '@SourceType-1'  #
         publication: '@Publication-2' #97
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-5: #35
         displayName: 'Revista de Biologia Tropical'
         childSources: ['@Source-6']  #
         sourceType: '@SourceType-1'  #
         publication: '@Publication-3' #91
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-6: #36
         displayName: 'Two cases of bat pollination in Central America'
@@ -1842,8 +1842,8 @@ App\Entity\Source:
         interactions: ['@Interaction-5']  #
         contributors: ['@Contribution-3']  #475
         citation: '@Citation-3'  #223
-        # created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-7:  #74
         displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
@@ -1852,8 +1852,8 @@ App\Entity\Source:
         childSources: ['@Source-8']  #75
         sourceType: '@SourceType-1'  #
         publication: '@Publication-4'  #22
-        # created: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updatedBy: '@User-1'
     Source-8:  #75
@@ -1866,8 +1866,8 @@ App\Entity\Source:
         interactions: ['@Interaction-6'] #56
         contributors: ['@Contribution-4']  #504
         citation: '@Citation-4'  #144
-        # created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updatedBy: '@User-1'
     Source-9:  #73
@@ -1875,48 +1875,48 @@ App\Entity\Source:
         description: 'University of Paris VI (Pierre and Marie Curie University)'
         childSources: ['@Source-7']  #74
         sourceType: '@SourceType-4'  #
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-10:  #634
         displayName: 'Gardner, Alfred L'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-1']  #517
         author: '@Author-1' #282
-        # created: '<(new \DateTime("2016-11-23 01:20:30", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-24 15:44:16", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:30", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:16", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-11:  #666
         displayName: 'Bloedel, P'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-2']  #541
         author: '@Author-2'  #315
-        # created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-12:  #110
         displayName: 'Baker, Herbert G'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-3']  #475
         author: '@Author-3'  #250
-        # created: '<(new \DateTime("2016-11-23 01:20:27", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:27", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-13:  #624
         displayName: 'Cockle, Anya'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-4'] #504
         author: '@Author-4' #274
-        # created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-14:  #---
         displayName: 'Britanica Books'
         description: ''
         childSources: ['@Source-2']  #74
         sourceType: '@SourceType-4'  #
-        # created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
 App\Entity\SourceType:
     SourceType-1:
@@ -1924,130 +1924,130 @@ App\Entity\SourceType:
         displayName: Publication
         ordinal: 20
         sources: ['@Source-2', '@Source-4', '@Source-5', '@Source-7'] #
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     SourceType-2:
         slug: citation
         displayName: Citation
         ordinal: 40
         sources: ['@Source-1', '@Source-3', '@Source-6', '@Source-8']  #
-        # created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     SourceType-3:
         slug: author
         displayName: Author
         ordinal: 30
         sources: ['@Source-10', '@Source-11', '@Source-12', '@Source-13'] #
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     SourceType-4:
         slug: publisher
         displayName: Publisher
         ordinal: 10
         sources: ['@Source-9']  #
-        # created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\SystemDate:
     SystemDate-1:
         description: System
-        dateVal: '<(new \DateTime("2017-09-17 23:56:43", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-2:
         description: Author
-        dateVal: '<(new \DateTime("2017-09-17 19:19:47", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-3:
         description: Authority
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-4:
         description: Citation
-        dateVal: '<(new \DateTime("2017-09-17 22:01:24", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-5:
         description: CitationType
-        dateVal: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
     SystemDate-6:
         description: ContentBlock
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-7:
         description: Contribution
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-8:
         description: Realm
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-9:
         description: Feedback
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-10:
         description: HabitatType
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-11:
         description: ImageUpload
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-12:
         description: Interaction
-        dateVal: '<(new \DateTime("2017-09-17 23:56:43", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-13:
         description: InteractionType
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-14:
         description: Level
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-15:
         description: Location
-        dateVal: '<(new \DateTime("2017-09-17 23:15:52", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-16:
         description: LocationType
-        dateVal: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
     SystemDate-17:
         description: Naming
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-18:
         description: NamingType
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-19:
         description: Publication
-        dateVal: '<(new \DateTime("2017-09-17 21:54:09", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-20:
         description: PublicationType
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-21:
         description: Source
-        dateVal: '<(new \DateTime("2017-09-17 22:01:24", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-22:
         description: SourceType
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-23:
         description: Tag
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-24:
         description: Taxon
-        dateVal: '<(new \DateTime("2017-09-17 23:51:43", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     SystemDate-25:
         description: Taxonym
-        dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\Tag:
     Tag-1:
@@ -2056,9 +2056,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         interactions: ['@Interaction-2']
         intTypeConstraints: ['@InteractionType-1', '@InteractionType-2', '@InteractionType-3', '@InteractionType-4', '@InteractionType-5', '@InteractionType-6', '@InteractionType-7', '@InteractionType-8', '@InteractionType-9', '@InteractionType-10', '@InteractionType-11']
-        # created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-2:
         displayName: Seed
@@ -2066,9 +2066,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         intTypeConstraints: ['@InteractionType-2']
         interactions: ['@Interaction-2']
-        # created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-3:
         displayName: Flower
@@ -2076,9 +2076,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         intTypeConstraints: ['@InteractionType-1', '@InteractionType-2', '@InteractionType-4']
         interactions: ['@Interaction-1', '@Interaction-8']
-        # created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-4:
         displayName: Fruit
@@ -2086,9 +2086,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         interactions: ['@Interaction-6']
         intTypeConstraints: ['@InteractionType-2']
-        # created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-5:
         displayName: Leaf
@@ -2096,9 +2096,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         interactions: ['@Interaction-9']
         intTypeConstraints: ['@InteractionType-2', '@InteractionType-8']
-        # created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-6:
         displayName: Arthropod
@@ -2106,9 +2106,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         interactions: ['@Interaction-7']
         intTypeConstraints: ['@InteractionType-5']
-        # created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-7:
         displayName: Bryophyte Fragment
@@ -2116,9 +2116,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         intTypeConstraints: ['@InteractionType-5']
         interactions: ['@Interaction-4']
-        # created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-8:
         displayName: Wood
@@ -2126,9 +2126,9 @@ App\Entity\Tag:
         constrainedToEntity: Interaction
         interactions: ['@Interaction-5']
         intTypeConstraints: ['@InteractionType-8']
-        # created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\Taxon:
     Taxon-1:
@@ -2137,9 +2137,9 @@ App\Entity\Taxon:
         name: Animalia
         level: '@Level-1'
         childTaxa: ['@Taxon-2']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-2:
         slug: chiroptera
@@ -2150,9 +2150,9 @@ App\Entity\Taxon:
         level: '@Level-4'
         parentTaxon: '@Taxon-1'
         childTaxa: ['@Taxon-5']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-3:
         slug: plantae
@@ -2162,9 +2162,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-2' #3
         level: '@Level-1' #7
         childTaxa: ['@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-4: #11
         slug: arthropoda
@@ -2174,9 +2174,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-3' #2
         level: '@Level-2' #6
         childTaxa: ['@Taxon-8']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-5: #6
         slug: phyllostomidae
@@ -2186,9 +2186,9 @@ App\Entity\Taxon:
         parentTaxon: '@Taxon-2' #7
         childTaxa: ['@Taxon-6', '@Taxon-12', '@Taxon-21']
         subjectRoles: ['@Interaction-5', '@Interaction-8']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-6: #41
         slug: micronycteris
@@ -2198,9 +2198,9 @@ App\Entity\Taxon:
         parentTaxon: '@Taxon-5' #6
         childTaxa: ['@Taxon-7', '@Taxon-17']
         subjectRoles: ['@Interaction-9']
-        # created: '<(new \DateTime("2016-07-15 23:19:50", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:50", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:50", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:50", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-7:  #40
         slug: micronycteris-hirsuta
@@ -2209,9 +2209,9 @@ App\Entity\Taxon:
         level: '@Level-7' #1
         parentTaxon: '@Taxon-6' #41
         subjectRoles: ['@Interaction-1', '@Interaction-2']
-        # created: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-8:  #218
         slug: lepidoptera
@@ -2221,9 +2221,9 @@ App\Entity\Taxon:
         parentTaxon: '@Taxon-4'  #11
         childTaxa: ['@Taxon-9']
         objectRoles: ['@Interaction-4', '@Interaction-7']
-        # created: '<(new \DateTime("2016-07-15 23:20:12", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:20:12", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:20:12", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:20:12", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-9: #859
         slug: sphingidae
@@ -2232,9 +2232,9 @@ App\Entity\Taxon:
         level: '@Level-5' #3
         parentTaxon: '@Taxon-8'  #218
         objectRoles: ['@Interaction-1']
-        # created: '<(new \DateTime("2016-07-15 23:20:17", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:20:17", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:20:17", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:20:17", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-10: #900
         slug: lauraceae
@@ -2243,9 +2243,9 @@ App\Entity\Taxon:
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3'  #20
         childTaxa: ['@Taxon-11']
-        # created: '<(new \DateTime("2016-07-15 23:20:04", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:20:04", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:20:04", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:20:04", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-11: #899
         slug: beilschmiedia
@@ -2254,9 +2254,9 @@ App\Entity\Taxon:
         level: '@Level-6'  #2
         parentTaxon: '@Taxon-10' #900
         objectRoles: ['@Interaction-2']
-        # created: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:20:24", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-12: #56
         slug: artibeus
@@ -2265,9 +2265,9 @@ App\Entity\Taxon:
         level: '@Level-6'  #6
         parentTaxon: '@Taxon-5'  #6
         childTaxa: ['@Taxon-13']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-13: #120
         slug: artibeus-lituratus
@@ -2276,9 +2276,9 @@ App\Entity\Taxon:
         level: '@Level-7' #1
         parentTaxon: '@Taxon-12' #56
         subjectRoles: ['@Interaction-3']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-14: #72
         slug: anacardiaceae
@@ -2287,9 +2287,9 @@ App\Entity\Taxon:
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-15']
-        # created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-15: #73
         slug: anacardium
@@ -2298,9 +2298,9 @@ App\Entity\Taxon:
         level: '@Level-6' #2
         parentTaxon: '@Taxon-14' #72
         childTaxa: ['@Taxon-16']
-        # created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-16: #74
         slug: anacardium-excelsum
@@ -2309,9 +2309,9 @@ App\Entity\Taxon:
         level: '@Level-7' #1
         parentTaxon: '@Taxon-15' #73
         objectRoles: ['@Interaction-3']
-        # created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-17: #1250
         slug: micronycteris-schmidtorum
@@ -2320,9 +2320,9 @@ App\Entity\Taxon:
         level: '@Level-7' #1
         parentTaxon: '@Taxon-6' #41
         subjectRoles: ['@Interaction-4']
-        # created: '<(new \DateTime("2016-07-15 23:20:25", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:20:25", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:20:25", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:20:25", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-18: #155
         slug: fabaceae
@@ -2331,9 +2331,9 @@ App\Entity\Taxon:
         level: '@Level-5' #3
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-19']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-19: #562
         slug: mucuna
@@ -2342,9 +2342,9 @@ App\Entity\Taxon:
         level: '@Level-6' #2
         parentTaxon: '@Taxon-18'    #155
         childTaxa: ['@Taxon-20']
-        # created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-20: #564
         slug: mucuna-andreana
@@ -2353,9 +2353,9 @@ App\Entity\Taxon:
         level: '@Level-7' #1
         parentTaxon: '@Taxon-19' #562
         objectRoles: ['@Interaction-5', '@Interaction-8']
-        # created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:46", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-21: #59
         slug: rhinophylla
@@ -2365,9 +2365,9 @@ App\Entity\Taxon:
         parentTaxon: '@Taxon-5' #6
         childTaxa: ['@Taxon-22']
         subjectRoles: ['@Interaction-10']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-22: #58
         slug: rhinophylla-pumilio
@@ -2376,9 +2376,9 @@ App\Entity\Taxon:
         level: '@Level-7' #1
         parentTaxon: '@Taxon-21' #59
         subjectRoles: ['@Interaction-6', '@Interaction-7']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-23: #507
         slug: araceae
@@ -2388,9 +2388,9 @@ App\Entity\Taxon:
         parentTaxon: '@Taxon-3' #20
         childTaxa: ['@Taxon-24']
         objectRoles: ['@Interaction-9', '@Interaction-10']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-24: #510
         slug: philodendron
@@ -2399,9 +2399,9 @@ App\Entity\Taxon:
         level: '@Level-6' #2
         parentTaxon: '@Taxon-23' #507
         childTaxa: ['@Taxon-25']
-        # created: '<(new \DateTime("2016-07-15 23:19:48", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-25: #528
         slug: philodendron-sphalerum
@@ -2410,9 +2410,9 @@ App\Entity\Taxon:
         level: '@Level-7'
         parentTaxon: '@Taxon-24' #510
         objectRoles: ['@Interaction-6']
-        # created: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-26:
         slug: domain-bacteria
@@ -2422,9 +2422,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-4' #
         level: '@Level-8' #
         childTaxa: ['@Taxon-27']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-27:
         slug: class-gammaproteobacteria
@@ -2432,18 +2432,18 @@ App\Entity\Taxon:
         name: Gammaproteobacteria
         level: '@Level-3' #
         parentTaxon: '@Taxon-26'
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-28:
         slug: class-actinopterygii
         displayName: 'Class Actinopterygii'
         name: Actinopterygii
         level: '@Level-3'
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-29:
         slug: kingdom-fungi
@@ -2452,9 +2452,9 @@ App\Entity\Taxon:
         isRoot: true
         realm: '@RealmRoot-6'
         level: '@Level-1'
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-30:
         slug: domain-virus
@@ -2464,9 +2464,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-7'
         level: '@Level-8'
         childTaxa: ['@Taxon-27']
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-31:
         slug: class-aves
@@ -2476,9 +2476,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-8'
         level: '@Level-3'
         childTaxa: []
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-32:
         slug: class-reptilia
@@ -2488,9 +2488,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-9'
         level: '@Level-3'
         childTaxa: []
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Taxon-33:
         slug: class-amphibia
@@ -2500,9 +2500,9 @@ App\Entity\Taxon:
         realm: '@RealmRoot-10'
         level: '@Level-3'
         childTaxa: []
-        # created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        # updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\User:  #passwordhere
     User-1:
@@ -2518,8 +2518,6 @@ App\Entity\User:  #passwordhere
         aboutMe: 'Test super admin'
         firstName: ''
         lastName: ''
-        # created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-11-16 12:17:47", new \DateTimeZone("America/Los_Angeles")))>'
     User-2:
         username: TestEditor
         usernameCanonical: testeditor
@@ -2534,8 +2532,6 @@ App\Entity\User:  #passwordhere
         aboutMe: 'Testing the editor user role.'
         firstName: Test
         lastName: Editor
-        # created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-11-16 12:14:30", new \DateTimeZone("America/Los_Angeles")))>'
     User-3:
         username: TestUser
         usernameCanonical: testuser
@@ -2549,8 +2545,6 @@ App\Entity\User:  #passwordhere
         aboutMe: 'Testing the user role.'
         firstName: Test
         lastName: User
-        # created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-11-16 12:12:43", new \DateTimeZone("America/Los_Angeles")))>'
     User-4:
         username: TestAdmin
         usernameCanonical: testadmin
@@ -2564,5 +2558,3 @@ App\Entity\User:  #passwordhere
         aboutMe: 'Test admin'
         firstName: ''
         lastName: ''
-        # created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
-        # updated: '<(new \DateTime("2017-11-16 12:15:00", new \DateTimeZone("America/Los_Angeles")))>'

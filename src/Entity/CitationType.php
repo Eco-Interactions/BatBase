@@ -221,13 +221,17 @@ class CitationType
     }
 
     /**
-     * Set createdBy user.
+     * Set created datetime.
      *
-     * @param \App\Entity\User $user
+     * @param \DateTime $createdAt
+     *
+     * @return CitationType
      */
-    public function setCreatedBy(\App\Entity\User $user)
+    public function setCreated(\DateTime $createdAt)
     {
-        $this->createdBy = $user;
+        $this->created = $createdAt;
+
+        return $this;
     }
 
     /**
@@ -241,6 +245,20 @@ class CitationType
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @param \App\Entity\User $user
+     *
+     * @return Citationtype
+     */
+    public function setCreatedBy(\App\Entity\User $user)
+    {
+        $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
      * Get createdBy user.
      *
      * @return \App\Entity\User
@@ -251,13 +269,17 @@ class CitationType
     }
 
     /**
-     * Set last updated by user.
+     * Set last-updated datetime.
      *
-     * @param \App\Entity\User $user
+     * @param \DateTime $updatedAt
+     *
+     * @return CitationType
      */
-    public function setUpdatedBy(\App\Entity\User $user)
+    public function setUpdated(\DateTime $updatedAt)
     {
-        $this->updatedBy = $user;
+        $this->updated = $updatedAt;
+
+        return $this;
     }
 
     /**
@@ -268,6 +290,16 @@ class CitationType
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @param \App\Entity\User $user
+     */
+    public function setUpdatedBy(\App\Entity\User $user)
+    {
+        $this->updatedBy = $user;
     }
 
     /**

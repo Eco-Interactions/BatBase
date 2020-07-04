@@ -175,6 +175,16 @@ class ImageUpload
     }
 
     /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Set description.
      *
      * @param string $description
@@ -189,13 +199,13 @@ class ImageUpload
     }
 
     /**
-     * Get description.
+     * Get path.
      *
      * @return string
      */
-    public function getDescription()
+    public function getPath()
     {
-        return $this->description;
+        return $this->path;
     }
 
     /**
@@ -213,13 +223,13 @@ class ImageUpload
     }
 
     /**
-     * Get path.
+     * Get mimeType.
      *
      * @return string
      */
-    public function getPath()
+    public function getMimeType()
     {
-        return $this->path;
+        return $this->mimeType;
     }
 
     /**
@@ -237,13 +247,13 @@ class ImageUpload
     }
 
     /**
-     * Get mimeType.
+     * Get size.
      *
      * @return string
      */
-    public function getMimeType()
+    public function getSize()
     {
-        return $this->mimeType;
+        return $this->size;
     }
 
     /**
@@ -261,13 +271,13 @@ class ImageUpload
     }
 
     /**
-     * Get size.
+     * Get image.
      *
-     * @return string
+     * @return File
      */
-    public function getSize()
+    public function getImage(): ?File
     {
-        return $this->size;
+        return $this->image;
     }
 
     /**
@@ -288,11 +298,6 @@ class ImageUpload
         }
     }
 
-    public function getImage(): ?File
-    {
-        return $this->image;
-    }
-
     public static function loadValidatorMetadata(ClassMetadata $metadata)
     {
         $metadata->addPropertyConstraint('image', new Assert\File([
@@ -307,20 +312,6 @@ class ImageUpload
     }
 
     /**
-     * Set issueReport.
-     *
-     * @param \App\Entity\IssueReport $issueReport
-     *
-     * @return Interaction
-     */
-    public function setIssueReport(\App\Entity\IssueReport $issueReport)
-    {
-        $this->issueReport = $issueReport;
-
-        return $this;
-    }
-
-    /**
      * Get issueReport.
      *
      * @return \App\Entity\IssueReport
@@ -331,13 +322,17 @@ class ImageUpload
     }
 
     /**
-     * Set createdBy user.
+     * Set issueReport.
      *
-     * @return \App\Entity\User
+     * @param \App\Entity\IssueReport $issueReport
+     *
+     * @return ImageUpload
      */
-    public function setCreatedBy(\App\Entity\User $user)
+    public function setIssueReport(\App\Entity\IssueReport $issueReport)
     {
-        $this->createdBy = $user;
+        $this->issueReport = $issueReport;
+
+        return $this;
     }
 
     /**
@@ -351,6 +346,34 @@ class ImageUpload
     }
 
     /**
+     * Set created datetime.
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return ImageUpload
+     */
+    public function setCreated(\DateTime $createdAt)
+    {
+        $this->created = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * Set createdBy user.
+     *
+     * @param \App\Entity\User
+     *
+     * @return ImageUpload
+     */
+    public function setCreatedBy(\App\Entity\User $user)
+    {
+        $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
      * Get createdBy user.
      *
      * @return \App\Entity\User
@@ -358,16 +381,6 @@ class ImageUpload
     public function getCreatedBy()
     {
         return $this->createdBy;
-    }
-
-    /**
-     * Set last updated by user.
-     *
-     * @return \App\Entity\User
-     */
-    public function setUpdatedBy(\App\Entity\User $user = null)
-    {
-        $this->updatedBy = $user;
     }
 
     /**
@@ -381,13 +394,29 @@ class ImageUpload
     }
 
     /**
-     * Set last updated datetime.
+     * Set last-updated datetime.
      *
-     * @return \App\Entity\User
+     * @param \DateTime $updatedAt
+     *
+     * @return ImageUpload
      */
     public function setUpdated(\DateTime $updatedAt)
     {
         $this->updated = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @param \App\Entity\User
+     *
+     * @return ImageUpload
+     */
+    public function setUpdatedBy(\App\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**
@@ -398,26 +427,6 @@ class ImageUpload
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
     }
 
     /**

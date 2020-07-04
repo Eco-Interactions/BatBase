@@ -201,13 +201,17 @@ class HabitatType
     }
 
     /**
-     * Set createdBy user.
+     * Set created datetime.
      *
-     * @return \App\Entity\User
+     * @param \DateTime $createdAt
+     *
+     * @return HabitatType
      */
-    public function setCreatedBy(\App\Entity\User $user)
+    public function setCreated(\DateTime $createdAt)
     {
-        $this->createdBy = $user;
+        $this->created = $createdAt;
+
+        return $this;
     }
 
     /**
@@ -221,6 +225,16 @@ class HabitatType
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @return \App\Entity\User
+     */
+    public function setCreatedBy(\App\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get createdBy user.
      *
      * @return \App\Entity\User
@@ -231,13 +245,17 @@ class HabitatType
     }
 
     /**
-     * Set last updated by user.
+     * Set last-updated datetime.
      *
-     * @return \App\Entity\User
+     * @param \DateTime $updatedAt
+     *
+     * @return HabitatType
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdated(\DateTime $updatedAt)
     {
-        $this->updatedBy = $user;
+        $this->updated = $updatedAt;
+
+        return $this;
     }
 
     /**
@@ -248,6 +266,16 @@ class HabitatType
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \App\Entity\User
+     */
+    public function setUpdatedBy(\App\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**

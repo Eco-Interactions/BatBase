@@ -161,6 +161,20 @@ class Authority
     }
 
     /**
+     * Set created datetime.
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Authority
+     */
+    public function setCreated(\DateTime $createdAt)
+    {
+        $this->created = $createdAt;
+
+        return $this;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -168,6 +182,20 @@ class Authority
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Set last-updated datetime.
+     *
+     * @param \DateTime $updatedAt
+     *
+     * @return Authority
+     */
+    public function setUpdated(\DateTime $updatedAt)
+    {
+        $this->updated = $updatedAt;
+
+        return $this;
     }
 
     /**

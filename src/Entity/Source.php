@@ -1041,15 +1041,15 @@ class Source
     }
 
     /**
-     * Set createdBy user.
+     * Set created datetime.
      *
-     * @param \App\Entity\User $user
+     * @param \DateTime $createdAt
      *
-     * @return  Source
+     * @return Source
      */
-    public function setCreatedBy(\App\Entity\User $user)
+    public function setCreated(\DateTime $createdAt)
     {
-        $this->createdBy = $user;
+        $this->created = $createdAt;
 
         return $this;
     }
@@ -1065,6 +1065,20 @@ class Source
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @param \App\Entity\User $user
+     *
+     * @return  Source
+     */
+    public function setCreatedBy(\App\Entity\User $user)
+    {
+        $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
      * Get createdBy user.
      *
      * @return \App\Entity\User
@@ -1072,6 +1086,30 @@ class Source
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Set last-updated datetime.
+     *
+     * @param \DateTime $updatedAt
+     *
+     * @return Source
+     */
+    public function setUpdated(\DateTime $updatedAt)
+    {
+        $this->updated = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get last updated datetime.
+     *
+     * @return \DateTime
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
     }
 
     /**
@@ -1086,16 +1124,6 @@ class Source
         $this->updatedBy = $user;
 
         return $this;
-    }
-
-    /**
-     * Get last updated datetime.
-     *
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
     }
 
     /**

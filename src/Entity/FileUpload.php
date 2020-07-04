@@ -69,19 +69,6 @@ class FileUpload
      * Used as container for UploadedFile obj.
      *
      * @Vich\UploadableField(
-     *      mapping="issue_image",
-     *      fileNameProperty="fileName",
-     *      size="size"
-     * )
-     *
-     * @var File|null
-     */
-    private $issueImage;
-
-    /**
-     * Used as container for UploadedFile obj.
-     *
-     * @Vich\UploadableField(
      *      mapping="pdf_image",
      *      fileNameProperty="fileName",
      *      size="size"
@@ -204,20 +191,6 @@ class FileUpload
     }
 
     /**
-     * Set description.
-     *
-     * @param string $description
-     *
-     * @return FileUpload
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
      * Get description.
      *
      * @return string
@@ -228,15 +201,15 @@ class FileUpload
     }
 
     /**
-     * Set path.
+     * Set description.
      *
-     * @param string $path
+     * @param string $description
      *
-     * @return File
+     * @return FileUpload
      */
-    public function setPath($path)
+    public function setDescription($description)
     {
-        $this->path = $path;
+        $this->description = $description;
 
         return $this;
     }
@@ -252,15 +225,15 @@ class FileUpload
     }
 
     /**
-     * Set mimeType.
+     * Set path.
      *
-     * @param string $mimeType
+     * @param string $path
      *
-     * @return File
+     * @return FileUpload
      */
-    public function setMimeType($mimeType)
+    public function setPath($path = 'uploads/publications/')
     {
-        $this->mimeType = $mimeType;
+        $this->path = $path;
 
         return $this;
     }
@@ -276,15 +249,15 @@ class FileUpload
     }
 
     /**
-     * Set size.
+     * Set mimeType.
      *
-     * @param string $size
+     * @param string $mimeType
      *
-     * @return File
+     * @return FileUpload
      */
-    public function setSize($size)
+    public function setMimeType($mimeType)
     {
-        $this->size = $size;
+        $this->mimeType = $mimeType;
 
         return $this;
     }
@@ -300,25 +273,27 @@ class FileUpload
     }
 
     /**
-     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
-     * of 'UploadedFile' is injected into this setter to trigger the update.
+     * Set size.
      *
-     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $issueImage
+     * @param string $size
+     *
+     * @return FileUpload
      */
-    public function setIssueImage(?File $issueImage = null): void
+    public function setSize($size)
     {
-        $this->issueImage = $issueImage;
+        $this->size = $size;
 
-        if (null !== $issueImage) {
-            // It is required that at least one field changes if you are using doctrine
-            // otherwise the event listeners won't be called and the file is lost
-            $this->updatedAt = new \DateTimeImmutable();
-        }
+        return $this;
     }
 
-    public function getIssueImage(): ?File
+    /**
+     * Get pdfFile.
+     *
+     * @return File
+     */
+    public function getPdfFile(): ?File
     {
-        return $this->issueImage;
+        return $this->pdfFile;
     }
 
     /**
@@ -338,11 +313,6 @@ class FileUpload
         }
     }
 
-    public function getPdfFile(): ?File
-    {
-        return $this->pdfFile;
-    }
-
     public static function loadValidatorMetadata(ClassMetadata $metadata)
     {
         $metadata->addPropertyConstraint('pdfFile', new Assert\File([
@@ -353,74 +323,6 @@ class FileUpload
             ],
             'mimeTypesMessage' => 'Please upload a valid PDF',
         ]));
-        $metadata->addPropertyConstraint('issueImage', new Assert\File([
-            'maxSize' => '1024k',
-            'mimeTypes' => [
-                'image/jpeg',
-                'image/gif',
-                'image/png'
-            ],
-            'mimeTypesMessage' => 'Please upload a valid image: jpg, gif, or png.',
-        ]));
-    }
-
-
-
-
-
-
-
-
-
-    // public function getAbsolutePath()
-    // {
-    //     return null === $this->path
-    //         ? null
-    //         : $this->getUploadRootDir().'/'.$this->path;
-    // }
-
-    // public function getWebPath()
-    // {
-    //     return null === $this->path
-    //         ? null
-    //         : $this->getUploadDir().'/'.$this->path;
-    // }
-
-    // public function upload()
-    // {
-    //     $validTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp');
-    //     $taxonImgsPath = $this->getUploadDir();
-    //     $mimeType = $this->getFile()->getClientMimeType();
-
-    //     if (in_array($mimeType, $validTypes)) {
-    //         $this->mimeType = $mimeType;
-    //         $randName = substr(sha1(rand(0, 1000)), 0, 11);
-    //         $extension = '.'.$this->getFile()->guessExtension();
-    //         $fileName = $randName.$extension;
-    //         $this->size = $this->getFile()->getClientSize();
-    //         $this->path = $taxonImgsPath.$fileName;   // set to the filename where you've saved the file
-    //         $this->fileName = $fileName;
-    //         $this->setStatus();
-
-    //         $this->getFile()->move(// move takes the target directory and then the
-    //             $this->getUploadDir(),                  // target filename to move to
-    //             $fileName
-    //         );
-    //     } else {
-    //         $this->file = null;
-    //         return false;
-    //     }
-    //     return true;
-    // }
-
-    /**
-     * Set createdBy user.
-     *
-     * @return \App\Entity\User
-     */
-    public function setCreatedBy(\App\Entity\User $user)
-    {
-        $this->createdBy = $user;
     }
 
     /**
@@ -434,6 +336,20 @@ class FileUpload
     }
 
     /**
+     * Set created datetime.
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return FileUpload
+     */
+    public function setCreated(\DateTime $createdAt)
+    {
+        $this->created = $createdAt;
+
+        return $this;
+    }
+
+    /**
      * Get createdBy user.
      *
      * @return \App\Entity\User
@@ -444,13 +360,13 @@ class FileUpload
     }
 
     /**
-     * Set last updated by user.
+     * Set createdBy user.
      *
      * @return \App\Entity\User
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(\App\Entity\User $user)
     {
-        $this->updatedBy = $user;
+        $this->createdBy = $user;
     }
 
     /**
@@ -464,13 +380,17 @@ class FileUpload
     }
 
     /**
-     * Set last updated datetime.
+     * Set last-updated datetime.
      *
-     * @return \App\Entity\User
+     * @param \DateTime $updatedAt
+     *
+     * @return FileUpload
      */
     public function setUpdated(\DateTime $updatedAt)
     {
         $this->updated = $updatedAt;
+
+        return $this;
     }
 
     /**
@@ -484,23 +404,13 @@ class FileUpload
     }
 
     /**
-     * Set deleted at.
+     * Set last updated by user.
      *
-     * @param \DateTime $deletedAt
+     * @return \App\Entity\User
      */
-    public function setDeletedAt($deletedAt)
+    public function setUpdatedBy(\App\Entity\User $user = null)
     {
-        $this->deletedAt = $deletedAt;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
+        $this->updatedBy = $user;
     }
 
     /**
@@ -512,18 +422,4 @@ class FileUpload
     {
         return $this->description;
     }
-
-    // protected function getUploadRootDir()
-    // {
-    //     // the absolute directory path where uploaded
-    //     // documents should be saved
-    //     return __DIR__.'/../../../web/'.$this->getUploadDir();
-    // }
-
-    // protected function getUploadDir()
-    // {
-    //     // get rid of the __DIR__ so it doesn't screw up
-    //     // when displaying uploaded doc/image in the view.
-    //     return 'uploads/files/';
-    // }
 }
