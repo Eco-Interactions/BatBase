@@ -58,9 +58,11 @@ class DataEntryController extends AbstractController
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
-        $returnData->detailEntity = $this->handleDetailEntity(
-            $coreFormData, $formData, $returnData, $em
-        );
+        if (property_exists($coreFormData, 'hasDetail')) {
+            $returnData->detailEntity = $this->handleDetailEntity(
+                $coreFormData, $formData, $returnData, $em
+            );
+        }
         $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
@@ -88,7 +90,7 @@ class DataEntryController extends AbstractController
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
-        if ($formData->coreEntity->hasDetail) {
+        if (property_exists($coreFormData, 'hasDetail')) {
             $returnData->detailEntity = $this->handleDetailEntity(
                 $coreFormData, $formData, $returnData, $em
             );
@@ -479,7 +481,7 @@ class DataEntryController extends AbstractController
         foreach ($serialize as $p) {
             $prop = $p.'Entity';
             $id = $p.'Id';
-            if (!$entityData->$prop) { continue; }
+            if (!property_exists($entityData, $prop)) { continue; }
             try {
                 $entityData->$id = $entityData->$prop->getId();
                 $entityData->$prop = $this->serializer->serialize(
@@ -505,7 +507,7 @@ class DataEntryController extends AbstractController
     private function setUpdatedAtTimes($entityData, &$em)
     {
         $this->setUpdatedAt($entityData->core, $em);
-        if ($entityData->detailEntity) {
+        if (property_exists($entityData, 'detailEntity')) {
             $this->setUpdatedAt($entityData->detail, $em);
         }
         $this->setUpdatedAt('System', $em);

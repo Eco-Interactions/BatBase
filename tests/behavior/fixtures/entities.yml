@@ -2521,7 +2521,7 @@ App\Entity\User:  #passwordhere
         # created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
         # updated: '<(new \DateTime("2017-11-16 12:17:47", new \DateTimeZone("America/Los_Angeles")))>'
     User-2:
-        username: testeditor
+        username: TestEditor
         usernameCanonical: testeditor
         email: test.editor@email.com
         emailCanonical: test.editor@email.com
@@ -2537,7 +2537,7 @@ App\Entity\User:  #passwordhere
         # created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
         # updated: '<(new \DateTime("2017-11-16 12:14:30", new \DateTimeZone("America/Los_Angeles")))>'
     User-3:
-        username: testuser
+        username: TestUser
         usernameCanonical: testuser
         email: test.user@email.com
         emailCanonical: test.user@email.com

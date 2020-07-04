@@ -9,7 +9,6 @@ Feature: Edit data in the database
         # Test form error handling
         # Test changing an interaction's citation
 
-    ## Todo:
     Background:
         Given the fixtures have been reloaded
         And I am on "/login"

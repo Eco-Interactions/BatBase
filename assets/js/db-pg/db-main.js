@@ -171,7 +171,7 @@ function setTableInitState(isAllDataAvailable) {
     tState.flags.allDataAvailable = isAllDataAvailable;
 }
 export function enableMap() {
-    if (!_db.getData('geoJson')) { return window.setTimeout(enableMap, 500); }
+    if (!db.getData('geoJson')) { return window.setTimeout(enableMap, 500); }
     $('#shw-map').data('loaded', true).prop('disabled', false).fadeTo('fast', 1);
     $('.map-ico').fadeTo('fast', 1);
 }
