@@ -1,7 +1,0 @@
-parameters:
-
-services:
-    app.form.type.registration:
-        class: App\Form\RegistrationFormType
-        tags:
-            - { name: form.type, alias: App_registration }

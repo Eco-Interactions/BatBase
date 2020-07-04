@@ -518,7 +518,7 @@ class Location
      *
      * @return Location
      */
-    public function addChildLocs(\App\Entity\Location $childLoc)
+    public function addChildLoc(\App\Entity\Location $childLoc)
     {
         $this->childLocs[] = $childLoc;
         $childLoc->setParentLoc($this);

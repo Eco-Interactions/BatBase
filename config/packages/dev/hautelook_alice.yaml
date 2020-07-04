@@ -1,10 +1,10 @@
 hautelook_alice:
-    fixtures_path: tests/fixtures
+    fixtures_path: tests/behavior/fixtures
 
     # db_drivers:
     #     orm: ~          # Enable Doctrine ORM if is registered
-    #     mongodb: false      
-    #     phpcr: false        
+    #     mongodb: false
+    #     phpcr: false
     # locale: en_US       # Locale to used for faker; must be a valid Faker locale otherwise will fallback to en_US
     # seed: 1             # A seed to make sure faker generates data consistently across runs, set to null to disable
     # persist_once: false # Only persist objects once if multiple files are passed

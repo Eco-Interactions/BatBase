@@ -60,7 +60,7 @@ class FeatureContext extends RawMinkContext implements Context
         exec('php bin/console doctrine:database:drop --force --env=test');
         exec('php bin/console doctrine:database:create --env=test');
         exec('php bin/console doctrine:schema:create --env=test');
-        exec('php bin/console hautelook_alice:fixtures:load --no-interaction --env=test');
+        exec('php bin/console hautelook:fixtures:load --no-interaction --env=test');
     }
 
     /**

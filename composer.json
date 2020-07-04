@@ -10,6 +10,7 @@
         }
     },
     "autoload-dev": {
+        "classmap": [ "tests/behavior/features/" ],
         "psr-4": {
             "App\\Tests\\": "tests/"
         }
@@ -57,7 +58,7 @@
         "behat/mink-extension": "^2.3",
         "behat/mink-goutte-driver": "^1.2",
         "behat/mink-selenium2-driver": "^1.4",
-        "behat/symfony2-extension": "^2.1",
+        "behat/symfony2-extension": "2.1.5",
         "dama/doctrine-test-bundle": "^6.3",
         "doctrine/data-fixtures": "^1.4",
         "hautelook/alice-bundle": "^2.7",
@@ -92,6 +93,7 @@
         "symfony/polyfill-php56": "*"
     },
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "conflict": {
         "symfony/symfony": "*"
     },

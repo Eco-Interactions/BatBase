@@ -602,27 +602,27 @@ class Taxon
     }
 
     /**
-     * Add childTaxa.
+     * Add childTaxon.
      *
-     * @param \App\Entity\Taxon $childTaxa
+     * @param \App\Entity\Taxon $childTaxon
      *
      * @return Taxon
      */
-    public function addChildTaxa(\App\Entity\Taxon $childTaxa)
+    public function addChildTaxon(\App\Entity\Taxon $childTaxon)
     {
-        $this->childTaxa[] = $childTaxa;
+        $this->childTaxa[] = $childTaxon;
 
         return $this;
     }
 
     /**
-     * Remove childTaxa.
+     * Remove childTaxon.
      *
-     * @param \App\Entity\Taxon $childTaxa
+     * @param \App\Entity\Taxon $childTaxon
      */
-    public function removeChildTaxa(\App\Entity\Taxon $childTaxa)
+    public function removeChildTaxon(\App\Entity\Taxon $childTaxon)
     {
-        $this->childTaxa->removeElement($childTaxa);
+        $this->childTaxa->removeElement($childTaxon);
     }
 
     /**

@@ -247,11 +247,13 @@ class Realm
     {
         $taxa = [];
 
+        if (!is_array($this->taxa)) { return [];}
+
         foreach ($this->taxa as $realmRoot) {
             array_push($taxa, $realmRoot->getTaxon());
         }
 
-        return $taxa;
+        return $this->taxa;
     }
 
     /**
