@@ -1562,9 +1562,10 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function editorLogIn($editor, $name)
     {
-        $editor->visit('http://localhost/BatBase/web/app_test.php/login');
+        $editor->visit('http://localhost/BatBase/public/test.php/login');
         $editor->getPage()->fillField('_username', $name);
         $editor->getPage()->fillField('_password', 'passwordhere');
+        $this->iPutABreakpoint();
         $editor->getPage()->pressButton('_submit');
     }
 
@@ -1589,7 +1590,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function editorVisitsSearchPage($editor)
     {
-        $editor->visit('http://localhost/BatBase/web/app_test.php/search');
+        $editor->visit('http://localhost/BatBase/public/test.php/search');
         usleep(400000);
         $this->iExitTheTutorial();
     }

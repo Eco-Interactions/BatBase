@@ -1,7 +1,7 @@
 {
     "name": "eif/eco-int-framework",
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
     "description": "The Eco-Interactions Framework",
     "autoload": {
         "psr-4": {
