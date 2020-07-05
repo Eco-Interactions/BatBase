@@ -8,7 +8,7 @@ vich_uploader:
             directory_namer:
                 service: Vich\UploaderBundle\Naming\CurrentDateTimeDirectoryNamer
                 options:
-                    date_time_format: 'Y/d/m'
+                    date_time_format: 'Y/m/d'
                     date_time_property: created
         pdf_image:
             uri_prefix: /uploads/publications

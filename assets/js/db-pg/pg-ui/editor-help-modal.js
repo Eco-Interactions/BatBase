@@ -148,10 +148,14 @@ function submitNewSentryIssue(fileNames) {
         summary: $('.bug-rprt-input')[0].value,
         steps: $('.bug-rprt-input')[1].value,
         etc: $('.bug-rprt-input')[2].value,
-        screenshots: JSON.stringify(fileNames.map(f => '/uploads/issue_screenshots/'+f))
+        screenshots: JSON.stringify(fileNames.map(f => buildScreenshotUrl(f)))
     };
     alertIssue('editorReport', data);
     updateBugReportUiAfterSubmit();
+}
+function buildScreenshotUrl(fileName) {
+    const date = new Date().today().split('-').join('/');  console.log('url = ', '/uploads/issue_screenshots/' + date + '/' + fileName);
+    return '/uploads/issue_screenshots/' + date + '/' + fileName;
 }
 function updateBugReportUiAfterSubmit() {
     $('#rprt-Cancel').val('Close');
