@@ -170,8 +170,12 @@ function setTableInitState(isAllDataAvailable) {
     // if ($('#shw-chngd')[0].checked) { filter.toggleDateFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable;
 }
-export function enableMap() {
-    if (!db.getData('geoJson')) { return window.setTimeout(enableMap, 500); }
+export function onDataDownloadComplete () {
+    $('.tree-show').fadeTo('fast', 1);
+    enableMapFeatures();
+}
+function enableMapFeatures() {
+    if (!db.getData('geoJson')) { return window.setTimeout(enableMapFeatures, 500); }
     $('#shw-map').data('loaded', true).prop('disabled', false).fadeTo('fast', 1);
     $('.map-ico').fadeTo('fast', 1);
 }
