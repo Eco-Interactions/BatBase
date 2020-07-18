@@ -26,7 +26,7 @@ final class Version20200630IssueReport extends AbstractMigration
         $this->addSql('ALTER TABLE file_upload DROP status');
         $this->addSql('ALTER TABLE image_upload DROP FOREIGN KEY FK_B8A0B8D7DE13F470');
         $this->addSql('DROP INDEX IDX_B8A0B8D7DE13F470 ON image_upload');
-        $this->addSql('ALTER TABLE image_upload ADD desctiption LONGTEXT DEFAULT NULL, DROP status, DROP deletedAt, CHANGE taxon_id report_id INT DEFAULT NULL, CHANGE caption title VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE image_upload ADD desctiption LONGTEXT DEFAULT NULL, DROP status, DROP deletedAt, CHANGE filename file_name VARCHAR(255) NOT NULL, CHANGE taxon_id report_id INT DEFAULT NULL, CHANGE caption title VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE image_upload ADD CONSTRAINT FK_B8A0B8D74BD2A4C0 FOREIGN KEY (report_id) REFERENCES issue_report (id)');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_B8A0B8D72B36786B ON image_upload (title)');
         $this->addSql('CREATE INDEX IDX_B8A0B8D74BD2A4C0 ON image_upload (report_id)');

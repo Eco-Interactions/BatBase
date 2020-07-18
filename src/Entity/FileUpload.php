@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-// use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
@@ -120,30 +120,6 @@ class FileUpload
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Get file path.
-     *
-     * @return string
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Set temporary UploadedFile obj.
-     *
-     * @param Symfony\Component\HttpFoundation\File\UploadedFile $file
-     *
-     * @return FileUpload
-     */
-    public function setFile(UploadedFile $file)
-    {
-        $this->file = $file;
-
-        return $this;
     }
 
     /**
