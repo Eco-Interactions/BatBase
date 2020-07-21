@@ -1,5 +1,5 @@
 /**
- * Entry point for all local data-storage methods. 
+ * Entry point for all local data-storage methods.
  *
  * EXPORT:
  *     fetchData
@@ -10,7 +10,7 @@
  *         IDB
  *         DATA SYNC
  *         DATA INIT
- *     DATA UTIL 
+ *     DATA UTIL
  */
 import * as _pg from '../db-main.js';
 import * as _idb from './idb-util.js';
@@ -76,7 +76,7 @@ export function syncLocalDbWithServer(lclDataUpdatedAt) {
 /* -------------------------- DATA INIT ------------------------------------- */
 /**
  * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @initLocalData. A data-loading popup message 
+ * from the server and stored locally @initLocalData. A data-loading popup message
  * and intro-walkthrough are shown on the Search page.
  */
 export function initStoredData(reset) {

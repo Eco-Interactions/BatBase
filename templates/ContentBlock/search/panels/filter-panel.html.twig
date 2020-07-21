@@ -1,0 +1,62 @@
+<div id='filter-pnl' class="flex-row pop-out-panel closed">
+    <div id="filter-col1" class="flex-col">
+        <div class="flex-row spaced">
+            <button id="fltr-pnl-hlp" class="ag-fresh tbl-bttn hlp-bttn">?</button>
+            <span style="flex-grow: 1;"></span>
+            <div id="focus-filter-hdr">Group and Date Filters</div>
+            <span style="flex-grow: 1.6;"></span>
+        </div>
+        <div id="focus-filters" class="flex-row flex-wrap"></div>
+        <div id="shw-chngd-ints" class="flex-row">
+            <input type="checkbox" id="shw-chngd">
+            <label for="shw-chngd" class="flex-row">Show interactions </label>
+            <select id="selDateFilter" class="date-fltr-sel" data-field="Date Filter">
+                <option selected value="cited">published</option>
+                <option value="updated">added/edited</option>
+            </select>
+            <div>after: </div>
+            <input type="text" id="filter-cal" disabled="disabled">
+        </div>
+    </div>
+    <div id="stored-filters" class="flex-col">
+        <div class="flex-row spaced">
+            <button id="apply-filter" class="ag-fresh tbl-bttn">
+                Apply
+            </button>
+            <span style="flex-grow: 1;"></span>
+            <span><b>Saved Filter Sets</b></span>
+            <span style="flex-grow: 1.6;"></span>
+            <button id="svd-fltr-hlp" class="ag-fresh tbl-bttn hlp-bttn">?</button>
+        </div>
+        <div class="flex-row spaced" style="min-height: 27px;">
+            <button id="save-filter" class="ag-fresh tbl-bttn">
+                Save
+            </button>
+            <span id="set-submit-msg" class="pnl-submit-msg">&#10004;</span>
+            <!-- <span class="fltr-desc">Select Filter: </span> -->
+            <select id="selSavedFilters" class="saved-filters-sel"></select>
+            <div class="flex-row spaced filter-set-details">
+                <span id="filter-set-name" class="fltr-desc">Name: </span>
+                <input type="text" placeholder="Filter Name" style="height: 27px;">
+            </div>
+        </div>
+        <div class="flex-row spaced">
+            <button id="delete-filter" class="ag-fresh tbl-bttn">
+                Delete
+            </button>
+            <div id="set-confm-cntnr" class="flex-col">
+                <button id="confm-set-delete" class="ag-fresh tbl-bttn">
+                    Confirm
+                </button>
+                <button id="cncl-set-delete" class="ag-fresh tbl-bttn">
+                    Cancel
+                </button>
+            </div>
+            <span style="width: 34px !important;"></span>
+            <div class="filter-set-details flex-row">
+                <span class="fltr-desc">Description: </span>
+                <textarea placeholder="Filter Description"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

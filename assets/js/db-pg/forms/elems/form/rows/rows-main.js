@@ -4,7 +4,7 @@
  * Exports:
  *     buildFormRow
  *     buildFormRows
- *     getFormFieldRows 
+ *     getFormFieldRows
  */
 import * as _f from '../../../forms-main.js';
 import getFieldConfgs from './field-confg.js';
@@ -12,14 +12,14 @@ import getFieldConfgs from './field-confg.js';
 export function buildFormRow() {
     return require('./single-row.js').default(...arguments);
 }
-/** 
- * Builds and returns the default fields for entity sub-form and returns the 
+/**
+ * Builds and returns the default fields for entity sub-form and returns the
  * row elems. Inits the params for the sub-form in the global mmry obj.
  */
 export function buildFormRows(entity, fVals, fLvl, params) {                    //console.log('buildFormRows. args = %O', arguments)
     return getFormFieldRows(entity, fVals, fLvl)
         .then(returnFinishedRows);
-    
+
     function returnFinishedRows(rows) {
         let id = entity+'_Rows';
         if ($('#'+id).length) { id = id+'_'+fLvl;  }
@@ -30,10 +30,10 @@ export function buildFormRows(entity, fVals, fLvl, params) {                    
     }
 }
 /**
- * Returns rows for the entity form fields. If the form is a source-type, 
- * the type-entity form config is used. 
+ * Returns rows for the entity form fields. If the form is a source-type,
+ * the type-entity form config is used.
  */
-export function getFormFieldRows(entity, fVals, fLvl) {  
+export function getFormFieldRows(entity, fVals, fLvl) {
     const fObj = getFieldConfgs(_f.util('lcfirst', [entity]), fLvl);            //console.log('getFormFieldRows [%s] = %O', entity, fObj);
     return buildRows(fObj, entity, fVals, fLvl);
 }
@@ -42,7 +42,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
     return Promise.all(fieldObj.order.map(f => {
         return Array.isArray(f) ? buildMultiFieldRow(f) : buildSingleFieldRow(f);
     }));
-    
+
     function buildMultiFieldRow(fields) {                                       //console.log('buildMultiFieldRow = %O', fields);
         const cntnr = _f.util('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
         const rows = fields.reduce(buildAndAppendField, Promise.resolve());
@@ -53,12 +53,12 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
                 .then(row => $(cntnr).append(row)));
         }
     }
-    function buildSingleFieldRow(field) {                                       //console.log('buildSingleFieldRow [%s]', field);  
+    function buildSingleFieldRow(field) {                                       //console.log('buildSingleFieldRow [%s]', field);
         return buildRow(field, fieldObj, entity, fVals, fLvl);
     }
 }
 /**
- * @return {div} Form field row with required-state and value (if passed) set.  
+ * @return {div} Form field row with required-state and value (if passed) set.
  */
 function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     const fieldData = getFieldData();
@@ -70,11 +70,11 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
             name: field,
             required: fieldsObj.required.indexOf(field) !== -1,
             type: fieldsObj.fields[field],
-            value: fVals[field] ? fVals[field] : 
+            value: fVals[field] ? fVals[field] :
                 (fieldsObj.fields[field] == 'multiSelect' ? {} : null)
         }
     }
     function buildFieldRow(input) {                                             //console.log('input = %O', input);
         return buildFormRow(_f.util('ucfirst', [field]), input, fLvl, "");
     }
-} /* End buildRow */ 
+} /* End buildRow */

@@ -1,5 +1,5 @@
 // Core Form
-//      Large 
+//      Large
 //      Medium
 //      Small
 //      Sub-forms
@@ -11,8 +11,8 @@
 .form-ovrly
     align-items: center
     display flex !important
-    
-.form-popup 
+
+.form-popup
     display flex
     top: 0 !important
     text-align: left
@@ -23,7 +23,7 @@
 #form-main
     padding: 5px 0 0 5px;
     overflow-x: hidden;
-    
+
 div[id$="_Rows"] //Form field container
     min-width: 100%
 
@@ -33,11 +33,11 @@ div[id$="_Rows"] //Form field container
     flex: 0 1 1330px
     max-height: 88vh
     min-width: 1200px
-    height 88vh 
+    height 88vh
     max-width 1330px;
 
 #form-main.lrg-form
-    height 88vh 
+    height 88vh
     flex 1 0 942px
 /* --- Medium Forms --- */
 .form-popup.med-form
@@ -47,18 +47,18 @@ div[id$="_Rows"] //Form field container
     max-height: 88vh
     min-width: 1200px
     // max-width: 666px
-    
+
 #form-main.med-form
     height 77vh
     flex 1 0 909px
     width 909px
-    
+
 #form-main.med-form .top-row
     width 450px
-    
+
 #form-main.med-form label
     flex: 0 1 100px
-    
+
 /* --- Small Forms --- */
 .form-popup.sml-form
     padding: 15px
@@ -66,69 +66,69 @@ div[id$="_Rows"] //Form field container
     height 55vh
     max-height: 55vh
     min-width: unset
-    
+
 #form-main.sml-form
     height 55vh
     flex 0 0 464px
 /* --- Sub-forms --- */
-$sub-form-styles 
+$sub-form-styles
     border: 1px solid grey
     border-radius: 5px
     padding: 5px
-    
+
 .med-sub-form
     @extends $sub-form-styles
     flex: 1 1 808px
     margin: 11px 25px
-    
+
 .sml-sub-form
     @extends $sub-form-styles
     flex: 1 1 385px
     margin-top: .5em
-    
+
 /* --------- Row Containers -------- */
-.top-row 
+.top-row
     width 468px
 
-.full-row 
+.full-row
     width: 100%
 /* --------- Fields -------- */
-#top-form label 
+#top-form label
     font-size: 1em
     padding: 9px 0 2px 0
     flex: 0 1 121px
 
-#sub-form label 
+#sub-form label
     font-size: 1em
     padding: 9px 0 2px 0
     flex: 0 1 109px
-    
+
 #top-form textarea
-    height: 63px 
+    height: 63px
     flex-grow 1
-    
+
 .xlrg-field.top
     width: 88%
-    
-.lrg-field 
+
+.lrg-field
     flex: 1 1 302px
-    
-.med-field 
+
+.med-field
     flex: 1 1 240px
 
-.sml-field 
+.sml-field
     flex: 0 1 200px
 /* ======================= FORM SPECIFIC ==================================== */
 #Realm_row .med-field //realm combobox class
     width: webkit-fill-available
     margin-left: -2em
-    
+
 #Realm_row .selectize-dropdown
     margin-left 0
-    
+
 
 /* -------------- TO BE SORTED ------------------- */
-.warn-msg 
+.warn-msg
     padding-top: .5em
     font-weight: 600
     margin-right: 1em

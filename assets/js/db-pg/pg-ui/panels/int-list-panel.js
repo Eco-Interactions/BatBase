@@ -1,13 +1,13 @@
 /**
  * Handles the saving, editing, and display of saved lists of interactions.
  *
- * Exports:                 
- *     addListPanelEvents   
- *     newIntList           
- *     isSavedIntListLoaded 
- *     selIntList           
+ * Exports:
+ *     addListPanelEvents
+ *     newIntList
+ *     isSavedIntListLoaded
+ *     selIntList
  *     toggleListPanelOrientation
- *     enableListResetBttn           
+ *     enableListResetBttn
  *
  * TOC:
  *     SHOW/HIDE LIST PANEL
@@ -22,7 +22,7 @@
  *             PSEUDO TAB INVISIBLE BOTTOM BORDER
  *             Select Rows Radio Toggles
  *             Reset & Enable/Disable UI
- *             Table Methods         
+ *             Table Methods
  */
 import * as pM from './panels-main.js';
 import { _u, _filter, _ui, resetDataTable, accessTableState as tState } from '../../db-main.js';
@@ -38,12 +38,12 @@ import { _u, _filter, _ui, resetDataTable, accessTableState as tState } from '..
  */
 let app = {};
 
-export function isSavedIntListLoaded() {                                          
+export function isSavedIntListLoaded() {
     return app.listLoaded;
 }
 export function initListPanel() {
     if ($('body').data('user-role') === 'visitor') { return; }
-    require('../../../../styles/pages/db/panels/lists.styl');  
+    require('../../../../styles/pages/db/panels/lists.styl');
     addListPanelEvents();
 }
 function addListPanelEvents() {
@@ -59,26 +59,26 @@ function addListPanelEvents() {
     $('#cncl-list-delete').click(cancelDelete);
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
-function toggleSaveIntsPanel() {                                         
-    if ($('#list-pnl').hasClass('closed')) { 
-        buildAndShowIntPanel(); 
+function toggleSaveIntsPanel() {
+    if ($('#list-pnl').hasClass('closed')) {
+        buildAndShowIntPanel();
         sizeIntPanelTab();
     } else { pM.togglePanel('lists', 'close'); }
 }
-function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')         
+function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')
     pM.togglePanel('lists', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();
     }
 }
-export function enableListResetBttn() {  
-    if (!app.listLoaded) { 
+export function enableListResetBttn() {
+    if (!app.listLoaded) {
         $('button[name="clear-list"]')
-            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5); 
+            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5);
     } else {
         $('button[name="clear-list"]')
-            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('slow', 1); 
+            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('slow', 1);
     }
 }
 /* --------------- Toggle Panel Vertically or Horizontally ------------------ */
@@ -132,7 +132,7 @@ function createDataList() {
 }
 /* ------ OPEN LIST ------- */
 /** Opens a saved list of interactions. */
-export function selIntList(val) {                                               
+export function selIntList(val) {
     if (val === 'create') { return newIntList(''); }
     if (!val && !app.submitting) { return resetListUi(); }
     if (val === 'new'|| (!val && app.submitting)) { return; } // New list typed into combobox or mid edit-submit
@@ -152,9 +152,9 @@ function editDataList() {
 }
 function fillListData(id) {
     _u('getData', ['dataLists']).then(lists => {
-        const list = addActiveListToMemory(lists[id]);              /*dbug-log*///console.log('activeList = %O', list);                                                 
+        const list = addActiveListToMemory(lists[id]);              /*dbug-log*///console.log('activeList = %O', list);
         fillListDataFields(
-            list.displayName, list.description, list.details.length);  
+            list.displayName, list.description, list.details.length);
     });
 }
 /* ====================== EDIT INTERACTION LIST ============================= */
@@ -170,30 +170,30 @@ function buildListData() {
 /* ----- ADD/REMOVE ROWS ----- */
 function getInteractions() {
     app.tblApi = tState().get('api');
-    return $('#mod-some-list').prop('checked') ? getUpdatedIntSet(app.modMode) : 
+    return $('#mod-some-list').prop('checked') ? getUpdatedIntSet(app.modMode) :
         $('#mod-all-list').prop('checked') ? getAllIntsInTable(app.modMode) : [];
 }
 function getAllIntsInTable(mode) {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
     _ui('setTreeToggleData', [true]);
-    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, true));           
+    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, true));
     return getUpdatedIntSet(mode);
 }
 /** An interaction row has 'interactionType' data. Selected or unselects all rows. */
-function selectInteractions(select, rowNode) { 
+function selectInteractions(select, rowNode) {
     if (rowNode.data.interactionType !== undefined) { rowNode.setSelected(select); }
 }
-function getUpdatedIntSet(mode) {                                               
-    const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; }); 
-    return mode == 'add' ? 
-        [ ...new Set(rows.concat(app.list.details).filter(id => id))] : 
+function getUpdatedIntSet(mode) {
+    const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; });
+    return mode == 'add' ?
+        [ ...new Set(rows.concat(app.list.details).filter(id => id))] :
         app.list.details.filter(id => rows.indexOf(id) === -1);
 }
 /* ====================== DELETE INTERACTION LIST =========================== */
-function deleteInteractionList() {                                  
+function deleteInteractionList() {
     $('#delete-list').hide();
-    $('#list-confm-cntnr').show();    
+    $('#list-confm-cntnr').show();
 }
 function confmDelete() {                                            /*perm-log*/console.log('           --Deleted Interaction List');
     resetDeleteButton();
@@ -205,7 +205,7 @@ function cancelDelete() {
     resetDeleteButton();
 }
 function resetDeleteButton() {
-    $('#list-confm-cntnr').hide();    
+    $('#list-confm-cntnr').hide();
     $('#delete-list').show();
 }
 /* ================== LOAD INTERACTION LIST IN TABLE ======================== */
@@ -220,7 +220,7 @@ function loadListInTable() {                                        /*perm-log*/
 }
 function prepareMemoryForTableLoad() {
     tState().set({'intSet': app.list.details});
-    app.tblState = tState().get();  
+    app.tblState = tState().get();
     app.listLoaded = true;
 }
 function updateRelatedListUi() {
@@ -237,8 +237,8 @@ function updateRelatedListUi() {
 }
 function syncFilterUi(focus) {
     _filter('syncViewFiltersAndUi', [focus]);
-    if ($('#selSavedFilters')[0].selectize) { 
-        $('#selSavedFilters')[0].selectize.clear('silent') 
+    if ($('#selSavedFilters')[0].selectize) {
+        $('#selSavedFilters')[0].selectize.clear('silent')
     }
 }
 function updateListLoadButton(text, clickFunc) {
@@ -247,7 +247,7 @@ function updateListLoadButton(text, clickFunc) {
 }
 /* ====================== UTILITY =========================================== */
 function addActiveListToMemory(list) {
-    app.list = pM.parseUserNamed(list); 
+    app.list = pM.parseUserNamed(list);
     return app.list;
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
@@ -256,7 +256,7 @@ function submitDataList(data, action, hndlr) {
     app.submitting = app.modMode; //Flag tells various event handlers how to handle submit
     pM.submitUpdates(data, action, hndlr);
 }
-function onListSubmitComplete(action, results) {                                      
+function onListSubmitComplete(action, results) {
     const list = JSON.parse(results.list.entity);                   /*temp-log*///console.log('listSubmitComplete results = %O, list = %O', results, list)
     pM.updateUserNamedList(results.list, action)
     .then(updateListComboboxOptions)
@@ -265,7 +265,7 @@ function onListSubmitComplete(action, results) {
 function updateUiAfterListSubmit(list) {
     $('#selIntList')[0].selectize.addItem(list.id)
     showSavedMsg();
-    toggleInstructions();  
+    toggleInstructions();
     if (app.submitting === 'rmv') { loadListInTable(); }
     delete app.submitting;
     $('#submit-list').data('submitting', false);
@@ -284,7 +284,7 @@ function hideSavedMsg() {
 }
 /* =============================== UI ======================================= */
 function initListCombobox() {
-    _u('initCombobox', ['Int-lists', selIntList, {add: newIntList}]);   
+    _u('initCombobox', ['Int-lists', selIntList, {add: newIntList}]);
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
         disableInputs();
@@ -293,9 +293,9 @@ function initListCombobox() {
 function fillListDataFields(nameVal, descVal, intCnt) {
     $('#list-details input').val(nameVal).focus();
     $('#list-details textarea').val(descVal);
-    $('#int-list-cnt')[0].innerHTML = '<b>'+intCnt+'</b>';  
-    if (intCnt > 0) { 
-        $('#load-list, #load-list+div').attr({disabled: false}).css({opacity: 1}); 
+    $('#int-list-cnt')[0].innerHTML = '<b>'+intCnt+'</b>';
+    if (intCnt > 0) {
+        $('#load-list, #load-list+div').attr({disabled: false}).css({opacity: 1});
     }
 }
 /* --- PSEUDO TAB INVISIBLE BOTTOM BORDER -------- */
@@ -314,9 +314,9 @@ function sizeIntPanelTab() {
 }
 function getPseudoStyle() {
     const panelT = $('#list-pnl').position().top;
-    const tabW = $('#list-opts').innerWidth();  
+    const tabW = $('#list-opts').innerWidth();
     const tabL = $('#list-opts').position().left + 1;               /*dbug-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
-    return `<style>.hide-int-bttm-border:before { 
+    return `<style>.hide-int-bttm-border:before {
         position: absolute;
         content: '';
         height: 3px;
@@ -325,22 +325,22 @@ function getPseudoStyle() {
         top: ${panelT}px;
         left: ${tabL}px;
         background: #e2f2f3;
-        }</style>`;  
+        }</style>`;
 }
 /* --- Select Rows Radio Toggles ---- */
-function toggleInstructions() {                                                 
-    $('#mod-info').fadeTo('fast', 0); 
-    addInfoMsgAndUpdateTableSelection();  
+function toggleInstructions() {
+    $('#mod-info').fadeTo('fast', 0);
+    addInfoMsgAndUpdateTableSelection();
     $('#mod-info').fadeTo('fast', 1);
 }
 function addInfoMsgAndUpdateTableSelection() {
-    const selMode = getRowSelectModeAndSyncRadioUi();   
-    const info = getRowSelectInfo(selMode);  
+    const selMode = getRowSelectModeAndSyncRadioUi();
+    const info = getRowSelectInfo(selMode);
     $('#mod-info')[0].innerHTML = info;
     app.rowSelMode = selMode;
 }
 function getRowSelectModeAndSyncRadioUi() {
-    const radioVal = $('#mod-some-list').prop('checked') ? 'some' : 
+    const radioVal = $('#mod-some-list').prop('checked') ? 'some' :
         $('#mod-all-list').prop('checked') ? 'all' : false;
     if (!radioVal) {
         $(`#mod-${app.rowSelMode}-list`).prop('checked', true);
@@ -352,7 +352,7 @@ function getRowSelectInfo(selMode) {
     const map = {
         some: 'Click on an *interaction row to select. Hold ctrl/cmd to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.',
         all: 'Click "Save List" to add/remove all *interactions in the table. *Interaction rows are the colored base-level rows.',
-    }; 
+    };
     return map[selMode];
 }
 /* ---- Reset & Enable/Disable UI --- */
@@ -368,27 +368,27 @@ function clearAndDisableInputs() {
     disableModUi();
     disableInputs();
 }
-function enableInputs(creating) {                                               
-    $(`#list-details input, #list-details textarea, #list-details span, #mod-list-pnl > span:first-child, 
+function enableInputs(creating) {
+    $(`#list-details input, #list-details textarea, #list-details span, #mod-list-pnl > span:first-child,
         #list-pnl button, #mod-mode, #mod-radios input, #mod-radios label`)
         .attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
-function disableInputs() {                                                      
-    $(`#list-details input, #list-details textarea, #list-details span, #list-sel-cntnr button, 
-        #mod-list-pnl button, #mod-list-pnl > span:first-child, #load-list+div, 
+function disableInputs() {
+    $(`#list-details input, #list-details textarea, #list-details span, #list-sel-cntnr button,
+        #mod-list-pnl button, #mod-list-pnl > span:first-child, #load-list+div,
         #mod-mode, #mod-radios input, #mod-radios label`)
             .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
     $('#mod-rmv-list, label[for="mod-rmv-list"]').css({display: 'none'});
 }
-function enableModUi(m) {                                                       
+function enableModUi(m) {
     const mode = app.submitting || m;
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
-    const label = mode === 'add' ? 
+    const label = mode === 'add' ?
         'Add Interactions to List:' : 'Remove Interactions from List:';
     $('#mod-mode').html(label).css({'font-weight': 600, 'font-size': '.9em'});
-    $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);  
+    $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
     app.modMode = mode;
 }
 function disableModUi() {
@@ -405,7 +405,7 @@ function updateDetailHdr(type) {
 }
 function updateListComboboxOptions() {
     return Promise.resolve(_u('getOptsFromStoredData', ['dataListNames']).then(
-        opts => { 
+        opts => {
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
             _u('replaceSelOpts', ['#selIntList', opts]);
     }));
@@ -413,13 +413,13 @@ function updateListComboboxOptions() {
 function resetPrevListUiState() {
     if (!app.listLoaded || app.submitting) { return; }
     resetTable();
-    updateListLoadButton('View Interaction List in Table', loadListInTable);  
+    updateListLoadButton('View Interaction List in Table', loadListInTable);
     delete app.listLoaded;
 }
 /* --- Table Methods --- */
 /** Resets interactions displayed to the full default set of the current focus. */
-function resetTable() {                     
-    tState().set({'intSet': false});                                            
+function resetTable() {
+    tState().set({'intSet': false});
     delete app.listLoaded;
     resetDataTable()
     .then(updateUiAfterTableReset);
@@ -436,8 +436,8 @@ function expandAllTableRows() {
     app.tblApi.expandAll();
     _ui('setTreeToggleData', [true]);
 }
-function deselectAllRows() {                                                    
+function deselectAllRows() {
     app.tblApi = tState().get('api');
-    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));       
+    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }

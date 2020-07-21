@@ -1,19 +1,19 @@
 /**--------------- Header Menu Styles -------------------*/
 #sticky-hdr
     @extend $content-width
-    
+
 #sticky-hdr.mobile
     @media $mqTablet
         width: 100vw
 
-.top-sticky 
-    z-index: 1002 
+.top-sticky
+    z-index: 1002
     position: fixed !important //necessary when showing browser optimization message (non-chrome browsers)
     top: 0 !important  //... and on mobile devices
     background-color: White
     width: 100%
 
-#hdrmenu 
+#hdrmenu
     display: flex
     justify-content: space-between
     height: 43px
@@ -21,8 +21,8 @@
     background: White
     border-bottom: 1px solid Gray
     z-index 1001
-    
-#hdrmenu.vert 
+
+#hdrmenu.vert
     height: fit-content
 /* ------------- MENU --------------- */
 $menu-font
@@ -35,7 +35,7 @@ $menu-font
     @media screen and (max-width: 600px)
         font-size: 19px
 
-.content-overlay 
+.content-overlay
     background: rgba(0,0,0,.6)
     height: fit-content
 /* ---- Mobile Nav ---- */
@@ -46,21 +46,21 @@ $menu-font
     width: 100vw
     z-index 1
     background-color WhiteSmoke
-      
-.toggle 
+
+.toggle
     @extends $menu-font
     height 0
 
 #oimenu
     @extends .flex-row
-    width fit-content 
-    
+    width fit-content
+
 #oimenu.vert.closed
     border-radius: 0
     padding: 0
     border: 0
     height: 0
-    overflow-y: hidden  
+    overflow-y: hidden
 
 #oimenu.vert
     @extends .flex-col
@@ -71,32 +71,32 @@ $menu-font
 
 #oimenu.vert .smtrigger.closed > ul
     max-height: 0;
-    overflow-y: hidden 
-    
+    overflow-y: hidden
+
 #oimenu.vert .smtrigger > ul
     max-height: fit-content;
     width 95vw
 
 #oimenu.vert .smtrigger > ul li
-    width 95vw    
+    width 95vw
 /* ---- Shared Nav ---- */
-nav 
+nav
     width 100%
     justify-content space-between
     z-index 1
-    
-#oimenu a 
+
+#oimenu a
     @extends $menu-font
     text-align: left
     width 100%
-    margin: 0 
-    display: block 
+    margin: 0
+    display: block
     width: 100%
 
 .smtrigger
     position: relative
-    
-.smtrigger > a:after 
+
+.smtrigger > a:after
     content: " \25BC"
     font-size: .5em
     display: block
@@ -104,10 +104,10 @@ nav
     top: .5em
     right: .7em
 
-#oimenu li:hover 
+#oimenu li:hover
     background: LightGrey
-    
-#oimenu ul 
+
+#oimenu ul
     max-height: fit-content
     z-index: 1000
     position: absolute
@@ -118,34 +118,34 @@ nav
     padding: 0
     box-shadow: 10px 10px 23px #888888
 
-#oimenu ul li 
+#oimenu ul li
     position: relative;
     width: 250px
     z-index: 1001
     margin:0;
     padding: 0;
-    
-#oimenu ul a 
+
+#oimenu ul a
     padding: 10px 15px
 
 #oimenu ul li.current-menu-item
     background: #ddd;
 
-#oimenu .smtrigger > ul 
+#oimenu .smtrigger > ul
     max-height: 0
     overflow-y hidden
 
 #oimenu .smtrigger:hover > ul
     max-height: fit-content
     height fit-content //fixes Safari bug
-    
-.admin-menu 
+
+.admin-menu
     background: rgba(26, 128, 230, .3)
 
-.super-admin-menu 
+.super-admin-menu
     background: rgba(54, 151, 111, .3)
 
-#site-name, .site-name 
+#site-name, .site-name
     text-align: center
     font-size: 23px
     color: DimGray
@@ -155,7 +155,7 @@ nav
     @media screen and (max-width: 600px)
         font-size: 19px
 /* -- PAGE HEADER BAR -- */
-#pg-hdr 
+#pg-hdr
     display: flex
     position: relative
     justify-content: space-between
@@ -170,11 +170,11 @@ nav
     @media screen and (max-width: 600px)
         font-size: 19px
 
-#hdr-right 
+#hdr-right
     display: flex
     justify-content: flex-start
     background: White
-    
+
 #hdricopen { //Edit pencil on content block show page
     width: 1em;
     height: auto;

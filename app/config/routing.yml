@@ -1,7 +1,0 @@
-app_entities:
-    resource: "@AppBundle/Controller"
-    type:     annotation
-
-fos_user:
-    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
-

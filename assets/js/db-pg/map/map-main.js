@@ -1,4 +1,4 @@
-/** 
+/**
  * This file is responsible for interactions with the google maps API.
  * Displays the map on the search database page.
  */
@@ -12,7 +12,7 @@
  *   showLoc                    db_page
  */
 import { accessTableState as tState, _db, _u, _ui} from '../db-main.js';
-import * as MM from './map-markers.js'; 
+import * as MM from './map-markers.js';
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
 
@@ -28,14 +28,14 @@ initMapState();
  *     geoCoder - used for reverse geocode
  *     map - leaflet map instance
  *     popups - (k) location name, (v) popup api
- *     volatile - container for volatile map objects: 
- *         loc - 
- *         markers - 
+ *     volatile - container for volatile map objects:
+ *         loc -
+ *         markers -
  *         pin - dropped on click in location forms
  *         poly - country oulined with search results and when clicking on map
- *         prevLoc - 
- *         prnt - 
- */         
+ *         prevLoc -
+ *         prnt -
+ */
 function initMapState() {
     app = {
         data: {},
@@ -80,7 +80,7 @@ function downloadDataAndBuildMap(loadFunc, mapId, type) {
     _db('getData', [Object.keys(map)]).then(data => {
         Object.keys(data).forEach(k => {app.data[map[k]] = data[k]});
         buildAndShowMap(loadFunc, mapId, type);
-    });                                   
+    });
 }
 /** Initializes the map using leaflet and mapbox. */
 function buildAndShowMap(loadFunc, mapId, type) {                               //console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
@@ -99,34 +99,34 @@ function getMapInstance(mapId) {
     if (app.map) { app.map.remove(); }
     $(mapId).empty();
     app.popups = {};
-    return L.map(mapId); 
+    return L.map(mapId);
 }
 /**
  * Either displays coordinates at click location; or drops a new map pin and updates
  * the form.
  */
-function onMapClick(type, e) { 
+function onMapClick(type, e) {
     if (ifClickOnMapTool(e)) { return; }
-    if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(type, e);  
+    if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(type, e);
     } else { showLatLngPopup(type, e) }
 }
 /** Catches clicks on map buttons or tools. */
-function ifClickOnMapTool(e) {                                                  //console.log('e = %O', e)  
+function ifClickOnMapTool(e) {                                                  //console.log('e = %O', e)
     let elemClass = getClickedElemClass(e.originalEvent.target);
     return typeof elemClass === 'string' && elemClass.includes('leaflet-control');
 }
 function getClickedElemClass(elem) {
-    return elem.className ? elem.className : 
+    return elem.className ? elem.className :
         elem._container ? elem._container.className : '';
 }
 /**
- * Drops a new map pin, draws the containing country and displays pins for all  
+ * Drops a new map pin, draws the containing country and displays pins for all
  * existing sub locations within the country.
- */ 
+ */
 function dropNewMapPinAndUpdateForm(type, e) {
     $('#form-map').css('cursor', 'progress');
     app.geoCoder.reverse(
-        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null); 
+        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null);
     fillCoordFields(e.latlng);
 }
 function showLatLngPopup(type, e) {
@@ -142,7 +142,7 @@ function getMapBounds() {
 function addMapTiles(mapId) {
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        minZoom: mapId === 'form-map' ? 1 : 3, //Don't zoom out passed 
+        minZoom: mapId === 'form-map' ? 1 : 3, //Don't zoom out passed
         maxZoom: 16,
         id: 'mapbox.run-bike-hike',
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
@@ -176,17 +176,17 @@ function setDefaultTipText() {
     $('#tips-legend').data('expanded', false);
 }
 function toggleTips() {
-    return $('#tips-legend').data('expanded') ? 
+    return $('#tips-legend').data('expanded') ?
         setDefaultTipText() : setExpandedTipText();
 }
 function addGeoCoderToMap(mapId) {
     const opts = getGeocoderOptions();
     L.Control.geocoder(opts).on(
-        'markgeocode', drawPolygonAndUpdateUi.bind(null, mapId)).addTo(app.map);  
+        'markgeocode', drawPolygonAndUpdateUi.bind(null, mapId)).addTo(app.map);
     $('.leaflet-control-geocoder').attr('title', `Search by name or coordinates`);
 }
 function getGeocoderOptions() {
-    app.geoCoder = L.Control.Geocoder.nominatim(); 
+    app.geoCoder = L.Control.Geocoder.nominatim();
     return {
         defaultMarkGeocode: false,
         position: 'topleft',
@@ -201,7 +201,7 @@ function drawPolygonAndUpdateUi(mapId, e) {                                     
 }
 function drawPolygon(bbox, address) {
     if (app.volatile.poly) { removePreviousPoly(); }
-    if (ifCntryResult(address)) { return; } 
+    if (ifCntryResult(address)) { return; }
     app.volatile.poly = L.polygon([
         bbox.getSouthEast(),
         bbox.getNorthEast(),
@@ -211,12 +211,12 @@ function drawPolygon(bbox, address) {
     app.map.fitBounds(app.volatile.poly.getBounds(), { padding: [10, 10] });
 }
 function removePreviousPoly() {
-    app.map.removeLayer(app.volatile.poly); 
+    app.map.removeLayer(app.volatile.poly);
     app.volatile.poly = null;
 }
 /** Returns true if the only data returned is Country data. */
-function ifCntryResult(address) {  
-    return Object.keys(address).every(k => {  
+function ifCntryResult(address) {
+    return Object.keys(address).every(k => {
         return ['country', 'country_code'].indexOf(k) !== -1
     });
 }
@@ -237,14 +237,14 @@ function addMarkerLegendHtml(map) {
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
-    
-    function addDensityHtml() {    
+
+    function addDensityHtml() {
         const densities = ['Light', 'Medium', 'Heavy'];
         const colors = ['110, 204, 57', '240, 194, 12', '241, 128, 23'];
 
         for (var i = 0; i < densities.length; i++) {
             div.innerHTML +=
-                `<span><i style="background: rgba(${colors[i]}, .9);"></i> 
+                `<span><i style="background: rgba(${colors[i]}, .9);"></i>
                     ${densities[i]}</span>`;
         }
     }
@@ -269,17 +269,17 @@ function fillIntCntLegend(shown, notShown) {
 export function initMap(data, fltrd) {                                          console.log('               //--initMap. data = %O', data);
     app.data.locs = data;
     const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
-    downloadDataAndBuildMap(dispFunc, 'map');                                               
+    downloadDataAndBuildMap(dispFunc, 'map');
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
-export function showLoc(id, zoom, data) {                 
-    app.data.locs = data; 
+export function showLoc(id, zoom, data) {
+    app.data.locs = data;
     downloadDataAndBuildMap(showLocInMap, 'map');
-    
+
     function showLocInMap() {
         const loc = app.data.locs[id];                                          console.log('               --show loc = %O, zoom = %s', loc, zoom)
-        const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId); 
+        const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
         if (!latLng) { return noGeoDataErr(); }
         zoomToLocAndShowPopup(loc, latLng, zoom);
         addAllIntMrkrsToMap();
@@ -291,28 +291,28 @@ export function showLoc(id, zoom, data) {
 }
 function zoomToLocAndShowPopup(loc, latLng, zoom) {
     const popup = app.popups[loc.displayName] || buildLocPopup(loc, latLng);
-    popup.setContent(MM.getLocationSummaryHtml(loc, app.data));  
+    popup.setContent(MM.getLocationSummaryHtml(loc, app.data));
     popup.options.autoClose = false;
-    app.map.openPopup(popup); 
-    app.map.setView(latLng, zoom, {animate: true});  
+    app.map.openPopup(popup);
+    app.map.setView(latLng, zoom, {animate: true});
 }
-function buildLocPopup(loc, latLng) {  
+function buildLocPopup(loc, latLng) {
     const popup = L.popup().setLatLng(latLng).setContent('');
-    app.popups[loc.displayName] = popup;  
+    app.popups[loc.displayName] = popup;
     return popup;
 }
 /* --- Show All Interaction Markers --- */
 /**
  * Default Location "Map View":
- * Adds a marker to the map for each interaction with any location data. Each 
- * marker has a popup with either the location name and the country, just the  
- * country or region name. Locations without gps data are added to markers at  
+ * Adds a marker to the map for each interaction with any location data. Each
+ * marker has a popup with either the location name and the country, just the
+ * country or region name. Locations without gps data are added to markers at
  * the country level with "Unspecified" as the location name. Inside the app.popups
- * is a "Location" button that will replace the name popup with a 
+ * is a "Location" button that will replace the name popup with a
  * summary of the interactions at the location.
  */
-function addAllIntMrkrsToMap() {  
-    let ttlShown = 0, 
+function addAllIntMrkrsToMap() {
+    let ttlShown = 0,
     ttlNotShown = 0,
     regions;
 
@@ -323,20 +323,20 @@ function addAllIntMrkrsToMap() {
     });
 
     function addMapMarkers() {
-        for (let id in regions) { 
+        for (let id in regions) {
             trackIntCnt(regions[id]);
-            addMarkersForRegion(regions[id]) 
+            addMarkersForRegion(regions[id])
         };
     }
     function trackIntCnt(region) {
-        if (region.displayName === "Unspecified") { 
-            return ttlNotShown += region.totalInts; 
+        if (region.displayName === "Unspecified") {
+            return ttlNotShown += region.totalInts;
         }
         ttlShown += region.totalInts;
     }
 }
 function getRegionLocs() {
-    return Promise.resolve(_db('getData', ['topRegionNames']).then(data => {  
+    return Promise.resolve(_db('getData', ['topRegionNames']).then(data => {
         return Object.values(data).map(id => app.data.locs[id]);
     }));
 }
@@ -344,21 +344,21 @@ function addMarkersForRegion(region) {
     if (region.displayName === "Unspecified") { return; }
     addMarkersForLocAndChildren(region);
 }
-function addMarkersForLocAndChildren(topLoc, fltrdSet) {                                 
+function addMarkersForLocAndChildren(topLoc, fltrdSet) {
     if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', topLoc.displayName, topLoc);
-    let intCnt = topLoc.interactions.length; 
-    buildMarkersForLocChildren(topLoc.children);                               
+    let intCnt = topLoc.interactions.length;
+    buildMarkersForLocChildren(topLoc.children);
     if (intCnt) { buildLocationMarkers(intCnt, topLoc); }
     /**
-     * When displaying a user-made set "list" of interactions focused on locations in 
+     * When displaying a user-made set "list" of interactions focused on locations in
      * "Map Data" view, the locations displayed on the map are only those in the set
-     * and their popup data reflects the data of the set. 
+     * and their popup data reflects the data of the set.
      */
     function buildMarkersForLocChildren(locs) {
         locs.forEach(l => {
             let loc = typeof l === 'object' ? l : app.data.locs[l];
-            if (loc.locationType.displayName == 'Country') { 
-                return addMarkersForLocAndChildren(loc); 
+            if (loc.locationType.displayName == 'Country') {
+                return addMarkersForLocAndChildren(loc);
             }
             buildLocationIntMarkers(loc, loc.interactions.length);
         });
@@ -380,16 +380,16 @@ function addMarkersForLocAndChildren(topLoc, fltrdSet) {
     }
     function locIsHabitatOfTopLoc(loc) {
         const subName = loc.displayName.split('-')[0];
-        const topName = topLoc.displayName;  
+        const topName = topLoc.displayName;
         return topName.indexOf(subName) !== -1;
     }
 } /* End addMarkersForLocAndChildren */
 /**
- * When the table is filtered to display a set of interactions created by the user, 
+ * When the table is filtered to display a set of interactions created by the user,
  * that set is displayed when the loc view "Map Data" is selected.
  */
 function addMrkrsInSet(tree) {                                                  //console.log('addMrkrsInSet. tree = %O', tree)
-    let ttlShown = 0, 
+    let ttlShown = 0,
     ttlNotShown = 0;
     addMarkersInTree();
     fillIntCntLegend(ttlShown, ttlNotShown);
@@ -401,8 +401,8 @@ function addMrkrsInSet(tree) {                                                  
         }
     }
     function trackBranchIntCnt(branch) {
-        if (branch.displayName === "Unspecified") { 
-            return ttlNotShown += branch.totalInts; 
+        if (branch.displayName === "Unspecified") {
+            return ttlNotShown += branch.totalInts;
         }
         ttlShown += branch.totalInts;
     }
@@ -411,23 +411,23 @@ function addMrkrsInSet(tree) {                                                  
 /** Shows the interactions displayed in the data-table on the map. */
 export function showInts(focus, viewRcrds, locRcrds) {              /*perm-log*/console.log('----------- showIntsOnMap. focus [%s], viewRcrds [%O], locRcrds = [%O]', focus, viewRcrds, app.data.locRcrds);
     app.data.locs = locRcrds;
-    downloadDataAndBuildMap(showIntsOnMap, 'map');            
-    
-    function showIntsOnMap() {                                                  
+    downloadDataAndBuildMap(showIntsOnMap, 'map');
+
+    function showIntsOnMap() {
         const tableData = buildMapDataObj(viewRcrds, app.data);                 //console.log('showIntsOnMap! data = %O', tableData);
-        const keys = Object.keys(tableData);                                     
-        addIntCntsToLegend(tableData); 
+        const keys = Object.keys(tableData);
+        addIntCntsToLegend(tableData);
         addIntMarkersToMap(focus, tableData);
         zoomIfAllInSameRegion(tableData);
     }
-} 
+}
 function addIntCntsToLegend(data) {
     let shwn = 0, notShwn = 0;
     Object.keys(data).forEach(trackIntCnts);
     fillIntCntLegend(shwn, notShwn);
 
-    function trackIntCnts(geoId) {  
-        if (geoId === 'none') { notShwn += data[geoId].ttl; 
+    function trackIntCnts(geoId) {
+        if (geoId === 'none') { notShwn += data[geoId].ttl;
         } else { shwn += data[geoId].ttl; }
     }
 }
@@ -437,23 +437,23 @@ function addIntMarkersToMap(focus, data) {                                      
         buildAndAddIntMarker(focus, geoId, data[geoId]);
     }
 }
-function buildAndAddIntMarker(focus, geoId, data) {  
-    const latLng = getCoords(geoId, data);  
+function buildAndAddIntMarker(focus, geoId, data) {
+    const latLng = getCoords(geoId, data);
     const intCnt = data.ttl;
     const MapMarker = buildIntMarker(focus, intCnt, latLng, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
     app.map.addLayer(MapMarker.layer);
 }
-function buildIntMarker(focus, intCnt, latLng, intData) {  
+function buildIntMarker(focus, intCnt, latLng, intData) {
     const params = {
         focus: focus, intData: intData, latLng: latLng, rcrds: app.data
     };
-     return intCnt > 1 ? 
+     return intCnt > 1 ?
         new MM.IntCluster(app.map, intCnt, params) : new MM.IntMarker(params);
 }
 function getCoords(geoId, intData) {
     return getLatLngObj(intData.locs[0], app.data.geo[geoId]);
 }
-function zoomIfAllInSameRegion(data) {  
+function zoomIfAllInSameRegion(data) {
     let region, latLng;
     getRegionData();
     zoomIfSharedRegion();
@@ -466,28 +466,28 @@ function zoomIfAllInSameRegion(data) {
         }
     }
     function getRegion(geoData, geoId) {
-        geoData.locs.forEach(loc => {  
+        geoData.locs.forEach(loc => {
             if (!latLng) { latLng = getCenterCoordsOfLoc(loc, geoId); }
             const regionName = getRegionName(loc);
-            region = regionName == region || !region ? regionName : false;  
+            region = regionName == region || !region ? regionName : false;
         });
     }
     function getRegionName(loc) {
-        return loc.region ? loc.region.displayName : loc.displayName;  
+        return loc.region ? loc.region.displayName : loc.displayName;
     }
-    function zoomIfSharedRegion() {  
+    function zoomIfSharedRegion() {
         if (region) { app.map.setView(latLng, 3, {animate: true}); }
     }
 }
 /* -------------- Helpers ------------------------------------------------ */
-function getCenterCoordsOfLoc(loc, geoId) { 
+function getCenterCoordsOfLoc(loc, geoId) {
     if (!geoId) { return false; }                                               //console.log('geoJson obj = %O', app.data.geo[geoId]);
-    return getLatLngObj(loc, app.data.geo[geoId]); 
-} 
+    return getLatLngObj(loc, app.data.geo[geoId]);
+}
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
-function getLatLngObj(loc, locGeoJson) {  
+function getLatLngObj(loc, locGeoJson) {
     if (!locGeoJson.displayPoint) { return getLocCenterPoint(loc, locGeoJson); }
-    let array = JSON.parse(locGeoJson.displayPoint); 
+    let array = JSON.parse(locGeoJson.displayPoint);
     return L.latLng(array[1], array[0]);
 }
 function getLocCenterPoint(loc, locGeoJson) {                                   //console.log('       getLocCenterPoint. loc = %O, locGeoJson = %O', loc, locGeoJson);
@@ -495,7 +495,7 @@ function getLocCenterPoint(loc, locGeoJson) {                                   
     const feature = buildFeature(loc, locGeoJson);
     const polygon = L.geoJson(feature);
     console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
-    return polygon.getBounds().getCenter(); 
+    return polygon.getBounds().getCenter();
 } /* End getLocCenterPoint */
 function buildFeature(loc, geoData) {                                           //console.log('place geoData = %O', geoData);
     return {
@@ -507,34 +507,34 @@ function buildFeature(loc, geoData) {                                           
             "properties": {
                 "name": loc.displayName
             }
-        };   
+        };
 }
 function addMarkerForEachInteraction(intCnt, latLng, loc) {                     //console.log('adding [%s] markers at [%O]', intCnt, latLng);
     const params = { loc: loc, latLng: latLng, rcrds: app.data };
-    const MapMarker = intCnt > 1 ? 
+    const MapMarker = intCnt > 1 ?
         new MM.LocCluster(app.map, intCnt, params) : new MM.LocMarker(params);
-    app.popups[loc.displayName] = MapMarker.popup;  
+    app.popups[loc.displayName] = MapMarker.popup;
     app.map.addLayer(MapMarker.layer);
-} 
+}
 /*===================== Location Form Methods ================================*/
 /** Shows all location in containing country and selects the country in the form. */
 function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);
     if (!results) { return; }
-    const cntryCode = results.address.country_code ? 
+    const cntryCode = results.address.country_code ?
         results.address.country_code.toUpperCase() : null;
-    if (!cntryCode) { return; } //console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); 
+    if (!cntryCode) { return; } //console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code);
     _db('getData', ['countryCodes']).then(codes => loadCountryAndSubLocs(codes[cntryCode]));
 }
 function loadCountryAndSubLocs(cntryId) {
-    app.volatile.prnt = cntryId; 
+    app.volatile.prnt = cntryId;
     if (app.map._container.id === 'map') { return addParentLocDataToMap(cntryId, null, 'map'); }
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
 export function addVolatileMapPin(val, type, cntryId) {                         console.log('           --addVolatileMapPin')
     if (!val) { return removePreviousMapPin(); }
-    const latLng = getMapPinCoords();  
-    if (type === 'edit') { addEditFormMapData(latLng, val, cntryId); 
+    const latLng = getMapPinCoords();
+    if (type === 'edit') { addEditFormMapData(latLng, val, cntryId);
     } else { addNewLocPinAndFillCoordFields(latLng); }
     $('#cnt-legend').html('');
 }
@@ -546,7 +546,7 @@ function addEditFormMapData(latLng, locId, cntryId) {
         latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, 'edit'), null);
     if (!cntryId) { return; }
     addParentLocDataToMap(cntryId, 'skipZoom', 'edit', locId);
-    app.map.setView(latLng, 10, {animate: true});  
+    app.map.setView(latLng, 10, {animate: true});
 }
 function addNewLocPinAndFillCoordFields(latLng) {
     app.geoCoder.reverse(
@@ -558,20 +558,20 @@ function fillCoordFields(latLng) {                                              
     $('#Longitude_row input').val(latLng.lng.toFixed(5));
 }
 /* ---- Update Form UI After Reverse Geocode Success ---- */
-/** 
+/**
  * Draws containing polygon on map, shows all locations in containing country,
- * and adds a map pin for the entered coodinates. 
+ * and adds a map pin for the entered coodinates.
  */
 function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('           --updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
     if (!app.map) { return; } //form cloesd before geocode results returned.
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
-    updateMapPin(latLng, results[0], zoomFlag); 
+    updateMapPin(latLng, results[0], zoomFlag);
 }
 function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
     _db('getData', ['countryCodes']).then(cntrys => {
         const loc = results ? buildLocData(results, cntrys) : null;
-        replaceMapPin(latLng, loc, zoomFlag);  
+        replaceMapPin(latLng, loc, zoomFlag);
         $('#'+app.map._container.id).css('cursor', 'default');
         if (zoomFlag === 'edit') { $('#'+app.map._container.id).data('loaded'); }
     });
@@ -593,18 +593,18 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
-        $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
+        $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
         addParentLocDataToMap(loc.cntryId, null);
     }
-    addPinToMap(latLng, marker.layer, zoomFlag);   
+    addPinToMap(latLng, marker.layer, zoomFlag);
 }
-function removePreviousMapPin(loc) { 
-    if (!app.volatile.pin) { return app.volatile.loc = loc; }  
+function removePreviousMapPin(loc) {
+    if (!app.volatile.pin) { return app.volatile.loc = loc; }
     app.map.removeLayer(app.volatile.pin);
     resetPinLoc(loc);
 }
 function resetPinLoc(loc) {
-    app.volatile.prevLoc = app.volatile.loc; 
+    app.volatile.prevLoc = app.volatile.loc;
     app.volatile.loc = loc;
 }
 function addPinToMap(latLng, pin, zoomFlag) {
@@ -617,10 +617,10 @@ function addPinToMap(latLng, pin, zoomFlag) {
  * what is the case caught in this if??
  */
 export function initFormMap(parent, rcrds, type) {                              console.log('           /--initFormMap type = [%s]', type);
-    app.data.locs = app.data.locs || rcrds;  
+    app.data.locs = app.data.locs || rcrds;
     // if (!type && app.volatile.prnt && parent == app.volatile.prnt) { return; }
     downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);
-} 
+}
 function finishFormMap(parentId, type) {                                        //console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
     _elems.addLocCountLegend(app.map);
     if (type === 'int') {
@@ -635,18 +635,18 @@ function finishFormMap(parentId, type) {                                        
     addParentLocDataToMap(parentId, null, type);
     $('#form-map').data('loaded', true);
 }
-/** 
- * Draws containing country polygon on map and displays all locations within. 
+/**
+ * Draws containing country polygon on map and displays all locations within.
  * If editing location, locId will be passed to skip the child loc's marker.
  */
-function addParentLocDataToMap(id, skipZoom, type, locId) {  
+function addParentLocDataToMap(id, skipZoom, type, locId) {
     const loc = app.data.locs[id];
     if (!loc) { return console.log('No country data matched in geocode results'); }
     const geoJson = loc.geoJsonId ? app.data.geo[loc.geoJsonId] : false;
     drawLocPolygon(loc, geoJson, skipZoom);
     if (type === 'map') { return; }
-    const zoomLvl = app.volatile.poly || skipZoom ? false : 
-        loc.locationType.displayName === 'Region' ? 3 : 8;  
+    const zoomLvl = app.volatile.poly || skipZoom ? false :
+        loc.locationType.displayName === 'Region' ? 3 : 8;
     showChildLocs(id, zoomLvl, type, locId);
 }
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */
@@ -654,7 +654,7 @@ function drawLocPolygon(loc, geoJson, skipZoom) {                               
     if (app.volatile.poly) { removePolyLayer() }
     if (!geoJson || geoJson.type == 'Point') { return; }
     let feature = buildFeature(loc, geoJson);
-    app.volatile.poly = L.geoJSON(feature);                                         
+    app.volatile.poly = L.geoJSON(feature);
     app.volatile.poly.addTo(app.map);
     if (skipZoom) { return; }
     app.map.fitBounds(app.volatile.poly.getBounds(), { padding: [10, 10] });
@@ -663,27 +663,27 @@ function removePolyLayer() {
     app.map.removeLayer(app.volatile.poly);
     delete app.volatile.poly;
 }
-/** 
- * Adds all child locations to map and zooms according to passed zoomLvl. 
+/**
+ * Adds all child locations to map and zooms according to passed zoomLvl.
  * If editing location, locId will be passed to skip the child loc's marker.
  */
-function showChildLocs(pId, zoomLvl, type, locId) {  
+function showChildLocs(pId, zoomLvl, type, locId) {
     const prnt = app.data.locs[pId];
     const prntLatLng = getCenterCoordsOfLoc(prnt, prnt.geoJsonId);
     clearPreviousMarkers();
     addChildLocsToMap(prnt, prntLatLng, type, locId);
     if (!zoomLvl || !prntLatLng) { return; }
-    app.map.setView(prntLatLng, zoomLvl, {animate: true});  
+    app.map.setView(prntLatLng, zoomLvl, {animate: true});
 }
 function clearPreviousMarkers() {
-    if (!app.volatile.markers) { return app.volatile.markers = []; } 
-    app.volatile.markers.forEach(m => app.map.removeLayer(m)); 
+    if (!app.volatile.markers) { return app.volatile.markers = []; }
+    app.volatile.markers.forEach(m => app.map.removeLayer(m));
     app.volatile.markers = [];
 }
 /** If editing location, locId will be passed to skip it's marker. */
-function addChildLocsToMap(prnt, coords, type, locId) {     
+function addChildLocsToMap(prnt, coords, type, locId) {
     const noGpsLocs = [];
-    const locs = getChildLocData(prnt);   
+    const locs = getChildLocData(prnt);
     addLocsWithGpsDataToMap();
     _elems.addCountToLegend(locs.length, noGpsLocs.length, prnt);
     if (noGpsLocs.length) { addLocsWithoutGpsDataToMap(noGpsLocs.length); }
@@ -697,7 +697,7 @@ function addChildLocsToMap(prnt, coords, type, locId) {
         });
     }
     function getGpsData(loc) {
-        return prnt.geoJsonId != loc.geoJsonId ? 
+        return prnt.geoJsonId != loc.geoJsonId ?
             getCenterCoordsOfLoc(loc, loc.geoJsonId) : false;
     }
     function buildLocMarker(loc, latLng) {
@@ -711,19 +711,19 @@ function addChildLocsToMap(prnt, coords, type, locId) {
         return (type === 'edit' ? 'edit' : '') +
             'form'+ (loc.locationType.displayName === 'Country' ? '-c' : '');
     }
-    function addLocsWithoutGpsDataToMap(cnt) {  
+    function addLocsWithoutGpsDataToMap(cnt) {
         if (!coords) { return; }
         const params = { latLng: coords, loc: noGpsLocs, rcrds: app.data };
-        const Marker = cnt === 1 ? 
-            new MM.LocMarker(params, 'form-noGps') : 
+        const Marker = cnt === 1 ?
+            new MM.LocMarker(params, 'form-noGps') :
             new MM.LocCluster(app.map, cnt, params, 'form-noGps');
         app.map.addLayer(Marker.layer);
         app.volatile.markers.push(Marker.layer);
     }
 }
 /** Return all sub-locs, except country-habitat locations with no interactions.*/
-function getChildLocData(prnt) {                                               
+function getChildLocData(prnt) {
     return prnt.children.map(id => app.data.locs[id]).filter(loc => {
-        return loc.locationType.displayName !== 'Habitat' || loc.totalInts > 0;        
+        return loc.locationType.displayName !== 'Habitat' || loc.totalInts > 0;
     });
 }

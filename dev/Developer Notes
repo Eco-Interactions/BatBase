@@ -7,13 +7,14 @@
     - TestUser: testuser123
     - testeditor: testeditor123
 ## ======================= REGULAR USE ====================================== ##
+php bin/console cache:clear
 
 ## RESET LOCAL DB ##
     - $ ./dev/resetdb.sh
 
 ## Generate Assets ##
-> Asset generation commands: 
-    - $ yarn run encore dev 
+> Asset generation commands:
+    - $ yarn run encore dev
     - $ yarn run encore dev --watch (run while actively working on asset code)
     - $ yarn run encore production (Switch output path in webpack.config.js first)
 
@@ -26,9 +27,9 @@
 
 >STEPS TO DEPLOY TO SERVER
 
-NOTIFY SENTRY OF NEW RELEASE:  
+NOTIFY SENTRY OF NEW RELEASE:
     - run ./sentry_release.sh
-    - copy the release name <YYYMMDD_BEI> 
+    - copy the release name <YYYMMDD_BEI>
 GENERATE ASSET FILES WITH WEBPACK:
     - webpack.config.js > Comment DEV specific config and uncomment PROD config
     - paste in the release name
@@ -44,7 +45,7 @@ SERVER UPDATES:
         - OPTIMIZE COMPOSER AUTOLOADER  (https://symfony.com/doc/3.4/performance.html)
             (Necessary to apply any changes to php classes)
             $ ssh user@batbase.org -p18765
-            $ export SYMFONY_ENV=prod
+            $ composer dump-env prod
             $ composer dump-autoload --no-dev --classmap-authoritative
             # $ composer install --optimize-autoloader --no-dev --classmap-authoritative
     - set up the main domain
@@ -59,7 +60,7 @@ SERVER UPDATES:
 > SSH
     ssh user@batbase.org -p18765
 
->.htaccess rewrite for batbase.org 
+>.htaccess rewrite for batbase.org
     RewriteEngine on
     RewriteCond %{HTTP_HOST} ^batbase.org$ [NC,OR]
     RewriteCond %{HTTP_HOST} ^www.batbase.org$
@@ -68,29 +69,29 @@ SERVER UPDATES:
 
 ## =========================== TESTING ====================================== ##
 
-Start Selenium: 
+Start Selenium:
     $ java -jar selenium-server-standalone-3.141.59.jar
-    - Exit = ctrl+c 
+    - Exit = ctrl+c
         - Clear port if necessary -  sudo fuser -k 4444/tcp
 
 Run Tests:
     - Functional Tests (Behat/Mink):
-        all tests: ./vendor/bin/behat 
+        all tests: ./vendor/bin/behat
         single feature: ./vendor/bin/behat features/[FeatureName].feature
             ##Automatically ran at the start of tests:
             ##  (generate fixtures as needed: php bin/console generate:fixtures)
-            ##  php bin/console doctrine:database:drop --force --env=test 
+            ##  php bin/console doctrine:database:drop --force --env=test
             ##  php bin/console doctrine:database:create --env=test
             ##  php bin/console doctrine:schema:update --force --env=test
-            ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
+            ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test
     # - Unit Tests:
     #     $phpunit = ./vendor/bin/simple-phpunit
-    #     [$phpunit] -c app/ tests   
-    #     [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+    #     [$phpunit] -c app/ tests
+    #     [$phpunit] -c app/ tests/App/Controller/<Entity>ControllerTest.php
 
 ## ==================== Local Installation ================================== ##
 
->Install Steps ## 
+>Install Steps ##
 - Install & Update COMPOSER:
     - Composer https://getcomposer.org/download/
     - Extend php.ini memory-limit
@@ -123,16 +124,16 @@ Run Tests:
 - After installing new plugin/package:
     - run $ sudo yarn install
 
-## TESTING ## 
+## TESTING ##
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
     - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
-- Install Chrome Driver 
+- Install Chrome Driver
     - Linux: (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
         - https://tecadmin.net/setup-selenium-with-chromedriver-on-debian/
-    - Mac: 
+    - Mac:
         $ brew tap homebrew/cask
         $ brew cask install chromedriver
->Resources used during tests set-up 
+>Resources used during tests set-up
 # https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
 # https://knpuniversity.com/screencast/behat
 
@@ -147,7 +148,7 @@ Run Tests:
 > SSH
     ssh user@batbase.org -p18765
 
->.htaccess rewrite for batbase.org 
+>.htaccess rewrite for batbase.org
     RewriteEngine on
     RewriteCond %{HTTP_HOST} ^batbase.org$ [NC,OR]
     RewriteCond %{HTTP_HOST} ^www.batbase.org$
@@ -155,36 +156,36 @@ Run Tests:
     RewriteRule (.*) /prod/web/$1 [L]
 ##------------------- Bugs ---------------------------------------------------##
 >::Known BUGS::
-## Bugs that I attempted to solve but ended up stumped or without time to delve in more. 
+## Bugs that I attempted to solve but ended up stumped or without time to delve in more.
 Search Page:
-    - The grid filter menus seem to not get cleared and/or destroyed properly with 
-    each call to setRowData. If that menu was displayed with previous grid instances, 
-    the previous filter menu options will be displayed and the new ones on top of 
-    them, causing the text to appear boldened and difficult to read-- even worse 
-    the menu is obviously inaccurrate. 
+    - The grid filter menus seem to not get cleared and/or destroyed properly with
+    each call to setRowData. If that menu was displayed with previous grid instances,
+    the previous filter menu options will be displayed and the new ones on top of
+    them, causing the text to appear boldened and difficult to read-- even worse
+    the menu is obviously inaccurrate.
 Forms:
     - Citation
-        * Removing previously selected authors from the dropdowns of new authors will 
-        require a bit of creativity. Currently, only the last selected author name 
-        is removed from the new combobox's options.  
-        * Removing empty author comboboxes has proven more complicated than expected. 
-        There is a some weirdness on 'destroy' in the selectize library that needs 
+        * Removing previously selected authors from the dropdowns of new authors will
+        require a bit of creativity. Currently, only the last selected author name
+        is removed from the new combobox's options.
+        * Removing empty author comboboxes has proven more complicated than expected.
+        There is a some weirdness on 'destroy' in the selectize library that needs
         to be isolated.
 composer.json:
-    -- Removed from symfony-scripts because it deletes everything in the web/bundles 
-      folder... The resoures/public is supposed to be symlinked into web/bundles folder 
+    -- Removed from symfony-scripts because it deletes everything in the web/bundles
+      folder... The resoures/public is supposed to be symlinked into web/bundles folder
       on update, but it is not working. (waiting to fix, potentially after the 3.4 update)
-      ("Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets") 
+      ("Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets")
 data wonkiness:
-    - Id inconsistencies in the db are from early testing with the interaction 
-      form before Sarah was conscious of the need to 'remove' entities via doctrine, 
-      rather than just deleting test rows from the db. There is now a db-migration, 
-      000EraseTests, that removes test entities so they can be safely deleted from 
+    - Id inconsistencies in the db are from early testing with the interaction
+      form before Sarah was conscious of the need to 'remove' entities via doctrine,
+      rather than just deleting test rows from the db. There is now a db-migration,
+      000EraseTests, that removes test entities so they can be safely deleted from
       the db without remaining in memory.
-  
-  
+
+
 >MISC
-Errors: 
+Errors:
     TAXON errors being caught:
         -- Can't change taxon to a level equal/beneath any children,
             -- or equal/above the parent.
@@ -194,10 +195,10 @@ Errors:
 
 >BEST PRACTICES
 ## Standards decided upon and why
-alphabetize: 
+alphabetize:
     Everything than can be should be.  (Adopted 2019-05-01)
 comments:
     //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
     /*Perm-log*/, /*Debg-log*/
-    - Tabs indicate depth in method chain. 
+    - Tabs indicate depth in method chain.
     '+--' prepends comment logs that are the head of a method chain

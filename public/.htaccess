@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    Options -MultiViews
+    RewriteEngine On
+
+    ## MAINTENANCE-PAGE REDIRECT
+    #RewriteCond %{REQUEST_URI} !/maintenance.html$ [NC]
+    #RewriteCond %{REQUEST_URI} !\.(jpe?g?|png|gif) [NC]
+    #RewriteRule .* /maintenance.html [R=302,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        RedirectMatch 302 ^/$ /index.php/
+    </IfModule>
+</IfModule>

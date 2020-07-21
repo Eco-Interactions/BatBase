@@ -1,0 +1,28 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}Users Active In The Last 24 Hours (Current time: {{ "now"|date("H:i:s", 'America/Los_Angeles') }}){% endblock %}
+
+{% block datatable %}online_users_tbl{% endblock datatable %}
+
+{% block detail %}
+    <table id="online_users_tbl" class="display">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First Name</th>
+                <th>Email</th>
+                <th>Last Activity At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in entities %}
+                <tr>
+	                <td>{{ user.username }}</td>
+	                <td>{{ user.firstname }}</td>
+	                <td>{{ user.email }}</td>
+	                <td>{{ user.lastActivityAt|date("H:i:s", 'America/Los_Angeles') }}</td>
+            	</tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock detail %}

@@ -14,7 +14,7 @@ import { accessTableState as tState } from '../../../db-main.js';
 // import * as pM from '../panels-main.js';
 
 export function initReviewPanel() {
-    require('../../../../../styles/pages/db/panels/rvw-data.styl');  
+    require('../../../../../styles/pages/db/panels/rvw-data.styl');
     $('#rvw-data').click(toggleEditorColumn);
 }
 
@@ -45,11 +45,11 @@ function toggleEditorColumn() {
 //     return confgs[field];
 // }
 // function initDateRangeSelect() {
-//     // _u.initCombobox('Review-Date-Range');   
+//     // _u.initCombobox('Review-Date-Range');
 // }
 // /* ----------------------- COMBOBOXES --------------------------------------- */
 // function toggleReviewPanel(argument) {
-//     if ($('#review-pnl').hasClass('closed')) { 
+//     if ($('#review-pnl').hasClass('closed')) {
 //         buildAndShowReviewPanel();
 //     } else { pM.togglePanel('review', 'close'); }
 // }

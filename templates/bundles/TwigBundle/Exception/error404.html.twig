@@ -1,0 +1,28 @@
+{% extends 'layout.html.twig' %}
+
+{% block masthead %}
+{% endblock %}
+
+{% block pageid %}error_content{% endblock pageid %}
+
+{% block detail %}
+    {% embed 'three_cols_sect.html.twig' %}
+        {% block firstcol %}
+        {% endblock firstcol %}
+        {% block secondcol %}
+            <img src="{{ asset('build/images/BatLogo_Horizontal_Color.svg') }}"
+            	id="error_logo" alt="batbase.org">
+            <h1>Page not found...</h1>
+            <p>The requested page could not be located.<br>Check for URL misspelling or
+        	    <a href="{{ path('app_home') }}"> return to the homepage</a>.<br><br>
+            		{% if is_granted("ROLE_USER") %}
+            		    If you think you have stumbled on a technical bug, <br><a
+            		    href="{{ path('app_feedback') }}">leave us feedback</a> so we can
+            		    track it down.
+            		{% endif %}
+        	   </p>
+        {% endblock secondcol %}
+        {% block thirdcol %}
+        {% endblock thirdcol %}
+    {% endembed %}
+{% endblock %}

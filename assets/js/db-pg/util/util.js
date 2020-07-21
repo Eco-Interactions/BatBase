@@ -18,7 +18,7 @@
  *   initCombobox
  *   initComboboxes
  *   init_db
- *   lcfirst 
+ *   lcfirst
  *   replaceSelOpts
  *   sendAjaxQuery
  *   setSelVal
@@ -50,31 +50,31 @@ extendPrototypes();
 /* ---------------------- SELECTIZE COMBOBOXES ------------------------------ */
 export function initCombobox() {
     return _cmbx.initCombobox(...arguments);
-} 
+}
 export function initComboboxes(fields) {
     return _cmbx.initComboboxes(fields);
-} 
+}
 export function getSelVal(field) {
     return _cmbx.getSelVal(field);
-} 
+}
 export function setSelVal() {
     return _cmbx.setSelVal(...arguments);
-} 
+}
 export function updatePlaceholderText() {
     return _cmbx.updatePlaceholderText(...arguments);
-} 
+}
 export function replaceSelOpts() {
     return _cmbx.replaceSelOpts(...arguments);
-} 
+}
 export function triggerComboChangeReturnPromise() {
     return _cmbx.triggerComboChangeReturnPromise(...arguments);
-} 
+}
 /* ----------------------- IDB STORAGE METHODS -----------------------------------------------------------------------*/
 
 /**
  * Gets data from data storage for each storage property passed. If an array
- * is passed, an object with each prop as the key for it's data is returned. 
- * If a property is not found, false is returned. 
+ * is passed, an object with each prop as the key for it's data is returned.
+ * If a property is not found, false is returned.
  */
 export function getData(props, returnUndefined) {  //breakpoint  //bp
     return _db.getData(props, returnUndefined);
@@ -120,8 +120,8 @@ export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       
     return false;
 }
 /* ------------ STRING HELPERS ---------------------------------------------- */
-export function ucfirst(str) { 
-    return str.charAt(0).toUpperCase() + str.slice(1); 
+export function ucfirst(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 export function lcfirst(str) {
     const f = str.charAt(0).toLowerCase();

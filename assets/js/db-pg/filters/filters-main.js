@@ -1,6 +1,6 @@
 /**
  * Handles filtering the data displayed in the table.
- *     
+ *
  * TOC:
  *     STATIC FILTERS
  *         TREE-TEXT
@@ -43,7 +43,7 @@ export function clearDateFilter() {
 export function reapplyDateFilterIfActive() {
     if (!$('#shw-chngd')[0].checked) { return; }
     const time = fState.getFilterStateKey('date').time;
-    fDate.reapplyPreviousDateFilter(time, 'skip'); 
+    fDate.reapplyPreviousDateFilter(time, 'skip');
 }
 export function toggleDateFilter() {
     fDate.toggleDateFilter(...arguments);
@@ -55,13 +55,13 @@ export function syncViewFiltersAndUi(focus) {
     fDate.syncViewFiltersAndUi(focus);
 }
 /* ===================== DYNAMIC FILTERS ==================================== */
-export function loadLocFilters(tblState) {                      
+export function loadLocFilters(tblState) {
     fLoc.loadLocFilters(tblState);
 }
-export function applyLocFilter() {                                 
+export function applyLocFilter() {
     return fLoc.applyLocFilter(...arguments);
 }
-export function loadSrcFilters(realm) {                      
+export function loadSrcFilters(realm) {
     fSrc.loadSrcFilters(realm);
 }
 export function applyPubFilter() {
@@ -70,7 +70,7 @@ export function applyPubFilter() {
 export function loadTxnFilters(tblState) {
     fTxn.loadTxnFilters(tblState);
 }
-export function applyTxnFilter() {                                        
+export function applyTxnFilter() {
     return fTxn.applyTxnFilter(...arguments);
 }
 /* ==================== FILTER STATE ======================================== */
@@ -91,13 +91,13 @@ export function getFilterStateKey(key) {
 export function getFilterState() {
     return fState.getFilterState();
 }
-export function getCurRowData() {                                                    
+export function getCurRowData() {
     return fState.getCurRowData();
-} 
+}
 export function isFilterActive() {
     return fState.isFilterActive();
 }
 /* ___________________ FILTER STATUS TEXT ___________________________________ */
-export function getActiveFilterVals() { 
+export function getActiveFilterVals() {
     return fState.getActiveFilterVals();
 }

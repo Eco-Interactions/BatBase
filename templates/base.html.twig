@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+    {% set eifusername = app.user.username %}
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+        {% set eifrole = 'super' %}
+    {% elseif is_granted('ROLE_ADMIN') %}
+        {% set eifrole = 'admin' %}
+    {% elseif is_granted('ROLE_EDITOR') %}
+        {% set eifrole = 'editor' %}
+    {% elseif is_granted('ROLE_USER') %}
+        {% set eifrole = 'user' %}
+    {% else %}
+        {% set eifrole = 'visitor' %}
+    {% endif %}
+{% else %}
+    {% set eifusername = '' %}
+    {% set eifrole = 'visitor' %}
+{% endif %}
+
+{% set baseurl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
+{% set menu = knp_menu_get('main', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
+
+<html {% block pagedata %}{% endblock %}>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Bat Eco-Interactions{% endblock %}</title>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+        <meta name="description" content="BatBase.org - A Bat Eco-Interactions Database" />
+        <meta name="keywords" content="bats plants insects biology taxonomy" />
+        <meta name="robots" content="index, follow" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="manifest" href="{{ asset('build/manifest.json') }}" />
+
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock stylesheets %}
+        <!-- Javascript at end of body. -->
+    </head>
+
+    <body data-env="{{ app.environment }}" data-base-url="{{ baseurl }}"
+        data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}"
+        data-user-name="{{ eifusername }}">
+        {% block body %}
+            <div id="pg-container" data-dt="{% block datatable %}false{% endblock %}">
+                {% block masthead %}
+                    {% if is_full_view() or is_tablet_view() %}
+                        {% set img1 = is_full_view() ? 'cactusbat.jpg' : 'cactusbat_750w.jpg' %}
+                        {% set img2 = is_full_view() ? 'twobats.jpg' : 'twobats_750w.jpg' %}
+                        {% set img3 = is_full_view() ? 'inflower.jpg' : 'inflower_750w.jpg' %}
+                        <div id="slider-logo"></div>
+                        <div id="img-slider">
+                            <img class="slide" style="opacity: 1;" src="{{ asset('build/images/'~img1) }}">
+                            <img class="slide" src="{{ asset('build/images/'~img2) }}">
+                            <img class="slide" src="{{ asset('build/images/'~img3) }}">
+                            <div id="slider-overlay"></div>   {# Shows browser optimization msg. #}
+                        </div>
+                    {% else %}
+                        <div id="slider-overlay" class="mobile-hdr"></div> {# Shows browser optimization msg. #}
+                        <div id="slider-logo" class="mobile-hdr"></div>
+                    {% endif %}
+                {% endblock %}
+
+                {% block menu %}
+                    {% set menuClass = is_mobile_view() ? 'mobile' : '' %}
+                    <div id="sticky-hdr" class="{{ menuClass }}">
+                        <div id="hdrmenu">
+                            <nav class="flex-row">
+                                <div id="mobile-menu-bar">
+                                    <span class="toggle">☰ Menu</span>
+                                    <div class="site-name">batbase.org</div>
+                                </div>
+                              {{ knp_menu_render(menu) }}
+                            </nav>
+                            <div id="site-name">batbase.org</div>
+                        </div>
+                        <div id="pg-hdr" class="flex-row" style="justify-content: space-between;">
+                            <div id="headln-txt">
+                                {% block headline %}{% endblock %}
+                            </div>
+                            <div id="hdr-right">{% block headerright %}{% endblock %}</div>
+                        </div>
+                    </div>
+                {% endblock %}
+                {% block pagecontent %}{% endblock %}
+            </div>
+            {% block modal %}{% endblock %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock javascripts %}
+    </body>
+</html>

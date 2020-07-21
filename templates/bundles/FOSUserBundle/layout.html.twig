@@ -1,0 +1,19 @@
+{% extends 'layout.html.twig' %}
+
+{% block detail %}
+    {% if app.request.hasPreviousSession %}
+        {% for type, messages in app.session.flashBag.all %}
+            {% for message in messages %}
+                <h3 class="{{ type }}">
+                    {{ message|trans({}, 'FOSUserBundle') }}
+                </h3>
+                <br>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <div>
+        {% block fos_user_content %}
+        {% endblock fos_user_content %}
+    </div>
+{% endblock detail %}

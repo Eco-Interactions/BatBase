@@ -22,16 +22,16 @@ function addLocCountHtml() {
     return _u('buildElem', ['div', { id: 'cnt-legend', class: 'info legend flex-col'}]);
 }
 export function addCountToLegend(ttlLocs, noGpsDataCnt, prnt) {
-    const noGpsDataHtml = noGpsDataCnt === 0 ? null : 
+    const noGpsDataHtml = noGpsDataCnt === 0 ? null :
         `<span style="align-self: flex-end;">${noGpsDataCnt} without GPS data</span>`;
-    const plural = ttlLocs === 1 ? '' : 's';    
+    const plural = ttlLocs === 1 ? '' : 's';
     let name = getLocName(prnt.displayName);
     $('#cnt-legend').html(`
         <h3 title='${prnt.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
         ${noGpsDataHtml ? noGpsDataHtml : ''}`);
 }
 function getLocName(name) {
-    name = name.split('[')[0];                                
+    name = name.split('[')[0];
     return name.length < 22 ? name : name.substring(0, 19)+'...';
 }
 /*--- Create New Location Button ---*/
@@ -79,12 +79,12 @@ function createNewLocHereBttn() {
         container = L.DomUtil.create('div', className),
         button = L.DomUtil.create('input', className + '-icon', container);
     button.type = 'button';
-    
+
     $(container).attr('title', "Click on map to select location position").append(button);
     return container;
 }
 /**
- * Sets a flag that will trigger reverse geocode of the coordinates of subsequent 
+ * Sets a flag that will trigger reverse geocode of the coordinates of subsequent
  * map clicks.
  */
 function createNewLocHere(e) {                                                  //console.log('Create new location with click! %O', e)
@@ -121,7 +121,7 @@ function createDrawLocBttn() {
         container = L.DomUtil.create('div', className),
         button = L.DomUtil.create('input', className + '-icon', container);
     button.type = 'button';
-    
+
     $(button).attr('disabled', 'disabled').css('opacity', '.3');
     $(container).attr('title', "Draw new location boundary on map").append(button);
     return container;

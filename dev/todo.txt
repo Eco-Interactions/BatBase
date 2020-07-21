@@ -2,41 +2,42 @@
 #
 # Contents:
 #   TASKS - Current, Next, Change Log
-#   MEETING NOTES - Feedback, Prep, Next/Future 
+#   MEETING NOTES - Feedback, Prep, Next/Future
 #   CHANGES SINCE LAST USER UPDATE
 #   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
-#       
+#
 Change Log:
-    - Updated all site links
-    - Added 'Bat' to the subject field label in interaction forms
-    - wrote definitions draft
-        - I see it is written that bats can consume other bats. That is not currently available
-        - I will not be making the pdf with the advanced and detailed definitions. 
-            My understanding was that already exists and is what this page was deafted from?
-    - Fixed duplicated bat ranks in map popups
-    - Tutorial:
-        - Map button enabling correctly
-        - Deifnitions link opens in new tab
-        - Data entry is never enabled because we have not created this yet
-        - Slide 10: added author and publisher
-        - Slide 16: This is addressed in the sentence in the middle "The summary shows details from up to 4 
-                interaction sets at the location." How can this be made more clear?
-        - Added slide numbering
-    - Can someone write breif definitions of the taxon realms? 
-    - Do we want the confirmation popups for all create forms? Or just citation, interaction, and location?
+    - upgraded to symfony 4.4
+
+
 
 QUESTIONS:
 
 >==== CURRENT ====
+    - 4.4 upgrade:
+        - custom error pages: https://symfony.com/doc/4.4/controller/error_pages.html
+
+    - When updating server
+        - add env.local to root with db url
+
+    - Interaction page
+        - Where to add list of related interactions from source
+        - Display globi link?
     - Create Taxon show page
+        - Display taxon page
+            - heirarchy
+            - related interactions?
+                - group by interaction type
     - Add interaction type verbs
+        - Use active verbs on interaction show page header
+        - "" in form detail panel
     - Add confirmation popup to citation and location forms
     - Add form hints
     - Add object realm and name filters to bat filter panel
     - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
 
     - fix cronjob to clean up hourly backups
-    - optimize data sync downloads. It takes almost as long as full download, 
+    - optimize data sync downloads. It takes almost as long as full download,
         depending on how much needs to be updated
     - testing
         - add interaction show page to tests
@@ -47,37 +48,33 @@ QUESTIONS:
     - add to form confg input type. (handle all number inputs)
     - add question marks to complicated fields
         - issue report form: how to copy logs
-    - DB migration
-        - remove user lists for fake users
-        - delete fake users
-        - remove parent taxon from deleted taxa
     - Add multiple realm root functionality
 
 
 >Next
-    - Refactor Source data 
+    - Refactor Source data
         - merge detail and core data on client side
     - Handle potential source name duplication
         - duplicate display names for entities with unique name fields
-            - source: if duplicate name is for a soft-deleted entity. 
-                - if not, 
-                    - are they of different types? 
+            - source: if duplicate name is for a soft-deleted entity.
+                - if not,
+                    - are they of different types?
                         - if not, different years?
                             - if not, append first author.
-                - if so, 
+                - if so,
                     - return the data of the deleted record
                         - display to user with prompt to restore
                             - submit, restoring the deleted record.
-                        - and to indicate they are creating a distinct record 
-                            - submit, append '-deleted' to deleted record to eliminate conflict. 
+                        - and to indicate they are creating a distinct record
+                            - submit, append '-deleted' to deleted record to eliminate conflict.
     - Create model of local storage
         - of entity relations
 
 >DATA CLEANUP
     - forms - Add 'trim' to all values before submitting
-        - Check for elevation field val when elev-max value entered. 
+        - Check for elevation field val when elev-max value entered.
     - db migration - Loop through all entities that could have random spaces in fields
-    - 
+    -
 
 STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining
@@ -85,7 +82,7 @@ STANDARDS:
 
 
 
-> ==== MEETING NOTES ==== 
+> ==== MEETING NOTES ====
 Prep:
     Changes:
     Questions:
@@ -103,16 +100,16 @@ Next/future rounds:
             * Identical tables
                 - Pending Edits
                     - entity, id, edits (json), timestamp
-                    - removed once approved 
+                    - removed once approved
                 - Edit History
                     - all fields pending has, plus approvedBy
         - Edit form
-            - allow selection of another location and merging of all data and 
+            - allow selection of another location and merging of all data and
                 deletion of location being edited
         - Features
             - UI - Draw areas and select as parent location
             - UI - Adjust display point for country
-            - Replace agGrid with MIT alternative 
+            - Replace agGrid with MIT alternative
 
 > ===== CHANGES SINCE LAST USER UPDATE: =====
     - Publication upload
@@ -123,7 +120,7 @@ Next/future rounds:
     - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
     - Added Interaction show page
 
-    Upcoming: 
+    Upcoming:
         - Data review features
         - Figure out how to get Logs in UI for new editors
 
@@ -132,7 +129,7 @@ Next/future rounds:
 
 Sort:
     - remove all unused properties from serialization (eg, slug)
-    - when clicking reset local data button on menu bar, figure out how to get 
+    - when clicking reset local data button on menu bar, figure out how to get
         a diff between the old and new stored data to better track down errors/bugs
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
     - REFACTOR - from 'top' to 'main' form
@@ -141,17 +138,17 @@ Sort:
     - replace ucfirst and lcfirst with built in 'toUpperCase'
     - add input type, ie number, to form field confgs
     - when attempting to use the database in FF incognito mode, which does not allow idb. Ignoring for now, will add notice to users at some point.
-    - Database doesn't work with IE. Notify user. 
+    - Database doesn't work with IE. Notify user.
     - move db-pg util elem builders to js/util/elems
-    - Add responsive styling testing 
+    - Add responsive styling testing
     - FOS registration email is not using the template found in src/appbundle/resources/translations/*
 
 TODOs:
 ##(Category){priority}[difficulty]##
 (CRUD FORMS/BACKEND)
-    - {high}[easy] When nothing is selected but a country, a habitat type, 
-        and the displayname, suggest to user they use the country-habitat combo. 
-    - {high}[med] add error to interaction form for when an 'invisible' error 
+    - {high}[easy] When nothing is selected but a country, a habitat type,
+        and the displayname, suggest to user they use the country-habitat combo.
+    - {high}[med] add error to interaction form for when an 'invisible' error
         occurs on entity selection (figure out how to trigger, then do this)
     - {high}[med] Ensure coordinates are within selected country
     - {high}[easy] Ensure all entities have a display name before submitting
@@ -173,16 +170,16 @@ TODOs:
 
 (STATIC/MISC SITE)
     - {high}[???] Set up email alert on feedback.
-    - {low}[med] Graph active users over time. 
+    - {low}[med] Graph active users over time.
         - daily max users?
-    - {med}[easy] Add headers and css styles to FOS pages 
+    - {med}[easy] Add headers and css styles to FOS pages
         - change password page (/profile/change-password)
         - update profile page (/profile/edit)
         - Reorder fields for profile edit form
     - {low}[med] Update read me for site.
 
 (SYNC-DATA)
-    - {high}[med] Add error handling for pending updates that can't be resolved 
+    - {high}[med] Add error handling for pending updates that can't be resolved
 
 (TESTS)
     - {high}[easy] Make list of all behat statements being used for reference when adding/editing tests
@@ -193,17 +190,17 @@ TODOs:
     - {med}[???] Add testing specifically for mobile responsiveness. (https://github.com/suncat2000/MobileDetectBundle/issues/76)
     - {med}[hard] Separate feature context controllers
     - {med}[???] Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
-        - check all errors trigger and clear 
+        - check all errors trigger and clear
         - tags are restricted by interaction type.
         - delete test db on test complete.
-        
+
 (PWA)
     - {low}[easy] Configure webpack's manifest plugin
     - {med}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
 
 (REFACTORING):
     --CRUD--
-        - {med}[crud.js] Add '-sel' to the edit taxon form's 'txn-lvl' field 
+        - {med}[crud.js] Add '-sel' to the edit taxon form's 'txn-lvl' field
         - {low}[easy] Change to sisngular tense in ref panel where appropriate. (taxon view complete)
     --General--
         - {med}[easy] use parital, effectively 'group', css selectors
@@ -211,7 +208,7 @@ TODOs:
         - {med}[med] Break up core util file.
         - {med}[med] Refactor css files into styl
     --Testing--
-        - {low}[easy] Refactor tests away from sleeping after js changes to attempting to run 
+        - {low}[easy] Refactor tests away from sleeping after js changes to attempting to run
             js or find elems on page multiple times before failing, 'spinning'.
 
 (BUGS):
@@ -223,7 +220,7 @@ TODOs:
 
 
 
-> CODE REVIEW 
+> CODE REVIEW
     - Is there a better name for the form's "detail-panel"?
     - openSubFormErr ??
     - replace 'err' in form code?

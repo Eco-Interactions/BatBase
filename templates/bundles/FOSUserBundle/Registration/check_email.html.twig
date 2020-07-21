@@ -1,0 +1,8 @@
+{% extends "bundles/FOSUserBundle/layout.html.twig" %}
+
+{% block fos_user_content %}
+    <p id="reg-check-email">{{
+        'registration.check_email'|trans({'%email%': user.email},
+        'FOSUserBundle')
+    }}</p>
+{% endblock fos_user_content %}

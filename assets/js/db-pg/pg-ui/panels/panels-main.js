@@ -26,7 +26,7 @@ import * as iM from './int-list-panel.js';
 import { initReviewPanel } from './data-review/review-panel-main.js';
 
 /* Panel confg */
-const panels = { 
+const panels = {
     'filter': { bttn: '#filter', key: 'filter',
         id: '#filter-pnl', tab: '#filter-opts', tabClass: 'hide-fltr-bttm-border'
     },
@@ -76,13 +76,13 @@ export function updateUserNamedList(data, action) {
 /* ********************* MAIN CODE ****************************************** */
 /* ======================= EVENTS =========================================== */
 export function addPanelEventsAndStyles(userRole) {
-    require('../../../../styles/pages/db/panels/panel.styl');  
+    require('../../../../styles/pages/db/panels/panel.styl');
     setInfoButtonClickEvents();
     fM.initFilterPanel();
     iM.initListPanel();
     if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
 }
-function setInfoButtonClickEvents() {    
+function setInfoButtonClickEvents() {
     $('#svd-list-hlp').click(_modal.bind(null, 'showHelpModal', ['saved-lists']));
     $('#svd-fltr-hlp').click(_modal.bind(null, 'showHelpModal', ['selSavedFilters']));
     $('#fltr-pnl-hlp').click(_modal.bind(null, 'showHelpModal', ['filter-panel']));
@@ -104,14 +104,14 @@ export function togglePanel(key, state) {                                       
 function openPanel(panel) {                                                     //console.log('openPanel = %O', panel);
     const opened = getOpenPanels();
     if (!opened.length) { return cssOpenPanel(panel); }
-    if (compatiblePanelOpened(opened, panel)) { openVerticalPanels(panel); 
+    if (compatiblePanelOpened(opened, panel)) { openVerticalPanels(panel);
     } else { closeOpenedPanelThenOpenNewPanel(opened, panel); }
 }
 function cssOpenPanel(panel) {
     $(panel.bttn).addClass('panel-open-toggle');
-    $(panel.id).removeClass('closed');  
+    $(panel.id).removeClass('closed');
     $(panel.tab).addClass('shw-col-borders ' + panel.tabClass);
-    window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 1000);  
+    window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 1000);
 }
 function compatiblePanelOpened(opened, panel) {
     return panel.key === 'review' ? false : opened.every(k => ['filter', 'lists'].indexOf(k) >= 0);
@@ -125,7 +125,7 @@ function openVerticalPanels(panel) {
 }
 function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
     opened.forEach(key => closePanel(panels[key]));
-    window.setTimeout(() => cssOpenPanel(panel), 500);  
+    window.setTimeout(() => cssOpenPanel(panel), 500);
 }
 /* ------------------------ Close Panel(s) ---------------------------------- */
 function closePanel(panel) {
@@ -159,11 +159,11 @@ export function submitUpdates(data, action, successFunc) {
     _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, successFunc]);
 }
 /* ================= MISC =================================================== */
-export function parseUserNamed(entity) {                                        
+export function parseUserNamed(entity) {
     return entity ? parseEntity(entity) : { details: [] };
 }
-function parseEntity(entity) {  
-    entity.details = typeof entity.details == 'string' ? 
+function parseEntity(entity) {
+    entity.details = typeof entity.details == 'string' ?
         JSON.parse(entity.details) : entity.details;
     return entity
 }

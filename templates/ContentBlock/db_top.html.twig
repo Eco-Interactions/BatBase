@@ -1,0 +1,46 @@
+{% extends "layout.html.twig" %}
+
+{% set blocks = entities %}
+
+{% block headline %}Bat Eco-Interactions Database{% endblock %}
+
+{% block detail %}
+	<div id="about-db" class="top-pgs">
+	{% embed 'two_cols_sect.html.twig' %}
+		{% block firstcol %}
+			<div id="about-db-data" class="wysiwyg">
+				{{ blocks["about-db-data"]|raw }}
+			</div>
+			<div id="about-db-caveats" class="wysiwyg">
+				{{ blocks["about-db-caveats"]|raw }}
+			</div>
+		{% endblock %}
+		{% block secondcol %}
+			<div id="about-db-how-to-use" class="wysiwyg">
+				{{ blocks["about-db-how-to-use"]|raw }}
+			</div>
+			<div id="about-db-tips" class="wysiwyg">
+				{{ blocks["about-db-tips"]|raw }}
+			</div>
+			<div id="how-to-cite" class="wysiwyg">
+				{{ blocks["how-to-cite"]|raw }}
+			</div>
+			<div id="how-to-contribute" class="wysiwyg">
+				{{ blocks["how-to-contribute"]|raw }}
+			</div>
+
+			<div id="new-data-entry" class="wysiwyg">
+				{{ blocks["new-data-entry"]|raw }}
+			</div>
+		{% endblock %}
+	{% endembed %}
+	</div>
+	<hr>
+	{% set cntnrClass = is_full_view() ? '' : 'db-about-imgs' %}
+	<div class="{{ cntnrClass }}">
+		<img id="about-db-maps" src="{{ asset('build/images/ConceptualMap740x552.JPG') }}" alt="Conceptual Map of Data">
+		<img id="db-new-data" class="about-db-maps" src="{{ asset('build/images/NewData740x552.JPG') }}" alt="New Data Workflow">
+	</div>
+{% endblock detail %}
+
+

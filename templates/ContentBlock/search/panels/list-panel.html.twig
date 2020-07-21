@@ -1,0 +1,69 @@
+<div id='list-pnl' class="flex-row pop-out-panel closed">
+    <div id="int-lists" class="flex-col flex-wrap">               <!-- Select list -->
+        <div class="flex-row spaced">
+            <button id="svd-list-hlp" class="ag-fresh tbl-bttn hlp-bttn">?</button>
+            <span style="flex-grow: 1;"></span>
+            <span><b>Select List of Interaction Data</b></span>
+            <span style="flex-grow: 1.6;"></span>
+        </div>
+        <div id='list-sel-cntnr' class="flex-col">
+            <select id="selIntList" class="int-list-sel"></select>
+            <div id="load-list-cntnr">
+                <button id="load-list" class="ag-fresh tbl-bttn" disabled="true">
+                    Load Interaction List in Table
+                </button>
+                <div>Note: Filters will be reset.</div>
+            </div>
+        </div>
+    </div>
+    <div id="list-details" class='flex-col'>                      <!-- List details -->
+        <span>List Details</span>
+        <div id="top-details" class="flex-row">
+            <span class="details-desc">List Name: </span>
+            <input type="text" placeholder="Display Name" style="height: 27px;">
+        </div>
+        <div class="flex-row" style="width: 100%;">
+            <span class="details-desc">Description: </span>
+            <textarea placeholder="Description"></textarea>
+        </div>
+        <div id="list-count" class="flex-row">
+            <span class="details-desc">Interactions: </span>
+            <span id="int-list-cnt"></span>
+        </div>
+    </div>
+    <div id="mod-list-pnl" class="flex-col">                                <!-- Add to / remove from list -->
+        <span><b>Modify List Data</b></span>
+        <div id="mod-opts-cntnr" class="flex-col">
+            <div id="mod-mode">Add Interactions to List:</div>
+            <div id="mod-radios" class="flex-row">
+                <input name="mod-list" type="radio" id="mod-all-list">
+                <label for="mod-all-list">All Shown</label>
+                <input name="mod-list" type="radio" id="mod-some-list">
+                <label for="mod-some-list">Select Rows</label>
+                <button id="unsel-rows" class="ag-fresh tbl-bttn" disabled="disabled">
+                    Unselect All
+                </button>
+            </div>
+        </div>
+        <span id="mod-info"></span>
+        <div class="flex-row submit-cntnr">
+            <button id="delete-list" class="ag-fresh tbl-bttn">
+                Delete
+            </button>
+            <div id="list-confm-cntnr">
+                <button id="confm-list-delete" class="ag-fresh tbl-bttn">
+                    Confirm
+                </button>
+                <button id="cncl-list-delete" class="ag-fresh tbl-bttn">
+                    Cancel
+                </button>
+            </div>
+            <div class="flex-row">
+                <span id="list-submit-msg" class="pnl-submit-msg">&#10004;</span>
+                <button id="submit-list" class="ag-fresh tbl-bttn">
+                    Save List
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

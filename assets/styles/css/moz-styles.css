@@ -10,7 +10,7 @@
     .hide-fltr-bttm-border-vert:before {
         top: 59px;
         width: 107px;
-        left: 764px;    
+        left: 764px;
     }*/
     #list-opts {
         width: 132px;
@@ -23,7 +23,7 @@
     #shw-map {
         width: 206px;
     }
-    @media screen and (max-width: 1500px) { 
+    @media screen and (max-width: 1500px) {
         #db-opts {
             margin-top: 1em;
         }

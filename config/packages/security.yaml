@@ -1,0 +1,50 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        fos_userbundle:
+            id: fos_user.user_provider.username_email
+
+    encoders:
+        FOS\UserBundle\Model\UserInterface: sha512  #docs recommend bcrypt?
+
+    firewalls:
+        dev:
+            pattern:  ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            pattern: ^/
+            form_login:
+                provider: fos_userbundle
+                csrf_token_generator: security.csrf.token_manager
+            logout:       true
+            anonymous:    true
+            remember_me:
+                secret: '%env(APP_SECRET)%'
+                lifetime: 604800 # 1 week in seconds
+                path: /
+
+    role_hierarchy:
+        ROLE_BETA:        [ROLE_USER]
+        ROLE_EDITOR:      [ROLE_USER, ROLE_BETA]
+        ROLE_ADMIN:       [ROLE_USER, ROLE_BETA, ROLE_EDITOR]
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_BETA, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        - { path: /delete$, roles: ROLE_ADMIN }
+        - { path: /update$, roles: ROLE_ADMIN }
+        - { path: /new$, roles: ROLE_ADMIN }
+        - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: upload/view-pdfs$, roles: ROLE_EDITOR }
+
+        - { path: feedback/post, roles: ROLE_USER }
+        - { path: lists/edit, roles: ROLE_USER }
+        - { path: lists/delete, roles: ROLE_USER }
+        - { path: profile/edit, roles: ROLE_USER }
+
+        - { path: login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }

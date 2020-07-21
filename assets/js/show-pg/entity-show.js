@@ -1,16 +1,16 @@
 /**
  * Builds and displays entity-data for the entity's show-page.
- * 
+ *
  * TOC:
  *     CORE SHOW PAGE BUILDER
  *     HTML BUILDERS
- */                                                                        
+ */
 import * as util from '../util/util-main.js';
 import getEntityShowData from './entity-show-data.js';
 
 initShowPage();
 
-function initShowPage () {                                          
+function initShowPage () {
     require('../../styles/pages/entity-show.styl');
     const entity = getEntity($('body').data('this-url'));
     buildEntityShowPage(entity, $('#entity-show').data('entity'));
@@ -52,7 +52,7 @@ function getRowGroupSect (dir, colCells) {                          /*dbug-log*/
     const classes = `group-${dir} flex-${dir}`;
     return getDivWithContent('', classes, colCells);
 }
-function buildDataCell (label, fieldHTML, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML); 
+function buildDataCell (label, fieldHTML, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
     const lbl = util.getLabel(label+':');
     const data = getDivWithContent(label+'-data', '', fieldHTML);
     const classes = 'flex-row cell-data ' + c;

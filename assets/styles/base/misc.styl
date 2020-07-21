@@ -1,11 +1,11 @@
 // WYSIWYG
-// DATATABLES 
+// DATATABLES
 // MISC
 /*------------- WYSIWYG STYLES -----------------*/
-.wysiwyg 
+.wysiwyg
     position: relative
 
-.wsywigEdit 
+.wsywigEdit
     position: absolute
     top: 0
     right: 0
@@ -13,17 +13,17 @@
     z-index: 10
     cursor: pointer
 
-#pg-hdr > button 
+#pg-hdr > button
     width: 133px
     font-size: .9em
 
-.adminbttn 
+.adminbttn
     background: #3399ff !important
     color: white !important
     border-radius: 5px !important
     box-shadow: 2px 2px 3px rgba(0,0,0,0.3)
 
-.adminbttn:hover 
+.adminbttn:hover
     background: #1A80E6
     box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
 /*------------- DATA TABLES STYLES -----------------*/
@@ -31,9 +31,9 @@
     position: absolute
     top: -1000px
     right: -1000px
-    
+
 #btn-div
-    flex-wrap wrap 
+    flex-wrap wrap
     justify-content center
 
 #btn-div > *
@@ -42,23 +42,37 @@
 input[type="search"]
     border 1px solid grey
     height 23px
-    
+
 .dt-bttn //data-tables
     font-size: 14px !important;
     line-height: 1.4 !important;
     padding: 2px 3px 1px 3px !important;
     height 25px
 /*------------- MISC STYLES -----------------*/
+.modal-msg // intro.js modal message window
+    min-width: 333px !important
+
+/* ------- STATIC PAGE FORMS --------------- */
+#top-form-container>form div div
+    justify-content: space-between
+
+#top-form-container>form div div input, #top-form-container>form div div textarea
+    width 100%
+/* ---------- ERROR PAGES ------------------- */
+#error_content .three-col-outer
+    display: flex
+    flex-direction: row
+    flex-wrap: wrap
+    justify-content: space-between
+
+#error_content .first-col, #error_content .third-col
+    flex: 0 0 10px
+#error_content .second-col
+    flex: 0 1 99%
+    text-align: center
+    font-size: 2em
+    line-height: 1.2em
+
 #error_logo /* Logo used on error and 404 pages */
     width: 50%   /* RESPONSIVE */
     margin: 2% auto 0 auto
-
-.modal-msg // intro.js modal message window
-    min-width: 333px !important
-    
-/* ------- REGISTRATION/LOGIN FORMS --------------- */
-.g-recaptcha
-    margin: 1em 0
-    
-#reg-submit
-    opacity: .5

@@ -56,7 +56,7 @@ input[type="radio"], input[type="checkbox"] {
 }
 #tbl-status {
     flex-grow: 1;
-    padding: .2em;  
+    padding: .2em;
 }
 #xtrnl-filter-status {
     flex-shrink: 1;
@@ -136,7 +136,7 @@ button[name="show-hide-col"] {
 #search-tbl {
     height: 100%;
 }
-.tbl-edit { 
+.tbl-edit {
     height: 22px;
     width: 20px;
     position: relative;
@@ -200,7 +200,7 @@ button[name="show-hide-col"] {
     opacity: 0.8;
 }
 #filter-in-tbl-msg {
-    position: absolute;    
+    position: absolute;
     top: 101px;
     left: 810px;
 }
@@ -221,14 +221,14 @@ button[name="show-hide-col"] {
 }
 .info-tooltip:hover {
     position:relative;
-    cursor: pointer; 
+    cursor: pointer;
 }
 .info-tooltip:hover div.tip {
-    position:absolute; 
-    top: 18px; 
-    left: 22px; 
-    display:block; 
-    width: 333px; 
+    position:absolute;
+    top: 18px;
+    left: 22px;
+    display:block;
+    width: 333px;
 }
 .popup-bttn {
     font-size: 14px !important;
@@ -254,7 +254,7 @@ button[name="show-hide-col"] {
 #db-overlay {
     display: none;
     position: absolute;
-    z-index: 1000;               
+    z-index: 1000;
     top: 0;
     left: 0;
     background-color: grey;
@@ -271,7 +271,7 @@ button[name="show-hide-col"] {
     margin-bottom: 15px;
     font-weight: bold;
     border: 2px solid;
-    padding: 10px; 
+    padding: 10px;
     display: none;
 }
 #success>div {
@@ -298,7 +298,7 @@ button[name="show-hide-col"] {
     margin-bottom: .5em;
 }
 #form-details p {
-    color: darkgrey;   
+    color: darkgrey;
     text-align: right
 }
 .det-div {
@@ -340,7 +340,7 @@ button[name="show-hide-col"] {
     font-size: .75em !important;
 }
 [id$="_row"] {
-    padding: .2em .75em .3em  .75em;    
+    padding: .2em .75em .3em  .75em;
     width: 100%;
 }
 #sub-hdr, #sub2-hdr {
@@ -350,7 +350,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 100%;
 }
 .all-fields-cntnr {
-    padding-top: 1em; 
+    padding-top: 1em;
 }
 .field-row {
     justify-content: space-between;
@@ -429,7 +429,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     position: relative;
 }
 .realm-row {
-    justify-content: flex-start !important; 
+    justify-content: flex-start !important;
 }
 select[id$="txn-lvl"] + div {
     width: 150px;
@@ -450,8 +450,8 @@ select[id$="txn-lvl"] + div {
     margin: 1em auto 0 auto;
 }
 .loc-gps-note {
-    width:initial; 
-    margin:auto; 
+    width:initial;
+    margin:auto;
     text-align: center;
     color: slategrey;
     margin-top: 3px;
@@ -477,7 +477,7 @@ select[id$="txn-lvl"] + div {
     background-color: rgba(110, 204, 57, 0.9);
     font-size: 11px;
 }
-.form-noGps { 
+.form-noGps {
     width: 33px !important;
     height: 33px !important;
     margin-left: -12px;
@@ -521,7 +521,7 @@ input.active-icon {
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
-@media screen and (max-width: 1500px) { 
+@media screen and (max-width: 1500px) {
     /*--------------- Search Page ---------------------*/
     #db-opts {
         /*margin: 1em auto 0 .5em;*/
@@ -557,4 +557,4 @@ input.active-icon {
         width: auto;
         flex-grow: 1;
     }
-} 
+}

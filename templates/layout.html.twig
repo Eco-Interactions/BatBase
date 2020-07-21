@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block pagecontent %}
+    <div id="{% block pageid %}content-detail{% endblock pageid %}">
+        <div id="detail-block">{% block detail %}{% endblock %}</div>
+
+        {% block footer %}
+            <div id="footer" class="flex-row flex-wrap">
+                <p>Site and Data Copyright 2020 batbase.org - Bat photos Copyright: Merlin D. Tuttle
+                    <a href="http://www.MerlinTuttle.org/">www.MerlinTuttle.org</a>
+                </p>
+                <br>
+                <span>
+                    <a id="footer-tos" href="Javascript:void(0)">
+                        Terms of Use</a>
+                </span>
+            </div>
+        {% endblock %}
+
+    </div>
+{% endblock %}
+
+{% block modal %}
+    <div id="b-overlay" class="flex-col">
+        <div id="b-overlay-popup" class="popup"></div>
+    </div>
+{% endblock %}

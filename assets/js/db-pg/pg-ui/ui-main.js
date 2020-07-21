@@ -12,7 +12,7 @@
  *     initTxnViewOpts                _pg
  *     loadLocFilterPanelElems          db-page, db-filters
  *     loadSrcFilterPanelElems          db-page, db-filters
- *     loadTxnFilterPanelElems          db-page, db-filters     
+ *     loadTxnFilterPanelElems          db-page, db-filters
  *     setTreeToggleData              _pg, init-table
  *     selectInitialSearchFocus         db-page
  *     updateUiForDatabaseInit             util
@@ -23,8 +23,8 @@
 import { accessTableState as tState, _u } from '../db-main.js';
 import * as pM from './panels/panels-main.js';
 import * as bttns from './feature-buttons.js';
-import * as rowToggle from './table-row-toggle.js'; 
-import * as views from './view-opts.js'; 
+import * as rowToggle from './table-row-toggle.js';
+import * as views from './view-opts.js';
 import * as mapUi from './ui-map-state.js';
 
 /* ************************** FACADE **************************************** */
@@ -83,14 +83,14 @@ function getTblApi() {
     return tState().get('api');
 }
 function setRowToggleEvents() {
-    $('button[name="xpand-all"]').click(toggleAllRows); 
+    $('button[name="xpand-all"]').click(toggleAllRows);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(toggleTreeRows.bind(null, false, true));
 }
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 /** Shows a loading popup message for the inital data-download wait. */
 export function init() {
-    const userRole = $('body').data("user-role");    
+    const userRole = $('body').data("user-role");
     showPopupMsg('Loading...');
     setRowToggleEvents();
     pM.addPanelEventsAndStyles(userRole);
@@ -114,13 +114,13 @@ function getFocusOpts() {
     ];
 }
 /* --------------- VIEW OPTS --------------- */
-export function initTxnViewOpts(view, reset) {           
+export function initTxnViewOpts(view, reset) {
     views.initTxnViewOpts(view, reset);
 }
-export function initLocViewOpts(view) {    
+export function initLocViewOpts(view) {
     views.initLocViewOpts(view);
-}        
-export function initSrcViewOpts(view) {            
+}
+export function initSrcViewOpts(view) {
     views.initSrcViewOpts(view);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =================== */
@@ -133,14 +133,14 @@ export function updateUiForMapView(noPopup) {
 }
 export function updateUiForTableView() {
     bttns.enableTableButtons();
-    mapUi.updateMapUiForTableView(); 
+    mapUi.updateMapUiForTableView();
 }
 /* ==================== UTILITY ============================================= */
-export function enableTableButtons(allDataAvailable) { 
+export function enableTableButtons(allDataAvailable) {
     if (!allDataAvailable) { return; }
     bttns.enableTableButtons(allDataAvailable);
 }
-export function fadeTable() {  
+export function fadeTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
 }
 export function showTable() {

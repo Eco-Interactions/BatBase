@@ -1,6 +1,6 @@
 /**
  * Dis/enables various features and buttons when entering and leaving map views.
- * 
+ *
  * Exports:
  *   showTableRecordsOnMap
  *   updateUiForMapView
@@ -13,13 +13,13 @@ import { showInts } from '../map/map-main.js';
 export function updateMapUiForMapView() {
     updateBttnToReturnRcrdsToTable();
     $('#tool-bar').fadeTo('fast', 1);
-    $('#search-tbl').hide();  
-    $('#map').show(); 
+    $('#search-tbl').hide();
+    $('#map').show();
 }
 export function updateMapUiForTableView() {
     $('#search-tbl').fadeTo('fast', 1);
     $('#map, #filter-in-tbl-msg').hide();
-    updateBttnToShowRcrdsOnMap(); 
+    updateBttnToShowRcrdsOnMap();
 }
 export function showTableRecordsOnMap() {                                              console.log('       +--showTableRecordsOnMap');
     const tblState = tState().get(null, ['curFocus', 'rcrdsById']);
@@ -31,8 +31,8 @@ export function showTableRecordsOnMap() {                                       
     });
 
     function getLocRcrds() {
-        return Promise.resolve(tblState.curFocus !== 'locs' ? 
-            _u('getData', ['location']) : tblState.rcrdsById);  
+        return Promise.resolve(tblState.curFocus !== 'locs' ?
+            _u('getData', ['location']) : tblState.rcrdsById);
     }
 }
 function updateBttnToReturnRcrdsToTable() {

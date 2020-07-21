@@ -1,6 +1,6 @@
 /**
  * Handles building select fields (which will be turned into comboboxes with selectize)
- * and building options arrays. 
+ * and building options arrays.
  *
  * EXPORTS:
  *     buildMultiSelect
@@ -20,7 +20,7 @@
  */
 import * as _f from '../../../forms-main.js';
 
-/* ---------------------- TAGS COMBOBOX ------------------------------------- */ 
+/* ---------------------- TAGS COMBOBOX ------------------------------------- */
 /**
  * Creates and returns a select dropdown that will be initialized with 'selectize'
  * to allow multiple selections. A data property is added for use form submission.
@@ -32,29 +32,29 @@ export function buildTagField(entity, field, fLvl) {
     _f.state('addComboToFormState', [fLvl, field]);
     return tagSel;
 }
-/* --------------------- SINGLE SELECT/COMBOS ------------------------------- */ 
+/* --------------------- SINGLE SELECT/COMBOS ------------------------------- */
 /**
- * Creates and returns a select dropdown for the passed field. If it is one of 
- * a larger set of select elems, the current count is appended to the id. Adds 
- * the select's fieldName to the subForm config's 'selElem' array to later 
- * init the 'selectize' combobox. 
+ * Creates and returns a select dropdown for the passed field. If it is one of
+ * a larger set of select elems, the current count is appended to the id. Adds
+ * the select's fieldName to the subForm config's 'selElem' array to later
+ * init the 'selectize' combobox.
  */
-export function buildSelect(entity, field, fLvl, cnt) {                         //console.log("buildSelect [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
+export function buildSelect(entity, field, fLvl, cnt) {                         //console.log("buildSelect [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);
     return getSelectOpts(field)
         .then(finishSelectBuild);
 
-    function finishSelectBuild(opts) {  
+    function finishSelectBuild(opts) {                                          //console.log('[%s] opts = %O', field, opts);
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const attr = { id: fieldId , class: 'med-field'};
         _f.state('addComboToFormState', [fLvl, field]);
         return _f.util('buildSelectElem', [opts, attr]);
     }
 }
-/* ---------------------- MULTI-SELECT/COMBOS ------------------------------- */ 
+/* ---------------------- MULTI-SELECT/COMBOS ------------------------------- */
 /**
  * Creates a select dropdown field wrapped in a div container that will
- * be reaplced inline upon selection. Either with an existing Author's name, 
- * or the Author create form when the user enters a new Author's name. 
+ * be reaplced inline upon selection. Either with an existing Author's name,
+ * or the Author create form when the user enters a new Author's name.
  */
 export function buildMultiSelect(entity, field, fLvl) {                           //console.log("entity = %s. field = ", entity, field);
     const cntnr = _f.util('buildElem', ['div', { id: field+'-sel-cntnr'}]);
@@ -63,7 +63,7 @@ export function buildMultiSelect(entity, field, fLvl) {                         
 
     function returnFinishedMultiSelectFields(fields) {
         $(cntnr).data('inputType', 'multiSelect').data('cnt', 1);
-        $(cntnr).append(fields); 
+        $(cntnr).append(fields);
         return cntnr;
     }
 }
@@ -71,14 +71,14 @@ export function buildMultiSelectElem(entity, field, fLvl, cnt) {
     return buildSelect(entity, field, fLvl, cnt)
         .then(returnFinishedMultiSelectField);
 
-    function returnFinishedMultiSelectField(input) { 
+    function returnFinishedMultiSelectField(input) {
         const wrapper = _f.util('buildElem', ['div', {class: 'flex-row'}]);
         const lbl = buildMultiSelectLbl(cnt)
         $(input).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
         $(wrapper).append([lbl, input]);
         return wrapper;
     }
-} 
+}
 function buildMultiSelectLbl(cnt) {
     const attr = {text: getCntLabel(cnt), class:'multi-span'};
     const lbl = _f.util('buildElem', ['span', attr]);
@@ -86,16 +86,16 @@ function buildMultiSelectLbl(cnt) {
 }
 function getCntLabel(cnt) {
     const map = {1: '1st: ', 2:'2nd: ', 3:'3rd: '};
-    return cnt in map ? map[cnt] : cnt+'th: '; 
+    return cnt in map ? map[cnt] : cnt+'th: ';
 }
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
-    const valueObj = _f.state('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);                
+    const valueObj = _f.state('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);
     valueObj[cnt] = e.target.value || null;
     _f.state('setFormFieldData', [fLvl, field, valueObj, 'multiSelect']);
-    checkForBlanksInOrder(valueObj, field, fLvl);    
+    checkForBlanksInOrder(valueObj, field, fLvl);
 }
 /**
- * Author/editor fields must have all fields filled continuously. There can 
+ * Author/editor fields must have all fields filled continuously. There can
  * be no blanks in the selected order. If found, an error is shown to the user.
  */
 function checkForBlanksInOrder(vals, field, fLvl) {                             //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
@@ -111,8 +111,8 @@ function checkForBlanks(vals) {
     function checkValsForBlanks() {
         for (let ord in vals) {
             blanks = vals[ord] && blanks ? 'found' :
-                !vals[ord] && !blanks ? 'maybe' : blanks;  
-        } 
+                !vals[ord] && !blanks ? 'maybe' : blanks;
+        }
     }
 }
 function reportFieldErr(field, fLvl) {
@@ -161,7 +161,7 @@ function getStoredOpts(prop) {
 export function getRcrdOpts(ids, rcrds) {
     var idAry = ids || Object.keys(rcrds);
     return idAry.map(function(id) {
-        let text = rcrds[id].displayName.includes('(citation)') ? 
+        let text = rcrds[id].displayName.includes('(citation)') ?
             rcrds[id].displayName.split('(citation)')[0] : rcrds[id].displayName;
         return { value: id, text: text };
     });
@@ -172,25 +172,25 @@ export function getRcrdOpts(ids, rcrds) {
 //     return _f.util('getOptsFromStoredData', [entity+"Tags"]);
 // }
 /** Returns an array of source-type (prop) options objects. */
-export function getSrcOpts(prop, field, rcrds) {  
+export function getSrcOpts(prop, field, rcrds) {
     return _f.util('getData', [prop]).then(buildSrcOpts);
 
-    function buildSrcOpts(ids) {   
+    function buildSrcOpts(ids) {
         const srcs = rcrds || _f.state('getEntityRcrds', ['source']);
         const opts = getRcrdOpts(ids, srcs);
         opts.unshift({ value: 'create', text: 'Add a new '+getFieldName()+'...'});
         return opts;
     }
     function getFieldName() {
-        return { 
-            'pubSrcs': 'Publication',   'publSrcs': 'Publisher', 
-            'authSrcs': field ? field.slice(0, -1) : 'Author' 
+        return {
+            'pubSrcs': 'Publication',   'publSrcs': 'Publisher',
+            'authSrcs': field ? field.slice(0, -1) : 'Author'
         }[prop];
     }
 }
 /** Return the citation type options available for the parent-publication's type. */
-function getCitTypeOpts(prop) {  
-    const fLvl = _f.getSubFormLvl('sub');  
+function getCitTypeOpts(prop) {
+    const fLvl = _f.getSubFormLvl('sub');
     return _f.util('getData', [prop]).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
@@ -202,7 +202,7 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        const pubRcrd = _f.state('getFormProp', [fLvl, 'rcrds']).pub; 
+        const pubRcrd = _f.state('getFormProp', [fLvl, 'rcrds']).pub;
         return opts[pubRcrd.publicationType.displayName];
     }
 } /* End getCitTypeOpts */
@@ -212,22 +212,22 @@ export function getTaxonOpts(level, field, r) {
     return _f.util('getOptsFromStoredData', [realm+level+'Names'])
         .then(buildTaxonOpts);
 
-        function buildTaxonOpts(opts) {                                         
+        function buildTaxonOpts(opts) {
             opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
             return opts;
         }
 }
 function getRealmOpts() {
     const realms = _f.state('getTaxonProp', ['realms']);
-    const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);  
+    const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);
     return opts;
 
-    function getRealmOpt(name) {  
+    function getRealmOpt(name) {
         if (name === 'Bat') { return null; }
         return { value: realms[name], text: name };
     }
 }
-/** Returns options for each country and region. */ 
+/** Returns options for each country and region. */
 function getCntryRegOpts() {
     const proms = ['countryNames', 'regionNames'].map(k => _f.util('getOptsFromStoredData', [k]));
     return Promise.all(proms).then(data => data[0].concat(data[1]));
@@ -239,7 +239,7 @@ export function getLocationOpts() {
     opts = opts.sort((a, b) => _f.util('alphaOptionObjs', [a, b]));
     opts.unshift({ value: 'create', text: 'Add a new Location...'});
     return opts;
-    
+
     function buildLocOpt(id) {
         return { value: id, text: rcrds[id].displayName };
     }

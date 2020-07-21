@@ -1,18 +1,18 @@
 /**
  * Handles en/disabling the various database features based on user role and the
  * state of the table or available data.
- *  
- * The database-options bar: Tutorial & Tips | Custom Data Lists | Table-Data 
- *    Focus/Grouping & View | Filters | Map & CSV | Data-Entry (New, Review, Help) 
- * The table-status bar: Table Row Toggles | Table-Data Status (total shown, 
+ *
+ * The database-options bar: Tutorial & Tips | Custom Data Lists | Table-Data
+ *    Focus/Grouping & View | Filters | Map & CSV | Data-Entry (New, Review, Help)
+ * The table-status bar: Table Row Toggles | Table-Data Status (total shown,
  *    active filters, filter set/data list) | Table Column Toggle (future feature)
- * 
+ *
  * EXPORTS:
  *   disableTableButtons
  *   enableTableButtons
  *   initFeatureButtons
  *   updateUiForDatabaseInit
- *   
+ *
  * TOC:
  *   AUTH-DEPENDENT FEATURES
  *   DATABASE INIT UI
@@ -52,7 +52,7 @@ export function authDependentInit(userRole) {
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
     $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #data-help,
-        #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
+        #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter,
         #stored-filters input, #stored-filters textarea`)
         .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
         .prop('title', 'Please register to use these features.');
@@ -65,12 +65,12 @@ function initUserFeatures() {                                                   
     return `button[name="csv"], #lists`; //list button init handled in list-panel js
 }
 function initEditorFeatures() {                                                 //console.log('enableEditorFeatures')
-    initUserButtons();                                              
+    initUserButtons();
     initEditorButtons();
     return '.map-dsbl';
 }
 function initUserButtons() {
-    $('button[name="csv"]').click(exportCsvData);  
+    $('button[name="csv"]').click(exportCsvData);
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
@@ -92,7 +92,7 @@ function showDataInitLoadingStatus() {
 }
 function toggleSearchOptions(toggleKey) {
     handleButtons(toggleKey);
-    $('#search-focus')[0].selectize[toggleKey](); 
+    $('#search-focus')[0].selectize[toggleKey]();
 }
 function handleButtons(toggleKey) {
     const opac = toggleKey === 'enable' ? 1 : .5;
@@ -102,12 +102,12 @@ function handleButtons(toggleKey) {
     toggleMapButton(toggleKey, disabled);
 }
 function toggleMapButton(toggleKey, disabled) {
-    if (toggleKey === 'enable' && !$('#shw-map').data('loaded')) { 
-        $('#shw-map').prop('disabled', disabled).fadeTo('fast', .5); 
+    if (toggleKey === 'enable' && !$('#shw-map').data('loaded')) {
+        $('#shw-map').prop('disabled', disabled).fadeTo('fast', .5);
     }
 }
-/** 
- * Once db init complete, the page features are enabled after a delay so the table  
+/**
+ * Once db init complete, the page features are enabled after a delay so the table
  * finishes reloading before the feature buttons fades in.
  */
 function updateUiAfterDatabaseInit() {
@@ -139,7 +139,7 @@ function getAllSelectors(selectors) {
     return app.enabledSelectors ? selectors += ', '+ app.enabledSelectors : selectors;
 }
 export function disableTableButtons() {
-    $('.tbl-tools, .map-dsbl, #help-opts button').fadeTo('slow', .3); 
+    $('.tbl-tools, .map-dsbl, #help-opts button').fadeTo('slow', .3);
     $(`.tbl-tools button, .tbl-tools input, .map-dsbl, #help-opts button`)
         .attr('disabled', 'disabled').css('cursor', 'default');
 }

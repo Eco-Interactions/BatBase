@@ -6,7 +6,7 @@ newDbPassword='dbPw'
 newDb='bei_test'
 host=localhost
 #host='%'
- 
+
 commands="DROP DATABASE IF EXISTS \`${newDb}\`;CREATE DATABASE \`${newDb}\`;
 CREATE USER IF NOT EXISTS '${newUser}'@'${host}' IDENTIFIED BY '${newDbPassword}';
 GRANT USAGE ON *.* TO '${newUser}'@'${host}' IDENTIFIED BY '${newDbPassword}';

@@ -1,7 +1,7 @@
 /**
  * Returns an object with (k) the form field and (v) value.
  *
- * Exports:             Imported by: 
+ * Exports:             Imported by:
  *     getValidatedFormData         db-forms
  */
 import * as _f from '../forms-main.js';
@@ -9,36 +9,36 @@ import * as _f from '../forms-main.js';
 let _fs; //form state
 
 /**
- * Loops through all rows in the form with the passed id and returns an object 
- * of the form values. Entity data not contained in an input on the form is 
+ * Loops through all rows in the form with the passed id and returns an object
+ * of the form values. Entity data not contained in an input on the form is
  * added @handleAdditionalEntityData.
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
     _fs = _f.state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
     const elems = getFormFieldElems(entity, fLvl);
     const formVals = {};
-    for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
+    for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }
     if (formVals.displayName) { formVals.displayName = _f.util('ucfirst', [formVals.displayName]) }
     return handleAdditionalEntityData(entity)
         .then(() => formVals);
 
     /** Get's the value from the form elem and set it into formVals. */
-    function getInputData(elem) {                                           
+    function getInputData(elem) {
         if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
         if (elem.className.includes('cntnr-row')) { return getMultiFieldRowData(elem); }
         const fieldName = getInputFieldNameFromCntnr(elem.children[1]);
         const input = elem.children[1].children[1];                             //console.log("           --get[%s]InputData = %O", fieldName, input);
         formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
-        
-        /** 
-         * Returns the input value from specialized parsing methods or trims the 
-         * field value and returns the value, with numbers parsed as integers. 
+
+        /**
+         * Returns the input value from specialized parsing methods or trims the
+         * field value and returns the value, with numbers parsed as integers.
          */
         function parseFieldData () {
-            const val = $(input).data('inputType') ? 
-                getInputVals(fieldName, input, $(input).data('inputType')) : 
-                input.value.trim() || null; 
-            return Number.isInteger(val) ? parseInt(val) : val;                                         
+            const val = $(input).data('inputType') ?
+                getInputVals(fieldName, input, $(input).data('inputType')) :
+                input.value.trim() || null;
+            return Number.isInteger(val) ? parseInt(val) : val;
         }
     }
     function getInputFieldNameFromCntnr(cntnr) {
@@ -62,27 +62,27 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         return typeHandlers[type](input, fieldName);
     }
     /** Adds an array of tag values. */
-    function getTagVals(input, fieldName) {                                 
+    function getTagVals(input, fieldName) {
         return _f.cmbx('getSelVal', ['#'+_f.util('ucfirst', [fieldName])+'-sel']);
     }
-    function handleAdditionalEntityData(entity) {  
-        if (!submitting) { return Promise.resolve(); }  
+    function handleAdditionalEntityData(entity) {
+        if (!submitting) { return Promise.resolve(); }
         const dataHndlrs = {
             'author': [ getAuthFullName, getAuthDisplayName ],
             'editor': [ getAuthFullName, getAuthDisplayName ],
             'citation': [ getPublicationData, addCitDisplayName, ifFullWorkCited,
-                addContributorData ], 
+                addContributorData ],
             'interaction': [ handleUnspecifiedLocs ],
-            'location': [ addElevUnits, padLatLong, getLocType ], 
+            'location': [ addElevUnits, padLatLong, getLocType ],
             'publication': [ addContributorData ],
             'taxon': [ getTaxonData ],
         };
-        if (!dataHndlrs[entity]) { return Promise.resolve(); }  
+        if (!dataHndlrs[entity]) { return Promise.resolve(); }
         return Promise.all(dataHndlrs[entity].map(func => Promise.resolve(func())));
     }
     /** ---- Additional Author data ------ */
-    /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
-    function getAuthFullName() { 
+    /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */
+    function getAuthFullName() {
         const nameFields = ['firstName', 'middleName', 'lastName', 'suffix'];
         const fullName = [];
         nameFields.forEach(function(field) {
@@ -91,7 +91,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         formVals.fullName = fullName.join(" ");
     }
     /** Concats author Last, First Middle Suffix as the author display name.*/
-    function getAuthDisplayName() {  
+    function getAuthDisplayName() {
         let displayName = formVals.lastName + ',';
         ["firstName", "middleName", "suffix"].forEach(name => {
             if (formVals[name]) { addToDisplayName(formVals[name]); };
@@ -100,25 +100,25 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
 
         function addToDisplayName(namePiece) {
             if (namePiece.length === 1) { namePiece += '.'; }
-            displayName += ' '+namePiece; 
-         } 
+            displayName += ' '+namePiece;
+         }
     } /* End getAuthDisplayName */
     /** ---- Additional Citation data ------ */
     function getPublicationData() {
-        formVals.publication = _fs.editing ? 
+        formVals.publication = _fs.editing ?
             _fs.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
     }
     /** Adds 'displayName', which will be added to both the form data objects. */
-    function addCitDisplayName() { 
+    function addCitDisplayName() {
         formVals.displayName = formVals.title ? formVals.title : formVals.chapterTitle;
     }
-    /** 
-     * Appends '(citation)' to citations that are attributed to entire books 
+    /**
+     * Appends '(citation)' to citations that are attributed to entire books
      * to maintain unique display names for both the publication and its citation.
      */
-    function ifFullWorkCited() { 
+    function ifFullWorkCited() {
         const type = $('#CitationType-sel option:selected').text();
-        const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other', 
+        const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other',
             'Ph.D. Dissertation', 'Report' ];
         if (fulls.indexOf(type) === -1) { return; }
         const pubTitle = _fs.forms[fLvl].rcrds.src.displayName;
@@ -133,25 +133,25 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     }
     /** Pads each to the 13 scale set by the db. This eliminates false change flags. */
     function padLatLong() {
-        if (formVals.latitude) {            
-            formVals.latitude = parseFloat(formVals.latitude).toFixed(14); 
+        if (formVals.latitude) {
+            formVals.latitude = parseFloat(formVals.latitude).toFixed(14);
         }
-        if (formVals.longitude) {            
-            formVals.longitude = parseFloat(formVals.longitude).toFixed(14); 
+        if (formVals.longitude) {
+            formVals.longitude = parseFloat(formVals.longitude).toFixed(14);
         }
     }
     /**
-     * Sets location type according to the most specific data entered. 
+     * Sets location type according to the most specific data entered.
      * "Point": if there is lat/long data. "Area" otherwise.
      */
     function getLocType() {
         return _f.util('getData', ['locTypeNames']).then(locTypes => {
             const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
-            formVals.locationType = locTypes[type];  
+            formVals.locationType = locTypes[type];
         });
     }
     /**
-     * If no location is selected for an interaction record, the country field 
+     * If no location is selected for an interaction record, the country field
      * is checked for a value. If set, it is added as the interaction's location;
      * if not, the 'Unspecfied' location is added.
      */
@@ -167,14 +167,14 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     }
     /** ---- Additional Publication data ------ */
     /**
-     * Builds contributor object with all contributing authors and editors, 
-     * distinguished by an isEditor flag.  
+     * Builds contributor object with all contributing authors and editors,
+     * distinguished by an isEditor flag.
      */
     function addContributorData() {
-        if (!formVals.contributor) { formVals.contributor = {}; } 
+        if (!formVals.contributor) { formVals.contributor = {}; }
         if (formVals.editors) { addContribs(formVals.editors, true); }
-        if (formVals.authors) { addContribs(formVals.authors, false); }  
-        
+        if (formVals.authors) { addContribs(formVals.authors, false); }
+
         function addContribs(vals, isEd) {                                      //console.log('addContributorData. editors ? [%s] formVals = %O', isEd, vals)
             for (let ord in vals) {
                 let id = vals[ord];
@@ -188,25 +188,25 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         formVals.parentTaxon = getParentTaxon(formTaxonLvl);
         formVals.level = formTaxonLvl;
     }
-    /** -------------------- Additional Taxon Data -----------------------*/ 
+    /** -------------------- Additional Taxon Data -----------------------*/
     /**
      * Checks each parent-level combo for a selected taxon. If none, the realm
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(lvl) {
         const lvls = _fs.forms.realmData.realmLvls;
-        const parentLvl = lvls[lvls.indexOf(lvl)+1]; 
-        if (ifParentIsRootTaxon(lvl, parentLvl)) { 
-            return _fs.forms.realmData.realmTaxon.id; 
+        const parentLvl = lvls[lvls.indexOf(lvl)+1];
+        if (ifParentIsRootTaxon(lvl, parentLvl)) {
+            return _fs.forms.realmData.realmTaxon.id;
         }
         return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
-        
+
         function ifParentIsRootTaxon(lvl, parentLvl) {
             return lvl === _fs.forms.realmData.rootLvl || !parentLvl;
         }
     }
-} 
-/** Taxon edit forms can potentially have nested create forms. */ 
+}
+/** Taxon edit forms can potentially have nested create forms. */
 function getFormFieldElems(entity, fLvl) {
     let id = '#' + entity + '_Rows';
     if ($(id+'_'+fLvl).length) { id = id + '_' + fLvl; }
@@ -218,24 +218,24 @@ function getFormFieldElems(entity, fLvl) {
 //     errs[entity](entity, formVals, fLvl);
 // }
 // /**
-//  * Checks to ensure the new author's name doesn't already exist in the database. 
-//  * If it does, a prompt is given to the user to check to ensure they are not 
-//  * creating a duplicate, and to add initials if they are sure this is a new author. 
+//  * Checks to ensure the new author's name doesn't already exist in the database.
+//  * If it does, a prompt is given to the user to check to ensure they are not
+//  * creating a duplicate, and to add initials if they are sure this is a new author.
 //  */
 // function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
 //     if (_fs.action === 'edit') { return; }
 //     const cntnr = $('#'+_f.util('ucfirst', [entity])+'s-sel1')[0];
-//     const opts = cntnr.selectize.options;  
-//     const dup = checkForDuplicate(opts, vals.displayName);  
+//     const opts = cntnr.selectize.options;
+//     const dup = checkForDuplicate(opts, vals.displayName);
 //     if (!dup) { return; }
 //     _f.val.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
 //     vals.err = true;
 // }
-// function checkForDuplicate(opts, name) {  
-//     const newName = name.replace(/\./g,'').toLowerCase(); 
+// function checkForDuplicate(opts, name) {
+//     const newName = name.replace(/\./g,'').toLowerCase();
 //     const optKeys = Object.keys(opts);
 //     return optKeys.find(k => {
-//         let optName = opts[k].text.replace(/\./g,'').toLowerCase(); 
+//         let optName = opts[k].text.replace(/\./g,'').toLowerCase();
 //         return optName == newName
 //     });
 // }

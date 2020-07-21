@@ -1,10 +1,10 @@
 /**
- * Html element methods. 
- * 
+ * Html element methods.
+ *
  * Exports:
  *     getElem
  *     getDiv
- *     
+ *
  * TOC:
  *    GET ELEMS
  *    GET ELEM FULL
@@ -30,17 +30,17 @@ function addElemProps(elem, attrs) {
     const allProps = [ 'id', 'class', 'title', 'text', 'html'];
     const transProps = { class: 'className', text: 'textContent', html: 'innerHTML' };
     allProps.forEach(orgProp => {
-        if (orgProp in attrs) { 
+        if (orgProp in attrs) {
             let prop = (orgProp in transProps) ? transProps[orgProp] : orgProp;
-            elem[prop] = attrs[orgProp]; 
-        } 
+            elem[prop] = attrs[orgProp];
+        }
     });
 }
 function addAttrProps(elem, attrs) {
     const allProps = [ 'name', 'type', 'value', 'placeholder', 'for' ];
     const attrsToAdd = {};
     allProps.forEach(prop => {
-       if (prop in attrs) { attrsToAdd[prop] = attrs[prop]; } 
+       if (prop in attrs) { attrsToAdd[prop] = attrs[prop]; }
     });                                                                 //console.log("attrsToAdd = %O", attrsToAdd);
     $(elem).attr(attrsToAdd);
 }

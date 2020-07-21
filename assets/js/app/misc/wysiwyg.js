@@ -1,7 +1,7 @@
 /**
- * Handles all wysiwyg related code. If user is editor or above, an 'edit content' 
+ * Handles all wysiwyg related code. If user is editor or above, an 'edit content'
  * button is added to the top of any page with editable content blocks.
- * 
+ *
  * Exports:
  *     initWysiwyg
  */
@@ -9,14 +9,14 @@
 export default function initWysiwyg(role) {
     requireStyles();
     if ($('.wysiwyg').length > 0) { addEditContentButton(role); }
-} 
+}
 function requireStyles () {
     require('../../../libs/wysiwyg/trumbowyg.min.js');
     require('../../../libs/wysiwyg/ui/trumbowyg.min.css');
 }
 function addEditContentButton(userRole) {
     const button = $('<button/>', {
-        text: "Edit Content", 
+        text: "Edit Content",
         id: 'editContentBttn',
         class: 'adminbttn',
         title: 'Edit Content',
@@ -24,7 +24,7 @@ function addEditContentButton(userRole) {
     });  //console.log("button = %O", button)
     button.css({
         position: "absolute",
-        top: "4px",         // We were using px for the 'batbase.org' just above this button...  
+        top: "4px",         // We were using px for the 'batbase.org' just above this button...
         right: "10px"       // in the interest of visual consistency, I am using px to style this as well.
     });
     $('#pg-hdr').append(button);
@@ -33,7 +33,7 @@ function addEditContentButton(userRole) {
 /**
  * Manages init and exit 'edit states' and related ui on the page.
  */
-function toggleContentBlockEditing(userRole) { 
+function toggleContentBlockEditing(userRole) {
     var editorElem = $('#editContentBttn').data('editing');                     //console.log("toggling.  editorElem = %O", editorElem)
     if (editorElem !== false) {
         $('#editContentBttn').text("Refreshing...");
@@ -45,13 +45,13 @@ function toggleContentBlockEditing(userRole) {
     }
 }
 /**
- * Extends the Trumbowyg library to include 'save' and 'cancel' buttons 
- * for the interface. The save button updates the content block in the 
- * database and then refreshes the page. 
+ * Extends the Trumbowyg library to include 'save' and 'cancel' buttons
+ * for the interface. The save button updates the content block in the
+ * database and then refreshes the page.
  */
 function addButtons() {
     (function($) {
-        $.extend(true, $.trumbowyg, { 
+        $.extend(true, $.trumbowyg, {
             langs: {
                 en: {
                     save: 'Save',
@@ -60,7 +60,7 @@ function addButtons() {
             },
             plugins: {
                 save: { // plugin name
-                    init: function(trumbowyg) { 
+                    init: function(trumbowyg) {
                         const btnDef = {
                             hasIcon: false,
                             fn: function() {                                    console.log("saving. trumbowyg = %O", trumbowyg);
@@ -92,28 +92,28 @@ function ajaxError(jqXHR, textStatus, errorThrown) {
 }
 /** Returns the block container id by removing '-edit' from the passed editId */
 function getBlockContainerId(editId) {
-    var elemIdAry = editId.split('-'); 
+    var elemIdAry = editId.split('-');
     elemIdAry.pop();
     return elemIdAry.join('-');
 }
-/** 
+/**
  * Adds edit pencil icons to the top left of every content block container,
  * any div with class 'wysiwyg', on the page.
  */
-function addEditPencils(userRole) {     
+function addEditPencils(userRole) {
     const icoSrc = require('../../../images/icons/eif.pencil.svg').default;
-    var contentBlocks = $('.wysiwyg');  
-    
+    var contentBlocks = $('.wysiwyg');
+
     for (var i = 0; i < contentBlocks.length; i++) {
         var blkId = contentBlocks[i].id;  //console.log("blkId = ", blkId);
         var blkEditId = blkId + '-edit';
-        $('#' + blkId).append(`<img src="${icoSrc}" id="${blkEditId}" class="wsywigEdit" 
+        $('#' + blkId).append(`<img src="${icoSrc}" id="${blkEditId}" class="wsywigEdit"
             title="Edit Content" alt="Edit Content">`);
         addButtons(blkEditId, blkId);
     }
     $('.wsywigEdit').click(startWysiwyg);
     /** Starts the wysiwyg editor. If 'super' admin, includes additional buttons. */
-    function startWysiwyg(e) { 
+    function startWysiwyg(e) {
         var containerElemId = getBlockContainerId(e.target.id);
         var bttns = [
             ['formatting'],
@@ -128,10 +128,10 @@ function addEditPencils(userRole) {
         ];
         $('#editContentBttn').data('editing', containerElemId); // tracks which content block contains the active editor
         removeEditPencils();   //adds developer buttons
-        
+
         if (userRole === "super") { bttns.splice(6, 0, ['viewHTML', 'removeformat']); }
-        
-        $('#' + containerElemId).trumbowyg({    
+
+        $('#' + containerElemId).trumbowyg({
             autogrow: false,
             btns: bttns,
             plugins: {  // options object unique to each instance of the wysiwyg.
@@ -145,5 +145,5 @@ function addEditPencils(userRole) {
 } /* End addEditPencils */
 /** Removes every edit pencil icon on the page */
 function removeEditPencils() {
-    $('.wsywigEdit').remove();  
+    $('.wsywigEdit').remove();
 }

@@ -1,8 +1,8 @@
 /*
  * Code related to the Terms of Service & Privacy Notice popup.
- * Registration page: hides the submit button and captcha until after user 
- * accepts the TOS. 
- * 
+ * Registration page: hides the submit button and captcha until after user
+ * accepts the TOS.
+ *
  * Exports:
  *     initTos
  */
@@ -12,12 +12,12 @@ export default function initTosPopup() {
     ifRegistrationPageHideSubmitAndCaptcha();
 }
 /* ==================== ToS POPUP =========================================== */
-function showTos() {  
+function showTos() {
     showTosPopup();
     addCloseButton();
 }
 /* --------------------- SHOW POPUP ----------------------------------------- */
-function showTosPopup() {      
+function showTosPopup() {
     $("#b-overlay-popup").html(getTosHtml);
     $("#b-overlay-popup").addClass("tos-popup");
     bindEscEvents();
@@ -95,16 +95,16 @@ function getTosHtml() {
 </div>`;
 }
 /* ==================== REGISTRATION PAGE =================================== */
-/** 
- * If this is the registration page, hide the disabled submit button and the 
- * captcha element until after the user accepts the ToS. 
+/**
+ * If this is the registration page, hide the disabled submit button and the
+ * captcha element until after the user accepts the ToS.
  */
 function ifRegistrationPageHideSubmitAndCaptcha() {
     if (!$("#reg-submit")) { return; }
     $('#reg-submit, .g-recaptcha').hide();
     $('#reg-tos').click(addRegistrationTosElems);
 }
-function addRegistrationTosElems() { 
+function addRegistrationTosElems() {
     const div = $('<div/>', {id: 'accept-tos-cntnr', class: 'flex-col'});
     $(div).append(acceptTosHtml());
     $("#close-tos-bttn").before(div);
