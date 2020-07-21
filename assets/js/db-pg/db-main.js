@@ -175,7 +175,7 @@ export function onDataDownloadComplete () {
     enableMapFeatures();
 }
 function enableMapFeatures() {
-    if (!db.getData('geoJson')) { return window.setTimeout(enableMapFeatures, 500); }
+    if (!db.getData('geoJson', true)) { return window.setTimeout(enableMapFeatures, 500); }
     $('#shw-map').data('loaded', true).prop('disabled', false).fadeTo('fast', 1);
     $('.map-ico').fadeTo('fast', 1);
 }

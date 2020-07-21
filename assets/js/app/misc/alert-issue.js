@@ -56,7 +56,7 @@ export function alertIssue(tag, errData = {}) {
 }
 function setSentryDebugContext(errData) {
     setBasicStateContext();
-    setErrorContext(tag, errData);
+    setErrorContext(errData);
 }
 function setBasicStateContext() {
     if ($('body').data('this-url') !== '/search') { return; }
@@ -64,8 +64,8 @@ function setBasicStateContext() {
     const base = {focus: state.curFocus, view: state.curView};
     Sentry.setContext('filter_state', Object.assign(base, getCurrentFilterState()));
 }
-function setErrorContext (tag, errData) {
-    Sentry.setContext('error_tags', errData);
+function setErrorContext (errData) {
+    Sentry.setContext('error_data', errData);
 }
 /* ---------------- EDITOR ISSUE REPORT ------------------------------------- */
 function submitEditorIssue(data) {
