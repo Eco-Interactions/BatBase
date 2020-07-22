@@ -21,7 +21,7 @@
  *         HELP MODAL STEPS
  */
 import * as _u from '../util/util.js';
-import { resetDataTable, accessTableState as tState } from '../db-main.js';
+import { resetDataTable, _db } from '../db-main.js';
 import { showTips } from '../pg-ui/ui-main.js';
 
 let intro, focus;
@@ -88,8 +88,7 @@ function addDbLoadNotice() {
         <br><center><b>Please wait for the table to load before continuing.`);
 }
 function isAllDataAvailable() {
-    const flags = tState().get('flags');
-    return flags ? flags.allDataAvailable : false;
+    return _db.getData('geoJson', true);
 }
 function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
     if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
