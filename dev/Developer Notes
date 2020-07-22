@@ -6,6 +6,10 @@
 >Test Users
     - TestUser: testuser123
     - testeditor: testeditor123
+
+STANDARDS:
+    - append '_' before imported file that requires the indirect 'method string' chaining
+    - alphbetize where sensible
 ## ======================= REGULAR USE ====================================== ##
 php bin/console cache:clear
 
@@ -45,9 +49,11 @@ SERVER UPDATES:
         - OPTIMIZE COMPOSER AUTOLOADER  (https://symfony.com/doc/3.4/performance.html)
             (Necessary to apply any changes to php classes)
             $ ssh user@batbase.org -p18765
-            $ composer dump-env prod
+            $ cd /public_html/[dir]
+            $ composer install --no-dev --optimize-autoloader
             $ composer dump-autoload --no-dev --classmap-authoritative
-            # $ composer install --optimize-autoloader --no-dev --classmap-authoritative
+            $ composer dump-env prod
+            $ APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
     - set up the main domain
         - clear cache
         - update the database name in parameters.yml

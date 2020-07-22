@@ -1,28 +1,52 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 #
 # Contents:
-#   TASKS - Current, Next, Change Log
-#   MEETING NOTES - Feedback, Prep, Next/Future
-#   CHANGES SINCE LAST USER UPDATE
-#   DEV INTERNAL TASK LIST - Todos, refactoring, bugs
-#
-Change Log:
-    - upgraded to symfony 4.4
+#   CURRENT - LOGS, QUESTIONS, TASKS, DATA CLEANUP, MEETING NOTES
+#   DEV INTERNAL TASKS - Todos, refactoring, bugs
+### __________________________ CURRENT _____________________________________ ###
+> ____ LOGS ____
+SINCE LAST TEAM UPDATE:
+
+SINCE LAST SERVER UPDATE:
+
+SINCE LAST USER UPDATE:
+    - Publication upload
+    - Site designed for mobile use
+    - Data entry forms improved
+        - Added mapping to location forms
+    - Ability to save set of filters and lists of interactions
+    - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
+    - Added Interaction show page
+
+    Upcoming:
+        - Data review features
+        - Figure out how to get Logs in UI for new editors
 
 
+> ____ QUESTIONS _____
 
-QUESTIONS:
+TEAM:
+    - Fully remove pdf files when deleted through UI
+        - or eventually add another layer where "trash" could be emptied
+    - Site activity summary
+        - new users
+        - pdf submissions
+        - feedback
+        - unique logins
+        - records added/edited
+    - logos need updating with batbase
 
->==== CURRENT ====
+TAYLOR:
+    - Is there a better name for the form's "detail-panel"?
+    - openSubFormErr ??
+    - replace 'err' in form code?
+
+> ____ TASKS _____
+CURRENT:
+    - Add globi to 'partners' section on about page
+    - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
     - 4.4 upgrade:
-        - custom error pages: https://symfony.com/doc/4.4/controller/error_pages.html
-
-    - When updating server
-        - add env.local to root with db url
-
-    - Interaction page
-        - Where to add list of related interactions from source
-        - Display globi link?
+        - Fix doctrine migrations
     - Create Taxon show page
         - Display taxon page
             - heirarchy
@@ -34,7 +58,6 @@ QUESTIONS:
     - Add confirmation popup to citation and location forms
     - Add form hints
     - Add object realm and name filters to bat filter panel
-    - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
 
     - fix cronjob to clean up hourly backups
     - optimize data sync downloads. It takes almost as long as full download,
@@ -44,14 +67,24 @@ QUESTIONS:
         - test all validation 'error' handlers
         - csv
         - wysiwyg
-    - Send email when publication or feedback is submitted
-    - add to form confg input type. (handle all number inputs)
-    - add question marks to complicated fields
-        - issue report form: how to copy logs
+    - add input type to form confg (handle all number inputs)
     - Add multiple realm root functionality
 
-
->Next
+NEXT:
+    - Review Data
+        * Identical tables
+            - Pending Edits
+                - entity, id, edits (json), timestamp
+                - removed once approved
+            - Edit History
+                - all fields pending has, plus approvedBy
+    - Edit form
+        - allow selection of another location and merging of all data and
+            deletion of location being edited
+    - Features
+        - UI - Draw areas and select as parent location
+        - UI - Adjust display point for country
+        - Replace agGrid with MIT alternative
     - Refactor Source data
         - merge detail and core data on client side
     - Handle potential source name duplication
@@ -70,17 +103,10 @@ QUESTIONS:
     - Create model of local storage
         - of entity relations
 
->DATA CLEANUP
+> ____ DATA CLEANUP ____
     - forms - Add 'trim' to all values before submitting
         - Check for elevation field val when elev-max value entered.
-    - db migration - Loop through all entities that could have random spaces in fields
-    -
-
-STANDARDS:
-    - append '_' before imported file that requires the indirect 'method string' chaining
-    - alphbetize where sensible
-
-
+        - Loop through all entities that could have random spaces in fields
 
 > ==== MEETING NOTES ====
 Prep:
@@ -91,42 +117,11 @@ Feedback:
 Next/future rounds:
     Possible:
     Next:
-        - Data Review panel
         - UI:
         - testing:
     Then:
     Future:
-        - Review Data
-            * Identical tables
-                - Pending Edits
-                    - entity, id, edits (json), timestamp
-                    - removed once approved
-                - Edit History
-                    - all fields pending has, plus approvedBy
-        - Edit form
-            - allow selection of another location and merging of all data and
-                deletion of location being edited
-        - Features
-            - UI - Draw areas and select as parent location
-            - UI - Adjust display point for country
-            - Replace agGrid with MIT alternative
-
-> ===== CHANGES SINCE LAST USER UPDATE: =====
-    - Publication upload
-    - Site designed for mobile use
-    - Data entry forms improved
-        - Added mapping to location forms
-    - Ability to save set of filters and lists of interactions
-    - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
-    - Added Interaction show page
-
-    Upcoming:
-        - Data review features
-        - Figure out how to get Logs in UI for new editors
-
-
->================ DEV Internal Task List ===================
-
+### _____________________ DEV INTERNAL TASKS _______________________________ ###
 Sort:
     - remove all unused properties from serialization (eg, slug)
     - when clicking reset local data button on menu bar, figure out how to get
@@ -141,7 +136,7 @@ Sort:
     - Database doesn't work with IE. Notify user.
     - move db-pg util elem builders to js/util/elems
     - Add responsive styling testing
-    - FOS registration email is not using the template found in src/appbundle/resources/translations/*
+    - FOS registration email is not using the template found in src/app/resources/translations/*
 
 TODOs:
 ##(Category){priority}[difficulty]##
@@ -219,8 +214,3 @@ TODOs:
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
-
-> CODE REVIEW
-    - Is there a better name for the form's "detail-panel"?
-    - openSubFormErr ??
-    - replace 'err' in form code?
