@@ -57,6 +57,8 @@ class Version20200718Delete extends AbstractMigration implements ContainerAwareI
         $this->mergeEntities($ents, 'Taxon', null);
 
         $this->em->flush();
+
+        $this->deleteBuggedInteractions();
     }
     private function getEntityIds()
     {
@@ -144,6 +146,24 @@ class Version20200718Delete extends AbstractMigration implements ContainerAwareI
         return $taxon->getRealm() ?
             $taxon->getRealm()->getDisplayName() :
             $this->getRealm($taxon->getParentTaxon());
+    }
+
+    private function deleteBuggedInteractions()
+    {
+        $ids = [10355, 10356];
+
+        foreach ($ids as $id) {
+            $int = $this->getEntity('Interaction', $id);
+            $this->em->remove($int);
+            $this->em->persist($int);
+            $this->em->remove($int); //removed from database fully
+            $this->em->persist($int);
+        }
+    }
+
+    private function removeSimpleRelations(&$int)
+    {
+        $entities = []
     }
 
 /* ======================== down ============================================ */
