@@ -56,9 +56,9 @@ class Version20200718Delete extends AbstractMigration implements ContainerAwareI
         $ents = $this->getEntityIds();
         $this->mergeEntities($ents, 'Taxon', null);
 
-        $this->em->flush();
-
         $this->deleteBuggedInteractions();
+
+        $this->em->flush();
     }
     private function getEntityIds()
     {
@@ -152,18 +152,13 @@ class Version20200718Delete extends AbstractMigration implements ContainerAwareI
     {
         $ids = [10355, 10356];
 
-        foreach ($ids as $id) {
+        foreach ($ids as $id) { print("\n id = ".$id);
             $int = $this->getEntity('Interaction', $id);
             $this->em->remove($int);
-            $this->em->persist($int);
-            $this->em->remove($int); //removed from database fully
-            $this->em->persist($int);
+            $this->em->flush();
+            $this->em->remove($int);
+            $this->em->flush();
         }
-    }
-
-    private function removeSimpleRelations(&$int)
-    {
-        $entities = []
     }
 
 /* ======================== down ============================================ */
