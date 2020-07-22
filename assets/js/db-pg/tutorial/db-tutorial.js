@@ -243,7 +243,8 @@ function getSteps() {
         },
         {
             element: '#filter',
-            intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>`,
+            intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>
+                <br>(Filters will not work until the database is fully downloaded.)`,
             position: 'bottom',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -253,7 +254,8 @@ function getSteps() {
                 show all taxa in the selected realm present in the table.</b><br><br>
                  - Select a specific taxon from the dropdown menu and the table will
                 update to show it at the top of the data tree. The other dropdowns will
-                populate with related taxa.`,
+                populate with related taxa.<br>(Filters will not work until the database
+                is fully downloaded.)`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -397,7 +399,8 @@ export function getFilterPanelSteps() {
              - The dropdowns show all taxa in the Taxon Tree<br>
              - Select a specific taxon and the Tree will update to show interactions
              for the taxon and lower related taxa. The other dropdowns
-            will populate with the related taxa in the Tree.`,
+            will populate with the related taxa in the Tree.<br>(Filters will not work until
+            the database is fully downloaded.)`,
         position: 'top',
     },
     {

@@ -37,9 +37,8 @@ TEAM:
     - logos need updating with batbase
 
 TAYLOR:
-    - Is there a better name for the form's "detail-panel"?
-    - openSubFormErr ??
-    - replace 'err' in form code?
+- Reach out to users who experience issues/bugs that get resolved to thank them
+for inadvertantly leading to sloving a bug in the code and invite them to check back
 
 > ____ TASKS _____
 CURRENT:

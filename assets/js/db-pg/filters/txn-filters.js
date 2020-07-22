@@ -133,7 +133,7 @@ function setSelectedTaxonVals(selected, tblState) {                             
 export function applyTxnFilter(val, text) {
     if (!val && text === undefined) { return; }                                              //console.log('       +-applyTxnFilter.')
     const tblState = tState().get(['rcrdsById', 'flags']);
-    if (!tblState.flags.allDataAvailable) { return $(this)[0].selectize.clear(); }
+    if (!tblState.flags.allDataAvailable) { return clearSelection($(this)[0]); }
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
     const txt = text || fM.getTreeFilterVal('Taxon');
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});
@@ -147,6 +147,11 @@ export function applyTxnFilter(val, text) {
         const filter = {};
         filter[curLevel] = { text: rcrd.displayName, value: val };
         fM.setPanelFilterState('combo', filter);;
+    }
+}
+function clearSelection(elem) {
+    if (elem && elem.selectize) {
+        elem.selectize.clear();
     }
 }
 /**
