@@ -8,19 +8,19 @@
     <table id="online_users_tbl" class="display">
         <thead>
             <tr>
-                <th>Username</th>
-                <th>First Name</th>
-                <th>Email</th>
                 <th>Last Activity At</th>
+                <th>First Name</th>
+                <th>Username</th>
+                <th>Email</th>
             </tr>
         </thead>
         <tbody>
             {% for user in entities %}
                 <tr>
-	                <td>{{ user.username }}</td>
+	                <td>{{ user.lastActivityAt|date("d:m:Y H:i:s", 'America/Los_Angeles') }}</td>
 	                <td>{{ user.firstname }}</td>
+	                <td>{{ user.username }}</td>
 	                <td>{{ user.email }}</td>
-	                <td>{{ user.lastActivityAt|date("H:i:s", 'America/Los_Angeles') }}</td>
             	</tr>
             {% endfor %}
         </tbody>
