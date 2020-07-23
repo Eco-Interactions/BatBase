@@ -44,6 +44,7 @@ function getHelpSteps(key) {
  */
 export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bttnText) {  //console.log('showing modal')
     if (intro) { return; }
+    intro = 'loading';
     window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
 }
 function initModal(confg) {
