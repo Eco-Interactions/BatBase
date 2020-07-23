@@ -45,7 +45,7 @@ class MenuBuilder
                 $menu[$user_name]['View Feedback']->setAttribute('class', 'admin-menu');
             }
             if ($this->_isSuper($options['usrrole'])) {
-                $menu[$user_name]->addChild('Online Users', array('route' => 'admin_user_online'));
+                $menu[$user_name]->addChild('Online Users', array('route' => 'super_user_online'));
                 $menu[$user_name]->addChild('Content Blocks', array('route' => 'admin_content_block'));
                 $menu[$user_name]['Online Users']->setAttribute('class', 'super-admin-menu');
                 $menu[$user_name]['Content Blocks']->setAttribute('class', 'super-admin-menu');

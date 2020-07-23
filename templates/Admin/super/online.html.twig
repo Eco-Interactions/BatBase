@@ -17,7 +17,7 @@
         <tbody>
             {% for user in entities %}
                 <tr>
-	                <td>{{ user.lastActivityAt|date("d:m:Y H:i:s", 'America/Los_Angeles') }}</td>
+	                <td>{{ user.lastActivityAt|date("d/m/Y H:i:s", 'America/Los_Angeles') }}</td>
 	                <td>{{ user.firstname }}</td>
 	                <td>{{ user.username }}</td>
 	                <td>{{ user.email }}</td>
