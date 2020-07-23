@@ -73,22 +73,23 @@ function setDbLoadDependentState() {
 /* ----------------- STEP SET UP -------------------------------------------- */
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
-    if (!$('#sel-view').val() && intro._currentStep > 2) { return waitForDbLoad(); }
+    if (!$('#sel-view').val() && intro._currentStep > 2) { return waitForDbLoad('tbl'); }
     if (intro._currentStep >= 14) { return showAlertIfGeoJsonNotAvailable(stepConfg); }
     if (stepConfg.setUpFunc) { stepConfg.setUpFunc(); }
 }
-function waitForDbLoad(mapSect) {
-    window.setTimeout(showDbStillLoadingAlert, 500);
-    if (mapSect || intro._currentStep >= 14) { return intro._currentStep = 13; }
+function waitForDbLoad(tag) {
+    window.setTimeout(() => showDbStillLoadingAlert(tag), 500);
+    if (tag == 'map' || intro._currentStep >= 14) { return intro._currentStep = 13; }
     intro.goToStep(3);
 }
-function showDbStillLoadingAlert() {
+function showDbStillLoadingAlert(tag) {
+    const elem = tag == 'map' ? 'Database' : 'Table';
     $('.introjs-tooltiptext').html(`
-        <br><center><b>Please wait for the database to load before continuing.`);
+        <br><center><b>Please wait for the ${elem} to load before continuing.`);
 }
 function showAlertIfGeoJsonNotAvailable(stepConfg) {
     isAllDataAvailablePromise().then(dataAvailable => {
-        if (!dataAvailable) { return waitForDbLoad(true); }
+        if (!dataAvailable) { return waitForDbLoad('map'); }
         if (stepConfg.setUpFunc) { stepConfg.setUpFunc(); }
     });
 }
@@ -164,8 +165,13 @@ function toggleListPanelInTutorial(close) {
 function resetTableState() {
     resetUi();
     if (!$('#sel-view').val()) { return; }
-    isAllDataAvailablePromise().then(databaseDownlaoded => {
-        if (databaseDownlaoded) { resetDataTable(focus); }
+    updateUiIfAllTableDataAvailable();
+}
+function updateUiIfAllTableDataAvailable() {
+    _db('getData', ['interaction', true]).then(interactions => {
+        if (!interactions) {return;}
+        $('#search-focus')[0].selectize.enable();
+        resetDataTable(focus);
     });
 }
 function resetUi() {                                                            //console.log('resetUiAndReloadTable')
@@ -174,7 +180,6 @@ function resetUi() {                                                            
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    $('#search-focus')[0].selectize.enable();
     $('#sel-view')[0].selectize.enable();
 }
 /* =================== TUTORIAL STEP CONFIG ================================= */
