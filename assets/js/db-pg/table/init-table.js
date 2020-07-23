@@ -189,9 +189,9 @@ function addIntShowIcon (id) {
     return `<a href="${getShowLink(id)}">${icon}</a>`;
 }
 function getShowIconHtml () {
-    const path = require('../../../images/icons/search.svg').default; 
+    const path = require('../../../images/icons/search.svg').default;
     const opac = tblState.flags.allDataAvailable ? 1 : 0;
-    return`<img src=${path} class="tree-show" title="Show Interaction Details" 
+    return`<img src=${path} class="tree-show" title="Show Interaction Details"
         alt="Show Interaction Details" style="opacity:${opac}">`;
 }
 function getShowLink (id) {
@@ -291,7 +291,7 @@ function addMapIcon(params) {                                                   
 }
 function getMapIcon(id) {
     const path = require('../../../images/icons/marker-icon.png').default;
-    return `<img src='${path}' id='map${id}' alt='Map Icon class='map-ico'
+    return `<img src='${path}' id='map${id}' alt='Map Icon' class='map-ico'
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
 function getMapIconStyles() {

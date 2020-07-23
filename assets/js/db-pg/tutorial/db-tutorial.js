@@ -84,7 +84,7 @@ function waitForDbLoad(mapSect) {
 }
 function showDbStillLoadingAlert() {
     $('.introjs-tooltiptext').html(`
-        <br><center><b>Please wait for the table to load before continuing.`);
+        <br><center><b>Please wait for the database to load before continuing.`);
 }
 function showAlertIfGeoJsonNotAvailable(stepConfg) {
     isAllDataAvailablePromise().then(dataAvailable => {
