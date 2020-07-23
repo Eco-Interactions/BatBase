@@ -99,6 +99,9 @@ export function init() {
 export function updateUiForDatabaseInit() {
     bttns.updateUiForDatabaseInit();
 }
+export function onDataDownloadCompleteEnableTableFeatures() {
+    bttns.onDataDownloadCompleteEnableTableFeatures();
+}
 /* =========== DATABASE ENTITY FOCUS/VIEW UI ================================ */
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 export function selectInitialSearchFocus(f) {                                   //console.log('--------------selectInitialSearchFocus [%s]', f);
@@ -137,8 +140,8 @@ export function updateUiForTableView() {
 }
 /* ==================== UTILITY ============================================= */
 export function enableTableButtons(allDataAvailable) {
-    if (!allDataAvailable) { return; }
-    bttns.enableTableButtons(allDataAvailable);
+    if (!allDataAvailable) { return bttns.enableViewOpts(); }
+    bttns.enableTableButtons();
 }
 export function fadeTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);

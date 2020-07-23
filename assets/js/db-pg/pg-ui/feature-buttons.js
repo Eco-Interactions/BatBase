@@ -81,9 +81,9 @@ function initEditorButtons() {
 /** While the database is being initialized, all options are disabled. */
 export function updateUiForDatabaseInit() {
     app.dbInitializing = true;
+    $('#shw-map').data('loading', true);
     showDataInitLoadingStatus();
     toggleSearchOptions('disable');
-    $('#shw-map').data('loaded', false);
 }
 function showDataInitLoadingStatus() {
     const status = '[ Database initializing... Table will reset once complete, ~45 seconds. ]';
@@ -98,42 +98,53 @@ function handleButtons(toggleKey) {
     const opac = toggleKey === 'enable' ? 1 : .5;
     const disabled = toggleKey === 'disable';
     const cursor = toggleKey === 'enable' ? 'pointer' : 'wait';
-    $('.ico-bttn').css('cursor', cursor).prop('disabled', disabled).fadeTo('fast', opac);
+    $('.map-dsbl').css('cursor', cursor).prop('disabled', disabled).fadeTo('fast', opac);
     toggleMapButton(toggleKey, disabled);
 }
 function toggleMapButton(toggleKey, disabled) {
-    if (toggleKey === 'enable' && !$('#shw-map').data('loaded')) {
-        $('#shw-map').prop('disabled', disabled).fadeTo('fast', .5);
-    }
+    if (toggleKey === 'enable') { return; }
+    $('#shw-map').css('cursor', 'wait').prop('disabled', true).fadeTo('fast', .5);
 }
 /**
  * Once db init complete, the page features are enabled after a delay so the table
  * finishes reloading before the feature buttons fades in.
  */
-function updateUiAfterDatabaseInit() {
+function updateUiAfterBaseDatabaseInit(allDataAvailable) {
     toggleSearchOptions('enable');
     $('#filter-status').css('color', 'black').data('loading', false);
     if (app.userRole === 'visitor') { disableUserFeatures(); }
     delete app.dbInitializing;
 }
+export function onDataDownloadCompleteEnableTableFeatures() {
+    $('.tree-show').fadeTo('fast', 1);
+    enableMapFeatures();
+}
+function enableMapFeatures() {
+    $('#shw-map').prop('disabled', false).fadeTo('fast', 1)
+        .data('loading', false).css('cursor', 'pointer');
+    $('.map-ico').fadeTo('fast', 1);
+}
 /* ================= TOGGLE TABLE BUTTONS  ================================== */
-export function enableTableButtons(allDataAvailable) {                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
-    if (app.dbInitializing && allDataAvailable || testingDbInit()) { updateUiAfterDatabaseInit() }
-    if (app.dbInitializing === true) { return enableToggleTreeButtons(); }
-    $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts, #help-opts button'))
-        .attr('disabled', false).css('cursor', 'pointer');
-    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $(getAllSelectors('.tbl-tools, #help-opts button')).fadeTo('slow', 1);
-    enableListResetBttn();
-    enableClearFiltersButton();
+export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
+    if (app.dbInitializing || testingDbInit()) { updateUiAfterBaseDatabaseInit(); }
+    enableButtonsAndUpdateCursors();
+    unfadeButtons();
 }
 function testingDbInit() {
     return app.dbInitializing && $('body').data('env') === 'test';
 }
-function enableToggleTreeButtons() {
-    $('#xpand-tree, #xpand-tree button').attr('disabled', false).css('cursor', 'pointer')
-        .fadeTo('slow', 1);
-    app.dbInitializing = 'complete';
+export function enableViewOpts() {
+    $('#focus-opts').attr('disabled', false).css('cursor', 'pointer').fadeTo('fast', 1);
+}
+function enableButtonsAndUpdateCursors() {
+    $(getAllSelectors('.tbl-tools button, .tbl-tools input, #focus-opts, #help-opts button'))
+        .attr('disabled', false).css('cursor', 'pointer');
+    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
+    enableListResetBttn();
+    enableClearFiltersButton();
+}
+function unfadeButtons() {
+    $(getAllSelectors('.tbl-tools, #help-opts button')).fadeTo('fast', 1);
 }
 function getAllSelectors(selectors) {
     return app.enabledSelectors ? selectors += ', '+ app.enabledSelectors : selectors;

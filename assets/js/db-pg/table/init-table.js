@@ -296,7 +296,7 @@ function getMapIcon(id) {
 }
 function getMapIconStyles() {
     const styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
-    if ($('#shw-map').data('disabled')) { styles += ' opacity: .3;' }
+    if ($('#shw-map').data('loading')) { styles += ' opacity: .3;' }
     return styles;
 }
 function getZoomLvl(loc) {

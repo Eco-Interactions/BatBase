@@ -167,17 +167,11 @@ function setTableInitState(isAllDataAvailable) {
     resetFilterPanel('taxa');
     resetTableParams('taxa');
     filter.toggleDateFilter('disable');
-    // if ($('#shw-chngd')[0].checked) { filter.toggleDateFilter('disable'); }//init the updatedAt table filter
     tState.flags.allDataAvailable = isAllDataAvailable;
 }
 export function onDataDownloadComplete () {
-    $('.tree-show').fadeTo('fast', 1);
-    enableMapFeatures();
-}
-function enableMapFeatures() {
-    if (!db.getData('geoJson', true)) { return window.setTimeout(enableMapFeatures, 500); }
-    $('#shw-map').data('loaded', true).prop('disabled', false).fadeTo('fast', 1);
-    $('.map-ico').fadeTo('fast', 1);
+    if ($('.map-dsbl').prop('disabled')) { return window.setTimeout(onDataDownloadComplete, 500); }
+    ui.onDataDownloadCompleteEnableTableFeatures();
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
@@ -371,7 +365,7 @@ function getGeoJsonAndShowLocsOnMap(tree) {
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
-    if ($('#shw-map').prop('disabled')) { return; }
+    if ($('#shw-map').prop('loading')) { return; }
     ui.updateUiForMapView();
     u.setSelVal('View', 'map', 'silent');
     _map.showLoc(locId, zoom, tState.rcrdsById);

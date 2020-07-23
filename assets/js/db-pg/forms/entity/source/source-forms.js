@@ -545,7 +545,7 @@ function initPublisherForm(value) {                                             
 export function selectExistingAuthors(field, authObj, fLvl) {                   //console.log('selectExistingAuthors. args = %O', arguments);
     if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }
     toggleOtherAuthorTypeSelect(field, false);
-    return Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)
+    return Object.keys(authObj).reduce((p, ord) => { //p(romise), (author-)ord(er)
         const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
         return p.then(selNextAuth);
     }, Promise.resolve());

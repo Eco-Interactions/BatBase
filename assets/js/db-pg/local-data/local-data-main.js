@@ -25,7 +25,7 @@ export function initDb(argument) {
 export function setData(prop, data) {
     _idb.setData(prop, data);
 }
-export function getData(props, returnUndefined) {  //breakpoint  //bp
+export function getData(props, returnUndefined) {
     return _idb.getData(props, returnUndefined);
 }
 /* -------------------------- DATA SYNC ------------------------------------- */

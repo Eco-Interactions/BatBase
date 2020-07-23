@@ -56,11 +56,12 @@ function downloadRemainingDataAndFullyEnableDb() {
     return getAndSetData('geoJson')
         .then(() => getAndSetData('lists'))
         .then(() => _db.setUpdatedDataInLocalDb())
-        .then(_db.pg('onDataDownloadComplete'));
+        .then(() => _db.pg('onDataDownloadComplete'));
 }
 /* -------------------------- HELPERS --------------------------------------- */
 function getAndSetData(url) {
-    return _db.fetchServerData(url).then(setData.bind(null, url))
+    return _db.fetchServerData(url)
+        .then(data => setData(url, data))
 }
 function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
     const setDataFunc = {
@@ -68,25 +69,28 @@ function setData(url, data) {                                                   
         'location': deriveLocationData,       'source': deriveSourceData,
         'taxon': deriveTaxonData,             'geoJson': Function.prototype,
     };
-    storeServerData(data);
-    setDataFunc[url](data);
+    return storeServerData(data)
+        .then(() => setDataFunc[url](data));
 }
 /**
  * Loops through the data object returned from the server, parsing and storing
  * the entity data.
  */
-function storeServerData(data) {                                                //console.log("data received = %O", data);
-    for (let entity in data) {                                                  //console.log("entity = %s, data = %O", entity, data[entity]);
-        _db.setDataInMemory(entity, parseData(data[entity]));
-    }
+function storeServerData(data) {                                                //console.log("storeServerData = %O", data);
+    const ents = Object.keys(data);
+    return ents.reduce((p, entity) => {                                         //console.log("     entity = %s, data = %O", entity, data[entity]);
+        return p.then(p => _db.setDataInMemory(entity, parseData(data[entity])));
+    }, Promise.resolve());
 }
 /**
  * Loops through the passed data object to parse the nested objects. This is
  * because the data comes back from the server having been double JSON-encoded,
  * due to the 'serialize' library and the JSONResponse object.
  */
-function parseData(data) {  //shared. refact
-    for (let k in data) { data[k] = JSON.parse(data[k]); }
+function parseData(data) {
+    for (let k in data) {                                                       //console.log('parse[%s]Data = %O', k, data);
+        data[k] = JSON.parse(data[k]);
+    }
     return data;
 }
 /* ======================= DERIVE DATA ====================================== */
