@@ -21,10 +21,10 @@
  *         HELP MODAL STEPS
  */
 import * as _u from '../util/util.js';
-import { resetDataTable, accessTableState as tState } from '../db-main.js';
+import { resetDataTable, _db } from '../db-main.js';
 import { showTips } from '../pg-ui/ui-main.js';
 
-let intro, focus;
+let intro, focus, isMapDataAvailable = false;
 
 addWalkthroughEventListener();
 /* ============================== INIT ====================================== */
@@ -74,22 +74,31 @@ function setDbLoadDependentState() {
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
     if (!$('#sel-view').val() && intro._currentStep > 2) { return waitForDbLoad(); }
-    if (intro._currentStep >= 14 && !isAllDataAvailable()) { return waitForDbLoad(); }
-    if (!stepConfg.setUpFunc) { return; }
-    stepConfg.setUpFunc();
+    if (intro._currentStep >= 14) { return showAlertIfGeoJsonNotAvailable(stepConfg); }
+    if (stepConfg.setUpFunc) { stepConfg.setUpFunc(); }
 }
-function waitForDbLoad() {
-    window.setTimeout(addDbLoadNotice, 500);
-    if (intro._currentStep == 14) { return intro._currentStep = 13; }
+function waitForDbLoad(mapSect) {
+    window.setTimeout(showDbStillLoadingAlert, 500);
+    if (mapSect || intro._currentStep >= 14) { return intro._currentStep = 13; }
     intro.goToStep(3);
 }
-function addDbLoadNotice() {
+function showDbStillLoadingAlert() {
     $('.introjs-tooltiptext').html(`
         <br><center><b>Please wait for the table to load before continuing.`);
 }
-function isAllDataAvailable() {
-    const flags = tState().get('flags');
-    return flags ? flags.allDataAvailable : false;
+function showAlertIfGeoJsonNotAvailable(stepConfg) {
+    isAllDataAvailablePromise().then(dataAvailable => {
+        if (!dataAvailable) { return waitForDbLoad(true); }
+        if (stepConfg.setUpFunc) { stepConfg.setUpFunc(); }
+    });
+}
+function isAllDataAvailablePromise() {
+    return isMapDataAvailable ? Promise.resolve(isMapDataAvailable) :
+        _db('getData', ['geoJson', true]).then(updateFlagAndReturn);
+}
+function updateFlagAndReturn(geoJson) {
+    isMapDataAvailable = !!geoJson;
+    return Promise.resolve(!!geoJson);
 }
 function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
     if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
@@ -113,14 +122,17 @@ function addBttnEvents() {
     window.setTimeout(function() { // Needed so events are bound when this step is revisted. afterChange event fires before fully loaded.
         $('.intro-bttn').each((i, elem) => {
             const key = map[elem.innerText];
-            if (key === 'map') { enableMapTutorialIfDataAvailable(elem); }
+            if (key === 'map') { return enableMapTutorialIfDataAvailable(elem, key); }
             $(elem).click(showTutorial.bind(null, key));
         });
     }, 400);
 }
-function enableMapTutorialIfDataAvailable(elem) {
-    $(elem).attr('disabled', !isAllDataAvailable())
-        .css({'opacity': .3, 'cursor': 'wait'});
+function enableMapTutorialIfDataAvailable(elem, key) {
+    isAllDataAvailablePromise().then(dataAvailable => {
+        if (!dataAvailable) { return; }
+        $(elem).attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});
+        $(elem).click(showTutorial.bind(null, key));
+    });
 }
 function showTutorial(tutKey) {
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
@@ -151,7 +163,10 @@ function toggleListPanelInTutorial(close) {
 /* ==================== TEAR DOWN =========================================== */
 function resetTableState() {
     resetUi();
-    if ($('#sel-view').val() && isAllDataAvailable()) { resetDataTable(focus); }
+    if (!$('#sel-view').val()) { return; }
+    isAllDataAvailablePromise().then(databaseDownlaoded => {
+        if (databaseDownlaoded) { resetDataTable(focus); }
+    });
 }
 function resetUi() {                                                            //console.log('resetUiAndReloadTable')
     focus = focus || "taxa";
@@ -178,9 +193,10 @@ function getSteps() {
                 </b><br><button class="intro-bttn" style="margin: 0 25px
                 5px 45px !important">Full Tutorial</button><button class="intro-bttn">
                 Table View</button><button class="intro-bttn" style="
-                margin: 0 25px 5px 45px !important">Map View</button><button class="intro-bttn"
-                disabled="disabled" title="Coming soon" style="opacity:
-                0.3; cursor: not-allowed;">Data Entry</button>`,
+                margin: 0 25px 5px 45px !important; opacity: 0.3; cursor: wait;"
+                disabled="disabled">Map View</button><button class="intro-bttn"
+                disabled="disabled" title="Coming soon" style="opacity: 0.3;
+                cursor: not-allowed;">Data Entry</button>`,
             position: 'right',
             setUpFunc: addBttnEvents
         },
@@ -244,7 +260,8 @@ function getSteps() {
         },
         {
             element: '#filter',
-            intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>`,
+            intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>
+                <br>(Filters will not work until the database is fully downloaded.)`,
             position: 'bottom',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -254,7 +271,8 @@ function getSteps() {
                 show all taxa in the selected realm present in the table.</b><br><br>
                  - Select a specific taxon from the dropdown menu and the table will
                 update to show it at the top of the data tree. The other dropdowns will
-                populate with related taxa.`,
+                populate with related taxa.<br>(Filters will not work until the database
+                is fully downloaded.)`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -398,7 +416,8 @@ export function getFilterPanelSteps() {
              - The dropdowns show all taxa in the Taxon Tree<br>
              - Select a specific taxon and the Tree will update to show interactions
              for the taxon and lower related taxa. The other dropdowns
-            will populate with the related taxa in the Tree.`,
+            will populate with the related taxa in the Tree.<br>(Filters will not work until
+            the database is fully downloaded.)`,
         position: 'top',
     },
     {

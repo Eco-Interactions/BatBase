@@ -59,7 +59,7 @@ class Interaction
     /**
      * @var \App\Entity\Source
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Source", inversedBy="interactions")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Source", inversedBy="interactions", cascade={"remove"})
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", nullable=false)
      * @JMS\Expose
      * @Groups({"flattened"})
@@ -69,7 +69,7 @@ class Interaction
     /**
      * @var \App\Entity\InteractionType
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\InteractionType", inversedBy="interactions")
+     * @ORM\ManyToOne(targetEntity="App\Entity\InteractionType", inversedBy="interactions", cascade={"remove"})
      * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false)
      */
     private $interactionType;
@@ -77,7 +77,7 @@ class Interaction
     /**
      * @var \App\Entity\Location
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Location", inversedBy="interactions")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Location", inversedBy="interactions", cascade={"remove"})
      * @ORM\JoinColumn(name="location_id", referencedColumnName="id", nullable=false)
      * @JMS\Expose
      * @Groups({"flattened"})
@@ -87,7 +87,7 @@ class Interaction
     /**
      * @var \App\Entity\Taxon
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Taxon", inversedBy="subjectRoles")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Taxon", inversedBy="subjectRoles", cascade={"remove"})
      * @ORM\JoinColumn(name="subject_taxon_id", referencedColumnName="id", nullable=false)
      * @JMS\Expose
      * @Groups({"flattened"})
@@ -97,7 +97,7 @@ class Interaction
     /**
      * @var \App\Entity\Taxon
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Taxon", inversedBy="objectRoles")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Taxon", inversedBy="objectRoles", cascade={"remove"})
      * @ORM\JoinColumn(name="object_taxon_id", referencedColumnName="id", nullable=false)
      * @JMS\Expose
      * @Groups({"flattened"})
@@ -105,7 +105,7 @@ class Interaction
     private $object;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="interactions")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="interactions", cascade={"remove"})
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $tags;

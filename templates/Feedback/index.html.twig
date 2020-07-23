@@ -28,7 +28,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for feedback in entities if feedback.status > 0 %}
+            {% for feedback in entities %}
                 {% set user = feedback.createdBy %}
                 {% set route = 'Home' %}
                 {% if feedback.route != '/' %}
