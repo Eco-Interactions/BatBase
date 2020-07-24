@@ -72,11 +72,11 @@ export default function getEntityShowData (entity, data, u) {
                             { field: 'Coordinates', content: getCoordinates(data.location), classes: 'max-cntnt'},
                             'col'
                         ], [
-                            { field: 'Country', content: data.location.country.displayName },
+                            { field: 'Country', content: getNameIfSet(data.location, "country") },
                             { field: 'Region', content: data.location.region.displayName, classes: 'max-cntnt' },
                             'col'
                         ], [
-                            { field: 'Habitat', content: data.location.habitatType.displayName },
+                            { field: 'Habitat', content: getNameIfSet(data.location, "habitatType") },
                             { field: 'Elevation(m)', content: getElevRange(data.location) },
                             'col'
                         ], [
@@ -95,12 +95,15 @@ function getTagData (tags) {
     if (!tags.length) { return null; }
     return tags.map(t => t.displayName).join(', ');
 }
+function getNameIfSet(entity, field) {
+    return entity[field] ? entity[field].displayName : null;
+}
 /* ------------------------------- TAXON ------------------------------------ */
 function getTaxonHierarchyDataHtml (taxon) {
-    return `<strong>${taxon.displayName}</strong>` + getParentTaxaNames(taxon.parentTaxon);
+    const name = `<strong>${taxon.displayName}</strong>` ;
+    return taxon.isRoot ? name : name + getParentTaxaNames(taxon.parentTaxon);
 }
 function getParentTaxaNames (pTaxon, lvl = 1) {
-    if (!pTaxon) { return ''; }
     const indent = '&emsp;'.repeat(lvl);
     return `<br>${indent}${String.fromCharCode(8627)}&nbsp${pTaxon.displayName}`
         + (pTaxon.isRoot ? '' : getParentTaxaNames(pTaxon.parentTaxon, ++lvl));
