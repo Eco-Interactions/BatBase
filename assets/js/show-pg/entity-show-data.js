@@ -100,6 +100,7 @@ function getTaxonHierarchyDataHtml (taxon) {
     return `<strong>${taxon.displayName}</strong>` + getParentTaxaNames(taxon.parentTaxon);
 }
 function getParentTaxaNames (pTaxon, lvl = 1) {
+    if (!pTaxon) { return ''; }
     const indent = '&emsp;'.repeat(lvl);
     return `<br>${indent}${String.fromCharCode(8627)}&nbsp${pTaxon.displayName}`
         + (pTaxon.isRoot ? '' : getParentTaxaNames(pTaxon.parentTaxon, ++lvl));
