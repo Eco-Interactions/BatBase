@@ -1,7 +1,7 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
-import { _form, _ui, _u, showLocOnMap, accessTableState as tState } from '../db-main.js';
+import { _forms, _ui, _u, showLocOnMap, accessTableState as tState } from '../db-main.js';
 import * as agGrid from '../../../libs/grid/ag-grid.js';
 import unqVals from './ag-grid-unique-filter.js';
 let tblState;
@@ -274,7 +274,7 @@ function getPencilHtml(id, entity) {
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
     $('#search-tbl').on('click', '#edit'+entity+id,
-        _form.bind(null, 'edit', [id, _u('lcfirst', [entity])]));
+        _forms.bind(null, 'edit', [id, _u('lcfirst', [entity])]));
     return editPencil;
 }
 /** -------- Map Column ---------- */

@@ -204,8 +204,8 @@ function getRowsAfterTime(filterTime, type) {
 } /* End getRowsAfterTime */
 function updateUiAfterTimeFilterChange(dateTime, skipSync) {
     $('.flatpickr-input').val(dateTime);
-    _ui('updateFilterStatusMsg')
-    if (skipSync) { return; } //console.log('skipping filter sync');
+    _ui('updateFilterStatusMsg');
+    if (skipSync) { return; }                                                   //console.log('skipping filter sync');
     syncFiltersAndUi(dateTime);
 }
 /* ============================== CLEAR ===================================== */

@@ -20,7 +20,7 @@ import * as _f from '../forms-main.js';
 /** Shows the entity's edit form in a pop-up window on the search page. */
 export default function editEntity(id, entity) {                                console.log("       //editEntity [%s] [%s]", entity, id);
     initEditForm(id, entity)
-    .then(() => _f.forms('finishEditFormInit', [entity, id]))
+    .then(() => _f._form('finishEditFormInit', [entity, id]))
 }
 /* ============================== FORM INIT ================================= */
 function initEditForm(id, entity) {
@@ -46,7 +46,7 @@ function buildEditFields(entity, id) {
     return complxBldrs[entity] ? getCmplxEditFields() : getEditFields(entity, id);
 
     function getCmplxEditFields() {
-        return _f.forms(complxBldrs[entity], [entity, id]);
+        return _f._form(complxBldrs[entity], [entity, id]);
     }
 }
 /** Returns the passed entity's form fields. */
@@ -61,11 +61,11 @@ function finishEditFormBuild(entity) {
     return cmplx.indexOf(entity) > -1 ? finishCmplxForm() : finishEditForm(entity);
 
     function finishCmplxForm() {
-        return _f.forms('finishEntityEditFormBuild', [entity]);
+        return _f._form('finishEntityEditFormBuild', [entity]);
     }
 }
 function finishEditForm(entity) {
-    _f.forms('initFormCombos', [entity, 'top']);
+    _f._form('initFormCombos', [entity, 'top']);
     $('.all-fields-cntnr').hide();  //Hide the "Show all fields" checkbox
     return Promise.resolve();
 }
@@ -232,7 +232,7 @@ function setMultiSelect(fieldId, prop, rcrd) {                                  
     const ucProp = _f.util('ucfirst', [prop]);
     _f.state('setFormFieldData', ['top', ucProp, rcrd[prop]]);
     if (!$('#'+ucProp+'-sel-cntnr').length) { return; } //can this be the first line here?
-    _f.forms('selectExistingAuthors', [ucProp, rcrd[prop], 'top']);
+    _f._form('selectExistingAuthors', [ucProp, rcrd[prop], 'top']);
 }
 function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);

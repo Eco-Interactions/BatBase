@@ -167,7 +167,7 @@ function getInfoLinkTextToOpenMap(argument) {
 function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
     if ($('#form-map').length) { return; }
     const pElem = $('#Location_row')[0].parentNode;
-    _f.forms('addMapToLocForm', ['int', $(pElem)]);
+    _f._form('addMapToLocForm', ['int', $(pElem)]);
     if (_f.cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
     _f.cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }
@@ -310,7 +310,7 @@ function onCntryRegSelection(val) {                                             
     if ($('#form-map').length) { showCountryDataOnMap(val); }
 }
 function showCountryDataOnMap(val) {
-    _f.forms('focusParentAndShowChildLocs', ['int', val]);
+    _f._form('focusParentAndShowChildLocs', ['int', val]);
 }
 /*------------------ LOCATION ------------------------------------------------*/
 /**

@@ -26,7 +26,7 @@ import * as ui from './pg-ui/ui-main.js';
 import * as db from './local-data/local-data-main.js';
 import * as format from './table/format-data/aggrid-format.js';
 import * as modal from '../misc/intro-modals.js';
-import * as form from './forms/forms-main.js';
+import * as forms from './forms/forms-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
 if (window.location.pathname.includes('search')) {
@@ -57,12 +57,15 @@ export function _tutorial(funcName, params = []) {
 export function _filter(funcName, params = []) {
     return moduleMethod(funcName, filter, 'filter', params);
 }
-export function _form(funcName, params = []) {
-    return moduleMethod(funcName, form, 'form', params);
+export function _forms(funcName, params = []) {
+    return moduleMethod(funcName, forms, 'forms', params);
+}
+export function _map(funcName, params = []) {
+    return moduleMethod(funcName, map, 'map', params);
 }
 export function openDataEntryForm() {
     ui.showPopupMsg();
-    form.initNewDataForm()
+    forms.initNewDataForm()
     .then(ui.hidePopupMsg);
 }
 /* ------------------- LOCAL DATA ------------------------------------------- */

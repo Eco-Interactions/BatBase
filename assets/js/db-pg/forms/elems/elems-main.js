@@ -190,13 +190,13 @@ function toggleShowAllFields(entity, fLvl) {                                    
 
     function appendAndFinishRebuild(rows) {
         $('#'+entity+'_Rows').append(rows);
-        _f.forms('initFormCombos', [_f.util('lcfirst', [entity]), fLvl]);
+        _f._form('initFormCombos', [_f.util('lcfirst', [entity]), fLvl]);
         fillComplexFormFields(fLvl)
         .then(finishComplexForms);
     }
     function finishComplexForms() {
         if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }
-        if (entity !== 'location') { _f.forms('onSrcToggleFields', [entity, fVals, fLvl]); }
+        if (entity !== 'location') { _f._form('onSrcToggleFields', [entity, fVals, fLvl]); }
         setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
@@ -245,7 +245,7 @@ export function fillComplexFormFields(fLvl) {
     }
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
-    return _f.forms.bind(null, 'selectExistingAuthors');
+    return _f._form.bind(null, 'selectExistingAuthors');
 }
 export function ifFieldIsDisplayed(field, fLvl) {
     return !!_f.state('getFormFieldData', [fLvl, field]);

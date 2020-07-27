@@ -356,7 +356,7 @@ function getCitationFieldText($elem, fLvl, reqFieldsFilled) {
 
     function getCitationText() {
         return ifNoChildFormOpen(fLvl) && reqFieldsFilled ?
-           _f.forms('getCitationText', [fLvl]) :
+           _f._form('getCitationText', [fLvl]) :
            ($elem.val() === dfault ? false : dfault);
     }
 }
@@ -720,7 +720,7 @@ export function finishSourceToggleAllFields(entity, fVals, fLvl) {
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
     _f.cmbx('enableCombobox', ['#Publication-sel']);
-    _f.forms('fillCitationField', [$('#Publication-sel').val()]);
+    _f._form('fillCitationField', [$('#Publication-sel').val()]);
 }
 function initEntitySubForm(entity, fLvl, fVals, pSel) {
     _f.state('addEntityFormState', [entity, fLvl, pSel, 'create']);

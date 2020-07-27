@@ -227,7 +227,7 @@ function clrNeedsHigherLvlPrnt(elem, fLvl, e) {
     _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, fLvl);
     if ($('#sub-form').length) {
-        return _f.forms('selectParentTaxon', [ $('#txn-prnt').data('txn') ]);
+        return _f._form('selectParentTaxon', [ $('#txn-prnt').data('txn') ]);
     }
     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
 }

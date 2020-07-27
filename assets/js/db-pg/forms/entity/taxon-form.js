@@ -268,7 +268,7 @@ function updateSubmitBttns() {
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectTaxonParent() {
-    const prnt =  _f.forms('getSelectedTaxon') || realmData.realmTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
+    const prnt =  _f._form('getSelectedTaxon') || realmData.realmTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
     if (ifParentSelectErrs(getLvlVal(prnt.level.displayName))) { return; }
     exitPrntEdit(prnt);
 }

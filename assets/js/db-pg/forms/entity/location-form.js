@@ -26,7 +26,7 @@ function buildLocForm(val) {
         'Country': $('#Country-Region-sel').val()
     };
     _f.state('addEntityFormState', ['location', 'sub', '#Location-sel', 'create']);
-    _f.state('setOnFormCloseHandler', ['sub', _f.forms.bind(null, 'enableCountryRegionField')]);
+    _f.state('setOnFormCloseHandler', ['sub', _f._form.bind(null, 'enableCountryRegionField')]);
     return _f.elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
         .then(appendLocFormAndFinishBuild);
 

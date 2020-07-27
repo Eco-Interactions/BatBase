@@ -10,7 +10,7 @@
  */
 import * as _confg from './etc/form-config.js';
 import editEntity from './edit/edit-forms.js';
-import * as _forms from './entity/entity-main.js';
+import * as form from './entity/entity-main.js';
 import * as _state from './etc/form-state.js';
 import * as _submit from './submit/submit-main.js';
 import * as _elems from './elems/elems-main.js';
@@ -35,7 +35,7 @@ export function showTodaysUpdates(focus) {
     pg.showTodaysUpdates(focus);
 }
 export function initNewDataForm() {
-    return _forms.createEntity('interaction');
+    return form.createEntity('interaction');
 }
 export function updateLocalDb() {
     return pg._db('updateLocalDb', [...arguments]);
@@ -48,17 +48,17 @@ export function alertIssue() {
     return pg._alert('alertIssue', [...arguments]);
 }
 /** ====================== FORMS FACADE ===================================== */
-export function forms(funcName, params = []) {                                  //console.log('entity func = %O', arguments);//entity form interface
-    return _forms[funcName](...getParams(params));
+export function _form(funcName, params = []) {                                  //console.log('entity func = %O', arguments);//entity form interface
+    return form[funcName](...getParams(params));
 }
 export function selectIntLoc(id) {
-    _forms.selectIntLoc(id);
+    form.selectIntLoc(id);
 }
 export function addNewLocationWithGps() {
-    _forms.addNewLocationWithGps();
+    form.addNewLocationWithGps();
 }
 export function create(entity, name) {
-    return _forms.createEntity(entity, name);
+    return form.createEntity(entity, name);
 }
 export function edit(id, entity) {
     _state.initFormState('edit', entity, id)
@@ -140,5 +140,5 @@ export function getSelectedVals(cntnr, fieldName) {
     }
 }
 export function onLevelSelection(val) {
-    _forms.onLevelSelection.bind(this)(val);
+    form.onLevelSelection.bind(this)(val);
 }

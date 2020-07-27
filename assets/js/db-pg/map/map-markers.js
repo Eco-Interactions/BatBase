@@ -1,7 +1,7 @@
 /*
  *
  */
-import { _form, showLocInDataTable, _u} from '../db-main.js';
+import { _forms, showLocInDataTable, _u} from '../db-main.js';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -459,7 +459,7 @@ function buildSelectLocBttn(editing) {
     return _u('buildElem', ['input', attr]);
 }
 function addSelectLocClickEvent(bttn, editing, locId) {
-    const onClick = editing ? Function.prototype : _form.bind(null, 'selectIntLoc');
+    const onClick = editing ? Function.prototype : _forms.bind(null, 'selectIntLoc');
     $(bttn).click(onClick.bind(null, [locId]));
 }
 function styleSelectLocBttn(bttn, editing) {
@@ -708,7 +708,7 @@ function getNewLocText(loc, editing) {
 function getCreateLocBttn() {
     const attr = {type: 'button', id: 'new-gps-loc', class:'ag-fresh', value: 'Create Location'};
     const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_form.bind(null, 'addNewLocationWithGps', []));
+    $(bttn).click(_forms.bind(null, 'addNewLocationWithGps', []));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }

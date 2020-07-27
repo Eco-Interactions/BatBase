@@ -79,7 +79,7 @@ function addFieldOnChangeHandler(entity, input, field, fLvl) {
 }
 function ifCitationFormAutoGenerateCitationOnChange(entity, input) {
     if (entity === 'citation'){
-        $(input).change(_f.forms.bind(null, 'handleCitText', []));
+        $(input).change(_f._form.bind(null, 'handleCitText', []));
     }
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {
