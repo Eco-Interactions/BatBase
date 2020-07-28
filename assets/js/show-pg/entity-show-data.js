@@ -38,8 +38,8 @@ export default function getEntityShowData (entity, data, u) {
                    [  //row 1
                         [
                             { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
-                            { field: 'DOI', content: data.source.doi },
-                            { field: 'Website', content: null },
+                            { field: 'DOI', content: getDoiLink(data.source.doi) },
+                            { field: 'Website', content: getCitationWebsite(data.source) },
                             'col'
                         ], [
                             getContributorFieldData(data.source.contributors)
@@ -127,6 +127,13 @@ function getPublisherData (pSrc) {
 }
 function getCitationTypeAndTitleFieldData (citation) {
     return { field: citation.citationType.displayName, content: citation.displayName };
+}
+function getCitationWebsite(source) {
+    return source.linkUrl ?
+        `<a href="${source.linkUrl}"" target="_blank">${source.linkDisplay}</a>` : null;
+}
+function getDoiLink(doi) {
+    return doi ? `<a href="${doi}" target="_blank">${doi}</a>` : null;
 }
 /* ---------------------------- LOCATION ------------------------------------ */
 function getElevRange (location) {
