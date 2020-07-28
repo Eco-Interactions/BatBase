@@ -1,20 +1,28 @@
 /**
  * Handles form-data formatting, validation, submit, and onSubmitSuccess.
  *
- * EXPORTS:
- *     getFormValuesAndSubmit
- *     buildFormDataAndSubmit
+ * EXPORTS
+ *     _validation
+ *     getFormValData
+ *     valAndSubmitFormData
  *
+ * TOC
+ *     VALIDATE DATA
+ *     SUBMIT FORM
+ *         ON SUBMIT SUCCESS
+ *             TOP-FORM
+ *             SUB-ENTITY
  */
-import * as _f from '../forms-main.js';
-import * as _val from './validation.js';
+import { executeMethod, _db, _u } from '../../db-main.js';
+import { _state, _elems, _confg, clearFormMemory } from '../forms-main.js';
+import * as val from './validation.js';
 import formatDataForServer from './format-data.js';
 import getValidatedFormData from './get-form-data.js';
 
-export function validation(funcName, params = []) {
-    return _val[funcName](...params);
+export function _validation(funcName, params = []) {
+    return executeMethod(funcName, val, 'val', 'submit-main', params);
 }
-/** ----------- Data manipulation --------------------- */
+/** ----------------------- VALIDATE DATA ----------------------------------- */
 export function getFormValData(entity, fLvl, submitting) {
     return getValidatedFormData(entity, fLvl, submitting);
 }
@@ -27,44 +35,44 @@ export function buildFormDataAndSubmit(entity, fLvl, formVals) {
     const data = formatDataForServer(entity, fLvl, formVals)
     submitFormData(data, fLvl, entity);
 }
-/*---------------------- Form Submit Methods ---------------------------------*/
+/* ------------------------- SUBMIT FORM ------------------------------------ */
 function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
-    const coreEntity = _f.confg('getCoreFormEntity', [entity]);
-    const url = getEntityAjaxUrl(_f.state('getFormProp', [fLvl, 'action']));
+    const coreEntity = _confg('getCoreFormEntity', [entity]);
+    const url = getEntityAjaxUrl(_state('getFormProp', [fLvl, 'action']));
     addEntityDataToFormData(data, coreEntity);
     storeParamsData(coreEntity, fLvl);
-    _f.elems('toggleWaitOverlay', [true]);
-    _f.util('sendAjaxQuery', [data, url, onSuccess, _val.formSubmitError]);
+    _elems('toggleWaitOverlay', [true]);
+    _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);
 }
 function getEntityAjaxUrl(action) {
     const path = $('body').data('base-url');
     return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity) {
-    const editingId = _f.state('getStateProp', ['editing']);
+    const editingId = _state('getStateProp', ['editing']);
     if (editingId) { data.ids = editingId; }
     data.coreEntity = coreEntity;
 }
 /** Stores data relevant to the form submission that will be used later. */
 function storeParamsData(entity, fLvl) {
-    _f.state('setStateProp', ['submit', { fLvl: fLvl, entity: entity }]);
+    _state('setStateProp', ['submit', { fLvl: fLvl, entity: entity }]);
 }
-/* ----------------- Form Submit Success Methods ---------------------------- */
-function onSuccess(data, textStatus, jqXHR) {                                   _f.util('logAjaxData', [data, arguments]);
-    _f.updateLocalDb(data.results)
+/* ----------------- ON SUBMIT SUCCESS ---------------------------- */
+function onSuccess(data, textStatus, jqXHR) {                                   _u('logAjaxData', [data, arguments]);
+    _db('updateLocalDb', [data.results])
     .then(onDataSynced);
 }
 function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
-    if (!_f.state('getStateProp', ['submit'])) { return; } //form closed.
-    _f.elems('toggleWaitOverlay', [false]);
-    if (data.fails) { return _val.errUpdatingData('dataSyncFailures'); }
+    if (!_state('getStateProp', ['submit'])) { return; } //form closed.
+    _elems('toggleWaitOverlay', [false]);
+    if (data.fails) { return val.errUpdatingData('dataSyncFailures'); }
     if (noDataChanges()) { return showNoChangesMessage(); }
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
 
     function noDataChanges() {
-        const fLvl = _f.state('getStateProp', ['submit']).fLvl;
-        const action = _f.state('getFormProp', [fLvl, 'action'])
+        const fLvl = _state('getStateProp', ['submit']).fLvl;
+        const action = _state('getFormProp', [fLvl, 'action'])
         return action === 'edit'  && !hasChngs(data);
     }
 }
@@ -85,35 +93,35 @@ function hasChngs(data) {
     }
 }
 function showNoChangesMessage() {
-    _f.elems('showSuccessMsg', ['No changes detected.', 'red']);
+    _elems('showSuccessMsg', ['No changes detected.', 'red']);
 }
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s])', entity, detailEntity);
-    return _f.util('getData', [entity]).then(addDataToMemory);
+    return _u('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
-        _f.state('addEntityRecords', [entity, data]);
+        _state('addEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }
-/*------------------ Top-Form Success Methods --------------------*/
+/*----------- Top-Form Success Methods ------------*/
 function handleFormComplete(data) {
-    const fLvl = _f.state('getStateProp', ['submit']).fLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
+    const fLvl = _state('getStateProp', ['submit']).fLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    const onClose = _f.state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
+    const onClose = _state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
     if (onClose) { onClose(data);
-    } else { _f.exitFormWindow() }
+    } else { _elems('exitFormPopup'); }
 }
-/*--------------------- After Sub-Entity Created -----------------------------*/
+/* ---------- After Sub-Entity Created ------------ */
 /**
  * Exits the successfully submitted form @exitForm. Adds and selects the new
  * entity in the form's parent elem @addAndSelectEntity.
  */
 function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
-    const formParent = _f.state('getFormParentId', [fLvl]);
-    _f.elems('exitSubForm', [fLvl]);
+    const formParent = _state('getFormParentId', [fLvl]);
+    _elems('exitSubForm', [fLvl]);
     if (formParent) { addAndSelectEntity(data, formParent);
-    } else { _f.clearFormMemory(); }
+    } else { clearFormMemory(); }
 }
 /** Adds and option for the new entity to the form's parent elem, and selects it. */
 function addAndSelectEntity(data, formParent) {

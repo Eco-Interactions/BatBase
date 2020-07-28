@@ -1,118 +1,105 @@
 /**
- * Sub-forms, form rows, fiele elements, etc.
+ * Sub-forms, form rows, field elements, etc.
  *
  * Exports:
+ *     _cmbx
+ *     _panel
  *     buildAndAppendForm
- *     getExitButton
- *     getFormFooter
- *     initSubForm
- *     buildFormRows
- *     getFormFieldRows
  *     buildFieldInput
- *     checkReqFieldsAndToggleSubmitBttn
- *     ifAllRequiredFieldsFilled
- *     getLocationOpts
- *     buildFormRow
+ *     buildFormRows
  *     buildLongTextArea
- *     getRcrdOpts
- *     getTaxonOpts
- *     buildMultiSelectElems
+ *     checkReqFieldsAndToggleSubmitBttn
+ *     disableSubmitBttn
+ *     enableSubmitBttn
+ *     exitSuccessMsg
+ *     getExitButton
+ *     getFormFieldRows
+ *     getFormFooter
+ *     ifAllRequiredFieldsFilled
+ *     initSubForm
+ *     setCoreRowStyles
+ *     showSuccessMsg
+ *     toggleSubmitBttn
+ *     toggleWaitOverlay
  *
+ * TOC
+ *     EXECUTE MODULE COMMANDS
+ *     FACADE
+ *     HELPERS
+ *         FORM-STATUS MESSAGES
+ *         SUBMIT BUTTON
+ *         TOGGLE FORM-FILDS
+ *         EXIT FORM
  */
-import * as _f from '../forms-main.js';
-import * as _pnl from './detail-panel/detail-panel.js';
+import { _filter, _u, executeMethod, reloadTableWithCurrentFilters } from '../../db-main.js';
+import { _form, _state, getNextFormLevel, clearFormMemory } from '../forms-main.js';
+import * as panel from './detail-panel/detail-panel.js';
+import * as cmbx from './form-elems/fields/combobox-fields.js';
+import * as base from './form-elems/base-form.js';
+import * as fields from './form-elems/fields/field-builder.js';
+import * as rows from './form-elems/rows/rows-main.js';
+import buildFormFooter from './form-elems/footer/form-footer.js';
+import handleSubFormInit from './form-elems/sub-form.js';
 
-import * as _cmbx from './form/fields/combobox-util.js';
-import * as _base from './form/base-form.js';
-import * as _fields from './form/fields/fields-main.js';
-import * as _rows from './form/rows/rows-main.js';
-
-
+/* -------------------- EXECUTE MODULE COMMANDS ----------------------------- */
+export function _cmbx(funcName, params = []) {
+    return executeMethod(funcName, cmbx, 'cmbx', 'elems-main', params);
+}
+export function _panel(funcName, params = []) {
+    return executeMethod(funcName, panel, 'panel', 'elems-main', params);
+}
+/* ------------------- FACADE ----------------------------------------------- */
 export function buildAndAppendForm(fields, id) {
-    return _base.buildAndAppendRootForm(fields, id);
+    return base.buildAndAppendRootForm(fields, id);
 }
 export function getExitButton() {
-    return _base.getExitButton();
+    return base.getExitButton();
 }
 export function getFormFooter() {
-    return require('./form/footer/form-footer.js').default(...arguments);
+    return buildFormFooter(...arguments);
 }
 export function initSubForm() {
-    return require('./form/sub-form.js').default(...arguments);
+    return handleSubFormInit(...arguments);
 }
 export function buildFormRows() {
-    return _rows.buildFormRows(...arguments);
+    return rows.buildFormRows(...arguments);
 }
 export function getFormFieldRows() {
-    return _rows.getFormFieldRows(...arguments);
+    return rows.getFormFieldRows(...arguments);
 }
 export function buildFieldInput() {
-    return _fields.buildFieldInput(...arguments);
+    return fields.buildFieldInput(...arguments);
 }
 export function ifAllRequiredFieldsFilled() {
-    return _fields.ifAllRequiredFieldsFilled(...arguments);
-}
-export function getLocationOpts() {
-    return _fields.getLocationOpts();
-}
-export function getTaxonOpts() {
-    return _fields.getTaxonOpts(...arguments);
-}
-export function getRcrdOpts() {
-    return _fields.getRcrdOpts(...arguments);
-}
-export function buildMultiSelectElem() {
-    return _fields.buildMultiSelectElem(...arguments);
-}
-/**
- * Note: The 'unchanged' property exists only after the create interaction form
- * has been submitted and before any changes have been made.
- */
-export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
-    const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
-    _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', reqFieldsFilled]);
-    return reqFieldsFilled;
-}
-function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
-    return _fields.ifAllRequiredFieldsFilled(fLvl) &&
-        !hasOpenSubForm(fLvl) && !locHasGpsData(fLvl);
-}
-/** Returns true if the next sub-level form exists in the dom. */
-function hasOpenSubForm(fLvl) {
-    const childFormLvl = _f.getNextFormLevel('child', fLvl);
-    return $('#'+childFormLvl+'-form').length > 0;
-}
-/** Prevents the location form's submit button from enabling when GPS data entered.*/
-function locHasGpsData(fLvl) {
-    if (_f.state('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
-    if (_f.state('getFormProp', [fLvl, 'action']) === 'edit') { return false; }
-    return ['Latitude', 'Longitude'].some(field => {
-        return $(`#${field}_row input`).val();
-    });
-}
-
-export function combos(funcName, params) {
-    return _cmbx[funcName](...params);
-}
-export function panel(funcName, params) {
-    return _pnl[funcName](...params);
+    return fields.ifAllRequiredFieldsFilled(...arguments);
 }
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {
     const w = $(formId).innerWidth() / 2 - 3;
     $(rowClass).css({'flex': '0 1 '+w+'px', 'max-width': w});
 }
+/* used by form-errors & submit-main */
+export function toggleWaitOverlay(waiting) {                                    //console.log("toggling wait overlay")
+    if (waiting) { appendWaitingOverlay();
+    } else { $('#c-overlay').remove(); }
+}
+function appendWaitingOverlay() {
+    const attr = { class: 'overlay waiting', id: 'c-overlay'}
+    $('#b-overlay').append(_u('buildElem', ['div', attr]));
+    $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
+}
+/* --------------------- FORM STATUS MESSAGES ------------------------------- */
 /** Shows a form-submit success message at the top of the interaction form. */
 export function showSuccessMsg(msg, color = 'green') {
-    const cntnr = _f.util('buildElem', ['div', { id: 'success' }]);
+    const cntnr = _u('buildElem', ['div', { id: 'success' }]);
     cntnr.append(getSuccessMsgHtml(msg));
     $(cntnr).css('border-color', (color));
     $('#top-hdr').after(cntnr);
     $(cntnr).fadeTo('400', .8);
 }
 function getSuccessMsgHtml(msg) {
-    const div = _f.util('buildElem', ['div', { class: 'flex-row' }]);
-    const p = _f.util('buildElem', ['p', { text: msg }]);
+    const div = _u('buildElem', ['div', { class: 'flex-row' }]);
+    const p = _u('buildElem', ['p', { text: msg }]);
     const bttn = getSuccessMsgExitBttn();
     div.append(p, bttn);
     return div;
@@ -120,59 +107,53 @@ function getSuccessMsgHtml(msg) {
 function getSuccessMsgExitBttn() {
     const attr = { 'id': 'sucess-exit', 'class': 'exit-bttn',
         'type': 'button', 'value': 'X' }
-    const bttn = _f.util('buildElem', ['input', attr]);
+    const bttn = _u('buildElem', ['input', attr]);
     $(bttn).click(exitSuccessMsg);
     return bttn;
 }
 export function exitSuccessMsg() {
     $('#success').fadeTo('400', 0, () => $('#success').remove());
 }
-/* ============================ EXIT FORM =================================== */
+/* --------------------------- SUBMIT BUTTON -------------------------------- */
+export function toggleSubmitBttn(bttnId, enable = true) {
+    return enable ? enableSubmitBttn(bttnId) : disableSubmitBttn(bttnId);
+}
+/** Enables passed submit button */
+export function enableSubmitBttn(bttnId) {
+    $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"});
+}
+/** Enables passed submit button */
+export function disableSubmitBttn(bttnId) {                                     //console.log('disabling bttn = ', bttnId)
+    $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"});
+}
+/* ----------- ENABLE WHEN REQUIRED FIELDS FILLED ----------- */
 /**
- * Removes the form container with the passed id, clears and enables the combobox,
- * and contextually enables to parent form's submit button. Calls the exit
- * handler stored in the form's params object.
+ * Note: The 'unchanged' property exists only after the create interaction form
+ * has been submitted and before any changes have been made.
  */
-export function exitSubForm(fLvl, focus, onExit, data) {
-    const exitFunc = onExit || _f.state('getFormProp', [fLvl, 'onFormClose']);   console.log("               --exitForm fLvl = %s, onExit = %O", fLvl, exitFunc);
-    $('#'+fLvl+'-form').remove();
-    _cmbx.resetFormCombobox(fLvl, focus);
-    ifParentFormValidEnableSubmit(fLvl);
-    // if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
-    if (exitFunc) { exitFunc(data); }
+export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
+    const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
+    toggleSubmitBttn('#'+fLvl+'-submit', reqFieldsFilled);
+    return reqFieldsFilled;
 }
-/** Returns popup and overlay to their original/default state. */
-export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
-    hideSearchFormPopup();
-    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
-    $('#b-overlay').removeClass('form-ovrly');
-    $('#b-overlay-popup').removeClass('form-popup');
-    $('#b-overlay-popup').empty();
-    _f.clearFormMemory();
+function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
+    return fields.ifAllRequiredFieldsFilled(fLvl) &&
+        !hasOpenSubForm(fLvl) && !locHasGpsData(fLvl);
 }
-function hideSearchFormPopup() {
-    $('#b-overlay').css({display: 'none'});
+/** Returns true if the next sub-level form exists in the dom. */
+function hasOpenSubForm(fLvl) {
+    const childFormLvl = getNextFormLevel('child', fLvl);
+    return $('#'+childFormLvl+'-form').length > 0;
 }
-/**
- * If the form was not submitted the table does not reload. Otherwise, if exiting
- * the edit-forms, the table will reload with the current focus; or, after creating
- * an interaction, the table will refocus into source-view. Exiting the interaction
- * forms also sets the 'int-updated-at' filter to 'today'.
- */
-function refocusTableIfFormWasSubmitted() {
-    const submitData = _f.state('getStateProp', ['submit']);                    //console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
-    if (!submitData) { return; }
-    if (submitData.entity === 'interaction') { return refocusAndShowUpdates(submitData); }
-    _f.loadDataTableAfterFormClose();
+/** Prevents the location form's submit button from enabling when GPS data entered.*/
+function locHasGpsData(fLvl) {
+    if (_state('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
+    if (_state('getFormProp', [fLvl, 'action']) === 'edit') { return false; }
+    return ['Latitude', 'Longitude'].some(field => {
+        return $(`#${field}_row input`).val();
+    });
 }
-function refocusAndShowUpdates(submitData) {                                    //console.log('refocusAndShowUpdates.')
-    if (_f.state('getFormProp', ['top', 'action']) === 'create') {
-        _f.showTodaysUpdates('srcs');
-    } else {
-        _f.loadDataTableAfterFormClose();
-    }
-}
-/** -------------- sort! --------------- */
+/* -------------------- TOGGLE FORM-FIELDS ---------------------------------- */
 export function setToggleFieldsEvent(elem, entity, fLvl) {
     $(elem).click(toggleShowAllFields.bind(elem, entity, fLvl));
 }
@@ -180,46 +161,46 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
  * Toggles between displaying all fields for the entity and only showing the
  * default (required and suggested) fields.
  */
-function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
+function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all [%s] [%s] Fields [%s] -------', entity, fLvl, this.checked);
     if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
     updateFormMemoryOnFieldToggle(this.checked, fLvl);
-    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', _f.util('snapshot', [fVals]));
+    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', _u('snapshot', [fVals]));
     $('#'+entity+'_Rows').empty();
-    _rows.getFormFieldRows(entity, fVals, fLvl)
+    rows.getFormFieldRows(entity, fVals, fLvl)
     .then(appendAndFinishRebuild);
 
     function appendAndFinishRebuild(rows) {
         $('#'+entity+'_Rows').append(rows);
-        _f._form('initFormCombos', [_f.util('lcfirst', [entity]), fLvl]);
+        _form('initFormCombos', [_u('lcfirst', [entity]), fLvl]);
         fillComplexFormFields(fLvl)
         .then(finishComplexForms);
     }
     function finishComplexForms() {
-        if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }
-        if (entity !== 'location') { _f._form('onSrcToggleFields', [entity, fVals, fLvl]); }
+        const complex = ['citation', 'publication', 'location'];
+        if (complex.indexOf(entity) === -1) { return; }
+        if (entity !== 'location') { _form('onSrcToggleFields', [entity, fVals, fLvl]); }
         setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
 function updateFormMemoryOnFieldToggle(isChecked, fLvl) {
-    _f.state('setFormProp', [fLvl, 'expanded', isChecked]);
-    _f.state('setFormProp', [fLvl, 'reqElems', []]);
+    _state('setFormProp', [fLvl, 'expanded', isChecked]);
+    _state('setFormProp', [fLvl, 'reqElems', []]);
 }
 function ifOpenSubForm(fLvl) {
-    const subLvl = _f.getNextFormLevel('child', fLvl);
+    const subLvl = getNextFormLevel('child', fLvl);
     return $('#'+subLvl+'-form').length !== 0;
 }
 function showOpenSubFormErr(fLvl) {
-    const subLvl = _f.getNextFormLevel('child', fLvl);
-    let entity = _f.util('ucfirst', [_f.state('getFormProp', [fLvl, entity])]);
+    const subLvl = getNextFormLevel('child', fLvl);
+    let entity = _u('ucfirst', [_state('getFormProp', [fLvl, entity])]);
     if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
-    _f.val('openSubFormErr', [entity, null, subLvl, true]);
+    _val('openSubFormErr', [entity, null, subLvl, true]);
     $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
 }
-/*--------------------------- Misc Form Helpers ------------------------------*/
-/*--------------------------- Fill Form Fields -------------------------------*/
+/*------------ Fill Form Fields -----------------*/
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) {
-    const fieldData = _f.state('getFormProp', [fLvl, 'fieldData']);
+    const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
     const vals = {};
     for (let field in fieldData) {
         vals[field] = fieldData[field].val;
@@ -233,7 +214,7 @@ export function getCurrentFormFieldVals(fLvl) {
  * reinitiation are handled here.
  */
 export function fillComplexFormFields(fLvl) {
-    const fieldData = _f.state('getFormProp', [fLvl, 'fieldData']);
+    const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
     const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs);
     return fields.reduce(fillAllComplexFieldsWithData, Promise.resolve());
@@ -245,34 +226,57 @@ export function fillComplexFormFields(fLvl) {
     }
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
-    return _f._form.bind(null, 'selectExistingAuthors');
+    return _form.bind(null, 'selectExistingAuthors');
 }
 export function ifFieldIsDisplayed(field, fLvl) {
-    return !!_f.state('getFormFieldData', [fLvl, field]);
+    return !!_state('getFormFieldData', [fLvl, field]);
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
-    const parentLvl = _f.getNextFormLevel('parent', fLvl);
-    _f.elems('checkReqFieldsAndToggleSubmitBttn', [parentLvl]);
+    const parentLvl = getNextFormLevel('parent', fLvl);
+    checkReqFieldsAndToggleSubmitBttn(parentLvl);
 }
-export function toggleSubmitBttn(bttnId, enable = true) {
-    return enable ? enableSubmitBttn(bttnId) : disableSubmitBttn(bttnId);
+/* ---------------------------- EXIT FORM ----------------------------------- */
+/**
+ * Removes the form container with the passed id, clears and enables the combobox,
+ * and contextually enables to parent form's submit button. Calls the exit
+ * handler stored in the form's params object.
+ */
+export function exitSubForm(fLvl, focus, onExit, data) {
+    const exitFunc = onExit || _state('getFormProp', [fLvl, 'onFormClose']);    console.log("               --exitSubForm fLvl = %s, onExit = %O", fLvl, exitFunc);
+    $('#'+fLvl+'-form').remove();
+    cmbx.resetFormCombobox(fLvl, focus);
+    ifParentFormValidEnableSubmit(fLvl);
+    if (exitFunc) { exitFunc(data); }
 }
-/** Enables passed submit button */
-export function enableSubmitBttn(bttnId) {
-    $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"});
+/** Returns popup and overlay to their original/default state. */
+export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
+    hideSearchFormPopup();
+    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
+    $('#b-overlay').removeClass('form-ovrly');
+    $('#b-overlay-popup').removeClass('form-popup');
+    $('#b-overlay-popup').empty();
+    clearFormMemory();
 }
-/** Enables passed submit button */
-export function disableSubmitBttn(bttnId) {                                            //console.log('disabling bttn = ', bttnId)
-    $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"});
+function hideSearchFormPopup() {
+    $('#b-overlay').css({display: 'none'});
 }
-/* used by form-errors & submit-main */
-export function toggleWaitOverlay(waiting) {                                           //console.log("toggling wait overlay")
-    if (waiting) { appendWaitingOverlay();
-    } else { $('#c-overlay').remove(); }
+/**
+ * If the form was not submitted the table does not reload. Otherwise, if exiting
+ * the edit-forms, the table will reload with the current focus; or, after creating
+ * an interaction, the table will refocus into source-view. Exiting the interaction
+ * forms also sets the 'int-updated-at' filter to 'today'.
+ */
+function refocusTableIfFormWasSubmitted() {
+    const submitData = _state('getStateProp', ['submit']);                      //console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
+    if (!submitData) { return; }
+    if (submitData.entity === 'interaction') { return refocusAndShowUpdates(submitData); }
+    reloadTableWithCurrentFilters();
 }
-function appendWaitingOverlay() {
-    const attr = { class: 'overlay waiting', id: 'c-overlay'}
-    $('#b-overlay').append(_f.util('buildElem', ['div', attr]));
-    $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
+function refocusAndShowUpdates(submitData) {                                    //console.log('refocusAndShowUpdates.')
+    if (_state('getFormProp', ['top', 'action']) === 'create') {
+        _filter('showTodaysUpdates', ['srcs']);
+    } else {
+        reloadTableWithCurrentFilters();
+    }
 }

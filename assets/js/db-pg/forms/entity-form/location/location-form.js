@@ -5,14 +5,15 @@
  *     addNewLocationWithGps        map-main
  *     initCreateForm               forms-main
  *
- * CODE SECTIONS
+ * TOC
  *     CREATE FORM
  *     EDIT FORM
  *     SHARED HELPERS
  *         FORM COMBOBOXES
  *         MAP METHODS
  */
-import * as _f from '../forms-main.js';
+import { _map, _u } from '../../../db-main.js';
+import { _state, _elems, _cmbx, _form, _val, getSubFormLvl, submitForm } from '../../forms-main.js';
 
 /** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
@@ -25,18 +26,18 @@ function buildLocForm(val) {
     const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#Country-Region-sel').val()
     };
-    _f.state('addEntityFormState', ['location', 'sub', '#Location-sel', 'create']);
-    _f.state('setOnFormCloseHandler', ['sub', _f._form.bind(null, 'enableCountryRegionField')]);
-    return _f.elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
+    _state('addEntityFormState', ['location', 'sub', '#Location-sel', 'create']);
+    _state('setOnFormCloseHandler', ['sub', _form.bind(null, 'enableCountryRegionField')]);
+    return _elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
-        _f.cmbx('enableCombobox', ['#Country-Region-sel', false]);
+        _cmbx('enableCombobox', ['#Country-Region-sel', false]);
         $('#sub-submit').val('Create without GPS data');
-        _f.elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
-        _f.elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
+        _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
+        _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_row input').focus();
     }
 }
@@ -88,23 +89,23 @@ function handleElevFieldsAndNumberInputs() {
  * in a the new location's green map pin's popup on the map in the form.
  */
 export function addNewLocationWithGps() {
-    const fLvl = _f.getSubFormLvl('sub');
-    if (_f.elems('ifAllRequiredFieldsFilled', [fLvl])) {
-        _f.submitForm('#'+fLvl+'-form',  fLvl, 'location');
+    const fLvl = getSubFormLvl('sub');
+    if (_elems('ifAllRequiredFieldsFilled', [fLvl])) {
+        submitForm('#'+fLvl+'-form',  fLvl, 'location');
     } else { showFillAllLocFieldsError(fLvl); }
 }
 function showFillAllLocFieldsError(fLvl) {
-    _f.val('reportFormFieldErr', ['Display Name', 'needsLocData', fLvl]);
+    _val('reportFormFieldErr', ['Display Name', 'needsLocData', fLvl]);
 }
 function locCoordErr(field) {
-    const fLvl = _f.getSubFormLvl('sub');
-    _f.val('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
+    const fLvl = getSubFormLvl('sub');
+    _val('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
 }
 /** ======================= EDIT FORM ======================================= */
 export function finishEditFormBuild(entity) {
     initFormCombos('Location', 'top');
     updateCountryChangeMethod();
-    addGpsListenerToEditForm(_f.state('getEditEntityId', ['core']));
+    addGpsListenerToEditForm(_state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
     $('#DisplayName-lbl, #ElevationMax-lbl').css('min-width', '106px');
     onLocFormLoadComplete();
@@ -123,8 +124,8 @@ export function addMapToLocationEditForm(id) {
 }
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
-    _f.elems('setCoreRowStyles', ['#form-main', '.top-row']);
-    _f.map('addVolatileMapPin', [id, 'edit', _f.cmbx('getSelVal', ['#Country-sel'])]);
+    _elems('setCoreRowStyles', ['#form-main', '.top-row']);
+    _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['#Country-sel'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
 function afterMapLoads(onLoadFunc, id) {
@@ -140,38 +141,38 @@ export function initFormCombos(entity, fLvl) {
     const events = {
         'Country': { change: focusParentAndShowChildLocs.bind(null, 'create') }
     };
-    _f.cmbx('initFormCombos', ['location', fLvl, events]);
+    _cmbx('initFormCombos', ['location', fLvl, events]);
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
 export function addMapToLocForm(type, $formElem = $('#location_Rows')) {
-    const mapContainer = _f.util('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
+    const mapContainer = _u('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
     $formElem.after(mapContainer);
     initLocFormMap(type);
 }
 function initLocFormMap(type) {
     const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
-    const locRcrds = _f.state('getEntityRcrds', ['location'])
-    _f.map('initFormMap', [prntId, locRcrds, type]);
+    const locRcrds = _state('getEntityRcrds', ['location'])
+    _map('initFormMap', [prntId, locRcrds, type]);
 }
 export function focusParentAndShowChildLocs(type, val) {
     if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
-    const locRcrds = _f.state('getEntityRcrds', ['location'])
-    _f.map('initFormMap', [val, locRcrds, type]);
+    const locRcrds = _state('getEntityRcrds', ['location'])
+    _map('initFormMap', [val, locRcrds, type]);
 }
 export function addListenerToGpsFields(fLvl, params = [true]) {
     $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
 
     function toggleNoGpsSubmitBttn() {
         const coords = getCoordVals()
-        _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+        _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         if (coords.length === 1) { ifEditingDisableSubmit(fLvl, coords); }
-        if (coords.length !== 2) { _f.map('addVolatileMapPin', [false]); }
-        if (coords.length === 2) { _f.map('addVolatileMapPin', params); }
+        if (coords.length !== 2) { _map('addVolatileMapPin', [false]); }
+        if (coords.length === 2) { _map('addVolatileMapPin', params); }
     }
 }
 function ifEditingDisableSubmit(fLvl, coords) {
-    if (_f.state('getFormProp', [fLvl, 'action']) !== 'edit') { return; }
-    _f.elems('toggleSubmitBttn', ['#top-submit', false]);
+    if (_state('getFormProp', [fLvl, 'action']) !== 'edit') { return; }
+    _elems('toggleSubmitBttn', ['#top-submit', false]);
 }
 function getCoordVals() {
     return ['Lat', 'Long'].map(l => lintCoord(l)).filter(v => v);

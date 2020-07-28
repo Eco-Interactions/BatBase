@@ -1,18 +1,21 @@
-import * as _f from '../../../forms-main.js';
+/**
+ * Builds a single form-row.
+ */
+import { _u } from '../../../../db-main.js';
 /**
  * Each element is built, nested, and returned as a completed row.
  * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
  */
 export default function buildFormRow(field, input, fLvl, rowClss) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
-    const errorDiv = _f.util('buildElem', ['div', { id: field+'_errs'}]);
+    const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]);
     const fieldCntnr = buildFieldContainer(input, field, fLvl);
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
 }
 function buildRowContainer(field, input, fLvl, rowClss) {
     const attr = { class: getRowClasses(), id: field + '_row'}
-    return _f.util('buildElem', ['div', attr]);
+    return _u('buildElem', ['div', attr]);
     /** Returns the style classes for the row. */
     function getRowClasses() {
         const rowClass = input.className.includes('xlrg-field') ?
@@ -21,7 +24,7 @@ function buildRowContainer(field, input, fLvl, rowClss) {
     }
 }
 function buildFieldContainer(input, field, fLvl) {
-    const cntnr = _f.util('buildElem', ['div', { class: 'field-row flex-row'}]);
+    const cntnr = _u('buildElem', ['div', { class: 'field-row flex-row'}]);
     const label = buildFieldLabel(input, field);
     const pin = fLvl === 'top' ? getPinElem(field) : null;
     $(cntnr).append([label, input, pin]);
@@ -29,14 +32,14 @@ function buildFieldContainer(input, field, fLvl) {
 }
 function buildFieldLabel(input, field) {
     const attr = { id: field+'-lbl', class: getLabelClass(), text: getFieldName()};
-    return _f.util('buildElem', ['label', attr]);
+    return _u('buildElem', ['label', attr]);
 
     function getLabelClass() {
         return $(input).data('fLvl') ? 'required' : '';
     }
     function getFieldName() {
         const fieldName = field.replace(/([A-Z])/g, ' $1'); //Adds space between pascal-cased words
-        return _f.util('ucfirst', [fieldName]).trim();
+        return _u('ucfirst', [fieldName]).trim();
     }
 }
 function getPinElem(field) {
@@ -46,8 +49,8 @@ function getPinElem(field) {
 }
 function buildPinElem(field) {
     const attr = {type: 'checkbox', id: field+'_pin', class: 'top-pin'};
-    const pin = _f.util('buildElem', ['input', attr]);
-    _f.util('addEnterKeypressClick', [pin]);
+    const pin = _u('buildElem', ['input', attr]);
+    _u('addEnterKeypressClick', [pin]);
     return pin;
 }
 function handledRelatedFieldPins(pin, field) {

@@ -3,20 +3,21 @@
  * specific to their form container @getBttnEvents, and a left spacer that
  * pushes the buttons to the bottom right of their form container.
  *
- * CODE SECTIONS:
+ * TOC
  *     SHOW ALL FIELDS CHECKBOX
  *     SUBMIT AND CANCEL BUTTONS
  */
-import * as _f from '../../../forms-main.js';
+import { _u } from '../../../../db-main.js';
+import { _confg, _elems, _state, exitFormLevel, submitForm } from '../../../forms-main.js';
 
-let _fs;
+let fS;
 /**
  * Returns row with a checkbox that will toggle optional form fields on the left
  * and the submit/cancel buttons on the right.
  */
 export default function(entity, level, action) {
-    _fs = _f.state('getFormState').forms[level];
-    const cntnr = _f.util('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
+    fS = _state('getFormState').forms[level];
+    const cntnr = _u('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     $(cntnr).append(...buildFooterElems(entity, level, action));
     return cntnr;
 }
@@ -35,33 +36,33 @@ function buildFooterElems(entity, level, action) {
  */
 function buildAddFieldsCheckbox(entity, level) {
     if (!ifEntityHasOptionalFields(entity)) { return null; }
-    const cntnr = _f.util('buildElem', ['div', {class: 'all-fields-cntnr'}]);
+    const cntnr = _u('buildElem', ['div', {class: 'all-fields-cntnr'}]);
     $(cntnr).append([getCheckbox(level, entity), getLabel(level)]);
     return cntnr;
 }
 function ifEntityHasOptionalFields(entity) {
-    const fConfg = _f.confg('getFormConfg', [entity]);
+    const fConfg = _confg('getFormConfg', [entity]);
     return fConfg && fConfg.order.opt !== false;
 }
 function getCheckbox(level, entity) {
     const chkbx = buildChkbxInput(level);
     setToggleEvent(level, entity, chkbx);
-    _f.util('addEnterKeypressClick', [chkbx]);
+    _u('addEnterKeypressClick', [chkbx]);
     return chkbx;
 }
 function buildChkbxInput(level) {
     const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };
-    const input = _f.util('buildElem', ['input', attr]);
-    if (_fs.expanded) { input.checked = true; }
+    const input = _u('buildElem', ['input', attr]);
+    if (fS.expanded) { input.checked = true; }
     return input;
 }
 function setToggleEvent(level, entity, chkbx) {
-    const lcEntity = _f.util('lcfirst', [entity]);
-    _f.elems('setToggleFieldsEvent', [chkbx, lcEntity, level]);
+    const lcEntity = _u('lcfirst', [entity]);
+    _elems('setToggleFieldsEvent', [chkbx, lcEntity, level]);
 }
 function getLabel(level) {
     const attr = { for: level+'-all-fields', text: 'Show all fields.' };
-    return _f.util('buildElem', ['label', attr]);
+    return _u('buildElem', ['label', attr]);
 }
 /* ------------------ SUBMIT AND CANCEL BUTTONS ----------------------------- */
 
@@ -77,7 +78,7 @@ function buildSubmitAndCancelBttns(level, action, entity) {
     }
     function getSubmitText() {
         const text = { create: "Create", edit: "Update" };;
-        return text[action] + " " + _f.util('ucfirst', [entity]);
+        return text[action] + " " + _u('ucfirst', [entity]);
     }
     function getCancelBttn() {
         const bttn = buildFormButton('cancel', level, 'Cancel');
@@ -97,15 +98,15 @@ function getBttnEvents(entity, level) {                                         
 
 }
 function getSubmitEvent(entity, level) {
-    return _f.submitForm.bind(null, '#'+level+'-form', level, entity);
+    return submitForm.bind(null, '#'+level+'-form', level, entity);
 }
 function getCancelFunc(entity, level) {
-    const onExit = _fs ? _fs.onFormClose : Function.prototype;
-    return level === 'top' ? _f.exitFormWindow :
-        _f.exitFormLevel.bind(null, level, true, onExit);
+    const onExit = _state ? fS.onFormClose : Function.prototype;
+    return level === 'top' ? _elems.bind(null, 'exitFormPopup') :
+        exitFormLevel.bind(null, level, true, onExit);
 }
 /** Returns a (submit or cancel) button for the form level. */
 function buildFormButton(actn, lvl, val) {
     const attr = { id: lvl+'-'+actn, class: 'ag-fresh', type: 'button', value: val}
-    return _f.util('buildElem', ['input', attr]);
+    return _u('buildElem', ['input', attr]);
 }

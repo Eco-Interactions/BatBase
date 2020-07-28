@@ -23,23 +23,24 @@
  *         SOURCE DETAILS
  *     CLEAR PANELS
  */
-import * as _f from '../../forms-main.js';
+import { _u } from '../../../db-main.js';
+import { _state } from '../../forms-main.js';
 
 /* ===================== INIT DETAIL PANEL ================================== */
 export function getDetailPanelElems(entity, id, action) {                       //console.log("getDetailPanelElems. action = %s, entity = %s", action, entity)
-    const cntnr = _f.util('buildElem', ['div', { 'id': 'form-details' }]);
+    const cntnr = _u('buildElem', ['div', { 'id': 'form-details' }]);
     $(cntnr).append(buildPanelHeader(entity));
     $(cntnr).append(getDetailElems(entity, action));
     $(cntnr).append(getEntityIdFooter(id));
     return cntnr;
 }
 function buildPanelHeader(entity) {
-    const txt = _f.util('ucfirst', [entity]) + ' Details';
-    return _f.util('buildElem', ['h3', { 'text':  txt}]);
+    const txt = _u('ucfirst', [entity]) + ' Details';
+    return _u('buildElem', ['h3', { 'text':  txt}]);
 }
 function getEntityIdFooter(id) {
     const intIdStr = id ? 'Id:  ' + id : '';
-    return _f.util('buildElem', ['p', { id: 'ent-id',  'text': intIdStr }]);
+    return _u('buildElem', ['p', { id: 'ent-id',  'text': intIdStr }]);
 }
 function getDetailElems(entity, action) {
     const builder = action === 'edit' && entity !== 'interaction' ?
@@ -57,19 +58,19 @@ function initDetailDiv(ent) {
 }
 function getDetailContainer(ent) {
     const attr = { 'id': ent+'-det', 'class': 'det-div' };
-    return  _f.util('buildElem', ['div', attr]);
+    return  _u('buildElem', ['div', attr]);
 }
 function getDetailHeader(ent) {
     const entities = {'src': 'Source', 'loc': 'Location'};
-     return _f.util('buildElem', ['h5', { 'text': entities[ent]+':' }]);
+     return _u('buildElem', ['h5', { 'text': entities[ent]+':' }]);
 }
 function getInitDetailData() {
-    return _f.util('buildElem', ['div', { 'text': 'None selected.' }]);
+    return _u('buildElem', ['div', { 'text': 'None selected.' }]);
 }
 /** Returns the elems that will display the count of references to the entity. */
 function getSubEntityEditDetailElems(entity) {                                  //console.log("getSubEntityEditDetailElems for [%s]", entity);
-    const div = _f.util('buildElem', ['div', { 'id': 'det-cnt-cntnr' }]);
-    $(div).append(_f.util('buildElem', ['span']));
+    const div = _u('buildElem', ['div', { 'id': 'det-cnt-cntnr' }]);
+    $(div).append(_u('buildElem', ['span']));
     $(div).append(getCountElemForEachReferencedEntityType(entity));
     return div;
 }
@@ -90,17 +91,17 @@ function initCountDiv(ent) {
 }
 function getCntCntnr(ent) {
     const attr = { 'id': ent+'-det', 'class': 'cnt-div flex-row' };
-    return _f.util('buildElem', ['div', attr]);
+    return _u('buildElem', ['div', attr]);
 }
 function getInitCntElem() {
-    return _f.util('buildElem', ['div', {'text': '0' }]);
+    return _u('buildElem', ['div', {'text': '0' }]);
 }
 function getEntityNameElem(ent) {
     const entities = { 'cit': 'Citations', 'fam': 'Families', 'gen': 'Genera',
         'int': 'Interactions', 'loc': 'Locations', 'ord': 'Orders',
         'pub': 'Publications', 'spc': 'Species', 'txn': 'Taxa',
     };
-    return _f.util('buildElem', ['span', {'text': entities[ent] }]);
+    return _u('buildElem', ['span', {'text': entities[ent] }]);
 }
 /* ================== EDIT FORM RELATIONAL DETAILS ========================== */
 export function fillRelationalDataInPanel(entity, rcrd) {
@@ -127,18 +128,18 @@ function fillSrcDetailData(entity, srcRcrd) {                                   
         const ref = entity === 'publisher' ? 'pub' : 'cit';
         refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
     }
-} /* End fillSrcDataInDetailPanel */
+}
 function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
     return entity === 'citation' ?
         rcrd.interactions.length : getAllSourceInts(rcrd);
 }
 function getAllSourceInts(rcrd) {
-    const srcRcrds = _f.state('getEntityRcrds', ['source']);
+    const srcRcrds = _state('getEntityRcrds', ['source']);
     return getTtlIntCnt(rcrd, 'interactions', srcRcrds);
 }
 /* ------------- TAXON --------- */
 function fillTxnDetailData(entity, rcrd) {
-    const txnRcrds = _f.state('getEntityRcrds', ['taxon']);
+    const txnRcrds = _state('getEntityRcrds', ['taxon']);
     const refs = {
         'int': getTtlIntCnt(rcrd, 'objectRoles', txnRcrds) ||
             getTtlIntCnt(rcrd, 'subjectRoles', txnRcrds)
@@ -247,17 +248,17 @@ function getAllLocData(locRcrd) {
 /** Adds source data to the interaction form's detail panel. */
 export function updateSrcDetails(entity) {                                      //console.log('           --updateSrcDetails');
     const data = {};
-    const srcRcrds = _f.state('getEntityRcrds', ['source']);
+    const srcRcrds = _state('getEntityRcrds', ['source']);
     buildSourceData();
     addDataToIntDetailPanel('src', data);
 
     function buildSourceData() {
         const pubSrc = srcRcrds[$('#Publication-sel').val()];
-        const pub = _f.state('getRcrd', ['publication', pubSrc.publication]);
+        const pub = _state('getRcrd', ['publication', pubSrc.publication]);
         const pubType = getSrcType(pub, 'publication');
         const citId = $('#CitationTitle-sel').val();
         const citSrc = citId ? srcRcrds[citId] : false;
-        const cit = !citSrc ? false :  _f.state('getRcrd', ['citation', citSrc.citation]);
+        const cit = !citSrc ? false :  _state('getRcrd', ['citation', citSrc.citation]);
         const citType = cit ? getSrcType(cit, 'citation') : false;              //console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit);
 
         addCitationText();

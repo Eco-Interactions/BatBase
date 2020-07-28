@@ -1,55 +1,57 @@
 /**
- * Handles all data-entry form entry points.
+ * Data-entry form bundle's main file.
  *
- * CODE SECTIONS
- *     DATABASE PAGE FACADE
- *     FORMS FACADE
+ * TOC
+ *     EXTERNAL FACADE
+ *     BUNDLE FACADE
  *         FORM STATE / MEMORY
+ *         ENTITY FORMS
  *         FORM UI
- *         HELPERS
+ *         VALIDATION & SUBMIT
+ *     BUNDLE HELPERS
  */
-import * as _confg from './etc/form-config.js';
+import { _alert, _map, executeMethod } from '../db-main.js';
+import * as confg from './etc/form-config.js';
+import * as form from './entity-form/entity-form-main.js';
+import * as state from './etc/form-state.js';
+import * as submit from './submit/submit-main.js';
+import * as elems from './elems/elems-main.js';
 import editEntity from './edit/edit-forms.js';
-import * as form from './entity/entity-main.js';
-import * as _state from './etc/form-state.js';
-import * as _submit from './submit/submit-main.js';
-import * as _elems from './elems/elems-main.js';
-// REFACTOR
-import * as _map from '../map/map-main.js';
-import * as pg from '../db-main.js';
 
+/* Handles captures of event objects and returns wrapped in array. */
 function getParams(params) {
     return Array.isArray(params) ? params : [params];
 }
-/** =================== DATABASE PAGE FACADE ================================ */
-export function util(funcName, params) {
-    return pg._u(funcName, params);
+/** ======================== EXTERNAL FACADE ================================ */
+export function alertIssue() {
+    if (!state.getFormState()) { return; } //form closed
+    return _alert('alertIssue', [...arguments]);
 }
-export function map(funcName, params = []) {
-    return _map[funcName](...params);
+/** ===================== BUNDLE FACADE ===================================== */
+export function _confg(funcName, params = []) {
+    return executeMethod(funcName, confg, 'confg', 'forms-main', params);
 }
-export function loadDataTableAfterFormClose() {
-    pg.reloadTableWithCurrentFilters();
+/** ------------------- FORM STATE / MEMORY --------------------------------- */
+export function _state(funcName, params = []) {
+    return executeMethod(funcName, state, 'state', 'forms-main', params);
 }
-export function showTodaysUpdates(focus) {
-    pg.showTodaysUpdates(focus);
+export function clearFormMemory() {
+    _map('clearMemory');
+    state.clearState();
+}
+/* ----------------- ENTITY FORMS ------------------------------------------- */
+export function _form(funcName, params = []) {                                  //console.log('entity func = %O', arguments);//entity form interface
+    return executeMethod(funcName, form, 'form', 'forms-main', getParams(params));
+}
+export function create(entity, name) {
+    return form.createEntity(entity, name);
 }
 export function initNewDataForm() {
     return form.createEntity('interaction');
 }
-export function updateLocalDb() {
-    return pg._db('updateLocalDb', [...arguments]);
-}
-export function resetStoredData() {
-    pg._db('resetStoredData');
-}
-export function alertIssue() {
-    if (!_state.getFormState()) { return; } //form closed
-    return pg._alert('alertIssue', [...arguments]);
-}
-/** ====================== FORMS FACADE ===================================== */
-export function _form(funcName, params = []) {                                  //console.log('entity func = %O', arguments);//entity form interface
-    return form[funcName](...getParams(params));
+export function edit(id, entity) {
+    state.initFormState('edit', entity, id)
+    .then(() => editEntity(id, entity));
 }
 export function selectIntLoc(id) {
     form.selectIntLoc(id);
@@ -57,63 +59,38 @@ export function selectIntLoc(id) {
 export function addNewLocationWithGps() {
     form.addNewLocationWithGps();
 }
-export function create(entity, name) {
-    return form.createEntity(entity, name);
+/** --------------------------- FORM UI ------------------------------------- */
+export function _elems(funcName, params = []) {
+    return executeMethod(funcName, elems, 'elems', 'forms-main', getParams(params));
 }
-export function edit(id, entity) {
-    _state.initFormState('edit', entity, id)
-    .then(() => editEntity(id, entity));
+export function _cmbx(funcName, params = []) {
+    return elems._cmbx(funcName, params);
 }
-export function val(funcName, params = []) {
-    return _submit.validation(funcName, params);
+export function _panel(funcName, params = []) {
+    return elems._panel(funcName, params);
+}
+export function exitFormLevel() {
+    return elems.exitSubForm(...arguments);
+}
+/* ------------------- VALIDATION & SUBMIT ---------------------------------- */
+export function _val(funcName, params = []) {
+    return submit._validation(funcName, params);
+}
+export function getFormValData() {
+    return submit.getFormValData(...arguments);
 }
 export function submitForm(formId, fLvl, entity) {
     $('#'+fLvl+'-submit').attr('disabled', true).fadeTo('fast', .6);
-    _submit.valAndSubmitFormData(formId, fLvl, entity);
+    submit.valAndSubmitFormData(formId, fLvl, entity);
 }
-/** edit-forms */
+/* Refactor: only used for taxon forms */
 export function formatAndSubmitData(entity, fLvl, formVals) {
-    return _submit.buildFormDataAndSubmit(entity, fLvl, formVals);
+    return submit.buildFormDataAndSubmit(entity, fLvl, formVals);
 }
-/** ------------------- FORM STATE / MEMORY --------------------------------- */
-export function confg(funcName, params = []) {
-    return _confg[funcName](...params);
-}
-export function state(funcName, params = []) {
-    return _state[funcName](...params);
-}
-export function clearFormMemory() {
-    _map.clearMemory();
-    _state.clearState();
-}
-/** --------------------------- FORM UI ------------------------------------- */
-export function elems(funcName, params = []) {                                     //console.log('ui func = %O', arguments);  //ui interface
-    return _elems[funcName](...params);
-}
-// export function elems(funcName, params = []) {
-//     return _ui.elems(funcName, params);
-// }
-export function cmbx(funcName, params = []) {
-    return _elems.combos(funcName, params);
-}
-export function panel(funcName, params = []) {
-    return _elems.panel(funcName, params);
-}
-export function exitFormWindow(e, skipReset) {
-    _elems.exitFormPopup(e, skipReset);
-}
-/** form-footer */
-export function exitFormLevel() {
-    return _elems.exitSubForm(...arguments);
-}
-/** --------------------------- HELPERS ------------------------------------- */
-/* generate-citation */
-export function getFormValData(entity, fLvl, submitting) {
-    return _submit.getFormValData(entity, fLvl, submitting);
-}
+/* ======================= BUNDLE HELPERS =================================== */
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
-    const fLvls = _state.getStateProp('formLevels');
+    const fLvls = state.getStateProp('formLevels');
     const nextLvl = next === 'parent' ?
         fLvls[fLvls.indexOf(curLvl) - 1] :
         fLvls[fLvls.indexOf(curLvl) + 1] ;
@@ -124,8 +101,8 @@ export function getNextFormLevel(next, curLvl) {
  * the passed form lvl is reduced by one and returned.
  */
 export function getSubFormLvl(lvl) {
-    const topEntity = _state.getFormProp('top', 'entity');
-    const fLvls = _state.getStateProp('formLevels');
+    const topEntity = state.getFormProp('top', 'entity');
+    const fLvls = state.getStateProp('formLevels');
     return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
@@ -138,7 +115,4 @@ export function getSelectedVals(cntnr, fieldName) {
         $.each(subElems, (i, subEl) => {
             if (subEl.value) { vals[cnt] = subEl.value; }});
     }
-}
-export function onLevelSelection(val) {
-    form.onLevelSelection.bind(this)(val);
 }

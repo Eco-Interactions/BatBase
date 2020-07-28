@@ -3,7 +3,7 @@
  *
  * Note - required form methods: initCreateForm, initFormCombos
  *
- * CODE SECTIONS
+ * TOC
  *     CREATE ENTITY
  *     EDIT FORMS
  *     INTERACTION
@@ -13,11 +13,10 @@
  *         AUTHOR
  *         CITATION
  */
-import * as _f from '../forms-main.js';
 import * as _int from './interaction/interaction-form.js';
-import * as _loc from './location-form.js';
+import * as _loc from './location/location-form.js';
 import * as _src from './source/source-forms.js';
-import * as _txn from './taxon-form.js';
+import * as _txn from './taxon/taxon-form.js';
 import * as _autoCite from './source/auto-citation.js';
 
 const forms = {
@@ -58,8 +57,8 @@ export function selectIntLoc(id) {
 export function enableCountryRegionField() {
     _int.enableCountryRegionField();
 }
-export function onLevelSelection(val) {
-    _int.onLevelSelection.bind(this)(val);
+export function onLevelSelection() {
+    _int.onLevelSelection(...arguments);
 }
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {

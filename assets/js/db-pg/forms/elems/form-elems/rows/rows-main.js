@@ -6,7 +6,8 @@
  *     buildFormRows
  *     getFormFieldRows
  */
-import * as _f from '../../../forms-main.js';
+import { _u } from '../../../../db-main.js';
+import { _elems } from '../../../forms-main.js';
 import getFieldConfgs from './field-confg.js';
 
 export function buildFormRow() {
@@ -24,7 +25,7 @@ export function buildFormRows(entity, fVals, fLvl, params) {                    
         let id = entity+'_Rows';
         if ($('#'+id).length) { id = id+'_'+fLvl;  }
         const attr = { id: id, class: 'flex-row flex-wrap'};
-        const rowCntnr = _f.util('buildElem', ['div', attr]);
+        const rowCntnr = _u('buildElem', ['div', attr]);
         $(rowCntnr).append(rows);
         return rowCntnr;
     }
@@ -34,7 +35,7 @@ export function buildFormRows(entity, fVals, fLvl, params) {                    
  * the type-entity form config is used.
  */
 export function getFormFieldRows(entity, fVals, fLvl) {
-    const fObj = getFieldConfgs(_f.util('lcfirst', [entity]), fLvl);            //console.log('getFormFieldRows [%s] = %O', entity, fObj);
+    const fObj = getFieldConfgs(_u('lcfirst', [entity]), fLvl);                 //console.log('getFormFieldRows [%s] = %O', entity, fObj);
     return buildRows(fObj, entity, fVals, fLvl);
 }
 /** @return {ary} Rows for each field in the entity field obj. */
@@ -44,7 +45,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
     }));
 
     function buildMultiFieldRow(fields) {                                       //console.log('buildMultiFieldRow = %O', fields);
-        const cntnr = _f.util('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
+        const cntnr = _u('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
         const rows = fields.reduce(buildAndAppendField, Promise.resolve());
         return rows.then(() => cntnr);
 
@@ -62,7 +63,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
  */
 function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     const fieldData = getFieldData();
-    return _f.elems('buildFieldInput', [fieldData, entity, fLvl])
+    return _elems('buildFieldInput', [fieldData, entity, fLvl])
         .then(buildFieldRow);
 
     function getFieldData() {
@@ -75,6 +76,6 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
         }
     }
     function buildFieldRow(input) {                                             //console.log('input = %O', input);
-        return buildFormRow(_f.util('ucfirst', [field]), input, fLvl, "");
+        return buildFormRow(_u('ucfirst', [field]), input, fLvl, "");
     }
 } /* End buildRow */

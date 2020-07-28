@@ -18,7 +18,7 @@
  *         ERRS
  *
  */
-import * as _db from './local-data-main.js';
+import * as db from './local-data-main.js';
 import { _u, _forms } from '../db-main.js';
 
 let failed = { data: [], retryQueue: {}};
@@ -32,11 +32,11 @@ let failed = { data: [], retryQueue: {}};
  * search page ui is initialized @initStoredData.
  */
 export function syncLocalDbWithServer(lclUpdtdAt) {                             if ($('body').data('env') !== 'prod') { console.log("   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt); } else { console.log("   /--syncLocalDbWithServer"); }
-    _db.fetchServerData('data-state').then(checkAgainstLocalDataState);
-    _db.getData('user').then(checkUserData);
+    db.fetchServerData('data-state').then(checkAgainstLocalDataState);
+    db.getData('user').then(checkUserData);
 
     function checkAgainstLocalDataState(srvrUpdtdAt) {                          //console.log('checkAgainstLocalDataState. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt, lclUpdtdAt);
-        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _db.resetStoredData(); }
+        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return db.resetStoredData(); }
         const entities = checkEachEntityForUpdates(srvrUpdtdAt.state);
         return entities.length ? syncDb(entities, srvrUpdtdAt.state) : initSearchPage();
     }
@@ -63,17 +63,17 @@ function entityHasUpdates(timeOne, timeTwo) {
 }
 /* -------------- ADD UPDATED SERVER DATA TO LOCAL DB ----------------------- */
 function syncDb(entities, dataUpdatedAt) {
-    _db.getAllStoredData().then(data => _db.setMmryDataObj(data))
+    db.getAllStoredData().then(data => db.setMmryDataObj(data))
     .then(() => downloadAndStoreNewData(entities))
-    .then(_db.setUpdatedDataInLocalDb)
-    .then(() => _db.setData('lclDataUpdtdAt', dataUpdatedAt))
+    .then(db.setUpdatedDataInLocalDb)
+    .then(() => db.setData('lclDataUpdtdAt', dataUpdatedAt))
     .then(initSearchPage)
     .then(clearMemory);
 }
 function trackTimeUpdated(entity, rcrd) {
-    _db.getData('lclDataUpdtdAt').then(stateObj => {
+    db.getData('lclDataUpdtdAt').then(stateObj => {
         stateObj[entity] = rcrd.serverUpdatedAt;
-        return _db.setData('lclDataUpdtdAt', stateObj);
+        return db.setData('lclDataUpdtdAt', stateObj);
     });
     return Promise.resolve()
 }
@@ -110,7 +110,7 @@ function hasInteractionUpdates(entities) {
 function getNewData(entity) {                                                   //console.log('getting new data for ', entity);
     let data = { entity: entity.name, updatedAt: entity.updated };
     const fetchOpts = { method: 'POST', body: JSON.stringify(data)};
-    return _db.fetchServerData('sync-data', fetchOpts);
+    return db.fetchServerData('sync-data', fetchOpts);
 }
 /** Sends each entity's ajax return to be processed and stored. */
 function processUpdatedData(data) {                                             //console.log('processUpdatedData = %O', data);
@@ -147,11 +147,11 @@ function storeUpdatedData(rcrds, entity) {
     function storeUpdatedDataRecord(id) {
         if (ifUpdatedByCurUser(rcrds[id])) { return; }
         const syncRecordData = getEntityUpdateFunc(entity);
-        syncRecordData(_u.lcfirst(entity), rcrds[id]);
+        syncRecordData(_u('lcfirst', [entity]), rcrds[id]);
     }
 }
 function ifUpdatedByCurUser(record) {
-    return _db.getMmryData('user') === record.updatedBy;
+    return db.getMmryData('user') === record.updatedBy;
 }
 function getEntityUpdateFunc(entity) {
     const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
@@ -165,19 +165,19 @@ function getEntityUpdateFunc(entity) {
  */
 function checkUserData(dbUser) {
     if (dbUser == $('body').data('user-name')) { return; }
-    _db.fetchServerData("lists")
+    db.fetchServerData("lists")
     .then(data => replaceUserData($('body').data('user-name'), data));
 }
 function replaceUserData(userName, data) {                                      //console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));
-    _db.deriveUserData(data);
-    _db.setDataInMemory('user', userName);
-    _db.setUpdatedDataInLocalDb().then(_db.clearTempMmry);
+    db.deriveUserData(data);
+    db.setDataInMemory('user', userName);
+    db.setUpdatedDataInLocalDb().then(db.clearTempMmry);
 }
 /* -------------- ON SYNC COMPLETE ------------------------------------------ */
 function initSearchPage() {
     reportDataSyncFailures();
-    _db.getData('curFocus', true).then(f => _db.pg('initSearchStateAndTable', [f]));
+    db.getData('curFocus', true).then(f => db.pg('initSearchStateAndTable', [f]));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -186,14 +186,14 @@ function initSearchPage() {
  * the data, along with any errors or messages, is returned.
  */
 export function updateLocalDb(data) {                                           console.log("   /--updateLocalDb data recieved = %O", data);
-    return _db.getAllStoredData()
+    return db.getAllStoredData()
         .then(storeMmryAndUpdate);
 
     function storeMmryAndUpdate(mmry) {
-        _db.setMmryDataObj(mmry);
+        db.setMmryDataObj(mmry);
         parseEntityData(data);
         updateEntityData(data);
-        return _db.setUpdatedDataInLocalDb()
+        return db.setUpdatedDataInLocalDb()
             .then(() => handleFailuresAndReturnData(data));
     }
 }
@@ -272,8 +272,8 @@ function getRelDataHndlrs(entity, rcrd) {
 }
 /** Returns the records source-type. */
 function getSourceType(entity, rcrd) {                                          //console.log('getSourceType. [%s] = %O', entity, rcrd);
-    var type = _u.lcfirst(entity)+"Type";
-    return _u.lcfirst(rcrd[type].displayName);
+    var type = _u('lcfirst', [entity])+"Type";
+    return _u('lcfirst', [rcrd[type].displayName]);
 }
 /** Sends entity-record data to each storage property-type handler. */
 function updateDataProps(entity, rcrd, updateFuncs) {                           //console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
@@ -299,22 +299,22 @@ function updateDetailData(entity, rcrd) {
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdProp(prop, rcrd, entity) {
-    const rcrds = _db.getMmryData(prop);                                        //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, _u.snapshot(rcrds), _u.snapshot(rcrd));
+    const rcrds = db.getMmryData(prop);                                        //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, _u('snapshot', [rcrds]), _u('snapshot', [rcrd]));
     rcrds[rcrd.id] = rcrd;
-    _db.setDataInMemory(prop, rcrds);
+    db.setDataInMemory(prop, rcrds);
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdAryProp(prop, rcrd, entity) {
-    const rcrds = _db.getMmryData(prop);                                         //console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    const rcrds = db.getMmryData(prop);                                         //console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
     if (!ifNewRcrd(rcrds, rcrd.id)) { return; }
     rcrds.push(rcrd.id);
-    _db.setDataInMemory(prop, rcrds);
+    db.setDataInMemory(prop, rcrds);
 }
 /** Add the new entity's display name and id to the prop's stored names object.  */
 function addToNameProp(prop, rcrd, entity) {
-    const nameObj = _db.getMmryData(prop);
+    const nameObj = db.getMmryData(prop);
     nameObj[rcrd.displayName] = rcrd.id;
-    _db.setDataInMemory(prop, nameObj);
+    db.setDataInMemory(prop, nameObj);
 }
 // NOTE: DON'T DELETE. COULD BE USED AGAIN
 /** Add the new record's id to the entity-type's stored id array.  */
@@ -324,7 +324,7 @@ function addToNameProp(prop, rcrd, entity) {
 //     const typeObj = mmryData[prop].value;
 //     if (!ifNewRcrd(typeObj[typeId][entity+'s'], rcrd.id)) { return; }
 //     typeObj[typeId][entity+'s'].push(rcrd.id);
-//     _db.setDataInMemory(prop, typeObj);
+//     db.setDataInMemory(prop, typeObj);
 // }
 function ifNewRcrd(ary, id) {
     return ary.indexOf(id) === -1;
@@ -332,11 +332,11 @@ function ifNewRcrd(ary, id) {
 /** Adds a new child record's id to it's parent's 'children' array. */
 function addToParentRcrd(prop, rcrd, entity) {
     if (!rcrd.parent) { return; }
-    const rcrds = _db.getMmryData(prop);                                         //console.log("               --addToParentRcrd. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    const rcrds = db.getMmryData(prop);                                         //console.log("               --addToParentRcrd. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
     const parent = rcrds[rcrd.parent];
     if (!ifNewRcrd(parent.children, rcrd.id)) { return; }
     parent.children.push(rcrd.id);
-    _db.setDataInMemory(prop, rcrds);
+    db.setDataInMemory(prop, rcrds);
 }
 // NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
 // /** Adds a new tagged record to the tag's array of record ids. */
@@ -346,13 +346,13 @@ function addToParentRcrd(prop, rcrd, entity) {
 //     const toAdd = rcrd.tags.filter(tag => ifNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id));
 //     if (!toAdd) { return; }
 //     toAdd.forEach(tag => tagObj[tag.id][entity+'s'].push(rcrd.id));
-//     _db.setDataInMemory(prop, tagObj);
+//     db.setDataInMemory(prop, tagObj);
 // }
 function addRealmDataToRcrd(prop, rcrd, entity) {
-    const taxa = _db.getMmryData('taxon');
+    const taxa = db.getMmryData('taxon');
     const taxon = taxa[rcrd.id];
     taxon.realm = getTaxonRealm(taxon, taxa);
-    _db.setDataInMemory('taxon', taxa);
+    db.setDataInMemory('taxon', taxa);
 }
 function getTaxonRealm(taxon, taxa) {
     const parent = taxa[taxon.parent];
@@ -364,39 +364,39 @@ function getTaxonRealm(taxon, taxa) {
  * Note: 'realm' is added above, so the taxon from storage is used rather than the rcrd.
  */
 function addToTaxonNames(prop, rcrd, entity) {
-    const taxon = _db.getMmryData('taxon')[rcrd.id];
+    const taxon = db.getMmryData('taxon')[rcrd.id];
     const realm = taxon.realm.displayName;
     const level = taxon.level.displayName;
     const nameProp = realm+level+"Names";
-    let data = _db.getMmryData(nameProp) || {};
+    let data = db.getMmryData(nameProp) || {};
     data[taxon.name] = taxon.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
-    _db.setDataInMemory(nameProp, data);
+    db.setDataInMemory(nameProp, data);
 }
 /** Adds the Interaction to the stored entity's collection.  */
 function addInteractionToEntity(prop, rcrd, entity) {                           //console.log('addInteractionToEntity. prop = [%s] rcrd = %O', prop, rcrd);
     if (!rcrd[prop]) { return; }
-    const rcrds = _db.getMmryData(prop);
+    const rcrds = db.getMmryData(prop);
     const storedEntity = rcrds[rcrd[prop]];
     if (!ifNewRcrd(storedEntity.interactions, rcrd.id)) { return; }
     storedEntity.interactions.push(rcrd.id);
     if (prop === 'source') { storedEntity.isDirect = true; }
-    _db.setDataInMemory(prop, rcrds);
+    db.setDataInMemory(prop, rcrds);
 }
 /** Adds the Interaction to the taxon's subject/objectRole collection.  */
 function addInteractionRole(prop, rcrd, entity) {
-    const taxa = _db.getMmryData('taxon');
+    const taxa = db.getMmryData('taxon');
     const taxon = taxa[rcrd[prop]];
     if (!ifNewRcrd(taxon[prop+"Roles"], rcrd.id)) { return; }
     taxon[prop+"Roles"].push(rcrd.id);
-    _db.setDataInMemory("taxon", taxa);
+    db.setDataInMemory("taxon", taxa);
 }
 /** When a Publication/Citation has been updated, add new author contributions. */
 function addContribData(prop, rcrd, entity) {                                   //console.log("               --addContribData. [%s] [%s]. rcrd = %O", prop, entity, rcrd);
     if (!rcrd[prop]) { return; }
     const changes = false;
-    const srcObj = _db.getMmryData('source');
+    const srcObj = db.getMmryData('source');
     addNewContribData();
-    if (changes) { _db.setDataInMemory('source', srcObj); }
+    if (changes) { db.setDataInMemory('source', srcObj); }
 
     function addNewContribData() {
         for (let ord in rcrd[prop]) {
@@ -457,25 +457,25 @@ function rmvIdFromAry(ary, id) {
 /** Removes a record's id from the previous parent's 'children' array. */
 function rmvFromParent(prop, rcrd, entity, edits) {
     if (!edits[prop].old) { return; }
-    const rcrds = _db.getMmryData(entity);
+    const rcrds = db.getMmryData(entity);
     rmvIdFromAry(rcrds[edits[prop].old].children, rcrd.id);
-    _db.setDataInMemory(entity, rcrds);
+    db.setDataInMemory(entity, rcrds);
 }
 /** Removes the Interaction from the stored entity's collection. */
 function rmvIntFromEntity(prop, rcrd, entity, edits) {
-    const rcrds = _db.getMmryData(prop);                                         //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const rcrds = db.getMmryData(prop);                                         //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
     const storedEntity = rcrds[edits[prop].old];
     rmvIdFromAry(storedEntity.interactions, rcrd.id);
-    _db.setDataInMemory(prop, rcrds);
+    db.setDataInMemory(prop, rcrds);
 }
 /** Removes the Interaction and updates parent location total counts.  */
 function rmvIntAndAdjustTotalCnts(prop, rcrd, entity, edits) {
-    const rcrds = _db.getMmryData(prop);                                         //console.log("               --rmvIntFromLocation. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const rcrds = db.getMmryData(prop);                                         //console.log("               --rmvIntFromLocation. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
     const oldLoc = rcrds[edits[prop].old];
     const newLoc = rcrds[edits[prop].new];
     rmvIdFromAry(oldLoc.interactions, rcrd.id);
     adjustLocCnts(oldLoc, newLoc, rcrds);
-    _db.setDataInMemory(prop, rcrds);
+    db.setDataInMemory(prop, rcrds);
 }
 function adjustLocCnts(oldLoc, newLoc, rcrds) {
     adjustLocAndParentCnts(oldLoc, false);
@@ -488,10 +488,10 @@ function adjustLocCnts(oldLoc, newLoc, rcrds) {
 }
 /** Removes the Interaction from the taxon's subject/objectRole collection. */
 function rmvIntFromTaxon(prop, rcrd, entity, edits) {
-    const taxa = _db.getMmryData('taxon');                                          //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+    const taxa = db.getMmryData('taxon');                                          //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
     const taxon = taxa[edits[prop].old];
     rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
-    _db.setDataInMemory("taxon", taxa);
+    db.setDataInMemory("taxon", taxa);
 }
 // /** Removes the record from the entity-type's stored array. */
 // function rmvFromTypeProp(prop, rcrd, entity, edits) {
@@ -499,7 +499,7 @@ function rmvIntFromTaxon(prop, rcrd, entity, edits) {
 //     const typeObj = mmryData[prop].value;
 //     const type = typeObj[edits[prop].old];
 //     rmvIdFromAry(type[entity+'s'], rcrd.id);
-//     _db.setDataInMemory(prop, typeObj);
+//     db.setDataInMemory(prop, typeObj);
 // }
 // NOTE: DON'T DELETE. WILL BE USED AGAIN WHEN TAGS ARE USED WITH MORE THAN JUST INTERACTIONS
 // /** Removes a record from the tag's array of record ids. */
@@ -509,21 +509,21 @@ function rmvIntFromTaxon(prop, rcrd, entity, edits) {
 //     edits.tag.removed.forEach(tagId => {
 //         rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);
 //     });
-//     _db.setDataInMemory(prop, tagObj);
+//     db.setDataInMemory(prop, tagObj);
 // }
 function rmvContrib(prop, rcrd, entity, edits) {                                //console.log("               --rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
-    const srcObj = _db.getMmryData('source');
+    const srcObj = db.getMmryData('source');
     edits.contributor.removed.forEach(id => {
         rmvIdFromAry(srcObj[id].contributions, rcrd.id)
     });
-    _db.setDataInMemory('source', srcObj);
+    db.setDataInMemory('source', srcObj);
 }
 function rmvFromNameProp(prop, rcrd, entity, edits) {
     const taxonName = getTaxonName(edits, rcrd);
     const nameProp = getNameProp(edits, rcrd);
-    const nameObj = _db.getMmryData(nameProp);
+    const nameObj = db.getMmryData(nameProp);
     delete nameObj[taxonName];
-    _db.setDataInMemory(nameProp, nameObj);
+    db.setDataInMemory(nameProp, nameObj);
 }
 function getTaxonName(edits, rcrd) {
     return edits.name ? edits.name.old : rcrd.name;
@@ -534,7 +534,7 @@ function getNameProp(edits, rcrd) {
 }
 function getLevel(lvlEdits, rcrd) {
     return !lvlEdits ? rcrd.level.displayName :
-        _db.getMmryData('level')[lvlEdits.old].displayName;
+        db.getMmryData('level')[lvlEdits.old].displayName;
 }
 /** ---------------------- UPDATE RELATED DATA ------------------------------ */
 function ifEditedSourceDataUpdatedCitations(data) {
@@ -558,7 +558,7 @@ function updateRelatedCitations(data) {                                         
     function getChildCites(srcs) {
         const cites = [];
         srcs.forEach(id => {
-            const src = _db.getMmryData('source')[id];
+            const src = db.getMmryData('source')[id];
             if (src.citation) { return cites.push(id); }
             src.children.forEach(cId => cites.push(cId))
         });
@@ -566,7 +566,7 @@ function updateRelatedCitations(data) {                                         
     }
 } /* End updateRelatedCitations */
 function updateCitations(rcrds, cites) {                                        //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
-    const srcRcrds = _db.getMmryData('source');
+    const srcRcrds = db.getMmryData('source');
     const proms = [];
     cites.forEach(id => proms.push(updateCitText(id)));
     return Promise.all(proms).then(onUpdateSuccess)
@@ -589,14 +589,14 @@ function updateCitations(rcrds, cites) {                                        
 /** Sends ajax data to update citation and source entities. */
 function updateCitationData(citSrc, text) {
     const data = { srcId: citSrc.id, text: text };
-    return _u.sendAjaxQuery(
-        data, 'crud/citation/edit', Function.prototype, _val.formSubmitError);
+    return _u('sendAjaxQuery', [
+        data, 'crud/citation/edit', Function.prototype, _forms.bind(null, '_val', ['formSubmitError'])]);
 }
 function onUpdateSuccess(ajaxData) {
     return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
 }
 function handledUpdatedSrcData(data) {
-    if (data.error) { return Promise.resolve(_val.errUpdatingData('updateRelatedCitationsErr')); }
+    if (data.error) { return Promise.resolve(_forms('_val', ['errUpdatingData', ['updateRelatedCitationsErr']])); }
     return updateEntityData(data.results);
 }
 /*---------------- Update User Named Lists -----------------------------------*/
@@ -606,7 +606,7 @@ export function updateUserNamedList(data, action) {                             
     const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
     const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';
 
-    return _db.getData([rcrdKey, nameKey])
+    return db.getData([rcrdKey, nameKey])
         .then(storedData => syncListData(storedData))
         .then(trackTimeUpdated.bind(null, 'UserNamed', list));
 
@@ -617,8 +617,8 @@ export function updateUserNamedList(data, action) {                             
         if (action == 'delete') { removeListData();
         } else { updateListData(); }
 
-        _db.setData(rcrdKey, rcrds);
-        _db.setData(nameKey, names);
+        db.setData(rcrdKey, rcrds);
+        db.setData(nameKey, names);
     }
     function removeListData() {
         delete rcrds[list.id];
@@ -641,7 +641,6 @@ function getFocusAndViewOptionGroupString(list) {  //copy. refact away
         map[list.details.focus] + ' - ' + map[list.details.view];
 }
 /* =========================== HELPERS ====================================== */
-
 /**
  * Attempts to update the data and catches any errors.
  * @param  {func} updateFunc  To update the entity's data.
@@ -662,7 +661,7 @@ function getCurrentDate() {
     return new Date().today() + " " + new Date().timeNow();
 }
 function clearMemory() {
-    _db.clearTempMmry();
+    db.clearTempMmry();
     failed = { data: [], retryQueue: {}};
 }
 /*------------------------------ ERRS ----------------------------------------*/
@@ -679,7 +678,7 @@ function addToRetryQueue(updateFunc, prop, params, edits) {                     
     };
 }
 /** Retries any updates that failed in the first pass. */
-function retryFailedUpdates() {                                                 console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, _u.snapshot(failed));
+function retryFailedUpdates() {                                                 console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, _u('snapshot', [failed]));
     if (!Object.keys(failed.retryQueue).length) { return Promise.resolve(); }
     failed.final = true;
     Object.keys(failed.retryQueue).forEach(retryEntityUpdates);
@@ -695,7 +694,7 @@ function reportDataSyncFailures(obj) {
     const data = obj || {};
     addFailedUpdatesToObj(data);
     if (!data.fails) { return data; }                                           console.log('           !!Reporting failures = %O', data.fails)
-    _db.pg('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
+    db.pg('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
     return data
 }
 function getFailureReport (failures) {

@@ -13,13 +13,14 @@
  *             FORM
  *    APPEND AND STYLE
  */
-import * as _f from '../../forms-main.js';
+import { _u } from '../../../db-main.js';
+import { _elems, _panel, _state } from '../../forms-main.js';
 
 let entity;
 let action;
 
 export function buildAndAppendRootForm(fields, id) {
-    setScopeParams(_f.state('getFormState'));
+    setScopeParams(_state('getFormState'));
     const form = buildForm(id, fields);
     appendAndStyleForm(form, entity);
     return Promise.resolve();
@@ -37,41 +38,40 @@ function buildForm(id, fields) {
     return [getExitButtonRow(), getMainFormAndDetailPanelHtml(id, fields)];
 }
 function getMainFormAndDetailPanelHtml(id, fields) {
-    const cntnr = _f.util('buildElem', ['div', { class: 'flex-row' }]);
-    const detailPanelHtml = _f.panel('getDetailPanelElems', [entity, id, action]);
+    const cntnr = _u('buildElem', ['div', { class: 'flex-row' }]);
+    const detailPanelHtml = _panel('getDetailPanelElems', [entity, id, action]);
     $(cntnr).append([buildMainForm(fields), detailPanelHtml]);
     return cntnr;
 }
 /* ----------------------- TOP CORNER EXIT BUTTON --------------------------- */
 function getExitButtonRow() {
-    const  row = _f.util('buildElem', ['div', { class: 'exit-row' }]);
+    const  row = _u('buildElem', ['div', { class: 'exit-row' }]);
     $(row).append(getExitButton());
     return row;
 }
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'exit-bttn', 'type': 'button', 'value': 'X' }
-    const bttn = _f.util('buildElem', ['input', attr]);
-    $(bttn).click(_f.exitFormWindow);
+    const bttn = _u('buildElem', ['input', attr]);
+    $(bttn).click(_elems.bind(null, 'exitFormPopup'));
     return bttn;
 }
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
-    const formWin = _f.util('buildElem', ['div', { id: 'form-main', class: action }]);
+    const formWin = _u('buildElem', ['div', { id: 'form-main', class: action }]);
     $(formWin).append([getHeader(), getForm(fields)]);
     return formWin;
 }
 /* ------------------ HEADER --------------------------------- */
 function getHeader() {
-    const title = (action == 'create' ? 'New ' : 'Editing ') +
-        _f.util('ucfirst', [entity]);
-    return _f.util('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
+    const title = (action == 'create' ? 'New ' : 'Editing ') + _u('ucfirst', [entity]);
+    return _u('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }
 /* ------------------------- FORM --------------------------------------- */
 function getForm(fields) {
     const form = buildFormElem();
     $(form).append([
         buildEntityFieldContainer(fields),
-        _f.elems('getFormFooter', [entity, 'top', action])
+        _elems('getFormFooter', [entity, 'top', action])
     ]);
     return form;
 }
@@ -85,7 +85,7 @@ function buildFormElem() {
 }
 function buildEntityFieldContainer(fields) {
     const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
-    const div = _f.util('buildElem', ['div', attr]);
+    const div = _u('buildElem', ['div', attr]);
     $(div).append(fields);
     return div;
 }

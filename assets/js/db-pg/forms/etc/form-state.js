@@ -5,8 +5,14 @@
  *     getFormEntity
  *     initFormState
  *     addEntityFormState
+ *
+ * TOC
+ *     INIT FORM MEMORY
+ *     GETTERS
+ *     SETTERS
  */
-import * as _f from '../forms-main.js';
+import { alertIssue } from '../forms-main.js';
+import { _db, _u } from '../../db-main.js';
 
 let formState = {}; //formState
 
@@ -29,9 +35,9 @@ export function clearState() {
 export function initFormState(action, entity, id) {
     const entities = getDataKeysForEntityForm(action, entity);
     formState.init = true; //eliminates possibility of opening form multiple times.
-    return _f.util('getData', [entities]).then(data => {
+    return _db('getData', [entities]).then(data => {
         initMainState(data);
-        addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormState = %O", _f.util('snapshot', [formState]), formState);
+        addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormState = %O", _u('snapshot', [formState]), formState);
         delete formState.init;
         return formState;
     });
@@ -118,7 +124,7 @@ export function addEntityFormState(entity, level, pSel, action) {
 }
 /*------------- Taxon Params --------------------*/
 export function initRealmState(role, realmId) {
-    return _f.util('getData', [['realm', 'realmNames', 'levelNames']])
+    return _db('getData', [['realm', 'realmNames', 'levelNames']])
         .then(data => setTxnState(data.realm, data.realmNames, data.levelNames));
 
     function setTxnState(realms, realmNames, levels) {
@@ -182,8 +188,8 @@ function buildRcrdsObj(entities) {
 export function getRcrd(entity, id) {
     if (!formState.records[entity]) { return; }
     return formState.records[entity][id] ?
-        _f.util('snapshot', [formState.records[entity][id]]) :
-        _f.alertIssue('noRcrdFound', {id: id, entity: entity });
+        _u('snapshot', [formState.records[entity][id]]) :
+        alertIssue('noRcrdFound', {id: id, entity: entity });
 }
 /* ---------------------------- Setters ------------------------------------- */
 /**

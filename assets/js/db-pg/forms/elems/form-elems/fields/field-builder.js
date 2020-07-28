@@ -5,54 +5,43 @@
  *     buildFieldInput
  *     buildTagField
  *     buildLongTextArea
- *     buildMultiSelectElem
- *     getLocationOpts
- *     getRcrdOpts
- *     getTaxonOpts
- *     getLocationOpts
  *     ifAllRequiredFieldsFilled
  *
- * CODE SECTIONS:
- *     COMBOBOX FACADE
+ * TOC:
  *     BASIC FIELD INPUTS
  *         INPUT BUILDERS
  *         CHANGE HANDLER
  */
+import { _u } from '../../../../db-main.js';
+import { _state, _elems, _cmbx, _form } from '../../../forms-main.js';
 
-import * as _f from '../../../forms-main.js';
-import * as _combos from './combos.js';
-
-/* ====================== COMBOBOX FACADE =================================== */
-export function buildMultiSelectElem() {
-    return _combos.buildMultiSelectElem(...arguments);
-}
-export function getRcrdOpts() {
-    return _combos.getRcrdOpts(...arguments);
-}
-export function getTaxonOpts() {
-    return _combos.getTaxonOpts(...arguments);
-}
-export function getLocationOpts() {
-    return _combos.getLocationOpts();
-}
-/* ====================== BUILD BASIC FIELD INPUTS ========================== */
+/* ============================ BUILD FIELD INPUTS ========================== */
 export function buildFieldInput(field, entity, fLvl) {                          //console.log('buildFieldInput. [%s] field = %O, lvl [%s]', entity, field, fLvl);
     return Promise.resolve(getFieldInput())
         .then(finishFieldBuild)
 
     function getFieldInput() {
-        const builders = { 'text': buildTextInput, 'tags': _combos.buildTagField,
-            'select': _combos.buildSelect, 'multiSelect': _combos.buildMultiSelect,
+        const builders = { 'text': buildTextInput, 'tags': getCmbxFunc(field.type),
+            'select': getCmbxFunc(field.type), 'multiSelect': getCmbxFunc(field.type),
             'textArea': buildTextArea, 'fullTextArea': buildLongTextArea };
         return builders[field.type](entity, field.name, fLvl);
     }
     function finishFieldBuild(input) {
-        _f.state('setFormFieldData', [fLvl, field.name, field.value, field.type]);
+        _state('setFormFieldData', [fLvl, field.name, field.value, field.type]);
         if (field.required) { handleRequiredField(input, fLvl); }
         addFieldOnChangeHandler(entity, input, field.name, fLvl);
         if (field.type != 'multiSelect') { $(input).val(field.value); }
         return input;
     }
+}
+function getCmbxFunc(type) {
+    const map = {
+        tags: 'buildTagField', select: 'buildSelect', multiSelect: 'buildMultiSelect'
+    };
+    return buildCombobox.bind(null, map[type]);
+}
+function buildCombobox(builder, entity, field, fLvl) {
+    return _cmbx(builder, [entity, field, fLvl]);
 }
 function getFieldClass(fLvl, fieldType) {
     const classes = { 'top': 'lrg-field', 'sub': 'med-field', 'sub2': 'med-field' };
@@ -62,14 +51,14 @@ function getFieldClass(fLvl, fieldType) {
 /* ----------------------- INPUT BUIDLERS ----------------------------------- */
 function buildTextInput(entity, field, fLvl) {
     const attr = { 'type': 'text', class: getFieldClass(fLvl) };
-    return _f.util('buildElem', ['input', attr]);
+    return _u('buildElem', ['input', attr]);
 }
 function buildTextArea(entity, field, fLvl) {
-    return _f.util('buildElem', ['textarea', {class: getFieldClass(fLvl) }]);
+    return _u('buildElem', ['textarea', {class: getFieldClass(fLvl) }]);
 }
 export function buildLongTextArea(entity, field, fLvl) {
     const attr = { class: getFieldClass(fLvl, 'long'), id:field+'-txt' };
-    return _f.util('buildElem', ['textarea', attr]);
+    return _u('buildElem', ['textarea', attr]);
 }
 /* --------------------- CHANGE HANDLER ------------------------------------- */
 function addFieldOnChangeHandler(entity, input, field, fLvl) {
@@ -79,14 +68,13 @@ function addFieldOnChangeHandler(entity, input, field, fLvl) {
 }
 function ifCitationFormAutoGenerateCitationOnChange(entity, input) {
     if (entity === 'citation'){
-        $(input).change(_f._form.bind(null, 'handleCitText', []));
+        $(input).change(_form.bind(null, 'handleCitText', []));
     }
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {
     const val = value || $(elem).val();
-    _f.state('setFormFieldData', [fLvl, fieldName, val]);
+    _state('setFormFieldData', [fLvl, fieldName, val]);
 }
-
 /**
  * Required field's have a 'required' class added which appends '*' to their
  * label. Added to the input elem is a change event reponsible for enabling/
@@ -96,7 +84,7 @@ function storeFieldValue(elem, fieldName, fLvl, value, e) {
 function handleRequiredField(input, fLvl) {
     $(input).change(checkRequiredFields);
     $(input).data('fLvl', fLvl);
-    _f.state('addRequiredFieldInput', [fLvl, input]);
+    _state('addRequiredFieldInput', [fLvl, input]);
 }
 /**
  * On a required field's change event, the submit button for the element's form
@@ -105,11 +93,11 @@ function handleRequiredField(input, fLvl) {
  */
 function checkRequiredFields(e) {                                               //console.log('checkRequiredFields e = %O', e)
     const fLvl = $(e.currentTarget).data('fLvl');
-   _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+   _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {
-    const reqElems = _f.state('getFormProp', [fLvl, 'reqElems']);               //console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
+    const reqElems = _state('getFormProp', [fLvl, 'reqElems']);                 //console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
