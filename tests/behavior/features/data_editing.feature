@@ -1,4 +1,4 @@
-@data-editing
+@db-edit-data
 Feature: Edit data in the database
     In order to have accurate data about bat eco-interactions
     As an editor

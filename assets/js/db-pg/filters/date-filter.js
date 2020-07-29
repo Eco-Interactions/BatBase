@@ -232,7 +232,7 @@ function resetDateFilter(skipSync) {                                            
 function syncFiltersAndUi(dateTime) {                              /*debug-log*///console.log('           --syncFiltersAndUi [%s]', dateTime);
     _ui('setTreeToggleData', [false]);
     if (dateTime != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); }
-    // _ui('updateFilterStatusMsg')
+    _ui('updateFilterStatusMsg')
 }
 export function syncViewFiltersAndUi(focus) {
     tblState = tState().get();

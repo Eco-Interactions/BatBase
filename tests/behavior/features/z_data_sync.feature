@@ -1,3 +1,4 @@
+@db-sync
 Feature: Local Data Storage updates with changes made by other editors
     In order to search the most recent interaction data
     As an editor

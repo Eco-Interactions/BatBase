@@ -1,3 +1,4 @@
+@db-filter-set
 Feature: Save and manage custom sets of filters
     In order to have custom filter sets
     As a user
