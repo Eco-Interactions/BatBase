@@ -19,7 +19,7 @@
  *
  */
 import * as db from './local-data-main.js';
-import { _u, _forms } from '../db-main.js';
+import { _forms, _u, alertIssue, initSearchStateAndTable } from '../db-main.js';
 
 let failed = { data: [], retryQueue: {}};
 
@@ -177,7 +177,7 @@ function replaceUserData(userName, data) {                                      
 /* -------------- ON SYNC COMPLETE ------------------------------------------ */
 function initSearchPage() {
     reportDataSyncFailures();
-    db.getData('curFocus', true).then(f => db.pg('initSearchStateAndTable', [f]));
+    db.getData('curFocus', true).then(f => initSearchStateAndTable(f));
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
@@ -694,7 +694,7 @@ function reportDataSyncFailures(obj) {
     const data = obj || {};
     addFailedUpdatesToObj(data);
     if (!data.fails) { return data; }                                           console.log('           !!Reporting failures = %O', data.fails)
-    db.pg('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
+    alertIssue('dataSyncFailure', { fails: getFailureReport(data.fails) });
     return data
 }
 function getFailureReport (failures) {
