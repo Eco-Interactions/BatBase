@@ -39,7 +39,7 @@ export function executeMethod(funcName, mod, modName, caller, params = []) {
     } catch(e) {
         alertIssue('facadeErr', {module: modName, caller: 'db-main', called: funcName, error: e.toString(), errMsg: e.message});
         if ($('body').data('env') === 'prod') { return; }
-        console.error('[%s] module: [%s] call failed.  params = %O, err = %O', modName, funcName, params, e);
+        console.error('[%s][%s] module: [%s] call failed.  params = %O, err = %O', caller, modName, funcName, params, e);
     }
 }
 function moduleMethod(funcName, mod, modName, params) {

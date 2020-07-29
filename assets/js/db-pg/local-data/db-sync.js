@@ -50,7 +50,7 @@ export function syncLocalDbWithServer(lclUpdtdAt) {                             
 }
 /** Db is reset unless testing suite did not reload database. */
 function ifTestEnvDbNeedsReset(systemUpdateAt) {
-    return systemUpdateAt == "2017-09-17 23:56:43";
+    return systemUpdateAt == "2020-05-20 11:11:11";
 }
 /**
  * Returns true if the first datetime is more recent than the second.

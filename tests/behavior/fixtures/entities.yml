@@ -1953,101 +1953,101 @@ App\Entity\SourceType:
 App\Entity\SystemDate:
     SystemDate-1:
         description: System
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-2:
         description: Author
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-3:
         description: Authority
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-4:
         description: Citation
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-5:
         description: CitationType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
     SystemDate-6:
         description: ContentBlock
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-7:
         description: Contribution
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-8:
         description: Realm
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-9:
         description: Feedback
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-10:
         description: HabitatType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-11:
         description: ImageUpload
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-12:
         description: Interaction
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-13:
         description: InteractionType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-14:
         description: Level
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-15:
         description: Location
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-16:
         description: LocationType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
     SystemDate-17:
         description: Naming
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-18:
         description: NamingType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-19:
         description: Publication
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-20:
         description: PublicationType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-21:
         description: Source
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-22:
         description: SourceType
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-23:
         description: Tag
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-24:
         description: Taxon
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-25:
         description: Taxonym
-        dateVal: '<(new \DateTime("now", new \DateTimeZone("America/Los_Angeles")))>'
+        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
 App\Entity\Tag:
     Tag-1:

@@ -101,7 +101,7 @@ function getSubmitEvent(entity, level) {
     return submitForm.bind(null, '#'+level+'-form', level, entity);
 }
 function getCancelFunc(entity, level) {
-    const onExit = _state ? fS.onFormClose : Function.prototype;
+    const onExit = fS ? fS.onFormClose : Function.prototype;
     return level === 'top' ? _elems.bind(null, 'exitFormPopup') :
         exitFormLevel.bind(null, level, true, onExit);
 }
