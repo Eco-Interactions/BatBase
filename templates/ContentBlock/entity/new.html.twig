@@ -1,11 +1,11 @@
 {% extends "layout.html.twig" %}
 
 {% block headline %}
-	Creating New Content Block
+	New Content Block
 {% endblock headline %}
 
 {% block detail %}
-    <ul class="record_actions">
+    <div id="top-form-container">
         {{ form(form) }}
-	</ul>
+	</div>
 {% endblock detail %}
