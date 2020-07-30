@@ -8,7 +8,12 @@
 	<div id="home-pg" class="top-pgs">
 	{% embed 'two_cols_sect.html.twig' %}
 		{% block firstcol %}
-			{% if eifrole == 'user' %}
+			{% if is_granted('ROLE_QA_EDITOR') or is_granted('ROLE_QA_ADMIN') %}
+				<h2 style="color: #2D7853;">Welcome {{ eifusername }}</h2>
+				<div class="wysiwyg" id="member-welcome">
+					{{ blocks['qa-welcome']|raw }}
+				</div>
+			{% elseif eifrole == 'user' %}
 				<h2 style="color: #2D7853;">Welcome {{ eifusername }}</h2>
 				<div class="wysiwyg" id="member-welcome">
 					{{ blocks['member-welcome']|raw }}
