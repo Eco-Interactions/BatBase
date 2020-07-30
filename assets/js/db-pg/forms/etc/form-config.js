@@ -8,14 +8,14 @@
  *     getFieldTranslations     validate-data
  *     getCoreFormEntity        validate-data
  *
- * CODE SECTIONS:
+ * TOC
  *     FORM CONFG
  *         TAXON SELECT FORM CONFG
  *         CREATE/EDIT FORM CONFG
  *             CORE-ENTITY CONFG
  *     SERVER FIELD CONFG
  */
-import * as _f from '../forms-main.js';
+import { _state } from '../forms-main.js';
 
 /* *************************** FORM CONFG *********************************** */
 /**
@@ -51,7 +51,7 @@ function ifObjectFormAddRealmSelect(role) {
     return role === 'subject' || $('#Realm_row').length ? {} : {'Realm': 'select'};
 }
 function getTaxonSelectFields(addField) {
-    const lvls = _f.state('getTaxonProp', ['realmLvls']);
+    const lvls = _state('getTaxonProp', ['realmLvls']);
     return Object.keys(addField).length  ? ['Realm', ...lvls] : lvls;
 }
 /* ------------------ CREATE/EDIT FORM CONFG ------------------------------- */

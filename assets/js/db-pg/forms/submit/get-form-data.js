@@ -1,12 +1,13 @@
 /**
  * Returns an object with (k) the form field and (v) value.
  *
- * Exports:             Imported by:
- *     getValidatedFormData         db-forms
+ * Exports
+ *     getValidatedFormData
  */
-import * as _f from '../forms-main.js';
+import { _u } from '../../db-main.js';
+import { _cmbx, _state, getSelectedVals } from '../forms-main.js';
 
-let _fs; //form state
+let fS; //form state
 
 /**
  * Loops through all rows in the form with the passed id and returns an object
@@ -14,11 +15,11 @@ let _fs; //form state
  * added @handleAdditionalEntityData.
  */
 export default function getValidatedFormData(entity, fLvl, submitting) {
-    _fs = _f.state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
+    fS = _state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
     const elems = getFormFieldElems(entity, fLvl);
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }
-    if (formVals.displayName) { formVals.displayName = _f.util('ucfirst', [formVals.displayName]) }
+    if (formVals.displayName) { formVals.displayName = _u('ucfirst', [formVals.displayName]) }
     return handleAdditionalEntityData(entity)
         .then(() => formVals);
 
@@ -43,7 +44,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     }
     function getInputFieldNameFromCntnr(cntnr) {
         let field = removeInfoTextFromLabel(cntnr.children[0].innerText);
-        return _f.util('lcfirst', [field.trim().split(" ").join("")]);
+        return _u('lcfirst', [field.trim().split(" ").join("")]);
     }
     function removeInfoTextFromLabel (text) {
         return text.split(' (m)')[0].split(' (Bat)')[0];
@@ -57,13 +58,13 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     /** Edge case input type values are processed via their type handlers. */
     function getInputVals(fieldName, input, type) {
         const typeHandlers = {
-            'multiSelect': _f.getSelectedVals, 'tags': getTagVals
+            'multiSelect': getSelectedVals, 'tags': getTagVals
         };
         return typeHandlers[type](input, fieldName);
     }
     /** Adds an array of tag values. */
     function getTagVals(input, fieldName) {
-        return _f.cmbx('getSelVal', ['#'+_f.util('ucfirst', [fieldName])+'-sel']);
+        return _cmbx('getSelVal', ['#'+_u('ucfirst', [fieldName])+'-sel']);
     }
     function handleAdditionalEntityData(entity) {
         if (!submitting) { return Promise.resolve(); }
@@ -105,8 +106,8 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     } /* End getAuthDisplayName */
     /** ---- Additional Citation data ------ */
     function getPublicationData() {
-        formVals.publication = _fs.editing ?
-            _fs.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
+        formVals.publication = fS.editing ?
+            fS.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
     }
     /** Adds 'displayName', which will be added to both the form data objects. */
     function addCitDisplayName() {
@@ -121,7 +122,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other',
             'Ph.D. Dissertation', 'Report' ];
         if (fulls.indexOf(type) === -1) { return; }
-        const pubTitle = _fs.forms[fLvl].rcrds.src.displayName;
+        const pubTitle = fS.forms[fLvl].rcrds.src.displayName;
         if (formVals.displayName.includes('(citation)')) { return; }
         if (pubTitle != formVals.displayName) { return; }
         formVals.displayName += '(citation)';
@@ -145,7 +146,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
      * "Point": if there is lat/long data. "Area" otherwise.
      */
     function getLocType() {
-        return _f.util('getData', ['locTypeNames']).then(locTypes => {
+        return _u('getData', ['locTypeNames']).then(locTypes => {
             const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
             formVals.locationType = locTypes[type];
         });
@@ -162,7 +163,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     }
     /** Returns the id of the Unspecified region. */
     function getUnspecifiedLocId() {
-        return _f.util('getData', ['topRegionNames'])
+        return _u('getData', ['topRegionNames'])
             .then(regions => regions['Unspecified']);
     }
     /** ---- Additional Publication data ------ */
@@ -184,7 +185,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     } /* End addContributorData */
     /** ---- Additional Taxon data ------ */
     function getTaxonData() {
-        const formTaxonLvl = _fs.forms.realmData.formTaxonLvl;
+        const formTaxonLvl = fS.forms.realmData.formTaxonLvl;
         formVals.parentTaxon = getParentTaxon(formTaxonLvl);
         formVals.level = formTaxonLvl;
     }
@@ -194,15 +195,15 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(lvl) {
-        const lvls = _fs.forms.realmData.realmLvls;
+        const lvls = fS.forms.realmData.realmLvls;
         const parentLvl = lvls[lvls.indexOf(lvl)+1];
         if (ifParentIsRootTaxon(lvl, parentLvl)) {
-            return _fs.forms.realmData.realmTaxon.id;
+            return fS.forms.realmData.realmTaxon.id;
         }
         return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
 
         function ifParentIsRootTaxon(lvl, parentLvl) {
-            return lvl === _fs.forms.realmData.rootLvl || !parentLvl;
+            return lvl === fS.forms.realmData.rootLvl || !parentLvl;
         }
     }
 }
@@ -223,12 +224,12 @@ function getFormFieldElems(entity, fLvl) {
 //  * creating a duplicate, and to add initials if they are sure this is a new author.
 //  */
 // function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
-//     if (_fs.action === 'edit') { return; }
-//     const cntnr = $('#'+_f.util('ucfirst', [entity])+'s-sel1')[0];
+//     if (fS.action === 'edit') { return; }
+//     const cntnr = $('#'+_u('ucfirst', [entity])+'s-sel1')[0];
 //     const opts = cntnr.selectize.options;
 //     const dup = checkForDuplicate(opts, vals.displayName);
 //     if (!dup) { return; }
-//     _f.val.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
+//     _val.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
 //     vals.err = true;
 // }
 // function checkForDuplicate(opts, name) {

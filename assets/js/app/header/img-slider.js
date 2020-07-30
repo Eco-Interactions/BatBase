@@ -28,6 +28,7 @@ function setSliderAndContentSize() {
         $('#slider-logo').css('height', (imgHeight/2));
     }
     $('#content-detail').css('top', top);
+    $('#slider-logo').fadeTo('slow', 1);
 }
 /** Note: #slider-overlay used for non-chrome browsers. */
 function getMobileTopValue() {

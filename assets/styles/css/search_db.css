@@ -499,25 +499,6 @@ select[id$="txn-lvl"] + div {
     padding: initial;
     font-size: initial;
 }
-/* --- Custom Map Icons --- */
-input.custom-icon {
-    height: 34px;
-    width: 34px;
-    border: 2px solid rgba(0,0,0,0.39);
-    border-radius: 4px;
-    background-color: white;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 17px 17px;
-    margin: initial;
-    padding: initial;
-    font-size: initial;
-    cursor: pointer;
-}
-input.active-icon {
-    background-color: rgba(40, 143, 235, .4);
-    border-color: #288feb;
-}
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */

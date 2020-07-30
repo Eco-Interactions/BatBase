@@ -9,7 +9,7 @@
  *     clrNeedsHigherLvl
  *     clrContribFieldErr
  *
- * TOC:
+ * TOC
  *      FORM-SUBMIT ERROR
  *      DATA-STORAGE ERROR
  *      FORM-FIELD ERRORS
@@ -27,19 +27,19 @@
  *          BLANKS IN AUTHOR ORDER
  *     ERROR ELEMENTS
  */
-import * as _f from '../forms-main.js';
-
-let _fs;
+import { _db, _u } from '../../db-main.js';
+import { _state, _elems, _cmbx, _form, getNextFormLevel } from '../forms-main.js';
+let fS;
 /* ====================== FORM SUBMIT ERRORS ================================ */
 /** Builds and appends an error elem that displays the error to the user. */
 export function formSubmitError(jqXHR, textStatus) {                            console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
-    const fLvl = _f.state('getStateProp', ['submit']).fLvl;
+    const fLvl = _state('getStateProp', ['submit']).fLvl;
     const elem = getFormErrElem(fLvl);
     const errTag = getFormErrTag(jqXHR.responseText);
     const msg = getFormErrMsg(errTag);
-    _f.elems('toggleWaitOverlay', [false]);
+    _elems('toggleWaitOverlay', [false]);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
+    _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 /**
  * Returns an error tag based on the server error text. Reports duplicated
@@ -63,7 +63,7 @@ function getFormErrMsg(errTag) {
 }
 /* ===================== DATA STORAGE ERRORS ================================ */
 export function errUpdatingData(errTag) {                                       console.log('           !!!errUpdatingData [%s]', errTag);
-    const cntnr = _f.util('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
+    const cntnr = _u('buildElem', ['div', { class: 'flex-col', id:'data_errs' }]);
     $(cntnr).append([buildErrMsg(), buildResetDataButton()]);
     $('#top-hdr').after(cntnr);
     $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
@@ -74,24 +74,24 @@ function buildErrMsg() {
         <br>All stored data will be redownloaded.</span>`;
 }
 function buildResetDataButton() {
-    const confirm = _f.util('buildElem', ['span', { class: 'flex-row',
+    const confirm = _u('buildElem', ['span', { class: 'flex-row',
             'text': `Please click "OK" to continue.` }]);
-    const bttn = _f.util('buildElem', ['input', { type: 'button', value: 'OK',
+    const bttn = _u('buildElem', ['input', { type: 'button', value: 'OK',
             class: 'exit-bttn' }]);
     $(bttn).click(reloadAndRedownloadData);
     $(confirm).append(bttn);
     return confirm;
 }
 function reloadAndRedownloadData() {
-    _f.exitFormWindow(null, 'skipTableReset');
-    _f.resetStoredData(true);
+    _elems('exitFormPopup', [null, 'skipTableReset']);
+    _db('resetStoredData', [true]);
 }
 /**
  * When the user attempts to create an entity that uses the sub-form and there
  * is already an instance using that form, show the user an error message and
  * reset the select elem.
  */
-export function openSubFormErr(field, id, fLvl, skipClear) {                    //console.log("selId = %s, _fs = %O ", selId, _fs)
+export function openSubFormErr(field, id, fLvl, skipClear) {                    //console.log("selId = %s, fS = %O ", selId, fS)
     const selId = id || '#'+field+'-sel';
     return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
 }
@@ -103,7 +103,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
     const selId = id || '#'+field+'-sel';
     reportFormFieldErr(field, errTag, fLvl);
     if (skipClear) { return; }
-    window.setTimeout(function() {_f.cmbx('clearCombobox', [selId])}, 10);
+    window.setTimeout(function() {_cmbx('clearCombobox', [selId])}, 10);
     return { 'value': '', 'text': 'Select ' + field };
 }
 /* =================== FORM-FIELD ERRORS ==================================== */
@@ -112,7 +112,7 @@ export function formInitErr(field, errTag, fLvl, id, skipClear) {               
  * error manually with the close button, or automatically by resolving the error.
  */
 export function reportFormFieldErr(fieldName, errTag, fLvl) {                   console.log("       !!!formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
-    _fs = _f.state('getFormState');
+    fS = _state('getFormState');
     const errMsgMap = {
         'dupAuth': handleDupAuth,
         'fillAuthBlanks': handleAuthBlanks,
@@ -149,7 +149,7 @@ function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrIsGenusPrnt(elem, fLvl, e) {
-    _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
+    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /* ----------------- INVALID COORDINATES ------------------------------------ */
@@ -167,7 +167,7 @@ function clrInvalidCoords(elem, fLvl, e, fieldName) {
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
-    const genus = _f.cmbx('getSelTxt', ['#Genus-sel']);
+    const genus = _cmbx('getSelTxt', ['#Genus-sel']);
     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
@@ -183,7 +183,7 @@ function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrNeedsGenusPrntErr(elem, fLvl, e) {
-    _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
+    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /* ------------------- NEEDS FAMILY ----------------------------------------- */
@@ -224,10 +224,10 @@ function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) {
 }
 /** Clears the cause, either the parent-selection process or the taxon's level. */
 function clrNeedsHigherLvlPrnt(elem, fLvl, e) {
-    _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
+    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, fLvl);
     if ($('#sub-form').length) {
-        return _f.forms('selectParentTaxon', [ $('#txn-prnt').data('txn') ]);
+        return _form('selectParentTaxon', [ $('#txn-prnt').data('txn') ]);
     }
     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
 }
@@ -239,7 +239,7 @@ function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {
 }
 export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl');
-    _f.cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl'), 'silent']);
+    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl'), 'silent']);
     $('#txn-lvl').data('lvl', txnLvl);
     clearErrElemAndEnableSubmit($('#Taxon_errs')[0], fLvl);
     enableChngPrntBtttn();
@@ -271,22 +271,22 @@ function clrNeedsName(elem, fLvl, e) {
 /* ----------------- SUB-FORM ALREADY OPEN ---------------------------------- */
 /** Note: error used for the publication form. */
 function handleOpenSubForm(elem, errTag, fLvl, fieldName) {
-    var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
-    var msg = '<p>Please finish the open '+ _f.util('ucfirst', [subEntity]) + ' form.</p>';
+    var subEntity = fS.forms[fLvl] ? fS.forms[fLvl].entity : '';
+    var msg = '<p>Please finish the open '+ _u('ucfirst', [subEntity]) + ' form.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /* --------------- BLANKS IN AUTHOR ORDER ----------------------------------- */
 /** Note: error used for the publication/citation form. */
 function handleAuthBlanks(elem, errTag, fLvl, fieldName) {
-    var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
+    var subEntity = fS.forms[fLvl] ? fS.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of authors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication form. */
 function handleEdBlanks(elem, errTag, fLvl, fieldName) {
-    var subEntity = _fs.forms[fLvl] ? _fs.forms[fLvl].entity : '';
+    var subEntity = fS.forms[fLvl] ? fS.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of editors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
@@ -294,7 +294,7 @@ function handleEdBlanks(elem, errTag, fLvl, fieldName) {
 export function clrContribFieldErr(field, fLvl) {                               //console.log('clrContribFieldErr.')
     const elem = $('#'+field+'_errs')[0];
     clearErrElemAndEnableSubmit(elem, fLvl);
-    _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 function setOnFormCloseListenerToClearErr(elem, fLvl) {
     $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem, fLvl));
@@ -311,14 +311,14 @@ function getFieldErrElem(fieldName, fLvl) {                                     
     return elem;
 }
 function getFormErrElem(fLvl) {
-    const elem = _f.util('buildElem', ['div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }]);
+    const elem = _u('buildElem', ['div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }]);
     $('#'+fLvl+'-hdr').after(elem);
     return elem;
 }
 function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
     elem.innerHTML = msg;
     $(elem).append(getErrExitBttn(errTag, elem, fLvl));
-    _f.elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
+    _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
@@ -332,18 +332,18 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'fillAuthBlanks': false, 'fillEdBlanks': false
     };
     if (!exitHdnlrs[errTag]) { return []; }
-    const bttn = _f.elems('getExitButton');
+    const bttn = _elems('getExitButton');
     bttn.className += ' err-exit';
     $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
     return bttn;
 }
 function clrFormLvlErr(elem, fLvl) {
-    const childFormLvl = _f.getNextFormLevel('child', fLvl);
+    const childFormLvl = getNextFormLevel('child', fLvl);
     $('#'+fLvl+'_errs').remove();
-    _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 export function clearErrElemAndEnableSubmit(elem, fLvl, enable = false) {                       //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
-    const subLvl = _f.getNextFormLevel('child', fLvl);
+    const subLvl = getNextFormLevel('child', fLvl);
     $(elem).fadeTo(200, 0, clearAndEnable);
 
     function clearAndEnable() {
@@ -358,6 +358,6 @@ export function clearErrElemAndEnableSubmit(elem, fLvl, enable = false) {       
     function enableSubmitIfFormReady() {
         if (!$('#'+fLvl+'-form').length || $('#'+subLvl+'-form').length) { return; }
         if (!enable) { return; }
-        _f.elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+        _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
 }

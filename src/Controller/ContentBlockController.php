@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 /**
  * Content Block controller.
@@ -290,84 +292,29 @@ class ContentBlockController extends AbstractController
      *
      * @Route("/admin/contentblock/{slug}/edit", name="admin_content_block_edit")
      */
-    public function editAction($slug)
+    public function editAction(ContentBlock $block, Request $request, EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
+        // $entity = $em->getRepository('App:ContentBlock')
+        //         ->findOneBy(array('slug' => $slug));
+        $form = $this->createForm(ContentBlockType::class, $block);
+        $form->handleRequest($request);
 
-        $entity = $em->getRepository('App:ContentBlock')
-                ->findOneBy(array('slug' => $slug));
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var ContentBlock $block */
+            $block = $form->getData();
+            $em->persist($block);
+            $em->flush();
 
-        if (!$entity) {
-            throw $this->createNotFoundException('Unable to find Content Block entity.');
+            return $this->redirectToRoute('admin_content_block_show', [
+                'slug' => $block->getSlug(),
+            ]);
         }
-
-        $editForm = $this->createEditForm($entity);
-        $deleteForm = $this->createDeleteForm($entity->getId());
-
-        return $this->render('ContentBlock/entity/edit.html.twig', array(
-            'entity' => $entity,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
+        return $this->render('ContentBlock/entity/edit.html.twig', [
+            'form' => $form->createView(),
+            'contentblock' => $block
+        ]);
     }
 
-    /**
-     * Creates a form to edit a Content Block entity.
-     *
-     * @param ContentBlock $entity The entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createEditForm(ContentBlock $entity)
-    {
-        $form = $this->createForm('App\Form\ContentBlockType', $entity, array(
-            'action' => $this->generateUrl('admin_content_block_update', array('slug' => $entity->getSlug())),
-            'method' => 'PUT',
-        ));
-
-        $form->add('submit', SubmitType::class, array('label' => 'Update'));
-
-        return $form;
-    }
-
-    /**
-     * Edits an existing Content Block entity.
-     *
-     * @Route(
-     *      "/admin/contentblock/{slug}/update",
-     *      name="admin_content_block_update",
-     *      methods={"PUT", "POST"}
-     * )
-     */
-    public function updateAction(Request $request, $slug)
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }
-
-        $em = $this->getDoctrine()->getManager();
-
-        $entity = $em->getRepository('App:ContentBlock')
-                ->findOneBy(array('slug' => $slug));
-
-        if (!$entity) {
-            throw $this->createNotFoundException('Unable to find Content Block entity.');
-        }
-
-        $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent);
-        $content = $pushedData->content;
-
-        $entity->setContent($content);
-        $em->flush();
-
-        $response = new JsonResponse();
-        $response->setData(array(
-            'contentblock' => "success",
-        ));
-
-        return $response;
-    }
     /**
      * Deletes a Content Block entity.
      *

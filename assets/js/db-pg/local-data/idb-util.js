@@ -12,7 +12,8 @@
  *     getData              util
  *     setData              util
  */
-import * as _db from './local-data-main.js';
+import { initStoredData, syncLocalDbWithServer } from './local-data-main.js';
+import { alertIssue } from '../db-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
 const db_v = '.50'; //prod: .50
@@ -36,7 +37,7 @@ export function downloadFullDb(reset) {                                         
 }
 function clearAndDownload(reset) {
     idb.clear();
-    _db.initStoredData(reset).then(() => idb.set(db_v, true));
+    initStoredData(reset).then(() => idb.set(db_v, true));
 }
 /**
  * On page load, syncs local database with sever data.
@@ -45,7 +46,7 @@ function clearAndDownload(reset) {
  * db_sync calls @initSearchPage.
  */
 function checkForServerUpdates() {
-    getData('lclDataUpdtdAt').then(_db.syncLocalDbWithServer);
+    getData('lclDataUpdtdAt').then(syncLocalDbWithServer);
     // debugUpdate();
 }
 /** ----------------------- GETTERS ----------------------------------------- */
@@ -91,14 +92,14 @@ function getStoredDataObj(keys, returnUndefined) {
 }
 /* ----------------------- ERROR HANDLING ----------------------------------- */
 function handleMissingDataKey(key) {                                            console.log('       !!!!getData: key missing [%s]', key); console.trace();
-    _db.pg('alertIssue', ['undefiendDataKey', {key: key}]);
+    alertIssue('undefiendDataKey', {key: key});
 }
 function handleInvalidKeyType(key) {                                            console.log('       !!!!getData: Non-string key passed = [%O]', key); console.trace();
-    _db.pg('alertIssue', ['invalidDataKeyType', {
-        key: JSON.stringify(key), type: typeof key }]);
+    alertIssue('invalidDataKeyType', {
+        key: JSON.stringify(key), type: typeof key });
 }
 function handleExpectedDataNotFound(key) {                                      console.log('       !!!!getData: [%s] Not Found', key); console.trace();
-    _db.pg('alertIssue', ['expectedDataNotFound', {key: key}]);
+    alertIssue('expectedDataNotFound', {key: key});
 }
 /** ----------------------- SETTERS ----------------------------------------- */
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);

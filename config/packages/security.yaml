@@ -24,10 +24,11 @@ security:
                 path: /
 
     role_hierarchy:
-        ROLE_BETA:        [ROLE_USER]
-        ROLE_EDITOR:      [ROLE_USER, ROLE_BETA]
-        ROLE_ADMIN:       [ROLE_USER, ROLE_BETA, ROLE_EDITOR]
-        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_BETA, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_EDITOR:        [ROLE_USER]
+        ROLE_QA_EDITOR:     ['%env(string:APP_ROLE_QA_EDITOR)%', ROLE_ALLOWED_TO_SWITCH]
+        ROLE_ADMIN:         [ROLE_EDITOR]
+        ROLE_QA_ADMIN:      ['%env(APP_ROLE_QA_ADMIN)%', ROLE_ALLOWED_TO_SWITCH]
+        ROLE_SUPER_ADMIN:   [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
@@ -36,7 +37,7 @@ security:
         - { path: /update$, roles: ROLE_ADMIN }
         - { path: /new$, roles: ROLE_ADMIN }
         - { path: ^/admin/, role: ROLE_ADMIN }
-        - { path: upload/view-pdfs$, roles: ROLE_EDITOR }
+        - { path: upload/view-pdfs$, roles: ROLE_ADMIN }
 
         - { path: feedback/post, roles: ROLE_USER }
         - { path: lists/edit, roles: ROLE_USER }

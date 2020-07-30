@@ -1,3 +1,4 @@
+@db-int-list
 Feature: Save and manage custom Lists of interaction data
     In order to have custom Lists of interacitons
     As a user

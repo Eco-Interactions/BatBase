@@ -1,3 +1,4 @@
+@db-tbl-filter
 Feature: Filtering the data displayed in the database table
     In order to find specific data about bat eco-interactions
     As a web visitor

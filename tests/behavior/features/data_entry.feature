@@ -1,3 +1,4 @@
+@db-new-data
 Feature: Add new data to the database
     In order to have accurate data about bat eco-interactions
     As an editor

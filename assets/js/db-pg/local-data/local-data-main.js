@@ -12,49 +12,46 @@
  *         DATA INIT
  *     DATA UTIL
  */
-import * as _pg from '../db-main.js';
-import * as _idb from './idb-util.js';
-import * as _sync from './db-sync.js';
-import * as _temp from './temp-data.js';
-import * as _init from './init-data.js';
+import { _modal, alertIssue, showIntroAndLoadingMsg } from '../db-main.js';
+import * as idb from './idb-util.js';
+import * as sync from './db-sync.js';
+import * as temp from './temp-data.js';
+import * as init from './init-data.js';
 
 /* ========================== FACADE ======================================== */
 export function initDb(argument) {
-    _idb.initDb();
+    idb.initDb();
 }
 export function setData(prop, data) {
-    _idb.setData(prop, data);
+    idb.setData(prop, data);
 }
 export function getData(props, returnUndefined) {
-    return _idb.getData(props, returnUndefined);
+    return idb.getData(props, returnUndefined);
 }
 /* -------------------------- DATA SYNC ------------------------------------- */
 export function updateLocalDb(data) {
-    return _sync.updateLocalDb(data);
+    return sync.updateLocalDb(data);
 }
 export function updateUserNamedList() {
-    return _sync.updateUserNamedList(...arguments);
+    return sync.updateUserNamedList(...arguments);
 }
 /* -------------------------- DATA INIT ------------------------------------- */
 export function resetStoredData(reset) {
-    _idb.downloadFullDb(reset);
+    idb.downloadFullDb(reset);
 }
 export function resetLocalDb() {
     const confg = {
         html: '<center>Click "Reset" to redownload all data.</center>',
         elem: '#data-help', dir: 'left', submit: resetDb, bttn: 'Reset'
     }
-    _pg._modal('showSaveModal', [confg]);
+    _modal('showSaveModal', [confg]);
 
     function resetDb() {
-        _pg._modal('exitModal');
-        _idb.downloadFullDb(true);
+        _modal('exitModal');
+        idb.downloadFullDb(true);
     }
 }
 /* ================ LOCAL-DATA INTERNAL FACADE ============================== */
-export function pg(funcName, params = []) {                                     //console.log('func = [%s], agrs = %O', funcName, params);
-    return _pg[funcName](...params);
-}
 export function fetchServerData(url, options = {}, n = 9) {                     console.log('       *-fetchServerData [%s] with params = %O', url, Object.keys(options).length ? options : null);
     return fetch('fetch/'+url, options).then(response => {
         if (!!response.ok) { return response.json(); }
@@ -63,15 +60,15 @@ export function fetchServerData(url, options = {}, n = 9) {                     
     });
 };
 function alertFetchIssue(url, responseText) {
-     _pg.alertIssue('fetchIssue', { url: url, response: responseText });
+    alertIssue('fetchIssue', { url: url, response: responseText });
     return Promise.reject();
 }
 export function getAllStoredData() {
-    return _idb.getAllStoredData();
+    return idb.getAllStoredData();
 }
 /* -------------------------- DATA SYNC ------------------------------------- */
 export function syncLocalDbWithServer(lclDataUpdatedAt) {
-    _sync.syncLocalDbWithServer(lclDataUpdatedAt);
+    sync.syncLocalDbWithServer(lclDataUpdatedAt);
 }
 /* -------------------------- DATA INIT ------------------------------------- */
 /**
@@ -80,28 +77,28 @@ export function syncLocalDbWithServer(lclDataUpdatedAt) {
  * and intro-walkthrough are shown on the Search page.
  */
 export function initStoredData(reset) {
-    _pg.showIntroAndLoadingMsg(reset);
+    showIntroAndLoadingMsg(reset);
     return require('./init-data.js').default(reset);
 }
 export function deriveUserData() {
-    return _init.deriveUserData(...arguments);
+    return init.deriveUserData(...arguments);
 }
 /** ------------------- DATA IN MEMORY -------------------------------------- */
 export function getMmryData() {
-    return _temp.getMmryData(...arguments);
+    return temp.getMmryData(...arguments);
 }
 export function setDataInMemory() {
-    _temp.setDataInMemory(...arguments);
+    temp.setDataInMemory(...arguments);
 }
 export function setUpdatedDataInLocalDb() {
-    return _temp.setUpdatedDataInLocalDb();
+    return temp.setUpdatedDataInLocalDb();
 }
 export function setMmryDataObj() {
-    return _temp.setMmryDataObj(...arguments);
+    return temp.setMmryDataObj(...arguments);
 }
 export function deleteMmryData() {
-    return _temp.deleteMmryData(...arguments);
+    return temp.deleteMmryData(...arguments);
 }
 export function clearTempMmry() {
-    return _temp.clearTempMmry();
+    return temp.clearTempMmry();
 }

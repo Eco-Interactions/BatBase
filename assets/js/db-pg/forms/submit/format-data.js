@@ -3,7 +3,8 @@
  *
  * Export default only.
  */
-import * as _f from '../forms-main.js';
+import { _confg, _state } from '../forms-main.js';
+import { _u } from '../../db-main.js';
 
 export default function(entity, fLvl, formVals) {
     if (entity === 'editor') { entity = 'author'; }
@@ -14,7 +15,7 @@ export default function(entity, fLvl, formVals) {
  * which are grouped into flat data and related-entity data objects.
  */
 function buildFormData(entity, formVals, fLvl) {
-    const cEntity = _f.confg('getCoreEntity', [entity]);
+    const cEntity = _confg('getCoreEntity', [entity]);
     const data = buildBaseFormDataObj({});
     if (cEntity !== entity) { addDetailTypeData(); }                      //console.log("formData = %O", data);
     addDirectFormFieldData(entity, formVals, cEntity, data);
@@ -38,8 +39,8 @@ function buildFormData(entity, formVals, fLvl) {
     }
 } /* End buildFormData */
 function addDirectFormFieldData(entity, formVals, cEntity, data) {
-    const fieldTrans = _f.confg('getFieldTranslations', [entity]);
-    const rels = _f.confg('getRelationshipFields', [entity]);
+    const fieldTrans = _confg('getFieldTranslations', [entity]);
+    const rels = _confg('getRelationshipFields', [entity]);
     const parentFields = !cEntity || getParentFields(entity);                     //console.log("buildFormDataObj. [%s] cEntity = %s, formVals = %O, parentFields = %O", entity, cEntity, formVals, parentFields);
     for (let field in formVals) { getFormFieldData(field, formVals[field]); }
 
@@ -85,7 +86,7 @@ function addAllRemainingData(entity, formVals, data) {
      * would be overwritten. Once map editing is complete, this will be revised.
      */
     function addGeoJson() {
-        const editing = _f.state('getStateProp', ['editing']);
+        const editing = _state('getStateProp', ['editing']);
         if (!editing && (!formVals.latitude || !formVals.longitude)) { return; }
         const displayPoint = JSON.stringify([ formVals.longitude, formVals.latitude ]);
         data.geoJson = {
@@ -100,7 +101,7 @@ function addAllRemainingData(entity, formVals, data) {
         delete data.false;
 
         function getGeoJsonCoords() {
-            const geoJson = _f.state('getFormProp', ['top', 'geoJson']);
+            const geoJson = _state('getFormProp', ['top', 'geoJson']);
             return geoJson ? geoJson.coordinates : displayPoint;
         }
     }
@@ -115,6 +116,6 @@ function addAllRemainingData(entity, formVals, data) {
 }
 /** Returns an array of the parent entity's field names. */
 function getParentFields(entity) {
-    const parentFields = Object.keys(_f.confg('getCoreFieldDefs', [entity]));
-    return parentFields.map(field => _f.util('lcfirst', [field.split(' ').join('')]));
+    const parentFields = Object.keys(_confg('getCoreFieldDefs', [entity]));
+    return parentFields.map(field => _u('lcfirst', [field.split(' ').join('')]));
 }

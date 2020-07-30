@@ -1,16 +1,17 @@
 {% extends "layout.html.twig" %}
 
-{% set contentblock = entity %}
-
 {% block headline %}
 	Editing {{ contentblock }}
 {% endblock headline %}
 
 {% block detail %}
-    <ul class="record_actions">
-        {{ form(edit_form) }}
-	</ul>
-    <p><a href="{{ path('admin_content_block_show', { 'slug': contentblock.slug }) }}"> Return to {{ contentblock }}</a></p>
-	<h4><a href="{{ path('admin_content_block') }}">View All Content Blocks</a></h4>
+	<div id="edit-content-block-page" class="top-pgs flex-col">
+	    <a href="{{ path('admin_content_block_show', { 'slug': contentblock.slug }) }}">
+	    	Return to {{ contentblock }}</a>
+	    <a href="{{ path('admin_content_block') }}">View All Content Blocks</a>
+    	<div id="top-form-container">
+        	{{ form(form) }}
+		</div>
+	</div>
 {% endblock detail %}
 

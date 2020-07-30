@@ -1,4 +1,5 @@
- Feature: Search page features and database table controls
+@db-ui
+Feature: Search page features and database table controls
     In order to interact with the database
     As a web visitor
     I should be able to use the various features and controls on the search page

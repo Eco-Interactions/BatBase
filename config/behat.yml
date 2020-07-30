@@ -1,0 +1,41 @@
+default:
+    suites:
+        default:
+            paths:
+                features: ../tests/behavior/features
+                bootstrap: ../tests/behavior/features/bootstrap
+            contexts:
+                - FeatureContext
+                - Behat\MinkExtension\Context\MinkContext
+            # formatter:
+            #     name:                       pretty
+            #     parameters:
+            #         decorated:              true
+            #         verbose:                false
+            #         time:                   true
+            #         language:               en
+            #         output_path:            null
+            #         output_styles:
+            #             comment: [ black, white, [ underscore ] ]
+            #         multiline_arguments:    true
+    extensions:
+        Behat\Symfony2Extension:
+            context:
+                path_suffix: tests/behavior/features/
+                class_suffix: tests/behavior/bootstrap/
+            kernel:
+                bootstrap: config/bootstrap.php
+                class: App\Kernel
+        Behat\MinkExtension:
+            base_url: http://localhost/BatBase/public/test.php
+            browser_name: chrome
+            goutte: ~
+            javascript_session: selenium2
+            selenium2:
+                wd_host: "http://127.0.0.1:4444/wd/hub"
+                capabilities:
+                    browser: chrome
+                    marionette: true
+                    extra_capabilities:
+                        chromeOptions:
+                            args: ['--disable-gpu', '--window-size=1660,1000']

@@ -21,26 +21,29 @@ import * as alert from '../app/misc/alert-issue.js';
 import * as u from './util/util.js';
 import * as _tree from './table/format-data/data-tree.js';
 import * as filter from './filters/filters-main.js';
-import * as _map from './map/map-main.js';
+import * as map from './map/map-main.js';
 import * as ui from './pg-ui/ui-main.js';
 import * as db from './local-data/local-data-main.js';
 import * as format from './table/format-data/aggrid-format.js';
 import * as modal from '../misc/intro-modals.js';
-import * as form from './forms/forms-main.js';
+import * as forms from './forms/forms-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
 if (window.location.pathname.includes('search')) {
     initDbPage();
 }
 /** ==================== FACADE ============================================= */
-function moduleMethod(funcName, mod, modName, params = []) {
+export function executeMethod(funcName, mod, modName, caller, params = []) {
     try {
         return mod[funcName](...params);
     } catch(e) {
         alertIssue('facadeErr', {module: modName, caller: 'db-main', called: funcName, error: e.toString(), errMsg: e.message});
         if ($('body').data('env') === 'prod') { return; }
-        console.error('[%s] module call [%s] failed.  params = %O, err = %O', modName, funcName, params, e);
+        console.error('[%s][%s] module: [%s] call failed.  params = %O, err = %O', caller, modName, funcName, params, e);
     }
+}
+function moduleMethod(funcName, mod, modName, params) {
+    return executeMethod(funcName, mod, modName, 'db-main', params);
 }
 export function _u(funcName, params = []) {
     return moduleMethod(funcName, u, 'util', params);
@@ -57,12 +60,15 @@ export function _tutorial(funcName, params = []) {
 export function _filter(funcName, params = []) {
     return moduleMethod(funcName, filter, 'filter', params);
 }
-export function _form(funcName, params = []) {
-    return moduleMethod(funcName, form, 'form', params);
+export function _forms(funcName, params = []) {
+    return moduleMethod(funcName, forms, 'forms', params);
+}
+export function _map(funcName, params = []) {
+    return moduleMethod(funcName, map, 'map', params);
 }
 export function openDataEntryForm() {
     ui.showPopupMsg();
-    form.initNewDataForm()
+    forms.initNewDataForm()
     .then(ui.hidePopupMsg);
 }
 /* ------------------- LOCAL DATA ------------------------------------------- */
@@ -348,7 +354,7 @@ export function showLocInDataTable(loc) {                          /*Perm-log*/c
 function buildLocMap() {
     ui.updateUiForMapView();
     if (tState.intSet) { return showLocsInSetOnMap(); }
-    _map.initMap(tState.rcrdsById);
+    map.initMap(tState.rcrdsById);
     return Promise.resolve();
 }
 /**
@@ -361,14 +367,14 @@ function showLocsInSetOnMap() {
     .then(getGeoJsonAndShowLocsOnMap);
 }
 function getGeoJsonAndShowLocsOnMap(tree) {
-    _map.initMap(tState.rcrdsById, tree);
+    map.initMap(tState.rcrdsById, tree);
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
     if ($('#shw-map').prop('loading')) { return; }
     ui.updateUiForMapView();
     u.setSelVal('View', 'map', 'silent');
-    _map.showLoc(locId, zoom, tState.rcrdsById);
+    map.showLoc(locId, zoom, tState.rcrdsById);
     $('#tbl-filter-status').html('No Active Filters.');
 }
 /* ==================== SOURCE SEARCH =============================================================================== */

@@ -1435,7 +1435,7 @@ class FeatureContext extends RawMinkContext implements Context
         return $checkbox == null ? false : $checkbox->isVisible();
     }
 /** ---------------------------- Misc Util ---------------------------------- */
-    private function spin ($lambda, $errMsg, $wait = 5)
+    private function spin ($lambda, $errMsg, $wait = 3)
     {
         for ($i = 0; $i < $wait; $i++)
         {

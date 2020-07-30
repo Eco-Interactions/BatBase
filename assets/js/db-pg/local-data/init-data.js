@@ -15,7 +15,8 @@
  *         USER LIST DATA
  *         HELPERS
  */
-import * as _db from './local-data-main.js';
+import * as db from './local-data-main.js';
+import { initSearchStateAndTable, onDataDownloadComplete } from '../db-main.js';
 
 /* ======================= DOWNLOAD DATA ==================================== */
 /**
@@ -30,37 +31,37 @@ import * as _db from './local-data-main.js';
  *   /interaction - Interaction, InteractionType, Tag
  */
 export default function (reset) {                                               console.log("   *-initLocalData");
-    return _db.fetchServerData('data-state')
-        .then(data => _db.setDataInMemory('lclDataUpdtdAt', data.state))
+    return db.fetchServerData('data-state')
+        .then(data => db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initTaxonDataAndLoadTable(reset))
         .then(downloadRemainingTableData)
         .then(downloadRemainingDataAndFullyEnableDb)
-        .then(_db.clearTempMmry);
+        .then(db.clearTempMmry);
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
 function initTaxonDataAndLoadTable(reset) {
     return getAndSetData('taxon')
-        .then(() => _db.setUpdatedDataInLocalDb())
-        .then(() => _db.pg('initSearchStateAndTable', ['taxa', false]));
+        .then(() => db.setUpdatedDataInLocalDb())
+        .then(() => initSearchStateAndTable('taxa', false));
 }
 /* -------------- DOWNLOAD REMAINING TABLE DATA ----------------------------- */
 function downloadRemainingTableData() {
     return getAndSetData('source')
         .then(() => getAndSetData('location'))
         .then(() => getAndSetData('interaction'))
-        .then(() => _db.setUpdatedDataInLocalDb())
-        .then(() => _db.pg('initSearchStateAndTable'));
+        .then(() => db.setUpdatedDataInLocalDb())
+        .then(() => initSearchStateAndTable());
 }
 /* ------------------- DOWNLOAD MAP DATA ------------------------------------ */
 function downloadRemainingDataAndFullyEnableDb() {
     return getAndSetData('geoJson')
         .then(() => getAndSetData('lists'))
-        .then(() => _db.setUpdatedDataInLocalDb())
-        .then(() => _db.pg('onDataDownloadComplete'));
+        .then(() => db.setUpdatedDataInLocalDb())
+        .then(() => onDataDownloadComplete());
 }
 /* -------------------------- HELPERS --------------------------------------- */
 function getAndSetData(url) {
-    return _db.fetchServerData(url)
+    return db.fetchServerData(url)
         .then(data => setData(url, data))
 }
 function setData(url, data) {                                                   console.log('           *-storing [%s] data = %O', url, data);
@@ -79,7 +80,7 @@ function setData(url, data) {                                                   
 function storeServerData(data) {                                                //console.log("storeServerData = %O", data);
     const ents = Object.keys(data);
     return ents.reduce((p, entity) => {                                         //console.log("     entity = %s, data = %O", entity, data[entity]);
-        return p.then(p => _db.setDataInMemory(entity, parseData(data[entity])));
+        return p.then(p => db.setDataInMemory(entity, parseData(data[entity])));
     }, Promise.resolve());
 }
 /**
@@ -103,18 +104,18 @@ function parseData(data) {
  */
 /** Stores an object of taxon names and ids for each level in each realm. */
 function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
-    _db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
+    db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
     storeTaxaByLevelAndRealm(data.taxon, data.realm, data.realmRoot);
     modifyRealmData(data.realm, data.level);
     storeLevelData(data.level);
-    _db.deleteMmryData('realmRoot');
+    db.deleteMmryData('realmRoot');
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
     const levels = {};
     const order = Object.keys(levelData).sort(orderLevels);
     $(order).each(addLevelData);
-    _db.setDataInMemory('levelNames', levels);
+    db.setDataInMemory('levelNames', levels);
 
     function orderLevels(a, b) {
         const x = levelData[a].ordinal;
@@ -135,8 +136,8 @@ function storeTaxaByLevelAndRealm(taxa, realms, roots) {
         addRealmDataToTaxon(taxon, realm);
         separateAndStoreRealmTaxa(taxon, realm);
     }
-    _db.setDataInMemory('realm', realms);
-    _db.setDataInMemory('taxon', taxa);
+    db.setDataInMemory('realm', realms);
+    db.setDataInMemory('taxon', taxa);
 
     function separateAndStoreRealmTaxa(taxon, realm) {
         const data = {};
@@ -166,14 +167,14 @@ function addRealmDataToTaxon(taxon, realm) {
 }
 function storeTaxaByLvl(realm, taxonObj) {
     for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
-        _db.setDataInMemory(realm+level+'Names', taxonObj[level]);
+        db.setDataInMemory(realm+level+'Names', taxonObj[level]);
         //TODO: Check for previously sorted taxa for realms with multiple roots
     }
 }
 /* ---------- Modify Realm Data -------------- */
 function modifyRealmData(realms, levels) {                                              //console.log('realms = %O', realms);
     modifyRealms(Object.keys(realms));
-    _db.setDataInMemory('realm', realms);
+    db.setDataInMemory('realm', realms);
 
     function modifyRealms(ids) {
         ids.forEach(id => {
@@ -193,14 +194,14 @@ function modifyRealmData(realms, levels) {                                      
 function deriveLocationData(data) {                                             //console.log('loc data to store = %O', data);
     const regns = getTypeObj(data.locationType, 'region', 'locations');
     const cntries = getTypeObj(data.locationType, 'country', 'locations');       //console.log('reg = %O, cntry = %O', regns, cntries);
-    _db.setDataInMemory('countryNames', getNameDataObj(cntries, data.location));
-    _db.setDataInMemory('countryCodes', getCodeNameDataObj(cntries, data.location));
-    _db.setDataInMemory('regionNames', getNameDataObj(regns, data.location));
-    _db.setDataInMemory('topRegionNames', getTopRegionNameData(data, regns));
-    _db.setDataInMemory('habTypeNames', getTypeNameData(data.habitatType));
-    _db.setDataInMemory('locTypeNames', getTypeNameData(data.locationType));
-    _db.setDataInMemory('location', addInteractionTotalsToLocs(data.location));
-    ['locationType', 'habitatType'].forEach(k => _db.deleteMmryData(k));
+    db.setDataInMemory('countryNames', getNameDataObj(cntries, data.location));
+    db.setDataInMemory('countryCodes', getCodeNameDataObj(cntries, data.location));
+    db.setDataInMemory('regionNames', getNameDataObj(regns, data.location));
+    db.setDataInMemory('topRegionNames', getTopRegionNameData(data, regns));
+    db.setDataInMemory('habTypeNames', getTypeNameData(data.habitatType));
+    db.setDataInMemory('locTypeNames', getTypeNameData(data.locationType));
+    db.setDataInMemory('location', addInteractionTotalsToLocs(data.location));
+    ['locationType', 'habitatType'].forEach(k => db.deleteMmryData(k));
 }
 /** Return an obj with the 2-letter ISO-country-code (k) and the country id (v).*/
 function getCodeNameDataObj(ids, rcrds) {
@@ -243,21 +244,21 @@ function deriveSourceData(data) {                                               
     const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
     const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
     const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources');
-    _db.setDataInMemory('authSrcs', authSrcs);
-    _db.setDataInMemory('pubSrcs', pubSrcs);
-    _db.setDataInMemory('publSrcs', publSrcs);
-    _db.setDataInMemory('citTypeNames', getTypeNameData(data.citationType));
-    _db.setDataInMemory('pubTypeNames', getTypeNameData(data.publicationType));
-    ['citationType', 'publicationType', 'sourceType'].forEach(k => _db.deleteMmryData(k));
+    db.setDataInMemory('authSrcs', authSrcs);
+    db.setDataInMemory('pubSrcs', pubSrcs);
+    db.setDataInMemory('publSrcs', publSrcs);
+    db.setDataInMemory('citTypeNames', getTypeNameData(data.citationType));
+    db.setDataInMemory('pubTypeNames', getTypeNameData(data.publicationType));
+    ['citationType', 'publicationType', 'sourceType'].forEach(k => db.deleteMmryData(k));
 }
 /* -------------------- INTERACTION DATA ------------------------------------ */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
  */
 function deriveInteractionData(data) {
-    _db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
-    _db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));
-    _db.deleteMmryData('tag');
+    db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
+    db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));
+    db.deleteMmryData('tag');
 }
 /** Returns an object with a record (value) for each id (key) in passed array.*/
 function getEntityRcrds(ids, rcrds) {
@@ -302,11 +303,11 @@ export function deriveUserData(data) {                                          
     const int_setIds = [];
 
     data.lists.forEach(addToDataObjs);
-    _db.setDataInMemory('savedFilters', filters);
-    _db.setDataInMemory('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
-    _db.setDataInMemory('dataLists', int_sets);
-    _db.setDataInMemory('dataListNames', getNameDataObj(int_setIds, int_sets));
-    _db.setDataInMemory('user', getUserName());
+    db.setDataInMemory('savedFilters', filters);
+    db.setDataInMemory('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
+    db.setDataInMemory('dataLists', int_sets);
+    db.setDataInMemory('dataListNames', getNameDataObj(int_setIds, int_sets));
+    db.setDataInMemory('user', getUserName());
 
     function addToDataObjs(l) {
         const entities = l.type == 'filter' ? filters : int_sets;

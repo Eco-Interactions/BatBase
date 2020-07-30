@@ -199,8 +199,9 @@ class DataEntryController extends AbstractController
     /** Returns either a newly created entity or an existing entity to edit. */
     private function getDetailEntity($dName, $edits, $em)
     {
-        if ($edits->editing !== false && $edits->editing !== null) {
-            return $this->getEntity(ucfirst($dName), $edits->editing, $em);
+        if (!!$edits->editing) {
+            $curDetail = $this->getEntity(ucfirst($dName), $edits->editing, $em);
+            if ($curDetail) { return $curDetail; }
         }
         $dClass = 'App\\Entity\\'. ucfirst($dName);
         return new $dClass();

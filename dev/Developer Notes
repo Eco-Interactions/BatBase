@@ -83,7 +83,7 @@ Start Selenium:
 Run Tests:
     - Functional Tests (Behat/Mink):
         all tests: ./vendor/bin/behat
-        single feature: ./vendor/bin/behat features/[FeatureName].feature
+        single feature: ./vendor/bin/behat --tags @feature-file-tag
             ##Automatically ran at the start of tests:
             ##  (generate fixtures as needed: php bin/console generate:fixtures)
             ##  php bin/console doctrine:database:drop --force --env=test

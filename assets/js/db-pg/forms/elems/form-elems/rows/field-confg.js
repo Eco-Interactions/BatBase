@@ -1,9 +1,10 @@
-import * as _f from '../../../forms-main.js';
 /**
  * Returns an obj with the entity's field defs and all required fields.
  * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
  *               .required Ary of required fields
  */
+import { _confg, _state } from '../../../forms-main.js';
+
 export default function getFieldConfgs(entity, fLvl) {
     const confg = getFormConfgData(entity, fLvl);                               //console.log('[%s] get[%s]FieldConfg = %O', fLvl, entity, confg);
     return {
@@ -15,14 +16,14 @@ export default function getFieldConfgs(entity, fLvl) {
 function getFormConfgData(entity, fLvl) {
     return {
         entity: entity,
-        form: _f.confg('getFormConfg', [entity]),
+        form: _confg('getFormConfg', [entity]),
         type: getEntityTypeFormConfg(entity, fLvl),
-        showAll: _f.state('getFormProp', [fLvl, 'expanded'])
+        showAll: _state('getFormProp', [fLvl, 'expanded'])
     };
 }
 function getEntityTypeFormConfg(entity, fLvl) {
-    const type = _f.state('getFormProp', [fLvl, 'entityType'])
-    return type ? _f.confg('getFormConfg', [entity]).types[type] : false;
+    const type = _state('getFormProp', [fLvl, 'entityType'])
+    return type ? _confg('getFormConfg', [entity]).types[type] : false;
 }
 function getIncludedFields(confg) {
     const allFields = getFieldTypes(confg);
@@ -31,7 +32,7 @@ function getIncludedFields(confg) {
     return included;
 }
 function getFieldTypes(confg) {
-    const coreFields = _f.confg('getCoreFieldDefs', [confg.entity]);
+    const coreFields = _confg('getCoreFieldDefs', [confg.entity]);
     return Object.assign(coreFields, confg.form.add);
 }
 /**

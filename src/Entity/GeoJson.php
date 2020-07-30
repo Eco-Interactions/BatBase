@@ -284,6 +284,6 @@ class GeoJson
      */
     public function __toString()
     {
-        return $this->getLocation()->getDisplayName() + ' - GeoJson';
+        return 'GeoJson';
     }
 }

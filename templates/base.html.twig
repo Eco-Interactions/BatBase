@@ -10,8 +10,6 @@
         {% set eifrole = 'editor' %}
     {% elseif is_granted('ROLE_USER') %}
         {% set eifrole = 'user' %}
-    {% else %}
-        {% set eifrole = 'visitor' %}
     {% endif %}
 {% else %}
     {% set eifusername = '' %}
