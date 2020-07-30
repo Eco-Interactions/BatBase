@@ -6,7 +6,7 @@
  *     HTML BUILDERS
  */
 import * as util from '../util/util-main.js';
-import getEntityShowData from './entity-show-data.js';
+import getEntityDisplayConfg from './entity-show-data.js';
 
 initShowPage();
 
@@ -21,7 +21,7 @@ function getEntity (url) {
 }
 /* ==================== CORE SHOW PAGE BUILDER ============================== */
 function buildEntityShowPage (entity, data) {                       /*Perm-log*///console.log('   *//init[%s]ShowPage = %O', entity, data);
-    const confg = getEntityShowData(entity, data, util);
+    const confg = getEntityDisplayConfg(entity, data, util);
     const sections = confg.map(buildDataSection);
     $('#entity-show').append(sections.filter(s => s));
 }

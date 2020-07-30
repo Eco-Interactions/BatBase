@@ -9,86 +9,9 @@
  */
  let util;
 /* =================== ENTITY-SHOW CONFIG =================================== */
-export default function getEntityShowData (entity, data, u) {
+export default function getEntityDisplayConfg (entity, data, u) {
     util = u;
-    const confg = {
-        interaction: [
-            {
-                section:  'Interaction Details',
-                rows: [
-                   [  //row 1
-                        [ //cell 1
-                            { field: 'Type', content: data.interactionType.displayName },
-                            { field: 'Tag', content: getTagData(data.tags) },
-                            'col' //flex direction for multiple fields in single cell
-                        ],[  //cell 2
-                            { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
-                        ],[  //cell 3
-                            { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
-                        ],
-                    ], [ //row 2
-                        [  //cell 1
-                            { field: 'Note', content: data.note }
-                        ]
-                    ]
-                ]
-            },{
-                section:  'Source',
-                rows: [
-                   [  //row 1
-                        [
-                            { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
-                            { field: 'DOI', content: getDoiLink(data.source.doi) },
-                            { field: 'Website', content: getCitationWebsite(data.source) },
-                            'col'
-                        ], [
-                            getContributorFieldData(data.source.contributors)
-                        ], [
-                            { field: 'Citation', content: data.source.description },
-                        ]
-                    ], [
-                        [
-                            { field: 'Abstract', content: data.source.citation.abstract }
-                        ]
-                    ]
-                            // { field: 'Publication', content: data.source.parent.displayName },
-                            // { field: 'Publisher', content: getPublisherData(data.source.parent.parent) },
-                            // { field: 'Description', content: data.source.parent.description },
-                            // { field: 'Year', content: data.source.parent.year },
-                            // { field: 'DOI', content: data.source.parent.doi },
-                            // { field: 'Website', content: null },
-                            // getCitationTypeAndTitleFieldData(data.source.citation)
-                            // { field: 'Year', content: data.source.year },
-                            // { field: 'Pages', content: data.source.citation.publicationPages },
-                            // { field: 'Volume', content: data.source.citation.publicationVolume },
-                            // { field: 'Issue', content: data.source.citation.publicationIssue },
-                ]
-            },{
-                section:  'Location',
-                rows: [
-                   [  //row 1
-                        [
-                            { field: 'Name', content: data.location.displayName },
-                            { field: 'Coordinates', content: getCoordinates(data.location), classes: 'max-cntnt'},
-                            'col'
-                        ], [
-                            { field: 'Country', content: getNameIfSet(data.location, "country") },
-                            { field: 'Region', content: data.location.region.displayName, classes: 'max-cntnt' },
-                            'col'
-                        ], [
-                            { field: 'Habitat', content: getNameIfSet(data.location, "habitatType") },
-                            { field: 'Elevation(m)', content: getElevRange(data.location) },
-                            'col'
-                        ], [
-                            { field: 'Description', content: data.location.description },
-                        ]
-                    ]
-                ]
-            }
-        ]
-    };
-    util = null;
-    return confg[entity].map(c => c); //detach obj
+    return getEntityConfg(entity, data).map(c => c); //detach obj
 }
 /* ================== FIELD-DATA HANDLERS =================================== */
 function getTagData (tags) {
@@ -99,14 +22,23 @@ function getNameIfSet(entity, field) {
     return entity[field] ? entity[field].displayName : null;
 }
 /* ------------------------------- TAXON ------------------------------------ */
-function getTaxonHierarchyDataHtml (taxon) {
-    const name = `<strong>${taxon.displayName}</strong>` ;
-    return taxon.isRoot ? name : name + getParentTaxaNames(taxon.parentTaxon);
+function getTaxonHierarchyDataHtml (taxon, dir) {
+    const taxonNameHtml = `<strong>${taxon.displayName}</strong>` ;
+    if (taxon.isRoot) { return taxonNameHtml; }
+    const names = [taxonNameHtml];
+    getHeirarchyTaxaNames(taxon.parentTaxon);
+    if (dir === 'down') { names.reverse(); }
+    return names.reduce(buildTaxonomicHierarchyHtml, '');
+
+    function getHeirarchyTaxaNames(pTaxon) {
+        names.push(pTaxon.displayName);
+        if (pTaxon.isRoot) { return; }
+        getHeirarchyTaxaNames(pTaxon.parentTaxon);
+    }
 }
-function getParentTaxaNames (pTaxon, lvl = 1) {
-    const indent = '&emsp;'.repeat(lvl);
-    return `<br>${indent}${String.fromCharCode(8627)}&nbsp${pTaxon.displayName}`
-        + (pTaxon.isRoot ? '' : getParentTaxaNames(pTaxon.parentTaxon, ++lvl));
+function buildTaxonomicHierarchyHtml(namesHtml, val, i) {
+    const indent = !i ? '' : '<br>' + '&emsp;'.repeat(i);
+    return namesHtml + `${indent}${String.fromCharCode(8627)}&nbsp${val}`;
 }
 /* ---------------------------- SOURCE -------------------------------------- */
 function getContributorFieldData (contribs) {
@@ -144,4 +76,101 @@ function getElevRange (location) {
 function getCoordinates (location) {
     return location.latitude ?
         (location.latitude.toString() + ', ' + location.longitude.toString()) : null;
+}
+/* ====================== PAGE DISPLAY CONFG ================================ */
+function getEntityConfg(entity, data) {
+    const map = {
+        interaction: getIntDisplayConfg, taxon: getTxnDisplayConfg
+    };
+    return map[entity](data);
+}
+function getIntDisplayConfg(data) {
+    return [
+        {
+            section:  'Interaction Details',
+            rows: [
+               [  //row 1
+                    [ //cell 1
+                        { field: 'Type', content: data.interactionType.displayName },
+                        { field: 'Tag', content: getTagData(data.tags) },
+                        'col' //flex direction for multiple fields in single cell
+                    ],[  //cell 2
+                        { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
+                    ],[  //cell 3
+                        { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
+                    ],
+                ], [ //row 2
+                    [  //cell 1
+                        { field: 'Note', content: data.note }
+                    ]
+                ]
+            ]
+        },{
+            section:  'Source',
+            rows: [
+               [  //row 1
+                    [
+                        { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
+                        { field: 'DOI', content: getDoiLink(data.source.doi) },
+                        { field: 'Website', content: getCitationWebsite(data.source) },
+                        'col'
+                    ], [
+                        getContributorFieldData(data.source.contributors)
+                    ], [
+                        { field: 'Citation', content: data.source.description },
+                    ]
+                ], [
+                    [
+                        { field: 'Abstract', content: data.source.citation.abstract }
+                    ]
+                ]
+                        // { field: 'Publication', content: data.source.parent.displayName },
+                        // { field: 'Publisher', content: getPublisherData(data.source.parent.parent) },
+                        // { field: 'Description', content: data.source.parent.description },
+                        // { field: 'Year', content: data.source.parent.year },
+                        // { field: 'DOI', content: data.source.parent.doi },
+                        // { field: 'Website', content: null },
+                        // getCitationTypeAndTitleFieldData(data.source.citation)
+                        // { field: 'Year', content: data.source.year },
+                        // { field: 'Pages', content: data.source.citation.publicationPages },
+                        // { field: 'Volume', content: data.source.citation.publicationVolume },
+                        // { field: 'Issue', content: data.source.citation.publicationIssue },
+            ]
+        },{
+            section:  'Location',
+            rows: [
+               [  //row 1
+                    [
+                        { field: 'Name', content: data.location.displayName },
+                        { field: 'Coordinates', content: getCoordinates(data.location), classes: 'max-cntnt'},
+                        'col'
+                    ], [
+                        { field: 'Country', content: getNameIfSet(data.location, "country") },
+                        { field: 'Region', content: data.location.region.displayName, classes: 'max-cntnt' },
+                        'col'
+                    ], [
+                        { field: 'Habitat', content: getNameIfSet(data.location, "habitatType") },
+                        { field: 'Elevation(m)', content: getElevRange(data.location) },
+                        'col'
+                    ], [
+                        { field: 'Description', content: data.location.description },
+                    ]
+                ]
+            ]
+        }
+    ];
+}
+function getTxnDisplayConfg(data) {
+    return [
+        {
+            section:  'Taxon Hierarchy',
+            rows: [
+               [  //row 1
+                    [
+                        { field: data.realm.displayName, content: getTaxonHierarchyDataHtml(data, 'down') },
+                    ],
+                ]
+            ]
+        }
+    ];
 }
