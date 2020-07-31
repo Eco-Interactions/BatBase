@@ -19,7 +19,7 @@
  */
 import * as alert from '../app/misc/alert-issue.js';
 import * as u from './util/util.js';
-import * as _tree from './table/format-data/data-tree.js';
+import * as tree from './table/format-data/data-tree.js';
 import * as filter from './filters/filters-main.js';
 import * as map from './map/map-main.js';
 import * as ui from './pg-ui/ui-main.js';
@@ -29,6 +29,7 @@ import * as modal from '../misc/intro-modals.js';
 import * as forms from './forms/forms-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
+/*NOTE: Not sure why this page is getting loaded on external pages. It could be something tangled with webpack.*/
 if (window.location.pathname.includes('search')) {
     initDbPage();
 }
@@ -338,7 +339,7 @@ function getTopRegionIds() {
     return ids;
 }
 function startLocTableBuildChain(topLocs, textFltr) {
-    return _tree.buildLocTree(topLocs, textFltr)
+    return tree.buildLocTree(topLocs, textFltr)
         .then(tree => format.buildLocRowData(tree, tState))
         .then(rowData => loadTbl('Location Tree', rowData))
         .then(() => filter.loadLocFilters(tState));
@@ -363,7 +364,7 @@ function buildLocMap() {
  * and their popup data reflects the data of the set.
  */
 function showLocsInSetOnMap() {
-    _tree.buildLocTree(getTopRegionIds())
+    tree.buildLocTree(getTopRegionIds())
     .then(getGeoJsonAndShowLocsOnMap);
 }
 function getGeoJsonAndShowLocsOnMap(tree) {
@@ -410,7 +411,7 @@ function rebuildSrcTable(val) {                                     /*Perm-log*/
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    return _tree.buildSrcTree(tState.curView)
+    return tree.buildSrcTree(tState.curView)
         .then(tree => format.buildSrcRowData(tree, tState))
         .then(rowData => loadTbl('Source Tree', rowData, tState))
         .then(() => filter.loadSrcFilters(tState.curView));
@@ -490,7 +491,7 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/
  */
 function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     tState.openRows = [topTaxon.id.toString()];
-    return _tree.buildTxnTree(topTaxon, filtering, textFltr)
+    return tree.buildTxnTree(topTaxon, filtering, textFltr)
         .then(tree => format.buildTxnRowData(tree, tState))
         .then(rowData => loadTbl('Taxon Tree', rowData, tState))
         .then(() => filter.loadTxnFilters(tState, topTaxon.realm.pluralName));
