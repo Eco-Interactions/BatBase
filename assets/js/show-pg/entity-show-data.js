@@ -127,19 +127,25 @@ function getTagData (tags) {
 function getNameIfSet(entity, field) {
     return entity[field] ? entity[field].displayName : null;
 }
+function getEntityLinkHtml(entity, id, displayTxt) {
+    const link = $('body').data('base-url') + entity + '/' + id;
+    return `<a href="${link}">${displayTxt}</a>`;
+}
 /* ------------------------------- TAXON ------------------------------------ */
 function getTaxonHierarchyDataHtml (taxon, dir) {
-    const taxonNameHtml = `<strong>${taxon.displayName}</strong>` ;
-    if (taxon.isRoot) { return taxonNameHtml; }
-    const names = [taxonNameHtml];
-    getHeirarchyTaxaNames(taxon.parentTaxon);
-    if (dir === 'down') { names.reverse(); }
-    return names.reduce(buildTaxonomicHierarchyHtml, '');
+    const txnNameHtml = `<strong>${taxon.displayName}</strong>`;
+    const linkedTxn = getEntityLinkHtml('taxon', taxon.id, txnNameHtml);
+    if (taxon.isRoot) { return linkedTxn; }
+    const txnLinks = [linkedTxn];
+    getHeirarchyTaxaLinks(taxon.parentTaxon);
+    if (dir === 'down') { txnLinks.reverse(); }
+    return txnLinks.reduce(buildTaxonomicHierarchyHtml, '');
 
-    function getHeirarchyTaxaNames(pTaxon) {
-        names.push(pTaxon.displayName);
+    function getHeirarchyTaxaLinks(pTaxon) {
+        const link = getEntityLinkHtml('taxon', pTaxon.id, pTaxon.displayName);
+        txnLinks.push(link);
         if (pTaxon.isRoot) { return; }
-        getHeirarchyTaxaNames(pTaxon.parentTaxon);
+        getHeirarchyTaxaLinks(pTaxon.parentTaxon);
     }
 }
 function buildTaxonomicHierarchyHtml(namesHtml, val, i) {
