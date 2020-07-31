@@ -177,25 +177,31 @@ function getTreeWidth() {
 }
 function handleTreeRowRender (params) {
     const rowName = params.data.name || null;
-    return rowName ? addToolTipToCell(rowName) : addIntShowIcon(params.data.id);
+    if (!rowName) { return addShowIcon('interaction', params.data.id); }
+    return tblState.curFocus === 'taxa' ?
+        getTxnTreeCellHtml(params.data) : getToolTipTreeCellHtml(rowName);
 }
 /* ----------- TOOL TIP ------------- */
-function addToolTipToCell(name) {
+function getToolTipTreeCellHtml(name) {
     return '<span title="'+name+'">'+name+'</span>';
 }
-/* ----------- INT-SHOW ICON ------------- */
-function addIntShowIcon (id) {
-    const icon = getShowIconHtml();
-    return `<a href="${getShowLink(id)}">${icon}</a>`;
+/* ----------- SHOW ICON ------------- */
+function addShowIcon (entity, id) {
+    const icon = getShowIconHtml(_u('ucfirst', [entity]));
+    return `<a href="${getShowLink(entity, id)}">${icon}</a>`;
 }
-function getShowIconHtml () {
+function getShowIconHtml (entity) {
     const path = require('../../../images/icons/search.svg').default;
     const opac = tblState.flags.allDataAvailable ? 1 : 0;
-    return`<img src=${path} class="tree-show" title="Show Interaction Details"
-        alt="Show Interaction Details" style="opacity:${opac}">`;
+    return`<img src=${path} class="tree-show" title="Show ${entity} Details"
+        alt="Show ${entity} Details" style="opacity:${opac}">`;
 }
-function getShowLink (id) {
-    return $('body').data('base-url') + 'interaction/' + id;
+function getShowLink (entity, id) {
+    return $('body').data('base-url') + entity + '/' + id;
+}
+/* --------------- TXN-TREE CELL ------------------ */
+function getTxnTreeCellHtml(data) {
+    return getToolTipTreeCellHtml(data.name) + addShowIcon('taxon', data.id);
 }
 /* ----------- SORT TAXON TREE AND COLUMNS --------------- */
 /**

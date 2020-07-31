@@ -68,5 +68,26 @@ class ShowEntityController extends AbstractController
             'id' => $id, 'entity' => $jsonEntity
         ));
     }
+/* ----------------------------- TAXON -------------------------------- */
+    /**
+     * Opens the Taxon show page.
+     *
+     * @Route("taxon/{id}", name="app_taxon_show")
+     */
+    public function showTaxonAction($id)
+    {
+        $this->em = $this->getDoctrine()->getManager();
+
+        $taxon = $this->getEntity('Taxon', $id);
+        if (!$taxon) {
+            throw $this->createNotFoundException("Unable to find Taxon [$id].");
+        }
+
+        $jsonEntity = $this->serializeEntity($taxon);
+
+        return $this->render('Entity/taxon.html.twig', array(
+            'displayName' => $taxon->getDisplayName(), 'entity' => $jsonEntity
+        ));
+    }
 
 }
