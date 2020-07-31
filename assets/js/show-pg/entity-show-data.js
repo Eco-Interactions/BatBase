@@ -1,7 +1,16 @@
 /**
- * Returns an Array with the entity's data seperated into sections, rows, and
- * cells for each field with it's data formatted for display.
- * Eg: [{ section: 'name', rows: [ row1-[ cell1-[ { field: 'name', content: data } ], cell... ], row... ]}, { section2 }]
+ * Returns the entity's data formatted for display and grouped by sections, rows,
+ * and cells.
+ * Ex: [{
+ *        section: 'name',
+ *        rows: [
+ *            (row1)[
+ *                (cell) [
+ *                    { field: 'name', content: data }
+ *                ], (cell)...
+ *            ], (row2)...
+ *         ]
+ *      }, { section2 }]
  *
  * TOC:
  *    ENTITY-SHOW CONFG
@@ -9,82 +18,17 @@
  */
  let util;
 /* =================== ENTITY-SHOW CONFIG =================================== */
-export default function getEntityDisplayConfg (entity, data, u) {
+export default function getEntityDisplayData (entity, data, u) {
     util = u;
-    return getEntityConfg(entity, data).map(c => c); //detach obj
+    return getEntityShowData(entity, data).map(c => c); //detach obj
 }
-/* ================== FIELD-DATA HANDLERS =================================== */
-function getTagData (tags) {
-    if (!tags.length) { return null; }
-    return tags.map(t => t.displayName).join(', ');
-}
-function getNameIfSet(entity, field) {
-    return entity[field] ? entity[field].displayName : null;
-}
-/* ------------------------------- TAXON ------------------------------------ */
-function getTaxonHierarchyDataHtml (taxon, dir) {
-    const taxonNameHtml = `<strong>${taxon.displayName}</strong>` ;
-    if (taxon.isRoot) { return taxonNameHtml; }
-    const names = [taxonNameHtml];
-    getHeirarchyTaxaNames(taxon.parentTaxon);
-    if (dir === 'down') { names.reverse(); }
-    return names.reduce(buildTaxonomicHierarchyHtml, '');
-
-    function getHeirarchyTaxaNames(pTaxon) {
-        names.push(pTaxon.displayName);
-        if (pTaxon.isRoot) { return; }
-        getHeirarchyTaxaNames(pTaxon.parentTaxon);
-    }
-}
-function buildTaxonomicHierarchyHtml(namesHtml, val, i) {
-    const indent = !i ? '' : '<br>' + '&emsp;'.repeat(i);
-    return namesHtml + `${indent}${String.fromCharCode(8627)}&nbsp${val}`;
-}
-/* ---------------------------- SOURCE -------------------------------------- */
-function getContributorFieldData (contribs) {
-    if (!contribs || !Object.keys(contribs).length) { return null; }
-    let type;
-    const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
-    return { field: util.ucfirst(type)+'s', content: names, classes: 'max-cntnt' };
-
-    function storeTypeAndReturnName (ord) {
-        type = Object.keys(contribs[ord])[0];
-        return contribs[ord][type];
-    }
-}
-function getPublisherData (pSrc) {
-    if (!pSrc) { return null; }
-    const loc = [pSrc.publisher.city, pSrc.publisher.country].filter(c => c).join(', ');
-    return pSrc.displayName + (!!loc ? ('<br>' + loc) : '');
-}
-function getCitationTypeAndTitleFieldData (citation) {
-    return { field: citation.citationType.displayName, content: citation.displayName };
-}
-function getCitationWebsite(source) {
-    return source.linkUrl ?
-        `<a href="${source.linkUrl}"" target="_blank">${source.linkDisplay}</a>` : null;
-}
-function getDoiLink(doi) {
-    return doi ? `<a href="${doi}" target="_blank">${doi}</a>` : null;
-}
-/* ---------------------------- LOCATION ------------------------------------ */
-function getElevRange (location) {
-    return location.elevationMax && location.elevation ?
-        (location.elevation + ' - ' + location.elevationMax) :
-        (location.elevation || location.elevationMax); //Some locations have a max but not the base of the range. Will fix in data soon.
-}
-function getCoordinates (location) {
-    return location.latitude ?
-        (location.latitude.toString() + ', ' + location.longitude.toString()) : null;
-}
-/* ====================== PAGE DISPLAY CONFG ================================ */
-function getEntityConfg(entity, data) {
+function getEntityShowData(entity, data) {
     const map = {
-        interaction: getIntDisplayConfg, taxon: getTxnDisplayConfg
+        interaction: getIntDisplayData, taxon: getTxnDisplayData
     };
     return map[entity](data);
 }
-function getIntDisplayConfg(data) {
+function getIntDisplayData(data) {
     return [
         {
             section:  'Interaction Details',
@@ -160,7 +104,7 @@ function getIntDisplayConfg(data) {
         }
     ];
 }
-function getTxnDisplayConfg(data) {
+function getTxnDisplayData(data) {
     return [
         {
             section:  'Taxon Hierarchy',
@@ -173,4 +117,69 @@ function getTxnDisplayConfg(data) {
             ]
         }
     ];
+}
+
+/* ================== FIELD-DATA HANDLERS =================================== */
+function getTagData (tags) {
+    if (!tags.length) { return null; }
+    return tags.map(t => t.displayName).join(', ');
+}
+function getNameIfSet(entity, field) {
+    return entity[field] ? entity[field].displayName : null;
+}
+/* ------------------------------- TAXON ------------------------------------ */
+function getTaxonHierarchyDataHtml (taxon, dir) {
+    const taxonNameHtml = `<strong>${taxon.displayName}</strong>` ;
+    if (taxon.isRoot) { return taxonNameHtml; }
+    const names = [taxonNameHtml];
+    getHeirarchyTaxaNames(taxon.parentTaxon);
+    if (dir === 'down') { names.reverse(); }
+    return names.reduce(buildTaxonomicHierarchyHtml, '');
+
+    function getHeirarchyTaxaNames(pTaxon) {
+        names.push(pTaxon.displayName);
+        if (pTaxon.isRoot) { return; }
+        getHeirarchyTaxaNames(pTaxon.parentTaxon);
+    }
+}
+function buildTaxonomicHierarchyHtml(namesHtml, val, i) {
+    const indent = !i ? '' : '<br>' + '&emsp;'.repeat(i);
+    return namesHtml + `${indent}${String.fromCharCode(8627)}&nbsp${val}`;
+}
+/* ---------------------------- SOURCE -------------------------------------- */
+function getContributorFieldData (contribs) {
+    if (!contribs || !Object.keys(contribs).length) { return null; }
+    let type;
+    const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
+    return { field: util.ucfirst(type)+'s', content: names, classes: 'max-cntnt' };
+
+    function storeTypeAndReturnName (ord) {
+        type = Object.keys(contribs[ord])[0];
+        return contribs[ord][type];
+    }
+}
+function getPublisherData (pSrc) {
+    if (!pSrc) { return null; }
+    const loc = [pSrc.publisher.city, pSrc.publisher.country].filter(c => c).join(', ');
+    return pSrc.displayName + (!!loc ? ('<br>' + loc) : '');
+}
+function getCitationTypeAndTitleFieldData (citation) {
+    return { field: citation.citationType.displayName, content: citation.displayName };
+}
+function getCitationWebsite(source) {
+    return source.linkUrl ?
+        `<a href="${source.linkUrl}"" target="_blank">${source.linkDisplay}</a>` : null;
+}
+function getDoiLink(doi) {
+    return doi ? `<a href="${doi}" target="_blank">${doi}</a>` : null;
+}
+/* ---------------------------- LOCATION ------------------------------------ */
+function getElevRange (location) {
+    return location.elevationMax && location.elevation ?
+        (location.elevation + ' - ' + location.elevationMax) :
+        (location.elevation || location.elevationMax); //Some locations have a max but not the base of the range. Will fix in data soon.
+}
+function getCoordinates (location) {
+    return location.latitude ?
+        (location.latitude.toString() + ', ' + location.longitude.toString()) : null;
 }
