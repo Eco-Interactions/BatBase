@@ -353,7 +353,7 @@ class Interaction
      */
     public function getLocationId()
     {
-        return $this->location ? $this->location->getId() : null;
+        return $this->location->getId();
     }
 
     /**

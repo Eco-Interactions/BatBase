@@ -727,12 +727,23 @@ class Taxon
      * Returns an array of ids for all interactions where the taxon was the subject.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("subjectRoles")
-     * @Groups({"normalized", "flattened"})
+     * @Groups({"normalized"})
      */
     public function getSubjectRoleIds()
     {
         $interactions = $this->subjectRoles;
         return $this->getInteractionIds($interactions);
+    }
+
+    /**
+     * Returns flattened interactions where the taxon was the subject.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("subjectRoles")
+     * @Groups({"flattened"})
+     */
+    public function flattenSubjectRoles()
+    {
+        return $this->flattenTaxonInteractions($this->subjectRoles);
     }
 
     /**
@@ -774,21 +785,24 @@ class Taxon
      * Returns an array of ids for all interactions where the taxon was the object.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("objectRoles")
-     * @Groups({"normalized", "flattened"})
+     * @Groups({"normalized"})
      */
     public function getObjectRoleIds()
     {
         $interactions = $this->objectRoles;
         return $this->getInteractionIds($interactions);
     }
-    // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS
-    // public function getInteractions()
-    // {
-    //     $subj = $this->getSubjectRoles();
-    //     $obj = $this->getObjectRoles();
 
-    //     return count($subj) > 0 ? $subj : $obj;
-    // }
+    /**
+     * Returns flattened interactions where the taxon was the object.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("objectRoles")
+     * @Groups({"flattened"})
+     */
+    public function flattenObjectRoles()
+    {
+        return $this->flattenTaxonInteractions($this->objectRoles);
+    }
 
     /**
      * Returns an array of ids for all passed interactions.
@@ -806,6 +820,23 @@ class Taxon
     public function getAllInteractionIds()
     {
         return array_merge($this->getObjectRoleIds(), $this->getSubjectRoleIds());
+    }
+
+    public function flattenTaxonInteractions($interactions)
+    {
+        $flattened = [];
+        foreach ($interactions as $int) {  //print("\n    COUNTRY [".$int->getLocation()->getCountryData()."]    \n");
+            $flatInt = [
+                'country' => $int->getLocation()->getCountryData() ?
+                    $int->getLocation()->getCountryData()['displayName']: 'Unspecified',
+                'id' => $int->getId(),
+                'interactionType' => $int->getInteractionType()->getDisplayName(),
+                'publication' => $int->getSource()->getParentSource()->getDisplayName(),
+                'region' => $int->getLocation()->getRegionData()['displayName'],
+            ];
+            array_push($flattened, $flatInt);
+        }
+        return $flattened;
     }
 
     /**

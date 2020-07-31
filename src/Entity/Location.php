@@ -622,7 +622,7 @@ class Location
      */
     public function getCountryData()
     {
-        $locType = $this->locationType; //print("Country loc Type = ".$locType->getId()." for ".$this->displayName);
+        $locType = $this->locationType; //print("\n[".$this->displayName."] locationType = [".$locType->getDisplayName()."]");
         if ($locType->getSlug() === 'region') { return false; }
         if ($locType->getSlug() === 'country') { return $this->getLocObj($this); }
         return $this->findParentLocType($this, 'country');

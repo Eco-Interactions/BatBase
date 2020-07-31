@@ -18,7 +18,7 @@
  */
  let util;
 /* =================== ENTITY-SHOW CONFIG =================================== */
-export default function getEntityDisplayData (entity, data, u) {
+export default function getEntityDisplayData (entity, data, u) {    /*dbug-log*/console.log('get[%s]DisplayData = %O', entity, data);
     util = u;
     return getEntityShowData(entity, data).map(c => c); //detach obj
 }
@@ -115,6 +115,19 @@ function getTxnDisplayData(data) {
                     ],
                 ]
             ]
+        },{
+            section:  'Interactions',
+            rows: [
+               [  //row 1
+                    [
+                        { field: 'By Type', content: getIntsGroupedBy('type', data), classes: 'max-cntnt' },
+                    ],[
+                        { field: 'By Country', content: getIntsGroupedBy('loc', data), classes: 'max-cntnt' },
+                    ],[
+                        { field: 'By Publication', content: getIntsGroupedBy('src', data) },
+                    ],
+                ]
+            ]
         }
     ];
 }
@@ -188,4 +201,65 @@ function getElevRange (location) {
 function getCoordinates (location) {
     return location.latitude ?
         (location.latitude.toString() + ', ' + location.longitude.toString()) : null;
+}
+/* -------------------------- INTERACTIONS ---------------------------------- */
+function getIntsGroupedBy(grouping, taxon) {
+    const groupByMap = {
+        type: getIntsGroupedByIntType, loc: getIntsGroupedByLocation,
+        src: getIntsGroupedByPublication
+    };
+    const ints = taxon.subjectRoles.concat(taxon.objectRoles);
+    return groupByMap[grouping](ints);
+}
+function sortAndFormatInts(ints, field) {
+    const sorted = {};
+    ints.forEach(sortInt);
+    return formatSortedInts(sorted);
+
+    function sortInt(int) {                                                     //console.log('int = %O', int);
+        if (!sorted[int[field]]) { sorted[int[field]] = []; }
+        sorted[int[field]].push(int.id);
+    }
+}
+function formatSortedInts(sorted) {
+    return Object.keys(sorted).sort().map(formatTypeGroup).join('<br>');
+
+    function formatTypeGroup(field) {
+        const intCount = sorted[field].length;
+        return `<span class="show-int-cnt">${intCount}</span><span>${field}</span>`;
+    }
+}
+/* ------------ BY COUNTRY ------------------ */
+function getIntsGroupedByLocation(ints) {
+    const sorted = {};
+    ints.forEach(sortIntByLoc);
+    return formatIntsForLocs(sorted);
+
+    function sortIntByLoc(int) {
+        if (!sorted[int.region]) { sorted[int.region] = {}; }
+        if (!sorted[int.region][int.country]) { sorted[int.region][int.country] = []; }
+        sorted[int.region][int.country].push(int.id);
+    }
+}
+function formatIntsForLocs(sorted) {                                            //console.log('sorted = %O', sorted);
+    return Object.keys(sorted).sort().map(formatRegionGroup).join('<br><br>');
+
+    function formatRegionGroup(region) {
+        const regionHtml = `<i>${region}</i><br>`;
+        const cntrys = Object.keys(sorted[region]).sort().map(formatCountryInts).join('<br>');
+        return regionHtml + cntrys;
+
+        function formatCountryInts(country) {
+            const intCntHtml = `&nbsp;&nbsp;${sorted[region][country].length}`;
+            return `<span class="show-int-cnt">${intCntHtml}</span><span>&nbsp;&nbsp;${country}</span>`;
+        }
+    }
+}
+/* ------------ BY PUBLICATION ------------------ */
+function getIntsGroupedByPublication(ints) {
+    return sortAndFormatInts(ints, 'publication');
+}
+/* ------------ BY TYPE ------------------ */
+function getIntsGroupedByIntType(ints) {
+    return sortAndFormatInts(ints, 'interactionType');
 }
