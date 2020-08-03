@@ -827,8 +827,8 @@ class Taxon
         $flattened = [];
         foreach ($interactions as $int) {  //print("\n    COUNTRY [".$int->getLocation()->getCountryData()."]    \n");
             $flatInt = [
-                'country' => $int->getLocation()->getCountryData() ?
-                    $int->getLocation()->getCountryData()['displayName']: 'Unspecified',
+                'country' => !$int->getLocation()->getCountryData() ? 'Unspecified' :
+                    explode('[', $int->getLocation()->getCountryData()['displayName'])[0],
                 'id' => $int->getId(),
                 'interactionType' => $int->getInteractionType()->getDisplayName(),
                 'publication' => $int->getSource()->getParentSource()->getDisplayName(),

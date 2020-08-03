@@ -116,15 +116,15 @@ function getTxnDisplayData(data) {
                 ]
             ]
         },{
-            section:  'Interactions',
+            section:  getAllTaxonInts(data).length + ' Interactions',
             rows: [
                [  //row 1
                     [
-                        { field: 'By Type', content: getIntsGroupedBy('type', data), classes: 'max-cntnt' },
+                        { field: 'Type', content: getIntsGroupedBy('type', data), classes: 'max-cntnt' },
                     ],[
-                        { field: 'By Country', content: getIntsGroupedBy('loc', data), classes: 'max-cntnt' },
+                        { field: 'Country', content: getIntsGroupedBy('loc', data), classes: 'max-cntnt' },
                     ],[
-                        { field: 'By Publication', content: getIntsGroupedBy('src', data) },
+                        { field: 'Publication', content: getIntsGroupedBy('src', data) },
                     ],
                 ]
             ]
@@ -208,8 +208,11 @@ function getIntsGroupedBy(grouping, taxon) {
         type: getIntsGroupedByIntType, loc: getIntsGroupedByLocation,
         src: getIntsGroupedByPublication
     };
-    const ints = taxon.subjectRoles.concat(taxon.objectRoles);
+    const ints = getAllTaxonInts(taxon);
     return groupByMap[grouping](ints);
+}
+function getAllTaxonInts(taxon) {
+    return  taxon.subjectRoles.concat(taxon.objectRoles);
 }
 function sortAndFormatInts(ints, field) {
     const sorted = {};
