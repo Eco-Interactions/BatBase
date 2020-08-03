@@ -6,19 +6,20 @@
  * set.
  * The search tips available by clicking on "Show Tips".
  *
- * Exports:             Imported by:
- *     exitModal                save-fltrs
- *     showHelpModal            save-fltrs, save-ints
- *     showSaveModal            save-fltrs, view-pdfs
+ * Exports:
+ *     exitModal
+ *     showInfoModal
+ *     showSaveModal
  */
 import { _tutorial } from '../db-pg/db-main.js';
+import { introJs } from '../libs/intro.js';
 let intro;
 
-/* ===================== MODALS/TIPS ======================================== */
-/* ------------ HELP MODALS ------------ */
-export function showHelpModal(key) {
+/* ================ STEP-BY-STEP MODALS ===================================== */
+/* ---------------------- HELP MODALS --------------------------------------- */
+export function showInfoModal(key) {
     if (intro) { return; }
-    intro = require('../libs/intro.js').introJs();
+    intro = introJs.introJs();
     intro.onexit(() => intro = null);
     intro.oncomplete(() => intro = null);
     intro.setOptions({
@@ -83,3 +84,4 @@ function getSlideConfg(text, elem, dir) {
         position: dir
     }];
 }
+/* ================== HINT MODALS =========================================== */
