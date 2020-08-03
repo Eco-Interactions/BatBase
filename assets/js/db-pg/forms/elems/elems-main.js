@@ -34,9 +34,9 @@
 import { _filter, _u, executeMethod, reloadTableWithCurrentFilters } from '../../db-main.js';
 import { _form, _state, getNextFormLevel, clearFormMemory } from '../forms-main.js';
 import * as panel from './detail-panel/detail-panel.js';
-import * as cmbx from './form-elems/fields/combobox-fields.js';
+import * as cmbx from './form-elems/input/combobox-input.js';
 import * as base from './form-elems/base-form.js';
-import * as fields from './form-elems/fields/field-builder.js';
+import * as fields from './form-elems/input/input-builder.js';
 import * as rows from './form-elems/rows/rows-main.js';
 import buildFormFooter from './form-elems/footer/form-footer.js';
 import handleSubFormInit from './form-elems/sub-form.js';
