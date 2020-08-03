@@ -30,6 +30,10 @@ export default function() {  													console.log('getCitationFormConfg');
             'CitationType': 'select',
             'CitationText': 'fullTextArea'
         },
+        'info': {
+        	'Doi': "Digital Object Identifier provided by the Publisher",
+        	'LinkUrl': 'Copy and paste link to article, if available'
+        },
         'required': [
         	'Title',
         	'CitationType'

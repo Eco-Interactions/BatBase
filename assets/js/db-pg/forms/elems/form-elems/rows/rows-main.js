@@ -68,6 +68,7 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
 
     function getFieldData() {
         return {
+            info: fieldsObj.info ? fieldsObj.info[field] : null,
             name: field,
             required: fieldsObj.required.indexOf(field) !== -1,
             type: fieldsObj.fields[field],

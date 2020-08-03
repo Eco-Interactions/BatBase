@@ -29,6 +29,7 @@ export function buildFieldInput(field, entity, fLvl) {                          
     function finishFieldBuild(input) {
         _state('setFormFieldData', [fLvl, field.name, field.value, field.type]);
         if (field.required) { handleRequiredField(input, fLvl); }
+        if (field.info) { $(input).attr('title', field.info); }
         addFieldOnChangeHandler(entity, input, field.name, fLvl);
         if (field.type != 'multiSelect') { $(input).val(field.value); }
         return input;
