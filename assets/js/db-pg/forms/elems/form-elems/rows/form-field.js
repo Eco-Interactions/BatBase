@@ -6,10 +6,10 @@ import { _u } from '../../../../db-main.js';
  * Each element is built, nested, and returned as a completed row.
  * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
  */
-export default function buildFormRow(field, input, fLvl, rowClss) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
+export default function buildFormField(field, input, fLvl, rowClss, info) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
     const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]);
-    const fieldCntnr = buildFieldContainer(input, field, fLvl);
+    const fieldCntnr = buildFieldContainer(input, field, fLvl, info);
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
 }
@@ -23,8 +23,8 @@ function buildRowContainer(field, input, fLvl, rowClss) {
         return rowClass;
     }
 }
-function buildFieldContainer(input, field, fLvl) {
-    const cntnr = _u('buildElem', ['div', { class: 'field-row flex-row'}]);
+function buildFieldContainer(input, field, fLvl, info) {
+    const cntnr = _u('buildElem', ['div', { class: 'field-row flex-row', title: info}]);
     const label = buildFieldLabel(input, field);
     const pin = fLvl === 'top' ? getPinElem(field) : null;
     $(cntnr).append([label, input, pin]);

@@ -9,7 +9,7 @@ export default function getFieldConfgs(entity, fLvl) {
     const confg = getFormConfgData(entity, fLvl);                               //console.log('[%s] get[%s]FieldConfg = %O', fLvl, entity, confg);
     return {
         fields: getIncludedFields(confg),
-        info: confg.form.info,
+        info: confg.form.info || {},
         order: getFieldOrder(confg),
         required: getRequiredFields(confg)
     }

@@ -29,7 +29,6 @@ export function buildFieldInput(field, entity, fLvl) {                          
     function finishFieldBuild(input) {
         _state('setFormFieldData', [fLvl, field.name, field.value, field.type]);
         if (field.required) { handleRequiredField(input, fLvl); }
-        if (field.info) { $(input).attr('title', field.info); }
         addFieldOnChangeHandler(entity, input, field.name, fLvl);
         if (field.type != 'multiSelect') { $(input).val(field.value); }
         return input;
@@ -44,12 +43,12 @@ function getCmbxFunc(type) {
 function buildCombobox(builder, entity, field, fLvl) {
     return _cmbx(builder, [entity, field, fLvl]);
 }
+/* ----------------------- INPUT BUIDLERS ----------------------------------- */
 function getFieldClass(fLvl, fieldType) {
     const classes = { 'top': 'lrg-field', 'sub': 'med-field', 'sub2': 'med-field' };
     return fieldType === 'long' ? (fLvl === 'top' ? 'xlrg-field top' :
         'xlrg-field') : classes[fLvl];
 }
-/* ----------------------- INPUT BUIDLERS ----------------------------------- */
 function buildTextInput(entity, field, fLvl) {
     const attr = { 'type': 'text', class: getFieldClass(fLvl) };
     return _u('buildElem', ['input', attr]);

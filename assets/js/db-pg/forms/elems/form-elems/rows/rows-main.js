@@ -9,9 +9,10 @@
 import { _u } from '../../../../db-main.js';
 import { _elems } from '../../../forms-main.js';
 import getFieldConfgs from './field-confg.js';
+import buildFormField from './form-field.js';
 
 export function buildFormRow() {
-    return require('./single-row.js').default(...arguments);
+    return buildFormField(...arguments);
 }
 /**
  * Builds and returns the default fields for entity sub-form and returns the
@@ -55,20 +56,20 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                             
         }
     }
     function buildSingleFieldRow(field) {                                       //console.log('buildSingleFieldRow [%s]', field);
-        return buildRow(field, fieldObj, entity, fVals, fLvl);
+        return buildRowField(field, fieldObj, entity, fVals, fLvl);
     }
 }
 /**
  * @return {div} Form field row with required-state and value (if passed) set.
  */
-function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+function buildRowField(field, fieldsObj, entity, fVals, fLvl) {                 //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     const fieldData = getFieldData();
     return _elems('buildFieldInput', [fieldData, entity, fLvl])
-        .then(buildFieldRow);
+        .then(buildField);
 
     function getFieldData() {
         return {
-            info: fieldsObj.info ? fieldsObj.info[field] : null,
+            info: fieldsObj.info[field] || '',
             name: field,
             required: fieldsObj.required.indexOf(field) !== -1,
             type: fieldsObj.fields[field],
@@ -76,7 +77,7 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
                 (fieldsObj.fields[field] == 'multiSelect' ? {} : null)
         }
     }
-    function buildFieldRow(input) {                                             //console.log('input = %O', input);
-        return buildFormRow(_u('ucfirst', [field]), input, fLvl, "");
+    function buildField(input) {                                                //console.log('input = %O', input);
+        return buildFormField(_u('ucfirst', [field]), input, fLvl, "", fieldData.info);
     }
-} /* End buildRow */
+}
