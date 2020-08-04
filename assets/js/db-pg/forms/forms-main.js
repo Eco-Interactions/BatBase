@@ -47,7 +47,7 @@ export function create(entity, name) {
     return form.createEntity(entity, name);
 }
 export function initNewDataForm() {
-    return form.createEntity('interaction');
+    return create('interaction');
 }
 export function edit(id, entity) {
     state.initFormState('edit', entity, id)

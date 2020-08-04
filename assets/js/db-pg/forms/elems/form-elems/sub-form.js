@@ -6,7 +6,7 @@
 import { _elems, _cmbx, _state } from '../../forms-main.js';
 import { _u } from '../../../db-main.js';
 
-export default function(fLvl, fClasses, fVals, selId) {
+export default function getSubForm(fLvl, fClasses, fVals, selId) {
     const formEntity = _state('getFormProp', [fLvl, 'entity']);
     return _elems('buildFormRows', [formEntity, fVals, fLvl])
         .then(buildFormContainer)

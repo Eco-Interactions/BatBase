@@ -19,7 +19,7 @@
  * 	  }
  * }
  */
-export default function() {  													console.log('getCitationFormConfg');
+export default function() {  													//console.log('getCitationFormConfg');
 	return {
         'add': {
         	'Title': 'text',

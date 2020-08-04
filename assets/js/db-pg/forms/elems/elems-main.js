@@ -39,7 +39,7 @@ import * as base from './form-elems/base-form.js';
 import * as fields from './form-elems/input/input-builder.js';
 import * as rows from './form-elems/rows/rows-main.js';
 import buildFormFooter from './form-elems/footer/form-footer.js';
-import handleSubFormInit from './form-elems/sub-form.js';
+import getSubForm from './form-elems/sub-form.js';
 
 /* -------------------- EXECUTE MODULE COMMANDS ----------------------------- */
 export function _cmbx(funcName, params = []) {
@@ -59,7 +59,7 @@ export function getFormFooter() {
     return buildFormFooter(...arguments);
 }
 export function initSubForm() {
-    return handleSubFormInit(...arguments);
+    return getSubForm(...arguments);
 }
 export function buildFormRows() {
     return rows.buildFormRows(...arguments);
