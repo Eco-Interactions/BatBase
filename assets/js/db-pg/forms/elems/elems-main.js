@@ -35,11 +35,10 @@ import { _filter, _u, executeMethod, reloadTableWithCurrentFilters } from '../..
 import { _form, _state, getNextFormLevel, clearFormMemory } from '../forms-main.js';
 import * as panel from './detail-panel/detail-panel.js';
 import * as cmbx from './form-elems/input/combobox-input.js';
-import * as base from './form-elems/base-form.js';
+import * as base from './form-elems/form-container.js';
 import * as fields from './form-elems/input/input-builder.js';
 import * as rows from './form-elems/rows/rows-main.js';
 import buildFormFooter from './form-elems/footer/form-footer.js';
-import getSubForm from './form-elems/sub-form.js';
 
 /* -------------------- EXECUTE MODULE COMMANDS ----------------------------- */
 export function _cmbx(funcName, params = []) {
@@ -55,11 +54,8 @@ export function buildAndAppendForm(fields, id) {
 export function getExitButton() {
     return base.getExitButton();
 }
-export function getFormFooter() {
-    return buildFormFooter(...arguments);
-}
 export function initSubForm() {
-    return getSubForm(...arguments);
+    return base.initSubForm(...arguments);
 }
 export function buildFormRows() {
     return rows.buildFormRows(...arguments);
@@ -72,6 +68,9 @@ export function buildFieldInput() {
 }
 export function ifAllRequiredFieldsFilled() {
     return fields.ifAllRequiredFieldsFilled(...arguments);
+}
+export function getFormFooter() {
+    return buildFormFooter(...arguments);
 }
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {

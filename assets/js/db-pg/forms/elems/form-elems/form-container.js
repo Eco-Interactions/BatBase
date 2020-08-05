@@ -4,18 +4,20 @@
  * Exports:
  *     buildAndAppendRootForm
  *     getExitButton
+ *     initSubForm
  *
  * TOC
- *     BUILD ROOT FORM
+ *     ROOT FORM
  *         TOP CORNER EXIT BUTTON
  *         MAIN FORM CONTAINER
  *             HELP ELEMS
  *             HEADER
  *             FORM
- *    APPEND AND STYLE
+ *         APPEND AND STYLE
+ *     SUB FORM
  */
 import { _modal, _u } from '../../../db-main.js';
-import { _elems, _panel, _state } from '../../forms-main.js';
+import { _cmbx, _confg, _elems, _panel, _state } from '../../forms-main.js';
 
 let entity;
 let action;
@@ -30,7 +32,7 @@ function setScopeParams(state) {
     entity = state.entity;
     action = state.action;
 }
-/* ======================== BUILD ROOT FORM ================================= */
+/* ============================== ROOT FORM ================================= */
 /**
  * Returns the form window elements - the form and the detail panel.
  * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
@@ -67,7 +69,7 @@ function getFormHelpElems() {
     const cntnr = _u('buildElem', ['div', { class: 'flex-row'}]);
     if (entity === 'interaction') { addLinkToReferenceGuide(); }
     $(cntnr).css({width: '100%', 'justify-content': 'space-between'})
-        .append(getFormTutorialButton);
+        .append(getTutorialBttn('top'));
     return cntnr;
 
     function addLinkToReferenceGuide() {
@@ -75,13 +77,6 @@ function getFormHelpElems() {
             reference guide while completing this form.</a>`;
         $(cntnr).append(link);
     }
-}
-function getFormTutorialButton() {
-    const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
-    const attr = { class: 'ag-fresh', type: 'button', value: bttnTxt };
-    const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_modal.bind(null, 'showFormTutorial', ['top']));
-    return bttn;
 }
 /* ------------------------------ HEADER ------------------------------------ */
 function getHeader() {
@@ -111,7 +106,7 @@ function buildEntityFieldContainer(fields) {
     $(div).append(fields);
     return div;
 }
-/* ======================= APPEND AND STYLE ================================= */
+/* ----------------------- APPEND AND STYLE --------------------------------- */
 /** Builds and shows the popup form's structural elements. */
 function appendAndStyleForm(form) {
     $('#b-overlay').addClass('form-ovrly');
@@ -129,4 +124,50 @@ function addFormStyleClass() {
     };
     $('#form-main, .form-popup').removeClass(['lrg-form', 'med-form', 'sml-form']);
     $('#form-main, .form-popup').addClass(map[entity]);
+}
+/* ============================== SUB FORM ================================== */
+export function initSubForm(fLvl, fClasses, fVals, sId) {
+    entity = _state('getFormProp', [fLvl, 'entity']);
+    return _elems('buildFormRows', [entity, fVals, fLvl])
+        .then(rows => buildFormContainer(rows, fClasses, fLvl))
+        .then(subForm => finishSubFormInit(subForm, fLvl, sId));
+}
+function buildFormContainer(rows, fClasses, fLvl, sId) {
+    const subFormContainer = buildSubFormCntnr(fClasses, fLvl);
+    const tutorial = getTutorialBttn(fLvl);
+    const hdr = buildFormHdr(fLvl);
+    const footer = _elems('getFormFooter', [entity, fLvl, 'create']);
+    $(subFormContainer).append([tutorial, hdr, rows, footer]);
+    return subFormContainer;
+}
+function buildSubFormCntnr(fClasses, fLvl) {
+    const attr = {id: fLvl+'-form', class: fClasses };
+    return _u('buildElem', ['div', attr]);
+}
+function buildFormHdr(fLvl) {
+    const attr = { text: 'New '+_u('ucfirst', [entity]), id: fLvl+'-hdr' };
+    return _u('buildElem', ['p', attr]);
+}
+function finishSubFormInit(subForm, fLvl, sId) {
+    _state('setFormProp', [fLvl, 'pSelId', sId]);
+    _cmbx('enableCombobox', [sId, false]);
+    return subForm;
+}
+/* ============================== SHARED ==================================== */
+function getTutorialBttn() {
+    if (!formHasTutorialInfo()) { return; }
+    const cntnr = _u('buildElem', ['div', { class: 'flex-row'}]);
+    $(cntnr).append(getFormTutorialButton).css({'justify-content': 'flex-end'});
+    return cntnr;
+}
+function formHasTutorialInfo() {
+    const formInfoConfg = _confg('getFormConfg', [entity]).info;
+    return formInfoConfg && Object.keys(formInfoConfg).length;
+}
+function getFormTutorialButton(fLvl) {
+    const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
+    const attr = { class: 'ag-fresh '+fLvl+'-help', type: 'button', value: bttnTxt };
+    const bttn = _u('buildElem', ['input', attr]);
+    $(bttn).click(_modal.bind(null, 'showFormTutorial', ['top']));
+    return bttn;
 }
