@@ -406,6 +406,7 @@ function onRealmSelection(val) {                                                
         $('#Realm_row').after(rows);
         _state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
+        _elems('toggleSubmitBttn', ['#sub-submit', false]);
         /* Binds the current realm to the 'Select Unspecified' button */
         $('#select-realm').off('click');
         $('#select-realm').click(selectRoleTaxon.bind(null, null, getRealmData('realmTaxon')));

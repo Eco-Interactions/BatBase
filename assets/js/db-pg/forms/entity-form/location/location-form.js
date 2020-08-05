@@ -66,9 +66,10 @@ function addHowToCreateWithGpsNote(pElem) {
     $(pElem).before(getHowToCreateLocWithGpsDataNote());
 }
 function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">GPS
-        data? Enter all data and see the added green pin's popup for name
-        suggestions and the "Create" button.</p>`;
+    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">Enter
+        decimal data (convert <a href="https://www.fcc.gov/media/radio/dms-decimal"
+        target="_blank">here</a>) and see the green pin’s popup for name suggestions,
+        then click “Create”</p>`;
 }
 function addHowToCreateWithOutGpsNote(pElem) {
     $(pElem).before(getHowToCreateLocWithoutGpsDataNote());
