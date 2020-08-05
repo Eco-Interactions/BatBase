@@ -9,25 +9,41 @@
  * Exports:
  *     exitModal
  *     showInfoModal
+ *     showFormTutorial
  *     showSaveModal
+ *
+ * TOC
+ *     INIT INTROJS
+ *     HELP MODALS
+ *     SAVE MODALS
+ *     FORM TUTORIAL
  */
 import { _tutorial } from '../db-pg/db-main.js';
 import { introJs } from '../libs/intro.js';
 let intro;
 
-/* ================ STEP-BY-STEP MODALS ===================================== */
+function initIntroJs(options, onComplete, onExit) {
+    intro = introJs();
+    intro.oncomplete(onComplete);
+    intro.onexit(onExit);
+    intro.setOptions(options);
+}
+function clearIntroMemory() {
+    intro = null;
+}
 /* ---------------------- HELP MODALS --------------------------------------- */
 export function showInfoModal(key) {
     if (intro) { return; }
-    intro = introJs();
-    intro.onexit(() => intro = null);
-    intro.oncomplete(() => intro = null);
-    intro.setOptions({
+    initIntroJs(getInfoModalOpts(key), clearIntroMemory, clearIntroMemory);
+    intro.start();
+}
+function getInfoModalOpts(key) {
+    return {
         showBullets: false,
         showStepNumbers: false,
         steps: getHelpSteps(key),
-        tooltipClass: 'intro-tips'});
-    intro.start();
+        tooltipClass: 'intro-tips'
+    };
 }
 function getHelpSteps(key) {
     const getSteps = {
@@ -37,7 +53,7 @@ function getHelpSteps(key) {
     };
     return _tutorial(getSteps[key]);
 }
-/* ------------ SAVE MODALS ------------ */
+/* ----------------------- SAVE MODALS -------------------------------------- */
 /**
  * Shows the save modal. Possible configuration are:
  * > Required config: html, elem, dir
@@ -49,10 +65,8 @@ export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bt
     window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
 }
 function initModal(confg) {
-    intro = introJs();
-    intro.oncomplete(getSubmitFunc(confg.submit, confg.cancel));
-    intro.onexit(getExitFunc(confg.cancel));
-    intro.setOptions(getModalOptions(confg));
+    const onComplete = getSubmitFunc(confg.submit, confg.cancel);
+    initIntroJs(getModalOptions(confg), onComplete, getExitFunc(confg.cancel));
     if (confg.onLoad) { intro.onafterchange(confg.onLoad); }
     intro.start();
 }
@@ -84,31 +98,36 @@ function getSlideConfg(text, elem, dir) {
         position: dir
     }];
 }
-/* ================== HINT MODALS =========================================== */
+/* ----------------------- FORM TUTORIAL ------------------------------------ */
 export function showFormTutorial(fLvl) {                                        console.log('show[%s]FormTutorial', fLvl);
     if (intro) { intro.exit() }
-    hideNonFormElems();
-    intro = introJs();
-    intro.onexit(exitFormTutorial);
-    intro.oncomplete(() => intro = null);
-    intro.setOptions({
-        // showBullets: false,
-        // showStepNumbers: false,
-        tooltipClass: 'intro-tips'});
-    intro.start('.'+fLvl);
-    window.setTimeout(() => {intro.refresh();}, 500);
-
+    formTutorialSetUp();
+    initIntroJs({tooltipClass: 'intro-tips'}, exitFormTutorial, exitFormTutorial);
+    intro.start('.'+fLvl+'-intro');
+    refreshIntro();
 }
-function hideNonFormElems(hide) {
+function formTutorialSetUp() {
+    togglePgElemZindexes('hide');
+    $(window).scroll(refreshIntro)
+}
+function togglePgElemZindexes(state) {
+    if (state === 'hide') { hideNonFormElems();
+    } else { resetPgElems(); }
+}
+function hideNonFormElems() {
     const selectors = 'nav, #hdrmenu, #slider-logo';
     $(selectors).css({'z-index': 0});
-}
-function exitFormTutorial() {
-    intro = null;
-    resetPgElems();
 }
 function resetPgElems() {
     $('nav').css({'z-index': 1});
     $('#hdrmenu').css({'z-index': 1001});
     $('#slider-logo').css({'z-index': 11});
+}
+function refreshIntro() {
+    window.setTimeout(() => {intro.refresh();}, 500);
+}
+function exitFormTutorial() {
+    intro = null;
+    resetPgElems();
+    $(window).off('scroll', refreshIntro);
 }
