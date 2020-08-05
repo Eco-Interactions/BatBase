@@ -2,18 +2,19 @@
  * Initiates and appends the main entity form.
  *
  * Exports:
- *     buildAndAppendRootForm       elems-main
- *     getExitButton                form-errs, interaction-form
+ *     buildAndAppendRootForm
+ *     getExitButton
  *
- * CODE SECTIONS
+ * TOC
  *     BUILD ROOT FORM
  *         TOP CORNER EXIT BUTTON
  *         MAIN FORM CONTAINER
+ *             HELP ELEMS
  *             HEADER
  *             FORM
  *    APPEND AND STYLE
  */
-import { _u } from '../../../db-main.js';
+import { _modal, _u } from '../../../db-main.js';
 import { _elems, _panel, _state } from '../../forms-main.js';
 
 let entity;
@@ -29,7 +30,7 @@ function setScopeParams(state) {
     entity = state.entity;
     action = state.action;
 }
-/* ======================== BUILD ROOT FORM ================================== */
+/* ======================== BUILD ROOT FORM ================================= */
 /**
  * Returns the form window elements - the form and the detail panel.
  * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
@@ -58,15 +59,36 @@ export function getExitButton() {
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
     const formWin = _u('buildElem', ['div', { id: 'form-main', class: action }]);
-    $(formWin).append([getHeader(), getForm(fields)]);
+    $(formWin).append([getFormHelpElems(), getHeader(), getForm(fields)]);
     return formWin;
 }
-/* ------------------ HEADER --------------------------------- */
+/* ----------------------- HELP ELEMS --------------------------------------- */
+function getFormHelpElems() {
+    const cntnr = _u('buildElem', ['div', { class: 'flex-row'}]);
+    if (entity === 'interaction') { addLinkToReferenceGuide(); }
+    $(cntnr).css({width: '100%', 'justify-content': 'space-between'})
+        .append(getFormTutorialButton);
+    return cntnr;
+
+    function addLinkToReferenceGuide() {
+        const link = `<a href="#" target="_blank">Click here and use the
+            reference guide while completing this form.</a>`;
+        $(cntnr).append(link);
+    }
+}
+function getFormTutorialButton() {
+    const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
+    const attr = { class: 'ag-fresh', type: 'button', value: bttnTxt };
+    const bttn = _u('buildElem', ['input', attr]);
+    $(bttn).click(_modal.bind(null, 'showFormTutorial', ['top']));
+    return bttn;
+}
+/* ------------------------------ HEADER ------------------------------------ */
 function getHeader() {
     const title = (action == 'create' ? 'New ' : 'Editing ') + _u('ucfirst', [entity]);
     return _u('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }
-/* ------------------------- FORM --------------------------------------- */
+/* ----------------------------- FORM --------------------------------------- */
 function getForm(fields) {
     const form = buildFormElem();
     $(form).append([

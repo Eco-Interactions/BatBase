@@ -19,7 +19,7 @@ let intro;
 /* ---------------------- HELP MODALS --------------------------------------- */
 export function showInfoModal(key) {
     if (intro) { return; }
-    intro = introJs.introJs();
+    intro = introJs();
     intro.onexit(() => intro = null);
     intro.oncomplete(() => intro = null);
     intro.setOptions({
@@ -49,7 +49,7 @@ export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bt
     window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
 }
 function initModal(confg) {
-    intro = require('../libs/intro.js').introJs();
+    intro = introJs();
     intro.oncomplete(getSubmitFunc(confg.submit, confg.cancel));
     intro.onexit(getExitFunc(confg.cancel));
     intro.setOptions(getModalOptions(confg));
@@ -85,3 +85,30 @@ function getSlideConfg(text, elem, dir) {
     }];
 }
 /* ================== HINT MODALS =========================================== */
+export function showFormTutorial(fLvl) {                                        console.log('show[%s]FormTutorial', fLvl);
+    if (intro) { intro.exit() }
+    hideNonFormElems();
+    intro = introJs();
+    intro.onexit(exitFormTutorial);
+    intro.oncomplete(() => intro = null);
+    intro.setOptions({
+        // showBullets: false,
+        // showStepNumbers: false,
+        tooltipClass: 'intro-tips'});
+    intro.start('.'+fLvl);
+    window.setTimeout(() => {intro.refresh();}, 500);
+
+}
+function hideNonFormElems(hide) {
+    const selectors = 'nav, #hdrmenu, #slider-logo';
+    $(selectors).css({'z-index': 0});
+}
+function exitFormTutorial() {
+    intro = null;
+    resetPgElems();
+}
+function resetPgElems() {
+    $('nav').css({'z-index': 1});
+    $('#hdrmenu').css({'z-index': 1001});
+    $('#slider-logo').css({'z-index': 11});
+}

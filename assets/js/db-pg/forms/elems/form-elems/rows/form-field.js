@@ -9,7 +9,7 @@ import { _u } from '../../../../db-main.js';
 export default function buildFormField(field, input, fLvl, rowClss, info) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
     const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]);
-    const fieldCntnr = buildFieldContainer(input, field, fLvl, info);
+    const fieldCntnr = buildField(input, field, fLvl, info);
     $(rowDiv).append([errorDiv, fieldCntnr]);
     return rowDiv;
 }
@@ -23,11 +23,20 @@ function buildRowContainer(field, input, fLvl, rowClss) {
         return rowClass;
     }
 }
-function buildFieldContainer(input, field, fLvl, info) {
-    const cntnr = _u('buildElem', ['div', { class: 'field-row flex-row', title: info}]);
+function buildField(input, field, fLvl, info) {
+    const cntnr = buildFieldContainer(fLvl, info);
     const label = buildFieldLabel(input, field);
     const pin = fLvl === 'top' ? getPinElem(field) : null;
     $(cntnr).append([label, input, pin]);
+    return cntnr;
+}
+/**
+ * Note: The formLvl class is used for the form-specific tutorials.
+ */
+function buildFieldContainer(fLvl, info) {
+    const attr = { class: 'field-row flex-row '+fLvl, title: info};
+    const cntnr = _u('buildElem', ['div', attr]);
+    if (info) { $(cntnr).attr('data-intro', info); }
     return cntnr;
 }
 function buildFieldLabel(input, field) {

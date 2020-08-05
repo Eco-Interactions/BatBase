@@ -17,7 +17,7 @@ import * as _int from './interaction/interaction-form.js';
 import * as _loc from './location/location-form.js';
 import * as _src from './source/source-forms.js';
 import * as _txn from './taxon/taxon-form.js';
-import * as _autoCite from './source/auto-citation.js';
+import * as autoCite from './source/auto-citation.js';
 
 const forms = {
     'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
@@ -87,14 +87,11 @@ export function selectParentTaxon(id) {
     return _txn.selectParentTaxon(id);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
-export function loadSrcTypeFields(subEntity, typeId, elem, typeName) {
-    return _src.loadSrcTypeFields(subEntity, typeId, elem, typeName);
-}
 export function onSrcToggleFields() {
     _src.finishSourceToggleAllFields(...arguments);
 }
-export function getSrcTypeFields(subEntity, typeId) {
-    return _src.getSrcTypeFields(subEntity, typeId);
+export function getSrcTypeFields() {
+    return _src.getSrcTypeFields(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */
@@ -106,8 +103,8 @@ export function handleCitText(formLvl) {
     _src.handleCitText(formLvl);
 }
 export function getCitationText(fLvl) {
-    return _autoCite.getCitationText(fLvl);
+    return autoCite.getCitationText(fLvl);
 }
 export function rebuildCitationText(params) {
-    return _autoCite.rebuildCitationText(params);
+    return autoCite.rebuildCitationText(params);
 }

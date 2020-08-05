@@ -31,7 +31,7 @@
  *     HELPERS
  */
 import { _u } from '../../../db-main.js';
-import { _state, _elems, _cmbx, _form, _val, getSubFormLvl, getNextFormLevel } from '../../forms-main.js';
+import { _state, _elems, _cmbx, _form, _panel, _val, getSubFormLvl, getNextFormLevel } from '../../forms-main.js';
 
 let timeout = null; //Prevents citation text being generated multiple times.
 let rmvdAuthField = {};
@@ -44,14 +44,24 @@ export function initFormCombos(entity, fLvl) {
 function getEntityComboEvents(entity) {
     return  {
         'citation': {
-            'CitationType': { add: false, change: loadCitTypeFields },
-            'Authors': { add: initAuthForm.bind(null, 1), change: onAuthSelection },
+            'CitationType': {
+                change: loadCitTypeFields },
+            'Authors': {
+                add: initAuthForm.bind(null, 1),
+                change: onAuthSelection },
         },
         'publication': {
-            'PublicationType': { change: loadPubTypeFields },
-            'Publisher': { change: onPublSelection, add: initPublisherForm },
-            'Authors': { add: initAuthForm.bind(null, 1), change: onAuthSelection },
-            'Editors': { change: onEdSelection, add: initEdForm.bind(null, 1) }
+            'PublicationType': {
+                change: loadPubTypeFields },
+            'Publisher': {
+                add: initPublisherForm,
+                change: onPublSelection },
+            'Authors': {
+                add: initAuthForm.bind(null, 1),
+                change: onAuthSelection },
+            'Editors': {
+                change: onEdSelection,
+                add: initEdForm.bind(null, 1) }
         }
     }[entity];
 }
@@ -64,7 +74,7 @@ export function initCreateForm(entity, name) {                                  
         'publication': initPubForm,
         'publisher': initPublisherForm
     };
-    funcs[entity](name);
+    return funcs[entity](name);
 }
 /* ========================== PUBLICATION =================================== */
 /* ---------------- CREATE FORM --------------------- */
@@ -76,13 +86,15 @@ export function initCreateForm(entity, name) {                                  
 function initPubForm(value) {                                                   console.log('       /--initPubForm [%s]', value);
     const val = value === 'create' ? '' : value;
     initPubMemory();
-    buildAndAppendPubForm(val);
+    _cmbx('clearCombobox', ['#CitationTitle-sel']);
+    _panel('clearFieldDetails', ['CitationTitle']);
+    return buildAndAppendPubForm(val);
 }
 function initPubMemory() {
     _state('addEntityFormState', ['publication', 'sub', '#Publication-sel', 'create']);
 }
 function buildAndAppendPubForm(val) {
-    _elems('initSubForm',
+    return _elems('initSubForm',
         ['sub', 'med-sub-form', {'Title': val}, '#Publication-sel'])
     .then(form => appendPubFormAndFinishBuild(form));
 }
@@ -98,8 +110,7 @@ function appendPubFormAndFinishBuild(form) {
  * previous type-fields and initializes the selectized dropdowns.
  */
 function loadPubTypeFields(typeId) {                                            console.log('           /--loadPubTypeFields');
-    const elem = this.$input[0];
-    return loadSrcTypeFields('publication', typeId, elem)
+    return loadSrcTypeFields('publication', typeId)
         .then(finishPubTypeFields);
 
     function finishPubTypeFields() {
@@ -124,7 +135,7 @@ function initCitForm(v) {                                                       
     const val = v === 'create' ? '' : v;
     timeout = null;
     rmvdAuthField = {};
-    _u('getData', [['author', 'publication']])
+    return _u('getData', [['author', 'publication']])
     .then(data => initCitFormMemory(data))
     .then(() => buildAndAppendCitForm(val));
 }
@@ -147,7 +158,7 @@ function addPubRcrdsToMemory(pubRcrds) {
     setPubInMemory(pubSrc, pub, 'sub');
 }
 function buildAndAppendCitForm(val) {
-    initCitSubForm(val)
+    return initCitSubForm(val)
     .then(form => appendCitFormAndFinishBuild(form));
 }
 function initCitSubForm(val) {
@@ -157,7 +168,7 @@ function initCitSubForm(val) {
 function appendCitFormAndFinishBuild(form) {                                    //console.log('           --appendCitFormAndFinishBuild');
     $('#CitationTitle_row')[0].parentNode.after(form);
     initFormCombos('citation', 'sub');
-    selectDefaultCitType()
+    return selectDefaultCitType()
     .then(() => finishCitFormUiLoad());
 }
 function finishCitFormUiLoad() {
@@ -176,7 +187,8 @@ function setCitType(citTypes) {
         'Book': getBookDefault(pubType, rcrds), 'Journal': 'Article',
         'Other': 'Other', 'Thesis/Dissertation': 'Ph.D. Dissertation'
     }[pubType];
-    _cmbx('setSelVal', ['#CitationType-sel', citTypes[defaultType]]);
+    _cmbx('setSelVal', ['#CitationType-sel', citTypes[defaultType], 'silent']);
+    return loadCitTypeFields(citTypes[defaultType], defaultType);
 }
 function getBookDefault(pubType, rcrds) {
     if (pubType !== 'Book') { return 'Book'; }
@@ -192,15 +204,15 @@ function setPubInMemory(pubSrc, pub, fLvl) {
  * loading the default fields for the selected Citation Type. If this is an
  * edit form, skip loading pub data...
  */
-function loadCitTypeFields(typeId) {                                            //console.log('           /--loadCitTypeFields');
+function loadCitTypeFields(typeId, typeName) {                                            //console.log('           /--loadCitTypeFields');
     const fLvl = getSubFormLvl('sub');
-    const elem = this.$input[0];
-    if (!_state('isEditForm')) { addPubData(typeId, elem, fLvl); }
-    return loadSrcTypeFields('citation', typeId, elem)
+    const type = typeName || this.$input[0].innerText;
+    if (!_state('isEditForm')) { addPubData(typeId, type, fLvl); }
+    return loadSrcTypeFields('citation', typeId, type)
         .then(finishCitTypeFields);
 
     function finishCitTypeFields() {
-        handleSpecialCaseTypeUpdates(elem, fLvl);
+        handleSpecialCaseTypeUpdates(type, fLvl);
         handleCitText(fLvl);
         setCitationFormRowStyles(fLvl);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
@@ -214,8 +226,7 @@ function setCitationFormRowStyles(fLvl) {
  * Shows/hides the author field depending on whether the publication has authors
  * already. Disables title field for citations that don't allow sub-titles.
  */
-function handleSpecialCaseTypeUpdates(elem, fLvl) {
-    const type = elem.innerText;                                                //console.log('handleSpecialCaseTypeUpdates [%s]', type)
+function handleSpecialCaseTypeUpdates(type, fLvl) {                             //console.log('handleSpecialCaseTypeUpdates [%s]', type)
     const hndlrs = {
         'Book': updateBookFields, 'Chapter': updateBookFields,
         "Master's Thesis": disableTitleField, 'Other': disableFilledFields,
@@ -277,8 +288,8 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {
     }
 } /* End handleSpecialCaseTypeUpdates */
 /** Adds or removes publication data from the form's values, depending on type. */
-function addPubData(typeId, citTypeElem, fLvl) {
-    const type = citTypeElem.innerText;
+function addPubData(typeId, type, fLvl) {
+    // const type = citTypeElem.innerText;
     const copy = ['Book', "Master's Thesis", 'Museum record', 'Other',
         'Ph.D. Dissertation', 'Report', 'Chapter' ];
     const addSameData = copy.indexOf(type) !== -1;
@@ -330,7 +341,7 @@ export function handleCitText(formLvl) {                                        
     if (timeout) { return; }
     timeout = window.setTimeout(buildCitTextAndUpdateField, 750);
 
-    function buildCitTextAndUpdateField() {                                     console.log('           /--buildCitTextAndUpdateField')
+    function buildCitTextAndUpdateField() {                                     //console.log('           /--buildCitTextAndUpdateField')
         const fLvl = formLvl || getSubFormLvl('sub');
         const $elem = $('#CitationText_row textarea');
         if (!$elem.val()) { initializeCitField($elem); }
@@ -395,10 +406,10 @@ function ifFieldShouldBeSkipped (el, label, input) {
  * any type-specific labels for fields.
  * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
  */
-export function loadSrcTypeFields(entity, typeId, elem, typeName) {             //console.log('           /--loadSrcTypeFields [%s][%s]', entity, typeName);
+export function loadSrcTypeFields(entity, typeId, type) {                       //console.log('           /--loadSrcTypeFields [%s][%s]', entity, type);
     const fLvl = getSubFormLvl('sub');
     resetOnFormTypeChange(entity, typeId, fLvl);
-    return getSrcTypeRows(entity, typeId, fLvl, typeName)
+    return getSrcTypeRows(entity, typeId, fLvl, type)
         .then(finishSrcTypeFormBuild);
 
     function finishSrcTypeFormBuild(rows) {                                     //console.log('rows = %O', rows)
@@ -532,7 +543,7 @@ function initPublisherForm(value) {                                             
     if ($('#'+fLvl+'-form').length !== 0) {
         return _val('openSubFormErr', ['Publisher', null, fLvl]);
     }
-    initEntitySubForm('publisher', fLvl, {'DisplayName': val}, '#Publisher-sel')
+    return initEntitySubForm('publisher', fLvl, {'DisplayName': val}, '#Publisher-sel')
     .then(appendPublFormAndFinishBuild);
 
     function appendPublFormAndFinishBuild(form) {
@@ -634,10 +645,10 @@ function getAuthAddFunc(authType, cnt) {
 }
 /* ------------------------ AUTHOR CREATE ----------------------------------- */
 function initAuthForm(selCnt, val) {                                            //console.log("Adding new auth! val = %s, e ? ", val, arguments);
-    handleNewAuthForm(selCnt, val, 'Authors');
+    return handleNewAuthForm(selCnt, val, 'Authors');
 }
 function initEdForm(selCnt, val) {                                              //console.log("Adding new editor! val = %s, e ? ", val, arguments);
-    handleNewAuthForm(selCnt, val, 'Editors');
+    return handleNewAuthForm(selCnt, val, 'Editors');
 }
 /**
  * When a user enters a new author (or editor) into the combobox, a create
@@ -654,7 +665,7 @@ function handleNewAuthForm(authCnt, value, authType) {                          
     }
     const val = value === 'create' ? '' : value;
     const singular = _u('lcfirst', [authType.slice(0, -1)]);
-    initEntitySubForm(singular, fLvl, {'LastName': val}, pId)
+    return initEntitySubForm(singular, fLvl, {'LastName': val}, pId)
     .then(appendAuthFormAndFinishBuild);
 
     function appendAuthFormAndFinishBuild(form) {
@@ -699,7 +710,7 @@ export function finishEditFormBuild(entity) {                                   
     initFormCombos(entity, 'top');
     $('.all-fields-cntnr').hide();
     if (entity === 'citation') {
-        handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
+        handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['#CitationType-sel']), 'top');
     } else {
         $('#PublicationType-lbl').css('min-width', '125px');
     }
@@ -714,7 +725,7 @@ export function finishSourceToggleAllFields(entity, fVals, fLvl) {
     if (entity === 'publication') {
         ifBookAddAuthEdNote(fVals.PublicationType);
     } else  { // 'citation'
-        handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
+        handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['#CitationType-sel']), fLvl);
         handleCitText(fLvl);
     }
     updateFieldsForSourceType(entity, fLvl);
