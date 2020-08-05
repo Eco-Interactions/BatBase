@@ -34,9 +34,9 @@ function buildField(input, field, fLvl, info) {
  * Note: The formLvl class is used for the form-specific tutorials.
  */
 function buildFieldContainer(fLvl, info) {
-    const attr = { class: 'field-row flex-row '+fLvl+'-intro', title: info};
+    const attr = { class: 'field-row flex-row', title: info};
     const cntnr = _u('buildElem', ['div', attr]);
-    if (info) { $(cntnr).attr('data-intro', info); }
+    if (info) { $(cntnr).attr('data-intro', info).addClass(fLvl+'-intro'); }
     return cntnr;
 }
 function buildFieldLabel(input, field) {
