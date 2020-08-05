@@ -17,9 +17,10 @@
  *     HELP MODALS
  *     SAVE MODALS
  *     FORM TUTORIAL
+ *         refreshIntroPosition
  */
 import { _tutorial } from '../db-pg/db-main.js';
-import { introJs } from '../libs/intro.js';
+import * as introJs from '../libs/intro.js';
 let intro;
 
 function initIntroJs(options, onComplete, onExit) {
@@ -99,16 +100,15 @@ function getSlideConfg(text, elem, dir) {
     }];
 }
 /* ----------------------- FORM TUTORIAL ------------------------------------ */
-export function showFormTutorial(fLvl) {                                        console.log('show[%s]FormTutorial', fLvl);
-    if (intro) { intro.exit() }
+export function showFormTutorial(fLvl) {                                        //console.log('show[%s]FormTutorial', fLvl);
+    if (intro) { intro.exit(); }
     formTutorialSetUp();
     initIntroJs({tooltipClass: 'intro-tips'}, exitFormTutorial, exitFormTutorial);
-    intro.start('.'+fLvl+'-intro');
+    intro.start(fLvl+'-intro');
     refreshIntro();
 }
 function formTutorialSetUp() {
     togglePgElemZindexes('hide');
-    $(window).scroll(refreshIntro)
 }
 function togglePgElemZindexes(state) {
     if (state === 'hide') { hideNonFormElems();
@@ -118,16 +118,15 @@ function hideNonFormElems() {
     const selectors = 'nav, #hdrmenu, #slider-logo';
     $(selectors).css({'z-index': 0});
 }
+function refreshIntro() {
+    window.setTimeout(() => {intro.refresh()}, 250);
+}
 function resetPgElems() {
     $('nav').css({'z-index': 1});
     $('#hdrmenu').css({'z-index': 1001});
     $('#slider-logo').css({'z-index': 11});
 }
-function refreshIntro() {
-    window.setTimeout(() => {intro.refresh();}, 500);
-}
 function exitFormTutorial() {
     intro = null;
     resetPgElems();
-    $(window).off('scroll', refreshIntro);
 }

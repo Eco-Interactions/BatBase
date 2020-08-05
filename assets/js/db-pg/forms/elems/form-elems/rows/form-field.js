@@ -36,7 +36,8 @@ function buildField(input, field, fLvl, info) {
 function buildFieldContainer(fLvl, info) {
     const attr = { class: 'field-row flex-row', title: info};
     const cntnr = _u('buildElem', ['div', attr]);
-    if (info) { $(cntnr).attr('data-intro', info).addClass(fLvl+'-intro'); }
+    if (info) { $(cntnr).addClass(fLvl+'-intro')
+        .attr({'data-intro': info, 'data-intro-group': fLvl+'-intro'}); }
     return cntnr;
 }
 function buildFieldLabel(input, field) {

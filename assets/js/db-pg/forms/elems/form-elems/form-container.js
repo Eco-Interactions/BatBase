@@ -154,10 +154,10 @@ function finishSubFormInit(subForm, fLvl, sId) {
     return subForm;
 }
 /* ============================== SHARED ==================================== */
-function getTutorialBttn() {
+function getTutorialBttn(fLvl) {
     if (!formHasTutorialInfo()) { return; }
     const cntnr = _u('buildElem', ['div', { class: 'flex-row'}]);
-    $(cntnr).append(getFormTutorialButton).css({'justify-content': 'flex-end'});
+    $(cntnr).append(getFormTutorialButton(fLvl)).css({'justify-content': 'flex-end'});
     return cntnr;
 }
 function formHasTutorialInfo() {
@@ -168,6 +168,6 @@ function getFormTutorialButton(fLvl) {
     const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
     const attr = { class: 'ag-fresh '+fLvl+'-help', type: 'button', value: bttnTxt };
     const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_modal.bind(null, 'showFormTutorial', ['top']));
+    $(bttn).click(_modal.bind(null, 'showFormTutorial', [fLvl]));
     return bttn;
 }
