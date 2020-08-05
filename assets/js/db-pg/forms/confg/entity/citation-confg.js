@@ -1,25 +1,7 @@
 /**
- * Citation form config:
- * {
- * 	  add: { FieldName: fieldType, ... }
- * 	  required: [ FieldName, ... ],
- * 	  basic: [ FieldName, ... ] (always shown)
- * 	  optional: [ FieldName, ... ]  //todo: if optional is false, suggested can be emptu here and opt can be removed from order
- * 	  order: {
- * 	  	 'basic': [ FullRowField, [FieldName, SecondFieldInRow, ...], ...]
- * 	  	 'opt': [SameFormat, or FALSE]
- * 	  }
- * 	  types: {
- * 	  	   Type name: {
- * 	  	   		name:
- * 	  	   		required:
- * 	  	   		optional:
- * 	  	   		order
- * 	  	   }
- * 	  }
- * }
+ * Citation form configuration.
  */
-export default function() {  													//console.log('getCitationFormConfg');
+export default function() {
 	return {
         'add': {
         	'Title': 'text',
@@ -45,7 +27,7 @@ export default function() {  													//console.log('getCitationFormConfg');
         	'LinkDisplay',
         	'LinkUrl'],
         'optional': [],
-        'order': {
+        'order': {  //will be merged with type.order
             'sug': [
             	'CitationText',
             	'Abstract',
