@@ -136,8 +136,7 @@ export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
     return reqFieldsFilled;
 }
 function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
-    return fields.ifAllRequiredFieldsFilled(fLvl) &&
-        !hasOpenSubForm(fLvl) && !locHasGpsData(fLvl);
+    return fields.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl) //&& !locHasGpsData(fLvl);
 }
 /** Returns true if the next sub-level form exists in the dom. */
 function hasOpenSubForm(fLvl) {
@@ -145,13 +144,13 @@ function hasOpenSubForm(fLvl) {
     return $('#'+childFormLvl+'-form').length > 0;
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
-function locHasGpsData(fLvl) {
-    if (_state('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
-    if (_state('getFormProp', [fLvl, 'action']) === 'edit') { return false; }
-    return ['Latitude', 'Longitude'].some(field => {
-        return $(`#${field}_row input`).val();
-    });
-}
+// function locHasGpsData(fLvl) {
+//     if (_state('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
+//     if (_state('getFormProp', [fLvl, 'action']) === 'edit') { return false; }
+//     return ['Latitude', 'Longitude'].some(field => {
+//         return $(`#${field}_row input`).val();
+//     });
+// }
 /* -------------------- TOGGLE FORM-FIELDS ---------------------------------- */
 export function setToggleFieldsEvent(elem, entity, fLvl) {
     $(elem).click(toggleShowAllFields.bind(elem, entity, fLvl));

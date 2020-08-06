@@ -35,7 +35,7 @@ function buildLocForm(val) {
         $('#Location_row')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
         _cmbx('enableCombobox', ['#Country-Region-sel', false]);
-        $('#sub-submit').val('Create without GPS data');
+        // $('#sub-submit').val('Create without GPS data');
         _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_row input').focus();
@@ -60,25 +60,30 @@ function scrollToLocFormWindow() {
 }
 function addNotesToForm() {
     addHowToCreateWithGpsNote($('#Latitude_row')[0].parentNode);
-    addHowToCreateWithOutGpsNote($('#DisplayName_row')[0].parentNode);
+    addSelectSimilarLocationNote($('#ElevationMax_row')[0].parentNode);
+    // addHowToCreateWithOutGpsNote($('#DisplayName_row')[0].parentNode);
 }
 function addHowToCreateWithGpsNote(pElem) {
-    $(pElem).before(getHowToCreateLocWithGpsDataNote());
-}
-function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">Enter
+    const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">Enter
         decimal data (convert <a href="https://www.fcc.gov/media/radio/dms-decimal"
-        target="_blank">here</a>) and see the green pin’s popup for name suggestions,
-        then click “Create”</p>`;
+        target="_blank">here</a>) and see the green pin’s popup for name suggestions.</p>`;
+    $(pElem).before(note);
 }
-function addHowToCreateWithOutGpsNote(pElem) {
-    $(pElem).before(getHowToCreateLocWithoutGpsDataNote());
+function getHowToCreateLocWithGpsDataNote() {
 }
-function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p class="loc-gps-note skipFormData">No GPS data? Fill
-        in available data and click "Create without GPS data" at the bottom of
-        the form.</p>`;
+function addSelectSimilarLocationNote(prevElem) {
+    const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">
+        Select an existing location by clicking inside its pin's popup.</p>`;
+    $(prevElem).after(note);
 }
+// function addHowToCreateWithOutGpsNote(pElem) {
+//     $(pElem).before(getHowToCreateLocWithoutGpsDataNote());
+// }
+// function getHowToCreateLocWithoutGpsDataNote() {
+//     return `<p class="loc-gps-note skipFormData">No GPS data? Fill
+//         in available data and click "Create without GPS data" at the bottom of
+//         the form.</p>`;
+// }
 function handleElevFieldsAndNumberInputs() {
     $('#Elevation-lbl').text('Elevation (m)');
     $('#Elevation_row input, #ElevationMax_row input, #Latitude_row input, #Longitude_row input')
@@ -161,9 +166,9 @@ export function focusParentAndShowChildLocs(type, val) {
     _map('initFormMap', [val, locRcrds, type]);
 }
 export function addListenerToGpsFields(fLvl, params = [true]) {
-    $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
+    $('#Latitude_row input, #Longitude_row input').change(validateLocFields);
 
-    function toggleNoGpsSubmitBttn() {
+    function validateLocFields() {
         const coords = getCoordVals()
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         if (coords.length === 1) { ifEditingDisableSubmit(fLvl, coords); }

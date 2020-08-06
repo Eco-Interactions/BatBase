@@ -566,11 +566,12 @@ function fillCoordFields(latLng) {                                              
 function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('           --updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
     if (!app.map) { return; } //form cloesd before geocode results returned.
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
-    updateMapPin(latLng, results[0], zoomFlag);
+    updateMapPin(latLng, results[0], zoomFlag)
+    .then(() => app.volatile.marker.openPopup());
 }
 function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
-    _db('getData', ['countryCodes']).then(cntrys => {
+    return _db('getData', ['countryCodes']).then(cntrys => {
         const loc = results ? buildLocData(results, cntrys) : null;
         replaceMapPin(latLng, loc, zoomFlag);
         $('#'+app.map._container.id).css('cursor', 'default');
@@ -597,7 +598,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
         addParentLocDataToMap(loc.cntryId, null);
     }
-    addPinToMap(latLng, marker.layer, zoomFlag);
+    addPinToMap(latLng, marker, zoomFlag);
 }
 function removePreviousMapPin(loc) {
     if (!app.volatile.pin) { return app.volatile.loc = loc; }
@@ -608,10 +609,11 @@ function resetPinLoc(loc) {
     app.volatile.prevLoc = app.volatile.loc;
     app.volatile.loc = loc;
 }
-function addPinToMap(latLng, pin, zoomFlag) {
+function addPinToMap(latLng, marker, zoomFlag) {
     const zoom = zoomFlag ? app.map.getZoom() : 8;
-    app.volatile.pin = pin;
-    app.map.addLayer(pin);
+    app.volatile.marker = marker;
+    app.volatile.pin = marker.layer;
+    app.map.addLayer(marker.layer);
     app.map.setView(latLng, zoom, {animate:true});
 }
 /**

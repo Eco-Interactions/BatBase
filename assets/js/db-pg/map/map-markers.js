@@ -693,22 +693,21 @@ function buildLocDetails(loc) {
 function getGeocodedLocHtml(loc, editing) {                                     //console.log('buildingGeocodedLocationPopup. editing? ', editing);
     const cntnr = _u('buildElem', ['div', {class: 'flex-col new-loc-popup'}]);
     const text = getNewLocText(loc, editing);
-    const bttn = editing ? '' : getCreateLocBttn();
-    $(cntnr).append([text, bttn]);
+    // const bttn = editing ? '' : getCreateLocBttn();
+    $(cntnr).append([text]);  //, bttn
     return cntnr;
 }
 function getNewLocText(loc, editing) {
     const name = !loc ? 'No geo-data found. Please double-check coordinates.' :
         'Near: <b>'+ loc.name;
     const html = `<div style="font-size:1.1em;">${name}</b></div>`;
-    return editing ? html : `${html}After confirming that this location is unique,
-        please fill in all available data and click "Create Location" to submit.`;
+    return editing ? html : `${html}Please ensure that this location is unique.`;
 }
-/** Click event added in location-form. */
-function getCreateLocBttn() {
-    const attr = {type: 'button', id: 'new-gps-loc', class:'ag-fresh', value: 'Create Location'};
-    const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_forms.bind(null, 'addNewLocationWithGps', []));
-    $(bttn).css({'margin': '.5em 0 0 -.4em'});
-    return bttn;
-}
+// /** Click event added in location-form. */
+// function getCreateLocBttn() {
+//     const attr = {type: 'button', id: 'new-gps-loc', class:'ag-fresh', value: 'Create Location'};
+//     const bttn = _u('buildElem', ['input', attr]);
+//     $(bttn).click(_forms.bind(null, 'addNewLocationWithGps', []));
+//     $(bttn).css({'margin': '.5em 0 0 -.4em'});
+//     return bttn;
+// }
