@@ -6,17 +6,16 @@ export default function() {
         'add': {},
         'info': {
             'Latitude': {
-                info: 'Coordinates need to be entered in decimal degrees. Convert' +
-                'using the <a href="https://www.fcc.gov/media/radio/dms-decimal"' +
-                'target="_blank">FCC converter</a>.',
-                tooltip: 'Coordinates need to be entered in decimal degrees. Convert' +
+                intro: 'Coordinates need to be entered in decimal degrees. Convert ' +
+                'using the <a href="https://www.fcc.gov/media/radio/dms-decimal" target="_blank">FCC converter</a>.',
+                tooltip: 'Coordinates need to be entered in decimal degrees. Convert ' +
                 'using the FCC converter at https://www.fcc.gov/media/radio/dms-decimal',
             },
             'Longitude': {
-                info: 'Coordinates need to be entered in decimal degrees. Convert' +
-                'using the <a href="https://www.fcc.gov/media/radio/dms-decimal"' +
+                intro: 'Coordinates need to be entered in decimal degrees. Convert ' +
+                'using the <a href="https://www.fcc.gov/media/radio/dms-decimal" ' +
                 'target="_blank">FCC converter</a>.',
-                tooltip: 'Coordinates need to be entered in decimal degrees. Convert' +
+                tooltip: 'Coordinates need to be entered in decimal degrees. Convert ' +
                 'using the FCC converter at https://www.fcc.gov/media/radio/dms-decimal',
             },
             'DisplayName': 'Use the formal name of the location. If it doesn’t' +
@@ -25,7 +24,7 @@ export default function() {
                 '[Landmark, or “Near” Landmark], [Town/City, or “Near” Town/City],' +
                 '[Province or State]',
             'HabitatType': {
-                info: 'See Habitat Type Definitions <a href="/definitions"' +
+                intro: 'See Habitat Type Definitions <a href="/definitions"' +
                 'target="_blank">here</a>.',
                 tooltip: 'See Habitat Type Definitions under About in the site menu.'
             },
