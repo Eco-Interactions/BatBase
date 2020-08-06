@@ -54,14 +54,14 @@ function getIntDisplayData(data) {
             rows: [
                [  //row 1
                     [
-                        { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
-                        { field: 'DOI', content: getDoiLink(data.source.doi) },
-                        { field: 'Website', content: getCitationWebsite(data.source) },
-                        'col'
-                    ], [
+                        // { field: 'Publication Type', content: data.source.citation.citationType.displayName, classes: 'max-cntnt' },
+                        // { field: 'DOI', content: getDoiLink(data.source.doi) },
+                        // { field: 'Website', content: getCitationWebsite(data.source) },
+                    //     'col'
+                    // ], [
                         getContributorFieldData(data.source.contributors)
                     ], [
-                        { field: 'Citation', content: data.source.description },
+                        { field: 'Citation', content: getCitationDisplay(data.source) },
                     ]
                 ], [
                     [
@@ -177,20 +177,20 @@ function getContributorFieldData (contribs) {
         return contribs[ord][type];
     }
 }
-function getPublisherData (pSrc) {
-    if (!pSrc) { return null; }
-    const loc = [pSrc.publisher.city, pSrc.publisher.country].filter(c => c).join(', ');
-    return pSrc.displayName + (!!loc ? ('<br>' + loc) : '');
-}
 function getCitationTypeAndTitleFieldData (citation) {
     return { field: citation.citationType.displayName, content: citation.displayName };
 }
-function getCitationWebsite(source) {
-    return source.linkUrl ?
-        `<a href="${source.linkUrl}"" target="_blank">${source.linkDisplay}</a>` : null;
+function getCitationDisplay(source) {
+    const type = source.citation.citationType.displayName;
+    const doi = getDoiLink(source.doi);
+    const url = getCitationWebsite(source.linkUrl, type);
+    return source.description + doi + url;
 }
 function getDoiLink(doi) {
-    return doi ? `<a href="${doi}" target="_blank">${doi}</a>` : null;
+    return doi ? ` <a href="${doi}" target="_blank">DOI</a>` : '';
+}
+function getCitationWebsite(url, type) {
+    return url ? ` <a href="${url}"" target="_blank">Read ${type}</a>` : '';
 }
 /* ---------------------------- LOCATION ------------------------------------ */
 function getElevRange (location) {
