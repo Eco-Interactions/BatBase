@@ -34,11 +34,14 @@ function buildField(input, field, fLvl, info) {
  * Note: The formLvl class is used for the form-specific tutorials.
  */
 function buildFieldContainer(fLvl, info) {
-    const attr = { class: 'field-row flex-row', title: info};
+    const attr = { class: 'field-row flex-row', title: getInfoTxt(info)};
     const cntnr = _u('buildElem', ['div', attr]);
     if (info) { $(cntnr).addClass(fLvl+'-intro')
-        .attr({'data-intro': info, 'data-intro-group': fLvl+'-intro'}); }
+        .attr({'data-intro': getInfoTxt(info, 'intro'), 'data-intro-group': fLvl+'-intro'}); }
     return cntnr;
+}
+function getInfoTxt(info, key = 'tooltip') {
+    return typeof info === 'string' ? info : info[key];
 }
 function buildFieldLabel(input, field) {
     const attr = { id: field+'-lbl', class: getLabelClass(), text: getFieldName()};

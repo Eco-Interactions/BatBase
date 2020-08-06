@@ -106,6 +106,7 @@ export function showFormTutorial(fLvl) {                                        
     initIntroJs({tooltipClass: 'intro-tips'}, exitFormTutorial, exitFormTutorial);
     intro.start(fLvl+'-intro');
     refreshIntro();
+    // addFinalInfoStep(fLvl);
 }
 function formTutorialSetUp() {
     togglePgElemZindexes('hide');
@@ -130,3 +131,14 @@ function exitFormTutorial() {
     intro = null;
     resetPgElems();
 }
+// Not working yet
+// function addFinalInfoStep(fLvl) {
+//     intro._introItems.push({
+//         disableInteraction: false,
+//         element: `form#${fLvl}-form.flex-row.introjs-showElement.introjs-relativePosition`,
+//         intro: "View field info by hovering over the field at any time.",
+//         position: "right",
+//         scrollTo: "element",
+//         step: intro._introItems.length,
+//     }); console.log('intro = %O', intro._introItems)
+// }
