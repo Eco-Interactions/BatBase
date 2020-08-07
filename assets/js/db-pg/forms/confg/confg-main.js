@@ -99,7 +99,7 @@ export function getCoreFieldDefs(entity) {
             'InteractionTags': 'tags', 'Note': 'fullTextArea'
         },
         'source': { 'DisplayName': 'text', 'Description': 'textArea',
-            'Year': 'text', 'Doi': 'text','LinkUrl': 'text',
+            'Year': 'text', 'Doi': 'text','Website': 'text',
             'Authors': 'multiSelect', 'Editors': 'multiSelect'
         },
         'taxonLvls': {
@@ -134,7 +134,8 @@ export function getCoreEntity(entity) {
 export function getFieldTranslations(entity) {                                  //console.log('entity = ', entity)
     const fieldTrans = {
         'author': {
-            'displayName': { 'source': 'displayName', 'author': 'displayName' }
+            'displayName': { 'source': 'displayName', 'author': 'displayName' },
+            'website': { 'source': 'linkUrl' }
         },
         'citation': {
             'authors': { 'source': false },
@@ -148,7 +149,8 @@ export function getFieldTranslations(entity) {                                  
             'edition': { 'citation': 'publicationVolume' },
             'issue': { 'citation': 'publicationIssue' },
             'pages': { 'citation': 'publicationPages' },
-            'reportType': { 'citation': 'subType' }
+            'reportType': { 'citation': 'subType' },
+            'website': { 'source': 'linkUrl' }
             // 'tags': { 'source': 'tags' }
         },
         'interaction': {
@@ -168,10 +170,12 @@ export function getFieldTranslations(entity) {                                  
             'publisher': { 'source': 'parentSource' },
             'description': { 'source': 'description', 'publication': 'description' },
             'title': { 'source': 'displayName', 'publication': 'displayName' },
-            'publisher/University': { 'source': 'parentSource' }
+            'publisher/University': { 'source': 'parentSource' },
+            'website': { 'source': 'linkUrl' }
         },
         'publisher': {
-            'displayName': { 'source': 'displayName', 'publisher': 'displayName' }
+            'displayName': { 'source': 'displayName', 'publisher': 'displayName' },
+            'website': { 'source': 'linkUrl' }
         },
         'taxon': {
             'displayName': { 'taxon': 'name' }

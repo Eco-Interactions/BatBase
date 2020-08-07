@@ -15,7 +15,7 @@ export default function() {
         'suggested': [],
         'optional': [
             'Description',
-            'LinkUrl',
+            'Website',
         ],
         'order': {
             'sug': [
@@ -28,7 +28,7 @@ export default function() {
                 'City',
                 'Country',
                 'Description',
-                'LinkUrl',
+                'Website',
             ]
         }
     };

@@ -18,7 +18,7 @@ export default function() {
             'Suffix'
         ],
         'optional': [
-            'LinkUrl',
+            'Website',
         ],
         'order': {
             'sug': [
@@ -32,7 +32,7 @@ export default function() {
                 'MiddleName',
                 'LastName',
                 'Suffix',
-                'LinkUrl',
+                'Website',
             ]
         }
     };

@@ -512,7 +512,7 @@ function updatePlaceholderText(elem, newTxt) {
 /* ----------------- INPUTS ----------------------------------- */
 function updateInputTypes () {
     setNumberInputs();
-    setInputType('LinkUrl', 'url');
+    setInputType('Website', 'url');
     // $('#Pages-lbl + input').attr('pattern', "[0-9]+([-\,][0-9]+)?");
 }
 function setNumberInputs () {

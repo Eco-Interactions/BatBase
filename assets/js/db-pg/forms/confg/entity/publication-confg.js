@@ -34,7 +34,7 @@ export default function() {
                 'suggested': [],
                 'optional': [
                     'Description',
-                    'LinkUrl',
+                    'Website',
                     'Doi'
                 ],
                 'order': {
@@ -44,7 +44,7 @@ export default function() {
                     ],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkUrl', 'Description'],
+                        ['Website', 'Description'],
                         ['Publisher'],
                         ['Authors', 'Editors']
                     ]
@@ -57,7 +57,7 @@ export default function() {
                 'optional': [
                     'Year',
                     'Description',
-                    'LinkUrl',
+                    'Website',
                     'Doi',
                     'Publisher'
                 ],
@@ -65,7 +65,7 @@ export default function() {
                     'sug': [],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkUrl', 'Description'],
+                        ['Website', 'Description'],
                         ['Publisher'],
                     ]
                 }
@@ -81,7 +81,7 @@ export default function() {
                 ],
                 'optional': [
                     'Description',
-                    'LinkUrl',
+                    'Website',
                     'Doi'
                 ],
                 'order':  {
@@ -91,7 +91,7 @@ export default function() {
                     ],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkUrl', 'Description'],
+                        ['Website', 'Description'],
                         ['Publisher', 'Authors'],
                     ]
                 }
@@ -106,7 +106,7 @@ export default function() {
                 'suggested': [],
                 'optional': [
                     'Description',
-                    'LinkUrl',
+                    'Website',
                     'Doi'
                 ],
                 'order':  {
@@ -116,7 +116,7 @@ export default function() {
                     ],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkUrl', 'Description'],
+                        ['Website', 'Description'],
                         ['Publisher', 'Authors'],
                     ]
                 }

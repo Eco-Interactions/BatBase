@@ -14,7 +14,7 @@ export default function() {
         },
         'info': {
         	'Doi': "Digital Object Identifier provided by the Publisher",
-        	'LinkUrl': 'Copy and paste link to article, if available'
+        	'Website': 'Copy and paste link to article, if available'
         },
         'required': [
         	'Title',
@@ -24,7 +24,7 @@ export default function() {
         	'CitationText',
         	'Abstract',
         	'Doi',
-        	'LinkUrl'],
+        	'Website'],
         'optional': [],
         'order': {  //will be merged with type.order
             'sug': [
@@ -48,7 +48,7 @@ export default function() {
                     'sug': [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
-                        ['Doi', 'LinkUrl'],
+                        ['Doi', 'Website'],
                         ['Authors']],
                     'opt': false,
                 }
@@ -63,7 +63,7 @@ export default function() {
                 'order': {
                     'sug': [
                     	['Volume', 'Doi'],
-                        ['LinkUrl', 'Authors']],
+                        ['Website', 'Authors']],
                     'opt': false,
                 }
             },
@@ -77,7 +77,7 @@ export default function() {
                 'order': {
                     'sug': [
                     	['Pages', 'Doi'],
-                        ['LinkUrl', 'Authors']],
+                        ['Website', 'Authors']],
                     'opt': false,
                 }
             },
@@ -88,7 +88,7 @@ export default function() {
                 'optional': [],
                 'order': {
                     'sug': [
-                    	['Doi', 'LinkUrl']],
+                    	['Doi', 'Website']],
                     'opt': false,
                 }
             },
@@ -103,7 +103,7 @@ export default function() {
                 'order': {
                     'sug': [
                     	['Year', 'Pages'],
-                        ['Doi', 'LinkUrl'],
+                        ['Doi', 'Website'],
                         ['Authors']],
                     'opt': false,
                 }
@@ -122,7 +122,7 @@ export default function() {
                     'sug': [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
-                        ['LinkUrl'],
+                        ['Website'],
                         ['Doi', 'Authors']],
                     'opt': false,
                 }
@@ -134,7 +134,7 @@ export default function() {
                 'optional': [],
                 'order': {
                     'sug': [
-                    	['LinkUrl','Doi']],
+                    	['Website','Doi']],
                     'opt': false,
                 }
             },
@@ -152,7 +152,7 @@ export default function() {
                     'sug': [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
-                        ['LinkUrl','Doi'],
+                        ['Website','Doi'],
                         ['Doi', 'Authors']],
                     'opt': false,
                 }
