@@ -16,7 +16,6 @@ export default function() {
         'optional': [
             'Description',
             'LinkUrl',
-            'LinkDisplay'
         ],
         'order': {
             'sug': [
@@ -30,7 +29,6 @@ export default function() {
                 'Country',
                 'Description',
                 'LinkUrl',
-                'LinkDisplay'
             ]
         }
     };

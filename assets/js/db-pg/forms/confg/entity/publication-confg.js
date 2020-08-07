@@ -34,7 +34,6 @@ export default function() {
                 'suggested': [],
                 'optional': [
                     'Description',
-                    'LinkDisplay',
                     'LinkUrl',
                     'Doi'
                 ],
@@ -45,8 +44,8 @@ export default function() {
                     ],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkDisplay', 'LinkUrl'],
-                        ['Description', 'Publisher'],
+                        ['LinkUrl', 'Description'],
+                        ['Publisher'],
                         ['Authors', 'Editors']
                     ]
                 }
@@ -58,7 +57,6 @@ export default function() {
                 'optional': [
                     'Year',
                     'Description',
-                    'LinkDisplay',
                     'LinkUrl',
                     'Doi',
                     'Publisher'
@@ -67,8 +65,8 @@ export default function() {
                     'sug': [],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkDisplay', 'LinkUrl'],
-                        ['Description', 'Publisher']
+                        ['LinkUrl', 'Description'],
+                        ['Publisher'],
                     ]
                 }
             },
@@ -83,7 +81,6 @@ export default function() {
                 ],
                 'optional': [
                     'Description',
-                    'LinkDisplay',
                     'LinkUrl',
                     'Doi'
                 ],
@@ -94,9 +91,8 @@ export default function() {
                     ],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkDisplay', 'LinkUrl'],
-                        ['Description', 'Publisher'],
-                        'Authors'
+                        ['LinkUrl', 'Description'],
+                        ['Publisher', 'Authors'],
                     ]
                 }
             },
@@ -110,7 +106,6 @@ export default function() {
                 'suggested': [],
                 'optional': [
                     'Description',
-                    'LinkDisplay',
                     'LinkUrl',
                     'Doi'
                 ],
@@ -121,9 +116,8 @@ export default function() {
                     ],
                     'opt': [
                         ['Year', 'Doi'],
-                        ['LinkDisplay', 'LinkUrl'],
-                        ['Description', 'Publisher'],
-                        'Authors'
+                        ['LinkUrl', 'Description'],
+                        ['Publisher', 'Authors'],
                     ]
                 }
             }

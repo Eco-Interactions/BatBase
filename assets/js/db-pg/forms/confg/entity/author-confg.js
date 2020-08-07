@@ -19,7 +19,6 @@ export default function() {
         ],
         'optional': [
             'LinkUrl',
-            'LinkDisplay'
         ],
         'order': {
             'sug': [
@@ -34,7 +33,6 @@ export default function() {
                 'LastName',
                 'Suffix',
                 'LinkUrl',
-                'LinkDisplay'
             ]
         }
     };

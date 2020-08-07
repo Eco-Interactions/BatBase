@@ -24,7 +24,6 @@ export default function() {
         	'CitationText',
         	'Abstract',
         	'Doi',
-        	'LinkDisplay',
         	'LinkUrl'],
         'optional': [],
         'order': {  //will be merged with type.order
@@ -49,9 +48,10 @@ export default function() {
                     'sug': [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
-                        ['LinkDisplay', 'LinkUrl'],
-                        ['Doi', 'Authors']]},
+                        ['Doi', 'LinkUrl'],
+                        ['Authors']],
                     'opt': false,
+                }
             },
             'Book': {
                 'name': 'Book',
@@ -63,9 +63,9 @@ export default function() {
                 'order': {
                     'sug': [
                     	['Volume', 'Doi'],
-                    	['LinkDisplay', 'LinkUrl'],
-                        ['Authors']]},
+                        ['LinkUrl', 'Authors']],
                     'opt': false,
+                }
             },
             'Chapter': {
                 'name': 'Chapter',
@@ -77,9 +77,9 @@ export default function() {
                 'order': {
                     'sug': [
                     	['Pages', 'Doi'],
-                    	['LinkDisplay', 'LinkUrl'],
-                        'Authors' ]},
+                        ['LinkUrl', 'Authors']],
                     'opt': false,
+                }
             },
             "Master's Thesis": {
                 'name': "Master's Thesis",
@@ -88,9 +88,9 @@ export default function() {
                 'optional': [],
                 'order': {
                     'sug': [
-                    	['LinkDisplay', 'LinkUrl'],
-                    	'Doi']},
+                    	['Doi', 'LinkUrl']],
                     'opt': false,
+                }
             },
             'Museum record': {
                 'name': 'Museum record',
@@ -103,9 +103,10 @@ export default function() {
                 'order': {
                     'sug': [
                     	['Year', 'Pages'],
-                    	['LinkDisplay', 'LinkUrl'],
-                        ['Doi', 'Authors']]},
+                        ['Doi', 'LinkUrl'],
+                        ['Authors']],
                     'opt': false,
+                }
             },
             'Other': {
                 'name': 'Other',
@@ -121,9 +122,10 @@ export default function() {
                     'sug': [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
-                        ['LinkDisplay', 'LinkUrl'],
-                        ['Doi', 'Authors']]},
+                        ['LinkUrl'],
+                        ['Doi', 'Authors']],
                     'opt': false,
+                }
             },
             'Ph.D. Dissertation': {
                 'name': 'Ph.D. Dissertation',
@@ -132,9 +134,9 @@ export default function() {
                 'optional': [],
                 'order': {
                     'sug': [
-                    	['LinkDisplay', 'LinkUrl'],
-                    	'Doi']},
+                    	['LinkUrl','Doi']],
                     'opt': false,
+                }
             },
             'Report': {
                 'name': 'Report',
@@ -150,7 +152,7 @@ export default function() {
                     'sug': [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
-                        ['LinkDisplay', 'LinkUrl'],
+                        ['LinkUrl','Doi'],
                         ['Doi', 'Authors']],
                     'opt': false,
                 }
