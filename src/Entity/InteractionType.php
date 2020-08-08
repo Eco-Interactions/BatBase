@@ -27,7 +27,7 @@ class InteractionType
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"displayName"})
+     * @Gedmo\Slug(fields={"nounForm"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
@@ -43,11 +43,29 @@ class InteractionType
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="noun_form", type="string", length=255)
      * @JMS\Expose
-     * @JMS\SerializedName("displayName")
+     * @JMS\SerializedName("nounForm")
      */
-    private $displayName;
+    private $nounForm;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="active_form", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("activeForm")
+     */
+    private $activeForm;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="passive_form", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("passiveForm")
+     */
+    private $passiveForm;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -167,27 +185,75 @@ class InteractionType
     }
 
     /**
-     * Set displayName.
+     * Set nounForm.
      *
-     * @param string $displayName
+     * @param string $nounForm
      *
      * @return InteractionType
      */
-    public function setDisplayName($displayName)
+    public function setNounForm($nounForm)
     {
-        $this->displayName = $displayName;
+        $this->nounForm = $nounForm;
 
         return $this;
     }
 
     /**
-     * Get displayName.
+     * Get nounForm.
      *
      * @return string
      */
-    public function getDisplayName()
+    public function getNounForm()
     {
-        return $this->displayName;
+        return $this->nounForm;
+    }
+
+    /**
+     * Set activeForm.
+     *
+     * @param string $activeForm
+     *
+     * @return InteractionType
+     */
+    public function setActiveForm($activeForm)
+    {
+        $this->activeForm = $activeForm;
+
+        return $this;
+    }
+
+    /**
+     * Get activeForm.
+     *
+     * @return string
+     */
+    public function getActiveForm()
+    {
+        return $this->activeForm;
+    }
+
+    /**
+     * Set passiveForm.
+     *
+     * @param string $passiveForm
+     *
+     * @return InteractionType
+     */
+    public function setPassiveForm($passiveForm)
+    {
+        $this->passiveForm = $passiveForm;
+
+        return $this;
+    }
+
+    /**
+     * Get passiveForm.
+     *
+     * @return string
+     */
+    public function getPassiveForm()
+    {
+        return $this->passiveForm;
     }
 
     /**
