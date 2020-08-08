@@ -142,7 +142,7 @@ function buildFormContainer(rows, fClasses, fLvl, sId) {
 }
 function buildSubFormCntnr(fClasses, fLvl) {
     const attr = {id: fLvl+'-form', class: fClasses };
-    return _u('buildElem', ['div', attr]);
+    return _u('buildElem', ['form', attr]);
 }
 function buildFormHdr(fLvl) {
     const attr = { text: 'New '+_u('ucfirst', [entity]), id: fLvl+'-hdr' };

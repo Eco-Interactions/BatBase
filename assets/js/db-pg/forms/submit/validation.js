@@ -118,7 +118,6 @@ export function reportFormFieldErr(fieldName, errTag, fLvl) {                   
         'fillAuthBlanks': handleAuthBlanks,
         'fillEdBlanks': handleEdBlanks,
         'isGenusPrnt': handleIsGenusPrnt,
-        'invalidCoords': handleInvalidCoords,
         'needsGenusName': handleNeedsGenusName,
         'needsGenusPrnt': handleNeedsGenusParent,
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
@@ -151,19 +150,6 @@ function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {
 function clrIsGenusPrnt(elem, fLvl, e) {
     _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
-}
-/* ----------------- INVALID COORDINATES ------------------------------------ */
-/** Note: error used for the location form. */
-function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
-    const msg = `<span>Invalid coordinate format.</span>`;
-    $(`#${fieldName}_row input[type="text"]`).on('input',
-        clrInvalidCoords.bind(null, elem, fLvl, null, fieldName));
-    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    $('.err-exit').hide();
-}
-function clrInvalidCoords(elem, fLvl, e, fieldName) {
-    clearErrElemAndEnableSubmit(elem, fLvl);
-    if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {

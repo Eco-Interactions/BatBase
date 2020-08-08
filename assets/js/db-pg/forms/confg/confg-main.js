@@ -90,8 +90,8 @@ export function getCoreFieldDefs(entity) {
     };
     const fields = {
         'location': { 'DisplayName': 'text', 'Description': 'textArea',
-            'Elevation': 'text', 'ElevationMax': 'text', 'Longitude': 'text',
-            'Latitude': 'text', 'HabitatType': 'select', 'Country': 'select',
+            'Elevation': 'num', 'ElevationMax': 'num', 'Longitude': 'lng',
+            'Latitude': 'lat', 'HabitatType': 'select', 'Country': 'select',
         },
         'interaction': { 'Publication': 'select', 'CitationTitle': 'select',
             'Country-Region': 'select', 'Location': 'select',
@@ -99,7 +99,7 @@ export function getCoreFieldDefs(entity) {
             'InteractionTags': 'tags', 'Note': 'fullTextArea'
         },
         'source': { 'DisplayName': 'text', 'Description': 'textArea',
-            'Year': 'text', 'Doi': 'text','Website': 'text',
+            'Year': 'year', 'Doi': 'text','Website': 'url',
             'Authors': 'multiSelect', 'Editors': 'multiSelect'
         },
         'taxonLvls': {

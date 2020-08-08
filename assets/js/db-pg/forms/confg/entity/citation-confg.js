@@ -5,10 +5,10 @@ export default function() {
 	return {
         'add': {
         	'Title': 'text',
-        	'Volume': 'text',
+        	'Volume': 'num',
         	'Abstract': 'fullTextArea',
-            'Issue': 'text',
-            'Pages': 'text',
+            'Issue': 'num',
+            'Pages': 'page',
             'CitationType': 'select',
             'CitationText': 'fullTextArea'
         },
