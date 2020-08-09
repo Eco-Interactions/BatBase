@@ -8,13 +8,13 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Adds active, passive, and noun form to Interaction Type.
+ * Adds active, passive, and noun form variables to the Interaction Type entity.
  */
 final class Version20200808 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return 'Adds active, passive, and noun form to Interaction Type';
+        return 'Adds active, passive, and noun form variables to the Interaction Type entity';
     }
 
     public function up(Schema $schema) : void

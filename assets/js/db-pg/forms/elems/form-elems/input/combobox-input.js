@@ -69,7 +69,7 @@ export function initSingle(confg, fLvl) {                                       
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, comboEvents) {                     console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
+export function initFormCombos(entity, fLvl, comboEvents) {                     //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
     const elems = _state('getFormProp', [fLvl, 'selElems']);
     elems.forEach(selectizeElem);
     _state('setFormProp', [fLvl, 'selElems', []]);

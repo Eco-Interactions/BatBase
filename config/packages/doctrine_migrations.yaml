@@ -41,11 +41,11 @@ doctrine_migrations:
     check_database_platform: true
 
     services:
+        # Custom migration classes factory
+         'Doctrine\Migrations\Version\MigrationFactory': 'App\Migrations\Factory\MigrationFactoryDecorator'
+
         # Custom migration sorting service id
         # 'Doctrine\Migrations\Version\Comparator': ~
-
-        # Custom migration classes factory
-        # 'Doctrine\Migrations\Version\MigrationFactory': ~
 
     factories:
         # Custom migration sorting service id via callables (MyCallableFactory must be a callable)
