@@ -29,7 +29,7 @@
  *     HELPERS
  */
 import { _u } from '../../../db-main.js';
-import { _state, _elems, _panel, _cmbx, _form, _val, getSubFormLvl } from '../../forms-main.js';
+import { _confg, _state, _elems, _panel, _cmbx, _form, _val, getSubFormLvl } from '../../forms-main.js';
 
 /** ====================== CREATE FORM ====================================== */
 /**
@@ -177,6 +177,7 @@ function finishComboboxInit() {
     initFormCombos('interaction', 'top');
     _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
+    _cmbx('enableCombobox', ['#InteractionType-sel', false]);
     _cmbx('enableCombobox', ['#InteractionTags-sel', false]);
     focusPubFieldIfNewRecord();
 }
@@ -383,10 +384,10 @@ function initSubjectSelect() {                                                  
 function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
     initTaxonSelectForm('Object', getObjectRealm());
 }
-function getObjectRealm() {
+function getObjectRealm(prop = 'id') {
     const prevSelectedId = $('#Object-sel').data('selTaxon');
     if (!prevSelectedId) { return 2; } //default: Plants (2)
-    return getRcrd('taxon', prevSelectedId).realm.id;
+    return getRcrd('taxon', prevSelectedId).realm[prop];
 }
 /**
  * Removes any previous realm comboboxes. Shows a combobox for each level present
@@ -723,6 +724,7 @@ function selectRoleTaxon(e, realmTaxon) {
     if (!opt) { return; } //issue alerted to developer and editor
     _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
     _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
+    ifBothTaxaSelectedEnableInteractionTypes(role);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(realmTaxon) {
@@ -774,7 +776,37 @@ function enableTaxonCombos() {
 function getRealmData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getRealmState');
 }
+function ifBothTaxaSelectedEnableInteractionTypes(role) {
+    const oppRole = role === 'Subject' ? 'Object' : 'Subject';
+    if (!_cmbx('getSelVal', ['#'+oppRole+'-sel'])) { return; }
+    const objectRealm = role === 'Object' ?
+        getRealmData('realmName') : getObjectRealm('displayName');
+    loadInteractionTypesForObjectRealm(objectRealm);
+
+}
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
+/**
+ * Interaction Types are restricted by the Object Realm.
+ * Ex:
+        'Visitation': ['Plant'],
+        'Pollination': ['Plant'],
+        'Seed Dispersal': ['Plant'],
+        'Consumption': ['Plant', 'Fungi'],
+        'Transport': ['Plant', 'Arthropod'],
+        'Roost': ['Plant'],
+        'Predation': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
+        'Prey': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
+        'Host': ['Arthropod', 'Virus', 'Fungi', 'Bacteria', 'Other Parasite'],
+        'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
+        'Hematophagy': ['Bird', 'Mammal'],
+ */
+function loadInteractionTypesForObjectRealm(objectRealm) {  console.log('objectRealm = %s', objectRealm);
+    const types = _confg('getRealmInteractionTypes')[objectRealm];
+    _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
+    .then(opts => _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]))
+    .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
+    .then(() => _cmbx('focusCombobox', ['#InteractionType-sel', true]));
+}
 function onInteractionTypeSelection(val) {
     if (!val) { return; }
     fillAndEnableTags(val);

@@ -52,6 +52,9 @@ export function getFormConfg(entity) {
 function getEntityConfg(entity) {
     return require(`./entity/${entity}-confg.js`).default();
 }
+export function getRealmInteractionTypes() {
+    return require(`./entity/realm-confg.js`).default(...arguments);
+}
 /* ------------------ TAXON SELECT FORM CONFG ------------------------------- */
 function getRoleConfg(role) {
     const addField = ifObjectFormAddRealmSelect(role);

@@ -151,7 +151,7 @@ private function validateSourceUrls()
         // $byErrorResponse[$invalidUrl['response']] += [
         //     $src->getDisplayName().' ['.$src->getId().']' => $invalidUrl['url']
         // ];
-    }  print("\n\invalidUrls = "); print_r($invalidUrls);
+    }                                                                           print("\n\invalidUrls = "); print_r($invalidUrls);
     // ksort($byErrorResponse);
     // foreach ($byErrorResponse as $name => $urls) {
     //     ksort($urls);

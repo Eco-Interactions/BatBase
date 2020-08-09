@@ -14,6 +14,7 @@
  *     focusFirstCombobox
  *     getLocationOpts
  *     getRcrdOpts
+ *     getSelectStoredOpts
  *     getSelVal
  *     getSelTxt
  *     getSrcOpts
@@ -277,7 +278,7 @@ function getSelectOpts(field) {                                                 
         'Genus': [ getTaxonOpts, 'Genus' ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
         // 'InteractionTags': [ getTagOpts, 'interaction' ],
-        'InteractionType': [ getStoredOpts, 'intTypeNames' ],
+        // 'InteractionType': [ getSelectStoredOpts, 'intTypeNames' ],
         'Location': [ getLocationOpts, null ],
         'Order': [ getTaxonOpts, 'Order' ],
         'Object': [() => []],
@@ -289,12 +290,17 @@ function getSelectOpts(field) {                                                 
         'Subject': [() => []]
         // "Tags": [ getTagOpts, 'source' ],
     };
+    if (!optMap[field]) { return Promise.resolve([]); }
     const getOpts = optMap[field][0];
     const fieldKey = optMap[field][1];
     return Promise.resolve(getOpts(fieldKey, field));
 }
-function getStoredOpts(prop) {
+function getStoredOpts(prop, field) {
     return _u('getOptsFromStoredData', [prop]);
+}
+export function getSelectStoredOpts(prop, field, include) {
+    return _u('getOptsFromStoredData', [prop])
+        .then(opts => opts.filter(o => include.indexOf(o.text) !== -1));
 }
 /** Builds options out of the passed ids and their entity records. */
 export function getRcrdOpts(ids, rcrds) {
@@ -329,7 +335,7 @@ export function getSrcOpts(prop, field, rcrds) {
     }
 }
 /** Return the citation type options available for the parent-publication's type. */
-function getCitTypeOpts(prop) {
+function getCitTypeOpts(prop, field) {
     const fLvl = getSubFormLvl('sub');
     return _u('getData', [prop]).then(buildCitTypeOpts);
 
@@ -358,7 +364,7 @@ export function getTaxonOpts(level, field, r) {
             return opts;
         }
 }
-function getRealmOpts() {
+function getRealmOpts(prop, field) {
     const realms = _state('getTaxonProp', ['realms']);
     const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);
     return opts;
@@ -370,12 +376,12 @@ function getRealmOpts() {
 }
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */
-function getCntryRegOpts() {
+function getCntryRegOpts(prop, field) {
     const proms = ['countryNames', 'regionNames'].map(k => _u('getOptsFromStoredData', [k]));
     return Promise.all(proms).then(data => data[0].concat(data[1]));
 }
 /** Returns an array of option objects with all unique locations.  */
-export function getLocationOpts() {
+export function getLocationOpts(prop, field) {
     const rcrds = _state('getEntityRcrds', ['location']);
     let opts = Object.keys(rcrds).map(buildLocOpt);
     opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
