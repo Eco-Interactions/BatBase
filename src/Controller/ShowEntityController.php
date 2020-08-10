@@ -63,9 +63,17 @@ class ShowEntityController extends AbstractController
         }
 
         $jsonEntity = $this->serializeEntity($interaction);
+        $object = $interaction->getObject()->getDisplayName();
+        $subject = $interaction->getSubject()->getDisplayName();
+        $tags = $interaction->getTagNames();
+        $type = $interaction->getInteractionType()->getActiveForm();
 
         return $this->render('Entity/interaction.html.twig', array(
-            'id' => $id, 'entity' => $jsonEntity
+            'entity' => $jsonEntity,
+            'object' => $object,
+            'subject' => $subject,
+            'tags' => $tags,
+            'type' => $type
         ));
     }
 /* ----------------------------- TAXON -------------------------------- */

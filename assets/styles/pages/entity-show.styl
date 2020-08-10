@@ -7,6 +7,16 @@
  *    RESPONSIVE STYLES
  */
 @import '../util/*'
+
+#entity-csv
+    opacity: .4
+    cursor: waiting
+    margin-bottom: .2em
+
+#entity-csv:before
+    content: embedurl('../../images/icons/file-download.svg', 'utf8')
+    width: 12px
+
 /* =========================== DATA SECTION ================================= */
 .data-sect
     @extend .flex-col

@@ -308,14 +308,33 @@ class Interaction
      * Get the Interaction Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactionType")
-     * @Groups({"normalized", "flattened"})
+     * @Groups({"normalized"})
      */
-    public function getInteractionTypeData()
+    public function getInteractionTypeSummaryData()
     {
         if ($this->interactionType) {
             return [
                 'id' => $this->interactionType->getId(),
                 'displayName' => $this->interactionType->getDisplayName()
+            ];
+        }
+        return null;
+    }
+
+    /**
+     * Get the Interaction Type id and displayName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactionType")
+     * @Groups({"flattened"})
+     */
+    public function getAllInteractionTypeData()
+    {
+        if ($this->interactionType) {
+            return [
+                'id' => $this->interactionType->getId(),
+                'displayName' => $this->interactionType->getDisplayName(),
+                'activeForm' => $this->interactionType->getActiveForm(),
+                'passiveForm' => $this->interactionType->getPassiveForm()
             ];
         }
         return null;

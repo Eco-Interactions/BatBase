@@ -3,7 +3,8 @@
  *
  * TOC:
  *     CORE SHOW PAGE BUILDER
- *     HTML BUILDERS
+ *         HTML BUILDERS
+ *     CSV DOWNLOAD
  */
 import * as util from '../util/util-main.js';
 import getEntityDisplayConfg from './entity-show-data.js';
@@ -14,6 +15,7 @@ function initShowPage () {
     require('../../styles/pages/entity-show.styl');
     const entity = getEntity($('body').data('this-url'));
     buildEntityShowPage(entity, $('#entity-show').data('entity'));
+    buildCsvDownloadButton();
     $('#entity-show').removeAttr('data-entity');
 }
 function getEntity (url) {
@@ -64,4 +66,13 @@ function getDivWithContent (id, classes, content) {                 /*dbug-log*/
     const html = !!content ? content : '[ NONE ]';
     $(div).append(html);
     return div;
+}
+/* ======================== CSV DOWNLOAD ==================================== */
+function buildCsvDownloadButton() {
+    const attrs = {
+        class: 'ag-fresh map-dsbl ico-bttn', id: 'entity-csv',
+        name: 'csv',                         text: 'CSV Download Coming Soon',
+        title: 'Download CSV'
+    };
+    $('#hdr-right').append($('<button/>', attrs));
 }

@@ -31,7 +31,7 @@ function getEntityShowData(entity, data) {
 function getIntDisplayData(data) {
     return [
         {
-            section:  'Interaction Details',
+            section:  'Interaction ' + data.id + ':',
             rows: [
                [  //row 1
                     [ //cell 1

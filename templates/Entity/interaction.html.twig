@@ -1,5 +1,8 @@
 {% extends "Entity/show-layout.html.twig" %}
 
 {% block headline %}
-    Interaction {{ id }}
+    {{ subject }} <i> {{ type }} </i> {{ object }}
+    {% if tags %}
+    	( {{ tags }} )
+    {% endif %}
 {% endblock headline %}
