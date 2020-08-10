@@ -58,12 +58,11 @@ final class Version20200809IntTypeForms extends AbstractMigration implements Con
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->getEntity('User', 6, 'id');
 
-        $this->addInteractionTypeForms();
+        // $this->addInteractionTypeForms();
         $this->validateSourceUrls();
-        $this->deleteSourceErrs();
+        // $this->deleteSourceErrs();
 
         $this->em->flush();
-
     }
 /* ------------------ INTERACTION TYPE  ------------------------------------- */
 private function addInteractionTypeForms()
@@ -133,32 +132,65 @@ private function getInteractionTypeNameForms()
 private function validateSourceUrls()
 {
     $srcs = $this->getEntities('Source');
-    $invalidUrls = [/* id => url */];
-    // $byErrorResponse =[];
+    $invalidUrls = [];
 
     foreach ($srcs as $src) {
-        if ($src->getId() === 1408) { $src->setLinkUrl(null); continue; }       print("\n Source ID [".$src->getId()."] ");
-        $link = $src->getLinkUrl();
-        if (!$link) { continue; }
-        if (!preg_match('-https?://.+-', $link)) { $link = 'http://' . $link; }
-        $src->setLinkUrl($link);
-        $this->persistEntity($src);
-        $invalidUrl = $this->ifInvalidGetLinkData($link);
-        if (!$invalidUrl) { continue; };
-        if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
-            $invalidUrls[$invalidUrl['response']] = [];
-        }
-        $invalidUrls += [ $src->getId() => $invalidUrl ];
-        // $byErrorResponse[$invalidUrl['response']] += [
-        //     $src->getDisplayName().' ['.$src->getId().']' => $invalidUrl['url']
-        // ];
-    }                                                                           print("\n\invalidUrls = "); print_r($invalidUrls);
-    // ksort($byErrorResponse);
-    // foreach ($byErrorResponse as $name => $urls) {
-    //     ksort($urls);
-    //     $byErrorResponse[$name] = $urls;
-    // }
+        $this->handleLinkUrl($src, $invalidUrls);
+        $this->handleDoi($src, $invalidUrls);
+    }
+
+    ksort($invalidUrls);  //print('reporting...');
+    foreach ($invalidUrls as $name => $urls) {
+        ksort($urls);
+        $invalidUrls[$name] = $urls;
+    }                                            print("\n\Report = "); print_r($invalidUrls);
 }
+private function handleDoi($src, &$invalidUrls)
+{
+    $url = $src->getDoi() ? trim($src->getDoi()) : null;
+    if (!$url) { return; }
+
+    if (!preg_match('-http(s?)://doi.org/.+-', $url)) {
+        $url = 'https://doi.org/' . $url;
+        $src->setDoi($url);
+        $this->persistEntity($src);
+    }
+
+    $invalidUrl = $this->ifInvalidGetLinkData($url);
+    if (!$invalidUrl) { continue; };
+
+    if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
+        $invalidUrls[$invalidUrl['response']] = [];
+    }
+    $invalidUrls[$invalidUrl['response']] += [
+        $src->getDisplayName().' ['.$src->getId().' - '.$prop.']' => $invalidUrl['url']
+    ];
+}
+private function handleLinkUrl($src, &$invalidUrls)
+{
+    if ($src->getId() === 1408) { $src->setLinkUrl(null); return; }
+
+    $url = $src->getLinkUrl() ? trim($src->getLinkUrl()) : null;
+    if (!$url) { return; }
+
+    if (!preg_match('-http(s?)://.+-', $url)) {
+        $url = 'https://' . $url;
+        $src->$setLinkUrl($url);
+        $this->persistEntity($src);
+    }
+
+    $invalidUrl = $this->ifInvalidGetLinkData($url);
+    if (!$invalidUrl) { continue; };
+
+    if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
+        $invalidUrls[$invalidUrl['response']] = [];
+    }
+    $invalidUrls[$invalidUrl['response']] += [
+        $src->getDisplayName().' ['.$src->getId().' - '.$prop.']' => $invalidUrl['url']
+    ];
+}
+
+
 private function ifInvalidGetLinkData($url)
 {
     $headers = @get_headers($url);                                              //print("\n    headers = ".$headers[0]);

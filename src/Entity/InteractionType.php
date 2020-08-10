@@ -216,7 +216,7 @@ class InteractionType
      * @return InteractionType
      */
     public function setActiveForm($activeForm)
-    {   print('setting active form = '.$activeForm);
+    {
         $this->activeForm = $activeForm;
 
         return $this;
