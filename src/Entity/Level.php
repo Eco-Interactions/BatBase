@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * Level.
  *
  * @ORM\Table(name="level")
- * @ORM\Entity(readOnly=true)
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */

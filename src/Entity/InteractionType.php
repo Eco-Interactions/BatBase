@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation as JMS;
  * InteractionType.
  *
  * @ORM\Table(name="interaction_type")
- * @ORM\Entity(readOnly=true)
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -27,7 +27,7 @@ class InteractionType
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"nounForm"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
@@ -43,11 +43,11 @@ class InteractionType
     /**
      * @var string
      *
-     * @ORM\Column(name="noun_form", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
-     * @JMS\SerializedName("nounForm")
+     * @JMS\SerializedName("displayName")
      */
-    private $nounForm;
+    private $displayName;
 
     /**
      * @var string
@@ -185,27 +185,27 @@ class InteractionType
     }
 
     /**
-     * Set nounForm.
+     * Set displayName.
      *
-     * @param string $nounForm
+     * @param string $displayName
      *
      * @return InteractionType
      */
-    public function setNounForm($nounForm)
+    public function setDisplayName($displayName)
     {
-        $this->nounForm = $nounForm;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get nounForm.
+     * Get displayName.
      *
      * @return string
      */
-    public function getNounForm()
+    public function getDisplayName()
     {
-        return $this->nounForm;
+        return $this->displayName;
     }
 
     /**
@@ -216,7 +216,7 @@ class InteractionType
      * @return InteractionType
      */
     public function setActiveForm($activeForm)
-    {
+    {   print('setting active form = '.$activeForm);
         $this->activeForm = $activeForm;
 
         return $this;

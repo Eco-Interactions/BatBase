@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Adds active, passive, and noun form to each Interaction Type.
+ * Adds active and passive verb forms to each Interaction Type entity.
  * Trims all string fields that could have be edited directly.
  * Ensures all URLs are valid and with the full path.
  */
@@ -27,7 +27,7 @@ final class Version20200809IntTypeForms extends AbstractMigration implements Con
 
     public function getDescription() : string
     {
-        return "Adds active, passive, and noun form to each Interaction Type.
+        return "Adds active and passive verb forms to each Interaction Type entity.
             Trims all string fields that could have be edited directly.
             Ensures all URLs are valid and with the full path.";
     }
@@ -60,7 +60,7 @@ final class Version20200809IntTypeForms extends AbstractMigration implements Con
 
         $this->addInteractionTypeForms();
         $this->validateSourceUrls();
-        // $this->deleteSourceErrs();
+        $this->deleteSourceErrs();
 
         $this->em->flush();
 
@@ -71,10 +71,11 @@ private function addInteractionTypeForms()
     $names = $this->getInteractionTypeNameForms();
     $types = $this->getEntities('InteractionType');
 
-    foreach ($types as $type) {                      print("\n type [".$type->getNounForm()."]\n");
-        $forms = $names[$type->getNounForm()];
+    foreach ($types as $type) {                                                 print("\n type [".$type->getDisplayName()."]\n");
+        $forms = $names[$type->getDisplayName()];
         $type->setActiveForm($forms['active']);
         $type->setPassiveForm($forms['passive']);
+        if ($type->getDisplayName() == 'Visitation') { $type->getDisplayName('Flower Visitation'); }
         $this->persistEntity($type);
     }
 }
@@ -144,10 +145,10 @@ private function validateSourceUrls()
         $this->persistEntity($src);
         $invalidUrl = $this->ifInvalidGetLinkData($link);
         if (!$invalidUrl) { continue; };
-        $invalidUrls += [ $src->getId() => $invalidUrl ];
-        if (!array_key_exists($invalidUrl['response'], $byErrorResponse)) {
-            $byErrorResponse[$invalidUrl['response']] = [];
+        if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
+            $invalidUrls[$invalidUrl['response']] = [];
         }
+        $invalidUrls += [ $src->getId() => $invalidUrl ];
         // $byErrorResponse[$invalidUrl['response']] += [
         //     $src->getDisplayName().' ['.$src->getId().']' => $invalidUrl['url']
         // ];
@@ -174,11 +175,12 @@ private function returnInvalidUrl($url, $header)
 
 private function deleteSourceErrs()
 {
-    $ids = [2089, 2090];
+    $ids = ['Citation' => 2090, 'Publication' => 2089];
 
-    foreach ($ids as $id) {
-        $src = $this->getEntity('Source', $id);
-        $this->em->remove($src);
+    foreach ($ids as $type => $id) {
+        $getSrcType = 'get'.$type;
+        $srcType = $this->getEntity('Source', $id)->$getSrcType();
+        $this->em->remove($srcType);
     }
 }
 
@@ -187,6 +189,5 @@ private function deleteSourceErrs()
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE interaction_type ADD display_name VARCHAR(255) CHARACTER SET utf8 NOT NULL COLLATE `utf8_unicode_ci`, DROP noun_form, DROP active_form, DROP passive_form');
     }
 }
