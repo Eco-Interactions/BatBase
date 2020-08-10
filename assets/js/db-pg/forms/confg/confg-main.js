@@ -102,7 +102,7 @@ export function getCoreFieldDefs(entity) {
             'InteractionTags': 'tags', 'Note': 'fullTextArea'
         },
         'source': { 'DisplayName': 'text', 'Description': 'textArea',
-            'Year': 'year', 'Doi': 'text','Website': 'url',
+            'Year': 'year', 'Doi': 'doi','Website': 'url',
             'Authors': 'multiSelect', 'Editors': 'multiSelect'
         },
         'taxonLvls': {

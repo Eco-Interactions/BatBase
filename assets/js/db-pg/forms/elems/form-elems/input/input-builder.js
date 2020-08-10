@@ -32,6 +32,7 @@ export function buildFieldInput(field, entity, fLvl) {                          
 
     function getFieldInput() {
         const builders = {
+            doi:            buildInput,
             fullTextArea:   buildLongTextArea,
             lat:            buildInput,
             lng:            buildInput,
@@ -57,8 +58,8 @@ export function buildFieldInput(field, entity, fLvl) {                          
     function handleFieldValidation(input) {
         const map = {
             lng: setLongitudePattern, lat: setLatitudePattern,
-            page: setPageRange,
-            url: setUrlPlaceholder,  year: setYearCharLength
+            page: setPageRange,       doi: setDoiPattern,
+            url: setHttpPatternAndPlaceholder,  year: setYearCharLength
         };
         return !map[field.type] ? input : map[field.type](input, fLvl);
     }
@@ -110,8 +111,15 @@ function handleCoordPattern(input, fLvl, prefix) {
     return addAttrAndValidation(input, { pattern: coordRegex }, msg, fLvl);
 }
 /* ---------- URL ---------- */
-function setUrlPlaceholder(input) {
-    return addAttrAndValidation(input, { placeholder: 'https://www.example.com/path' });
+function setHttpPatternAndPlaceholder(input, fLvl) {
+    const msg = 'Please enter a valid URL. Ex: https://...';
+    const attrs = { pattern: '\\b(https?:\/\/\\S+\.\S*\\b\/?)', placeholder: 'http(s)://...' };
+    return addAttrAndValidation(input, attrs, msg, fLvl);
+}
+function setDoiPattern(input, fLvl) {
+    const msg = 'Please enter the full DOI URL. Ex: https://doi.org/10.1111/j.1439';
+    const attrs = { pattern: 'https?:\/\/doi.org/\\S+', placeholder: 'https://doi.org/...' };
+    return addAttrAndValidation(input, attrs, msg, fLvl);
 }
 /* ---------- PAGE ---------- */
 function setPageRange(input, fLvl) {
@@ -132,15 +140,20 @@ function addAttrAndValidation(input, attrs, msg, fLvl) {
 function validateInput(msg, fLvl, e) {                                          //console.log('validateInput. e = %O, msg = [%s]', e, msg);
     const valid = e.currentTarget.checkValidity();                              //console.log('valid ? ', valid)
     if (valid) { return; }
-    e.currentTarget.setCustomValidity(msg);
+    if (msg) { setCustomInvalidMsg(e.currentTarget, msg, fLvl); }
     e.currentTarget.reportValidity();
-    e.currentTarget.oninput = resetValidityMsg;
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false])
 }
+function setCustomInvalidMsg(input, msg, fLvl) {  console.log('fLvl = ', fLvl)
+    input.setCustomValidity(msg);
+    input.oninput = resetValidityMsg.bind(null, fLvl);
+}
 /* HTML5 validation always fails if a custom validity message is set. */
-function resetValidityMsg(e) {
-    e.currentTarget.setCustomValidity('');
-    e.currentTarget.oninput = null;
+function resetValidityMsg(fLvl, e) {
+    const input = e.currentTarget;                                              //console.log('resetValidityMsg. isValid ? %s = %O', input.validity.valid, input)
+    input.setCustomValidity('');
+    input.oninput = null;
+    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* --------------------- CHANGE HANDLER ------------------------------------- */
 function addFieldOnChangeHandler(entity, input, field, fLvl) {

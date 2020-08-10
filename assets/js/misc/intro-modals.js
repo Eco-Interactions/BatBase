@@ -75,10 +75,13 @@ function getSubmitFunc(submitCb, cancelCb) {
     return !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
 }
 function getExitFunc(cancelCb) {
-    return cancelCb ? exitModal.bind(null, cancelCb) : exitModal;
+    return cancelCb ? onModalExit.bind(null, cancelCb) : onModalExit;
 }
 export function exitModal(cancelCb) {
     if (intro) { intro.exit(); }
+    onModalExit(cancelCb);
+}
+function onModalExit(cancelCb) {
     if (cancelCb) { cancelCb(); }
     intro = null;
 }
