@@ -2,7 +2,7 @@
  * Returns the entity's data formatted for display and grouped by sections, rows,
  * and cells.
  * Ex: [{
- *        section: 'name',
+ *        section: { classes, name },
  *        rows: [
  *            (row1)[
  *                (cell) [
@@ -31,7 +31,9 @@ function getEntityShowData(entity, data) {
 function getIntDisplayData(data) {
     return [
         {
-            section:  'Interaction ' + data.id + ':',
+            section:  {
+                name: 'Interaction ' + data.id + ':',
+            },
             rows: [
                [  //row 1
                     [ //cell 1
@@ -39,9 +41,9 @@ function getIntDisplayData(data) {
                         { field: 'Tag', content: getTagData(data.tags) },
                         'col' //flex direction for multiple fields in single cell
                     ],[  //cell 2
-                        { field: 'Subject', content: getTaxonHierarchyDataHtml(data.subject) }
+                        { field: 'Subject', content: getTxnHierarchy(data.subject, 'parent') }
                     ],[  //cell 3
-                        { field: 'Object', content: getTaxonHierarchyDataHtml(data.object) }
+                        { field: 'Object', content: getTxnHierarchy(data.object, 'parent') }
                     ],
                 ], [ //row 2
                     [  //cell 1
@@ -107,25 +109,31 @@ function getIntDisplayData(data) {
 function getTxnDisplayData(data) {
     return [
         {
-            section:  'Taxon Hierarchy',
+            section:  {
+                name: 'Taxon Hierarchy',
+            },
             rows: [
                [  //row 1
                     [
-                        { field: data.realm.displayName, content: getTaxonHierarchyDataHtml(data, 'down') },
+                        { field: data.realm.displayName, content: getTxnHierarchy(data, 'full') },
                     ],
                 ]
             ]
         },{
-            section:  getAllTaxonInts(data).length + ' Interactions',
+            section:  {
+                classes: 'flex-grow flex-wrap',
+                name: getAllTaxonInts(data).length + ' Interactions',
+            },
             rows: [
                [  //row 1
                     [
-                        { field: 'Type', content: getIntsGroupedBy('type', data), classes: 'max-cntnt' },
+                        { field: 'By Type', content: getIntsGroupedBy('type', data), classes: 'max-cntnt' },
                     ],[
-                        { field: 'Country', content: getIntsGroupedBy('loc', data), classes: 'max-cntnt' },
-                    ],[
-                        { field: 'Publication', content: getIntsGroupedBy('src', data) },
+                        { field: 'By Country', content: getIntsGroupedBy('loc', data), classes: 'max-cntnt' },
                     ],
+                    // [
+                    //     { field: 'Publication', content: getIntsGroupedBy('src', data) },
+                    // ],
                 ]
             ]
         }
@@ -145,25 +153,57 @@ function getEntityLinkHtml(entity, id, displayTxt) {
     return `<a href="${link}">${displayTxt}</a>`;
 }
 /* ------------------------------- TAXON ------------------------------------ */
-function getTaxonHierarchyDataHtml (taxon, dir) {
+/**
+ * Returns the taxonomic heirachy for the group:
+ *     full - All related taxa from the root down with the core taxon bolded
+ *     parent - From the core taxon up through the realm
+ */
+function getTxnHierarchy (taxon, group) {
     const txnNameHtml = `<strong>${taxon.displayName}</strong>`;
     const linkedTxn = getEntityLinkHtml('taxon', taxon.id, txnNameHtml);
-    if (taxon.isRoot) { return linkedTxn; }
-    const txnLinks = [linkedTxn];
-    getHeirarchyTaxaLinks(taxon.parentTaxon);
-    if (dir === 'down') { txnLinks.reverse(); }
-    return txnLinks.reduce(buildTaxonomicHierarchyHtml, '');
+    if (taxon.isRoot && group === 'parent') { return linkedTxn; }
+    const heirachy = [ linkedTxn ] ;
+    if (!taxon.isRoot) { getParentTaxaLinks(taxon.parentTaxon, 2); }
+    ifFullHeirarchyReverseDisplayOrderAndAddChildren();
+    return heirachy.reduce(formatHierarchy, '');
 
-    function getHeirarchyTaxaLinks(pTaxon) {
-        const link = getEntityLinkHtml('taxon', pTaxon.id, pTaxon.displayName);
-        txnLinks.push(link);
+    function getParentTaxaLinks(pTaxon) {
+        heirachy.push(getTxnLink(pTaxon));
         if (pTaxon.isRoot) { return; }
-        getHeirarchyTaxaLinks(pTaxon.parentTaxon);
+        getParentTaxaLinks(pTaxon.parentTaxon);
+    }
+    function ifFullHeirarchyReverseDisplayOrderAndAddChildren() {
+        if (group !== 'full') { return; }
+        heirachy.reverse();
+        if (!taxon.childTaxa) { return; }
+        let childTaxa = getChildTaxa(taxon.childTaxa.map(getChildTxnLinks));
+        heirachy.push(childTaxa);
+    }
+    function getChildTxnLinks(taxon) {
+        const links = [getTxnLink(taxon)];
+        return links.concat(taxon.childTaxa.map(getChildTxnLinks));
+    }
+    function getTxnLink(taxon) {
+        return getEntityLinkHtml('taxon', taxon.id, taxon.displayName);
+    }
+    function getChildTaxa(childLinks) {
+        if (!childLinks.length) { return; }
+        return childLinks.length === 1 ? childLinks[0] : childLinks;
     }
 }
-function buildTaxonomicHierarchyHtml(namesHtml, val, i) {
-    const indent = !i ? '' : '<br>' + '&emsp;'.repeat(i);
-    return namesHtml + `${indent}${String.fromCharCode(8627)}&nbsp${val}`;
+function formatHierarchy(namesHtml, val, i) {
+    const lvlHtml = typeof val === 'string' ? (getIndentHtml(i) + val) :
+        val.map(formatChildLinks.bind(null, i)).join('');
+    return namesHtml + lvlHtml;
+
+    function formatChildLinks(lvl, childVal) {                                  //console.log('childVal = %O, lvl', childVal, lvl)
+        return typeof childVal === 'string' ? (getIndentHtml(lvl) + childVal) :
+            childVal.map(subVal => formatChildLinks(lvl+1, subVal));
+    }
+    function getIndentHtml(lvl) {
+        const indent = !lvl ? '' : '<br>' + '&emsp;'.repeat(lvl);
+        return `${indent}${String.fromCharCode(8627)}&nbsp`;
+    }
 }
 /* ---------------------------- SOURCE -------------------------------------- */
 function getContributorFieldData (contribs) {
@@ -212,7 +252,8 @@ function getIntsGroupedBy(grouping, taxon) {
     return groupByMap[grouping](ints);
 }
 function getAllTaxonInts(taxon) {
-    return  taxon.subjectRoles.concat(taxon.objectRoles);
+    const childInts = taxon.childTaxa.map(getAllTaxonInts)
+    return  taxon.subjectRoles.concat(taxon.objectRoles).concat(...childInts);
 }
 function sortAndFormatInts(ints, field) {
     const sorted = {};
@@ -225,11 +266,16 @@ function sortAndFormatInts(ints, field) {
     }
 }
 function formatSortedInts(sorted) {
-    return Object.keys(sorted).sort().map(formatTypeGroup).join('<br>');
+    return Object.keys(sorted).sort(byIntCnt).map(formatTypeGroup).join('<br>');
 
     function formatTypeGroup(field) {
         const intCount = sorted[field].length;
         return `<span class="show-int-cnt">${intCount}</span><span>${field}</span>`;
+    }
+    function byIntCnt(a, b) {
+        const x = sorted[a].length;
+        const y = sorted[b].length;
+        return x<y ? 1 : x>y ? -1 : 0;
     }
 }
 /* ------------ BY COUNTRY ------------------ */
@@ -249,12 +295,17 @@ function formatIntsForLocs(sorted) {                                            
 
     function formatRegionGroup(region) {
         const regionHtml = `<i>${region}</i><br>`;
-        const cntrys = Object.keys(sorted[region]).sort().map(formatCountryInts).join('<br>');
+        const cntrys = Object.keys(sorted[region]).sort(byIntCnt).map(formatCountryInts).join('<br>');
         return regionHtml + cntrys;
 
         function formatCountryInts(country) {
             const intCntHtml = `&nbsp;&nbsp;${sorted[region][country].length}`;
-            return `<span class="show-int-cnt">${intCntHtml}</span><span>&nbsp;&nbsp;${country}</span>`;
+            return `<span class="show-int-cnt">${intCntHtml}</span><span>${country}</span>`;
+        }
+        function byIntCnt(a, b) {
+            const x = sorted[region][a].length;
+            const y = sorted[region][b].length;
+            return x<y ? 1 : x>y ? -1 : 0;
         }
     }
 }

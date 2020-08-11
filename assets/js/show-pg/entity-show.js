@@ -27,8 +27,8 @@ function buildEntityShowPage (entity, data) {                       /*dbug-log*/
     const sections = confg.map(buildDataSection);
     $('#entity-show').append(sections.filter(s => s));
 }
-function buildDataSection (confg) {
-    return getDataSect(confg.section, confg.rows.map(getSectionRow).filter(r => r));
+function buildDataSection (confg, i) {
+    return getDataSect(++i, confg.section, confg.rows.map(getSectionRow).filter(r => r));
 }
 function getSectionRow (row, i) {
     return buildDataRow(++i, row.map(getRowCell).filter(c => c));
@@ -42,10 +42,11 @@ function getDataCell (data) {
     return buildDataCell(data.field, data.content, data.classes);
 }
 /* ------------------------- HTML BUILDERS ---------------------------------- */
-function getDataSect (title, rows) {                                /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
-    const hdr = util.getElem('h3', { text: title });
-    const id = title.replace(/ /g,'') + '-data-sect';
-    return getDivWithContent(id, 'data-sect', [hdr, ...rows]);
+function getDataSect (cnt, section, rows) {                         /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
+    const hdr = util.getElem('h3', { text: section.name });
+    const id = 'data-sect-'+cnt;
+    const classes = 'data-sect' + (section.classes ? ' ' + section.classes : '');
+    return getDivWithContent(id, classes, [hdr, ...rows]);
 }
 function buildDataRow (cnt, rowCells) {                             /*dbug-log*///console.log('   buildDataRow [%O]', rowCells);
     return getDivWithContent('sect-row'+cnt, 'sect-row', rowCells);
@@ -71,8 +72,8 @@ function getDivWithContent (id, classes, content) {                 /*dbug-log*/
 function buildCsvDownloadButton() {
     const attrs = {
         class: 'ag-fresh map-dsbl ico-bttn', id: 'entity-csv',
-        name: 'csv',                         text: 'CSV Download Coming Soon',
-        title: 'Download CSV'
+        name: 'csv',                         title: 'CSV Download Coming Soon',
+        text: 'Download CSV'
     };
     $('#hdr-right').append($('<button/>', attrs));
 }

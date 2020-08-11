@@ -6,10 +6,10 @@
 {% endblock stylesheets %}
 
 {% block detail %}
-    <div id='entity-show' class='flex-col' data-entity='{{ entity }}'>
-        <a href="{{ baseurl }}search">Browse Database</a>
-        <br>
-    </div>
+    <a href="{{ baseurl }}search">Browse Database</a>
+    <br>
+    <div id='entity-show' class={% block showclass %}"flex-col"{% endblock %}
+    	data-entity='{{ entity }}'></div>
 {% endblock detail %}
 
 {% block javascripts %}
