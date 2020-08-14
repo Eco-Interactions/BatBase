@@ -10,9 +10,6 @@
 STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
-## ======================= REGULAR USE ====================================== ##
-php bin/console cache:clear
-/var/log/apache2/error.log
 
 ## RESET LOCAL DB ##
     - $ ./dev/resetdb.sh

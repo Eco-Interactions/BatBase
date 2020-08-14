@@ -12,19 +12,20 @@ SINCE LAST SERVER UPDATE:
 SINCE LAST USER UPDATE:
     - Publication upload
     - Site designed for mobile use
-    - Data entry forms improved
-        - Added mapping to location forms
     - Ability to save set of filters and lists of interactions
     - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
-    - Added Interaction show page
+    - Added Interaction and Taxon pages
+    - Data Entry
+        - Error reporting feature
+        - Forms improved
+            - Added mapping to location forms
+            - Tutorials added to forms
 
     Upcoming:
         - Data review features
-        - Figure out how to get Logs in UI for new editors
 
 
 > ____ QUESTIONS _____
-
 TEAM:
     - Fully remove pdf files when deleted through UI
         - or eventually add another layer where "trash" could be emptied
@@ -34,28 +35,34 @@ TEAM:
         - feedback
         - unique logins
         - records added/edited
-    - logos need updating with batbase
 
 TAYLOR:
-- Reach out to users who experience issues/bugs that get resolved to thank them
-for inadvertantly leading to sloving a bug in the code and invite them to check back
+    - Reach out to users who experience issues/bugs that get resolved to thank them
+        for inadvertantly leading to sloving a bug in the code and invite them to check back?
+
+    2083-2085?
+
 
 > ____ TASKS _____
+rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
+    - Adding form hints
+        - addFinalInfoStep about info in tooltips on fields
+
+    - check that url is valid in js
+        - remove the https prepending code
+        - check url is valid before saving
+        - Sort invalid urls by the editor who created the source
+
+    - Create Taxon show page
+        - responsive design
+
+    - Database page
+        - Publication text search isn't searching child tree layers
+
     - Add globi to 'partners' section on about page
     - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
-    - 4.4 upgrade:
-        - Fix doctrine migrations
-    - Create Taxon show page
-        - Display taxon page
-            - heirarchy
-            - related interactions?
-                - group by interaction type
-    - Add interaction type verbs
-        - Use active verbs on interaction show page header
-        - "" in form detail panel
-    - Add confirmation popup to citation and location forms
-    - Add form hints
+    - Add confirmation popup to interaction form
     - Add object realm and name filters to bat filter panel
 
     - fix cronjob to clean up hourly backups
@@ -63,10 +70,11 @@ CURRENT:
         depending on how much needs to be updated
     - testing
         - add interaction show page to tests
+        - test editor report form
+        - test data reset
         - test all validation 'error' handlers
         - csv
         - wysiwyg
-    - add input type to form confg (handle all number inputs)
     - Add multiple realm root functionality
 
 NEXT:
@@ -106,6 +114,7 @@ NEXT:
     - forms - Add 'trim' to all values before submitting
         - Check for elevation field val when elev-max value entered.
         - Loop through all entities that could have random spaces in fields
+        - Fix all URLs entered without http
 
 > ==== MEETING NOTES ====
 Prep:
@@ -122,7 +131,6 @@ Next/future rounds:
     Future:
 ### _____________________ DEV INTERNAL TASKS _______________________________ ###
 Sort:
-    - remove all unused properties from serialization (eg, slug)
     - when clicking reset local data button on menu bar, figure out how to get
         a diff between the old and new stored data to better track down errors/bugs
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
