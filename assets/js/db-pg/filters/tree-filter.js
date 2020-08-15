@@ -78,21 +78,26 @@ function ifRowContainsText(row, text) {                             /*dbug-log*/
 export function getTreeRowsWithText(data, text) {                   /*dbug-log*///console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
     const curFocus = tState().get('curFocus');
     const rows = data.map(row => Object.assign({}, row));
-    return rows.filter(row => {
+    return rows.filter(filterRowByText);
+
+    function filterRowByText(row) {
         const isRow = ifRowContainsText(row, text);
-        if (rowChildrenAreTreeEntities(curFocus, row)) {
+        if (rowChildrenAreTreeEntities(row)) {
             row.children = getTreeRowsWithText(row.children, text);
+            return isRow || row.children.length;
         }                                                           /*dbug-log*///console.log('   isRow = [%s] children [%s]', isRow, nonSrcRowHasChildren(curFocus, row))
-        return isRow || (nonSrcRowHasChildren(curFocus, row) ?
-            !row.children[0].hasOwnProperty('interactionType') : false );
-    });
+        return isRow;
+    }
 }
-function rowChildrenAreTreeEntities(curFocus, row) {
-    return nonSrcRowHasChildren(curFocus, row) && !row.children[0].hasOwnProperty('interactionType');
+function rowChildrenAreTreeEntities(row) {
+    return rowHasChildren(row) && rowChildrenAreNotInteractions(row);
 }
-function nonSrcRowHasChildren(curFocus, row) {
-    if (curFocus === 'srcs') { return false; }
+function rowHasChildren(row) {
+    // if (curFocus === 'srcs') { return false; } //Not sure why I wasn't trying to filter src child rows...
     return row.children && row.children.length > 0;
+}
+function rowChildrenAreNotInteractions(row) {
+    return !row.children[0].hasOwnProperty('interactionType');
 }
 /* ================= SYNC WITH ACTIVE FILTERS =============================== */
 /*------------------ LOCATION -----------------------------*/

@@ -6,6 +6,13 @@
 ### __________________________ CURRENT _____________________________________ ###
 > ____ LOGS ____
 SINCE LAST TEAM UPDATE:
+    - Forms
+        - Not able to validate URL loads without error due to it being far too complicated with current web standards.
+        - Changed 'entity form tutorial' button text to walkthrough
+        - Added the 'Reference Guide' as a button next to the walkthrough
+
+    - Bugs
+        - Source text filter wasn't filtering beyond first level of tree
 
 SINCE LAST SERVER UPDATE:
 
@@ -48,20 +55,11 @@ rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
     - Adding form hints
         - addFinalInfoStep about info in tooltips on fields
-        - move link (as button) to reference guide next to tutorial button
 
-
-
-    - check that url is valid in js
-        - remove the https prepending code
-        - check url is valid before saving
-        - Sort invalid urls by the editor who created the source
+    - Sort invalid urls by the editor who created the source
 
     - Create Taxon show page
         - responsive design
-
-    - Database page
-        - Publication text search isn't searching child tree layers
 
     - Data
         - tags- leaf = external, wood = internal
