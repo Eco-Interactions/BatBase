@@ -11,6 +11,8 @@
  *         RESET CREATE FORM AFTER SUBMIT
  *     EDIT FORM
  *     ON FORM INIT COMPLETE
+ *         REFERENCE GUIDE BUTTON
+ *         LOCATION OPTIONS NOTE
  *         FORM COMBOBOXES
  *     FORM FIELD HANDLERS
  *         PUBLICATION
@@ -145,7 +147,20 @@ function modifyFormDisplay() {
     $('.all-fields-cntnr').hide();
     $('#Subject-lbl').text('Subject (Bat)');
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
+    addReferenceGuideButton();
 }
+/* ----------------------- REFERENCE GUIDE BUTTON --------------------------- */
+function addReferenceGuideButton() {
+    const bttnTxt = 'Reference Guide';
+    const attr = { class: 'ag-fresh', type: 'button', value: bttnTxt };
+    const bttn = _u('buildElem', ['input', attr]);
+    $(bttn).click(openReferenceGuideInNewTab);
+    $('#top-help').prepend(bttn);
+}
+function openReferenceGuideInNewTab() {
+    //window.open(pathString, target);
+}
+/* ---------------------- LOCATION OPTIONS NOTE ----------------------------- */
 /** Adds a message above the location fields in interaction forms. */
 function addLocationSelectionMethodsNote() {
     const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);

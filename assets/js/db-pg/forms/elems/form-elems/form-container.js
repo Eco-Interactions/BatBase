@@ -19,20 +19,16 @@
 import { _modal, _u } from '../../../db-main.js';
 import { _cmbx, _confg, _elems, _panel, _state } from '../../forms-main.js';
 
-let entity;
-let action;
+let action, entity, fLvl;
 
+/* ============================== ROOT FORM ================================= */
 export function buildAndAppendRootForm(fields, id) {
-    setScopeParams(_state('getFormState'));
+    const state = _state('getFormState');
+    setFormScopeParams(state.action, state.entity, 'top');
     const form = buildForm(id, fields);
     appendAndStyleForm(form, entity);
     return Promise.resolve();
 }
-function setScopeParams(state) {
-    entity = state.entity;
-    action = state.action;
-}
-/* ============================== ROOT FORM ================================= */
 /**
  * Returns the form window elements - the form and the detail panel.
  * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
@@ -61,22 +57,8 @@ export function getExitButton() {
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
     const formWin = _u('buildElem', ['div', { id: 'form-main', class: action }]);
-    $(formWin).append([getFormHelpElems(), getHeader(), getForm(fields)]);
+    $(formWin).append([getFormHelpElems('top'), getHeader(), getForm(fields)]);
     return formWin;
-}
-/* ----------------------- HELP ELEMS --------------------------------------- */
-function getFormHelpElems() {
-    const cntnr = _u('buildElem', ['div', { class: 'flex-row'}]);
-    if (entity === 'interaction') { addLinkToReferenceGuide(); }
-    $(cntnr).css({width: '100%', 'justify-content': 'space-between'})
-        .append(getTutorialBttn('top'));
-    return cntnr;
-
-    function addLinkToReferenceGuide() {
-        const link = `<a href="#" target="_blank">Click here and use the
-            reference guide while completing this form.</a>`;
-        $(cntnr).append(link);
-    }
 }
 /* ------------------------------ HEADER ------------------------------------ */
 function getHeader() {
@@ -128,46 +110,53 @@ function addFormStyleClass() {
 /* ============================== SUB FORM ================================== */
 export function initSubForm(fLvl, fClasses, fVals, sId) {
     entity = _state('getFormProp', [fLvl, 'entity']);
+    setFormScopeParams('create', entity, fLvl);
     return _elems('buildFormRows', [entity, fVals, fLvl])
-        .then(rows => buildFormContainer(rows, fClasses, fLvl))
-        .then(subForm => finishSubFormInit(subForm, fLvl, sId));
+        .then(rows => buildFormContainer(rows, fClasses))
+        .then(subForm => finishSubFormInit(subForm, sId));
 }
-function buildFormContainer(rows, fClasses, fLvl, sId) {
-    const subFormContainer = buildSubFormCntnr(fClasses, fLvl);
-    const tutorial = getTutorialBttn(fLvl);
-    const hdr = buildFormHdr(fLvl);
+function buildFormContainer(rows, fClasses, sId) {
+    const subFormContainer = buildSubFormCntnr(fClasses);
+    const helpBttn = getFormHelpElems();
+    const hdr = buildSubFormHdr();
     const footer = _elems('getFormFooter', [entity, fLvl, 'create']);
-    $(subFormContainer).append([tutorial, hdr, rows, footer]);
+    $(subFormContainer).append([helpBttn, hdr, rows, footer]);
     return subFormContainer;
 }
-function buildSubFormCntnr(fClasses, fLvl) {
+function buildSubFormCntnr(fClasses) {
     const attr = {id: fLvl+'-form', class: fClasses };
     return _u('buildElem', ['form', attr]);
 }
-function buildFormHdr(fLvl) {
+function buildSubFormHdr() {
     const attr = { text: 'New '+_u('ucfirst', [entity]), id: fLvl+'-hdr' };
     return _u('buildElem', ['p', attr]);
 }
-function finishSubFormInit(subForm, fLvl, sId) {
+function finishSubFormInit(subForm, sId) {
     _state('setFormProp', [fLvl, 'pSelId', sId]);
     _cmbx('enableCombobox', [sId, false]);
     return subForm;
 }
 /* ============================== SHARED ==================================== */
-function getTutorialBttn(fLvl) {
-    if (!formHasTutorialInfo()) { return; }
-    const cntnr = _u('buildElem', ['div', { class: 'flex-row'}]);
-    $(cntnr).append(getFormTutorialButton(fLvl)).css({'justify-content': 'flex-end'});
+function setFormScopeParams(a, e, l) {
+    entity = e,
+    action = a,
+    fLvl = l;
+}
+/* ----------------------- HELP ELEMS --------------------------------------- */
+function getFormHelpElems() {
+    const cntnr = _u('buildElem', ['div', { id: fLvl+'-help', class: 'flex-row'}]);
+    $(cntnr).append(getFormWalkthroughBttn());
     return cntnr;
 }
-function formHasTutorialInfo() {
-    const formInfoConfg = _confg('getFormConfg', [entity]).info;
-    return formInfoConfg && Object.keys(formInfoConfg).length;
-}
-function getFormTutorialButton(fLvl) {
-    const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
-    const attr = { class: 'ag-fresh '+fLvl+'-help', type: 'button', value: bttnTxt };
+function getFormWalkthroughBttn() {
+    if (!formHasWalkthroughInfo()) { return; }
+    // const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
+    const attr = { class: 'ag-fresh', type: 'button', value: 'Walkthrough' };
     const bttn = _u('buildElem', ['input', attr]);
     $(bttn).click(_modal.bind(null, 'showFormTutorial', [fLvl]));
     return bttn;
+}
+function formHasWalkthroughInfo() {
+    const formInfoConfg = _confg('getFormConfg', [entity]).info;
+    return formInfoConfg && Object.keys(formInfoConfg).length;
 }
