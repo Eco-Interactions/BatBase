@@ -66,25 +66,17 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     function handleAdditionalEntityData(entity) {
         if (!submitting) { return Promise.resolve(); }
         const dataHndlrs = {
-            'author': [ getAuthFullName, getAuthDisplayName, formatUrl ],
-            'editor': [ getAuthFullName, getAuthDisplayName, formatUrl ],
+            'author': [ getAuthFullName, getAuthDisplayName ],
+            'editor': [ getAuthFullName, getAuthDisplayName ],
             'citation': [ getPublicationData, addCitDisplayName, ifFullWorkCited,
-                addContributorData, formatUrl ],
+                addContributorData ],
             'interaction': [ handleUnspecifiedLocs ],
             'location': [ addElevUnits, padLatLong, getLocType ],
-            'publication': [ addContributorData, formatUrl ],
-            'publisher': [ formatUrl ],
+            'publication': [ addContributorData ],
             'taxon': [ getTaxonData ],
         };
         if (!dataHndlrs[entity]) { return Promise.resolve(); }
         return Promise.all(dataHndlrs[entity].map(func => Promise.resolve(func())));
-    }
-    /**
-     * HTML5 validation ensures valid url. If url starts wtih 'www' prepend 'https://'.
-     */
-    function formatUrl() {
-        if (!formVals.website || formVals.website[0] !== 'w') { return; }
-        formVals.website = 'https://' + formVals.website;
     }
     /** ---- Additional Author data ------ */
     /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */

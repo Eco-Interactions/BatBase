@@ -6,7 +6,7 @@
 import { _confg, _state } from '../forms-main.js';
 import { _u } from '../../db-main.js';
 
-export default function(entity, fLvl, formVals) {
+export default function formatDataForServer(entity, fLvl, formVals) {
     if (entity === 'editor') { entity = 'author'; }
     return buildFormData(entity, formVals, fLvl);                               //console.log("formData = %O", formData);
 }
