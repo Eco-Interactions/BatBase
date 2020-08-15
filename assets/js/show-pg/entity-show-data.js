@@ -32,27 +32,29 @@ function getIntDisplayData(data) {
     return [
         {
             section:  {
-                name: 'Interaction ' + data.id + ':',
+                name: 'Interaction ' + data.id,
             },
             rows: [
                [  //row 1
                     [ //cell 1
+                        { field: 'Subject', content: getTxnHierarchy(data.subject, 'parent') }
+                    ],[  //cell 2
+                        { field: 'Object', content: getTxnHierarchy(data.object, 'parent') }
+                    ],[  //cell 3
                         { field: 'Type', content: data.interactionType.displayName },
                         { field: 'Tag', content: getTagData(data.tags) },
                         'col' //flex direction for multiple fields in single cell
-                    ],[  //cell 2
-                        { field: 'Subject', content: getTxnHierarchy(data.subject, 'parent') }
-                    ],[  //cell 3
-                        { field: 'Object', content: getTxnHierarchy(data.object, 'parent') }
-                    ],
-                ], [ //row 2
+                    ]
+                ],[ //row 2
                     [  //cell 1
                         { field: 'Note', content: data.note }
                     ]
                 ]
             ]
         },{
-            section:  'Source',
+            section: {
+                name:  'Source',
+            },
             rows: [
                [  //row 1
                     [
@@ -83,7 +85,9 @@ function getIntDisplayData(data) {
                         // { field: 'Issue', content: data.source.citation.publicationIssue },
             ]
         },{
-            section:  'Location',
+            section:  {
+                name: 'Location',
+            },
             rows: [
                [  //row 1
                     [
@@ -110,12 +114,12 @@ function getTxnDisplayData(data) {
     return [
         {
             section:  {
-                name: 'Taxon Hierarchy',
+                name: data.realm.displayName + ' Hierarchy - ' + data.name,
             },
             rows: [
                [  //row 1
                     [
-                        { field: data.realm.displayName, content: getTxnHierarchy(data, 'full') },
+                        { field: 'heirachy', label: false, content: getTxnHierarchy(data, 'full') },
                     ],
                 ]
             ]
@@ -143,7 +147,10 @@ function getTxnDisplayData(data) {
 /* ================== FIELD-DATA HANDLERS =================================== */
 function getTagData (tags) {
     if (!tags.length) { return null; }
-    return tags.map(t => t.displayName).join(', ');
+    return tags.map(t => t.displayName).sort(moveSecondaryTag).join(', ');
+}
+function moveSecondaryTag(a, b) {
+    return b === 'Secondary' ? -1 : 1;
 }
 function getNameIfSet(entity, field) {
     return entity[field] ? entity[field].displayName : null;

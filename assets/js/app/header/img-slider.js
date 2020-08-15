@@ -34,7 +34,7 @@ function setSliderAndContentSize() {
 function getMobileTopValue() {
     const cntnrHeight = $('#slider-overlay').outerHeight();
     const logoHeight = $('#slider-logo').outerHeight();
-    return (cntnrHeight || logoHeight) + 86;
+    return (cntnrHeight || logoHeight) + $('#sticky-hdr').outerHeight();
 }
 function setSlideInterval() {
     let curSlide = 1,

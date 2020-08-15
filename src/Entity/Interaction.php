@@ -516,7 +516,7 @@ class Interaction
     }
 
     /**
-     * Get comma separated tag names.
+     * Get comma separated tag names. If 'Secondary' present, it is listed last.
      *
      * @return array
      */
@@ -527,6 +527,12 @@ class Interaction
         if ($this->tags) {
             foreach ($this->tags as $tag) { array_push($names, $tag->getDisplayName()); }
         }
+        uasort($names, function($a, $b)
+        {
+            if ($a == 'Secondary') return 1;
+            if ($b == 'Secondary') return -1;
+            return 0;
+        });
         return join(', ', $names);
     }
 

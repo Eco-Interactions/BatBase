@@ -8,8 +8,8 @@
 {% block detail %}
     <a href="{{ baseurl }}search">Browse Database</a>
     <br>
-    <div id='entity-show' class={% block showclass %}"flex-col"{% endblock %}
-    	data-entity='{{ entity }}'></div>
+    <h4 id='show-loading-msg'><br>[LOADING]</h4>
+    <div id='entity-show' class='{{ show }}-show flex-col' data-entity='{{ entity }}'></div>
 {% endblock detail %}
 
 {% block javascripts %}

@@ -25,6 +25,7 @@ function getEntity (url) {
 function buildEntityShowPage (entity, data) {                       /*dbug-log*/console.log('   *//init[%s]ShowPage = %O', entity, data);
     const confg = getEntityDisplayConfg(entity, data, util);
     const sections = confg.map(buildDataSection);
+    $('#show-loading-msg').remove();
     $('#entity-show').append(sections.filter(s => s));
 }
 function buildDataSection (confg, i) {
@@ -39,7 +40,7 @@ function getRowCell (cell) {
 }
 function getDataCell (data) {
     if (!data) { return false; }
-    return buildDataCell(data.field, data.content, data.classes);
+    return buildDataCell(data.field, data.content, data.label, data.classes);
 }
 /* ------------------------- HTML BUILDERS ---------------------------------- */
 function getDataSect (cnt, section, rows) {                         /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
@@ -55,11 +56,15 @@ function getRowGroupSect (dir, colCells) {                          /*dbug-log*/
     const classes = `group-${dir} flex-${dir}`;
     return getDivWithContent('', classes, colCells);
 }
-function buildDataCell (label, fieldHTML, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
-    const lbl = util.getLabel(label+':');
-    const data = getDivWithContent(label+'-data', '', fieldHTML);
+function buildDataCell (field, fieldHTML, label, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
+    const lbl = getFieldLabel(field, label);
+    const data = getDivWithContent(field+'-data', '', fieldHTML);
     const classes = 'flex-row cell-data ' + c;
-    return getDivWithContent(label+'-cell', classes, [lbl, data]);
+    return getDivWithContent(field+'-cell', classes, [lbl, data].filter(e=>e));
+}
+/** Note: If label is set to FALSE in confg, no label is built. */
+function getFieldLabel(field, label) {
+    return label === false ? false : util.getLabel(field+':');
 }
 /* ------------ base ------------------- */
 function getDivWithContent (id, classes, content) {                 /*dbug-log*///console.log('               getDivWithContent [%s] = [%O]', classes, content);
@@ -73,7 +78,7 @@ function buildCsvDownloadButton() {
     const attrs = {
         class: 'ag-fresh map-dsbl ico-bttn', id: 'entity-csv',
         name: 'csv',                         title: 'CSV Download Coming Soon',
-        text: 'Download CSV'
+        text: 'CSV'
     };
-    $('#hdr-right').append($('<button/>', attrs));
+    $('#headln-txt').append($('<button/>', attrs));
 }

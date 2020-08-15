@@ -71,9 +71,10 @@ class ShowEntityController extends AbstractController
         return $this->render('Entity/interaction.html.twig', array(
             'entity' => $jsonEntity,
             'object' => $object,
+            'show' => 'interaction',
             'subject' => $subject,
             'tags' => $tags,
-            'type' => $type
+            'type' => $type,
         ));
     }
 /* ----------------------------- TAXON -------------------------------- */
@@ -94,7 +95,9 @@ class ShowEntityController extends AbstractController
         $jsonEntity = $this->serializeEntity($taxon);
 
         return $this->render('Entity/taxon.html.twig', array(
-            'displayName' => $taxon->getDisplayName(), 'entity' => $jsonEntity
+            'displayName' => $taxon->getDisplayName(),
+            'entity' => $jsonEntity,
+            'show' => 'taxon',
         ));
     }
 
