@@ -175,7 +175,7 @@ function getTxnHierarchy (taxon, group) {
     function ifFullHeirarchyReverseDisplayOrderAndAddChildren() {
         if (group !== 'full') { return; }
         heirachy.reverse();
-        if (!taxon.childTaxa) { return; }
+        if (!taxon.childTaxa.length) { return; }
         let childTaxa = getChildTaxa(taxon.childTaxa.map(getChildTxnLinks));
         heirachy.push(childTaxa);
     }

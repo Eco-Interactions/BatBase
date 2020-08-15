@@ -422,10 +422,18 @@ function ifLevelComboRemoveCombo(i, elem) {
 /* ------------------- ROLE SHARED HELPERS --------------- */
 /* ------- initTaxonSelectForm --------- */
 function initTaxonSelectForm(role, realmId) {
-    if (ifFormAlreadyOpenAtLevel('sub')) { return throwAndCatchSubFormErr(role, 'sub'); }
+    if (ifSubFormAlreadyInUse(role)) { return throwAndCatchSubFormErr(role, 'sub'); }
+    $('#'+role+'-sel').data('loading', true);
     return buildTaxonSelectForm(role, realmId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));
+}
+function ifSubFormAlreadyInUse(role) {
+    return ifFormAlreadyOpenAtLevel('sub') || ifOppositeRoleFormLoading(role);
+}
+function ifOppositeRoleFormLoading(role) {
+    const oppRole = getRealmData('oppositeRole');
+    return $('#'+oppRole+'-sel').data('loading');
 }
 function buildTaxonSelectForm(role, realmId) {                                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     addNewFormState(role);
@@ -446,6 +454,7 @@ function finishTaxonSelectBuild(role) {
     customizeElemsForTaxonSelectForm(role);
     selectInitTaxonOrFocusFirstCombo(role);
     _u('replaceSelOpts', ['#'+role+'-sel', []]);
+    $('#'+role+'-sel').data('loading', false);
 }
 /* --------- SELECT UNSPECIFIED BUTTON -------------- */
 function addSelectRealmBttn() {
@@ -777,12 +786,13 @@ function getRealmData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getRealmState');
 }
 function ifBothTaxaSelectedEnableInteractionTypes(role) {
-    const oppRole = role === 'Subject' ? 'Object' : 'Subject';
-    if (!_cmbx('getSelVal', ['#'+oppRole+'-sel'])) { return; }
+    if (ifOppositeRoleTaxonNull(role)) { return; }
     const objectRealm = role === 'Object' ?
         getRealmData('realmName') : getObjectRealm('displayName');
     loadInteractionTypesForObjectRealm(objectRealm);
-
+}
+function ifOppositeRoleTaxonNull(role) {
+    return !_cmbx('getSelVal', ['#'+getRealmData('oppositeRole')+'-sel']);
 }
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
 /**

@@ -1,5 +1,4 @@
 #! /bin/bash
-# rp: kik
 
 newUser='bei_dev'
 newDbPassword='dbPw'

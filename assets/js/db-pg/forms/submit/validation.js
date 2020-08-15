@@ -308,7 +308,7 @@ function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
-        'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
+        'isGenusPrnt': clrIsGenusPrnt,
         'needsGenusName': clrNeedsGenusName,    'needsName': clrNeedsName,
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr,
         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,

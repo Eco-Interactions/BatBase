@@ -8,9 +8,10 @@ Encore
 /* ======== DEV ======= */
     /* During rebuilds, all webpack assets that are not used will be removed. */
     .setPublicPath('/BatBase/public/build')
-/* ========= PROD ======= */
+/* ========= SERVER ======= */
     /* the public path used by the web server to access the previous directory */
     // .setPublicPath('/build')
+/* -------- PROD ------- */
     /* Sends source maps to Sentry for bug/issue tracking. */
     // .addPlugin(new SentryWebpackPlugin({
     //     include: '.', test: [/\.js$/], release: '20200730_BB',

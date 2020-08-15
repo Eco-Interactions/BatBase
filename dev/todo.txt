@@ -48,6 +48,9 @@ rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
     - Adding form hints
         - addFinalInfoStep about info in tooltips on fields
+        - move link (as button) to reference guide next to tutorial button
+
+
 
     - check that url is valid in js
         - remove the https prepending code
@@ -59,6 +62,10 @@ CURRENT:
 
     - Database page
         - Publication text search isn't searching child tree layers
+
+    - Data
+        - tags- leaf = external, wood = internal
+
 
     - Add globi to 'partners' section on about page
     - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.

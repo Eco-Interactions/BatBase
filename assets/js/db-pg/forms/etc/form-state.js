@@ -138,6 +138,7 @@ export function initRealmState(role, realmId) {
             realms: realmNames,
             realmTaxon: taxon,
             role: role,
+            oppositeRole: role === 'Subject' ? 'Object' : 'Subject',
             rootLvl: taxon.level.displayName,
         };                                                                      console.log('           /--taxon params = %O', formState.forms.realmData)
         return formState.forms.realmData;
