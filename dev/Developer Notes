@@ -25,6 +25,10 @@ STANDARDS:
     - $ php -d memory_limit=-1 [path] [command]
         - php -d memory_limit=-1 /usr/local/bin/composer [command]
 
+## TODO: DOCUMENTATION ##
+    - Steps to add a filter to the database page
+        - to build a combobox
+
 ## ======================= DEPLOYMENT STEPS ================================= ##
 
 >STEPS TO DEPLOY TO SERVER

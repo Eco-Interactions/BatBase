@@ -27,6 +27,7 @@ export function initCombobox(field, change, options) {                          
 export function initComboboxes(fields) {                                        //console.log('initComboboxes = %O', fields);
     Object.keys(fields).forEach(field => initCombobox(field, fields[field]));
 }
+/* TODO: Figure out when exactly blur is needed currently. */
 function getBaseConfgObj(field, onChange) {
     const confgs = {
         // Search Page Database Options Bar Comboboxes
@@ -38,7 +39,7 @@ function getBaseConfgObj(field, onChange) {
         'Family' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Genus' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Order' : { name: field, id: '#sel'+field, change: onChange, blur: true },
-        'ObjRealm': { name: 'Object Realms', id:'#sel' + field, change: onChange, blur: true },
+        'ObjRealm': { name: 'Object Realms', id:'#sel' + field, change: onChange },
         'Publication Type' : {name: field, id: '#selPubType', change: onChange, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: onChange, blur: true },

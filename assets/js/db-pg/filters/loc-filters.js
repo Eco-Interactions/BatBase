@@ -141,16 +141,11 @@ function buildLocSelects(locOptsObj) {
     function buildLocSel(selName, opts) {
         const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
         const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
-        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
+        const sel = fM.newSel(opts, 'opts-box', 'sel' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;
     }
-}
-function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
-    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
-    $(elem).data('field', field);
-    return elem;
 }
 function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {

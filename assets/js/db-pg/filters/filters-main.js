@@ -12,12 +12,13 @@
  *         GET
  *             FILTER STATUS TEXT
  */
+import { _u } from '../db-main.js';
 import * as fDate from './date-filter.js';
 import * as fLoc from './loc-filters.js';
 import * as fSrc from './src-filters.js';
 import * as fState from './filter-state.js';
 import * as fTree from './tree-filter.js';
-import * as fTxn from './txn-filters.js';
+import * as fTxn from './taxon/txn-filters.js';
 
 /* ====================== STATIC FILTERS ==================================== */
 /* ------------------ TREE-TEXT FILTER -------------------------------------- */
@@ -100,4 +101,10 @@ export function isFilterActive() {
 /* ___________________ FILTER STATUS TEXT ___________________________________ */
 export function getActiveFilterVals() {
     return fState.getActiveFilterVals();
+}
+/* ------------------- UTIL ------------------------------------------------- */
+export function newSel(opts, c, i, field) {
+    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
+    $(elem).data('field', field);
+    return elem;
 }

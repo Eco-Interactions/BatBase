@@ -44,16 +44,11 @@ function loadPubSearchElems(pubTypeOpts) {
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u('buildElem', ['label', {class: "sel-cntnr flex-row"}]);
     const span = _u('buildElem', ['span', { text: 'Type:' }]);
-    const sel = newSelEl(addAllOpt(opts), '', 'selPubType', 'Publication Type');
+    const sel = fM.newSel(addAllOpt(opts), '', 'selPubType', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';
     $(sel).css('width', '177px');
     $(lbl).css('width', lblW).append([span, sel]);
     return lbl;
-}
-function newSelEl(opts, c, i, field) {                                   //console.log('newSelEl for [%s]. args = %O', field, arguments);
-    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
-    $(elem).data('field', field);
-    return elem;
 }
 function addAllOpt(opts) {
     opts.unshift({value: 'all', text: '- All -'});
