@@ -149,7 +149,7 @@ export function applyTxnFilter(val, text) {
         if (!rcrd.parent || rcrd.parent == 1) { return fM.setPanelFilterState('combo', false); }
         const filter = {};
         filter[curLevel] = { text: rcrd.displayName, value: val };
-        fM.setPanelFilterState('combo', filter);;
+        fM.setPanelFilterState('combo', filter, 'rebuild');;
     }
 }
 function clearSelection(elem) {

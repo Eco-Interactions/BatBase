@@ -118,7 +118,7 @@ function ifDateFilterActive(state) {
 function updateDateFilterState(dateTime) {
     if (!app.date) { app.date = {}; }
     app.date = { time: dateTime || app.date.time, type:  _u('getSelVal', ['Date Filter']) };
-    fM.setPanelFilterState('date', app.date);
+    fM.setPanelFilterState('date', app.date, 'direct');
 }
 /* ============================ FILTER BY DATE ============================== */
 function filterTableByDate(date) {                                              //console.log('filterTableByDate. date? = [%s] prevDate = %O', date, app.date.time);

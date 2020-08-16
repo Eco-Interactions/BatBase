@@ -6,46 +6,64 @@
  *      GET
  *      FILTER STATUS TEXT
  */
-/**
- * {str} timeout        Ppresent when window is being resized.
- * {ary} fRowData       rowData when the date-filter is applied.
- * {obj} active
- *      combo: obj with combo-label(k): obj with text and value(v) with their respective values
- *      name: name filter string
- *      date: obj with the datetime(v) and filter type(k), date published or added/updated
- */
 import { _ui, accessTableState as tState } from '../db-main.js';
-let fState = { active: {}};
+
+let fS;
+
+initFilterStateObj();
+/**
+ * Filter state object structure:
+ *
+ * {str} timeout            Present when window is being resized.
+ * {ary} fRowData           rowData when 'direct' filters are applied.
+ * {obj} filters            Filter-panel options only. (No table column filters)
+ *     {obj} direct         Filters rowData only: type(k) value(v)
+ *          {obj} date
+ *              {str} time  Datetime
+ *              {str} type  'cited' or 'updated' (in the database)
+ *          {str} name      Name text
+ *          {obj} combo     (objRealm, pubType)
+ *              {obj} field text(k) and value(v)
+ *     {obj} rebuild        Filters rebuild the table: type (k) value (v)
+ *          {obj} combo     (Taxon levels, country||region)
+ *              {obj} field text(k) and value(v)
+ *
+ *
+ * Note: Date filter persists through reset due to how time consuming it is to select a date
+ */
+function initFilterStateObj(persisted = {}) {
+    fS = { filters: { direct: persisted, rebuild: {} } };
+}
 /* =========================== SET ========================================== */
 export function setCurrentRowData(data) {
-    fState.fRowData = data;
+    fS.fRowData = data;
 }
-export function setPanelFilterState(key, value) {
-    if (value === false) { delete fState.active[key];
-    } else { fState.active[key] = value; }
+export function setPanelFilterState(key, value, filterType) {
+    if (value === false) { delete fS.filters[filterType][key];
+    } else { fS.filters[filterType][key] = value; }
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
 export function resetFilterState() {
-    const state = fState.active.date ? { date: fState.active.date } : {};
-    fState = { active: state };
+    const persistedDate = fS.filters.direct.date ? { date: fS.filters.direct.date } : {};
+    initFilterStateObj(persistedDate);
 }
 /* =========================== GET ========================================== */
-export function getFilterStateKey(key) {
-    return key ? fState.active[key] : fState.active;
+export function getFilterStateKey(key, filterType = 'direct') {
+    return key ? fS.filters[filterType][key] : fS.filters[filterType];
 }
 export function getFilterState() {
     return {
-        panel: getPanelFilters(Object.assign({}, fState.active)),
+        panel: getPanelFilters(Object.assign({}, fS.filters)),
         table: getActiveTableFilterObj()
     };
 }
 function getPanelFilters(filters) {
-    if (!fState.fRowData) { delete filters.date; }
+    if (!fS.fRowData) { delete filters.direct.date; }
     return filters;
 }
 /** If table is filtered by an external filter, the rows are stored in fRowData. */
 export function getCurRowData() {
-    return fState.fRowData ? fState.fRowData : tState().get('rowData');
+    return fS.fRowData ? fS.fRowData : tState().get('rowData');
 }
 export function isFilterActive() {
     const tbl = getTblFilterNames().length > 0;
@@ -54,7 +72,7 @@ export function isFilterActive() {
 }
 /* =================== FILTER STATUS TEXT =================================== */
 /**
- * Returns the display names of all active filters in an array.
+ * Returns the display values of all active filters in an array.
  * If a saved filter set is applied filters are read from the set. Otherwise, the
  * active filters in the panel and table are checked and returned.
  */
@@ -80,14 +98,17 @@ function getPageActiveFilters (argument) {
 }
 function getPanelFilterVals() {
     const map = { combo: addComboValue, name: addName, date: getDateFltrString };
-    return getFocusFilterDisplayVals();
+    return ['direct', 'rebuild'].flatMap(getFocusFilterDisplayVals);
 
-    function getFocusFilterDisplayVals() {
-        const filters = [];
-        Object.keys(fState.active).forEach(type => {                             //console.log('filter [%s] = %O', type, fPs.pnlFltrs[type]);
-            filters.push(map[type](fState.active[type]));
-        });
-        return filters.filter(f => f);
+    function getFocusFilterDisplayVals(group) {
+        if (!fS.filters[group]) { return []; }
+        const vals = [];
+        Object.keys(fS.filters[group]).forEach(addFilterVal);
+        return vals.filter(f => f);
+
+        function addFilterVal(type) {                                           //console.log('filter [%s] = %O', type, fS.filters[group][type]);
+            vals.push(map[type](fS.filters[group][type]));
+        }
     }
 }
 /** Stores the most recent combobox selection. */
@@ -99,7 +120,7 @@ function addName(name) {
     return name;
 }
 function getDateFltrString(date) {
-    if (!fState.fRowData) { return null; }
+    if (!fS.fRowData) { return null; }
     const type = date.type === 'cited' ? 'Published' : 'Updated';
     return 'Date '+ type;
 }

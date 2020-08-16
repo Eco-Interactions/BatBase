@@ -184,11 +184,11 @@ function updateLocFilterMemory(loc, locType) {
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
-    fM.setPanelFilterState('combo', filter);
+    fM.setPanelFilterState('combo', filter, 'rebuild');
 }
 function resetLocComboMemory() {
     tState().set({'selectedOpts': {}});
-    fM.setPanelFilterState('combo', false);
+    fM.setPanelFilterState('combo', false, 'rebuild');
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};

@@ -79,15 +79,15 @@ export function applyTxnFilter() {
 export function setCurrentRowData(data) {
     fState.setCurrentRowData(data);
 }
-export function setPanelFilterState(key, value) {
-    fState.setPanelFilterState(key, value);
+export function setPanelFilterState() {
+    fState.setPanelFilterState(...arguments);
 }
 export function resetFilterState() {
     fState.resetFilterState();
 }
 /* --------------------------- GET ----------------------------------------- */
-export function getFilterStateKey(key) {
-    return fState.getFilterStateKey(key);
+export function getFilterStateKey() {
+    return fState.getFilterStateKey(...arguments);
 }
 export function getFilterState() {
     return fState.getFilterState();
