@@ -8,30 +8,37 @@
  *
  * TOC:
  *      UI
+ *          NAME FILTER
+ *          LEVEL TAXON
+ *          OBJECT REALM
  *      FILTER
  */
 import * as fM from './filters-main.js';
 import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../db-main.js';
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
-    loadTaxonComboboxes(tblState);
-    if (!$('.taxonLbl input[type="text"]').length) { return loadTxnNameSearchElem(tblState); }
+    loadTxnLevelComboboxes(tblState);
+    if ($('#selObjRealm').length) { return; } //elems already initialized
+    loadTxnNameSearchElem(tblState);
+    loadObjectRealmCombobox();
 }
+/* ------------------------ NAME FILTER ------------------------------------- */
 function loadTxnNameSearchElem(tblState) {
     const searchTreeElem = fM.getTreeTextFilterElem('Taxon');
     $('#focus-filters').append(searchTreeElem);
 }
+/* ------------------------ LEVEL TAXON ------------------------------------- */
 /**
  * Builds and initializes a search-combobox for each level present in the
  * the unfiltered realm tree. Each level's box is populated with the names
  * of every taxon at that level in the displayed, filtered, table-tree. After
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
-function loadTaxonComboboxes(tblState) {
+function loadTxnLevelComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
     if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
-    updateTaxonComboboxes(lvlOptsObj, levels, tblState);
+    updateTxnLevelComboboxes(lvlOptsObj, levels, tblState);
 }
 /**
  * Builds select options for each level with taxon data in the current realm.
@@ -76,7 +83,7 @@ function buildTaxonSelectOpts(tblState) {                                       
         } else { optsObj[lvl] = []; }
     }
 } /* End buildTaxonSelectOpts */
-function updateTaxonComboboxes(lvlOptsObj, levels, tblState) {
+function updateTxnLevelComboboxes(lvlOptsObj, levels, tblState) {
     if ($('#focus-filters label').length) {
         updateTaxonSelOptions(lvlOptsObj, levels, tblState);
     } else {
@@ -123,6 +130,24 @@ function setSelectedTaxonVals(selected, tblState) {                             
         if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
         _u('setSelVal', [lvl, selected[lvl], 'silent']);
     });
+}
+/* ----------------------- OBJECT REALM ------------------------------------- */
+function loadObjectRealmCombobox() {
+    _u('getOptsFromStoredData', ['realmNames'])
+    .then(buildObjectRealmCombo)
+    .then(finishRealmComboInit);
+}
+function buildAndInitObjectRealmCombo(realms) {
+    const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row objLbl' }]);
+    const span = _u('buildElem', ['span', { text: 'Realms: ' }]);
+    const opts = realms.filter(r => r.text !== 'Bat');
+    const sel = newSelEl(opts, 'opts-box objSel', 'selObjRealm', 'ObjRealm');
+    $(lbl).append([span, sel]);
+    return lbl;
+}
+function finishRealmComboInit(filterEl) {
+    $('#focus-filters').append(filterEl);
+    _u('initCombobox', ['ObjRealm', filterTableByObjectRealm, {maxItems: null}])
 }
 /* ====================== FILTER ============================================ */
 /**
@@ -193,4 +218,8 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
         selected[taxon.level.displayName] = taxon.id;
         selectAncestorTaxa(_u('getDetachedRcrd', [taxon.parent, taxonRcrds]));
     }
+}
+/* --------------------- OBJECT REALM FILTER -------------------------------- */
+function filterTableByObjectRealm() {  console.log('filterTableByObjectRealm args = %O', arguments);
+    // body...
 }

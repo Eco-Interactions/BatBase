@@ -38,6 +38,7 @@ function getBaseConfgObj(field, onChange) {
         'Family' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Genus' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Order' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'ObjRealm': { name: 'Object Realms', id:'#sel' + field, change: onChange, blur: true },
         'Publication Type' : {name: field, id: '#selPubType', change: onChange, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: onChange, blur: true },
