@@ -30,8 +30,8 @@
  *         INTERACTION TYPE & TAGS
  *     HELPERS
  */
-import { _u } from '../../../db-main.js';
-import { _confg, _state, _elems, _panel, _cmbx, _form, _val, getSubFormLvl } from '../../forms-main.js';
+import { _modal, _u } from '../../../db-main.js';
+import { _confg, _state, _elems, _panel, _cmbx, _form, _val, submitForm, getSubFormLvl } from '../../forms-main.js';
 
 /** ====================== CREATE FORM ====================================== */
 /**
@@ -140,6 +140,7 @@ function finishInteractionFormBuild() {                                         
     modifyFormDisplay();
     addLocationSelectionMethodsNote();
     finishComboboxInit();
+    addConfirmationBeforeSubmit();
 }
 function modifyFormDisplay() {
     $('#Note_row label')[0].innerText += 's';
@@ -261,6 +262,31 @@ function addTaxonFocusListener(role) {
     const elem = '#'+role+'-sel + div div.selectize-input';
     const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
     $('#form-main').on('focus', elem, showSelectForm);
+}
+/* -------------------- SUBMIT CONFIRMATION MODAL --------------------------- */
+function addConfirmationBeforeSubmit() {
+    $('#top-submit').off('click').click(showSubmitModal);
+}
+function showSubmitModal() {
+    const modalConfg = {
+        html: buildConfirmationModalHtml(),
+        selector: '#top-submit',
+        dir: 'left',
+        submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
+        bttn: 'Confirm'
+    };
+    _modal('showSaveModal', [ modalConfg ]);
+    window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
+}
+function buildConfirmationModalHtml() {
+    const subj = $('#Subject-sel')[0].innerText;
+    const obj = $('#Object-sel')[0].innerText;
+    const typeVerb = getIntTypeVerbForm(_cmbx('getSelVal', ['#InteractionType-sel']));
+    return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
+}
+function getIntTypeVerbForm(typeId) {
+    const types = _state('getEntityRcrds', ['interactionType']);
+    return types[typeId].activeForm;
 }
 /** ====================== FORM FIELD HANDLERS ============================== */
 /*------------------ PUBLICATION ---------------------------------------------*/

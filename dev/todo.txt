@@ -11,8 +11,14 @@ SINCE LAST TEAM UPDATE:
         - Changed 'entity form tutorial' button text to walkthrough
         - Added the 'Reference Guide' as a button next to the walkthrough
 
+    - Data
+        - Visitation - removing 'flower' from verb forms
+
     - Bugs
         - Source text filter wasn't filtering beyond first level of tree
+
+    - QUESTIONS
+        - Looping back to link text. Can we find a similar color to default link colors that matches our UI a little more? I am seeing similar link styling on the site we modeled our citation text after. https://www.batnames.org/explore.html
 
 SINCE LAST SERVER UPDATE:
 
@@ -58,16 +64,13 @@ CURRENT:
 
     - Sort invalid urls by the editor who created the source
 
-    - Create Taxon show page
-        - responsive design
-
     - Data
         - tags- leaf = external, wood = internal
+        - Visitation - removing 'flower' from verb forms
 
 
     - Add globi to 'partners' section on about page
     - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
-    - Add confirmation popup to interaction form
     - Add object realm and name filters to bat filter panel
 
     - fix cronjob to clean up hourly backups

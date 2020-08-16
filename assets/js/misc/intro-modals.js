@@ -37,6 +37,7 @@ export function showInfoModal(key) {
     if (intro) { return; }
     initIntroJs(getInfoModalOpts(key), clearIntroMemory, clearIntroMemory);
     intro.start();
+    refreshIntro();
 }
 function getInfoModalOpts(key) {
     return {
@@ -57,19 +58,21 @@ function getHelpSteps(key) {
 /* ----------------------- SAVE MODALS -------------------------------------- */
 /**
  * Shows the save modal. Possible configuration are:
- * > Required config: html, elem, dir
+ * > Required config: html, selector, dir
  * > Optional: submit, cancel, bttn
  */
-export function showSaveModal(confg) { //text, elem, dir, submitCb, cancelCb, bttnText) {  //console.log('showing modal')
+export function showSaveModal(confg) {                                          //console.log('showing modal')
     if (intro) { return; }
     intro = 'loading';
     window.setTimeout(initModal.bind(null, confg), 500); //keeps the above button from flashing
 }
 function initModal(confg) {
     const onComplete = getSubmitFunc(confg.submit, confg.cancel);
+    togglePgElemZindexes('hide');
     initIntroJs(getModalOptions(confg), onComplete, getExitFunc(confg.cancel));
     if (confg.onLoad) { intro.onafterchange(confg.onLoad); }
     intro.start();
+    refreshIntro();
 }
 function getSubmitFunc(submitCb, cancelCb) {
     return !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
@@ -84,6 +87,7 @@ export function exitModal(cancelCb) {
 function onModalExit(cancelCb) {
     if (cancelCb) { cancelCb(); }
     intro = null;
+    togglePgElemZindexes('show');
 }
 function getModalOptions(confg) {
     return {
@@ -92,12 +96,12 @@ function getModalOptions(confg) {
         skipLabel: 'Cancel',
         doneLabel: confg.bttn ? confg.bttn : 'Close',
         tooltipClass: 'modal-msg',
-        steps: getSlideConfg(confg.html, confg.elem, confg.dir)
+        steps: getSlideConfg(confg.html, confg.selector, confg.dir)
     };
 }
-function getSlideConfg(text, elem, dir) {
+function getSlideConfg(text, selector, dir) {
     return [{
-        element: elem,
+        element: selector,
         intro: text,
         position: dir
     }];
@@ -105,15 +109,13 @@ function getSlideConfg(text, elem, dir) {
 /* ----------------------- FORM TUTORIAL ------------------------------------ */
 export function showFormTutorial(fLvl) {                                        //console.log('show[%s]FormTutorial', fLvl);
     if (intro) { intro.exit(); }
-    formTutorialSetUp();
+    togglePgElemZindexes('hide');
     initIntroJs({tooltipClass: 'intro-tips'}, exitFormTutorial, exitFormTutorial);
     intro.start(fLvl+'-intro');
     refreshIntro();
     // addFinalInfoStep(fLvl);
 }
-function formTutorialSetUp() {
-    togglePgElemZindexes('hide');
-}
+/* ================================ SHARED ================================== */
 function togglePgElemZindexes(state) {
     if (state === 'hide') { hideNonFormElems();
     } else { resetPgElems(); }
@@ -132,7 +134,7 @@ function resetPgElems() {
 }
 function exitFormTutorial() {
     intro = null;
-    resetPgElems();
+    togglePgElemZindexes('show');
 }
 // Not working yet
 // function addFinalInfoStep(fLvl) {

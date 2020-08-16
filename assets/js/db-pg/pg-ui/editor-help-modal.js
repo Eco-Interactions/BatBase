@@ -18,7 +18,7 @@ import { alertIssue, resetLocalDb, _modal, _u } from '../db-main.js';
 /* ===================== HELP MODAL ========================================= */
 export default function showEditorHelpModal() {
     const confg = {
-        html: getHelpHtml(), elem: '#data-help', dir: 'left', onLoad: setBttnEvents
+        html: getHelpHtml(), selector: '#data-help', dir: 'left', onLoad: setBttnEvents
     }
     _modal('showSaveModal', [confg]);
 }

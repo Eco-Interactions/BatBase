@@ -290,19 +290,19 @@ class InteractionType
         return $this->interactions;
     }
 
-    /**
-     * Returns an array of interactions ids.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("interactions")
-     */
-    public function getInteractionIds()
-    {
-        $allIntIds = [];
-        foreach ($this->interactions as $interaction) {
-            array_push($allIntIds, $interaction->getId());
-        }
-        return $allIntIds;
-    }
+    // /**
+    //  * Returns an array of interactions ids.
+    //  * @JMS\VirtualProperty
+    //  * @JMS\SerializedName("interactions")
+    //  */
+    // public function getInteractionIds()
+    // {
+    //     $allIntIds = [];
+    //     foreach ($this->interactions as $interaction) {
+    //         array_push($allIntIds, $interaction->getId());
+    //     }
+    //     return $allIntIds;
+    // }
 
     /**
      * Add validTags.

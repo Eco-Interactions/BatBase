@@ -222,7 +222,7 @@ function showSaveFilterModal(success) {
     if (!$('.filter-set-details input').val()) { return $('.filter-set-details input').focus(); }
     let saveReady = true;
     const confg = {
-        html: buildModalHtml(), elem: '#save-filter', dir: 'right',
+        html: buildModalHtml(), selector: '#save-filter', dir: 'right',
         submit: saveReady ? success : false, bttn: saveReady ? 'Submit' : 'Cancel'
     };
     _modal('showSaveModal', [confg]);

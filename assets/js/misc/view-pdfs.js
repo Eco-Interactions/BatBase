@@ -20,7 +20,7 @@ function handleDeletePdf() {
     const id = $(this).data('id');
     const confg = {
         html: '<center><h2>Are you sure you want to delete?</h2><br>',
-        elem: 'input[data-id="'+id+'"]', dir: 'left', bttn: 'Confirm',
+        selector: 'input[data-id="'+id+'"]', dir: 'left', bttn: 'Confirm',
         submit: deletePdf.bind(null, id)
     }
     showSaveModal(confg);
