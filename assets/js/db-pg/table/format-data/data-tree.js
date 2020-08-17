@@ -29,14 +29,13 @@ let tblState;
  * Note: If loading a user-named data set (intSet), only the entities within
  * those interactions are added to the data tree.
  */
-export function buildLocTree(topLocs, textFltr) {
+export function buildLocTree(topLocs) {
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
-    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, textFltr));
+    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs));
 }
-function buildLocDataTree(topLocs, textFltr) {
+function buildLocDataTree(topLocs) {
     let tree = {};                                                              //console.log("tree = %O", tree);
     topLocs.forEach(buildLocBrach);
-    tree = filterTreeByText(textFltr, tree);
     tree = filterTreeToInteractionSet(tree, 'locs');
     return sortDataTree(tree);
 

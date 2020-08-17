@@ -153,15 +153,14 @@ function setSelectedLocVals(selected) {                                         
     });
 }
 /* =========================== FILTER ======================================= */
-export function applyLocFilter(val, text) {
-    if (!val && text === undefined) { return; }
+export function applyLocFilter(val) {
+    if (!val) { return; }
     const selectedOpts = tState().get('selectedOpts');
-    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text);
+    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLoc[%s]Filter = [%s]', locType, val);
     const root = getNewLocRoot();
-    const txt = text || fM.getTreeFilterVal('Location');
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
-    return rebuildLocTable(root, txt)
+    return rebuildLocTable(root)
         .then(() => fM.reapplyDateFilterIfActive());
 
     function getNewLocRoot() {

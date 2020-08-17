@@ -339,8 +339,8 @@ function getTopRegionIds() {
     for (let name in regions) { ids.push(regions[name]); }
     return ids;
 }
-function startLocTableBuildChain(topLocs, textFltr) {
-    return tree.buildLocTree(topLocs, textFltr)
+function startLocTableBuildChain(topLocs) {
+    return tree.buildLocTree(topLocs)
         .then(tree => format.buildLocRowData(tree, tState))
         .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Location Tree', rowData))
