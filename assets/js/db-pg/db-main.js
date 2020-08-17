@@ -443,7 +443,7 @@ function beginTaxonLoad(realmId, taxa) {
     tState.rcrdsById = taxa;                                                    //console.log('Building Taxon Table. taxa = %O', u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd(realmId);
     ui.initTxnViewOpts(realmTaxon.id, tState.flags.allDataAvailable);
-    return startTxnTableBuildChain(realmTaxon);
+    return startTxnTableBuildChain(realmTaxon, true);
 }
 /** Event fired when the taxon view select box has been changed. */
 export function onTxnViewChange(val) {                              /*Perm-log*/console.log('       --onTxnViewChange. [%s]', val)
@@ -482,9 +482,9 @@ function getSelValOrDefault(val) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O, filtering ? [%s], textFilter ? [%s]', topTaxon, filtering, textFltr);
+export function rebuildTxnTable(topTaxon) {                         /*Perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O', topTaxon);
     if (!tState.api || tState.flags.allDataAvailable) { ui.fadeTable(); }
-    return startTxnTableBuildChain(topTaxon, filtering, textFltr)
+    return startTxnTableBuildChain(topTaxon)
 }
 /**
  * Builds a family tree of taxon data with passed taxon as the top of the tree,
@@ -492,9 +492,9 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/
  * The top taxon's id is added to the global focus storage obj's 'openRows'
  * and will be expanded on table load.
  */
-function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
+function startTxnTableBuildChain(topTaxon, init = false) {
     tState.openRows = [topTaxon.id.toString()];
-    return tree.buildTxnTree(topTaxon, filtering, textFltr)
+    return tree.buildTxnTree(topTaxon, init)
         .then(tree => format.buildTxnRowData(tree, tState))
         .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Taxon Tree', rowData, tState))

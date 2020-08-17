@@ -60,6 +60,7 @@ TAYLOR:
 > ____ TASKS _____
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
+    - On form map click, automatically open popup with option to fill in coordinates
     - Adding form hints
         - addFinalInfoStep about info in tooltips on fields
 

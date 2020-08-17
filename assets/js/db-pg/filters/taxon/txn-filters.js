@@ -133,15 +133,14 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * is updated with the taxon as the top of the new tree. The remaining level
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-export function applyTxnFilter(val, text) {
-    if (!val && text === undefined) { return; }                                              //console.log('       +-applyTxnFilter.')
+export function applyTxnFilter(val) {
+    if (!val) { return; }                                                       //console.log('       +-applyTxnFilter.')
     const tblState = tState().get(['rcrdsById', 'flags']);
     if (!tblState.flags.allDataAvailable) { return clearSelection($(this)[0]); }
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
-    const txt = text || fM.getTreeFilterVal('Taxon');
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});
     addToFilterState();
-    return rebuildTxnTable(rcrd, 'filtering', txt)
+    return rebuildTxnTable(rcrd)
         .then(() => fM.reapplyDateFilterIfActive());
 
     function addToFilterState() {

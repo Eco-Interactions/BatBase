@@ -49,7 +49,7 @@ function onTextFilterChange(entity, e) {
 }
 function getTextFilterHandler(entity) {                                         //console.log('entity = [%s]', entity);
     let cmplxHndlrs = {
-        'Location': filterLocs, 'Publication': filterSrcs, 'Taxon': filterTaxa
+        'Location': filterLocs, 'Publication': filterSrcs, //'Taxon': filterTaxa
     };
     return cmplxHndlrs[entity] ? cmplxHndlrs[entity] : filterTableByText;
 }
