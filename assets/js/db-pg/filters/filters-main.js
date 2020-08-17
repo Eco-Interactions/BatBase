@@ -1,24 +1,26 @@
 /**
  * Handles filtering the data displayed in the table.
  *
- * TOC:
+ *  TOC
  *     STATIC FILTERS
  *         TREE-TEXT
  *         DATE
  *     DYNAMIC FILTERS
+ *     FILTER ROW DATA
  *     FILTER SETS
  *     FILTER STATE
  *         SET
  *         GET
  *             FILTER STATUS TEXT
  */
-import { _u } from '../db-main.js';
+import { accessTableState as tState, _ui, _u } from '../db-main.js';
 import * as fDate from './date-filter.js';
 import * as fLoc from './loc-filters.js';
 import * as fSrc from './src-filters.js';
 import * as fState from './filter-state.js';
 import * as fTree from './tree-filter.js';
 import * as fTxn from './taxon/txn-filters.js';
+import * as fRows from './row-data-filter.js';
 
 /* ====================== STATIC FILTERS ==================================== */
 /* ------------------ TREE-TEXT FILTER -------------------------------------- */
@@ -74,13 +76,30 @@ export function loadTxnFilters(tblState) {
 export function applyTxnFilter() {
     return fTxn.applyTxnFilter(...arguments);
 }
+/* ====================== FILTER ROW DATA =================================== */
+export function getRowDataForCurrentFilters(rowData) {
+    const filters = fState.getRowDataFilters();                                 console.log('active filters = %O', filters);
+    if (!Object.keys(filters).length) { return rowData; }                       console.log('getRowDataForCurrentFilters %O', filters)
+    return fRows.getFilteredRowData(filters, rowData);
+}
+export function onFilterChangeUpdateRowData() {
+    const rowData = getRowDataForCurrentFilters(fState.getCurRowData());
+    setCurrentRowData(rowData);
+}
+function setCurrentRowData(rowData) {
+    const api = tState().get('api');
+    api.setRowData(rows);
+    fState.setStateRowData(data);
+    _ui('updateFilterStatusMsg');
+    _ui('setTreeToggleData', [false]);
+}
 /* ==================== FILTER STATE ======================================== */
 /* --------------------------- SET ----------------------------------------- */
-export function setCurrentRowData(data) {
-    fState.setCurrentRowData(data);
+export function setStateRowData(data) {
+    fState.setStateRowData(data);
 }
-export function setPanelFilterState() {
-    fState.setPanelFilterState(...arguments);
+export function setFilterState() {
+    fState.setFilterState(...arguments);
 }
 export function resetFilterState() {
     fState.resetFilterState();

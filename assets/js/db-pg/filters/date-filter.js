@@ -118,7 +118,7 @@ function ifDateFilterActive(state) {
 function updateDateFilterState(dateTime) {
     if (!app.date) { app.date = {}; }
     app.date = { time: dateTime || app.date.time, type:  _u('getSelVal', ['Date Filter']) };
-    fM.setPanelFilterState('date', app.date, 'direct');
+    fM.setFilterState('date', app.date, 'direct');
 }
 /* ============================ FILTER BY DATE ============================== */
 function filterTableByDate(date) {                                              //console.log('filterTableByDate. date? = [%s] prevDate = %O', date, app.date.time);
@@ -179,7 +179,7 @@ function updateMemoryAndReturnTime(dateTime) {
 function filterInteractionsByTime(dateTime, type) {
     const rows = getRowsAfterTime(dateTime, type);                              //console.log("rows = %O", rows);
     tblState.api.setRowData(rows);
-    fM.setCurrentRowData(rows);
+    fM.setStateRowData(rows);
 }
 function getRowsAfterTime(filterTime, type) {
     const rowData = _u('snapshot', [tblState.rowData]);
@@ -216,7 +216,7 @@ export function clearDateFilter() {
 }
 /** Clears Date filter and resets table with remainig active filters reapplied. */
 function resetDateFilter(skipSync) {                                            //console.log('resetDateFilter. skipSync?', skipSync);
-    fM.setCurrentRowData(null);
+    fM.setStateRowData(null);
     if (!skipSync && tblState.api && tblState.rowData) {
         tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();

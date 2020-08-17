@@ -10,6 +10,7 @@ SINCE LAST TEAM UPDATE:
         - Not able to validate URL loads without error due to it being far too complicated with current web standards.
         - Changed 'entity form tutorial' button text to walkthrough
         - Added the 'Reference Guide' as a button next to the walkthrough
+        - Added confirmation to interaction form submit
 
     - Data
         - Visitation - removing 'flower' from verb forms
@@ -74,8 +75,6 @@ CURRENT:
     - Add object realm and name filters to bat filter panel
 
     - fix cronjob to clean up hourly backups
-    - optimize data sync downloads. It takes almost as long as full download,
-        depending on how much needs to be updated
     - testing
         - add interaction show page to tests
         - test editor report form
@@ -84,6 +83,9 @@ CURRENT:
         - csv
         - wysiwyg
     - Add multiple realm root functionality
+
+    - optimize data sync downloads. It takes almost as long as full download,
+        depending on how much needs to be updated
 
 NEXT:
     - Review Data

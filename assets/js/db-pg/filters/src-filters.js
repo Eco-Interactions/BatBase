@@ -97,7 +97,7 @@ export function applyPubFilter(tId, text) {
     }
     function updatePubFilterState(type, id, text) {
         const filter = type === '- All -' ? false : buildPubFilterObj({});
-        fM.setPanelFilterState('combo', filter, 'direct');
+        fM.setFilterState('combo', filter, 'direct');
 
         function buildPubFilterObj(obj) {
             obj['Publication Type'] = { text: 'Publication Type', value: id };

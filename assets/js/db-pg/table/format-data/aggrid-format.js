@@ -179,6 +179,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,
+        realm: taxon.realm.id, // Used for the object realm filter in Bat view
         taxonLvl: taxon.level.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy

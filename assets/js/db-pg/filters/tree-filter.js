@@ -70,7 +70,7 @@ export function filterTableByText(text) {                           /*perm-log*/
 }
 function updateTreeFilterState(text) {
     const val = !text ? false : '"'+text+'"';
-    fM.setPanelFilterState('name', val);
+    fM.setFilterState('name', val, 'direct');
 }
 function ifRowContainsText(row, text) {                             /*dbug-log*///console.log('ifRow [%s] ContainsText [%s]', row.name, text);
     return row.name.toLowerCase().includes(text);

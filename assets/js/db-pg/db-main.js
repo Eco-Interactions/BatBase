@@ -188,6 +188,7 @@ export function accessTableState() {
     };
 }
 /** Returns table state to requesting module. */
+//Todo: remove the redundant second param
 function getTableState(k, keys) {                                               //console.log('getTableState. params? ', arguments);
     return k && Array.isArray(k) ? getStateObj(k) : k ? tState[k] :
         keys ? getStateObj(keys) : tState;
@@ -341,6 +342,7 @@ function getTopRegionIds() {
 function startLocTableBuildChain(topLocs, textFltr) {
     return tree.buildLocTree(topLocs, textFltr)
         .then(tree => format.buildLocRowData(tree, tState))
+        .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Location Tree', rowData))
         .then(() => filter.loadLocFilters(tState));
 }
@@ -413,6 +415,7 @@ function startSrcTableBuildChain(val) {
     storeSrcView(val);
     return tree.buildSrcTree(tState.curView)
         .then(tree => format.buildSrcRowData(tree, tState))
+        .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Source Tree', rowData, tState))
         .then(() => filter.loadSrcFilters(tState.curView));
 }
@@ -493,6 +496,7 @@ function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     tState.openRows = [topTaxon.id.toString()];
     return tree.buildTxnTree(topTaxon, filtering, textFltr)
         .then(tree => format.buildTxnRowData(tree, tState))
+        .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Taxon Tree', rowData, tState))
         .then(() => filter.loadTxnFilters(tState, topTaxon.realm.pluralName));
 }

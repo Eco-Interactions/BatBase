@@ -12,6 +12,7 @@
 import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../../db-main.js';
 import * as fM from '../filters-main.js';
 
+let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectRealmCombobox() {
     _u('getOptsFromStoredData', ['realmNames'])
@@ -31,6 +32,16 @@ function finishRealmComboInit(filterEl) {
     _u('initCombobox', ['ObjRealm', filterTableByObjectRealm, {maxItems: null}])
 }
 /* ----------------------- APPLY FILTER ------------------------------------- */
+/**
+ * When viewing by publication, interactions can be filtered by the publication type.
+ * Handles synchronizing with the tree-text filter.
+ */
 export function filterTableByObjectRealm(realmIds) {                            //console.log('filterTableByObjectRealm args = %O', arguments);
-
+	_ui('fadeTable');
+	if (!timeout) { timeout = setTimeout(filterByObjRealms, 1000); }
+}
+function filterByObjRealms() {
+	timeout = null;
+	fM.setFilterState('ObjRealm', _u('getSelVal', ['ObjRealm']), 'direct');
+	fM.onFilterChangeUpdateRowData();
 }

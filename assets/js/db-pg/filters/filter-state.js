@@ -32,14 +32,14 @@ initFilterStateObj();
  * Note: Date filter persists through reset due to how time consuming it is to select a date
  */
 function initFilterStateObj(persisted = {}) {
-    fS = { filters: { direct: persisted, rebuild: {} } };
+    fS = { filters: { direct: persisted, rebuild: {} }};
 }
 /* =========================== SET ========================================== */
-export function setCurrentRowData(data) {
+export function setStateRowData(data) {
     fS.fRowData = data;
 }
-export function setPanelFilterState(key, value, filterType) {
-    if (value === false) { delete fS.filters[filterType][key];
+export function setFilterState(key, value, filterType) {
+    if (value === false) { fS.filters[filterType][key]
     } else { fS.filters[filterType][key] = value; }
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
@@ -58,7 +58,7 @@ export function getFilterState() {
     };
 }
 function getPanelFilters(filters) {
-    if (!fS.fRowData) { delete filters.direct.date; }
+    filters.direct = getRowDataFilters(filters.direct)
     return filters;
 }
 /** If table is filtered by an external filter, the rows are stored in fRowData. */
@@ -69,6 +69,11 @@ export function isFilterActive() {
     const tbl = getTblFilterNames().length > 0;
     const pnl = getPanelFilterVals().length > 0;
     return tbl || pnl;
+}
+export function getRowDataFilters(f) {
+    const filters = f || Object.assign({}, fS.filters.direct);
+    if (!fS.fRowData) { delete filters.date; }
+    return filters;
 }
 /* =================== FILTER STATUS TEXT =================================== */
 /**
