@@ -420,7 +420,7 @@ function hideUnusedColFilterMenus() {
     $('div[colId="lng"] .ag-sort-ascending-icon').hide();
     $('div[colId="lng"] .ag-sort-descending-icon').hide();
 }
-
+/* --------------- UPDATE INTERACTION TOTAL ON MODEL CHANGE ----------------- */
 /**
  * When the table rowModel is updated, the total interaction count for each
  * tree node is updated. Interactions filtered out will not be included in the totals.
@@ -428,43 +428,30 @@ function hideUnusedColFilterMenus() {
  */
 function onModelUpdated() {
     if (!tblState.api) { return; }
-    const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);  //console.log("-----new total ints = ", ttlInts);
+    const ttlInts = updateRowsAndGetIntCounts(tblState.api.getModel().rootNode);
     updateTotalCountDisplay(ttlInts);
 }
 /**
- * Sets new interaction totals for each tree node @getChildrenCnt and then
- * calls the table's softRefresh method, which refreshes any rows with "volatile"
- * set "true" in the columnDefs - currently only "Count".
+ * Note: softRefreshView refreshes any columns with "volatile" set "true" in the
+ * columnDefs - currently only "Count"
  */
-function updateTotalRowIntCounts(rootNode) {
-    const ttlInts = getChildrenCnt(rootNode.childrenAfterFilter);
+function updateRowsAndGetIntCounts(root) {
+    const ttls = root.childrenAfterFilter.map(row => updateTotalRowIntCounts(0, row));
     tblState.api.softRefreshView();
-    return ttlInts;
+    return ttls.reduce((ttl, cnt) => ttl += cnt, 0);
 }
-function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
-    var nodeCnt, ttl = 0;
-    nodeChildren.forEach(function(child) {
-        nodeCnt = 0;
-        nodeCnt += addSubNodeInteractions(child);
-        ttl += nodeCnt;
-        if (nodeCnt !== 0 && child.data.intCnt !== null) { child.data.intCnt = nodeCnt; }
-    });
-    return ttl;
+/** Sets new interaction totals for each tree node and returns count. */
+function updateTotalRowIntCounts(total, row) {
+    if (!row.childrenAfterFilter) { return total; }
+    total += ifChildRowsAreInteractions(row) ?
+        row.childrenAfterFilter.length :
+        row.childrenAfterFilter.reduce(updateTotalRowIntCounts, 0);
+    if (row.data) { row.data.intCnt = total; }
+    return total;
 }
-/**
- * Interaction records are identified by their lack of any children, specifically
- * their lack of a "childrenAfterFilter" property.
- */
-function addSubNodeInteractions(child) {
-    var cnt = 0;
-    if (child.childrenAfterFilter) {
-        cnt += getChildrenCnt(child.childrenAfterFilter);
-        if (cnt !== 0) { child.data.intCnt = cnt; }
-    } else { /* Interaction record row */
-        ++cnt;
-        child.data.intCnt = null;
-    }
-    return cnt;
+function ifChildRowsAreInteractions(row) {
+    return !row.childrenAfterFilter.length ||
+        !row.childrenAfterFilter[0].childrenAfterFilter;
 }
 function updateTotalCountDisplay(cnt) {
     $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);
