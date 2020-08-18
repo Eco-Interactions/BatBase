@@ -9,68 +9,109 @@
  *
  */
 
-let filters;
+let filters, rows;
 /**
- * Text, date, realm, intSet?
- *
  * These are handled before table rebuild starts:
- *   Level combos
+ *   Level combos, Region and Country combos
  */
-export function getFilteredRowData(filters, rowData) {							console.log('filterRowData filters = %O, rowData = %O', filters, rowData);
-	if (!Object.keys(filters).length) { return rowData; }
-    const rows = rowData.map(r => Object.assign({}, r));
-	return rows.map(getRowsThatPassAllFilters).filter(r=>r);
-
-	function getRowsThatPassAllFilters(row) {
-		if (!row.name) { return ifInteractionFiltersPass(row, filters); }
-		const passesTreeFilter = ifTreeFiltersPass(row, filters);  				console.log('passesTreeFilter %s, row = %O', passesTreeFilter, row)
-		row.children = filterRowChildren(row, passesTreeFilter);
-		return passesTreeFilter || row.children.length ? row : false;
-	}
-	function filterRowChildren(row, passesTreeFilter) {
-		if (passesTreeFilter) { return row.children.map(getRowsThatPassAllFilters); }
-		return !row.children[0].name ? [] : removeDirectIntsAndFilterChildren(row);
-	}
-	function removeDirectIntsAndFilterChildren(row) {  							console.log('removeDirectIntsAndFilterChildren row = %O', row)
-		if (row.children[0].name.includes('Unspecified')) { row.children.shift(); }
-		return row.children.map(getRowsThatPassAllFilters).filter(r=>r);
-	}
-}
-/* ---------------------- INTERACTION FILTERS ------------------------------- */
-function ifInteractionFiltersPass(row, filters) {
-	const rowPasses = Object.keys(filters).every(ifRowPassesFilter);
-	return rowPasses ? row : null;
-
-	function ifRowPassesFilter(filterType) {
-		const map = {
-			// 'date':
-			// 'pubType':
-			// 'objRealm':
-			// 'intList':
-		};
-		return map[filterType] ? map[filterType](row, filters[filterType]) : true;
-	}
-
+export function getFilteredRowData(f, rowData) {					/*dbug-log*/console.log('filterRowData filters = %O, rowData = %O', f, rowData);
+	if (!Object.keys(f).length) { return rowData; }
+	filters = f,
+    rows = rowData.map(r => Object.assign({}, r));
+    handleTreeFilters();
+    handleInteractionFilters();
+    return rows;
 }
 /* ------------------------- TREE FILTERS ----------------------------------- */
-function ifTreeFiltersPass(row, filters) {
-	return Object.keys(filters).every(ifRowPassesFilter);
-
-	function ifRowPassesFilter(filterType) {
-		const map = {
-			'name': ifRowNameContainsText
-		};
-		return map[filterType] ? map[filterType](row, filters[filterType]) : true;
+function handleTreeFilters() {
+	filterOnTopTreeLevel();
+	filterOnAllTreeLevels();
+}
+function filterOnTopTreeLevel() {
+	const filterFuncs = {
+		combo: { 'Publication Type': ifRowFromPubType }
+	};
+	rows = filterTreeRows(filterFuncs, 1);  									//console.log('rows = %O', rows)
+}
+function filterOnAllTreeLevels() {
+	const filterFuncs = {
+		name: ifRowNameContainsText
+	};
+	rows = filterTreeRows(filterFuncs);  										//console.log('rows = %O', rows)
+}
+function filterTreeRows(filterFuncs, depth = null) {
+	return 	rows.map(row => getRowsThatPassAllTreeFilters(row, filterFuncs, depth))
+		.filter(r=>r);
+}
+function getRowsThatPassAllTreeFilters(row, filterFuncs, depth) {
+	return getRowIfAllFiltersPass(row);
+	/** @return row */
+	function getRowIfAllFiltersPass(row) {
+		if (!row.name) { return row; }
+		const passesTreeFilter = ifRowPassesFilters(row, filterFuncs);  		//console.log('getRowIfAllFiltersPass. passesTreeFilter %s, row = %O', passesTreeFilter, row)
+		if (depth === 1) { return passesTreeFilter ? row : null; }
+		row.children = filterRowChildren(row, passesTreeFilter);
+		return passesTreeFilter || row.children.length ? row : null;
+	}
+	function filterRowChildren(row, passesTreeFilter) {
+		if (passesTreeFilter) { return row.children.map(getRowIfAllFiltersPass).filter(r=>r); }
+		return !row.children.length || !row.children[0].name ? [] :
+			removeDirectIntsAndFilterChildren(row);
+	}
+	function removeDirectIntsAndFilterChildren(row) {  						    //console.log('removeDirectIntsAndFilterChildren row = %O', row)
+		if (row.children[0].name.includes('Unspecified')) { row.children.shift(); }
+		return row.children.map(getRowIfAllFiltersPass).filter(r=>r);
 	}
 }
-/* If row fails, all direct interaction rows are removed. */
-function ifRowNameContainsText(row, text) {                         /*dbug-log*/console.log('ifRowName[%s]ContainsText [%s]', row.name, text);
-    return row.name.toLowerCase().includes(text.replace(/"/g,""));
+/* --------------------- INTERACTION FILTERS -------------------------------- */
+function handleInteractionFilters() {
+	// body...
 }
 
+	// return rows.map(getRowsThatPassAllFilters).filter(r=>r);
 
+// }
+// function ifInteractionFiltersPass(row, filters) {
+// 	const rowPasses = Object.keys(filters).every(ifRowPassesFilter);
+// 	return rowPasses ? row : null;
+
+// 	function ifRowPassesFilter(filterType) {
+// 		const map = {
+// 			// 'date':
+// 			// 'objRealm':
+// 			// 'intList':
+// 		};
+// 		return map[filterType] ? map[filterType](row, filters[filterType]) : true;
+// 	}
+// }
+/* =========================== FILTERS ====================================== */
+/** @return bool */
+function ifRowPassesFilters(row, filterFuncs) {						/*dbug-log*///console.log('ifRowPassesFilters row = %O, filters = %O', row, filterFuncs);
+ 	return Object.keys(filters).every(ifRowPassesFilter);
+
+	function ifRowPassesFilter(type) {
+		return filterFuncs[type] ? applyFilter(type) : true;
+	}
+	function applyFilter(type) {
+		if (type === 'combo') { return ifRowContainsComboValue(row, filterFuncs[type]); }
+		return filterFuncs[type](row, filters[type]);
+	}
+}
+/* ------------- COMBO FILTERS ------------------ */
+function ifRowContainsComboValue(row, comboFuncs) {
+	return Object.keys(comboFuncs).every(type => {
+		return comboFuncs[type] ? comboFuncs[type](row, filters.combo[type].value) : true;
+	});
+}
 /* --------------------------- NAME TEXT ------------------------------------ */
-/* --------------------------- NAME TEXT ------------------------------------ */
+/* If row fails, all direct interaction rows are removed. */
+function ifRowNameContainsText(row, text) {                         /*dbug-log*///console.log('ifRowName[%s]ContainsText [%s]', row.name, text);
+    return row.name.toLowerCase().includes(text.replace(/"/g,""));
+}
+/* ------------------------- PUBLICATION TYPE ------------------------------- */
+function ifRowFromPubType(row, pubTypeId) {  						/*dbug-log*///console.log('ifRowFromPubType [%s] %O', pubTypeId, row);
+	return row.type == pubTypeId;
+}
 /* --------------------------- NAME TEXT ------------------------------------ */
 /* --------------------------- NAME TEXT ------------------------------------ */
 /* ----------------------------- SHARED ------------------------------------- */

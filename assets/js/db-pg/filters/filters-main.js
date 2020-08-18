@@ -27,15 +27,6 @@ import * as fRows from './row-data-filter.js';
 export function getTreeTextFilterElem(entity) {
     return fTree.getTreeTextFilterElem(entity);
 }
-export function filterTableByText(entity) {
-    fTree.filterTableByText(entity);
-}
-export function getTreeFilterVal(entity) {
-    return fTree.getTreeFilterVal(entity);
-}
-export function getRowsWithText(text) {
-    return fTree.getTreeRowsWithText(getCurRowData(), text);
-}
 /* ------------------ DATE FILTER ------------------------------------------- */
 export function initDateFilterUi() {
     fDate.initDateFilterUi();
@@ -79,17 +70,18 @@ export function applyTxnFilter() {
 /* ====================== FILTER ROW DATA =================================== */
 export function getRowDataForCurrentFilters(rowData) {
     const filters = fState.getRowDataFilters();                                 console.log('active filters = %O', filters);
-    if (!Object.keys(filters).length) { return rowData; }                       console.log('getRowDataForCurrentFilters %O', filters)
+    if (!Object.keys(filters).length) { return rowData; }
     return fRows.getFilteredRowData(filters, rowData);
 }
+/** If filter cleared (!val), filter all table rows, else apply on top of current filters. */
 export function onFilterChangeUpdateRowData() {
-    const rowData = getRowDataForCurrentFilters(fState.getCurRowData());
+    const rowData = getRowDataForCurrentFilters(tState().get('rowData'));
     setCurrentRowData(rowData);
 }
 function setCurrentRowData(rowData) {
     const api = tState().get('api');
-    api.setRowData(rows);
-    fState.setStateRowData(data);
+    api.setRowData(rowData);
+    fState.setStateRowData(rowData);
     _ui('updateFilterStatusMsg');
     _ui('setTreeToggleData', [false]);
 }

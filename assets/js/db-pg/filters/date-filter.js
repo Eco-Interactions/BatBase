@@ -297,10 +297,10 @@ function seperateTaxonTreeByLvl(lvls, rowData) {
 }
 /* -------------------- TREE-TEXT ------------------------------------------- */
 function reapplyTreeTextFltr() {
-    const entity = getTableEntityName();                           /*debug-log*///console.log("reapplying [%s] text filter", entity);
-    const text = fM.getTreeFilterVal(entity);
-    if (text === '') { return; }
-    fM.filterTableByText(text);
+    // const entity = getTableEntityName();                           /*debug-log*///console.log("reapplying [%s] text filter", entity);
+    // const text = fM.getTreeFilterVal(entity);
+    // if (text === '') { return; }
+    // fM.filterTableByText(text);
 }
 function getTableEntityName() {
     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
