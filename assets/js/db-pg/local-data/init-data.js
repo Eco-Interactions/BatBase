@@ -235,7 +235,6 @@ function addInteractionTotalsToLocs(locs) {
     }
 } /* End addInteractionTotalsToLocs */
 /* ------------------------- SOURCE DATA ------------------------------------ */
-/** Note: Top regions are the trunk of the location data tree. */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
  * [entity]Sources - an array with of all source records for the entity type.

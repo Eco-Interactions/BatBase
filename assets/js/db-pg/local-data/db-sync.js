@@ -224,15 +224,22 @@ function updateDetailEntityData(data) {
 /** Updates stored-data props related to a core-entity record with new data. */
 function addCoreEntityData(entity, rcrd) {                                      //console.log("       --Updating Core entity. %s. %O", entity, rcrd);
     updateCoreData(entity, rcrd);
-    updateCoreDataProps(entity, rcrd);
+    updateCoreDataProps(entity, db.getMmryData('taxon')[rcrd.id]);
 }
 /**
  * Updates the stored core-records array and the stored entityType array.
  * Note: Taxa are the only core entity without 'types'.
  */
 function updateCoreData(entity, rcrd) {                                         //console.log("           --Updating Record data", entity);
+    handleEntityLocalDataUpdates(entity, rcrd);
     addToRcrdProp(entity, rcrd);
-    // addToCoreTypeProp(entity, rcrd);
+}
+function handleEntityLocalDataUpdates(entity, rcrd) {
+    const update = {
+        'taxon': { 'realm': addRealmDataToRcrd }
+    };
+    if (!update[entity]) { return; }
+    updateDataProps(entity, rcrd, update[entity]);
 }
 // function addToCoreTypeProp(entity, rcrd) {
 //     if (entity === "taxon") { return Promise.resolve(); }
@@ -240,7 +247,7 @@ function updateCoreData(entity, rcrd) {                                         
 // }
 function updateCoreDataProps(entity, rcrd) {
     const updateFuncs = getRelDataHndlrs(entity, rcrd);                         //console.log('updatedatahandlers = %O', updateFuncs);
-    return updateDataProps(entity, rcrd, updateFuncs)
+    updateDataProps(entity, rcrd, updateFuncs)
 }
 /** Returns an object of relational data properties and their update methods. */
 function getRelDataHndlrs(entity, rcrd) {
@@ -264,9 +271,7 @@ function getRelDataHndlrs(entity, rcrd) {
             'location': addToParentRcrd, //'habitatType': addToTypeProp,
             // 'locationType': addToTypeProp
         },
-        'taxon': { 'realm': addRealmDataToRcrd, 'taxon': addToParentRcrd,
-            'taxonNames': addToTaxonNames
-        },
+        'taxon': {  'taxon': addToParentRcrd, 'taxonNames': addToTaxonNames },
     };
     return type ? update[entity][type] : update[entity];
 }
@@ -363,7 +368,7 @@ function getTaxonRealm(taxon, taxa) {
  * Adds the Taxon's name to the stored names for it's realm and level.
  * Note: 'realm' is added above, so the taxon from storage is used rather than the rcrd.
  */
-function addToTaxonNames(prop, rcrd, entity) {
+function addToTaxonNames(prop, rcrd, entity) {                                  //console.log('addToTaxonNames. prop = [%s] rcrd = %O', prop, rcrd);
     const taxon = db.getMmryData('taxon')[rcrd.id];
     const realm = taxon.realm.displayName;
     const level = taxon.level.displayName;
