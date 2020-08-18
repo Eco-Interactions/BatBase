@@ -140,8 +140,7 @@ export function applyTxnFilter(val) {
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});
     addToFilterState();
-    return rebuildTxnTable(rcrd)
-        .then(() => fM.reapplyDateFilterIfActive());
+    return rebuildTxnTable(rcrd);
 
     function addToFilterState() {
         const curLevel = rcrd.level.displayName;

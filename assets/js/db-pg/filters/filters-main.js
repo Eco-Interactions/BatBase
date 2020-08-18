@@ -34,11 +34,6 @@ export function initDateFilterUi() {
 export function clearDateFilter() {
     fDate.clearDateFilter();
 }
-export function reapplyDateFilterIfActive() {
-    if (!$('#shw-chngd')[0].checked) { return; }
-    const time = fState.getFilterStateKey('date').time;
-    fDate.reapplyPreviousDateFilter(time, 'skip');
-}
 export function toggleDateFilter() {
     fDate.toggleDateFilter(...arguments);
 }
@@ -69,12 +64,12 @@ export function applyTxnFilter() {
 }
 /* ====================== FILTER ROW DATA =================================== */
 export function getRowDataForCurrentFilters(rowData) {
-    const filters = fState.getRowDataFilters();                                 console.log('active filters = %O', filters);
-    if (!Object.keys(filters).length) { return rowData; }
+    const filters = fState.getRowDataFilters();
+    if (!Object.keys(filters).length) { return rowData; }                       //console.log('getRowDataForCurrentFilters = %O', filters);
     return fRows.getFilteredRowData(filters, rowData);
 }
 /** If filter cleared (!val), filter all table rows, else apply on top of current filters. */
-export function onFilterChangeUpdateRowData() {
+export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
     const rowData = getRowDataForCurrentFilters(tState().get('rowData'));
     setCurrentRowData(rowData);
 }

@@ -72,7 +72,7 @@ export function isFilterActive() {
 }
 export function getRowDataFilters(f) {
     const filters = f || Object.assign({}, fS.filters.direct);
-    if (!fS.fRowData) { delete filters.date; }
+    if (filters.date && !filters.date.active) { delete filters.date; }
     return filters;
 }
 /* =================== FILTER STATUS TEXT =================================== */
@@ -125,7 +125,7 @@ function addName(name) {
     return name;
 }
 function getDateFltrString(date) {
-    if (!fS.fRowData) { return null; }
+    if (!date.active) { return null; }
     const type = date.type === 'cited' ? 'Published' : 'Updated';
     return 'Date '+ type;
 }

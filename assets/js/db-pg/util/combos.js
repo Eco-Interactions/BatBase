@@ -43,7 +43,7 @@ function getBaseConfgObj(field, onChange) {
         'Publication Type' : {name: field, id: '#selPubType', change: onChange, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: onChange, blur: true },
-        'Date Filter': { name: 'Filter', id: '#selDateFilter' },
+        'Date Filter': { name: 'Filter', id: '#selDateFilterType' },
         // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', change: onChange },
         'Saved Filter Set': {name: field, id: '#selSavedFilters', change: onChange },

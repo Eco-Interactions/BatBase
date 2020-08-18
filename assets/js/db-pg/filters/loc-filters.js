@@ -160,8 +160,7 @@ export function applyLocFilter(val) {
     const root = getNewLocRoot();
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
-    return rebuildLocTable(root)
-        .then(() => fM.reapplyDateFilterIfActive());
+    return rebuildLocTable(root);
 
     function getNewLocRoot() {
         return isNaN(parseInt(val)) ?

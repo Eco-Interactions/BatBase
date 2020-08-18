@@ -173,7 +173,6 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 function setTableInitState(isAllDataAvailable) {
     resetFilterPanel('taxa');
     resetTableParams('taxa');
-    filter.toggleDateFilter('disable');
     tState.flags.allDataAvailable = isAllDataAvailable;
 }
 export function onDataDownloadComplete () {

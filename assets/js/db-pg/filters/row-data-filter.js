@@ -6,7 +6,12 @@
  * 		filterRowData
  *
  * 	TOC
- *
+ *  	TREE FILTERS
+ *  	INTERACTION FILTERS
+ *  	FILTERS
+ *  		NAME TEXT
+ *  		PUBLICATION TYPE
+ *  		DATE/TIME
  */
 
 let filters, rows;
@@ -14,12 +19,12 @@ let filters, rows;
  * These are handled before table rebuild starts:
  *   Level combos, Region and Country combos
  */
-export function getFilteredRowData(f, rowData) {					/*dbug-log*/console.log('filterRowData filters = %O, rowData = %O', f, rowData);
+export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('getFilteredRowData filters = %O, rowData = %O', f, rowData);
 	if (!Object.keys(f).length) { return rowData; }
-	filters = f,
+	filters = Object.assign({}, f);
     rows = rowData.map(r => Object.assign({}, r));
     handleTreeFilters();
-    handleInteractionFilters();
+    handleInteractionFilters();										/*dbug-log*///console.log('filteredRowData = %O', rows)
     return rows;
 }
 /* ------------------------- TREE FILTERS ----------------------------------- */
@@ -48,7 +53,7 @@ function getRowsThatPassAllTreeFilters(row, filterFuncs, depth) {
 	/** @return row */
 	function getRowIfAllFiltersPass(row) {
 		if (!row.name) { return row; }
-		const passesTreeFilter = ifRowPassesFilters(row, filterFuncs);  		//console.log('getRowIfAllFiltersPass. passesTreeFilter %s, row = %O', passesTreeFilter, row)
+		const passesTreeFilter = ifRowPassesFilters(row, filterFuncs);/*dbug-log*///console.log('getRowIfAllFiltersPass. passesTreeFilter %s, row = %O', passesTreeFilter, row)
 		if (depth === 1) { return passesTreeFilter ? row : null; }
 		row.children = filterRowChildren(row, passesTreeFilter);
 		return passesTreeFilter || row.children.length ? row : null;
@@ -58,32 +63,35 @@ function getRowsThatPassAllTreeFilters(row, filterFuncs, depth) {
 		return !row.children.length || !row.children[0].name ? [] :
 			removeDirectIntsAndFilterChildren(row);
 	}
-	function removeDirectIntsAndFilterChildren(row) {  						    //console.log('removeDirectIntsAndFilterChildren row = %O', row)
+	function removeDirectIntsAndFilterChildren(row) {
 		if (row.children[0].name.includes('Unspecified')) { row.children.shift(); }
 		return row.children.map(getRowIfAllFiltersPass).filter(r=>r);
 	}
 }
 /* --------------------- INTERACTION FILTERS -------------------------------- */
 function handleInteractionFilters() {
-	// body...
+	const filterFuncs = {
+		'date': ifRowAfterDate
+	};
+	handlePersistedDateFilterObj();
+	rows = rows.map(getRowsThatPassInteractionFilters).filter(r=>r);
+
+	function getRowsThatPassInteractionFilters(row) {
+		if (!row.name) { return ifPassesReturnRow(row); }
+		row.children = filterRowChildren(row);
+		return row.children.length ? row : null;
+	}
+	function filterRowChildren(row) {
+		return row.children.map(getRowsThatPassInteractionFilters).filter(r=>r);
+	}
+	function ifPassesReturnRow(row) {
+		return ifRowPassesFilters(row, filterFuncs) ? row : false;
+	}
 }
-
-	// return rows.map(getRowsThatPassAllFilters).filter(r=>r);
-
-// }
-// function ifInteractionFiltersPass(row, filters) {
-// 	const rowPasses = Object.keys(filters).every(ifRowPassesFilter);
-// 	return rowPasses ? row : null;
-
-// 	function ifRowPassesFilter(filterType) {
-// 		const map = {
-// 			// 'date':
-// 			// 'objRealm':
-// 			// 'intList':
-// 		};
-// 		return map[filterType] ? map[filterType](row, filters[filterType]) : true;
-// 	}
-// }
+function handlePersistedDateFilterObj() {
+	if (!filters.date) { return; }
+	filters.date.time = new Date(filters.date.time).getTime();
+}
 /* =========================== FILTERS ====================================== */
 /** @return bool */
 function ifRowPassesFilters(row, filterFuncs) {						/*dbug-log*///console.log('ifRowPassesFilters row = %O, filters = %O', row, filterFuncs);
@@ -112,6 +120,15 @@ function ifRowNameContainsText(row, text) {                         /*dbug-log*/
 function ifRowFromPubType(row, pubTypeId) {  						/*dbug-log*///console.log('ifRowFromPubType [%s] %O', pubTypeId, row);
 	return row.type == pubTypeId;
 }
-/* --------------------------- NAME TEXT ------------------------------------ */
-/* --------------------------- NAME TEXT ------------------------------------ */
-/* ----------------------------- SHARED ------------------------------------- */
+/* --------------------------- DATE/TIME ------------------------------------ */
+function ifRowAfterDate(row, dateObj) {
+    const date = dateObj.type === 'cited' ? row.year + '-01-01' : row.updatedAt;
+    const rowTime = getRowTime(date); 								/*dbug-log*///console.log("row [%O] rowTime = %O >= since = %O [%s]", row, rowTime, dateObj.time, rowTime >= dateObj.time);
+    return rowTime >= dateObj.time;
+
+    function getRowTime(date) {
+        const rowTime = new Date(date)
+        rowTime.setHours(rowTime.getHours()+8);     //Resets from PCT to GMT
+        return rowTime.getTime();
+    }
+}
