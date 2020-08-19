@@ -70,6 +70,7 @@ CURRENT:
     - Data
         - tags- leaf = external, wood = internal
         - Visitation - removing 'flower' from verb forms
+        - update all saved filter sets into current format
 
 
     - Add globi to 'partners' section on about page

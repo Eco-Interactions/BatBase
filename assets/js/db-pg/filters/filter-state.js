@@ -6,7 +6,7 @@
  *      GET
  *      FILTER STATUS TEXT
  */
-import { _ui, accessTableState as tState } from '../db-main.js';
+import { _u, _ui, accessTableState as tState } from '../db-main.js';
 
 let fS;
 
@@ -49,7 +49,7 @@ export function getFilterStateKey(key, filterType = 'direct') {
 }
 export function getFilterState() {
     return {
-        panel: getPanelFilters(Object.assign({}, fS.filters)),
+        panel: getPanelFilters(_u('snapshot', [fS.filters])),
         table: getActiveTableFilterObj()
     };
 }
@@ -63,7 +63,7 @@ export function isFilterActive() {
     return tbl || pnl;
 }
 export function getRowDataFilters(f) {
-    const filters = f || Object.assign({}, fS.filters.direct);
+    const filters = f || _u('snapshot', [fS.filters.direct]);
     if (filters.date && !filters.date.active) { delete filters.date; }
     return filters;
 }
@@ -80,13 +80,13 @@ export function getActiveFilterVals() {
 /* ------------------- FILTER SET STATUS ------------------------------------ */
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = getSetPanelFilterVals(set.panel);
+    const pnlFltrs = Object.keys(set.rebuild).concat(getDirectFilterVals(set.direct));
     return pnlFltrs.concat(tblFltrs);
 }
-function getSetPanelFilterVals(filters) {
-    return Object.keys(filters).map(type => {
+function getDirectFilterVals(dFilters) {
+    return Object.keys(dFilters).map(type => {
         return type === 'date' ?
-            getDateFltrString(filters[type]) : Object.keys(filters[type])[0]
+            getDateFltrString(dFilters[type]) : dFilters[type];
     }).filter(v => v);
 }
 /* ----------------- ACTIVE PAGE FILTERS ------------------------------------ */

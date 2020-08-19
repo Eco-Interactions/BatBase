@@ -40,9 +40,6 @@ export function toggleDateFilter() {
 export function showTodaysUpdates(focus) {
     fDate.showTodaysUpdates(focus);
 }
-export function syncViewFiltersAndUi(focus) {
-    fDate.syncViewFiltersAndUi(focus);
-}
 /* ===================== DYNAMIC FILTERS ==================================== */
 export function loadLocFilters(tblState) {
     fLoc.loadLocFilters(tblState);
