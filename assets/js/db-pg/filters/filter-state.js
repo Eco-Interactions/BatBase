@@ -15,7 +15,6 @@ initFilterStateObj();
  * Filter state object structure:
  *
  * {str} timeout            Present when window is being resized.
- * {ary} fRowData           rowData when 'direct' filters are applied.
  * {obj} filters            Filter-panel options only. (No table column filters)
  *     {obj} direct         Filters rowData only: type(k) value(v)
  *          {obj} date
@@ -35,11 +34,8 @@ function initFilterStateObj(persisted = {}) {
     fS = { filters: { direct: persisted, rebuild: {} }};
 }
 /* =========================== SET ========================================== */
-export function setStateRowData(data) {
-    fS.fRowData = data;
-}
 export function setFilterState(key, value, filterType) {
-    if (value === false) { fS.filters[filterType][key]
+    if (value === false) { delete fS.filters[filterType][key]
     } else { fS.filters[filterType][key] = value; }
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
@@ -60,10 +56,6 @@ export function getFilterState() {
 function getPanelFilters(filters) {
     filters.direct = getRowDataFilters(filters.direct)
     return filters;
-}
-/** If table is filtered by an external filter, the rows are stored in fRowData. */
-export function getCurRowData() {
-    return fS.fRowData ? fS.fRowData : tState().get('rowData');
 }
 export function isFilterActive() {
     const tbl = getTblFilterNames().length > 0;

@@ -13,7 +13,7 @@
  *  		PUBLICATION TYPE
  *  		DATE/TIME
  */
-
+import { _u } from '../db-main.js';
 let filters, rows;
 /**
  * These are handled before table rebuild starts:
@@ -21,8 +21,8 @@ let filters, rows;
  */
 export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('getFilteredRowData filters = %O, rowData = %O', f, rowData);
 	if (!Object.keys(f).length) { return rowData; }
-	filters = Object.assign({}, f);
-    rows = rowData.map(r => Object.assign({}, r));
+	filters = _u('snapshot', [f]);
+    rows = _u('snapshot', [rowData]);
     handleTreeFilters();
     handleInteractionFilters();										/*dbug-log*///console.log('filteredRowData = %O', rows)
     return rows;
@@ -36,34 +36,35 @@ function filterOnTopTreeLevel() {
 	const filterFuncs = {
 		combo: { 'Publication Type': ifRowFromPubType }
 	};
+	if (noActiveFiltersForFilterFuncs(filterFuncs)) { return; }
 	rows = filterTreeRows(filterFuncs, 1);  									//console.log('rows = %O', rows)
 }
 function filterOnAllTreeLevels() {
 	const filterFuncs = {
 		name: ifRowNameContainsText
 	};
+	if (noActiveFiltersForFilterFuncs(filterFuncs)) { return; }
 	rows = filterTreeRows(filterFuncs);  										//console.log('rows = %O', rows)
 }
-function filterTreeRows(filterFuncs, depth = null) {
-	return 	rows.map(row => getRowsThatPassAllTreeFilters(row, filterFuncs, depth))
+function filterTreeRows(filterFuncs) {
+	return 	rows.map(row => getRowsThatPassAllTreeFilters(row, filterFuncs))
 		.filter(r=>r);
 }
-function getRowsThatPassAllTreeFilters(row, filterFuncs, depth) {
+function getRowsThatPassAllTreeFilters(row, filterFuncs) {
 	return getRowIfAllFiltersPass(row);
 	/** @return row */
 	function getRowIfAllFiltersPass(row) {
 		if (!row.name) { return row; }
-		const passesTreeFilter = ifRowPassesFilters(row, filterFuncs);/*dbug-log*///console.log('getRowIfAllFiltersPass. passesTreeFilter %s, row = %O', passesTreeFilter, row)
-		if (depth === 1) { return passesTreeFilter ? row : null; }
-		row.children = filterRowChildren(row, passesTreeFilter);
-		return passesTreeFilter || row.children.length ? row : null;
+		let rowPasses = ifRowPassesFilters(row, filterFuncs);       /*dbug-log*///console.log('getRowIfAllFiltersPass. rowPasses %s, row = %O', rowPasses, row)
+		if (rowPasses) { return row; }
+		row.children = filterRowChildren(row);
+		return row.children.length ? row : null;
 	}
-	function filterRowChildren(row, passesTreeFilter) {
-		if (passesTreeFilter) { return row.children.map(getRowIfAllFiltersPass).filter(r=>r); }
+	function filterRowChildren(row) {								/*dbug-log*///console.log('filterRowChildren row = %O', row)
 		return !row.children.length || !row.children[0].name ? [] :
 			removeDirectIntsAndFilterChildren(row);
 	}
-	function removeDirectIntsAndFilterChildren(row) {
+	function removeDirectIntsAndFilterChildren(row) {				/*dbug-log*///console.log('removeDirectIntsAndFilterChildren row = %O', row)
 		if (row.children[0].name.includes('Unspecified')) { row.children.shift(); }
 		return row.children.map(getRowIfAllFiltersPass).filter(r=>r);
 	}
@@ -73,6 +74,7 @@ function handleInteractionFilters() {
 	const filterFuncs = {
 		'date': ifRowAfterDate
 	};
+	if (noActiveFiltersForFilterFuncs(filterFuncs)) { return; }
 	handlePersistedDateFilterObj();
 	rows = rows.map(getRowsThatPassInteractionFilters).filter(r=>r);
 
@@ -122,7 +124,7 @@ function ifRowFromPubType(row, pubTypeId) {  						/*dbug-log*///console.log('if
 }
 /* --------------------------- DATE/TIME ------------------------------------ */
 function ifRowAfterDate(row, dateObj) {
-    const date = dateObj.type === 'cited' ? row.year + '-01-01' : row.updatedAt;
+    const date = dateObj.type === 'cited' ? row.year + '-12-31' : row.updatedAt;
     const rowTime = getRowTime(date); 								/*dbug-log*///console.log("row [%O] rowTime = %O >= since = %O [%s]", row, rowTime, dateObj.time, rowTime >= dateObj.time);
     return rowTime >= dateObj.time;
 

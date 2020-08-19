@@ -76,15 +76,10 @@ export function onFilterChangeUpdateRowData() {                                 
 function setCurrentRowData(rowData) {
     const api = tState().get('api');
     api.setRowData(rowData);
-    fState.setStateRowData(rowData);
     _ui('updateFilterStatusMsg');
     _ui('setTreeToggleData', [false]);
 }
 /* ==================== FILTER STATE ======================================== */
-/* --------------------------- SET ----------------------------------------- */
-export function setStateRowData(data) {
-    fState.setStateRowData(data);
-}
 export function setFilterState() {
     fState.setFilterState(...arguments);
 }

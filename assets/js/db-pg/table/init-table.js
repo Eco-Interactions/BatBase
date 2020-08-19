@@ -441,13 +441,13 @@ function updateRowsAndGetIntCounts(root) {
     return ttls.reduce((ttl, cnt) => ttl += cnt, 0);
 }
 /** Sets new interaction totals for each tree node and returns count. */
-function updateTotalRowIntCounts(total, row) {
+function updateTotalRowIntCounts(total, row) {                      /*dbug-log*///console.log('updateTotalRowIntCounts. total [%s], row = %O', total, row);
     if (!row.childrenAfterFilter) { return total; }
-    total += ifChildRowsAreInteractions(row) ?
+    const rowCnt = ifChildRowsAreInteractions(row) ?
         row.childrenAfterFilter.length :
         row.childrenAfterFilter.reduce(updateTotalRowIntCounts, 0);
-    if (row.data) { row.data.intCnt = total; }
-    return total;
+    row.data.intCnt = rowCnt;
+    return total += rowCnt;
 }
 function ifChildRowsAreInteractions(row) {
     return !row.childrenAfterFilter.length ||
