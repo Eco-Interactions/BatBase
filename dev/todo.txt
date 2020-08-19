@@ -156,7 +156,7 @@ Sort:
     - Database doesn't work with IE. Notify user.
     - move db-pg util elem builders to js/util/elems
     - Add responsive styling testing
-    - FOS registration email is not using the template found in src/app/resources/translations/*
+    - REFACTOR - Filter rows to interaction list in row-data-filters instead of during row build
 
 TODOs:
 ##(Category){priority}[difficulty]##

@@ -224,19 +224,17 @@ function prepareMemoryForTableLoad() {
     app.listLoaded = true;
 }
 function updateRelatedListUi() {
-    app.tblState.api.expandAll();
-    _ui('setTreeToggleData', [true]);
+    expandAllTableRows();
     syncFilterUi(app.tblState.curFocus);
     updateListLoadButton('Reset to All Interactions', resetTable);
     hideSavedMsg();
     enableModUi('rmv');
-    _ui('updateFilterStatusMsg');
     enableListResetBttn();
     updateDetailHdr('Loaded');
     delete app.tblState;
 }
 function syncFilterUi(focus) {
-    _filter('syncViewFiltersAndUi', [focus]);
+    _ui('updateFilterStatusMsg');
     if ($('#selSavedFilters')[0].selectize) {
         $('#selSavedFilters')[0].selectize.clear('silent')
     }
