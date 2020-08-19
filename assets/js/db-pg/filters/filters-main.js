@@ -74,10 +74,11 @@ export function onFilterChangeUpdateRowData() {                                 
     setCurrentRowData(rowData);
 }
 function setCurrentRowData(rowData) {
-    const api = tState().get('api');
-    api.setRowData(rowData);
+    const tblState = tState().get(['api', 'curFocus']);
+    tblState.api.setRowData(rowData);
     _ui('updateFilterStatusMsg');
     _ui('setTreeToggleData', [false]);
+    if (tblState.curFocus === 'taxa') { fTxn.updateTaxonComboboxes(rowData); }
 }
 /* ==================== FILTER STATE ======================================== */
 export function setFilterState() {
@@ -92,9 +93,6 @@ export function getFilterStateKey() {
 }
 export function getFilterState() {
     return fState.getFilterState();
-}
-export function getCurRowData() {
-    return fState.getCurRowData();
 }
 export function isFilterActive() {
     return fState.isFilterActive();

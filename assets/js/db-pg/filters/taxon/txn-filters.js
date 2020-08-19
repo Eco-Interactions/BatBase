@@ -12,6 +12,7 @@
  *          LEVEL TAXON
  *          OBJECT REALM
  *      FILTER
+ *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
 import * as fM from '../filters-main.js';
 import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../../db-main.js';
@@ -193,5 +194,41 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
         if (taxon.isRoot) { return; }
         selected[taxon.level.displayName] = taxon.id;
         selectAncestorTaxa(_u('getDetachedRcrd', [taxon.parent, taxonRcrds]));
+    }
+}
+/* --------------- UPDATE COMBOBOXES AFTER FILTER CHANGE -------------------- */
+/**
+ * When the date-updated filter is updated, the taxa-by-level property has to be
+ * updated based on the rows displayed in the grid so that the combobox options
+ * show only taxa in the filtered tree.
+ */
+export function updateTaxonComboboxes(rd) {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
+    const rowData = _u('snapshot', [rd]);
+    _u('getData', ['levelNames']).then(lvls => {
+        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
+        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
+        loadTxnFilters(tState().get());
+    });
+}
+/** Returns an object with taxon records by level and keyed with display names. */
+function seperateTaxonTreeByLvl(lvls, rowData) {
+    const separated = {};
+    rowData.forEach(data => separate(data));
+    return sortObjByLevelRank();
+
+    function separate(row) {                                                    //console.log('taxon = %O', taxon)
+        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
+        separated[row.taxonLvl][row.name] = row.id;
+
+        if (row.children) {
+            row.children.forEach(child => separate(child));
+        }
+    }
+    function sortObjByLevelRank() {
+        const obj = {};
+        Object.keys(lvls).forEach(lvl => {
+            if (lvl in separated) { obj[lvl] = separated[lvl]; }
+        });
+        return obj;
     }
 }

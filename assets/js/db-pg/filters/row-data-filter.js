@@ -27,6 +27,9 @@ export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('
     handleInteractionFilters();										/*dbug-log*///console.log('filteredRowData = %O', rows)
     return rows;
 }
+function noActiveFiltersForFilterFuncs(filterFuncs) {
+	return !Object.keys(filterFuncs).find(type => filters[type]);
+}
 /* ------------------------- TREE FILTERS ----------------------------------- */
 function handleTreeFilters() {
 	filterOnTopTreeLevel();

@@ -208,51 +208,5 @@ function resetDateFilter(skipSync) {                                            
  */
 function syncUiAfterDateFilter(dateTime) {                         /*debug-log*///console.log('           --syncUiAfterDateFilter [%s]', dateTime);
     _ui('setTreeToggleData', [false]);
-    if (dateTime != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); }
     _ui('updateFilterStatusMsg')
-}
-export function syncViewFiltersAndUi(focus) {
-    tblState = tState().get();
-    const map = {
-        taxa: updateTaxonComboboxes
-    };
-    if (!map[focus]) { return; }
-    map[focus](tblState);
-}
-/* ------------------ TAXON ------------------------------------------------- */
-/**
- * When the date-updated filter is updated, the taxa-by-level property has to be
- * updated based on the rows displayed in the grid so that the combobox options
- * show only taxa in the filtered tree.
- * TODO: Move to table build process after all filters update.
- */
-function updateTaxonComboboxes() {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
-    const rowData = _u('snapshot', [fM.getCurRowData()]);
-    _u('getData', ['levelNames']).then(lvls => {
-        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
-        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
-        fM.loadTxnFilters(tState().get());
-    });
-}
-/** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(lvls, rowData) {
-    const separated = {};
-    rowData.forEach(data => separate(data));
-    return sortObjByLevelRank();
-
-    function separate(row) {                                                    //console.log('taxon = %O', taxon)
-        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
-        separated[row.taxonLvl][row.name] = row.id;
-
-        if (row.children) {
-            row.children.forEach(child => separate(child));
-        }
-    }
-    function sortObjByLevelRank() {
-        const obj = {};
-        Object.keys(lvls).forEach(lvl => {
-            if (lvl in separated) { obj[lvl] = separated[lvl]; }
-        });
-        return obj;
-    }
 }
