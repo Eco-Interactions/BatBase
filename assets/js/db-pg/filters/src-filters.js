@@ -71,10 +71,5 @@ export function applyPubFilter(typeId) {
     fM.onFilterChangeUpdateRowData();
 }
 function buildPubFilterObj(id) {
-    return {
-        'Publication Type': {
-            text: 'Publication Type',
-            value: id
-        }
-    };
+    return { 'Publication Type': id };
 }

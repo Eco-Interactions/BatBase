@@ -27,8 +27,13 @@ export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('
     handleInteractionFilters();										/*dbug-log*///console.log('filteredRowData = %O', rows)
     return rows;
 }
-function noActiveFiltersForFilterFuncs(filterFuncs) {
-	return !Object.keys(filterFuncs).find(type => filters[type]);
+function ifActiveFiltersInGroup(filterFuncs, filterObj = filters) {
+	return !!Object.keys(filterFuncs).find(ifFilterTypeActive);
+
+	function ifFilterTypeActive(type) {
+		if (type !== 'combo') { return filterObj[type]; }
+		return ifActiveFiltersInGroup(filterFuncs.combo, filters.combo);
+	}
 }
 /* ------------------------- TREE FILTERS ----------------------------------- */
 function handleTreeFilters() {
@@ -39,14 +44,14 @@ function filterOnTopTreeLevel() {
 	const filterFuncs = {
 		combo: { 'Publication Type': ifRowFromPubType }
 	};
-	if (noActiveFiltersForFilterFuncs(filterFuncs)) { return; }
+	if (!ifActiveFiltersInGroup(filterFuncs)) { return; }
 	rows = filterTreeRows(filterFuncs, 1);  									//console.log('rows = %O', rows)
 }
 function filterOnAllTreeLevels() {
 	const filterFuncs = {
 		name: ifRowNameContainsText
 	};
-	if (noActiveFiltersForFilterFuncs(filterFuncs)) { return; }
+	if (!ifActiveFiltersInGroup(filterFuncs)) { return; }
 	rows = filterTreeRows(filterFuncs);  										//console.log('rows = %O', rows)
 }
 function filterTreeRows(filterFuncs) {
@@ -75,9 +80,10 @@ function getRowsThatPassAllTreeFilters(row, filterFuncs) {
 /* --------------------- INTERACTION FILTERS -------------------------------- */
 function handleInteractionFilters() {
 	const filterFuncs = {
-		'date': ifRowAfterDate
+		date: 		ifRowAfterDate,
+		combo: { 'Object Realm': ifIntWithRealm }
 	};
-	if (noActiveFiltersForFilterFuncs(filterFuncs)) { return; }
+	if (!ifActiveFiltersInGroup(filterFuncs)) { return; }
 	handlePersistedDateFilterObj();
 	rows = rows.map(getRowsThatPassInteractionFilters).filter(r=>r);
 
@@ -112,8 +118,9 @@ function ifRowPassesFilters(row, filterFuncs) {						/*dbug-log*///console.log('
 }
 /* ------------- COMBO FILTERS ------------------ */
 function ifRowContainsComboValue(row, comboFuncs) {
-	return Object.keys(comboFuncs).every(type => {
-		return comboFuncs[type] ? comboFuncs[type](row, filters.combo[type].value) : true;
+	return Object.keys(comboFuncs).every(type => {  							//console.log('type [%s] funcs = %O row = %O', type, comboFuncs, row);
+		const filterVal = filters.combo[type].value || filters.combo[type];
+		return comboFuncs[type] ? comboFuncs[type](row, filterVal) : true;
 	});
 }
 /* --------------------------- NAME TEXT ------------------------------------ */
@@ -136,4 +143,8 @@ function ifRowAfterDate(row, dateObj) {
         rowTime.setHours(rowTime.getHours()+8);     //Resets from PCT to GMT
         return rowTime.getTime();
     }
+}
+/* ------------------------ OBJECT REALM ------------------------------------ */
+function ifIntWithRealm(row, realmIds) {  							/*dbug-log*///console.log('ifIntWithRealms = %O, row = %O', realmIds, row);
+	return realmIds.indexOf(row.objRealm) !== -1;
 }

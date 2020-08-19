@@ -144,11 +144,15 @@ export function applyTxnFilter(val) {
     return rebuildTxnTable(rcrd);
 
     function addToFilterState() {
-        const curLevel = rcrd.level.displayName;
-        if (!rcrd.parent || rcrd.parent == 1) { return fM.setFilterState('combo', false, 'rebuild'); }
         const filter = {};
-        filter[curLevel] = { text: rcrd.displayName, value: val };
-        fM.setFilterState('combo', filter, 'rebuild');;
+        const curLevel = rcrd.level.displayName;
+        filter[curLevel] = getLevelFilterState()
+        fM.setFilterState('combo', filter, 'rebuild');
+
+        function getLevelFilterState() {
+            if (!rcrd.parent || rcrd.parent == 1) { return false; }
+            return { text: rcrd.displayName, value: val };
+        }
     }
 }
 function clearSelection(elem) {

@@ -60,6 +60,13 @@ TAYLOR:
 > ____ TASKS _____
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
+    - Bugs
+        - list rest button should be disabled on load
+        - filter reset button not enabling
+        - focus filter heading
+
+
+
     - On form map click, automatically open popup with option to fill in coordinates
     - fix edit form fill with new input types
     - Adding form hints
@@ -144,6 +151,7 @@ Next/future rounds:
     Future:
 ### _____________________ DEV INTERNAL TASKS _______________________________ ###
 Sort:
+    - Move filter sets into filter folder
     - when clicking reset local data button on menu bar, figure out how to get
         a diff between the old and new stored data to better track down errors/bugs
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)

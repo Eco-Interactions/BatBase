@@ -302,13 +302,14 @@ function buildIntRowData(intRcrd, treeLvl, idx){
         entity: 'Interaction',       //Not sure what this is all used for...
         id: intRcrd.id,
         interactionType: intRcrd.interactionType.displayName,   //Table data
-        isParent: false,  //Tell grid and various code not to expect sub-nodes
-        name: '',           // Blank tree field
-        note: intRcrd.note,    //Table data
+        isParent: false,        //Tell grid and various code not to expect sub-nodes
+        name: '',               // Blank tree field
+        note: intRcrd.note,     //Table data
         object: getEntityData('taxon', 'displayName', 'object'),
+        objRealm: intRcrd.objRealm.toString(),//Used for the Object Realm filter in taxon->bat view
         rowColorIdx: idx,       //Not sure what this is all used for...
         subject: getEntityData('taxon', 'displayName', 'subject'),
-        tags: intRcrd.tags,   //Table data
+        tags: intRcrd.tags,     //Table data
         treeLvl: treeLvl,       //Influences row coloring
         type: 'intRcrd',        //Not sure what this is all used for...
         updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated

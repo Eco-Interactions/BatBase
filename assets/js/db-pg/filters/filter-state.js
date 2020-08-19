@@ -22,10 +22,10 @@ initFilterStateObj();
  *              {str} type  'cited' or 'updated' (in the database)
  *          {str} name      Name text
  *          {obj} combo     (objRealm, pubType)
- *              {obj} field text(k) and value(v)
+ *              {obj} field value(v)
  *     {obj} rebuild        Filters rebuild the table: type (k) value (v)
  *          {obj} combo     (Taxon levels, country||region)
- *              {obj} field text(k) and value(v)
+ *              {obj} field text(k) and value(v) (Will set the combo and trigger the table rebuild)
  *
  *
  * Note: Date filter persists through reset due to how time consuming it is to select a date
@@ -34,9 +34,16 @@ function initFilterStateObj(persisted = {}) {
     fS = { filters: { direct: persisted, rebuild: {} }};
 }
 /* =========================== SET ========================================== */
-export function setFilterState(key, value, filterType) {
-    if (value === false) { delete fS.filters[filterType][key]
-    } else { fS.filters[filterType][key] = value; }
+export function setFilterState(key, value, filterGroup, fObj) {
+    if (!fObj) { fObj = fS.filters[filterGroup]; }
+    if (key === 'combo') { return setComboFilterState(...Object.keys(value)); }
+    if (value === false) { delete fObj[key];
+    } else { fObj[key] = value; }
+
+    function setComboFilterState(comboKey) {
+        if (!fObj.combo) { fObj.combo = {}; }
+        setFilterState(comboKey, value[comboKey], filterGroup, fObj.combo);
+    }
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
 export function resetFilterState() {
@@ -44,8 +51,8 @@ export function resetFilterState() {
     initFilterStateObj(persistedDate);
 }
 /* =========================== GET ========================================== */
-export function getFilterStateKey(key, filterType = 'direct') {
-    return key ? fS.filters[filterType][key] : fS.filters[filterType];
+export function getFilterStateKey(key, filterGroup = 'direct') {
+    return key ? fS.filters[filterGroup][key] : fS.filters[filterGroup];
 }
 export function getFilterState() {
     return {
@@ -84,13 +91,24 @@ function getSavedFilterStatus(set) {                                            
     return pnlFltrs.concat(tblFltrs);
 }
 function getDirectFilterVals(dFilters) {
+    const specl = ['combo', 'date'];
     return Object.keys(dFilters).map(type => {
-        return type === 'date' ?
-            getDateFltrString(dFilters[type]) : dFilters[type];
+        return specl.indexOf(type) === -1 ? dFilters[type] : formatFilterVal(type);
     }).filter(v => v);
+
+    function formatFilterVal(type) {
+        const map = {
+            'date': getDateFltrString,
+            'combo': getComboField
+        };
+        return map[type](dFilters[type]);
+    }
+}
+function getComboField(combo) {
+    return Object.keys(combo)[0]
 }
 /* ----------------- ACTIVE PAGE FILTERS ------------------------------------ */
-function getPageActiveFilters (argument) {
+function getPageActiveFilters () {
     return getTblFilterNames().concat(getPanelFilterVals());
 }
 function getPanelFilterVals() {
@@ -103,15 +121,18 @@ function getPanelFilterVals() {
         Object.keys(fS.filters[group]).forEach(addFilterVal);
         return vals.filter(f => f);
 
-        function addFilterVal(type) {                                           //console.log('filter [%s] = %O', type, fS.filters[group][type]);
-            vals.push(map[type](fS.filters[group][type]));
+        function addFilterVal(type) {
+            const val = map[type](fS.filters[group][type], group);
+            if (Array.isArray(val)) { return vals.push(...val); }
+            vals.push(val);
         }
     }
 }
 /** Stores the most recent combobox selection. */
-function addComboValue(comboObj) {                                              //console.log('comboObj = %O', comboObj);
-    const type = Object.keys(comboObj);
-    return comboObj[type].text;
+function addComboValue(comboObj, group) {                                              //console.log('comboObj = %O', comboObj);
+    const comboKeys = Object.keys(comboObj);
+    if (group === 'direct') { return comboKeys; }
+    return comboKeys.map(k => comboObj[k].text);
 }
 function addName(name) {
     return name;

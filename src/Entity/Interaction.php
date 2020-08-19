@@ -448,6 +448,18 @@ class Interaction
     }
 
     /**
+     * Get the Object id.
+     * Note: Used for filtering the database by object realm.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("objRealm")
+     * @Groups({"normalized"})
+     */
+    public function getObjectRealmId()
+    {
+        return $this->object->getTaxonRealm()->getId();
+    }
+
+    /**
      * Add Tag.
      *
      * @param \App\Entity\Tag $tag

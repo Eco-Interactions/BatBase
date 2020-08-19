@@ -194,14 +194,29 @@ function addFiltersToMemoryAndUi(filters) {
 }
 function handleUiUpdate(type, val) {
     const map = {
-        name: setNameTextInput
+        name: setNameTextInput,
+        combo: setComboElem
     };
     if (!map[type]) { return; }
     map[type](type, val);
 }
+/* ------------- SET RELATED UI ------------- */
 function setNameTextInput(type, val) {
     $('#focus-filters input[type="text"]').val(val.replace(/"/g,""));
 }
+function setComboElem(type, val) {
+    const field = Object.keys(val)[0];
+    const id = getComboId(field);
+    _u('setSelVal', [field, val[field], 'silent'])
+}
+function getComboId(field) {
+    const map = {
+        'Object Realm': '#selObjRealm',
+        'Publication Type': '#selPubType'
+    }
+    return map[field];
+}
+/* --------------- FILTERS THAT REBUILD TABLE ------- */
 function setFiltersThatResetTableThenApplyRemaining(filters) {
     if (!filters.rebuild) { return _filter('onFilterChangeUpdateRowData'); }
     setComboboxFilter(filters.rebuild.combo)
@@ -209,6 +224,7 @@ function setFiltersThatResetTableThenApplyRemaining(filters) {
     .then(onAllFiltersApplied);
 }
 function setComboboxFilter(filter) {
+    if (!filter) { return Promise.resolve(); }
     const name = Object.keys(filter)[0];                            /*dbug-log*///console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
     return _u('triggerComboChangeReturnPromise', [name, filter[name].value]);
 }
