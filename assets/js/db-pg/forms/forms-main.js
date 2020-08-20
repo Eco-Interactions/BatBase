@@ -56,8 +56,8 @@ export function edit(id, entity) {
 export function selectIntLoc(id) {
     form.selectIntLoc(id);
 }
-export function addNewLocationWithGps() {
-    form.addNewLocationWithGps();
+export function autofillCoordinateFields() {
+    form.autofillCoordinateFields(...arguments);
 }
 /** --------------------------- FORM UI ------------------------------------- */
 export function _elems(funcName, params = []) {

@@ -64,7 +64,6 @@ CURRENT:
 
 
 
-    - On form map click, automatically open popup with option to fill in coordinates
     - fix edit form fill with new input types
     - Adding form hints
         - addFinalInfoStep about info in tooltips on fields
@@ -79,7 +78,6 @@ CURRENT:
 
     - Add globi to 'partners' section on about page
     - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
-    - Add object realm and name filters to bat filter panel
 
     - fix cronjob to clean up hourly backups
     - testing

@@ -35,10 +35,17 @@ export class LocMarker extends Marker {
         this.markerType = markerType;
         bindClassContextToMethods(this);
         this.self = L.marker(params.latLng, getCustomIcon(markerType))
-            .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'})
+            .bindPopup(this.popup, this.getLocPopupOptions(markerType))
             .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
         this.addMarkerEvents();
+    }
+    getLocPopupOptions(markerType) {
+        const opts = {closeOnClick: false, maxWidth: '272', minWidth: '177'};
+        if (markerType === 'form-loc') {
+            opts.autoClose = false;
+        }  console.log('opts = %O', opts)
+        return opts;
     }
     addMarkerEvents() {
         this.self
@@ -73,6 +80,7 @@ export class LocMarker extends Marker {
         this.self.closePopup();
     }
     delayPopupClose(e) {
+        if (e.sourceTarget._icon.className.includes('form-loc')) { return; }
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End LocMarker Class */
@@ -272,7 +280,7 @@ function getCustomIcon(iconType) {                                              
         return {
             icon: L.divIcon({
                 className: 'single-marker info',
-                html: iconType === 'new-loc' ? '' : 1,
+                html: iconType === 'form-loc' ? '' : 1,
             })
         }
     }
@@ -287,7 +295,7 @@ function getCustomIcon(iconType) {                                              
                 shadowUrl: require('./../../../images/icons/marker-shadow.png').default,
                 shadowSize: [33, 45],
                 shadowAnchor: [10, 44],
-                className: 'new-loc'
+                className: 'form-loc'
             })
         };
     }
@@ -403,8 +411,10 @@ function ifLocPopupEmpty(content, type) {
 }
 function buildLocMarkerContent(type, loc) {
     const map = {
-        'e-loc': getGeocodedLocHtml, 'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml,
-        'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getGeocodedLocHtml
+        'form-loc': getGeocodedLocHtml,
+        'form': getLocDetailsHtml,
+        'form-c': getCountryDetailsHtml,
+        'form-noGps': getNoGpsLocDetailsHtml,
     };
     const editing = type ? ifEditingReturnTrueAndUpdateType() : false;
     return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc);
@@ -690,24 +700,29 @@ function buildLocDetails(loc) {
 }
 /* ============ New Location Popup ============== */
 /** Used when displaying a geocoded (new or edit) location on the form.  */
-function getGeocodedLocHtml(loc, editing) {                                     //console.log('buildingGeocodedLocationPopup. editing? ', editing);
-    const cntnr = _u('buildElem', ['div', {class: 'flex-col new-loc-popup'}]);
-    const text = getNewLocText(loc, editing);
-    // const bttn = editing ? '' : getCreateLocBttn();
-    $(cntnr).append([text]);  //, bttn
+function getGeocodedLocHtml(loc) {                                              //console.log('buildingGeocodedLocationPopup. loc = %O ', loc);
+    const cntnr = _u('buildElem', ['div', {class: 'flex-col form-loc-popup'}]);
+    const elems = getLocDataHtml(loc);
+    const bttn = getFillCoordsBttn(loc.lat, loc.lng);
+    $(cntnr).append([...elems, bttn]);
     return cntnr;
 }
-function getNewLocText(loc, editing) {
+function getLocDataHtml(loc) {
+    const name = getNameHtml(loc);
+    const latLng = !loc ? null : `<b>${loc.lat}, ${loc.lng}</b>`;
+    const unique = '<i>Please ensure that this location is unique.</i>';
+    return [name, latLng, unique].filter(e=>e);
+}
+function getNameHtml(loc) {
     const name = !loc ? 'No geo-data found. Please double-check coordinates.' :
         'Near: <b>'+ loc.name;
-    const html = `<div style="font-size:1.1em;">${name}</b></div>`;
-    return editing ? html : `${html}Please ensure that this location is unique.`;
+    return `<div style="font-size:1.1em;">${name}</b></div>`;
 }
-// /** Click event added in location-form. */
-// function getCreateLocBttn() {
-//     const attr = {type: 'button', id: 'new-gps-loc', class:'ag-fresh', value: 'Create Location'};
-//     const bttn = _u('buildElem', ['input', attr]);
-//     $(bttn).click(_forms.bind(null, 'addNewLocationWithGps', []));
-//     $(bttn).css({'margin': '.5em 0 0 -.4em'});
-//     return bttn;
-// }
+/** Click event added in location-form. */
+function getFillCoordsBttn(lat, lng) {
+    const attr = {type: 'button', id: 'fill-coords', class:'ag-fresh', value: 'Autofill Coordinates'};
+    const bttn = _u('buildElem', ['input', attr]);
+    $(bttn).click(_forms.bind(null, 'autofillCoordinateFields', [lat, lng]));
+    $(bttn).css({'margin': '.5em 0 0 -.4em'});
+    return bttn;
+}

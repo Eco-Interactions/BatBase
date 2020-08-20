@@ -122,7 +122,6 @@ export function reportFormFieldErr(fieldName, errTag, fLvl) {                   
         'needsGenusPrnt': handleNeedsGenusParent,
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
         'needsHigherLvl': handleNeedsHigherLvl,
-        'needsLocData': handleNeedsLocData,
         'needsName': handleNeedsName,
         'noFamily': handleNoFamily,
         'noGenus': handleNoGenus,
@@ -235,17 +234,6 @@ function enableChngPrntBtttn() {
     if ($('#sub-form').length ) { return; }
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
 }
-/* ----------- LOCATION REQUIRED FIELD EMPTY -------------------------------- */
-/** Note: error used for the location form when selecting new location from map. */
-function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
-    const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
-    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    $('div.new-loc-popup').prepend(msg);
-}
-function clrNeedsLocData(elem, fLvl, e) {
-    clearErrElemAndEnableSubmit(elem, fLvl);
-    $('.new-loc-popup #err').remove();
-}
 /* --------------------- NEEDS NAME ----------------------------------------- */
 function handleNeedsName(elem, errTag, fLvl, fieldName) {
     const msg = `<span>Please fill required fields and submit again.</span>`;
@@ -312,7 +300,7 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'needsGenusName': clrNeedsGenusName,    'needsName': clrNeedsName,
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr,
         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
-        'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm,
+        'openSubForm': clrOpenSubForm,
         'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr,
         'fillAuthBlanks': false, 'fillEdBlanks': false

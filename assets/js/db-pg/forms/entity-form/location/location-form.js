@@ -2,7 +2,6 @@
  * Contains code specific to the location form.
  *
  * Exports:                     Clients:
- *     addNewLocationWithGps        map-main
  *     initCreateForm               forms-main
  *
  * TOC
@@ -72,19 +71,6 @@ function addSelectSimilarLocationNote(prevElem) {
         Select an existing location by clicking inside its pin's popup.</p>`;
     $(prevElem).after(note);
 }
-/**
- * New locations with GPS data are created by clicking a "Create Location" button
- * in a the new location's green map pin's popup on the map in the form.
- */
-export function addNewLocationWithGps() {
-    const fLvl = getSubFormLvl('sub');
-    if (_elems('ifAllRequiredFieldsFilled', [fLvl])) {
-        submitForm('#'+fLvl+'-form',  fLvl, 'location');
-    } else { showFillAllLocFieldsError(fLvl); }
-}
-function showFillAllLocFieldsError(fLvl) {
-    _val('reportFormFieldErr', ['Display Name', 'needsLocData', fLvl]);
-}
 /** ======================= EDIT FORM ======================================= */
 export function finishEditFormBuild(entity) {
     initFormCombos('Location', 'top');
@@ -143,6 +129,7 @@ export function focusParentAndShowChildLocs(type, val) {
     const locRcrds = _state('getEntityRcrds', ['location'])
     _map('initFormMap', [val, locRcrds, type]);
 }
+/* ----------- COORDINATE FIELD LISTENER --------------- */
 export function addListenerToGpsFields(fLvl, params = [true]) {
     $('#Latitude_row input, #Longitude_row input').change(validateLocFields);
 
@@ -165,4 +152,10 @@ function lintCoord(prefix) {
     const field = prefix+'itude';
     const input = $('#'+field+'_row input')[0];
     return input.validity.valid ? input.value : null;
+}
+/* ----------- AUTOFILL COORDINATES --------------- */
+
+export function autofillCoordinateFields(lat, lng) {
+    $('#Latitude_row input').val(lat);
+    $('#Longitude_row input').val(lng);
 }

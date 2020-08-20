@@ -107,8 +107,7 @@ function getMapInstance(mapId) {
  */
 function onMapClick(type, e) {
     if (ifClickOnMapTool(e)) { return; }
-    if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(type, e);
-    } else { showLatLngPopup(type, e) }
+    showLatLngPopup(type, e);
 }
 /** Catches clicks on map buttons or tools. */
 function ifClickOnMapTool(e) {                                                  //console.log('e = %O', e)
@@ -119,20 +118,14 @@ function getClickedElemClass(elem) {
     return elem.className ? elem.className :
         elem._container ? elem._container.className : '';
 }
-/**
- * Drops a new map pin, draws the containing country and displays pins for all
- * existing sub locations within the country.
- */
-function dropNewMapPinAndUpdateForm(type, e) {
+function showLatLngPopup(type, e) {
+    if (['create', 'edit'].indexOf(type) === -1) { return console.log(latLng); }
+    return geocodeAndShowPopup(type, e);
+}
+function geocodeAndShowPopup(type, e) {
     $('#form-map').css('cursor', 'progress');
     app.geoCoder.reverse(
         e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null);
-    fillCoordFields(e.latlng);
-}
-function showLatLngPopup(type, e) {
-    const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-    if (['create', 'edit'].indexOf(type) === -1) { return console.log(latLng); }
-    new L.Popup().setLatLng(e.latlng).setContent(latLng).openOn(app.map);
 }
 function getMapBounds() {
     const southWest = L.latLng(-100, 200);
@@ -581,7 +574,9 @@ function updateMapPin(latLng, results, zoomFlag) {                              
 function buildLocData(results, cntrys) {                                        //console.log('buildLocData. results = %O', results);
     return {
         cntryId: getCountryId(cntrys, results.properties.address),
-        name: results.name
+        lat: results.center.lat.toFixed(5),
+        lng: results.center.lng.toFixed(5),
+        name: results.name,
     };
 }
 function getCountryId(cntrys, address) {
@@ -591,8 +586,7 @@ function getCountryId(cntrys, address) {
 /** Note: MarkerType triggers the marker's popup build method.  */
 function replaceMapPin(latLng, loc, zoomFlag) {
     const params = { latLng: latLng, loc: loc, rcrds: app.data };
-    const markerType = zoomFlag === 'edit' ? 'edite-loc' : 'new-loc';
-    const marker = new MM.LocMarker(params, markerType);
+    const marker = new MM.LocMarker(params, 'loc-form');
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
@@ -628,11 +622,6 @@ function finishFormMap(parentId, type) {                                        
     _elems.addLocCountLegend(app.map);
     if (type === 'int') {
         _elems.addNewLocBttn(app.map);
-    } else if (type === 'edit') {
-        _elems.addClickToCreateLocBttn(app.map);
-    } else { //'create'
-        _elems.addClickToCreateLocBttn(app.map);
-        _elems.addDrawNewLocBoundaryBttn(app.map);
     }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);

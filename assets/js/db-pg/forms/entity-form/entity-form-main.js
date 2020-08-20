@@ -13,17 +13,17 @@
  *         AUTHOR
  *         CITATION
  */
-import * as _int from './interaction/interaction-form.js';
-import * as _loc from './location/location-form.js';
-import * as _src from './source/source-forms.js';
-import * as _txn from './taxon/taxon-form.js';
+import * as int from './interaction/interaction-form.js';
+import * as loc from './location/location-form.js';
+import * as src from './source/source-forms.js';
+import * as txn from './taxon/taxon-form.js';
 import * as autoCite from './source/auto-citation.js';
 
 const forms = {
-    'author': _src, 'citation': _src, 'interaction': _int, 'location': _loc,
-    'publication': _src, 'publisher': _src, 'taxon': _txn, 'subject': _int,
-    'object': _int, 'species': _txn, 'genus': _txn, 'family': _txn, 'order': _txn,
-    'class': _txn
+    'author': src, 'citation': src, 'interaction': int, 'location': loc,
+    'publication': src, 'publisher': src, 'taxon': txn, 'subject': int,
+    'object': int, 'species': txn, 'genus': txn, 'family': txn, 'order': txn,
+    'class': txn
 };
 
 export function createEntity(entity, name) {                                    //console.log('createEntity. args = %O', arguments)
@@ -40,8 +40,8 @@ export function finishEntityEditFormBuild(entity) {
 }
 export function finishEditFormInit(entity, id) {
     const cmplxFnshrs = {
-        'citation': _src.setSrcEditRowStyle,
-        'publication': _src.setSrcEditRowStyle,
+        'citation': src.setSrcEditRowStyle,
+        'publication': src.setSrcEditRowStyle,
         'location': addMapToLocationEditForm,
     };
     if (!cmplxFnshrs[entity]) { return Promise.resolve(); }
@@ -49,58 +49,58 @@ export function finishEditFormInit(entity, id) {
 }
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationField() {
-    _int.fillCitationField(...arguments);
+    int.fillCitationField(...arguments);
 }
 export function selectIntLoc(id) {
-    _int.selectLoc(id);
+    int.selectLoc(id);
 }
 export function enableCountryRegionField() {
-    _int.enableCountryRegionField();
+    int.enableCountryRegionField();
 }
 export function onLevelSelection() {
-    _int.onLevelSelection(...arguments);
+    int.onLevelSelection(...arguments);
 }
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {
-    return _loc.addMapToLocationEditForm(...arguments);
+    return loc.addMapToLocationEditForm(...arguments);
 }
 export function addMapToLocForm(elem, mapType) {
-    return _loc.addMapToLocForm(elem, mapType);
+    return loc.addMapToLocForm(elem, mapType);
 }
 export function focusParentAndShowChildLocs(mapType, val) {
-    return _loc.focusParentAndShowChildLocs(mapType, val);
+    return loc.focusParentAndShowChildLocs(mapType, val);
 }
-export function addNewLocationWithGps() {
-    _loc.addNewLocationWithGps();
+export function autofillCoordinateFields() {
+    loc.autofillCoordinateFields(...arguments);
 }
 /** ------------------------ TAXON ------------------------------------------ */
 export function createTaxon(level, val) {
-    return _txn.initCreateForm(level, val);
+    return txn.initCreateForm(level, val);
 }
 export function getSelectedTaxon() {
-    return _int.getSelectedTaxon();
+    return int.getSelectedTaxon();
 }
 export function getTaxonEditFields(entity, id) {
-    return _txn.getTaxonEditFields(id);
+    return txn.getTaxonEditFields(id);
 }
 export function selectParentTaxon(id) {
-    return _txn.selectParentTaxon(id);
+    return txn.selectParentTaxon(id);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function onSrcToggleFields() {
-    _src.finishSourceToggleAllFields(...arguments);
+    src.finishSourceToggleAllFields(...arguments);
 }
 export function getSrcTypeFields() {
-    return _src.getSrcTypeFields(...arguments);
+    return src.getSrcTypeFields(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */
 export function selectExistingAuthors() {
-    return _src.selectExistingAuthors(...arguments);
+    return src.selectExistingAuthors(...arguments);
 }
 /** ---------- CITATION ------------------------- */
 export function handleCitText(formLvl) {
-    _src.handleCitText(formLvl);
+    src.handleCitText(formLvl);
 }
 export function getCitationText(fLvl) {
     return autoCite.getCitationText(fLvl);
