@@ -61,9 +61,6 @@ TAYLOR:
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
     - Bugs
-        - list rest button should be disabled on load
-        - filter reset button not enabling
-        - focus filter heading
 
 
 

@@ -69,6 +69,7 @@ export function getRowDataForCurrentFilters(rowData) {
 export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
     const prevRowData = tState().get('rowData')
     const rowData = getRowDataForCurrentFilters(prevRowData);
+    _ui('enableClearFiltersButton');
     if (prevRowData.length === rowData.length) { return; }
     setCurrentRowData(rowData);
 

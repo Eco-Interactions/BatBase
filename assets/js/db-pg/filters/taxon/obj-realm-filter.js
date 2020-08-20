@@ -47,7 +47,7 @@ export function filterTableByObjectRealm(realmIds) {                            
 }
 function filterByObjRealms() {
 	timeout = null;
-    const realmIds = _u('getSelVal', ['ObjRealm']);
+    const realmIds = _u('getSelVal', ['Object Realm']);
     const filterObj = buildObjRealmFilterObj(realmIds);
     ifAllRealmsSelectedClearFilter(realmIds.length);
 	fM.setFilterState('combo', filterObj, 'direct');

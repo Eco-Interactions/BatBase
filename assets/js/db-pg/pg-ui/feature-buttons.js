@@ -131,8 +131,8 @@ function enableMapFeatures() {
 /* ================= TOGGLE TABLE BUTTONS  ================================== */
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing || testingDbInit()) { updateUiAfterBaseDatabaseInit(); }
-    enableButtonsAndUpdateCursors();
     unfadeButtons();
+    enableButtonsAndUpdateCursors();
 }
 function testingDbInit() {
     return app.dbInitializing && $('body').data('env') === 'test';

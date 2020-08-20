@@ -164,15 +164,14 @@ export function showIntroAndLoadingMsg(resettingData) {
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
 export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = true) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s], allDataAvailable ? [%s]', focus, isAllDataAvailable);
-    setTableInitState(isAllDataAvailable);
+    setTableInitState(focus, isAllDataAvailable);
     ui.selectInitialSearchFocus(focus);
     if ($('body').data('env') === 'test' && isAllDataAvailable === false) { return; }
-    buildTable()
-    .then(ui.updateFilterPanelHeader.bind(null, focus));
+    buildTable();
 }
-function setTableInitState(isAllDataAvailable) {
-    resetFilterPanel('taxa');
-    resetTableParams('taxa');
+function setTableInitState(focus, isAllDataAvailable) {
+    resetFilterPanel(focus);
+    resetTableParams(focus);
     tState.flags.allDataAvailable = isAllDataAvailable;
 }
 export function onDataDownloadComplete () {
@@ -204,7 +203,7 @@ function setTableState(stateObj) {                                              
 /** Resets on focus change. */
 function resetTableParams(focus) {
     if (focus) { return Promise.resolve(resetTblParams(focus)); }
-    return Promise.resolve(u.getData('curFocus').then(f => resetTblParams(f)));
+    return Promise.resolve(u.getData('curFocus').then(resetTblParams));
 }
 function resetTblParams(focus) {
     const intSet =  tState.intSet;
