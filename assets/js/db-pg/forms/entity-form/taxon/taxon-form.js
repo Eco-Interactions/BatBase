@@ -180,7 +180,7 @@ function showParentTaxonSelectForm() {
 function buildParentTaxonEditElems(prntId) {
     const prnt = realmData.rcrds[prntId];
     const hdr = [ buildEditParentHdr()];
-    const bttns = [ _elems('getFormFooter', ['parent', 'sub', 'edit'])];
+    const bttns = [ _elems('getFormFooter', ['taxon', 'sub', 'edit'])];
     return getParentEditFields(prnt)
         .then(fields => hdr.concat(fields, bttns));
 }
@@ -391,9 +391,6 @@ function getHighestChildLvl(taxonId) {
         const child = realmData.rcrds[id]
         if (child.level.ord < high) { high = child.level.ord; }
     }
-} /* End getHighestChildLvl */
-function getSpeciesLvl() {
-
 }
 function clearPreviousErr(errTag, txnLvl) {
     if ($('.top-active-errs').length) {

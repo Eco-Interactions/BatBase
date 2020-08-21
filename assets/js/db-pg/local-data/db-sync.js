@@ -224,15 +224,15 @@ function updateDetailEntityData(data) {
 /** Updates stored-data props related to a core-entity record with new data. */
 function addCoreEntityData(entity, rcrd) {                                      //console.log("       --Updating Core entity. %s. %O", entity, rcrd);
     updateCoreData(entity, rcrd);
-    updateCoreDataProps(entity, db.getMmryData('taxon')[rcrd.id]);
+    updateCoreDataProps(entity, db.getMmryData(entity)[rcrd.id]);
 }
 /**
  * Updates the stored core-records array and the stored entityType array.
  * Note: Taxa are the only core entity without 'types'.
  */
 function updateCoreData(entity, rcrd) {                                         //console.log("           --Updating Record data", entity);
-    handleEntityLocalDataUpdates(entity, rcrd);
     addToRcrdProp(entity, rcrd);
+    handleEntityLocalDataUpdates(entity, rcrd);
 }
 function handleEntityLocalDataUpdates(entity, rcrd) {
     const update = {

@@ -565,17 +565,17 @@ function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  
 function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
     return _db('getData', ['countryCodes']).then(cntrys => {
-        const loc = results ? buildLocData(results, cntrys) : null;
+        const loc = results ? buildLocData(latLng, results, cntrys) : null;
         replaceMapPin(latLng, loc, zoomFlag);
         $('#'+app.map._container.id).css('cursor', 'default');
         if (zoomFlag === 'edit') { $('#'+app.map._container.id).data('loaded'); }
     });
 }
-function buildLocData(results, cntrys) {                                        //console.log('buildLocData. results = %O', results);
+function buildLocData(latLng, results, cntrys) {                                //console.log('buildLocData. latLng = %O results = %O', latLng, results);
     return {
         cntryId: getCountryId(cntrys, results.properties.address),
-        lat: results.center.lat.toFixed(5),
-        lng: results.center.lng.toFixed(5),
+        lat: latLng.lat,
+        lng: latLng.lng,
         name: results.name,
     };
 }
@@ -586,7 +586,8 @@ function getCountryId(cntrys, address) {
 /** Note: MarkerType triggers the marker's popup build method.  */
 function replaceMapPin(latLng, loc, zoomFlag) {
     const params = { latLng: latLng, loc: loc, rcrds: app.data };
-    const marker = new MM.LocMarker(params, 'loc-form');
+    const markerType = (zoomFlag === 'edit' ? 'edit' : '') + 'form-loc';
+    const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
@@ -611,7 +612,7 @@ function addPinToMap(latLng, marker, zoomFlag) {
     app.map.setView(latLng, zoom, {animate:true});
 }
 /**
- * what is the case caught in this if??
+ * Types: create, edit, int
  */
 export function initFormMap(parent, rcrds, type) {                              console.log('           /--initFormMap type = [%s]', type);
     app.data.locs = app.data.locs || rcrds;

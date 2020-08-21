@@ -44,7 +44,7 @@ export class LocMarker extends Marker {
         const opts = {closeOnClick: false, maxWidth: '272', minWidth: '177'};
         if (markerType === 'form-loc') {
             opts.autoClose = false;
-        }  console.log('opts = %O', opts)
+        }
         return opts;
     }
     addMarkerEvents() {
@@ -272,8 +272,7 @@ function bindClassContextToMethods(self) {
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) {                                              //console.log('iconType = ', iconType)
     if (!iconType) { return getGreenCircleMarker(); }
-    if (iconType && iconType.includes('form')) { return null; } //console.log('returning custom icon');
-    return getTealPinMarker();
+    return iconType.includes('edit') ? getTealPinMarker() : null;
     /** Displays single interactions on map as a green circle to match marker-clusters. */
     function getGreenCircleMarker() {
         const classes = iconType || 'single-marker info';
@@ -411,10 +410,10 @@ function ifLocPopupEmpty(content, type) {
 }
 function buildLocMarkerContent(type, loc) {
     const map = {
-        'form-loc': getGeocodedLocHtml,
-        'form': getLocDetailsHtml,
-        'form-c': getCountryDetailsHtml,
-        'form-noGps': getNoGpsLocDetailsHtml,
+        'form-loc': getGeocodedLocHtml,  //core location of the form
+        'form': getLocDetailsHtml,  //general location displayed in form map results
+        'form-c': getCountryDetailsHtml,  //general location for Country
+        'form-noGps': getNoGpsLocDetailsHtml,  //general locations without GPS data
     };
     const editing = type ? ifEditingReturnTrueAndUpdateType() : false;
     return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc);
@@ -709,13 +708,13 @@ function getGeocodedLocHtml(loc) {                                              
 }
 function getLocDataHtml(loc) {
     const name = getNameHtml(loc);
-    const latLng = !loc ? null : `<b>${loc.lat}, ${loc.lng}</b>`;
+    const latLng = !loc ? null : `Near: ${loc.lat}, ${loc.lng}`;
     const unique = '<i>Please ensure that this location is unique.</i>';
-    return [name, latLng, unique].filter(e=>e);
+    return [latLng, name, unique].filter(e=>e);
 }
 function getNameHtml(loc) {
     const name = !loc ? 'No geo-data found. Please double-check coordinates.' :
-        'Near: <b>'+ loc.name;
+        '<b>'+ loc.name;
     return `<div style="font-size:1.1em;">${name}</b></div>`;
 }
 /** Click event added in location-form. */

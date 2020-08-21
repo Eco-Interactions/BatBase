@@ -153,6 +153,7 @@ function fillSrcData(entity, id, src, dEntity) {
     const fields = getSourceFields(dEntity);
     setSrcData();
     setDetailData();
+    setAdditionalFields(dEntity, src, detail);
 
     function setSrcData() {
         fillFields(src, fields.core);
@@ -160,7 +161,6 @@ function fillSrcData(entity, id, src, dEntity) {
     }
     function setDetailData() {
         fillFields(detail, fields.detail);
-        setAdditionalFields(dEntity, src, detail);
         updateEditDetailMemory(detail.id);
     }
 }
@@ -172,10 +172,10 @@ function getSourceFields(entity) {
 }
 
 function setAdditionalFields(entity, srcRcrd, detail) {
+    setWebsiteField(srcRcrd);
     if (["publication", "citation"].indexOf(entity) === -1) { return; }
     setTitleField(entity, srcRcrd);
     setPublisherField(entity, srcRcrd);
-    setDoiField(srcRcrd);
     setCitationEdgeCaseFields(entity, detail);
 }
 function setTitleField(entity, srcRcrd) {                                       //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
@@ -191,15 +191,15 @@ function setPublisherField(entity, srcRcrd) {
     if (!_elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }
     _cmbx('setSelVal', ['#Publisher-sel', srcRcrd.parent]);
 }
-function setDoiField (srcRcrd) {
-    $('#Doi_row input[type="text"]').val(srcRcrd.doi);
+function setWebsiteField (srcRcrd) {
+    $('#Website_row input').val(srcRcrd.linkUrl);
 }
 function setCitationEdgeCaseFields(entity, citRcrd) {
     if (entity !== 'citation') { return; }
     $('#CitationText_row textarea').val(citRcrd.fullText);
-    $('#Issue_row input[type="number"]').val(parseInt(citRcrd.publicationIssue));
-    $('#Pages_row input[type="number"]').val(citRcrd.publicationPages);
-    $('#Volume_row input[type="number"]').val(parseInt(citRcrd.publicationVolume));
+    $('#Issue_row input').val(parseInt(citRcrd.publicationIssue));
+    $('#Pages_row input').val(citRcrd.publicationPages);
+    $('#Volume_row input').val(parseInt(citRcrd.publicationVolume));
 }
 /* ------------- TAXON ----------------- */
 function fillTaxonData(entity, id, rcrd, dEntity) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
@@ -211,10 +211,19 @@ function checkFieldsAndToggleSubmit() {
 }
 function fillFields(rcrd, fields) {                                             console.log('           --fillEditFields. rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
-        'text': setText, 'textArea': setTextArea, 'select': setSelect,
-        'fullTextArea': setTextArea, 'multiSelect': setMultiSelect,
-        'tags': setTagField, 'cntry': setCntry, 'source': addSource,
-        'taxon': addTaxon
+        'doi': setInput,
+        'fullTextArea': setTextArea,
+        'multiSelect': setMultiSelect,
+        'num': setInput,
+        'page': setInput,
+        'select': setSelect,
+        'source': addSource,
+        'tags': setTagField,
+        'text': setInput,
+        'taxon': addTaxon,
+        'textArea': setTextArea,
+        'url': setInput,
+        'year': setInput,
     };
     for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
@@ -236,7 +245,7 @@ function setMultiSelect(fieldId, prop, rcrd) {                                  
     if (!$('#'+ucProp+'-sel-cntnr').length) { return; } //can this be the first line here?
     _form('selectExistingAuthors', [ucProp, rcrd[prop], 'top']);
 }
-function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+function setInput(fieldId, prop, rcrd) {                                        //console.log("setInputField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);
     $('#'+fieldId+'_row input').val(val).change();
 }
@@ -250,7 +259,4 @@ function setSelect(fieldId, prop, rcrd) {                                       
 function setTagField(fieldId, prop, rcrd) {                                     //console.log("setTagField. rcrd = %O", rcrd)
     const tags = rcrd[prop] || rcrd.tags;
     tags.forEach(tag => _cmbx('setSelVal', ['#'+fieldId+'-sel', tag.id]));
-}
-function setCntry(fieldId, prop, rcrd) {
-    _cmbx('setSelVal', ['#Country-sel', rcrd.country.id]);
 }
