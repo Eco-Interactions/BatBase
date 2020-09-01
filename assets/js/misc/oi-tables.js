@@ -54,23 +54,35 @@ function getTblCfg(dataLngth, xportCols) {
     };
 }
 function relocCtrls(tableName) {
-    const $filterDiv = $('#' + tableName + '_filter');
-    const $pgLngthDiv = $('#' + tableName + '_length');
-    const $btnDiv = $('#tbl-ctrl-div .dt-buttons');
-    $btnDiv.attr({'id': 'btn-div', 'class': 'flex-row'});
-    $filterDiv.detach();
-    $pgLngthDiv.detach();
-    $btnDiv.append($filterDiv).detach();
-    addPgLengthIf(tableName, $btnDiv, $pgLngthDiv);
-    if ($('#online_users_tbl_wrapper').length) { return; }
-    if (window.outerWidth < 750) {
-        $('#content-detail').prepend($btnDiv);
-    } else {
-        $('#hdr-right').append($btnDiv);
+    if (tableName === 'online_users_tbl') { return; }
+    const $cntnr = getCntrlContainer();
+    $cntnr.append(getDetachedCntrl('_filter'));
+    responsivelyMovePageLengthCntrl();
+    responsivelyReattachCntrls();
+
+    function getDetachedCntrl(cntrlType) {
+        return $('#' + tableName + cntrlType).detach();
     }
-};
-/* If not viewing the bibliography table on a screen smaller than 1220 pixels wide. */
-function addPgLengthIf(tableName, $btnDiv, $pgLngthDiv) {
-    if (tableName == 'biblio_tbl' && window.outerWidth < 1220) { return; }
-    $btnDiv.prepend($pgLngthDiv);
+    function responsivelyMovePageLengthCntrl() {
+        if (tableName == 'biblio_tbl' && window.outerWidth < 1220) { return; }
+        $cntnr.prepend(getDetachedCntrl('_length'));
+    }
+    function responsivelyReattachCntrls() {
+        if (window.outerWidth < 555) {
+            $('#content-detail').prepend($cntnr);
+        } else {
+            $('#hdr-right').append($cntnr);
+            ifBiblioPageMoveTableInfoAndPageSelect();
+        }
+    }
+    function ifBiblioPageMoveTableInfoAndPageSelect() {
+        if (tableName !== 'biblio_tbl') { return; }
+        $('#'+tableName).before(getDetachedCntrl('_info'));
+        $('#'+tableName).before(getDetachedCntrl('_paginate'));
+    }
+}
+function getCntrlContainer() {
+    const $cntnr = $('#tbl-ctrl-div .dt-buttons').detach();
+    $cntnr.attr({'id': 'btn-div', 'class': 'flex-row'});
+    return $cntnr;
 }
