@@ -21,14 +21,12 @@ function addEditContentButton(userRole) {
         class: 'adminbttn',
         title: 'Edit Content',
         click: toggleContentBlockEditing.bind(null, userRole)
-    });  //console.log("button = %O", button)
-    button.css({
-        position: "absolute",
-        top: "4px",         // We were using px for the 'batbase.org' just above this button...
-        right: "10px"       // in the interest of visual consistency, I am using px to style this as well.
     });
-    $('#pg-hdr').append(button);
+    responsivelyAttachEditButton(button, userRole, window.outerWidth);
     $('#editContentBttn').data('editing', false);  // tracks which content block contains the active editor, if any.
+}
+function responsivelyAttachEditButton(button, userRole, pgWidth) {
+    $('#headln-txt').append(button);
 }
 /**
  * Manages init and exit 'edit states' and related ui on the page.

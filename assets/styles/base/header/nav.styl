@@ -16,8 +16,7 @@
 #hdrmenu
     display: flex
     justify-content: space-between
-    height: 43px
-    line-height: 43px
+    height: 2.5em
     background: White
     border-bottom: 1px solid Gray
     z-index 1001
@@ -29,11 +28,11 @@ $menu-font
     color: Black
     text-decoration: none
     font-weight: 700
-    font-size: 21px
-    line-height: 32px
+    font-size: 1.3em
+    line-height: 1.6em
     padding: .2em 1em .2em .5em
     @media screen and (max-width: 600px)
-        font-size: 19px
+        font-size: 1.1em
 
 .content-overlay
     background: rgba(0,0,0,.7)
@@ -112,15 +111,16 @@ nav
     z-index: 1000
     position: absolute
     top: 100%
-    left: 9px
-    bottom: 9px
+    left: .5em
+    bottom: .5em
     background: WhiteSmoke
     padding: 0
-    box-shadow: 10px 10px 23px #888888
+    box-shadow: .9em .9em 2em #888888
 
 #oimenu ul li
     position: relative;
-    width: 250px
+    width: 14em
+    min-width: max-content
     z-index: 1001
     margin:0;
     padding: 0;
@@ -147,33 +147,36 @@ nav
 
 #site-name, .site-name
     text-align: center
-    font-size: 23px
+    font-size: 1.5em
     color: DimGray
-    height: 43px
-    line-height: 43px
-    margin-right 1em
+    line-height: 1.5em
+    margin-right .5em
     @media screen and (max-width: 600px)
-        font-size: 19px
+        font-size: 1.1em
+        line-height: 2em
 /* -- PAGE HEADER BAR -- */
 #pg-hdr
     display: flex
     position: relative
     justify-content: space-between
-    // text-align: right
-    min-height: 43px
+    flex-wrap: wrap
+    min-height: 1.7em
     max-height fit-content
     padding: 9px 8px 3px 12px
     background: white
-    font-size: 21px
+    font-size: 1.5em
     z-index -1 //Otherwise, shows through img-slider on page load
     border-bottom: 1px solid Gray
     @media screen and (max-width: 600px)
-        font-size: 19px
+        font-size: 1.4em
 
 #hdr-right
     display: flex
-    justify-content: flex-start
     background: White
+    color: grey
+    font-size: .7em
+    margin-right: .5em
+    line-height: 1.7em
 
 #hdricopen { //Edit pencil on content block show page
     width: 1em;
