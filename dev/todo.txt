@@ -11,7 +11,9 @@ SINCE LAST TEAM UPDATE:
             - Bibliography improved control responsiveness
             - Menu and Header styles.
         - Header counts added to
-            - Home, About (project, database)
+            - Home (interactions, bat species, citations, locations)
+            - About project (users, editors, project start date)
+            - About database (same as home page, plus total of 'other species')
         - Moved the 'edit content' button to the right of the page header
 
     - Forms

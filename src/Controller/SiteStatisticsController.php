@@ -44,24 +44,36 @@ class SiteStatisticsController extends AbstractController
     private function getPageStats($page)
     {
         $map = [
-            "about" => function() { return $this->buildProjectStatData(); },
-            "db" => function() { return $this->buildDatabaseStatData(); },
-            "home" => function() { return $this->buildHomeStatData(); },
+            "about" => function() { return $this->buildAboutProjectStatData(); },
+            "db" => function() { return $this->buildAboutDatabaseStatData(); },
+            "home" => function() { return $this->buildCoreStatData(); },
         ];
         return call_user_func($map[$page]);
     }
 
-    private function buildProjectStatData()
+    private function buildAboutProjectStatData()
     {
-        # code...
+        $users = $this->em->getRepository('App:User')->findAll();
+        $editors = 0;
+
+        foreach ($users as $user) {
+            if (!$user->hasRole('ROLE_EDITOR')) { continue; }
+            $editors++;
+        }
+        return [
+            'usr' => count($users),
+            'editor' => $editors
+        ];
     }
 
-    private function buildDatabaseStatData()
+    private function buildAboutDatabaseStatData()
     {
-        # code...
+        $data = $this->buildCoreStatData();
+        $data['nonBats'] = $this->getAllNonBatSpeciesCount($data['bats']);
+        return $data;
     }
 
-    private function buildHomeStatData()
+    private function buildCoreStatData()
     {
         $locs = $this->getLocationsWithInteractions();
         $cntries = $this->getCountryCount($locs);
@@ -76,6 +88,7 @@ class SiteStatisticsController extends AbstractController
     }
 
 /* =========================== GET COUNTS =================================== */
+/* ---------------------------- LOCATIONS =---------------------------------- */
     private function getLocationsWithInteractions()
     {
         $data = [ 'count' => [/*names*/], 'cntries' => [/*names*/] ];
@@ -98,7 +111,7 @@ class SiteStatisticsController extends AbstractController
         $locs = $locs['count'];
         return $cntries;
     }
-
+/* --------------------------- BAT SPECIES ---------------------------------- */
     private function getBatSpeciesCount()
     {
         $speciesCount = 0;
@@ -118,6 +131,14 @@ class SiteStatisticsController extends AbstractController
         }
 
         return $subCount;
+    }
+/* ------------------------- OTHER SPECIES ---------------------------------- */
+    private function getAllNonBatSpeciesCount($batSpeciesCount)
+    {
+        $species = $this->em->getRepository('App:Level')
+            ->findOneBy(['displayName' => 'Species']);
+
+        return count($species->getTaxa()) - $batSpeciesCount;
     }
 
 }
