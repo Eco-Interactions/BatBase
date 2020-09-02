@@ -340,7 +340,7 @@ class ContentBlockController extends AbstractController
 
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);
-        $content = $pushedData->content;  print($content);
+        $content = $pushedData->content;
 
         $entity->setContent($content);
         $em->flush();
