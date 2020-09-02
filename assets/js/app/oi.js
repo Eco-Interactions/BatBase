@@ -19,10 +19,14 @@ import initSiteNav from './header/nav.js';
 import initSlider from './header/img-slider.js';
 import { initSentry } from './misc/alert-issue.js';
 
-initSentryIssueTracking();
-requireStyles();
-setGlobalJquery();
-initUi();
+initPage();
+
+function initPage() {
+    initSentryIssueTracking();
+    requireStyles();
+    setGlobalJquery();                                                          //console.log('window width [%s]', window.outerWidth);
+    initUi();
+}
 /* ================= SENTRY ERROR TRACKING ================================== */
 function initSentryIssueTracking() {
     if ($('body').data('env') !== 'prod') { return; }

@@ -1,5 +1,5 @@
 <?php
-namespace App\EventListener;
+namespace App\EventSubscriber;
 
 use Symfony\Component\Security\Core\SecurityContext;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;

@@ -38,14 +38,21 @@
  *         STRING HELPERS
  *         OBJECT HELPERS
  */
+import * as coreUtil from '../../app/util/util-main.js';
 import * as _pg from '../db-main.js';
-import * as _get from './ajax-util.js';
 import * as _cmbx from './combos.js';
 import * as _db from '../local-data/local-data-main.js';
 import * as _elems from './elems-util.js';
 import extendPrototypes from './extend.js';
 
 extendPrototypes();
+/** ==================== CORE APP FACADE ==================================== */
+export function sendAjaxQuery() {
+    return coreUtil.sendAjaxQuery(...arguments);
+}
+export function logAjaxData() {
+    return coreUtil.logAjaxData(...arguments);
+}
 /** ==================== UTIL FACADE ======================================== */
 /* ---------------------- SELECTIZE COMBOBOXES ------------------------------ */
 export function initCombobox() {
@@ -103,13 +110,6 @@ export function buildOptsObj() {
 }
 export function addEnterKeypressClick() {
     return _elems.addEnterKeypressClick(...arguments);
-}
-/* --------------- AJAX ----------------------------------------------------- */
-export function sendAjaxQuery() {
-    return _get.sendAjaxQuery(...arguments);
-}
-export function logAjaxData() {
-    return _get.logAjaxData(...arguments);
 }
 /* -------------------- LOGS ------------------------------------------------ */
 export function logInDevEnv() {

@@ -6,6 +6,14 @@
 ### __________________________ CURRENT _____________________________________ ###
 > ____ LOGS ____
 SINCE LAST TEAM UPDATE:
+    - Pages
+        - Responsiveness
+            - Bibliography improved control responsiveness
+            - Menu and Header styles.
+        - Header counts added to
+            - Home, About (project, database)
+        - Moved the 'edit content' button to the right of the page header
+
     - Forms
         - Not able to validate URL loads without error due to it being far too complicated with current web standards.
         - Changed 'entity form tutorial' button text to walkthrough
@@ -61,10 +69,12 @@ TAYLOR:
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
     - Bugs
-
-
-
     - fix edit form fill with new input types
+
+    - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
+        - [#] citations, Subj & Obj species, [#] unique locations in [#] countries,
+
+
     - Adding form hints
         - addFinalInfoStep about info in tooltips on fields
 
@@ -77,7 +87,6 @@ CURRENT:
 
 
     - Add globi to 'partners' section on about page
-    - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
 
     - fix cronjob to clean up hourly backups
     - testing

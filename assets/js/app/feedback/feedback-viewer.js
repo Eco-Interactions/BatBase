@@ -1,9 +1,16 @@
-var updateUrl, $asgnUsrElem, $statusElem, $adminNotesElem, $viewerPopup;
+/**
+ * Handles loading and managind user-submitted feedback for the admin-view page.
+ */
+import { sendAjaxQuery } from '../util/util-main.js';
+
+var $asgnUsrElem, $statusElem, $adminNotesElem, $viewerPopup;
 var minNotesChars = 1;
 var maxNotesChars = 500;
 var orgnlFeedback = {};
 var submitDisabled = true;
-var noteHasChanges = statusHasChanges = asgnUserHasChanges = false;
+var noteHasChanges = false;
+var statusHasChanges = false;
+var asgnUserHasChanges = false;
 
 requireCss();
 
@@ -13,13 +20,12 @@ function requireCss() {
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
 
-function showContextPage() {
+function showContextPage(e) {
+	e.preventDefault()
 	var $iframe = $('<iframe id="feedback-context-frame"></iframe>');
 	var contextUrl =  $(this).attr('href');
-	var loadUrl = $(this).data('ajaxload');
-	updateUrl = $(this).data('ajaxupdate');
 
-	sendAjaxRequest(loadFeedbackAjaxData(loadUrl));
+	sendAjaxQuery(null, $(this).data('ajaxload'), feedbackEntryRecieved);
 	$( 'body' ).empty();
 	$('html').css({ 'overflow-y': 'hidden' });
 	$( 'body' ).append($iframe);
@@ -109,41 +115,16 @@ function disableSubmit() {
 }
 
 function updateFeedback() {
+	const url = $(this).data('ajaxupdate');
 	var userId = $('select[name=asgnuser] option:selected').val();
 	var data = {
 			asgnUserId: userId === 0 ? null : userId,
     		adminNotes: $adminNotesElem.val(),
     		status: $('select[name=status] option:selected').val()
     	};																		console.log('$adminNotesElem = ', $adminNotesElem);
-    sendAjaxRequest(updateFeedbackAjaxData(data));
-    // closePopup() && sendAjaxRequest(data);
+    sendAjaxQuery(data, url, feedbackUpdateSucess);
 }
-
-function sendAjaxRequest(ajaxData) {
-    $.ajax(ajaxData);
-}
-
-function loadFeedbackAjaxData(loadUrl) {
-	return {
-		  method: "POST",
-		  url: loadUrl,
-		  success: feedbackEntryRecieved,
-		  error: ajaxError
-		};
-}
-
-function updateFeedbackAjaxData(feedbackData) {
-	return {
-		  method: "POST",
-		  url: updateUrl,
-		  success: feedbackUpdateSucess,
-		  error: ajaxError,
-		  data: JSON.stringify(feedbackData)
-		};
-}
-
-function feedbackUpdateSucess(data, textStatus, jqXHR) {
-	console.log('feedbackUpdateSucess data = ', data);
+function feedbackUpdateSucess(data, textStatus, jqXHR) {						console.log('feedbackUpdateSucess data = ', data);
 	closePopup();
 }
 
@@ -196,10 +177,6 @@ function createStatusSelect(curStatus) {
 
 function feedbackEntryRecieved(data, textStatus, jqXHR) {
 	createPopUp(data.feedbackObj);
-}
-
-function ajaxError(jqXHR, textStatus, errorThrown) {
-	console.log("ajaxError - status = %s - error = %s - jqXHR:%O", textStatus, errorThrown, jqXHR);
 }
 
 function formatDate(dateStr) {

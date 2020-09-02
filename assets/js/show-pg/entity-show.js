@@ -6,7 +6,7 @@
  *         HTML BUILDERS
  *     CSV DOWNLOAD
  */
-import * as util from '../util/util-main.js';
+import * as util from '../app/util/util-main.js';
 import getEntityDisplayConfg from './entity-show-data.js';
 
 initShowPage();

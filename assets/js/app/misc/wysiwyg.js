@@ -5,6 +5,7 @@
  * Exports:
  *     initWysiwyg
  */
+import { sendAjaxQuery } from '../util/util-main.js';
 
 export default function initWysiwyg(role) {
     requireStyles();
@@ -38,6 +39,7 @@ function toggleContentBlockEditing(userRole) {
         location.reload(true);
     } else {
         addEditPencils(userRole);
+        $('#editContentBttn').css({'opacity': 1});
         $('#editContentBttn').data('editing', true)
         $('#editContentBttn').text("Cancel Edit");
     }
@@ -61,17 +63,11 @@ function addButtons() {
                     init: function(trumbowyg) {
                         const btnDef = {
                             hasIcon: false,
-                            fn: function() {                                    console.log("saving. trumbowyg = %O", trumbowyg);
+                            fn: function() {                                    console.log("Saving WYSIWYG. trumbowyg = %O", trumbowyg);
                                 var blkId = trumbowyg.o.plugins.save.id;
-                                var data = { content: $('#' + blkId ).trumbowyg('html')};            //console.log("blkId = ", blkId)
+                                var data = { content: $('#' + blkId ).trumbowyg('html')};    //console.log("blkId = ", blkId)
                                 var url = "admin/contentblock/" + blkId + "/update";
-                                $.ajax({
-                                    method: "POST",
-                                    url: url,
-                                    success: wysiwygSubmitSuccess,
-                                    error: ajaxError,
-                                    data: JSON.stringify(data)
-                                });
+                                sendAjaxQuery(data, url, wysiwygSubmitSuccess);
                             }
                         };
                         trumbowyg.addBtnDef('save', btnDef);
@@ -82,11 +78,8 @@ function addButtons() {
     })(jQuery);
 } /* End addButtons */
 /** Reloads the page on content block update success */
-function wysiwygSubmitSuccess(data, textStatus, jqXHR) {                        console.log("Success is yours!! = %O", data);
+function wysiwygSubmitSuccess(data, textStatus, jqXHR) {                        //console.log("Success is yours!! = %O", data);
     location.reload(true);
-}
-function ajaxError(jqXHR, textStatus, errorThrown) {
-    console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
 }
 /** Returns the block container id by removing '-edit' from the passed editId */
 function getBlockContainerId(editId) {
