@@ -39,10 +39,9 @@
  *         OBJECT HELPERS
  */
 import * as coreUtil from '../../app/util/util-main.js';
-import * as _pg from '../db-main.js';
-import * as _cmbx from './combos.js';
-import * as _db from '../local-data/local-data-main.js';
-import * as _elems from './elems-util.js';
+import { alertIssue as _alertIssue, _db } from '../db-main.js';
+import * as cmbx from './combos.js';
+import * as elems from './elems-util.js';
 import extendPrototypes from './extend.js';
 
 extendPrototypes();
@@ -56,60 +55,59 @@ export function logAjaxData() {
 /** ==================== UTIL FACADE ======================================== */
 /* ---------------------- SELECTIZE COMBOBOXES ------------------------------ */
 export function initCombobox() {
-    return _cmbx.initCombobox(...arguments);
+    return cmbx.initCombobox(...arguments);
 }
 export function initComboboxes(fields) {
-    return _cmbx.initComboboxes(fields);
+    return cmbx.initComboboxes(fields);
 }
 export function getSelVal(field) {
-    return _cmbx.getSelVal(field);
+    return cmbx.getSelVal(field);
 }
 export function setSelVal() {
-    return _cmbx.setSelVal(...arguments);
+    return cmbx.setSelVal(...arguments);
 }
 export function updatePlaceholderText() {
-    return _cmbx.updatePlaceholderText(...arguments);
+    return cmbx.updatePlaceholderText(...arguments);
 }
 export function replaceSelOpts() {
-    return _cmbx.replaceSelOpts(...arguments);
+    return cmbx.replaceSelOpts(...arguments);
 }
 export function triggerComboChangeReturnPromise() {
-    return _cmbx.triggerComboChangeReturnPromise(...arguments);
+    return cmbx.triggerComboChangeReturnPromise(...arguments);
 }
 /* ----------------------- IDB STORAGE METHODS -----------------------------------------------------------------------*/
-
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned.
  * If a property is not found, false is returned.
  */
 export function getData(props, returnUndefined) {  //breakpoint  //bp
-    return _db.getData(props, returnUndefined);
+    return _db('getData', [props, returnUndefined]);
 }
 export function setData(k, v) {
-    return _db.setData(k, v);
+    return _db('setData', [k, v]);
 }
 /* -------------- HTML ELEMENT HELPERS  ------------------------------------- */
 export function buildElem() {
-    return _elems.buildElem(...arguments);
+    return elems.buildElem(...arguments);
 }
 export function buildSelectElem() {
-    return _elems.buildSelectElem(...arguments);
+    return elems.buildSelectElem(...arguments);
 }
 export function buildSimpleOpts() {
-    return _elems.buildSimpleOpts(...arguments);
+    return elems.buildSimpleOpts(...arguments);
 }
 export function alphaOptionObjs() {
-    return _elems.alphaOptionObjs(...arguments);
+    return elems.alphaOptionObjs(...arguments);
 }
 export function getOptsFromStoredData(prop) {
-    return _elems.getOptsFromStoredData(prop);
+    return elems.getOptsFromStoredData(prop);
 }
 export function buildOptsObj() {
-    return _elems.buildOptsObj(...arguments);
+    return elems.buildOptsObj(...arguments);
 }
 export function addEnterKeypressClick() {
-    return _elems.addEnterKeypressClick(...arguments);
+    return elems.addEnterKeypressClick(...arguments);
 }
 /* -------------------- LOGS ------------------------------------------------ */
 export function logInDevEnv() {
