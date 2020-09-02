@@ -49,11 +49,19 @@
     padding-top 0
 
 .db-about-imgs
-    @extends .flex-col
+    @extends .flex-row
     align-items center
 
-.db-about-imgs>img
+    @media $mqTablet
+        flex-wrap: wrap
+
+.db-about-imgs > img
     padding .25em 0 3em 0
+    max-width: 50%
+
+    @media $mqTablet
+        max-width: 90vw
+        margin: auto
 /*-------------- DEFINITIONS ----------------*/
 #def-pg .first-col
     flex: 1 0 290px
