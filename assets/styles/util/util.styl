@@ -2,12 +2,27 @@
    Contains all the functions, mixins, variables, etc.
 
    TOC:
+      VARIABLES
       ROOT ELEMS
       STYLE CLASSES
         FLEX
         LISTS
-      VARIABLES
     ========================================================================= */
+/* ==========================================================================
+   ----------------------------- VARIABLES ---------------------------------- */
+/* greens-pallete */
+$darkest-green = #1b3b1b
+// --darker-g = #245A37
+$dark-green = #2D7853
+$med-green = #36976F
+// --light-g = #3fb58b
+// --lighter-g = #77cab8
+// --lightest-g = #a2dadd
+
+$phoneWidth = 748px
+$tabletWidth = 1012px
+$mqPhone = "only screen and (max-width: " + $phoneWidth + ")"
+$mqTablet = "only screen and (max-width: " + $tabletWidth + ")"
 /* ==========================================================================
    ------------------------- ROOT ELEMS ------------------------------------ */
 *
@@ -40,6 +55,8 @@ input[type='button']
     @extend button
 input[type='submit']
     @extend button
+a
+    color: $dark-green
 /* ==========================================================================
    ------------------------- STYLE CLASSES ---------------------------------- */
 label.required:before
@@ -86,17 +103,3 @@ ol>li
     padding-top .5em
 /* ==========================================================================
    ----------------------------- FUNCTIONS ---------------------------------- */
-/* ==========================================================================
-   ----------------------------- VARIABLES ---------------------------------- */
-/* greens-pallete */
-// --darkest-g = #1b3b1b
-// --darker-g = #245A37
-// --dark-g = #2D7853
-// --med-g = #36976F
-// --light-g = #3fb58b
-// --lighter-g = #77cab8
-// --lightest-g = #a2dadd
-$phoneWidth = 748px
-$tabletWidth = 1012px
-$mqPhone = "only screen and (max-width: " + $phoneWidth + ")"
-$mqTablet = "only screen and (max-width: " + $tabletWidth + ")"

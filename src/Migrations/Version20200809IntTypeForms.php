@@ -83,8 +83,8 @@ private function getInteractionTypeNameForms()
 {
     return [
         'Visitation' => [
-            'active' => 'visited flowers of',
-            'passive' => 'flowers visited by'
+            'active' => 'visited',
+            'passive' => 'visited by'
         ],
         'Pollination' => [
             'active' => 'pollinated flowers of',
