@@ -475,9 +475,9 @@ class Taxon
     }
 
     /**
-     * Get id.
+     * Get Taxon Realm.
      *
-     * @return int
+     * @return Realm
      */
     public function getTaxonRealm()
     {
@@ -486,9 +486,8 @@ class Taxon
 
     private function findRealmAndReturnObj($taxon)
     {
-        if ($taxon->getSlug() === 'animalia') { return false; }
-        $realm = $taxon->getRealm();
-        if ($realm) { return $realm; }
+        if ($taxon->getSlug() === 'kingdom-animalia') { return false; }
+        if ($taxon->getIsRoot()) { return $taxon->getRealm(); }
         $parent = $taxon->getParentTaxon();
         if (!$parent) { return false; }
         return $this->findRealmAndReturnObj($parent);
