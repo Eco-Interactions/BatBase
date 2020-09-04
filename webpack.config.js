@@ -30,7 +30,7 @@ Encore
     .enableSourceMaps(true)
     // empty the outputPath dir before each build
     .cleanupOutputBeforeBuild()
-    // show OS notifications when builds finish/fail /** Stopped working and I don't know why. */
+    // show OS notifications when builds finish/fail
     .enableBuildNotifications(true, (options) => {
         options.alwaysNotify = true;
     })
