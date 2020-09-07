@@ -273,7 +273,7 @@ function showSubmitModal() {
         selector: '#top-submit',
         dir: 'left',
         submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
-        bttn: 'Confirm'
+        bttn: 'Submit'
     };
     _modal('showSaveModal', [ modalConfg ]);
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);

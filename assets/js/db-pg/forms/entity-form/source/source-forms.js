@@ -24,14 +24,15 @@
  *              GET SOURCE-TYPE ROWS
  *              UPDATE FIELD LABELS
  *              UPDATE NUMBER INPUTS
+ *              SUBMIT CONFIRMATION MODAL
  *          AUTHOR
  *              AUTHOR SELECTION
  *              AUTHOR CREATE
  *     EDIT FORMS
  *     HELPERS
  */
-import { _u } from '../../../db-main.js';
-import { _state, _elems, _cmbx, _form, _panel, _val, getSubFormLvl, getNextFormLevel } from '../../forms-main.js';
+import { _modal, _u } from '../../../db-main.js';
+import { _state, _elems, _cmbx, _form, _panel, _val, getSubFormLvl, getNextFormLevel, submitForm } from '../../forms-main.js';
 
 let timeout = null; //Prevents citation text being generated multiple times.
 let rmvdAuthField = {};
@@ -104,6 +105,7 @@ function appendPubFormAndFinishBuild(form) {
     $('#Title_row input').focus();
     _elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
     $('#PublicationType-lbl').css('min-width', '125px');
+    addConfirmationBeforeSubmit('sub', 'publication');
 }
 /**
  * Loads the deafult fields for the selected Publication Type. Clears any
@@ -175,6 +177,7 @@ function finishCitFormUiLoad() {
     _cmbx('enableCombobox', ['#Publication-sel', false]);
     $('#Abstract_row textarea').focus();
     _elems('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
+    addConfirmationBeforeSubmit('sub', 'citation');
 }
 function selectDefaultCitType() {
     return _u('getData', ['citTypeNames'])
@@ -523,6 +526,38 @@ function setInputType (fieldName, type) {
     if (!$('#'+fieldName+'-lbl + input').length) { return; }
     $('#'+fieldName+'-lbl + input').attr('type', type);
 }
+/* -------------------- SUBMIT CONFIRMATION MODAL --------------------------- */
+function addConfirmationBeforeSubmit(fLvl, entity) {
+    $(`#${fLvl}-submit`).off('click').click(showSubmitModal.bind(null, fLvl, entity));
+}
+function showSubmitModal(fLvl, entity) {
+    const linkHtml = buildConfirmationModalHtml();
+    const submit = submitForm.bind(null, `#${fLvl}-form`, fLvl, entity);
+    if (!linkHtml) { return submit(); }
+    _modal('showSaveModal', [ buildModalConfg(fLvl, submit) ]);
+    window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
+}
+function buildConfirmationModalHtml() {
+    const hdr = '<b>Please double-check URLs before submitting.</b><br><br>';
+    const links = ['Doi', 'Website'].map(buildLinkHtmlForValues).filter(l=>l);
+    return links.length ? hdr + links.join('<br><br>') : false;
+}
+function buildLinkHtmlForValues(field) {
+    const url = $(`#${field}_row input`).val();
+    return url ? buildUrlLink(field, url) : null;
+}
+function buildUrlLink(field, url) {
+    return `<b>${field}:</b> <a href="${url}"" target="_blank">${url}</a>`;
+}
+function buildModalConfg(fLvl, submit) {
+    return {
+        html: buildConfirmationModalHtml(),
+        selector: `#${fLvl}-submit`,
+        dir: 'left',
+        submit: submit,
+        bttn: 'Submit'
+    };
+}
 /* ========================== PUBLISHER ===================================== */
 function onPublSelection(val) {
     if (val === 'create') { return initPublisherForm(val); }
@@ -715,6 +750,7 @@ export function finishEditFormBuild(entity) {                                   
         $('#PublicationType-lbl').css('min-width', '125px');
     }
     finishSourceToggleAllFields(entity, {}, 'top');
+    addConfirmationBeforeSubmit('top', entity);
 }
 export function setSrcEditRowStyle() {
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
