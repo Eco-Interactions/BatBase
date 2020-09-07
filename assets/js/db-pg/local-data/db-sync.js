@@ -276,6 +276,13 @@ function getTaxonRealm(taxon, taxa) {
     if (parent.realm) { return parent.realm; }
     return getTaxonRealm(parent, taxa);
 }
+function addObjRealmIdToRcrd(prop, rcrd, entity) {
+    const ints = db.getMmryData('interaction');
+    const taxa = db.getMmryData('taxon');
+    const taxon = taxa[rcrd.object];  
+    rcrd.objRealm = taxon.realm.id;
+    db.setDataInMemory('interaction', ints);
+}
 /* ------------ CORE DATA HANDLERS ------------------ */
 function updateCoreDataProps(entity, rcrd) {
     const updateFuncs = getRelDataHndlrs(entity, rcrd);                         //console.log('updatedatahandlers = %O', updateFuncs);
