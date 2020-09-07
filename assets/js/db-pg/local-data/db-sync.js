@@ -8,12 +8,22 @@
  *     updateUserNamedList          save-ints
  *
  * Code Sections:
- *     DATABASE SYNC
+ *     DATABASE SYNC ON PAGE LOAD
+ *         ADD UPDATED SERVER DATA TO LOCAL DB
+ *         SYNC UPDATED DATA RECORDS
+ *         SYNC USER DATA
+ *         ON SYNC COMPLETE
  *     AFTER FORM SUBMIT
+ *     UPDATE LOCAL DATA
  *         ADD DATA
+ *             CORE ENTITY DATA
+ *                 MODIFY FOR LOCAL DB
+ *             CORE DATA HANDLERS 
+ *             DETAIL ENTITY DATA HANDLERS
+ *             DATA SETTERS
  *         REMOVE DATA
- *         UPDATE RELATED DATA
- *     INIT DATABASE
+ *             REMOVE DATA HANDLERS
+ *     UPDATE USER-NAMED LISTS
  *     HELPERS
  *         ERRS
  *
@@ -23,7 +33,7 @@ import { _forms, _u, alertIssue, initSearchStateAndTable } from '../db-main.js';
 
 let failed = { data: [], retryQueue: {}};
 
-/* ========================= DATABASE SYNC ================================== */
+/* ==================== DATABASE SYNC ON PAGE LOAD ========================== */
 /**
  * On search page load, the system updatedAt flag is compared against the page's.
  * If there they system data has updates more recent than the last sync, the
@@ -209,6 +219,7 @@ function parseEntityData(data) {
         } catch (e) { /* Fails on string values */ }
     }
 }
+/* ======================== UPDATE LOCAL DATA =============================== */
 /** Stores both core and detail entity data, and updates data affected by edits. */
 function updateEntityData(data) {
     addCoreEntityData(data.core, data.coreEntity);
@@ -220,7 +231,8 @@ function updateDetailEntityData(data) {
     if (!data.detailEntity) { return Promise.resolve(); }
     return addDetailEntityData(data.detail, data.detailEntity);
 }
-/* ------------------------------ ADD DATA ---------------------------------- */
+/* ____________________________ ADD DATA ____________________________________ */
+/* ------------------------ CORE ENTITY DATA -------------------------------- */
 /** Updates stored-data props related to a core-entity record with new data. */
 function addCoreEntityData(entity, rcrd) {                                      //console.log("       --Updating Core entity. %s. %O", entity, rcrd);
     updateCoreData(entity, rcrd);
@@ -234,17 +246,37 @@ function updateCoreData(entity, rcrd) {                                         
     addToRcrdProp(entity, rcrd);
     handleEntityLocalDataUpdates(entity, rcrd);
 }
-function handleEntityLocalDataUpdates(entity, rcrd) {
-    const update = {
-        'taxon': { 'realm': addRealmDataToRcrd }
-    };
-    if (!update[entity]) { return; }
-    updateDataProps(entity, rcrd, update[entity]);
+/** Add the new record to the prop's stored records object.  */
+function addToRcrdProp(prop, rcrd, entity) {
+    const rcrds = db.getMmryData(prop);                                         //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, _u('snapshot', [rcrds]), _u('snapshot', [rcrd]));
+    rcrds[rcrd.id] = rcrd;
+    db.setDataInMemory(prop, rcrds);
 }
 // function addToCoreTypeProp(entity, rcrd) {
 //     if (entity === "taxon") { return Promise.resolve(); }
 //     return addToTypeProp(entity+"Type", rcrd, entity);
 // }
+/* ------------ MODIFY FOR LOCAL DB ------------------ */
+function handleEntityLocalDataUpdates(entity, rcrd) {
+    const update = {
+        'taxon': { 'realm': addRealmDataToRcrd },
+        'interaction': { 'objRealm': addObjRealmIdToRcrd }
+    };
+    if (!update[entity]) { return; }
+    updateDataProps(entity, rcrd, update[entity]);
+}
+function addRealmDataToRcrd(prop, rcrd, entity) {
+    const taxa = db.getMmryData('taxon');
+    const taxon = taxa[rcrd.id];
+    taxon.realm = getTaxonRealm(taxon, taxa);
+    db.setDataInMemory('taxon', taxa);
+}
+function getTaxonRealm(taxon, taxa) {
+    const parent = taxa[taxon.parent];
+    if (parent.realm) { return parent.realm; }
+    return getTaxonRealm(parent, taxa);
+}
+/* ------------ CORE DATA HANDLERS ------------------ */
 function updateCoreDataProps(entity, rcrd) {
     const updateFuncs = getRelDataHndlrs(entity, rcrd);                         //console.log('updatedatahandlers = %O', updateFuncs);
     updateDataProps(entity, rcrd, updateFuncs)
@@ -280,14 +312,7 @@ function getSourceType(entity, rcrd) {                                          
     var type = _u('lcfirst', [entity])+"Type";
     return _u('lcfirst', [rcrd[type].displayName]);
 }
-/** Sends entity-record data to each storage property-type handler. */
-function updateDataProps(entity, rcrd, updateFuncs) {                           //console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
-    const params = { entity: entity, rcrd: rcrd, stage: 'addData' };
-    if (!updateFuncs) { return; }
-    Object.keys(updateFuncs).forEach(prop => {
-        updateData(updateFuncs[prop], prop, params);
-    });
-}
+/* ---------------------- DETAIL ENTITY DATA HANDLERS ----------------------- */
 /** Updates stored-data props related to a detail-entity record with new data. */
 function addDetailEntityData(entity, rcrd) {                                    //console.log("       --Updating Detail: [%s] %O", entity, rcrd);
     return updateDetailData(entity, rcrd)
@@ -302,11 +327,14 @@ function updateDetailData(entity, rcrd) {
     };
     return updateDataProps(entity, rcrd, update[entity]);
 }
-/** Add the new record to the prop's stored records object.  */
-function addToRcrdProp(prop, rcrd, entity) {
-    const rcrds = db.getMmryData(prop);                                        //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, _u('snapshot', [rcrds]), _u('snapshot', [rcrd]));
-    rcrds[rcrd.id] = rcrd;
-    db.setDataInMemory(prop, rcrds);
+/* -------------------------- DATA SETTERS ---------------------------------- */
+/** Sends entity-record data to each storage property-type handler. */
+function updateDataProps(entity, rcrd, updateFuncs) {                           //console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
+    const params = { entity: entity, rcrd: rcrd, stage: 'addData' };
+    if (!updateFuncs) { return; }
+    Object.keys(updateFuncs).forEach(prop => {
+        updateData(updateFuncs[prop], prop, params);
+    });
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdAryProp(prop, rcrd, entity) {
@@ -353,17 +381,6 @@ function addToParentRcrd(prop, rcrd, entity) {
 //     toAdd.forEach(tag => tagObj[tag.id][entity+'s'].push(rcrd.id));
 //     db.setDataInMemory(prop, tagObj);
 // }
-function addRealmDataToRcrd(prop, rcrd, entity) {
-    const taxa = db.getMmryData('taxon');
-    const taxon = taxa[rcrd.id];
-    taxon.realm = getTaxonRealm(taxon, taxa);
-    db.setDataInMemory('taxon', taxa);
-}
-function getTaxonRealm(taxon, taxa) {
-    const parent = taxa[taxon.parent];
-    if (parent.realm) { return parent.realm; }
-    return getTaxonRealm(parent, taxa);
-}
 /**
  * Adds the Taxon's name to the stored names for it's realm and level.
  * Note: 'realm' is added above, so the taxon from storage is used rather than the rcrd.
@@ -412,7 +429,7 @@ function addContribData(prop, rcrd, entity) {                                   
         }
     }
 }
-/* ---------------------------- REMOVE DATA --------------------------------- */
+/* ____________________________ REMOVE DATA _________________________________ */
 /** Updates any stored data that was affected during editing. */
 function updateAffectedData(data) {                                             //console.log("           --updateAffectedData called. data = %O", data);
     updateRelatedCoreData(data, data.coreEdits);
@@ -438,6 +455,7 @@ function updateAffectedDataProps(entity, rcrd, edits) {                         
         updateData(hndlrs[prop], prop, params, edits);
     });
 }
+/* ------------------------ REMOVE DATA HANDLERS ---------------------------- */
 /** Returns an object with relational properties and their removal handlers. */
 function getRmvDataPropHndlrs(entity) {
     return {
@@ -543,69 +561,69 @@ function getLevel(lvlEdits, rcrd) {
         db.getMmryData('level')[lvlEdits.old].displayName;
 }
 /** ---------------------- UPDATE RELATED DATA ------------------------------ */
-function ifEditedSourceDataUpdatedCitations(data) {
-    if (!isSrcDataEdited(data)) { return Promise.resolve(); }
-    return updateRelatedCitations(data);
-}
-function isSrcDataEdited(data) {
-    return data.core == 'source' && (hasEdits(data.coreEdits) || hasEdits(data.detailEdits));
-}
-/** Updates the citations for edited Authors, Publications or Publishers. */
-function updateRelatedCitations(data) {                                         //console.log('updateRelatedCitations. data = %O', data);
-    const srcData = data.coreEntity;
-    const srcType = srcData.sourceType.displayName;
-    const cites = srcType == 'Author' ? getChildCites(srcData.contributions) :
-        srcType == 'Publication' ? srcData.children :
-        srcType == 'Publisher' ? getChildCites(srcData.children) : false;
-    if (!cites) { return; }
-    return Promise.all(['author', 'citation', 'publisher'].map(e => getStoredData(e)))
-        .then(rcrds => updateCitations(rcrds, cites));
+// function ifEditedSourceDataUpdatedCitations(data) {
+//     if (!isSrcDataEdited(data)) { return Promise.resolve(); }
+//     return updateRelatedCitations(data);
+// }
+// function isSrcDataEdited(data) {
+//     return data.core == 'source' && (hasEdits(data.coreEdits) || hasEdits(data.detailEdits));
+// }
+// /** Updates the citations for edited Authors, Publications or Publishers. */
+// function updateRelatedCitations(data) {                                         //console.log('updateRelatedCitations. data = %O', data);
+//     const srcData = data.coreEntity;
+//     const srcType = srcData.sourceType.displayName;
+//     const cites = srcType == 'Author' ? getChildCites(srcData.contributions) :
+//         srcType == 'Publication' ? srcData.children :
+//         srcType == 'Publisher' ? getChildCites(srcData.children) : false;
+//     if (!cites) { return; }
+//     return Promise.all(['author', 'citation', 'publisher'].map(e => getStoredData(e)))
+//         .then(rcrds => updateCitations(rcrds, cites));
 
-    function getChildCites(srcs) {
-        const cites = [];
-        srcs.forEach(id => {
-            const src = db.getMmryData('source')[id];
-            if (src.citation) { return cites.push(id); }
-            src.children.forEach(cId => cites.push(cId))
-        });
-        return cites;
-    }
-} /* End updateRelatedCitations */
-function updateCitations(rcrds, cites) {                                        //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
-    const srcRcrds = db.getMmryData('source');
-    const proms = [];
-    cites.forEach(id => proms.push(updateCitText(id)));
-    return Promise.all(proms).then(onUpdateSuccess)
+//     function getChildCites(srcs) {
+//         const cites = [];
+//         srcs.forEach(id => {
+//             const src = db.getMmryData('source')[id];
+//             if (src.citation) { return cites.push(id); }
+//             src.children.forEach(cId => cites.push(cId))
+//         });
+//         return cites;
+//     }
+// } /* End updateRelatedCitations */
+// function updateCitations(rcrds, cites) {                                        //console.log('updateCitations. rcrds = %O cites = %O', rcrds, cites);
+//     const srcRcrds = db.getMmryData('source');
+//     const proms = [];
+//     cites.forEach(id => proms.push(updateCitText(id)));
+//     return Promise.all(proms).then(onUpdateSuccess)
 
-    function updateCitText(id) {
-        const citSrc = srcRcrds[id];
-        const params = {
-            authRcrds: rcrds[0],
-            cit: rcrds[1][citSrc.citation],
-            citRcrds: rcrds[1],
-            citSrc: citSrc,
-            pub: srcRcrds[citSrc.parent],
-            publisherRcrds: rcrds[2],
-            srcRcrds: srcRcrds
-        };
-        const citText = _forms('rebuildCitationText', [params]);
-        return updateCitationData(citSrc, citText);
-    }
-}
-/** Sends ajax data to update citation and source entities. */
-function updateCitationData(citSrc, text) {
-    const data = { srcId: citSrc.id, text: text };
-    return _u('sendAjaxQuery', [
-        data, 'crud/citation/edit', Function.prototype, _forms.bind(null, '_val', ['formSubmitError'])]);
-}
-function onUpdateSuccess(ajaxData) {
-    return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
-}
-function handledUpdatedSrcData(data) {
-    if (data.error) { return Promise.resolve(_forms('_val', ['errUpdatingData', ['updateRelatedCitationsErr']])); }
-    return updateEntityData(data.results);
-}
-/*---------------- Update User Named Lists -----------------------------------*/
+//     function updateCitText(id) {
+//         const citSrc = srcRcrds[id];
+//         const params = {
+//             authRcrds: rcrds[0],
+//             cit: rcrds[1][citSrc.citation],
+//             citRcrds: rcrds[1],
+//             citSrc: citSrc,
+//             pub: srcRcrds[citSrc.parent],
+//             publisherRcrds: rcrds[2],
+//             srcRcrds: srcRcrds
+//         };
+//         const citText = _forms('rebuildCitationText', [params]);
+//         return updateCitationData(citSrc, citText);
+//     }
+// }
+// /** Sends ajax data to update citation and source entities. */
+// function updateCitationData(citSrc, text) {
+//     const data = { srcId: citSrc.id, text: text };
+//     return _u('sendAjaxQuery', [
+//         data, 'crud/citation/edit', Function.prototype, _forms.bind(null, '_val', ['formSubmitError'])]);
+// }
+// function onUpdateSuccess(ajaxData) {
+//     return Promise.all(ajaxData.map(data => handledUpdatedSrcData(data)));
+// }
+// function handledUpdatedSrcData(data) {
+//     if (data.error) { return Promise.resolve(_forms('_val', ['errUpdatingData', ['updateRelatedCitationsErr']])); }
+//     return updateEntityData(data.results);
+// }
+/* ================= UPDATE USER-NAMED LISTS ================================ */
 export function updateUserNamedList(data, action) {                             console.log('   --Updating [%s] stored list data. %O', action, data);
     let rcrds, names;
     const list = action == 'delete' ? data : JSON.parse(data.entity);
