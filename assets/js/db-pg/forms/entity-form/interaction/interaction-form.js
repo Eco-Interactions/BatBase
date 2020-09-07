@@ -774,7 +774,6 @@ function selectRoleTaxon(e, realmTaxon) {
     if (!opt) { return; } //issue alerted to developer and editor
     _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
     _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
-    ifBothTaxaSelectedEnableInteractionTypes(role);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(realmTaxon) {
@@ -817,6 +816,7 @@ function onTaxonRoleSelection(role, val) {                                      
     $('#'+getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);
     enableTaxonCombos();
+    ifBothTaxaSelectedEnableInteractionTypes(role);
     focusPinAndEnableSubmitIfFormValid(role);
 }
 function enableTaxonCombos() {
@@ -828,12 +828,13 @@ function getRealmData(prop) {
 }
 function ifBothTaxaSelectedEnableInteractionTypes(role) {
     if (ifOppositeRoleTaxonNull(role)) { return; }
-    const objectRealm = role === 'Object' ?
-        getRealmData('realmName') : getObjectRealm('displayName');
-    loadInteractionTypesForObjectRealm(objectRealm);
+    // const objectRealm = ;
+    loadInteractionTypesForObjectRealm(getObjectRealm('displayName'));
 }
 function ifOppositeRoleTaxonNull(role) {
-    return !_cmbx('getSelVal', ['#'+getRealmData('oppositeRole')+'-sel']);
+    const oppRole = getRealmData('oppositeRole') || 
+        (role === 'Subject' ? 'Object' : 'Subject');  //Auto-filling for edit form
+    return !_cmbx('getSelVal', [`#${oppRole}-sel`]);
 }
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
 /**
@@ -851,7 +852,7 @@ function ifOppositeRoleTaxonNull(role) {
         'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
         'Hematophagy': ['Bird', 'Mammal'],
  */
-function loadInteractionTypesForObjectRealm(objectRealm) {  console.log('objectRealm = %s', objectRealm);
+function loadInteractionTypesForObjectRealm(objectRealm) {                      //console.log('loadInteractionTypesForObjectRealm = [%s]', objectRealm);
     const types = _confg('getRealmInteractionTypes')[objectRealm];
     _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
     .then(opts => _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]))

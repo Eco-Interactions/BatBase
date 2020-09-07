@@ -99,15 +99,20 @@ function updateEditDetailMemory(detailId) {
 }
 /* ------------- INTERACTION ----------------- */
 function fillIntData(entity, id, rcrd, dEntity) {
-    const fields = getInteractionFieldFillTypes();
+    const fields = getInteractionFieldFillTypes();   
     fillFields(rcrd, fields, true);
+    window.setTimeout(() => fillIntTypeAndTagFields(rcrd), 500);
 }
 function getInteractionFieldFillTypes() {
     const fieldTypes = _confg('getCoreFieldDefs', ['interaction']);
-    ['Publication', 'CitationTitle'].forEach(f => delete fieldTypes[f]);
+    removeFieldsWithSpecialHandling(fieldTypes);
     ['Subject', 'Object'].forEach(f => fieldTypes[f] = 'taxon');
     fieldTypes.Source = 'source';
     return fieldTypes;
+}
+function removeFieldsWithSpecialHandling(fieldTypes) {
+    const fields = ['Publication', 'CitationTitle', 'InteractionType', 'InteractionTags'];
+    fields.forEach(f => delete fieldTypes[f]);
 }
 function addTaxon(fieldId, prop, rcrd) {
     const selApi = $('#'+ fieldId + '-sel')[0].selectize;
@@ -119,6 +124,15 @@ function addSource(fieldId, prop, rcrd) {
     const citSrc = _state('getRcrd', ['source', rcrd.source])
     _cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
     _cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
+}
+function fillIntTypeAndTagFields(rcrd) {  
+    $('#InteractionType-sel')[0].selectize.addItem(rcrd.interactionType.id);
+    window.setTimeout(() => addTagDataAfterTypeLoad(rcrd), 250);
+}
+function addTagDataAfterTypeLoad(rcrd) {
+    const tagApi = $('#InteractionTags-sel')[0].selectize;
+    const tagIds = rcrd.tags.map(tag => tag.id);
+    tagApi.setValue(tagIds);
 }
 /* ------------- LOCATION ----------------- */
 function fillLocData(entity, id, rcrd, dEntity) {
