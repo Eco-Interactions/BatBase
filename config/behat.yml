@@ -38,4 +38,4 @@ default:
                     marionette: true
                     extra_capabilities:
                         chromeOptions:
-                            args: ['--disable-gpu', '--window-size=1660,1000']
+                            args: ['--disable-gpu', '--window-size=1260,800']
