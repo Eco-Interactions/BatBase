@@ -149,14 +149,32 @@ function getFormHelpElems() {
     return cntnr;
 }
 function getFormWalkthroughBttn() {
-    if (!formHasWalkthroughInfo()) { return; }
-    // const bttnTxt = _u('ucfirst', [entity]) + ' Form Tutorial';
-    const attr = { class: 'ag-fresh', type: 'button', value: 'Walkthrough' };
-    const bttn = _u('buildElem', ['input', attr]);
+    let formInfoStepCount = getFormInfoStepCount();
+    if (!formInfoStepCount) { return; }
+    const titleInfo = "Hover your mouse over any field and it's help popup will show, if it has one.";
+    const bttn = buildWalkthroughButton(titleInfo);
     $(bttn).click(_modal.bind(null, 'showFormTutorial', [fLvl]));
+    setIntroWalkthroughAttrs(bttn, titleInfo, ++formInfoStepCount);
     return bttn;
 }
-function formHasWalkthroughInfo() {
+function buildWalkthroughButton(titleInfo) {
+    const attr = {
+        class: 'ag-fresh',
+        id: fLvl + '-walkthrough',
+        title: titleInfo,
+        type: 'button',
+        value: 'Walkthrough',
+    };
+    return _u('buildElem', ['input', attr]);
+}
+function getFormInfoStepCount() {
     const formInfoConfg = _confg('getFormConfg', [entity]).info;
-    return formInfoConfg && Object.keys(formInfoConfg).length;
+    return formInfoConfg ? Object.keys(formInfoConfg).length : false;
+}
+function setIntroWalkthroughAttrs(bttn, titleInfo, formInfoStepCount) {
+    $(bttn).attr({
+        'data-intro': titleInfo,
+        'data-intro-group': fLvl+'-intro',
+        'data-step': formInfoStepCount
+    });
 }
