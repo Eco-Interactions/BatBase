@@ -63,7 +63,7 @@ class Publication
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\Source", inversedBy="publication")
+     * @ORM\OneToOne(targetEntity="App\Entity\Source", inversedBy="publication", cascade={"remove"})
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;

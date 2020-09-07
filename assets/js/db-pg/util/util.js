@@ -111,11 +111,16 @@ export function sendAjaxQuery() {
 export function logAjaxData() {
     return _get.logAjaxData(...arguments);
 }
+/* -------------------- LOGS ------------------------------------------------ */
+export function logInDevEnv() {
+    if ($('body').data('env') === 'prod') { return; }
+    console.log(...arguments);
+}
 /* ================== MISC UTIL METHODS ============================================================================= */
 /* ------------------ DATA -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
-    if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    //console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+    if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    logInDevEnv("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
     _pg.alertIssue('noRcrdFound', {id: rcrdKey, entity: entity });
     return false;
 }

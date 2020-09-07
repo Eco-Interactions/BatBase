@@ -65,7 +65,6 @@ function entityHasUpdates(timeOne, timeTwo) {
 function syncDb(entities, dataUpdatedAt) {
     db.getAllStoredData().then(data => db.setMmryDataObj(data))
     .then(() => downloadAndStoreNewData(entities))
-    .then(db.setUpdatedDataInLocalDb)
     .then(() => db.setData('lclDataUpdtdAt', dataUpdatedAt))
     .then(initSearchPage)
     .then(clearMemory);
@@ -119,7 +118,8 @@ function processUpdatedData(data) {                                             
 /** Parses and sends the returned data to @storeUpdatedData. */
 function processUpdatedEntityData(data) {
     const entity = Object.keys(data)[0];                                        logBasedOnEnv(entity, data[entity]);
-    return storeUpdatedData(parseData(data[entity]), entity);
+    return storeUpdatedData(parseData(data[entity]), entity)
+        .then(db.setUpdatedDataInLocalDb);
 }
 function logBasedOnEnv(entity, entityData) {
     const env = $('body').data('env');
@@ -377,6 +377,7 @@ function addInteractionToEntity(prop, rcrd, entity) {                           
     if (!rcrd[prop]) { return; }
     const rcrds = db.getMmryData(prop);
     const storedEntity = rcrds[rcrd[prop]];
+    if (!storedEntity) { console.log('[%s][%s] not found', prop, rcrd[prop]); }
     if (!ifNewRcrd(storedEntity.interactions, rcrd.id)) { return; }
     storedEntity.interactions.push(rcrd.id);
     if (prop === 'source') { storedEntity.isDirect = true; }
@@ -706,13 +707,19 @@ function addFailedUpdatesToObj(data) {
     return data;
 }
 /** Sends a message and error tag back to the form to be displayed to the user. */
-function trackDataSyncFailure(e, prop, params) {                                console.log('               !!Tracking failure with [%s] params = [%O] e = %O', prop, params, e);
-    const failData = {
+function trackDataSyncFailure(e, prop, params) {
+    logSyncFailure(e, prop, params);
+    failed.data.push(getFailDataObj(e, prop, params));
+}
+function logSyncFailure(e, prop, params) {
+    console.log('               !!Tracking failure: [%s][%s]->[%s] [func = %s] [params = %O] [e = %O], [rcrd = %s]', params.entity, params.rcrd.id, prop, params.updateFunc.name, params, e, JSON.stringify(params.rcrd));
+}
+function getFailDataObj(e, prop, params) {
+    return {
         errMsg: e.name + ': ' + e.message,
         msg: getDataSyncFailureMsg(params.entity, params.stage),
         tag: params.entity + ':' + prop + ':' + params.rcrd.id
     };
-    failed.data.push(failData);
 }
 function getDataSyncFailureMsg(entity, stage) {
     const trans = { 'addData': 'adding to', 'rmvData': 'removing from' };

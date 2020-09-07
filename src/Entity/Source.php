@@ -188,7 +188,6 @@ class Source
      * @ORM\OneToMany(
      *     targetEntity="App\Entity\Contribution",
      *     mappedBy="workSource",
-     *     cascade={"remove"},
      *     orphanRemoval=true
      * )
      *
@@ -202,7 +201,6 @@ class Source
      * @ORM\OneToMany(
      *     targetEntity="App\Entity\Contribution",
      *     mappedBy="authorSource",
-     *     cascade={"remove"},
      *     orphanRemoval=true,
      *     fetch="EXTRA_LAZY"
      * )

@@ -96,7 +96,7 @@ class Author
     /**
      * @var \App\Entity\Source
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\Source", inversedBy="author")
+     * @ORM\OneToOne(targetEntity="App\Entity\Source", inversedBy="author", cascade={"remove"})
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;

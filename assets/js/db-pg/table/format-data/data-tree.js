@@ -167,14 +167,14 @@ function buildPublTree(pubSrcRcrds, data) {                                 //co
  * ->->Citation Title (Publication Title)
  * ->->->Interactions Records
  */
-function buildAuthTree(authSrcRcrds, data) {                                //console.log("----buildAuthSrcTree. authSrcRcrds = %O, pubRcrds", authSrcRcrds, pubRcrds);
+function buildAuthTree(authSrcRcrds, data) {                                    //console.log("----buildAuthTree. authSrcRcrds = %O, data = %O", authSrcRcrds, data);
     const pubRcrds = data.publication;
     const authRcrds = data.author;
     const tree = {};
     authSrcRcrds.forEach(getAuthBranch);
     return tree;
 
-    function getAuthBranch(authSrc) {                                             //console.log("rcrd = %O", authSrc);
+    function getAuthBranch(authSrc) {                                           //console.log("rcrd = %O", authSrc);
         if (!authSrc.contributions.length) { return; }
         authSrc.author = _u.getDetachedRcrd(authSrc.author, authRcrds, 'author');
         if (!authSrc.author) { return; }
@@ -441,7 +441,7 @@ function filterEntityAndSubs(ent, focus, set) {                                 
     }
 } /* End filterEntityAndSubs */
 /* ================================ UTILITY ========================================================================= */
-function getTreeRcrds(idAry, rcrds, entity) {
+function getTreeRcrds(idAry, rcrds, entity) {                                   //console.log('getTreeRcrds. args = %O', arguments);
     return idAry.map(id => _u.getDetachedRcrd(id, rcrds, entity)).filter(r => r);
 }
 /** Sorts the all levels of the data tree alphabetically. */

@@ -58,6 +58,10 @@ class DataEntryController extends AbstractController
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
+        if ($coreName !== 'interaction') {
+            $returnData->name = $coreEntity->getDisplayName();
+        }
+
         if (property_exists($coreFormData, 'hasDetail')) {
             $returnData->detailEntity = $this->handleDetailEntity(
                 $coreFormData, $formData, $returnData, $em
@@ -90,6 +94,10 @@ class DataEntryController extends AbstractController
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
+        if ($coreName !== 'interaction') {
+            $returnData->name = $coreEntity->getDisplayName();
+        }
+
         if (property_exists($coreFormData, 'hasDetail')) {
             $returnData->detailEntity = $this->handleDetailEntity(
                 $coreFormData, $formData, $returnData, $em
@@ -106,9 +114,6 @@ class DataEntryController extends AbstractController
         $data->coreEntity = $coreEntity;
         $data->coreEdits = $this->getEditsObj($formData, 'core');
         $data->detailEdits = $this->getEditsObj($formData, 'detail');
-        if ($coreName !== 'interaction') {
-            $data->coreName = $coreEntity->getDisplayName();
-        }
         return $data;
     }
     /*--------------------- Update Citation Text -----------------------------*/

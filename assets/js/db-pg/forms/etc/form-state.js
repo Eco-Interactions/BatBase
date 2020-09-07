@@ -178,6 +178,7 @@ export function getFormFieldData(fLvl, field) {
     return formState.forms[fLvl].fieldData[field];
 }
 export function getEntityRcrds(entity) {
+    if (!formState.records) { return; } //form closing
     return typeof entity == 'string' ? formState.records[entity] : buildRcrdsObj(entity);
 }
 function buildRcrdsObj(entities) {
@@ -186,7 +187,7 @@ function buildRcrdsObj(entities) {
     return rcrds;
 }/** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {
-    if (!formState.records[entity]) { return; }
+    if (!formState.records || !formState.records[entity]) { return; }
     return formState.records[entity][id] ?
         _u('snapshot', [formState.records[entity][id]]) :
         alertIssue('noRcrdFound', {id: id, entity: entity });

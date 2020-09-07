@@ -39,7 +39,7 @@ export function buildFormDataAndSubmit(entity, fLvl, formVals) {
 function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
     const coreEntity = _confg('getCoreFormEntity', [entity]);
     const url = getEntityAjaxUrl(_state('getFormProp', [fLvl, 'action']));
-    addEntityDataToFormData(data, coreEntity);
+    addEntityDataToFormData(data, coreEntity, fLvl);
     storeParamsData(coreEntity, fLvl);
     _elems('toggleWaitOverlay', [true]);
     _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);
@@ -48,10 +48,11 @@ function getEntityAjaxUrl(action) {
     const path = $('body').data('base-url');
     return path + 'crud/entity/' + action;
 }
-function addEntityDataToFormData(data, coreEntity) {
-    const editingId = _state('getStateProp', ['editing']);
-    if (editingId) { data.ids = editingId; }
+function addEntityDataToFormData(data, coreEntity, fLvl) {
     data.coreEntity = coreEntity;
+    if (fLvl !== 'top') { return; }
+    const editingIds = _state('getStateProp', ['editing']);
+    if (editingIds) { data.ids = editingIds; }
 }
 /** Stores data relevant to the form submission that will be used later. */
 function storeParamsData(entity, fLvl) {

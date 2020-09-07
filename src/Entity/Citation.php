@@ -107,7 +107,7 @@ class Citation
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\Source", inversedBy="citation")
+     * @ORM\OneToOne(targetEntity="App\Entity\Source", inversedBy="citation", cascade={"remove"})
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true, nullable=false)
      */
     private $source;

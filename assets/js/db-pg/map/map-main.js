@@ -438,6 +438,7 @@ function addIntMarkersToMap(focus, data) {                                      
     }
 }
 function buildAndAddIntMarker(focus, geoId, data) {
+    if (!app) { return; } //map closed
     const latLng = getCoords(geoId, data);
     const intCnt = data.ttl;
     const MapMarker = buildIntMarker(focus, intCnt, latLng, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
