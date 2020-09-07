@@ -20,9 +20,9 @@ import { initObjectRealmCombobox, filterTableByObjectRealm } from './obj-realm-f
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
     loadTxnLevelComboboxes(tblState);
-    if ($('#selObjRealm').length) { return; } //elems already initialized
+    if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    initObjectRealmCombobox();
+    if (tblState.realmName === 'Bat') { initObjectRealmCombobox(); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {

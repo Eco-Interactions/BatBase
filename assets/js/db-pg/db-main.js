@@ -104,6 +104,7 @@ export function reportErr() {
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
+ * {str} realmName      Stores Taxon view Realm name 
  * {obj} selectedOpts   K: Combobox key V: value selected
  * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
  * {str} userRole       Stores the role of the user.
@@ -440,6 +441,7 @@ function getTxnDataAndBuildTable(view) {
 function beginTaxonLoad(realmId, taxa) {
     tState.rcrdsById = taxa;                                                    //console.log('Building Taxon Table. taxa = %O', u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd(realmId);
+    tState.realmName = realmTaxon.displayName;
     ui.initTxnViewOpts(realmTaxon.id, tState.flags.allDataAvailable);
     return startTxnTableBuildChain(realmTaxon, true);
 }
@@ -452,7 +454,7 @@ export function onTxnViewChange(val) {                              /*Perm-log*/
 function buildTxnTable(val) {
     const realmTaxon = storeAndReturnRealmRcrd(val);
     resetTableState();
-    return rebuildTxnTable(realmTaxon);
+    return startTxnTableBuildChain(realmTaxon, true);
 }
 /**
  * Gets the currently selected taxon realm/view's id, gets the record for the taxon,
