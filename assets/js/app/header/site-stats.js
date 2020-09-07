@@ -12,32 +12,39 @@
  */
 import { sendAjaxQuery } from '../util/util-main.js';
 
-let pg;
+/** @type {Object} Page URL (k) statdata-set key (v) */
+const pageStatKeys = {
+	'about': 'project',
+	'db': 'db',
+	'home': 'core',
+	'search': 'db'
+};
+/** @type {Object} Data-set key (k) loadHeaderData (v) */
+const loadHeaderData = {
+	'core': loadCoreDatabaseHeaderStats,
+	'db': loadFullDatabaseHeaderStats,
+	'project': loadAboutProjectHeaderStats
+}
 /* ------------------------ INIT STAT HEADER -------------------------------- */
 export default function initHeaderStats(pgPath) {
-	pg = pgPath || 'home';
-	if (!ifPgHasStatistics()) { return }
-	sendAjaxQuery({pg: pg}, 'stats/', loadPageHeaderStatistics);
+	const pg = pgPath || 'home';
+	if (!ifPgHasStatistics(pg)) { return }
+	sendAjaxQuery({tag: pageStatKeys[pg]}, 'stats/', loadPageHeaderStatistics);
+
+	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  				//console.log('loadPageHeaderStatistics. args = %O', arguments);
+		loadHeaderData[pageStatKeys[pg]](data);
+	}
 }
-function ifPgHasStatistics() {
-    const hasStats = ['home', 'about', 'db'];
-    return hasStats.indexOf(pg) !== -1;
+function ifPgHasStatistics(pg) {
+	return Object.keys(pageStatKeys).indexOf(pg) !== -1;
 }
 /* ------------------------ LOAD STAT HEADER -------------------------------- */
-function loadPageHeaderStatistics(data, textStatus, jqXHR) {  					console.log('loadPageHeaderStatistics. args = %O', arguments);
-	const map = {
-		'about': loadAboutProjectPageHeaderStats,
-		'db': loadAboutDatabasePageHeaderStats,
-		'home': loadHomePageHeaderStats,
-	};
-	map[pg](data);
-}
 function updateHeaderStats(counts) {
 	const statString = counts.join(' | ');
 	$('#hdr-stats').empty().append(statString);
 }
 /* ------------------ HOME ------------------------- */
-function loadHomePageHeaderStats(data) {
+function loadCoreDatabaseHeaderStats(data) {
 	const intCnt = `${data.ints} Interactions`;
 	const batCnt = `${data.bats} Bat Species`;
 	const citCnt = `${data.cits}  Citations`;
@@ -45,13 +52,13 @@ function loadHomePageHeaderStats(data) {
 	updateHeaderStats([intCnt, batCnt, citCnt, locCnt]);
 }
 /* -------------- ABOUT PROJECT --------------------- */
-function loadAboutProjectPageHeaderStats(data) {
+function loadAboutProjectHeaderStats(data) {
 	const usrCnt = `${data.usr} Users`;
 	const edtrCnt = `${data.editor} Editors`;
 	updateHeaderStats([usrCnt, edtrCnt, 'Est. 2002']);
 }
 /* -------------- ABOUT DATABASE --------------------- */
-function loadAboutDatabasePageHeaderStats(data) {
+function loadFullDatabaseHeaderStats(data) {
 	const intCnt = `${data.ints} Interactions`;
 	const batCnt = `${data.bats} Bat Species`;
 	const otherCnt = `${data.nonBats} Other Species`;

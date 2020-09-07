@@ -26,7 +26,7 @@ class SiteStatisticsController extends AbstractController
     }
 
     /**
-     * Finds and displays Definition page content blocks.
+     * Returns statistics for the passed data group.
      *
      * @Route("/", name="app_page_stats")
      */
@@ -34,21 +34,21 @@ class SiteStatisticsController extends AbstractController
     {
 
         $requestContent = $request->getContent();
-        $page = json_decode($requestContent)->pg;
-        $data = $this->getPageStats($page);
+        $tag = json_decode($requestContent)->tag;
+        $data = $this->getPageStats($tag);
 
         $response = new JsonResponse();
         $response->setData($data);
         return $response;
     }
-    private function getPageStats($page)
+    private function getPageStats($tag)
     {
         $map = [
-            "about" => function() { return $this->buildAboutProjectStatData(); },
+            "core" => function() { return $this->buildCoreStatData(); },
             "db" => function() { return $this->buildAboutDatabaseStatData(); },
-            "home" => function() { return $this->buildCoreStatData(); },
+            "project" => function() { return $this->buildAboutProjectStatData(); },
         ];
-        return call_user_func($map[$page]);
+        return call_user_func($map[$tag]);
     }
 
     private function buildAboutProjectStatData()
@@ -61,8 +61,8 @@ class SiteStatisticsController extends AbstractController
             $editors++;
         }
         return [
+            'editor' => $editors,
             'usr' => count($users),
-            'editor' => $editors
         ];
     }
 
@@ -79,11 +79,11 @@ class SiteStatisticsController extends AbstractController
         $cntries = $this->getCountryCount($locs);
 
         return [
-            'ints' => count($this->em->getRepository('App:Interaction')->findAll()),
-            'cits' => count($this->em->getRepository('App:Source')->findBy(['isDirect' => true])),
-            'locs' => $locs,
-            'cntries' => $cntries,
             'bats' => $this->getBatSpeciesCount(),
+            'cits' => count($this->em->getRepository('App:Source')->findBy(['isDirect' => true])),
+            'cntries' => $cntries,
+            'ints' => count($this->em->getRepository('App:Interaction')->findAll()),
+            'locs' => $locs,
         ];
     }
 
@@ -100,8 +100,8 @@ class SiteStatisticsController extends AbstractController
             array_push($data['count'], $loc->getDisplayName());
             array_push($data['cntries'], $loc->getCountryData()['displayName']);
         }
-        $data['count'] = count(array_unique($data['count']));
         $data['cntries'] = count(array_unique($data['cntries'])) - 1;
+        $data['count'] = count(array_unique($data['count']));
         return $data;
     }
 
