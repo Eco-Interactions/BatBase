@@ -134,7 +134,11 @@ export function getSelTxt(id) {                                                 
 }
 export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
     const $selApi = $(id)[0].selectize;
-    $selApi.addItem(val, silent);
+    if ($(id)[0].multiple) {
+        $selApi.setValue(val, silent);    
+    } else {
+        $selApi.addItem(val, silent);
+    }
 }
 /**
  * Clears and enables the parent combobox for the exited form. Removes any

@@ -89,7 +89,7 @@ function fillEntityData(cEntity, id, entity) {
     const hndlrs = {
         'interaction': fillIntData, 'location': fillLocData,
         'source': fillSrcData,      'taxon': fillTaxonData  };
-    const rcrd = _state('getRcrd', [cEntity, id]);                            console.log("      --fillEntityData [%s] [%s] = %O", cEntity, id, rcrd);
+    const rcrd = _state('getRcrd', [cEntity, id]);                              console.log("      --fillEntityData [%s] [%s] = %O", cEntity, id, rcrd);
     return Promise.resolve(hndlrs[cEntity](cEntity, id, rcrd, entity));
 }
 function updateEditDetailMemory(detailId) {
@@ -100,8 +100,8 @@ function updateEditDetailMemory(detailId) {
 /* ------------- INTERACTION ----------------- */
 function fillIntData(entity, id, rcrd, dEntity) {
     const fields = getInteractionFieldFillTypes();   
+    setTypeAndTagInitValuesAsDataFieldElems(rcrd);
     fillFields(rcrd, fields, true);
-    window.setTimeout(() => fillIntTypeAndTagFields(rcrd), 500);
 }
 function getInteractionFieldFillTypes() {
     const fieldTypes = _confg('getCoreFieldDefs', ['interaction']);
@@ -114,6 +114,13 @@ function removeFieldsWithSpecialHandling(fieldTypes) {
     const fields = ['Publication', 'CitationTitle', 'InteractionType', 'InteractionTags'];
     fields.forEach(f => delete fieldTypes[f]);
 }
+/**
+ * Values will be set in fields in the change event for the taxon role combos.
+ */
+function setTypeAndTagInitValuesAsDataFieldElems(rcrd) {
+    $('#InteractionType-sel').data('init-val', rcrd.interactionType.id);
+    $('#InteractionTags-sel').data('init-val', rcrd.tags.map(t => t.id).join(', '));
+}
 function addTaxon(fieldId, prop, rcrd) {
     const selApi = $('#'+ fieldId + '-sel')[0].selectize;
     const taxon = _state('getRcrd', ['taxon', rcrd[prop]]);
@@ -124,15 +131,6 @@ function addSource(fieldId, prop, rcrd) {
     const citSrc = _state('getRcrd', ['source', rcrd.source])
     _cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
     _cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
-}
-function fillIntTypeAndTagFields(rcrd) {  
-    $('#InteractionType-sel')[0].selectize.addItem(rcrd.interactionType.id);
-    window.setTimeout(() => addTagDataAfterTypeLoad(rcrd), 250);
-}
-function addTagDataAfterTypeLoad(rcrd) {
-    const tagApi = $('#InteractionTags-sel')[0].selectize;
-    const tagIds = rcrd.tags.map(tag => tag.id);
-    tagApi.setValue(tagIds);
 }
 /* ------------- LOCATION ----------------- */
 function fillLocData(entity, id, rcrd, dEntity) {
@@ -147,9 +145,14 @@ function fillLocData(entity, id, rcrd, dEntity) {
         delete fields.Latitude;
         delete fields.Longitude;
         delete fields.Country;
-        $('#Latitude_row input').val(parseFloat(rcrd.latitude));
-        $('#Longitude_row input').val(parseFloat(rcrd.longitude));
+        ['lat', 'long'].forEach(setCoordField);
         _cmbx('setSelVal', ['#Country-sel', rcrd.country.id, 'silent']);
+    }
+    function setCoordField(prefix) {
+        const value = rcrd[`${prefix}itude`];  
+        if (!value) { return; }
+        const $input = $(`#${_u('ucfirst', [prefix])}itude_row input`);
+        $input.val(parseFloat(value));
     }
     function handleGeoJsonFill(geoId) {
         updateEditDetailMemory(geoId);
@@ -163,7 +166,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
 /* ------------- SOURCE ----------------- */
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, src, dEntity) {
-    const detail = _state('getRcrd', [dEntity, src[dEntity]]);                //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+    const detail = _state('getRcrd', [dEntity, src[dEntity]]);                  //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
     const fields = getSourceFields(dEntity);
     setSrcData();
     setDetailData();

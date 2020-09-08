@@ -599,7 +599,7 @@ App\Entity\HabitatType:
 App\Entity\Interaction:
     Interaction-1:
         source: '@Source-1' #
-        interactionType: '@InteractionType-4' #Pollination
+        interactionType: '@InteractionType-7' #Host
         location: '@Location-12'  #Panama
         subject: '@Taxon-7' #40
         object: '@Taxon-9' #859
@@ -619,7 +619,7 @@ App\Entity\Interaction:
         updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
     Interaction-3:
         source: '@Source-3' #
-        interactionType: '@InteractionType-7' #Host
+        interactionType: '@InteractionType-4' #Pollination
         location: '@Location-23' #
         subject: '@Taxon-13' #120
         object: '@Taxon-16'  #74
@@ -693,7 +693,8 @@ App\Entity\Interaction:
     Interaction-10: #added
         note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
         source: '@Source-3'  #
-        interactionType: '@InteractionType-9'  #Prey
+        interactionType: '@InteractionType-1' #Visitation
+        # interactionType: '@InteractionType-9'  #Prey
         location: '@Location-59'  #
         subject: '@Taxon-21' #
         object: '@Taxon-23'  #

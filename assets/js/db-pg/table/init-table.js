@@ -301,7 +301,7 @@ function getMapIcon(id) {
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
 function getMapIconStyles() {
-    const styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
+    let styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
     if ($('#shw-map').data('loading')) { styles += ' opacity: .3;' }
     return styles;
 }

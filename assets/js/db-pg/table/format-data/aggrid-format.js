@@ -296,7 +296,7 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
     return [];
 }
 /** Returns an interaction rowData object with flat data in table-ready format. */
-function buildIntRowData(intRcrd, treeLvl, idx){
+function buildIntRowData(intRcrd, treeLvl, idx){                                //console.log('buildIntRowData. int = %O', intRcrd);
     const rowData = {
         citation: getEntityData('source', 'description'),
         entity: 'Interaction',       //Not sure what this is all used for...

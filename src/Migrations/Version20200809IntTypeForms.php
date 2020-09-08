@@ -104,19 +104,19 @@ private function getInteractionTypeNameForms()
         ],
         'Roost' => [
             'active' => 'roosted in',
-            'passive' => 'was roosted in by'
+            'passive' => 'roosted in by'
         ],
         'Predation' => [
             'active' => 'preyed upon',
-            'passive' => 'was preyed upon by`'
+            'passive' => 'preyed upon by`'
         ],
         'Prey' => [
-            'active' => 'was preyed upon by',
+            'active' => 'preyed upon by',
             'passive' => 'preyed upon'
         ],
         'Host' => [
-            'active' => 'was host of',
-            'passive' => 'was hosted by'
+            'active' => 'host of',
+            'passive' => 'hosted by'
         ],
         'Cohabitation' => [
             'active' => 'cohabitated with',

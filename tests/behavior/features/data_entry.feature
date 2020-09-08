@@ -41,8 +41,7 @@ Feature: Add new data to the database
         And I type "Nice" in the "City" field "input"
         And I type "France" in the "Country" field "input"
         And I type "Publisher Description" in the "Description" field "textarea"
-        And I type "www.publisher.com" in the "Link Url" field "input"
-        And I type "Test Publisher Webiste" in the "Link Display" field "input"
+        And I type "https://www.publisher.com" in the "Website" field "input"
         And I press the "Create Publisher" button
         And I wait for the "sub2" form to close
         ### Author ##
@@ -52,17 +51,15 @@ Feature: Add new data to the database
         And I type "J" in the "Middle Name" field "input"
         And I type "Callaye" in the "Last Name" field "input"
         And I type "Jr" in the "Suffix" field "input"
-        And I type "www.author.com" in the "Link Url" field "input"
-        And I type "Test Author Website" in the "Link Display" field "input"
+        And I type "https://www.author.com" in the "Website" field "input"
         And I press the "Create Author" button
         And I wait for the "sub2" form to close
         ## Book Details ##
         And I check the "Show all fields" box
         And I type "1990" in the "Year" field "input"
-        And I type "10.1037/rmh0000008" in the "Doi" field "input"
+        And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
-        And I type "www.publication.com" in the "Link Url" field "input"
-        And I type "Test Book Webiste" in the "Link Display" field "input"
+        And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
         ## Book Citation ##
         And I see "New Citation"
@@ -79,10 +76,9 @@ Feature: Add new data to the database
         And I select "Callaye, Bendry J. Jr" from the "Editors" dynamic dropdown
         And I select "Test Publisher" from the "Publisher" form dropdown
         And I check the "Show all fields" box
-        And I type "10.1037/rmh0000008" in the "Doi" field "input"
+        And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
-        And I type "www.publication.com" in the "Link Url" field "input"
-        And I type "Test Book Webiste" in the "Link Display" field "input"
+        And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
         ## Chapter Citation ##
         And I see "New Citation"
@@ -120,10 +116,9 @@ Feature: Add new data to the database
         And I type "1990" in the "Year" field "input"
         And I select "Callaye, Bendry J. Jr" from the "Authors" dynamic dropdown
         And I select "Test Publisher" from the "Publisher" form dropdown
-        And I type "10.1037/rmh0000008" in the "Doi" field "input"
+        And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
-        And I type "www.publication.com" in the "Link Url" field "input"
-        And I type "Test Book Webiste" in the "Link Display" field "input"
+        And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
         ## Dissertation Citation ##
         And I see "New Citation"
@@ -139,10 +134,9 @@ Feature: Add new data to the database
         And I select "Callaye, Bendry J. Jr" from the "Authors" dynamic dropdown
         And I select "Test Publisher" from the "Publisher" form dropdown
         And I check the "Show all fields" box
-        And I type "10.1037/rmh0000008" in the "Doi" field "input"
+        And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
-        And I type "www.publication.com" in the "Link Url" field "input"
-        And I type "Test Other Webiste" in the "Link Display" field "input"
+        And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
         ## Other Citation ##
         And I see "New Citation"
@@ -243,8 +237,7 @@ Feature: Add new data to the database
   #       And I type "France" in the "Country" field "input"
   #       And  I check the "Show all fields" box
   #       And I type "Publisher Description" in the "Description" field "textarea"
-  #       And I type "www.publisher.com" in the "Link Url" field "input"
-  #       And I type "Test Publisher Webiste" in the "Link Display" field "input"
+  #       And I type "https://www.publisher.com" in the "Website" field "input"
   #       And I press the "Create Publisher" button
   #       Then I should see "Test Publisher" in the "Publisher" form dropdown
   #   ## ------------------- AUTHOR ----------------- ##
@@ -261,8 +254,7 @@ Feature: Add new data to the database
   #       And I type "J" in the "Middle Name" field "input"
   #       And I type "Callaye" in the "Last Name" field "input"
   #       And I type "Jr" in the "Suffix" field "input"
-  #       And I type "www.author.com" in the "Link Url" field "input"
-  #       And I type "Test Author Website" in the "Link Display" field "input"
+  #       And I type "https://www.author.com" in the "Website" field "input"
   #       And I press the "Create Author" button
   #       Then I should see "Callaye, Bendry J. Jr" in the "Authors" dynamic dropdown
   #   ## ------------------- BOOKS ----------------- ##
@@ -277,10 +269,9 @@ Feature: Add new data to the database
   #       And I select "Callaye, Bendry J. Jr" from the "Authors" dynamic dropdown
   #       And I select "Test Publisher" from the "Publisher" form dropdown
   #       And I check the "Show all fields" box
-  #       And I type "10.1037/rmh0000008" in the "Doi" field "input"
+  #       And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
   #       And I type "Test description" in the "Description" field "textarea"
-  #       And I type "www.publication.com" in the "Link Url" field "input"
-  #       And I type "Test Book Webiste" in the "Link Display" field "input"
+  #       And I type "https://www.publication.com" in the "Website" field "input"
   #       And I press the "Create Publication" button
   #       Then I should see "Test Book" in the "Publication" form dropdown
   #       And I should see "Test Book" in the "Src" detail panel
@@ -303,10 +294,9 @@ Feature: Add new data to the database
   #       And I select "Callaye, Bendry J. Jr" from the "Editors" dynamic dropdown
   #       And I select "Test Publisher" from the "Publisher" form dropdown
   #       And I check the "Show all fields" box
-  #       And I type "10.1037/rmh0000008" in the "Doi" field "input"
+  #       And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
   #       And I type "Test description" in the "Description" field "textarea"
-  #       And I type "www.publication.com" in the "Link Url" field "input"
-  #       And I type "Test Book Webiste" in the "Link Display" field "input"
+  #       And I type "https://www.publication.com" in the "Website" field "input"
   #       And I press the "Create Publication" button
   #       Then I should see "Test Book with Editors" in the "Publication" form dropdown
   #       And I should see "Test Book with Editors" in the "Src" detail panel
@@ -421,10 +411,9 @@ Feature: Add new data to the database
   #       And I select "Callaye, Bendry J. Jr" from the "Authors" dynamic dropdown
   #       And I select "Test Publisher" from the "Publisher" form dropdown
   #       And I check the "Show all fields" box
-  #       And I type "10.1037/rmh0000008" in the "Doi" field "input"
+  #       And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
   #       And I type "Test description" in the "Description" field "textarea"
-  #       And I type "www.publication.com" in the "Link Url" field "input"
-  #       And I type "Test Book Webiste" in the "Link Display" field "input"
+  #       And I type "https://www.publication.com" in the "Website" field "input"
   #       And I press the "Create Publication" button
   #       Then I should see "Test Dissertation" in the "Publication" form dropdown
   #       And I should see "Thesis/Dissertation Title" in the "Src" detail panel
@@ -463,10 +452,9 @@ Feature: Add new data to the database
   #       And I select "Callaye, Bendry J. Jr" from the "Authors" dynamic dropdown
   #       And I select "Test Publisher" from the "Publisher" form dropdown
   #       And I check the "Show all fields" box
-  #       And I type "10.1037/rmh0000008" in the "Doi" field "input"
+  #       And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
   #       And I type "Test description" in the "Description" field "textarea"
-  #       And I type "www.publication.com" in the "Link Url" field "input"
-  #       And I type "Test Other Webiste" in the "Link Display" field "input"
+  #       And I type "https://www.publication.com" in the "Website" field "input"
   #       And I press the "Create Publication" button
   #       Then I should see "Test Other" in the "Publication" form dropdown
   #       And I should see "Publication Title" in the "Src" detail panel

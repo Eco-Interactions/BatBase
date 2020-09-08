@@ -46,6 +46,7 @@ export function initCreateForm(entity) {                                        
     .then(getInteractionFormFields)
     .then(fields => _elems('buildAndAppendForm', [fields]))
     .then(finishInteractionFormBuild)
+    .then(addConfirmationBeforeSubmit)
     .then(() => _state('setOnFormCloseHandler', ['top', resetInteractionForm]));
 }
 /** Builds and returns all interaction-form elements. */
@@ -140,7 +141,6 @@ function finishInteractionFormBuild() {                                         
     modifyFormDisplay();
     addLocationSelectionMethodsNote();
     finishComboboxInit();
-    addConfirmationBeforeSubmit();
 }
 function modifyFormDisplay() {
     $('#Note_row label')[0].innerText += 's';
@@ -273,7 +273,7 @@ function showSubmitModal() {
         selector: '#top-submit',
         dir: 'left',
         submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
-        bttn: 'Submit'
+        bttn: 'Submit Interaction'
     };
     _modal('showSaveModal', [ modalConfg ]);
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
@@ -855,20 +855,52 @@ function ifOppositeRoleTaxonNull(role) {
 function loadInteractionTypesForObjectRealm(objectRealm) {                      //console.log('loadInteractionTypesForObjectRealm = [%s]', objectRealm);
     const types = _confg('getRealmInteractionTypes')[objectRealm];
     _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
-    .then(opts => _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]))
+    .then(opts => {
+        _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
+        ifEditFormSelectInitValElseFocusCombo('InteractionType', opts);
+    })
     .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
-    .then(() => _cmbx('focusCombobox', ['#InteractionType-sel', true]));
+}
+/** Note: init-val is set during edit form build. */
+function ifEditFormSelectInitValElseFocusCombo(field, typeOpts) {
+    const initVal = $(`#${field}-sel`).data('init-val');                        //console.log('initVal = [%s] typeOpts = %O', initVal, typeOpts);//array
+    if (!initVal) { return _cmbx('focusCombobox', [`#${field}-sel`, true]); }
+    if (field.includes('Type')) {
+        selectInitValIfValidType(initVal, typeOpts);
+    } else {  console.log('tags = %O', $('#InteractionTags-sel')[0]);
+        _cmbx('setSelVal', ['#InteractionTags-sel', initVal.split(', ')]);
+    }
+}
+function selectInitValIfValidType(initVal, typeOpts) {  
+    const validType = typeOpts.find(opt => opt.value == initVal);               //console.log('validType = ', validType)
+    if (validType) {
+        _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
+    } else { 
+        onInteractionTypeSelection(null);
+    }
 }
 function onInteractionTypeSelection(val) {
-    if (!val) { return; }
+    if (!val) { return clearTypeRelatedTags(); }
     fillAndEnableTags(val);
     focusPinAndEnableSubmitIfFormValid('InteractionType');
+}
+function clearTypeRelatedTags() {
+    let opts = getPersistedTags($(`#InteractionTags-sel`)[0].selectize.options);
+    _cmbx('updateComboboxOptions', ['#InteractionTags-sel', opts]);
+    ifEditFormSelectInitValElseFocusCombo('InteractionTags');
+}
+function getPersistedTags(opts) {
+    const persist = ['Secondary'];
+    const newVals = Object.keys(opts).filter(k => persist.indexOf(opts[k].text) !== -1);
+    const newOpts = newVals.map(k=>opts[k]);  console.log('opts = %O', newOpts)
+    return newOpts;
 }
 function fillAndEnableTags(id) {
     const tagOpts = buildTagOpts(id);
     _cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
     _cmbx('enableCombobox', ['#InteractionTags-sel', true]);
     handleRequiredTagForType(tagOpts);
+    ifEditFormSelectInitValElseFocusCombo('InteractionTags');
 }
 function buildTagOpts(id) {
     const type = getRcrd('interactionType', id);
