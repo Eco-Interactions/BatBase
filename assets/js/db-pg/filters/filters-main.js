@@ -13,7 +13,7 @@
  *         GET
  *             FILTER STATUS TEXT
  */
-import { accessTableState as tState, _ui, _u } from '../db-main.js';
+import { accessTableState as tState, resetDataTable, _ui, _u } from '../db-main.js';
 import * as fDate from './date-filter.js';
 import * as fLoc from './loc-filters.js';
 import * as fSrc from './src-filters.js';
@@ -67,19 +67,17 @@ export function getRowDataForCurrentFilters(rowData) {
 }
 /** If filter cleared (!val), filter all table rows, else apply on top of current filters. */
 export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
-    const prevRowData = tState().get('rowData')
-    const rowData = getRowDataForCurrentFilters(prevRowData);
+    if (!Object.keys(fState.getRowDataFilters()).length) { return resetDataTable(); }              
+    const rowData = getRowDataForCurrentFilters(tState().get('rowData'));
     _ui('enableClearFiltersButton');
-    if (prevRowData.length === rowData.length) { return; }
     setCurrentRowData(rowData);
-
-    function setCurrentRowData(rowData) {
-        const tblState = tState().get(['api', 'curFocus']);
-        tblState.api.setRowData(rowData);
-        _ui('updateFilterStatusMsg');
-        _ui('setTreeToggleData', [false]);
-        if (tblState.curFocus === 'taxa') { fTxn.updateTaxonComboboxes(rowData); }
-    }
+}
+function setCurrentRowData(rowData) {
+    const tblState = tState().get(['api', 'curFocus']);
+    tblState.api.setRowData(rowData);
+    _ui('updateFilterStatusMsg');
+    _ui('setTreeToggleData', [false]);
+    if (tblState.curFocus === 'taxa') { fTxn.updateTaxonComboboxes(rowData); }
 }
 /* ==================== FILTER STATE ======================================== */
 export function setFilterState() {

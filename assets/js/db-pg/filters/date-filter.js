@@ -194,8 +194,8 @@ export function clearDateFilter() {
 /** Clears Date filter and resets table with remainig active filters reapplied. */
 function resetDateFilter(skipSync) {                                            //console.log('resetDateFilter. skipSync?', skipSync);
     updateDateFilterState(false, false);
-    fM.onFilterChangeUpdateRowData();
     if (!skipSync) {
+        fM.onFilterChangeUpdateRowData();
         syncUiAfterDateFilter();
     }
 }

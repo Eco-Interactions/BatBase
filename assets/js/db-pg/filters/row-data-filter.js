@@ -88,7 +88,7 @@ function handleInteractionFilters() {
 	rows = rows.map(getRowsThatPassInteractionFilters).filter(r=>r);
 
 	function getRowsThatPassInteractionFilters(row) {
-		if (!row.name) { return ifPassesReturnRow(row); }
+		if (!row.name) { return ifPassesReturnRow(row); } //interaction row
 		row.children = filterRowChildren(row);
 		return row.children.length ? row : null;
 	}

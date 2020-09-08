@@ -200,6 +200,7 @@ Feature: Edit data in the database
         And I change the "Suffix" field "input" to "Jr"
         And I change the "Website" field "input" to "https://www.link.com"
         And I press the "Update Author" button
+        And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I click on the edit pencil for the "Cockel, Joy Karen Jr" row
         And I see "Editing Author"
@@ -221,6 +222,7 @@ Feature: Edit data in the database
         And I change the "Description" field "textarea" to "Something descriptive"
         And I change the "Website" field "input" to "https://www.link.com"
         And I press the "Update Publisher" button
+        And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I click on the edit pencil for the "University of Paris V" row
         And I see "Editing Publisher"

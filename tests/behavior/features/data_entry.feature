@@ -43,6 +43,7 @@ Feature: Add new data to the database
         And I type "Publisher Description" in the "Description" field "textarea"
         And I type "https://www.publisher.com" in the "Website" field "input"
         And I press the "Create Publisher" button
+        And I press submit in the confirmation popup
         And I wait for the "sub2" form to close
         ### Author ##
         And I enter "Smith, George" in the "Authors" dynamic dropdown
@@ -53,6 +54,7 @@ Feature: Add new data to the database
         And I type "Jr" in the "Suffix" field "input"
         And I type "https://www.author.com" in the "Website" field "input"
         And I press the "Create Author" button
+        And I press submit in the confirmation popup
         And I wait for the "sub2" form to close
         ## Book Details ##
         And I check the "Show all fields" box
@@ -61,6 +63,7 @@ Feature: Add new data to the database
         And I type "Test description" in the "Description" field "textarea"
         And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
+        And I press submit in the confirmation popup
         ## Book Citation ##
         And I see "New Citation"
         And I should see "Book" in the "Citation Type" form dropdown
@@ -80,6 +83,7 @@ Feature: Add new data to the database
         And I type "Test description" in the "Description" field "textarea"
         And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
+        And I press submit in the confirmation popup
         ## Chapter Citation ##
         And I see "New Citation"
         And I select "Chapter" from the "Citation Type" form dropdown
@@ -120,6 +124,7 @@ Feature: Add new data to the database
         And I type "Test description" in the "Description" field "textarea"
         And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
+        And I press submit in the confirmation popup
         ## Dissertation Citation ##
         And I see "New Citation"
         And I should see "Ph.D. Dissertation" in the "Citation Type" form dropdown
@@ -138,6 +143,7 @@ Feature: Add new data to the database
         And I type "Test description" in the "Description" field "textarea"
         And I type "https://www.publication.com" in the "Website" field "input"
         And I press the "Create Publication" button
+        And I press submit in the confirmation popup
         ## Other Citation ##
         And I see "New Citation"
         And I should see "Other" in the "Citation Type" form dropdown
@@ -159,8 +165,7 @@ Feature: Add new data to the database
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
         # And I see the country's polygon drawn on the map  #(Couldn't identify elem)
-        And I break "Press 'Create Location' in the green pin's popup"
-        # And I press "Create Location" in the added green pin's popup (Not clicking reliably)
+        And I press the "Create Location" button
         And I wait for the "sub" form to close
         ## Without GPS ##
         And I enter "Test Location Without GPS" in the "Location" form dropdown
@@ -170,7 +175,7 @@ Feature: Add new data to the database
         And I select "Savanna" from the "Habitat Type" form dropdown
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
-        And I press the "Create without GPS data" button
+        And I press the "Create Location" button
         And I wait for the "sub" form to close
         ## --- Taxon --- ##
         ### Subject Family ##
@@ -706,6 +711,7 @@ Feature: Add new data to the database
         And I see "New Interaction"
         And I fill the new interaction form with the test values
         And I press the "Create Interaction" button
+        And I press submit in the confirmation popup
         Then I should see "New Interaction successfully created." in the form header
 
     @javascript
@@ -718,13 +724,14 @@ Feature: Add new data to the database
         And I pin the "Subject" field
         And I pin the "Interaction Type" field
         And I press the "Create Interaction" button
+        And I press submit in the confirmation popup
         Then I should see "New Interaction successfully created." in the form header
         And I should see "Test Book with Editors" in the "Publication" form dropdown
         And I should see "Test Title for Chapter" in the "Citation Title" form dropdown
         And I should see "Costa Rica" in the "Country-Region" form dropdown
         And I should see "Test Location With GPS" in the "Location" form dropdown
         And I should see "Genus SGenus" in the "Subject" form dropdown
-        And I should see "Consumption" in the "Interaction Type" form dropdown
+        And I should see "Host" in the "Interaction Type" form dropdown
         And the "Object" select field should be empty
         And the "Interaction Tags" select field should be empty
         And the "Note" field should be empty
@@ -847,14 +854,3 @@ Feature: Add new data to the database
         And the database table is in "Location" view
         When I exit the form window
         Then I should see the table displayed in "Location" view
-
-    @javascript
-    Scenario:  The table should reload in Source view after creating an interaction.
-        Given I press the "New" button
-        And I see "New Interaction"
-        And I fill the new interaction form with the test values
-        And I press the "Create Interaction" button
-        And I see "New Interaction successfully created." in the form header
-        When I exit the form window
-        Then I should see the table displayed in "Source" view
-        And I should see "1" row in the table data tree

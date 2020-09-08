@@ -590,7 +590,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
-        $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
+        $('#Country-sel')[0].selectize.addItem(loc.cntryId); //, 'silent'
         addParentLocDataToMap(loc.cntryId, null);
     }
     addPinToMap(latLng, marker, zoomFlag);

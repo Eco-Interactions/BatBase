@@ -38,8 +38,9 @@ let timeout = null; //Prevents citation text being generated multiple times.
 let rmvdAuthField = {};
 
 /** Inits comboboxes for the source forms. */
-export function initFormCombos(entity, fLvl) {
-    const events = getEntityComboEvents(entity);
+export function initFormCombos(entity, fLvl) { 
+    const events = getEntityComboEvents(entity);                                //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
+    if (!events) { return; } 
     _cmbx('initFormCombos', [entity, fLvl, events]);
 }
 function getEntityComboEvents(entity) {
@@ -101,11 +102,10 @@ function buildAndAppendPubForm(val) {
 }
 function appendPubFormAndFinishBuild(form) {
     $('#CitationTitle_row')[0].parentNode.after(form);
-    initFormCombos('publication', 'sub');
+    finishSourceForm('publication', 'sub');
     $('#Title_row input').focus();
     _elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
     $('#PublicationType-lbl').css('min-width', '125px');
-    addConfirmationBeforeSubmit('sub', 'publication');
 }
 /**
  * Loads the deafult fields for the selected Publication Type. Clears any
@@ -169,7 +169,7 @@ function initCitSubForm(val) {
 }
 function appendCitFormAndFinishBuild(form) {                                    //console.log('           --appendCitFormAndFinishBuild');
     $('#CitationTitle_row')[0].parentNode.after(form);
-    initFormCombos('citation', 'sub');
+    finishSourceForm('citation', 'sub');
     return selectDefaultCitType()
     .then(() => finishCitFormUiLoad());
 }
@@ -177,7 +177,6 @@ function finishCitFormUiLoad() {
     _cmbx('enableCombobox', ['#Publication-sel', false]);
     $('#Abstract_row textarea').focus();
     _elems('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
-    addConfirmationBeforeSubmit('sub', 'citation');
 }
 function selectDefaultCitType() {
     return _u('getData', ['citTypeNames'])
@@ -516,7 +515,6 @@ function updatePlaceholderText(elem, newTxt) {
 function updateInputTypes () {
     setNumberInputs();
     setInputType('Website', 'url');
-    // $('#Pages-lbl + input').attr('pattern', "[0-9]+([-\,][0-9]+)?");
 }
 function setNumberInputs () {
     const fields = ['Edition', 'Issue', 'Volume', 'Year'];
@@ -527,31 +525,36 @@ function setInputType (fieldName, type) {
     $('#'+fieldName+'-lbl + input').attr('type', type);
 }
 /* -------------------- SUBMIT CONFIRMATION MODAL --------------------------- */
-function addConfirmationBeforeSubmit(fLvl, entity) {
-    $(`#${fLvl}-submit`).off('click').click(showSubmitModal.bind(null, fLvl, entity));
+/**
+ * If a URL is entered in the form, a modal is shown prompting the editor to 
+ * double check the links work before submitting.
+ */
+function addConfirmationBeforeSubmit(entity, fLvl) {
+    $(`#${fLvl}-submit`).off('click').click(showSubmitModal.bind(null, entity, fLvl));
 }
-function showSubmitModal(fLvl, entity) {
-    const linkHtml = buildConfirmationModalHtml();
+function showSubmitModal(entity, fLvl) {  
+    const linkHtml = buildConfirmationModalHtml(fLvl);
     const submit = submitForm.bind(null, `#${fLvl}-form`, fLvl, entity);
     if (!linkHtml) { return submit(); }
-    _modal('showSaveModal', [ buildModalConfg(fLvl, submit) ]);
+    _modal('showSaveModal', [ buildModalConfg(fLvl, linkHtml, submit) ]);
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }
-function buildConfirmationModalHtml() {
+function buildConfirmationModalHtml(fLvl) {
     const hdr = '<b>Please double-check URLs before submitting.</b><br><br>';
     const links = ['Doi', 'Website'].map(buildLinkHtmlForValues).filter(l=>l);
     return links.length ? hdr + links.join('<br><br>') : false;
-}
-function buildLinkHtmlForValues(field) {
-    const url = $(`#${field}_row input`).val();
-    return url ? buildUrlLink(field, url) : null;
+    
+    function buildLinkHtmlForValues(field) {
+        const url = $(`#${fLvl}-form #${field}_row input`).val();
+        return url ? buildUrlLink(field, url) : null;
+    }
 }
 function buildUrlLink(field, url) {
     return `<b>${field}:</b> <a href="${url}"" target="_blank">${url}</a>`;
 }
-function buildModalConfg(fLvl, submit) {
+function buildModalConfg(fLvl, linkHtml, submit) {
     return {
-        html: buildConfirmationModalHtml(),
+        html: linkHtml,
         selector: `#${fLvl}-submit`,
         dir: 'left',
         submit: submit,
@@ -585,6 +588,7 @@ function initPublisherForm(value) {                                             
         $('#Publisher_row').append(form);
         _elems('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
         $('#DisplayName_row input').focus();
+        addConfirmationBeforeSubmit('publisher', fLvl);
     }
 }
 /* ========================== AUTHOR ======================================== */
@@ -708,6 +712,7 @@ function handleNewAuthForm(authCnt, value, authType) {                          
         handleSubmitBttns();
         $('#'+fLvl+'-cancel').click(_cmbx.bind(null, 'clearCombobox', ['#'+authType+'-sel'+authCnt]))
         $('#FirstName_row input').focus();
+        addConfirmationBeforeSubmit(singular, fLvl);
     }
     function handleSubmitBttns() {
         const prntLvl = getNextFormLevel('parent', fLvl);
@@ -742,21 +747,25 @@ function getSrcRcrd(pubId) {
 }
 /** Note: Only citation & publication forms use this. */
 export function finishEditFormBuild(entity) {                                   //console.log('---finishEditFormBuild')
-    initFormCombos(entity, 'top');
+    finishSourceForm(entity, 'top');
     $('.all-fields-cntnr').hide();
     if (entity === 'citation') {
         handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['#CitationType-sel']), 'top');
-    } else {
+        finishSourceToggleAllFields(entity, {}, 'top');
+    } else if (entity === 'publication') {
         $('#PublicationType-lbl').css('min-width', '125px');
+        finishSourceToggleAllFields(entity, {}, 'top');
     }
-    finishSourceToggleAllFields(entity, {}, 'top');
-    addConfirmationBeforeSubmit('top', entity);
 }
 export function setSrcEditRowStyle() {
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
 }
 
 /** ======================== HELPERS ======================================== */
+function finishSourceForm(entity, fLvl) {
+    initFormCombos(entity, fLvl);
+    addConfirmationBeforeSubmit(entity, fLvl);
+}
 export function finishSourceToggleAllFields(entity, fVals, fLvl) {
     if (entity === 'publication') {
         ifBookAddAuthEdNote(fVals.PublicationType);

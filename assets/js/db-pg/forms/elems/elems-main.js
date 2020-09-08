@@ -133,10 +133,6 @@ export function disableSubmitBttn(bttnId) {                                     
     $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"});
 }
 /* ----------- ENABLE WHEN REQUIRED FIELDS FILLED ----------- */
-/**
- * Note: The 'unchanged' property exists only after the create interaction form
- * has been submitted and before any changes have been made.
- */
 export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
     const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
     toggleSubmitBttn('#'+fLvl+'-submit', reqFieldsFilled);

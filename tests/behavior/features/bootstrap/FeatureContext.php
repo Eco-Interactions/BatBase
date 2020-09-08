@@ -198,7 +198,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iToggleTheFilterPanel($state)
     {
         $isClosed = $this->getUserSession()->evaluateScript("$('#filter-pnl').hasClass('closed');");
-        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return true; }
         $toggleBttn = $this->getUserSession()->getPage()->find('css', '#filter');
         if (!$toggleBttn) { $this->iPutABreakpoint('"Filters" button not found.'); }
         $toggleBttn->click();
@@ -208,6 +208,8 @@ class FeatureContext extends RawMinkContext implements Context
             $closed = $this->getUserSession()->evaluateScript("$('#filter-pnl').hasClass('closed');");
             if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
         }, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+
+        return true;
     }
 
     /**
@@ -274,7 +276,10 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iFilterTheTableToInteractionsCreatedToday()
     {
-        $this->iToggleTheFilterPanel('open');
+        $this->spin(function() {
+            return $this->iToggleTheFilterPanel('open');
+        }, 'Problem opening filter panel');
+    
         $this->iSetTheDateFilterTo('updated', 'today');
         $this->iToggleTheFilterPanel('close');
 
@@ -779,7 +784,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'SGenus', 'Species' => 'OGenus Species'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Consumption', 'Leaf', 'Detailed interaction notes.'];
+        $miscData = [ 'Host', 'Secondary', 'Detailed interaction notes.'];
         $this->fillMiscIntFields($miscData);
     }
 
@@ -872,7 +877,7 @@ class FeatureContext extends RawMinkContext implements Context
         $initialCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
         $this->setDateFilterDefault($date);
         $this->toggleTheDateFilter(true);
-        $this->iSelectFromTheDropdown($type, 'Date Filter');
+        $this->iSelectFromTheDropdown($type, 'Date Filter Type');
         $this->clickOnPageElement('#filter-col1');
         $this->spin(function() use ($initialCount) {
             $postCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
@@ -1120,7 +1125,6 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->spin(function() use ($level) {
             $form = $this->getUserSession()->getPage()->find('css', "#$level-form");    //fwrite(STDOUT, "\niWaitForTheFormToClose ? ". (!!$form === true ? 'true' : 'false'));
-            if ($form) { $this->pressTheButton("$level-form"); }
             return !$form;
         }, "Form [$level] did not close.");
     }
@@ -1157,9 +1161,6 @@ class FeatureContext extends RawMinkContext implements Context
 
         $this->pressTheButton($bttnText);
 
-        if ($this->ifFormHasConfirmationMsg($bttnText)) {
-            $this->ensureConfirmationModalOpened($bttnText);
-        }
         if ($bttnText === 'Update Interaction') {
             $this->ensureThatFormClosed();
         }
@@ -1183,6 +1184,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->spin(function() {  
             try {
+                $this->ensureConfirmationModalOpened();
                 $this->getUserSession()->executeScript("$('.introjs-donebutton').click();");
                 $closed = $this->getUserSession()->evaluateScript("!$('.modal-msg').length;"); 
                 return $closed;
@@ -1235,9 +1237,9 @@ class FeatureContext extends RawMinkContext implements Context
     private function setDateFilterDefault($date, $reset = false)
     {
         if ($reset) {
-            $this->getUserSession()->executeScript("$('#selDateFilter').data('default', false);");
+            $this->getUserSession()->executeScript("$('#selDateFilterType').data('default', false);");
         } else {
-            $this->getUserSession()->executeScript("$('#selDateFilter').data('default', '$date');");
+            $this->getUserSession()->executeScript("$('#selDateFilterType').data('default', '$date');");
         }
     }
 
@@ -1457,21 +1459,13 @@ class FeatureContext extends RawMinkContext implements Context
         $checkbox = $row->find('css', 'span.ag-group-expanded');
         return $checkbox == null ? false : $checkbox->isVisible();
     }
-    private function ifFormHasConfirmationMsg($bttnText)
+    private function ensureConfirmationModalOpened()
     {
-        $hasConfirmation = ['Create Interaction', 'Create Citation', 'Update Citation',
-            'Create Publication', 'Update Publication'];
-        return array_search($bttnText, $hasConfirmation, 'strict');
-    }
-    private function ensureConfirmationModalOpened($bttnText)
-    {
-        $this->spin(function() use ($bttnText) {
+        $this->spin(function() {
             try {
-                $modal = $this->getUserSession()->getPage()->find('css', '.introjs-tooltiptext');
-                if (!$modal) { $this->pressTheButton($bttnText); }
-                return $modal;
+                return $this->getUserSession()->getPage()->find('css', '.introjs-tooltiptext');
             } catch (Exception $e) { return; }
-        }, "[$bttnText] Confirmation modal did not open");
+        }, "Confirmation modal did not open");
     }
 /** ---------------------------- Misc Util ---------------------------------- */
     private function spin ($lambda, $errMsg, $wait = 3)
