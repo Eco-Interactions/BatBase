@@ -11,8 +11,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Adds active and passive verb forms to each Interaction Type entity.
- * Trims all string fields that could have be edited directly.
- * Ensures all URLs are valid and with the full path.
  */
 final class Version20200809IntTypeForms extends AbstractMigration implements ContainerAwareInterface
 {
@@ -27,9 +25,7 @@ final class Version20200809IntTypeForms extends AbstractMigration implements Con
 
     public function getDescription() : string
     {
-        return "Adds active and passive verb forms to each Interaction Type entity.
-            Trims all string fields that could have be edited directly.
-            Ensures all URLs are valid and with the full path.";
+        return "Adds active and passive verb forms to each Interaction Type entity.";
     }
 
     private function getEntity($className, $val, $prop = 'id')
@@ -58,9 +54,8 @@ final class Version20200809IntTypeForms extends AbstractMigration implements Con
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->getEntity('User', 6, 'id');
 
-        // $this->addInteractionTypeForms();
-        $this->validateSourceUrls();
-        // $this->deleteSourceErrs();
+        $this->addInteractionTypeForms();
+        // $this->validateSourceUrls();
 
         $this->em->flush();
     }
@@ -157,13 +152,13 @@ private function handleDoi($src, &$invalidUrls)
     }
 
     $invalidUrl = $this->ifInvalidGetLinkData($url);
-    if (!$invalidUrl) { continue; };
+    if (!$invalidUrl) { return; };
 
     if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
         $invalidUrls[$invalidUrl['response']] = [];
     }
     $invalidUrls[$invalidUrl['response']] += [
-        $src->getDisplayName().' ['.$src->getId().' - '.$prop.']' => $invalidUrl['url']
+        $src->getDisplayName().' ['.$src->getId().' - DOI]' => $invalidUrl['url']
     ];
 }
 private function handleLinkUrl($src, &$invalidUrls)
@@ -178,18 +173,16 @@ private function handleLinkUrl($src, &$invalidUrls)
         $src->$setLinkUrl($url);
         $this->persistEntity($src);
     }
-
     $invalidUrl = $this->ifInvalidGetLinkData($url);
-    if (!$invalidUrl) { continue; };
+    if (!$invalidUrl) { return; };
 
     if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
         $invalidUrls[$invalidUrl['response']] = [];
     }
     $invalidUrls[$invalidUrl['response']] += [
-        $src->getDisplayName().' ['.$src->getId().' - '.$prop.']' => $invalidUrl['url']
+        $src->getDisplayName().' ['.$src->getId().' - WEBSITE]' => $invalidUrl['url']
     ];
 }
-
 
 private function ifInvalidGetLinkData($url)
 {
@@ -203,17 +196,6 @@ private function returnInvalidUrl($url, $header)
         'response' => $header,
         'url' => $url
      ];
-}
-
-private function deleteSourceErrs()
-{
-    $ids = ['Citation' => 2090, 'Publication' => 2089];
-
-    foreach ($ids as $type => $id) {
-        $getSrcType = 'get'.$type;
-        $srcType = $this->getEntity('Source', $id)->$getSrcType();
-        $this->em->remove($srcType);
-    }
 }
 
 
