@@ -144,7 +144,7 @@ export function enableClearFiltersButton() {                        /*dbug-log*/
     const opac = noFilters ? .5 : 1;
     const cursor = noFilters ? 'inherit' : 'pointer';
     $('button[name="reset-tbl"]')
-        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('slow', opac);
+        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('fast', opac);
 }
 /* ----------------------- RESET UI ----------------------------------------- */
 export function clearFilterUi() {
@@ -156,6 +156,7 @@ export function clearFilterUi() {
 function resetFilterUi() {
     resetFilterStatus();
     $('#focus-filters input[type="select-one"]').val('');
+    $('label.txtLbl input[type="text"]').val('');
     if ($('div.selectize-control.multi').length) { clearMultiComboboxes() }
     if ($('#shw-chngd').prop('checked')) { _filter('clearDateFilter'); }
 }

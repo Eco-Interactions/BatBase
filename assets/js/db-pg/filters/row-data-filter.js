@@ -6,6 +6,7 @@
  * 		filterRowData
  *
  * 	TOC
+ * 		GET ACTIVE FILTERS
  *  	TREE FILTERS
  *  	INTERACTION FILTERS
  *  	FILTERS
@@ -15,6 +16,23 @@
  */
 import { _u } from '../db-main.js';
 let filters, rows;
+/**
+ * These filters directly modify the rowData after the table is built based on 
+ * the tree root row, all tree rows, or on interactions.
+ */
+const filterFuncs = {
+	root: {
+		combo: 	{ 'Publication Type': ifRowFromPubType }
+	},
+	tree: {
+		name: 	ifRowNameContainsText
+	},
+	int: {
+		combo: 	{ 'Object Realm': ifIntWithRealm },
+		date: 	ifRowAfterDate
+	}
+};
+
 /**
  * These are handled before table rebuild starts:
  *   Level combos, Region and Country combos
@@ -27,43 +45,48 @@ export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('
     handleInteractionFilters();										/*dbug-log*///console.log('filteredRowData = %O', rows)
     return rows;
 }
-function ifActiveFiltersInGroup(filterFuncs, filterObj = filters) {
-	return !!Object.keys(filterFuncs).find(ifFilterTypeActive);
-
-	function ifFilterTypeActive(type) {
-		if (type !== 'combo') { return filterObj[type]; }
-		return ifActiveFiltersInGroup(filterFuncs.combo, filters.combo);
+/* ---------------------- GET ACTIVE FILTERS -------------------------------- */
+function getFuncsForActiveFiltersInGroup(group, filterObj = filters) {
+	const funcObj = typeof group === 'string' ? filterFuncs[group] : group;
+	const active = {};
+	Object.keys(funcObj).forEach(ifFilterTypeActive);
+	return Object.keys(active).length ? active : false;
+	
+	function ifFilterTypeActive(type) {  										//console.log('type = [%s] funcs = %O filters = %O', type, funcObj, filterObj);
+		if (type !== 'combo') { return addFilterFuncIfActive(type, filterObj[type]); }
+		const subGroup = getFuncsForActiveFiltersInGroup(funcObj.combo, filters.combo);
+		addFilterFuncIfActive(type, subGroup);
+	}
+	function addFilterFuncIfActive(type, fData) {
+		if (!fData) { return; }
+		 active[type] = funcObj[type];
 	}
 }
 /* ------------------------- TREE FILTERS ----------------------------------- */
 function handleTreeFilters() {
-	filterOnTopTreeLevel();
+	filterOnRootLevel();
 	filterOnAllTreeLevels();
 }
-function filterOnTopTreeLevel() {
-	const filterFuncs = {
-		combo: { 'Publication Type': ifRowFromPubType }
-	};
-	if (!ifActiveFiltersInGroup(filterFuncs)) { return; }
-	rows = filterTreeRows(filterFuncs, 1);  									//console.log('rows = %O', rows)
+function filterOnRootLevel() {
+	const funcs = getFuncsForActiveFiltersInGroup('root');  					//console.log('root funcs = %O', funcs)
+	if (!funcs) { return; }
+	rows = filterTreeRows(funcs);  																	
 }
 function filterOnAllTreeLevels() {
-	const filterFuncs = {
-		name: ifRowNameContainsText
-	};
-	if (!ifActiveFiltersInGroup(filterFuncs)) { return; }
-	rows = filterTreeRows(filterFuncs);  										//console.log('rows = %O', rows)
+	const funcs = getFuncsForActiveFiltersInGroup('tree');						//console.log('tree funcs = %O', funcs)
+	if (!funcs) { return; }
+	rows = filterTreeRows(funcs);  								
 }
-function filterTreeRows(filterFuncs) {
-	return 	rows.map(row => getRowsThatPassAllTreeFilters(row, filterFuncs))
+function filterTreeRows(funcs) {
+	return 	rows.map(row => getRowsThatPassAllTreeFilters(row, funcs))
 		.filter(r=>r);
 }
-function getRowsThatPassAllTreeFilters(row, filterFuncs) {
+function getRowsThatPassAllTreeFilters(row, funcs) {  
 	return getRowIfAllFiltersPass(row);
 	/** @return row */
-	function getRowIfAllFiltersPass(row) {
+	function getRowIfAllFiltersPass(row) {   
 		if (!row.name) { return row; }
-		let rowPasses = ifRowPassesFilters(row, filterFuncs);       /*dbug-log*///console.log('getRowIfAllFiltersPass. rowPasses %s, row = %O', rowPasses, row)
+		let rowPasses = ifRowPassesFilters(row, funcs);             /*dbug-log*///console.log('getRowIfAllFiltersPass. rowPasses %s, row = %O', rowPasses, row)
 		if (rowPasses) { return row; }
 		row.children = filterRowChildren(row);
 		return row.children.length ? row : null;
@@ -79,12 +102,9 @@ function getRowsThatPassAllTreeFilters(row, filterFuncs) {
 }
 /* --------------------- INTERACTION FILTERS -------------------------------- */
 function handleInteractionFilters() {
-	const filterFuncs = {
-		date: 		ifRowAfterDate,
-		combo: { 'Object Realm': ifIntWithRealm }
-	};
-	if (!ifActiveFiltersInGroup(filterFuncs)) { return; }
-	handlePersistedDateFilterObj();
+	const funcs = getFuncsForActiveFiltersInGroup('int');  						//console.log('int funcs = %O', funcs)
+	if (!funcs) { return; }
+	if (funcs.date) { handlePersistedDateFilterObj(); }
 	rows = rows.map(getRowsThatPassInteractionFilters).filter(r=>r);
 
 	function getRowsThatPassInteractionFilters(row) {
@@ -96,7 +116,7 @@ function handleInteractionFilters() {
 		return row.children.map(getRowsThatPassInteractionFilters).filter(r=>r);
 	}
 	function ifPassesReturnRow(row) {
-		return ifRowPassesFilters(row, filterFuncs) ? row : false;
+		return ifRowPassesFilters(row, funcs) ? row : false;
 	}
 }
 function handlePersistedDateFilterObj() {
@@ -105,20 +125,20 @@ function handlePersistedDateFilterObj() {
 }
 /* =========================== FILTERS ====================================== */
 /** @return bool */
-function ifRowPassesFilters(row, filterFuncs) {						/*dbug-log*///console.log('ifRowPassesFilters row = %O, filters = %O', row, filterFuncs);
+function ifRowPassesFilters(row, funcs) {						    /*dbug-log*///console.log('ifRowPassesFilters row = %O, filters = %O', row, funcs);
  	return Object.keys(filters).every(ifRowPassesFilter);
 
-	function ifRowPassesFilter(type) {
-		return filterFuncs[type] ? applyFilter(type) : true;
+	function ifRowPassesFilter(type) {   
+		return funcs[type] ? applyFilter(type) : true;
 	}
 	function applyFilter(type) {
-		if (type === 'combo') { return ifRowContainsComboValue(row, filterFuncs[type]); }
-		return filterFuncs[type](row, filters[type]);
+		if (type === 'combo') { return ifRowContainsComboValue(row, funcs[type]); }
+		return funcs[type](row, filters[type]);
 	}
 }
 /* ------------- COMBO FILTERS ------------------ */
 function ifRowContainsComboValue(row, comboFuncs) {
-	return Object.keys(comboFuncs).every(type => {  							//console.log('type [%s] funcs = %O row = %O', type, comboFuncs, row);
+	return Object.keys(comboFuncs).every(type => {  							//console.log('type [%s] funcs = %O row = %O filters = %O', type, comboFuncs, row, filters);
 		const filterVal = filters.combo[type].value || filters.combo[type];
 		return comboFuncs[type] ? comboFuncs[type](row, filterVal) : true;
 	});
