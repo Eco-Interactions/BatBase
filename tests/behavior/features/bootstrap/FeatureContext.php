@@ -1638,9 +1638,10 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Sphingidae'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
+        $miscData = [ 'Prey', 'Secondary', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
+        $this->iPressSubmitInTheConfirmationPopup();
         $this->waitForInteractionFormToReset();
     }
     private function waitForInteractionFormToReset()
