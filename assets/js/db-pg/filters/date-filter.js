@@ -68,10 +68,12 @@ function initCal() {
     if (app.cal) { app.cal.destroy(); }
     const flatpickr = require('flatpickr');
     const calOpts = {
-        altInput: true, maxDate: "today", enableTime: ifFilteringByUpdates(),
-        plugins: ifFilteringByUpdates() ? getCalPlugins() : [],
-        onReady: getCalOnReadyMethod(), disableMobile: true,
+        altInput: true, maxDate: "today", 
+        disableMobile: true,
+        enableTime: ifFilteringByUpdates(),
         onClose: filterByTime,
+        onReady: getCalOnReadyMethod(), 
+        plugins: getCalPlugins(ifFilteringByUpdates()),
     };
     addDefaultTimeIfTesting(calOpts);
     return new flatpickr('#filter-cal', calOpts);
@@ -79,9 +81,22 @@ function initCal() {
 function ifFilteringByUpdates() {
     return app.date && app.date.type === 'updated';
 }
-function getCalPlugins() {
+function getCalPlugins(filterByDbUpdatedAt) {
+    return filterByDbUpdatedAt ? getConfirmDatePlugin() : getMonthPlugin(); 
+}
+function getConfirmDatePlugin() {
     const confirmDatePlugin = require('flatpickr/dist/plugins/confirmDate/confirmDate.js');
     return [new confirmDatePlugin({showAlways: true})];
+}
+function getMonthPlugin() {
+    return [];
+    // const monthSelectPlugin = require('flatpickr/dist/plugins/monthSelectPlugin/monthSelectPlugin.js');
+    // return [new monthSelectPlugin({
+    //     shorthand: true, //defaults to false
+    //     dateFormat: "m.y", //defaults to "F Y"
+    //     altFormat: "F Y", //defaults to "F Y"
+    //     theme: "dark" // defaults to "light"
+    // })];
 }
 function getCalOnReadyMethod() {
     return ifFilteringByUpdates() ?

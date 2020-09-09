@@ -118,9 +118,13 @@ function getClickedElemClass(elem) {
     return elem.className ? elem.className :
         elem._container ? elem._container.className : '';
 }
-function showLatLngPopup(type, e) {
-    if (['create', 'edit'].indexOf(type) === -1) { return console.log(latLng); }
+function showLatLngPopup(type, e) {  
+    if (['create', 'edit'].indexOf(type) === -1) { return showCoordPopup(e); }
     return geocodeAndShowPopup(type, e);
+}
+function showCoordPopup(e) {  
+    const latLngTxt = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+    new L.Popup().setLatLng(e.latlng).setContent(latLngTxt).openOn(app.map);
 }
 function geocodeAndShowPopup(type, e) {
     $('#form-map').css('cursor', 'progress');

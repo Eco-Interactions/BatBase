@@ -5,6 +5,10 @@
  *      SET
  *      GET
  *      FILTER STATUS TEXT
+ *          FILTER SET
+ *          PAGE FILTERS
+ *          PANEL FILTERS
+ *          TABLE FILTERS
  */
 import { _u, _ui, accessTableState as tState } from '../db-main.js';
 
@@ -36,8 +40,8 @@ function initFilterStateObj(persisted = {}) {
 /* =========================== SET ========================================== */
 export function setFilterState(key, value, filterGroup, fObj) {
     if (!fObj) { fObj = fS.filters[filterGroup]; }
-    if (key === 'combo') { return setComboFilterState(...Object.keys(value)); }
     if (value === false) { delete fObj[key];
+    } else if (key === 'combo') { return setComboFilterState(...Object.keys(value)); 
     } else { fObj[key] = value; }
 
     function setComboFilterState(comboKey) {
@@ -65,9 +69,7 @@ function getPanelFilters(filters) {
     return filters;
 }
 export function isFilterActive() {
-    const tbl = getTblFilterNames().length > 0;
-    const pnl = getPanelFilterVals().length > 0;
-    return tbl || pnl;
+    return !!getPageActiveFilters().length;
 }
 export function getRowDataFilters(f) {
     const filters = f || _u('snapshot', [fS.filters.direct]);
@@ -87,61 +89,56 @@ export function getActiveFilterVals() {
 /* ------------------- FILTER SET STATUS ------------------------------------ */
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = Object.keys(set.rebuild).concat(getDirectFilterVals(set.direct));
+    const pnlFltrs = getFilterDisplayNames(set.direct, set.rebuild); 
     return pnlFltrs.concat(tblFltrs);
 }
-function getDirectFilterVals(dFilters) {
-    const specl = ['combo', 'date'];
-    return Object.keys(dFilters).map(type => {
-        return specl.indexOf(type) === -1 ? dFilters[type] : formatFilterVal(type);
-    }).filter(v => v);
-
-    function formatFilterVal(type) {
-        const map = {
-            'date': getDateFltrString,
-            'combo': getComboField
-        };
-        return map[type](dFilters[type]);
-    }
-}
-function getComboField(combo) {
-    return Object.keys(combo)[0]
-}
-/* ----------------- ACTIVE PAGE FILTERS ------------------------------------ */
+/* ------------------- PAGE FILTERS ----------------------------------------- */
 function getPageActiveFilters () {
-    return getTblFilterNames().concat(getPanelFilterVals());
+    const panelFilters = getFilterDisplayNames(fS.filters.direct, fS.filters.rebuild);
+    return getTblFilterNames().concat(panelFilters);
 }
-function getPanelFilterVals() {
-    const map = { combo: addComboValue, name: addName, date: getDateFltrString };
-    return ['direct', 'rebuild'].flatMap(getFocusFilterDisplayVals);
+/* ----------------------- PANEL FILTERS ------------------------------------ */
+/**
+ * There are two groups of filters, ones that require the table to rebuild, and 
+ * the other can be applied to the row data directly.
+ */
+function getFilterDisplayNames(dFilters, rFilters) {                            //console.log('getFilterDisplayNames. detail = %O, rebuild = %O', dFilters, rFilters);
+    const names = [];
+    getActivePanelFilterDisplayNames(dFilters, 'direct');
+    getActivePanelFilterDisplayNames(rFilters, 'rebuild');
+    return names.filter(t=>t);
+    
+    function getActivePanelFilterDisplayNames(gFilters, group) {
+        Object.keys(gFilters).forEach(addActiveFilterType);
+        
+        function addActiveFilterType(type) {
+            const edgeCase = {
+                date: getDateFltrString,
+                combo: addComboValues,
+            };
+            const name = getFilterName(Object.keys(edgeCase));
+            if (Array.isArray(name)) { return names.push(...name); }
+            names.push(name);
 
-    function getFocusFilterDisplayVals(group) {
-        if (!fS.filters[group]) { return []; }
-        const vals = [];
-        Object.keys(fS.filters[group]).forEach(addFilterVal);
-        return vals.filter(f => f);
-
-        function addFilterVal(type) {
-            const val = map[type](fS.filters[group][type], group);
-            if (Array.isArray(val)) { return vals.push(...val); }
-            vals.push(val);
+            function getFilterName(edgeCases) {
+                return edgeCases.indexOf(type) === -1 ? 
+                    gFilters[type] : edgeCase[type](gFilters[type], group);
+            }
         }
     }
 }
 /** Stores the most recent combobox selection. */
-function addComboValue(comboObj, group) {                                              //console.log('comboObj = %O', comboObj);
+function addComboValues(comboObj, group) {                                      //console.log('comboObj = %O', comboObj);
     const comboKeys = Object.keys(comboObj);
     if (group === 'direct') { return comboKeys; }
     return comboKeys.map(k => comboObj[k].text);
 }
-function addName(name) {
-    return name;
-}
-function getDateFltrString(date) {
+function getDateFltrString(date, group) {
     if (!date.active) { return null; }
     const type = date.type === 'cited' ? 'Published' : 'Updated';
     return 'Date '+ type;
 }
+/* ----------------------- TABLE FILTERS ------------------------------------ */
 function getTblFilterNames() {
     return Object.keys(getActiveTableFilterObj());
 }

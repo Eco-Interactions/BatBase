@@ -175,9 +175,12 @@ function setView(filters) {
     _u('setSelVal', ['View', filters.view, 'silent']);
 }
 function onTableReloadComplete(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
-    if (id) { _u('setSelVal', ['Saved Filter Set', id]); }  //If no id, reapplying filters after form closed.
     addFiltersToMemoryAndUi(filters);
-    setFiltersThatResetTableThenApplyRemaining(filters);
+    setFiltersThatResetTableThenApplyRemaining(filters)
+    .then(() => ifActiveSetResetVal(id));
+}
+function ifActiveSetResetVal(id) {
+    if (id) { _u('setSelVal', ['Saved Filter Set', id]); }  //If no id, reapplying filters after form closed.
 }
 /* ------------ SET IN FILTER MEMORY -------------- */
 function addFiltersToMemoryAndUi(filters) {
@@ -218,9 +221,9 @@ function getComboId(field) {
     return map[field];
 }
 /* --------------- FILTERS THAT REBUILD TABLE ------- */
-function setFiltersThatResetTableThenApplyRemaining(filters) {
+function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
     if (!filters.rebuild) { return _filter('onFilterChangeUpdateRowData'); }
-    setComboboxFilter(filters.rebuild.combo)
+    return setComboboxFilter(filters.rebuild.combo)
     .then(applyColumnFilters.bind(null, filters.table))
     .then(onAllFiltersApplied);
 }

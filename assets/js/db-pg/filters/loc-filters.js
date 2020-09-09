@@ -156,7 +156,7 @@ function setSelectedLocVals(selected) {                                         
 export function applyLocFilter(val) {
     if (!val) { return; }
     const selectedOpts = tState().get('selectedOpts');
-    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLoc[%s]Filter = [%s]', locType, val);
+    let locType = getLocType(this, selectedOpts);                   /*perm-log*/console.log('       +-applyLoc[%s]Filter = [%s]', locType, val);
     const root = getNewLocRoot();
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
@@ -167,6 +167,7 @@ export function applyLocFilter(val) {
             getRegionIdAndUpdateType(locType) : [parseInt(val)];
     }
     function getRegionIdAndUpdateType (comboType) {
+        fM.setFilterState('combo', false, 'rebuild');
         locType = 'Region';
         return getRegionId(comboType);
     }
