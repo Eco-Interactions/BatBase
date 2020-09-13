@@ -441,7 +441,6 @@ function getTxnDataAndBuildTable(view) {
 function beginTaxonLoad(realmId, taxa) {
     tState.rcrdsById = taxa;                                                    //console.log('Building Taxon Table. taxa = %O', u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd(realmId);
-    tState.realmName = realmTaxon.displayName;
     ui.initTxnViewOpts(realmTaxon.id, tState.flags.allDataAvailable);
     return startTxnTableBuildChain(realmTaxon, true);
 }
@@ -471,6 +470,7 @@ function updateRealmTableState(realmId, realmTaxonRcrd) {
     u.setData('curView', realmId);
     tState.realmLvl = realmTaxonRcrd.level;
     tState.curView = realmId;
+    tState.realmName = realmTaxonRcrd.realm.displayName;
 }
 /** This catches errors in realm value caused by exiting mid-tutorial. TODO */
 function getSelValOrDefault(val) {

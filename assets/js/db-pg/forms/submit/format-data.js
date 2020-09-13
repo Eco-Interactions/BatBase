@@ -87,7 +87,7 @@ function addAllRemainingData(entity, formVals, data) {
      */
     function addGeoJson() {
         const editing = _state('getStateProp', ['editing']);
-        if (!editing && (!formVals.latitude || !formVals.longitude)) { return; }
+        if (!ifEntityHasGeoJsonEntity(editing)) { return; }
         const displayPoint = JSON.stringify([ formVals.longitude, formVals.latitude ]);
         data.geoJson = {
             flat: {
@@ -104,6 +104,9 @@ function addAllRemainingData(entity, formVals, data) {
             const geoJson = _state('getFormProp', ['top', 'geoJson']);
             return geoJson ? geoJson.coordinates : displayPoint;
         }
+    }
+    function ifEntityHasGeoJsonEntity(editing) {
+        return formVals.latitude || formVals.longitude || (editing && editing.detail); 
     }
     function addTaxonDisplayName() {
         const isSpecies = formVals.level == 'Species';

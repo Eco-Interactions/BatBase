@@ -116,10 +116,22 @@ function loadPubTypeFields(typeId) {                                            
         .then(finishPubTypeFields);
 
     function finishPubTypeFields() {
-        $('#PublicationType-lbl').css('min-width', '125px');
+        setPubComboLabelWidth();
         ifBookAddAuthEdNote();
         _elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
+        ifThesisDissertationModifyLabel();
     }
+}
+function setPubComboLabelWidth() {
+    const rowW = $('#PublicationType_row').width() - 14;
+    $('#PublicationType_row, #Publisher_row, #Editors_row').css('max-width', rowW);
+    $('#PublicationType-lbl, #Publisher-lbl, #Editors-lbl').css('min-width', '125px');
+    $('#Authors-lbl').css('min-width', '109px');
+}
+function ifThesisDissertationModifyLabel() {
+    const type = $('#PublicationType-sel')[0].innerText; 
+    if (type !== 'Thesis/Dissertation') { return; }
+    $('#Publisher-lbl').css({'flex': '0 0 157px'});
 }
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote() {
@@ -168,6 +180,7 @@ function initCitSubForm(val) {
         ['sub', 'med-sub-form', {'Title': val}, '#CitationTitle-sel']);
 }
 function appendCitFormAndFinishBuild(form) {                                    //console.log('           --appendCitFormAndFinishBuild');
+    $('#CitationText_row textarea').attr('disabled', true);
     $('#CitationTitle_row')[0].parentNode.after(form);
     finishSourceForm('citation', 'sub');
     return selectDefaultCitType()

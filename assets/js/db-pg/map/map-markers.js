@@ -702,11 +702,11 @@ function buildLocDetails(loc) {
 function getGeocodedLocHtml(loc) {                                              //console.log('buildingGeocodedLocationPopup. loc = %O ', loc);
     const cntnr = _u('buildElem', ['div', {class: 'flex-col form-loc-popup'}]);
     const elems = getLocDataHtml(loc);
-    const bttn = getFillCoordsBttn(loc.lat, loc.lng);
-    $(cntnr).append([...elems, bttn]);
+    const bttn = loc ? getFillCoordsBttn(loc.lat, loc.lng) : null;
+    $(cntnr).append([...elems, bttn].filter(e=>e));
     return cntnr;
 }
-function getLocDataHtml(loc) {
+function getLocDataHtml(loc) {                                                  //console.log('getLocDataHtml. loc = %O ', loc);
     const name = getNameHtml(loc);
     const latLng = !loc ? null : `Near: ${loc.lat}, ${loc.lng}`;
     const unique = '<i>Please ensure that this location is unique.</i>';

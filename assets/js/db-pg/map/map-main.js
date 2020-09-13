@@ -105,7 +105,7 @@ function getMapInstance(mapId) {
  * Either displays coordinates at click location; or drops a new map pin and updates
  * the form.
  */
-function onMapClick(type, e) {
+function onMapClick(type, e) {  
     if (ifClickOnMapTool(e)) { return; }
     showLatLngPopup(type, e);
 }
@@ -438,7 +438,7 @@ function buildAndAddIntMarker(focus, geoId, data) {
     if (!app) { return; } //map closed
     const latLng = getCoords(geoId, data);
     const intCnt = data.ttl;
-    const MapMarker = buildIntMarker(focus, intCnt, latLng, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
+    const MapMarker = buildIntMarker(focus, intCnt, latLng, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O MapMarker = %O', intCnt, data, MapMarker);
     app.map.addLayer(MapMarker.layer);
 }
 function buildIntMarker(focus, intCnt, latLng, intData) {
@@ -483,7 +483,7 @@ function getCenterCoordsOfLoc(loc, geoId) {
     return getLatLngObj(loc, app.data.geo[geoId]);
 }
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
-function getLatLngObj(loc, locGeoJson) {
+function getLatLngObj(loc, locGeoJson) {                                        //console.log('getLatLngObj for = %O, geoJson = %O', loc, locGeoJson)
     if (!locGeoJson.displayPoint) { return getLocCenterPoint(loc, locGeoJson); }
     let array = JSON.parse(locGeoJson.displayPoint);
     return L.latLng(array[1], array[0]);
@@ -511,7 +511,7 @@ function addMarkerForEachInteraction(intCnt, latLng, loc) {                     
     const params = { loc: loc, latLng: latLng, rcrds: app.data };
     const MapMarker = intCnt > 1 ?
         new MM.LocCluster(app.map, intCnt, params) : new MM.LocMarker(params);
-    app.popups[loc.displayName] = MapMarker.popup;
+    app.popups[loc.displayName] = MapMarker.popup;                              //console.log('MapMarker = %O, params = %O', MapMarker, params);
     app.map.addLayer(MapMarker.layer);
 }
 /*===================== Location Form Methods ================================*/
@@ -529,7 +529,7 @@ function loadCountryAndSubLocs(cntryId) {
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
-export function addVolatileMapPin(val, type, cntryId) {                         console.log('           --addVolatileMapPin')
+export function addVolatileMapPin(val, type, cntryId) {                         //console.log('           --addVolatileMapPin')
     if (!val) { return removePreviousMapPin(); }
     const latLng = getMapPinCoords();
     if (type === 'edit') { addEditFormMapData(latLng, val, cntryId);
@@ -540,11 +540,14 @@ function getMapPinCoords() {                                                    
     return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
 }
 function addEditFormMapData(latLng, locId, cntryId) {
-    app.geoCoder.reverse(
-        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, 'edit'), null);
+    if (latLng) { geocodeCoordinates(latLng); }
     if (!cntryId) { return; }
     addParentLocDataToMap(cntryId, 'skipZoom', 'edit', locId);
     app.map.setView(latLng, 10, {animate: true});
+}
+function geocodeCoordinates(latLng) {
+    app.geoCoder.reverse(
+        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, 'edit'), null);
 }
 function addNewLocPinAndFillCoordFields(latLng) {
     app.geoCoder.reverse(
@@ -594,8 +597,9 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
-        $('#Country-sel')[0].selectize.addItem(loc.cntryId); //, 'silent'
-        addParentLocDataToMap(loc.cntryId, null);
+        $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
+        $('#location_Rows #DisplayName_row input[type="text"]').change(); //Required fields handle submit button enabling
+        addParentLocDataToMap(loc.cntryId, zoomFlag === 'create');
     }
     addPinToMap(latLng, marker, zoomFlag);
 }

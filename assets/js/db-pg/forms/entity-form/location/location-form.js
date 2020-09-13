@@ -95,6 +95,7 @@ export function addMapToLocationEditForm(id) {
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
+    if (!$('#Latitude_row input').val()) { return; }
     _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['#Country-sel'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
