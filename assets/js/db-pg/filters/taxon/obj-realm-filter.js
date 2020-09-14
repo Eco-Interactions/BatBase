@@ -48,8 +48,8 @@ export function filterTableByObjectRealm(realmIds) {                            
 function filterByObjRealms() {
 	timeout = null;
     const realmIds = _u('getSelVal', ['Object Realm']);
+    if (realmIds.length) { ifAllRealmsSelectedClearFilter(realmIds.length); }
     const filterObj = buildObjRealmFilterObj(realmIds);
-    ifAllRealmsSelectedClearFilter(realmIds.length);
 	fM.setFilterState('combo', filterObj, 'direct');
 	fM.onFilterChangeUpdateRowData();
     _ui('showTable');
@@ -61,5 +61,5 @@ function filterByObjRealms() {
     }
 }
 function buildObjRealmFilterObj(realmIds) {
-    return { 'Object Realm': realmIds };
+    return { 'Object Realm': realmIds.length ? realmIds : false };
 }

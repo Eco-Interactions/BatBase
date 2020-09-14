@@ -65,7 +65,7 @@ export function getRowDataForCurrentFilters(rowData) {
     if (!Object.keys(filters).length) { return rowData; }                       //console.log('getRowDataForCurrentFilters = %O', filters);
     return fRows.getFilteredRowData(filters, rowData);
 }
-/** If filter cleared (!val), filter all table rows, else apply on top of current filters. */
+/** If filter cleared, filters all table rows, else applies on top of current filters. */
 export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
     if (!Object.keys(fState.getRowDataFilters()).length) { return resetDataTable(); }              
     const rowData = getRowDataForCurrentFilters(tState().get('rowData'));

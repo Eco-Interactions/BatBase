@@ -95,14 +95,6 @@ class GeoJson
     private $updatedBy;
 
     /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->locations = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    /**
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")

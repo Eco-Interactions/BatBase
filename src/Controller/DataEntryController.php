@@ -524,7 +524,7 @@ class DataEntryController extends AbstractController
         $entity = $em->getRepository('App:SystemDate')
             ->findOneBy(['description' => $name]);
         if (!$entity) { return; }
-        $entity->setDateVal(new \DateTime('now'));
+        $entity->setDateVal(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
         $em->persist($entity);
     }
 }

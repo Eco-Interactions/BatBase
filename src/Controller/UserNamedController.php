@@ -103,7 +103,7 @@ class UserNamedController extends AbstractController
         $returnData->entity = $list;
         $returnData->edits = new \stdClass;
 
-        $list->setLastLoaded(new \DateTime('now'));
+        $list->setLastLoaded(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
         $this->setListData($data, $list, $em, $returnData->edits);
         $em->persist($list);
 

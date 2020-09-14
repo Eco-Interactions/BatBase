@@ -180,7 +180,9 @@ function onTableReloadComplete(filters, id) {                       /*dbug-log*/
     .then(() => ifActiveSetResetVal(id));
 }
 function ifActiveSetResetVal(id) {
-    if (id) { _u('setSelVal', ['Saved Filter Set', id]); }  //If no id, reapplying filters after form closed.
+    if (!id) { return; }  //If no id, reapplying filters after form closed.
+    fillFilterDetailFields(app.fltr.displayName, app.fltr.description);
+    _u('setSelVal', ['Saved Filter Set', id, 'silent'])
 }
 /* ------------ SET IN FILTER MEMORY -------------- */
 function addFiltersToMemoryAndUi(filters) {
@@ -222,10 +224,13 @@ function getComboId(field) {
 }
 /* --------------- FILTERS THAT REBUILD TABLE ------- */
 function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
-    if (!filters.rebuild) { return _filter('onFilterChangeUpdateRowData'); }
+    if (!Object.keys(filters.rebuild).length) { return Promise.resolve(applyDirectFilters()); }
     return setComboboxFilter(filters.rebuild.combo)
     .then(applyColumnFilters.bind(null, filters.table))
     .then(onAllFiltersApplied);
+}
+function applyDirectFilters() {
+    _filter('onFilterChangeUpdateRowData');
 }
 function setComboboxFilter(filter) {
     if (!filter) { return Promise.resolve(); }
@@ -325,7 +330,7 @@ function hideSavedMsg() {
 }
 /* ------------------- RESET & ENABLE/DISABLE UI -----------------------------*/
 function resetFilterUi() {
-    if (app.filtr && !app.fltr.active) { app.fltr = null; }
+    if (app.filtr) { app.fltr = null; } // && !app.fltr.active
     hideSavedMsg();
     clearFilterDetailFields();
     disableFilterSetInputs();

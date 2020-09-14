@@ -55,7 +55,6 @@ final class Version20200809IntTypeForms extends AbstractMigration implements Con
         $this->admin = $this->getEntity('User', 6, 'id');
 
         $this->addInteractionTypeForms();
-        // $this->validateSourceUrls();
 
         $this->em->flush();
     }
@@ -123,81 +122,6 @@ private function getInteractionTypeNameForms()
         ]
     ];
 }
-/* -------------------- URL VALIDATION  ------------------------------------- */
-private function validateSourceUrls()
-{
-    $srcs = $this->getEntities('Source');
-    $invalidUrls = [];
-
-    foreach ($srcs as $src) {
-        $this->handleLinkUrl($src, $invalidUrls);
-        $this->handleDoi($src, $invalidUrls);
-    }
-
-    ksort($invalidUrls);  //print('reporting...');
-    foreach ($invalidUrls as $name => $urls) {
-        ksort($urls);
-        $invalidUrls[$name] = $urls;
-    }                                            print("\n\Report = "); print_r($invalidUrls);
-}
-private function handleDoi($src, &$invalidUrls)
-{
-    $url = $src->getDoi() ? trim($src->getDoi()) : null;
-    if (!$url) { return; }
-
-    if (!preg_match('-http(s?)://doi.org/.+-', $url)) {
-        $url = 'https://doi.org/' . $url;
-        $src->setDoi($url);
-        $this->persistEntity($src);
-    }
-
-    $invalidUrl = $this->ifInvalidGetLinkData($url);
-    if (!$invalidUrl) { return; };
-
-    if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
-        $invalidUrls[$invalidUrl['response']] = [];
-    }
-    $invalidUrls[$invalidUrl['response']] += [
-        $src->getDisplayName().' ['.$src->getId().' - DOI]' => $invalidUrl['url']
-    ];
-}
-private function handleLinkUrl($src, &$invalidUrls)
-{
-    if ($src->getId() === 1408) { $src->setLinkUrl(null); return; }
-
-    $url = $src->getLinkUrl() ? trim($src->getLinkUrl()) : null;
-    if (!$url) { return; }
-
-    if (!preg_match('-http(s?)://.+-', $url)) {
-        $url = 'https://' . $url;
-        $src->$setLinkUrl($url);
-        $this->persistEntity($src);
-    }
-    $invalidUrl = $this->ifInvalidGetLinkData($url);
-    if (!$invalidUrl) { return; };
-
-    if (!array_key_exists($invalidUrl['response'], $invalidUrls)) {
-        $invalidUrls[$invalidUrl['response']] = [];
-    }
-    $invalidUrls[$invalidUrl['response']] += [
-        $src->getDisplayName().' ['.$src->getId().' - WEBSITE]' => $invalidUrl['url']
-    ];
-}
-
-private function ifInvalidGetLinkData($url)
-{
-    $headers = @get_headers($url);                                              //print("\n    headers = ".$headers[0]);
-    $valid = $headers && strpos($headers[0],'200') !== false;                   //print("\n         valid = ".$valid);
-    return $valid ? false : $this->returnInvalidUrl($url, $headers[0]);
-}
-private function returnInvalidUrl($url, $header)
-{
-    return [
-        'response' => $header,
-        'url' => $url
-     ];
-}
-
 
 /* ============================ DOWN ======================================== */
     public function down(Schema $schema) : void
