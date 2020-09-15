@@ -175,7 +175,6 @@ function setView(filters) {
     _u('setSelVal', ['View', filters.view, 'silent']);
 }
 function onTableReloadComplete(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
-    addFiltersToMemoryAndUi(filters);
     setFiltersThatResetTableThenApplyRemaining(filters)
     .then(() => ifActiveSetResetVal(id));
 }
@@ -201,7 +200,8 @@ function addFiltersToMemoryAndUi(filters) {
 function handleUiUpdate(type, val) {
     const map = {
         name: setNameTextInput,
-        combo: setComboElem
+        combo: setComboElem,
+        date: setDateElems
     };
     if (!map[type]) { return; }
     map[type](type, val);
@@ -222,15 +222,22 @@ function getComboId(field) {
     }
     return map[field];
 }
+function setDateElems(type, val) {
+    _u('setSelVal', ['Date Filter', type, 'silent']);
+    _filter('toggleDateFilter', [true, val.time, 'skipSync']);
+}
 /* --------------- FILTERS THAT REBUILD TABLE ------- */
 function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
     if (!Object.keys(filters.rebuild).length) { return Promise.resolve(applyDirectFilters()); }
     return setComboboxFilter(filters.rebuild.combo)
+    .then(applyDirectFilters)
     .then(applyColumnFilters.bind(null, filters.table))
     .then(onAllFiltersApplied);
-}
-function applyDirectFilters() {
-    _filter('onFilterChangeUpdateRowData');
+    
+    function applyDirectFilters() {                                             //console.log('applyDirectFilters. args = %O', arguments)
+        addFiltersToMemoryAndUi(filters);
+        _filter('onFilterChangeUpdateRowData');
+    }
 }
 function setComboboxFilter(filter) {
     if (!filter) { return Promise.resolve(); }
