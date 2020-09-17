@@ -167,7 +167,7 @@ function resetFilterStatus() {
 function clearMultiComboboxes() {
     $('div.selectize-control.multi input').each(clearMultiCombo);
 }
-function clearMultiCombo(i, el) {  console.log('args = %O', arguments);
+function clearMultiCombo(i, el) {  
     const selId = el.id.split('-selectized')[0]
     $('#'+selId)[0].selectize.clear('silent');
 }

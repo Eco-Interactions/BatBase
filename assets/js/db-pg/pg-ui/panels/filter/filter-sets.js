@@ -185,8 +185,11 @@ function ifActiveSetResetVal(id) {
 }
 /* ------------ SET IN FILTER MEMORY -------------- */
 function addFiltersToMemoryAndUi(filters) {
-    ['direct', 'rebuild'].forEach(handleFilters);
+    window.setTimeout(waitThenHandle, 500);
 
+    function waitThenHandle() {
+        ['direct', 'rebuild'].forEach(handleFilters);
+    }
     function handleFilters(group) {
         if (!filters[group]) { return; }
         Object.keys(filters[group]).forEach(handleFilter);
