@@ -5,8 +5,6 @@
  *     addLocCountLegend
  *     addCountToLegend
  *     addNewLocBttn
- *     addClickToCreateLocBttn
- *     addDrawNewLocBoundaryBttn
  */
 import { _u } from '../db-main.js';
 import { getMapState, setMapState } from './map-main.js';
@@ -59,73 +57,73 @@ function createNewLocBttn() {
     return container;
 }
 /*--- Click To Create New Location Button ---*/
-export function addClickToCreateLocBttn(map) {
-    addNewLocHereControl();
-    L.control.createHere({ position: 'topleft' }).addTo(map);
-}
-function addNewLocHereControl() {
-    L.Control.CreateHere = L.Control.extend({
-        onAdd: function(map) {
-            const bttn = createNewLocHereBttn();
-            L.DomEvent.on(bttn, 'click', createNewLocHere);
-            return bttn;
-        },
-        onRemove: function(map) {}
-    });
-    L.control.createHere = function(opts) {return new L.Control.CreateHere(opts);}
-}
-function createNewLocHereBttn() {
-    const className = 'custom-icon leaflet-control-click-create',
-        container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('input', className + '-icon', container);
-    button.type = 'button';
+// export function addClickToCreateLocBttn(map) {
+//     addNewLocHereControl();
+//     L.control.createHere({ position: 'topleft' }).addTo(map);
+// }
+// function addNewLocHereControl() {
+//     L.Control.CreateHere = L.Control.extend({
+//         onAdd: function(map) {
+//             const bttn = createNewLocHereBttn();
+//             L.DomEvent.on(bttn, 'click', createNewLocHere);
+//             return bttn;
+//         },
+//         onRemove: function(map) {}
+//     });
+//     L.control.createHere = function(opts) {return new L.Control.CreateHere(opts);}
+// }
+// function createNewLocHereBttn() {
+//     const className = 'custom-icon leaflet-control-click-create',
+//         container = L.DomUtil.create('div', className),
+//         button = L.DomUtil.create('input', className + '-icon', container);
+//     button.type = 'button';
 
-    $(container).attr('title', "Click on map to select location position").append(button);
-    return container;
-}
-/**
- * Sets a flag that will trigger reverse geocode of the coordinates of subsequent
- * map clicks.
- */
-function createNewLocHere(e) {                                                  //console.log('Create new location with click! %O', e)
-    const bttnActive = isButtonActive();
-    const $bttn = $('input.leaflet-control-click-create-icon');
-    bttnActive ? $bttn.addClass('active-icon') : $bttn.removeClass('active-icon');
-}
-/* Returns true if button activated. Updates map state with button status. */
-function isButtonActive() {
-    const _s = getMapState();
-    const isActive = _s.flags.onClickDropPin ? !_s.flags.onClickDropPin : true;
-    _s.flags.onClickDropPin = isActive;
-    setMapState(_s);
-    return isActive;
-}
-/*--- Draw Location Boundary Bttn ---*/
-export function addDrawNewLocBoundaryBttn(map) {
-    addDrawLocBoundsCountrol();
-    L.control.draw({ position: 'topleft' }).addTo(map);
-}
-function addDrawLocBoundsCountrol() {
-    L.Control.Draw = L.Control.extend({
-        onAdd: function(map) {
-            const bttn = createDrawLocBttn();
-            L.DomEvent.on(bttn, 'click', drawNewLocBounds);
-            return bttn;
-        },
-        onRemove: function(map) {}
-    });
-    L.control.draw = function(opts) {return new L.Control.Draw(opts);}
-}
-function createDrawLocBttn() {
-    const className = 'custom-icon leaflet-control-draw',
-        container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('input', className + '-icon', container);
-    button.type = 'button';
+//     $(container).attr('title', "Click on map to select location position").append(button);
+//     return container;
+// }
+// /**
+//  * Sets a flag that will trigger reverse geocode of the coordinates of subsequent
+//  * map clicks.
+//  */
+// function createNewLocHere(e) {                                                  //console.log('Create new location with click! %O', e)
+//     const bttnActive = isButtonActive();
+//     const $bttn = $('input.leaflet-control-click-create-icon');
+//     bttnActive ? $bttn.addClass('active-icon') : $bttn.removeClass('active-icon');
+// }
+//  Returns true if button activated. Updates map state with button status.
+// function isButtonActive() {
+//     const _s = getMapState();
+//     const isActive = _s.flags.onClickDropPin ? !_s.flags.onClickDropPin : true;
+//     _s.flags.onClickDropPin = isActive;
+//     setMapState(_s);
+//     return isActive;
+// }
+// /*--- Draw Location Boundary Bttn ---*/
+// export function addDrawNewLocBoundaryBttn(map) {
+//     addDrawLocBoundsCountrol();
+//     L.control.draw({ position: 'topleft' }).addTo(map);
+// }
+// function addDrawLocBoundsCountrol() {
+//     L.Control.Draw = L.Control.extend({
+//         onAdd: function(map) {
+//             const bttn = createDrawLocBttn();
+//             L.DomEvent.on(bttn, 'click', drawNewLocBounds);
+//             return bttn;
+//         },
+//         onRemove: function(map) {}
+//     });
+//     L.control.draw = function(opts) {return new L.Control.Draw(opts);}
+// }
+// function createDrawLocBttn() {
+//     const className = 'custom-icon leaflet-control-draw',
+//         container = L.DomUtil.create('div', className),
+//         button = L.DomUtil.create('input', className + '-icon', container);
+//     button.type = 'button';
 
-    $(button).attr('disabled', 'disabled').css('opacity', '.3');
-    $(container).attr('title', "Draw new location boundary on map").append(button);
-    return container;
-}
-function drawNewLocBounds() {                                                   console.log('Draw new location boundary!')
+//     $(button).attr('disabled', 'disabled').css('opacity', '.3');
+//     $(container).attr('title', "Draw new location boundary on map").append(button);
+//     return container;
+// }
+// function drawNewLocBounds() {                                                   console.log('Draw new location boundary!')
 
-}
+// }

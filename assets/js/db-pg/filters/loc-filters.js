@@ -141,16 +141,11 @@ function buildLocSelects(locOptsObj) {
     function buildLocSel(selName, opts) {
         const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
         const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
-        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
+        const sel = fM.newSel(opts, 'opts-box', 'sel' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;
     }
-}
-function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
-    const elem = _u('buildSelectElem', [opts, { class: c, id: i }]);
-    $(elem).data('field', field);
-    return elem;
 }
 function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
@@ -158,22 +153,21 @@ function setSelectedLocVals(selected) {                                         
     });
 }
 /* =========================== FILTER ======================================= */
-export function applyLocFilter(val, text) {
-    if (!val && text === undefined) { return; }
+export function applyLocFilter(val) {
+    if (!val) { return; }
     const selectedOpts = tState().get('selectedOpts');
-    let locType = getLocType(this, selectedOpts);                 /*perm-log*/console.log('       +-applyLocFilter. [%s] = [%s] text = [%s]', locType, val, text);
+    let locType = getLocType(this, selectedOpts);                   /*perm-log*/console.log('       +-applyLoc[%s]Filter = [%s]', locType, val);
     const root = getNewLocRoot();
-    const txt = text || fM.getTreeFilterVal('Location');
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
-    return rebuildLocTable(root, txt)
-        .then(() => fM.reapplyDateFilterIfActive());
+    return rebuildLocTable(root);
 
     function getNewLocRoot() {
         return isNaN(parseInt(val)) ?
             getRegionIdAndUpdateType(locType) : [parseInt(val)];
     }
     function getRegionIdAndUpdateType (comboType) {
+        fM.setFilterState('combo', false, 'rebuild');
         locType = 'Region';
         return getRegionId(comboType);
     }
@@ -189,11 +183,11 @@ function updateLocFilterMemory(loc, locType) {
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
-    fM.setPanelFilterState('combo', filter);
+    fM.setFilterState('combo', filter, 'rebuild');
 }
 function resetLocComboMemory() {
     tState().set({'selectedOpts': {}});
-    fM.setPanelFilterState('combo', false);
+    fM.setFilterState('combo', false, 'rebuild');
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};

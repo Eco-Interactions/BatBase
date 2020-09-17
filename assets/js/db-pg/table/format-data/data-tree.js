@@ -29,14 +29,13 @@ let tblState;
  * Note: If loading a user-named data set (intSet), only the entities within
  * those interactions are added to the data tree.
  */
-export function buildLocTree(topLocs, textFltr) {
+export function buildLocTree(topLocs) {
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
-    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, textFltr));
+    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs));
 }
-function buildLocDataTree(topLocs, textFltr) {
+function buildLocDataTree(topLocs) {
     let tree = {};                                                              //console.log("tree = %O", tree);
     topLocs.forEach(buildLocBrach);
-    tree = filterTreeByText(textFltr, tree);
     tree = filterTreeToInteractionSet(tree, 'locs');
     return sortDataTree(tree);
 
@@ -195,11 +194,10 @@ function buildAuthTree(authSrcRcrds, data) {                                    
  * realm taxon through all children. The taxon levels present in the tree are
  * stored in tblState.
  */
-export function buildTxnTree(topTaxon, filtering, textFltr) {                   //console.log("buildTaxonTree called for topTaxon = %O. filtering? = %s. textFltr = ", topTaxon, filtering, textFltr);
+export function buildTxnTree(topTaxon, init) {                                        //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
     tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags']);
-    let tree = buildTxnDataTree(topTaxon);
-    tree = filterTreeByText(textFltr, tree);
-    storeTaxonLevelData(topTaxon, filtering);
+    const tree = buildTxnDataTree(topTaxon);
+    storeTaxonLevelData(topTaxon, init);
     if (!tblState.flags.allDataAvailable) { return Promise.resolve(tree); }
     return fillTreeWithInteractions('taxa', tree);
 }
@@ -222,9 +220,9 @@ function buildTxnDataTree(topTaxon) {
         return getTreeRcrds(taxa, tblState.rcrdsById, 'taxon').map(buildTaxonBranch);
     }
 } /* End buildTaxonTree */
-function storeTaxonLevelData(topTaxon, filtering) {                             //console.log('storeTaxonLevelData. filtering?', filtering);
+function storeTaxonLevelData(topTaxon, init) {
     _u.getData(['levelNames', 'realm']).then(data => {
-        if (!filtering) { storeLevelData(topTaxon, data);
+        if (init) { storeLevelData(topTaxon, data);
         } else { updateTaxaByLvl(topTaxon, data.levelNames); }
     });
 }
@@ -361,25 +359,6 @@ function getTreeRcrd(id, entityData, entity, prop) {  //console.log('getTreeRcrd
     if (!rcrd && prop === 'object') { return {}; }
     if (!rcrd) { _pg.alertIssue('noRcrdFound', {id: id, entity: entity }); }
     return rcrd ? rcrd : '_err_';
-}
-/* ======================== FILTER BY TEXT ================================== */
-function filterTreeByText(text, tree) {
-    if (!text) { return tree; }
-    const fltrd = {};
-
-    for (let branch in tree) {
-        const include = getRowsWithText(tree[branch], text);
-        if (include) { fltrd[branch] = tree[branch]; }
-    }
-
-    return fltrd;
-}
-function getRowsWithText(branch, text) {
-    let hasText = branch.displayName.toLowerCase().includes(text.toLowerCase());//console.log('getRowsWithText hasText [%s] branch = %O', hasText, branch);
-    branch.children = branch.children.filter(c => getRowsWithText(c, text));
-    branch.interactions = hasText ? branch.interactions : [];
-    branch.failedFltr = !hasText;
-    return hasText || branch.children.length > 0;
 }
 /* =================== FILTER BY INTERACTION SET ============================ */
 function filterTreeToInteractionSet(dataTree, focus) {                          //console.log('filter[%s]TreeToInteractionSet. tree = %O  set = %O', focus, dataTree, tblState.intSet);

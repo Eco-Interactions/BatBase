@@ -63,9 +63,41 @@ class ShowEntityController extends AbstractController
         }
 
         $jsonEntity = $this->serializeEntity($interaction);
+        $object = $interaction->getObject()->getDisplayName();
+        $subject = $interaction->getSubject()->getDisplayName();
+        $tags = $interaction->getTagNames();
+        $type = $interaction->getInteractionType()->getActiveForm();
 
         return $this->render('Entity/interaction.html.twig', array(
-            'id' => $id, 'entity' => $jsonEntity
+            'entity' => $jsonEntity,
+            'object' => $object,
+            'show' => 'interaction',
+            'subject' => $subject,
+            'tags' => $tags,
+            'type' => $type,
+        ));
+    }
+/* ----------------------------- TAXON -------------------------------- */
+    /**
+     * Opens the Taxon show page.
+     *
+     * @Route("taxon/{id}", name="app_taxon_show")
+     */
+    public function showTaxonAction($id)
+    {
+        $this->em = $this->getDoctrine()->getManager();
+
+        $taxon = $this->getEntity('Taxon', $id);
+        if (!$taxon) {
+            throw $this->createNotFoundException("Unable to find Taxon [$id].");
+        }
+
+        $jsonEntity = $this->serializeEntity($taxon);
+
+        return $this->render('Entity/taxon.html.twig', array(
+            'displayName' => $taxon->getDisplayName(),
+            'entity' => $jsonEntity,
+            'show' => 'taxon',
         ));
     }
 

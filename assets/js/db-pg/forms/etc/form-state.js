@@ -33,9 +33,9 @@ export function clearState() {
  * > submit - Data used during form submission: fLvl, entity
  */
 export function initFormState(action, entity, id) {
-    const entities = getDataKeysForEntityForm(action, entity);
+    const dataKeys = getDataKeysForEntityRootForm(action, entity);
     formState.init = true; //eliminates possibility of opening form multiple times.
-    return _db('getData', [entities]).then(data => {
+    return _db('getData', [dataKeys]).then(data => {
         initMainState(data);
         addEntityFormState(entity, 'top', null, action);                        console.log("       #### Init formState = %O, curFormState = %O", _u('snapshot', [formState]), formState);
         delete formState.init;
@@ -53,24 +53,19 @@ export function initFormState(action, entity, id) {
         };
     }
 }
-function getDataKeysForEntityForm(action, entity) {
-    const coreKeys = ['author', 'citation', 'interaction', 'interactionType',
-        'location', 'publication', 'publisher', 'source', 'taxon'];
-    return entity === 'interaction' ?
-        getIntFormDataKeys() : getSubEntityFormDataKeys(entity, 'edit');
-
-    function getIntFormDataKeys() {
-        if (action === 'create') { coreKeys.splice(2, 1); }
-        return coreKeys;
-    }
-}
-function getSubEntityFormDataKeys(entity, action) {
+function getDataKeysForEntityRootForm(action, entity) {
     const map = {
         'author': {
             'edit': ['source', 'author']
         },
         'citation': {
             'edit': ['source', 'citation', 'author', 'publisher']
+        },
+        'interaction': {
+            'create': ['author', 'citation', 'interactionType', 'location',
+                'publication', 'publisher', 'source', 'taxon'],
+            'edit': ['author', 'citation', 'interaction', 'interactionType',
+                'location', 'publication', 'publisher', 'source', 'taxon'],
         },
         'location': {
             'edit': ['location']
@@ -138,6 +133,7 @@ export function initRealmState(role, realmId) {
             realms: realmNames,
             realmTaxon: taxon,
             role: role,
+            oppositeRole: role === 'Subject' ? 'Object' : 'Subject',
             rootLvl: taxon.level.displayName,
         };                                                                      console.log('           /--taxon params = %O', formState.forms.realmData)
         return formState.forms.realmData;

@@ -2,7 +2,6 @@
  * Contains code specific to the location form.
  *
  * Exports:                     Clients:
- *     addNewLocationWithGps        map-main
  *     initCreateForm               forms-main
  *
  * TOC
@@ -35,7 +34,6 @@ function buildLocForm(val) {
         $('#Location_row')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
         _cmbx('enableCombobox', ['#Country-Region-sel', false]);
-        $('#sub-submit').val('Create without GPS data');
         _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_row input').focus();
@@ -50,7 +48,7 @@ function onCreateFormLoadComplete() {
 }
 function onLocFormLoadComplete() {
     addNotesToForm();
-    handleElevFieldsAndNumberInputs();
+    $('#Elevation-lbl').text('Elevation (m)');
 }
 function disableTopFormLocNote() {
     $('#loc-note').fadeTo(400, .3);
@@ -60,46 +58,18 @@ function scrollToLocFormWindow() {
 }
 function addNotesToForm() {
     addHowToCreateWithGpsNote($('#Latitude_row')[0].parentNode);
-    addHowToCreateWithOutGpsNote($('#DisplayName_row')[0].parentNode);
+    addSelectSimilarLocationNote($('#ElevationMax_row')[0].parentNode);
 }
 function addHowToCreateWithGpsNote(pElem) {
-    $(pElem).before(getHowToCreateLocWithGpsDataNote());
+    const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">Enter
+        decimal data (convert <a href="https://www.fcc.gov/media/radio/dms-decimal"
+        target="_blank">here</a>) and see the green pin’s popup for name suggestions.</p>`;
+    $(pElem).before(note);
 }
-function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">GPS
-        data? Enter all data and see the added green pin's popup for name
-        suggestions and the "Create" button.</p>`;
-}
-function addHowToCreateWithOutGpsNote(pElem) {
-    $(pElem).before(getHowToCreateLocWithoutGpsDataNote());
-}
-function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p class="loc-gps-note skipFormData">No GPS data? Fill
-        in available data and click "Create without GPS data" at the bottom of
-        the form.</p>`;
-}
-function handleElevFieldsAndNumberInputs() {
-    $('#Elevation-lbl').text('Elevation (m)');
-    $('#Elevation_row input, #ElevationMax_row input, #Latitude_row input, #Longitude_row input')
-        .attr('type', 'number');
-
-}
-/**
- * New locations with GPS data are created by clicking a "Create Location" button
- * in a the new location's green map pin's popup on the map in the form.
- */
-export function addNewLocationWithGps() {
-    const fLvl = getSubFormLvl('sub');
-    if (_elems('ifAllRequiredFieldsFilled', [fLvl])) {
-        submitForm('#'+fLvl+'-form',  fLvl, 'location');
-    } else { showFillAllLocFieldsError(fLvl); }
-}
-function showFillAllLocFieldsError(fLvl) {
-    _val('reportFormFieldErr', ['Display Name', 'needsLocData', fLvl]);
-}
-function locCoordErr(field) {
-    const fLvl = getSubFormLvl('sub');
-    _val('reportFormFieldErr', [field, 'invalidCoords', fLvl]);
+function addSelectSimilarLocationNote(prevElem) {
+    const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">
+        Select an existing location by clicking inside its pin's popup.</p>`;
+    $(prevElem).after(note);
 }
 /** ======================= EDIT FORM ======================================= */
 export function finishEditFormBuild(entity) {
@@ -125,6 +95,7 @@ export function addMapToLocationEditForm(id) {
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
+    if (!$('#Latitude_row input').val()) { return; }
     _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['#Country-sel'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
@@ -155,15 +126,16 @@ function initLocFormMap(type) {
     _map('initFormMap', [prntId, locRcrds, type]);
 }
 export function focusParentAndShowChildLocs(type, val) {
-    if (!val) { return; }                                                       console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
+    if (!val) { return; }                                                       //console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
     const locRcrds = _state('getEntityRcrds', ['location'])
     _map('initFormMap', [val, locRcrds, type]);
 }
+/* ----------- COORDINATE FIELD LISTENER --------------- */
 export function addListenerToGpsFields(fLvl, params = [true]) {
-    $('#Latitude_row input, #Longitude_row input').change(toggleNoGpsSubmitBttn);
+    $('#Latitude_row input, #Longitude_row input').change(validateLocFields);
 
-    function toggleNoGpsSubmitBttn() {
-        const coords = getCoordVals()
+    function validateLocFields() {
+        const coords = getCoordVals().filter(c=>c);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         if (coords.length === 1) { ifEditingDisableSubmit(fLvl, coords); }
         if (coords.length !== 2) { _map('addVolatileMapPin', [false]); }
@@ -179,12 +151,12 @@ function getCoordVals() {
 }
 function lintCoord(prefix) {
     const field = prefix+'itude';
-    const val = $('#'+field+'_row input').val();
-    if (ifCoordFieldHasErr(field, val)) { return locCoordErr(field); }
-    return val;
+    const input = $('#'+field+'_row input')[0];
+    return input.validity.valid ? input.value : null;
 }
-function ifCoordFieldHasErr(field) {
-    const coord = $(`#${field}_row input`).val();
-    const max = field === 'Latitude' ? 90 : 180;
-    return isNaN(coord) ? true : coord > max ? true : false;
+/* ----------- AUTOFILL COORDINATES --------------- */
+
+export function autofillCoordinateFields(lat, lng) {
+    $('#Latitude_row input').val(lat);
+    $('#Longitude_row input').val(lng);
 }

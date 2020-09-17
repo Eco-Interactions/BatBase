@@ -45,15 +45,17 @@ function toggleMenu() {                                                         
 function showMobileMenu() {
     $('#oimenu').removeClass('closed');
     $('#content-detail').addClass('content-overlay').click(toggleMenu);
-    $('#pg-hdr').css('background', 'rgba(0,0,0,.8)');
+    $('#pg-hdr').css('background', 'black');
+    $('#entity-csv').hide(); //entity-show pages
     if ($('body').data('browser') === 'Chrome') {
-        $('#content-detail').css('position', 'unset');  //"fixes" bug with mobile menu in chrome
+        $('#content-detail').css('position', 'unset');  //"fixes" bug with mobile menu in chrome that causes the content to jarringly jump back to the top
     }
 }
 function hideMobileMenu() {
     $('#oimenu').addClass('closed');
     $('#content-detail').removeClass('content-overlay').off('click', toggleMenu);
     $('#pg-hdr').css('background', '#fff');
+    $('#entity-csv').show(); //entity-show pages
     if ($('body').data('browser') === 'Chrome') {
         $('#content-detail').css('position', 'absolute'); //"fixes" bug with mobile menu in chrome
     }

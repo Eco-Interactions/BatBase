@@ -27,6 +27,7 @@ export function initCombobox(field, change, options) {                          
 export function initComboboxes(fields) {                                        //console.log('initComboboxes = %O', fields);
     Object.keys(fields).forEach(field => initCombobox(field, fields[field]));
 }
+/* TODO: Figure out when exactly blur is needed currently. */
 function getBaseConfgObj(field, onChange) {
     const confgs = {
         // Search Page Database Options Bar Comboboxes
@@ -38,10 +39,11 @@ function getBaseConfgObj(field, onChange) {
         'Family' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Genus' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Order' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Object Realm': { name: 'Object Realms', id:'#selObjRealm', change: onChange },
         'Publication Type' : {name: field, id: '#selPubType', change: onChange, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: onChange, blur: true },
-        'Date Filter': { name: 'Filter', id: '#selDateFilter' },
+        'Date Filter': { name: 'Filter', id: '#selDateFilterType' },
         // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', change: onChange },
         'Saved Filter Set': {name: field, id: '#selSavedFilters', change: onChange },
@@ -76,21 +78,19 @@ function getPlaceholer(id, name, add, empty) {
     return optCnt || add ? placeholder : '- None -';
 }
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
-    const selId = getBaseConfgObj(field).id;                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
+    const selId = getBaseConfgObj(field).id;                                    //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false;
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
     return $selApi.getValue();
 }
-// function getSelTxt(field) {
-//     const confg = getBaseConfgObj(field);
-//     const $selApi = $(confg.id)[0].selectize;
-//     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
-// }
-export function setSelVal(field, val, silent) {                                 //console.log('setSelVal [%s] = [%s]', field, val);
+export function setSelVal(field, val, silent) {                                 //console.log('setSelVal [%s] (silent ? %s) = [%O]', field, silent, val);
     const selId = getBaseConfgObj(field).id;
-    const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false;
+    const $selApi = $(selId).length ? $(selId)[0].selectize : false;
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
-    $selApi.addItem(val, silent);
+
+    if (Array.isArray(val)) { val.forEach(v => $selApi.addItem(v, 'silent'))
+    } else { $selApi.addItem(val, 'silent'); }
+
     saveSelVal($(selId), val);
 }
 /**
@@ -145,6 +145,9 @@ export function triggerComboChangeReturnPromise(field, val) {                   
     const confg = getBaseConfgObj(field);
     const $selApi = $(confg.id)[0].selectize;
     const change = confgs[field].change;
-    $selApi.addItem(val, 'silent');
+
+    if (Array.isArray(val)) { val.forEach(v => $selApi.addItem(val, 'silent'))
+    } else { $selApi.addItem(val, 'silent'); }
+
     return change(val);
 }

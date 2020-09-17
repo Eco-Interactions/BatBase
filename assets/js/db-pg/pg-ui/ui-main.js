@@ -17,6 +17,7 @@
  *     selectInitialSearchFocus         db-page
  *     updateUiForDatabaseInit             util
  *     showTips                         intro
+ *     updateFilterStatusMsg
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
  */

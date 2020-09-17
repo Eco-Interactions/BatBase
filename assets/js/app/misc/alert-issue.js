@@ -51,8 +51,8 @@ export function alertIssue(tag, errData = {}) {
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
     if (tag == 'editorReport') { return submitEditorIssue(errData); }
     setSentryDebugContext(errData);
-    Sentry.captureException(new SentryError(tag, errData));
     handleUserAlert(tag);
+    Sentry.captureException(new SentryError(tag, errData));
 }
 function setSentryDebugContext(errData) {
     setBasicStateContext();
@@ -119,7 +119,7 @@ function noRcrdFoundInForms() {
     alert(`Expected record not found. Try reloading the page or ${getEditorErrMsg()}`);
 }
 function showGeneralAlert() {
-    alert(`An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);
+    alert(`If you are using an adblocker, please disable.\n\n An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);
 }
 function getErrMsgForUserRole() {
     const userRole = $('body').data('user-role');

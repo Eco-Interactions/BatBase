@@ -3,10 +3,11 @@
  *
  * TOC:
  *     CORE SHOW PAGE BUILDER
- *     HTML BUILDERS
+ *         HTML BUILDERS
+ *     CSV DOWNLOAD
  */
-import * as util from '../util/util-main.js';
-import getEntityShowData from './entity-show-data.js';
+import * as util from '../app/util/util-main.js';
+import getEntityDisplayConfg from './entity-show-data.js';
 
 initShowPage();
 
@@ -14,19 +15,21 @@ function initShowPage () {
     require('../../styles/pages/entity-show.styl');
     const entity = getEntity($('body').data('this-url'));
     buildEntityShowPage(entity, $('#entity-show').data('entity'));
+    buildCsvDownloadButton();
     $('#entity-show').removeAttr('data-entity');
 }
 function getEntity (url) {
     return url.split('/').splice(-2, 1)[0];
 }
 /* ==================== CORE SHOW PAGE BUILDER ============================== */
-function buildEntityShowPage (entity, data) {                       /*Perm-log*///console.log('   *//init[%s]ShowPage = %O', entity, data);
-    const confg = getEntityShowData(entity, data, util);
+function buildEntityShowPage (entity, data) {                       /*dbug-log*/console.log('   *//init[%s]ShowPage = %O', entity, data);
+    const confg = getEntityDisplayConfg(entity, data, util);
     const sections = confg.map(buildDataSection);
+    $('#show-loading-msg').remove();
     $('#entity-show').append(sections.filter(s => s));
 }
-function buildDataSection (confg) {
-    return getDataSect(confg.section, confg.rows.map(getSectionRow).filter(r => r));
+function buildDataSection (confg, i) {
+    return getDataSect(++i, confg.section, confg.rows.map(getSectionRow).filter(r => r));
 }
 function getSectionRow (row, i) {
     return buildDataRow(++i, row.map(getRowCell).filter(c => c));
@@ -37,13 +40,14 @@ function getRowCell (cell) {
 }
 function getDataCell (data) {
     if (!data) { return false; }
-    return buildDataCell(data.field, data.content, data.classes);
+    return buildDataCell(data.field, data.content, data.label, data.classes);
 }
 /* ------------------------- HTML BUILDERS ---------------------------------- */
-function getDataSect (title, rows) {                                /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
-    const hdr = util.getElem('h3', { text: title });
-    const id = title.replace(/ /g,'') + '-data-sect';
-    return getDivWithContent(id, 'data-sect', [hdr, ...rows]);
+function getDataSect (cnt, section, rows) {                         /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
+    const hdr = util.getElem('h3', { text: section.name });
+    const id = 'data-sect-'+cnt;
+    const classes = 'data-sect' + (section.classes ? ' ' + section.classes : '');
+    return getDivWithContent(id, classes, [hdr, ...rows]);
 }
 function buildDataRow (cnt, rowCells) {                             /*dbug-log*///console.log('   buildDataRow [%O]', rowCells);
     return getDivWithContent('sect-row'+cnt, 'sect-row', rowCells);
@@ -52,11 +56,15 @@ function getRowGroupSect (dir, colCells) {                          /*dbug-log*/
     const classes = `group-${dir} flex-${dir}`;
     return getDivWithContent('', classes, colCells);
 }
-function buildDataCell (label, fieldHTML, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
-    const lbl = util.getLabel(label+':');
-    const data = getDivWithContent(label+'-data', '', fieldHTML);
+function buildDataCell (field, fieldHTML, label, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
+    const lbl = getFieldLabel(field, label);
+    const data = getDivWithContent(field+'-data', '', fieldHTML);
     const classes = 'flex-row cell-data ' + c;
-    return getDivWithContent(label+'-cell', classes, [lbl, data]);
+    return getDivWithContent(field+'-cell', classes, [lbl, data].filter(e=>e));
+}
+/** Note: If label is set to FALSE in confg, no label is built. */
+function getFieldLabel(field, label) {
+    return label === false ? false : util.getLabel(field+':');
 }
 /* ------------ base ------------------- */
 function getDivWithContent (id, classes, content) {                 /*dbug-log*///console.log('               getDivWithContent [%s] = [%O]', classes, content);
@@ -64,4 +72,13 @@ function getDivWithContent (id, classes, content) {                 /*dbug-log*/
     const html = !!content ? content : '[ NONE ]';
     $(div).append(html);
     return div;
+}
+/* ======================== CSV DOWNLOAD ==================================== */
+function buildCsvDownloadButton() {
+    const attrs = {
+        class: 'ag-fresh map-dsbl ico-bttn', id: 'entity-csv',
+        name: 'csv',                         title: 'CSV Download Coming Soon',
+        text: 'CSV'
+    };
+    $('#headln-txt').append($('<button/>', attrs));
 }

@@ -4,6 +4,10 @@
 
 {% block headline %}Bat Eco-Interactions Database{% endblock %}
 
+{% block headerstats %}
+	000 Interactions | 000 Citations | 000 Locations in 00 Countries | 000 Bat Species | 000 Other Species
+{% endblock %}
+
 {% block detail %}
 	<div id="about-db" class="top-pgs">
 	{% embed 'two_cols_sect.html.twig' %}
@@ -37,9 +41,10 @@
 	</div>
 	<hr>
 	{% set cntnrClass = is_full_view() ? '' : 'db-about-imgs' %}
-	<div class="{{ cntnrClass }}">
-		<img id="about-db-maps" src="{{ asset('build/images/ConceptualMap740x552.JPG') }}" alt="Conceptual Map of Data">
-		<img id="db-new-data" class="about-db-maps" src="{{ asset('build/images/NewData740x552.JPG') }}" alt="New Data Workflow">
+	<div class="db-about-imgs">
+		<img id="about-db-maps" src="{{ asset('build/images/ConceptualDataMap082020.svg') }}"
+		alt="Conceptual Map of Data">
+		<img id="db-new-data" class="about-db-maps" src="{{ asset('build/images/NewDataFlow082020.svg') }}" alt="New Data Workflow">
 	</div>
 {% endblock detail %}
 

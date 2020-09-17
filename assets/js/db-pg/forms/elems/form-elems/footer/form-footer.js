@@ -15,7 +15,7 @@ let fS;
  * Returns row with a checkbox that will toggle optional form fields on the left
  * and the submit/cancel buttons on the right.
  */
-export default function(entity, level, action) {
+export default function buildFormFooter(entity, level, action) {
     fS = _state('getFormState').forms[level];
     const cntnr = _u('buildElem', ['div', { class: "flex-row bttn-cntnr" }]);
     $(cntnr).append(...buildFooterElems(entity, level, action));

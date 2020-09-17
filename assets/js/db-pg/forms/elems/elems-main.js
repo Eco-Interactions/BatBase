@@ -34,12 +34,11 @@
 import { _filter, _u, executeMethod, reloadTableWithCurrentFilters } from '../../db-main.js';
 import { _form, _state, getNextFormLevel, clearFormMemory } from '../forms-main.js';
 import * as panel from './detail-panel/detail-panel.js';
-import * as cmbx from './form-elems/fields/combobox-fields.js';
-import * as base from './form-elems/base-form.js';
-import * as fields from './form-elems/fields/field-builder.js';
+import * as cmbx from './form-elems/input/combobox-input.js';
+import * as base from './form-elems/form-container.js';
+import * as fields from './form-elems/input/input-builder.js';
 import * as rows from './form-elems/rows/rows-main.js';
 import buildFormFooter from './form-elems/footer/form-footer.js';
-import handleSubFormInit from './form-elems/sub-form.js';
 
 /* -------------------- EXECUTE MODULE COMMANDS ----------------------------- */
 export function _cmbx(funcName, params = []) {
@@ -55,11 +54,8 @@ export function buildAndAppendForm(fields, id) {
 export function getExitButton() {
     return base.getExitButton();
 }
-export function getFormFooter() {
-    return buildFormFooter(...arguments);
-}
 export function initSubForm() {
-    return handleSubFormInit(...arguments);
+    return base.initSubForm(...arguments);
 }
 export function buildFormRows() {
     return rows.buildFormRows(...arguments);
@@ -72,6 +68,9 @@ export function buildFieldInput() {
 }
 export function ifAllRequiredFieldsFilled() {
     return fields.ifAllRequiredFieldsFilled(...arguments);
+}
+export function getFormFooter() {
+    return buildFormFooter(...arguments);
 }
 /* =============================== HELPERS ================================== */
 export function setCoreRowStyles(formId, rowClass) {
@@ -120,38 +119,32 @@ export function toggleSubmitBttn(bttnId, enable = true) {
 }
 /** Enables passed submit button */
 export function enableSubmitBttn(bttnId) {
+    if (!isFormValid(bttnId)) { return; }
     $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"});
+}
+function isFormValid(bttnId) {
+    const fLvl = bttnId.split('-')[0];
+    const valid = $(fLvl+'-form')[0].checkValidity();
+    if (valid) { return true; }
+    $(fLvl+'-form')[0].reportValidity();
 }
 /** Enables passed submit button */
 export function disableSubmitBttn(bttnId) {                                     //console.log('disabling bttn = ', bttnId)
     $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"});
 }
 /* ----------- ENABLE WHEN REQUIRED FIELDS FILLED ----------- */
-/**
- * Note: The 'unchanged' property exists only after the create interaction form
- * has been submitted and before any changes have been made.
- */
 export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
     const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
     toggleSubmitBttn('#'+fLvl+'-submit', reqFieldsFilled);
     return reqFieldsFilled;
 }
 function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
-    return fields.ifAllRequiredFieldsFilled(fLvl) &&
-        !hasOpenSubForm(fLvl) && !locHasGpsData(fLvl);
+    return fields.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl);
 }
 /** Returns true if the next sub-level form exists in the dom. */
 function hasOpenSubForm(fLvl) {
     const childFormLvl = getNextFormLevel('child', fLvl);
     return $('#'+childFormLvl+'-form').length > 0;
-}
-/** Prevents the location form's submit button from enabling when GPS data entered.*/
-function locHasGpsData(fLvl) {
-    if (_state('getFormProp', [fLvl, 'entity']) !== 'location') { return false; }
-    if (_state('getFormProp', [fLvl, 'action']) === 'edit') { return false; }
-    return ['Latitude', 'Longitude'].some(field => {
-        return $(`#${field}_row input`).val();
-    });
 }
 /* -------------------- TOGGLE FORM-FIELDS ---------------------------------- */
 export function setToggleFieldsEvent(elem, entity, fLvl) {

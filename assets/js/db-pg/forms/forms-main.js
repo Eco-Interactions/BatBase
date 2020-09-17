@@ -11,7 +11,7 @@
  *     BUNDLE HELPERS
  */
 import { _alert, _map, executeMethod } from '../db-main.js';
-import * as confg from './etc/form-config.js';
+import * as confg from './confg/confg-main.js';
 import * as form from './entity-form/entity-form-main.js';
 import * as state from './etc/form-state.js';
 import * as submit from './submit/submit-main.js';
@@ -47,7 +47,7 @@ export function create(entity, name) {
     return form.createEntity(entity, name);
 }
 export function initNewDataForm() {
-    return form.createEntity('interaction');
+    return create('interaction');
 }
 export function edit(id, entity) {
     state.initFormState('edit', entity, id)
@@ -56,8 +56,8 @@ export function edit(id, entity) {
 export function selectIntLoc(id) {
     form.selectIntLoc(id);
 }
-export function addNewLocationWithGps() {
-    form.addNewLocationWithGps();
+export function autofillCoordinateFields() {
+    form.autofillCoordinateFields(...arguments);
 }
 /** --------------------------- FORM UI ------------------------------------- */
 export function _elems(funcName, params = []) {

@@ -171,12 +171,12 @@ Feature: Edit data in the database
         And I change the "Publication Type" form dropdown to "Book"
         And I change the "Description" field "textarea" to "Description..."
         And I change the "Year" field "input" to "1993"
-        And I change the "Link Url" field "input" to "www.link.com"
-        And I change the "Link Display" field "input" to "Book Website"
-        And I change the "Doi" field "input" to "10.1037/rmh0000008"
+        And I change the "Website" field "input" to "https://www.link.com"
+        And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
         And I change the "Publisher" form dropdown to "University of Paris VI"
         And I add "Cockle, Anya" to the "Authors" dynamic dropdown
         And I press the "Update Publication" button
+        And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I select "Book" from the "Pub Type" dropdown
         And I click on the edit pencil for the "Book of Mammalogy" row
@@ -184,8 +184,7 @@ Feature: Edit data in the database
         Then I should see "Book of Mammalogy" in the "Title" field "input"
         Then I should see "Description..." in the "Description" field "textarea"
         Then I should see "Book" in the "Publication Type" form dropdown
-        Then I should see "www.link.com" in the "Link Url" field "input"
-        Then I should see "Book Website" in the "Link Display" field "input"
+        Then I should see "https://www.link.com" in the "Website" field "input"
         Then I should see "University of Paris VI" in the "Publisher" form dropdown
         Then I should see "Cockle, Anya" in the "Authors" dynamic dropdown
 
@@ -199,8 +198,7 @@ Feature: Edit data in the database
         And I change the "Middle Name" field "input" to "Karen"
         And I change the "Last Name" field "input" to "Cockel"
         And I change the "Suffix" field "input" to "Jr"
-        And I change the "Link Url" field "input" to "www.link.com"
-        And I change the "Link Display" field "input" to "Author Website"
+        And I change the "Website" field "input" to "https://www.link.com"
         And I press the "Update Author" button
         And I wait for the "top" form to close
         And I click on the edit pencil for the "Cockel, Joy Karen Jr" row
@@ -209,8 +207,7 @@ Feature: Edit data in the database
         Then I should see "Karen" in the "Middle Name" field "input"
         Then I should see "Cockel" in the "Last Name" field "input"
         Then I should see "Jr" in the "Suffix" field "input"
-        Then I should see "www.link.com" in the "Link Url" field "input"
-        Then I should see "Author Website" in the "Link Display" field "input"
+        Then I should see "https://www.link.com" in the "Website" field "input"
 
     @javascript
     Scenario:  I should be able to edit the data of an existing publisher
@@ -222,8 +219,7 @@ Feature: Edit data in the database
         And I change the "City" field "input" to "Nice"
         And I change the "Country" field "input" to "France"
         And I change the "Description" field "textarea" to "Something descriptive"
-        And I change the "Link Url" field "input" to "www.link.com"
-        And I change the "Link Display" field "input" to "Publisher Website"
+        And I change the "Website" field "input" to "https://www.link.com"
         And I press the "Update Publisher" button
         And I wait for the "top" form to close
         And I click on the edit pencil for the "University of Paris V" row
@@ -231,8 +227,7 @@ Feature: Edit data in the database
         Then I should see "Nice" in the "City" field "input"
         Then I should see "France" in the "Country" field "input"
         Then I should see "Something descriptive" in the "Description" field "textarea"
-        Then I should see "www.link.com" in the "Link Url" field "input"
-        Then I should see "Publisher Website" in the "Link Display" field "input"
+        Then I should see "https://www.link.com" in the "Website" field "input"
 
     #todo - test proper removal of citation from authors in tree
     @javascript
@@ -245,13 +240,13 @@ Feature: Edit data in the database
         And I change the "Citation Type" form dropdown to "Book"
         And I change the "Abstract" field "textarea" to "Test Abstract"
         And I change the "Edition" field "input" to "4"
-        And I change the "Link Url" field "input" to "www.link.com"
-        And I change the "Link Display" field "input" to "Citation Website"
-        And I change the "Doi" field "input" to "10.1037/rmh0000008"
+        And I change the "Website" field "input" to "https://www.link.com"
+        And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
         And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
         And I add "Baker, Herbert G" to the "Authors" dynamic dropdown
         And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I press the "Update Citation" button
+        And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I should not see "Gardner, Alfred L" in the tree
         And I expand "Baker, Herbert G" in the data tree
@@ -262,9 +257,8 @@ Feature: Edit data in the database
         And I should see "Feeding habits" in the "Title" field "input"
         And I should see "Book" in the "Citation Type" form dropdown
         And I should see "4" in the "Edition" field "input"
-        And I should see "www.link.com" in the "Link Url" field "input"
-        And I should see "Citation Website" in the "Link Display" field "input"
-        And I should see "10.1037/rmh0000008" in the "Doi" field "input"
+        And I should see "https://www.link.com" in the "Website" field "input"
+        And I should see "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I should see "Baker, Herbert G" in the "Authors" dynamic dropdown
         And I should see "Cockle, Anya" in the "Authors" dynamic dropdown
 
@@ -278,6 +272,7 @@ Feature: Edit data in the database
         When I change the "Publication" form dropdown to "Journal of Mammalogy"
         And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
         And I press the "Update Interaction" button
+        # And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I uncheck the date-updated filter
         And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree

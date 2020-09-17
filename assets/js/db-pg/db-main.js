@@ -19,7 +19,7 @@
  */
 import * as alert from '../app/misc/alert-issue.js';
 import * as u from './util/util.js';
-import * as _tree from './table/format-data/data-tree.js';
+import * as tree from './table/format-data/data-tree.js';
 import * as filter from './filters/filters-main.js';
 import * as map from './map/map-main.js';
 import * as ui from './pg-ui/ui-main.js';
@@ -29,6 +29,7 @@ import * as modal from '../misc/intro-modals.js';
 import * as forms from './forms/forms-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
+/*NOTE: Not sure why this page is getting loaded on external pages. It could be something tangled with webpack.*/
 if (window.location.pathname.includes('search')) {
     initDbPage();
 }
@@ -37,7 +38,7 @@ export function executeMethod(funcName, mod, modName, caller, params = []) {
     try {
         return mod[funcName](...params);
     } catch(e) {
-        alertIssue('facadeErr', {module: modName, caller: 'db-main', called: funcName, error: e.toString(), errMsg: e.message});
+        alertIssue('facadeErr', {module: modName, caller: caller, called: funcName, error: e.toString(), errMsg: e.message});
         if ($('body').data('env') === 'prod') { return; }
         console.error('[%s][%s] module: [%s] call failed.  params = %O, err = %O', caller, modName, funcName, params, e);
     }
@@ -103,6 +104,7 @@ export function reportErr() {
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
+ * {str} realmName      Stores Taxon view Realm name 
  * {obj} selectedOpts   K: Combobox key V: value selected
  * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
  * {str} userRole       Stores the role of the user.
@@ -163,16 +165,14 @@ export function showIntroAndLoadingMsg(resettingData) {
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
 export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = true) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s], allDataAvailable ? [%s]', focus, isAllDataAvailable);
-    setTableInitState(isAllDataAvailable);
+    setTableInitState(focus, isAllDataAvailable);
     ui.selectInitialSearchFocus(focus);
     if ($('body').data('env') === 'test' && isAllDataAvailable === false) { return; }
-    buildTable()
-    .then(ui.updateFilterPanelHeader.bind(null, focus));
+    buildTable();
 }
-function setTableInitState(isAllDataAvailable) {
-    resetFilterPanel('taxa');
-    resetTableParams('taxa');
-    filter.toggleDateFilter('disable');
+function setTableInitState(focus, isAllDataAvailable) {
+    resetFilterPanel(focus);
+    resetTableParams(focus);
     tState.flags.allDataAvailable = isAllDataAvailable;
 }
 export function onDataDownloadComplete () {
@@ -187,6 +187,7 @@ export function accessTableState() {
     };
 }
 /** Returns table state to requesting module. */
+//Todo: remove the redundant second param
 function getTableState(k, keys) {                                               //console.log('getTableState. params? ', arguments);
     return k && Array.isArray(k) ? getStateObj(k) : k ? tState[k] :
         keys ? getStateObj(keys) : tState;
@@ -203,7 +204,7 @@ function setTableState(stateObj) {                                              
 /** Resets on focus change. */
 function resetTableParams(focus) {
     if (focus) { return Promise.resolve(resetTblParams(focus)); }
-    return Promise.resolve(u.getData('curFocus').then(f => resetTblParams(f)));
+    return Promise.resolve(u.getData('curFocus').then(resetTblParams));
 }
 function resetTblParams(focus) {
     const intSet =  tState.intSet;
@@ -337,9 +338,10 @@ function getTopRegionIds() {
     for (let name in regions) { ids.push(regions[name]); }
     return ids;
 }
-function startLocTableBuildChain(topLocs, textFltr) {
-    return _tree.buildLocTree(topLocs, textFltr)
+function startLocTableBuildChain(topLocs) {
+    return tree.buildLocTree(topLocs)
         .then(tree => format.buildLocRowData(tree, tState))
+        .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Location Tree', rowData))
         .then(() => filter.loadLocFilters(tState));
 }
@@ -363,7 +365,7 @@ function buildLocMap() {
  * and their popup data reflects the data of the set.
  */
 function showLocsInSetOnMap() {
-    _tree.buildLocTree(getTopRegionIds())
+    tree.buildLocTree(getTopRegionIds())
     .then(getGeoJsonAndShowLocsOnMap);
 }
 function getGeoJsonAndShowLocsOnMap(tree) {
@@ -410,8 +412,9 @@ function rebuildSrcTable(val) {                                     /*Perm-log*/
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    return _tree.buildSrcTree(tState.curView)
+    return tree.buildSrcTree(tState.curView)
         .then(tree => format.buildSrcRowData(tree, tState))
+        .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Source Tree', rowData, tState))
         .then(() => filter.loadSrcFilters(tState.curView));
 }
@@ -439,7 +442,7 @@ function beginTaxonLoad(realmId, taxa) {
     tState.rcrdsById = taxa;                                                    //console.log('Building Taxon Table. taxa = %O', u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd(realmId);
     ui.initTxnViewOpts(realmTaxon.id, tState.flags.allDataAvailable);
-    return startTxnTableBuildChain(realmTaxon);
+    return startTxnTableBuildChain(realmTaxon, true);
 }
 /** Event fired when the taxon view select box has been changed. */
 export function onTxnViewChange(val) {                              /*Perm-log*/console.log('       --onTxnViewChange. [%s]', val)
@@ -450,7 +453,7 @@ export function onTxnViewChange(val) {                              /*Perm-log*/
 function buildTxnTable(val) {
     const realmTaxon = storeAndReturnRealmRcrd(val);
     resetTableState();
-    return rebuildTxnTable(realmTaxon);
+    return startTxnTableBuildChain(realmTaxon, true);
 }
 /**
  * Gets the currently selected taxon realm/view's id, gets the record for the taxon,
@@ -467,6 +470,7 @@ function updateRealmTableState(realmId, realmTaxonRcrd) {
     u.setData('curView', realmId);
     tState.realmLvl = realmTaxonRcrd.level;
     tState.curView = realmId;
+    tState.realmName = realmTaxonRcrd.realm.displayName;
 }
 /** This catches errors in realm value caused by exiting mid-tutorial. TODO */
 function getSelValOrDefault(val) {
@@ -478,9 +482,9 @@ function getSelValOrDefault(val) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O, filtering ? [%s], textFilter ? [%s]', topTaxon, filtering, textFltr);
+export function rebuildTxnTable(topTaxon) {                         /*Perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O', topTaxon);
     if (!tState.api || tState.flags.allDataAvailable) { ui.fadeTable(); }
-    return startTxnTableBuildChain(topTaxon, filtering, textFltr)
+    return startTxnTableBuildChain(topTaxon)
 }
 /**
  * Builds a family tree of taxon data with passed taxon as the top of the tree,
@@ -488,10 +492,11 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/
  * The top taxon's id is added to the global focus storage obj's 'openRows'
  * and will be expanded on table load.
  */
-function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
+function startTxnTableBuildChain(topTaxon, init = false) {
     tState.openRows = [topTaxon.id.toString()];
-    return _tree.buildTxnTree(topTaxon, filtering, textFltr)
+    return tree.buildTxnTree(topTaxon, init)
         .then(tree => format.buildTxnRowData(tree, tState))
+        .then(filter.getRowDataForCurrentFilters)
         .then(rowData => loadTbl('Taxon Tree', rowData, tState))
         .then(() => filter.loadTxnFilters(tState, topTaxon.realm.pluralName));
 }

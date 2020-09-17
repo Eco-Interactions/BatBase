@@ -1,0 +1,18 @@
+{% extends "layout.html.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/show.css') }}" />
+{% endblock stylesheets %}
+
+{% block detail %}
+    <a href="{{ baseurl }}search">Browse Database</a>
+    <br>
+    <h4 id='show-loading-msg'><br>[LOADING]</h4>
+    <div id='entity-show' class='{{ show }}-show flex-col' data-entity='{{ entity }}'></div>
+{% endblock detail %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('show') }}
+{% endblock javascripts %}

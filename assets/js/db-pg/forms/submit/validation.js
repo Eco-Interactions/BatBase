@@ -118,12 +118,10 @@ export function reportFormFieldErr(fieldName, errTag, fLvl) {                   
         'fillAuthBlanks': handleAuthBlanks,
         'fillEdBlanks': handleEdBlanks,
         'isGenusPrnt': handleIsGenusPrnt,
-        'invalidCoords': handleInvalidCoords,
         'needsGenusName': handleNeedsGenusName,
         'needsGenusPrnt': handleNeedsGenusParent,
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
         'needsHigherLvl': handleNeedsHigherLvl,
-        'needsLocData': handleNeedsLocData,
         'needsName': handleNeedsName,
         'noFamily': handleNoFamily,
         'noGenus': handleNoGenus,
@@ -151,19 +149,6 @@ function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {
 function clrIsGenusPrnt(elem, fLvl, e) {
     _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
     clearErrElemAndEnableSubmit(elem, 'top');
-}
-/* ----------------- INVALID COORDINATES ------------------------------------ */
-/** Note: error used for the location form. */
-function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
-    const msg = `<span>Invalid coordinate format.</span>`;
-    $(`#${fieldName}_row input[type="text"]`).on('input',
-        clrInvalidCoords.bind(null, elem, fLvl, null, fieldName));
-    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    $('.err-exit').hide();
-}
-function clrInvalidCoords(elem, fLvl, e, fieldName) {
-    clearErrElemAndEnableSubmit(elem, fLvl);
-    if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
@@ -249,17 +234,6 @@ function enableChngPrntBtttn() {
     if ($('#sub-form').length ) { return; }
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
 }
-/* ----------- LOCATION REQUIRED FIELD EMPTY -------------------------------- */
-/** Note: error used for the location form when selecting new location from map. */
-function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
-    const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
-    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    $('div.new-loc-popup').prepend(msg);
-}
-function clrNeedsLocData(elem, fLvl, e) {
-    clearErrElemAndEnableSubmit(elem, fLvl);
-    $('.new-loc-popup #err').remove();
-}
 /* --------------------- NEEDS NAME ----------------------------------------- */
 function handleNeedsName(elem, errTag, fLvl, fieldName) {
     const msg = `<span>Please fill required fields and submit again.</span>`;
@@ -322,11 +296,11 @@ function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
-        'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
+        'isGenusPrnt': clrIsGenusPrnt,
         'needsGenusName': clrNeedsGenusName,    'needsName': clrNeedsName,
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr,
         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
-        'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm,
+        'openSubForm': clrOpenSubForm,
         'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr,
         'fillAuthBlanks': false, 'fillEdBlanks': false

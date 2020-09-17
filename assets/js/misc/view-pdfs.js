@@ -4,9 +4,11 @@
  * TOC:
  *    DELETE
  *    OPEN
- *    AJAX
+ *        LOAD AND STYLE POPUP
+ *        UPDATE LAST VIEWED BY
  */
-import { exitModal, showSaveModal } from '../misc/intro-modals.js';
+import { exitModal, showSaveModal } from './intro-modals.js';
+import { sendAjaxQuery } from '../app/util/util-main.js';
 
 if (window.location.pathname.includes('pdfs')) {
     addPdfEvents();
@@ -20,13 +22,15 @@ function handleDeletePdf() {
     const id = $(this).data('id');
     const confg = {
         html: '<center><h2>Are you sure you want to delete?</h2><br>',
-        elem: 'input[data-id="'+id+'"]', dir: 'left', bttn: 'Confirm',
+        selector: 'input[name="delete-pdf"][data-id="'+id+'"]',
+        dir: 'left',
+        bttn: 'Confirm',
         submit: deletePdf.bind(null, id)
     }
     showSaveModal(confg);
 }
 function deletePdf(id) {
-    sendAjax('pub/'+id+'/delete', () => location.reload());
+    sendAjaxQuery(null, 'pub/'+id+'/delete', () => location.reload());
 }
 /* ============================ OPEN ======================================== */
 /**
@@ -76,20 +80,8 @@ function removePdfStyles() {
 }
 /* -------------------- UPDATE LAST VIEWED BY ------------------------------- */
 function updateLastViewedBy(id) {
-    sendAjax('pub/'+id+'/update', updateTableViewedBy.bind(null, id));
+    sendAjaxQuery(null, 'pub/'+id+'/update', updateTableViewedBy.bind(null, id));
 }
 function updateTableViewedBy(id, username) {
     $('#'+id+'-viewed').text(username)
-}
-/* ====================== AJAX ============================================== */
-function sendAjax(url, onSuccess) {
-    $.ajax({
-        method: "POST",
-        url: url,
-        success: onSuccess,
-        error: ajaxError
-    });
-}
-function ajaxError(jqXHR, textStatus, errorThrown) {
-    console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
 }

@@ -177,25 +177,31 @@ function getTreeWidth() {
 }
 function handleTreeRowRender (params) {
     const rowName = params.data.name || null;
-    return rowName ? addToolTipToCell(rowName) : addIntShowIcon(params.data.id);
+    if (!rowName) { return addShowIcon('interaction', params.data.id); }
+    return tblState.curFocus === 'taxa' ?
+        getTxnTreeCellHtml(params.data) : getToolTipTreeCellHtml(rowName);
 }
 /* ----------- TOOL TIP ------------- */
-function addToolTipToCell(name) {
+function getToolTipTreeCellHtml(name) {
     return '<span title="'+name+'">'+name+'</span>';
 }
-/* ----------- INT-SHOW ICON ------------- */
-function addIntShowIcon (id) {
-    const icon = getShowIconHtml();
-    return `<a href="${getShowLink(id)}">${icon}</a>`;
+/* ----------- SHOW ICON ------------- */
+function addShowIcon (entity, id) {
+    const icon = getShowIconHtml(_u('ucfirst', [entity]));
+    return `<a href="${getShowLink(entity, id)}">${icon}</a>`;
 }
-function getShowIconHtml () {
+function getShowIconHtml (entity) {
     const path = require('../../../images/icons/search.svg').default;
     const opac = tblState.flags.allDataAvailable ? 1 : 0;
-    return`<img src=${path} class="tree-show" title="Show Interaction Details"
-        alt="Show Interaction Details" style="opacity:${opac}">`;
+    return`<img src=${path} class="tree-show" title="Show ${entity} Details"
+        alt="Show ${entity} Details" style="opacity:${opac}">`;
 }
-function getShowLink (id) {
-    return $('body').data('base-url') + 'interaction/' + id;
+function getShowLink (entity, id) {
+    return $('body').data('base-url') + entity + '/' + id;
+}
+/* --------------- TXN-TREE CELL ------------------ */
+function getTxnTreeCellHtml(data) {
+    return getToolTipTreeCellHtml(data.name) + addShowIcon('taxon', data.id);
 }
 /* ----------- SORT TAXON TREE AND COLUMNS --------------- */
 /**
@@ -295,7 +301,7 @@ function getMapIcon(id) {
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
 function getMapIconStyles() {
-    const styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
+    let styles = 'height: 22px; margin-left: 9px; cursor:pointer;';
     if ($('#shw-map').data('loading')) { styles += ' opacity: .3;' }
     return styles;
 }
@@ -414,7 +420,7 @@ function hideUnusedColFilterMenus() {
     $('div[colId="lng"] .ag-sort-ascending-icon').hide();
     $('div[colId="lng"] .ag-sort-descending-icon').hide();
 }
-
+/* --------------- UPDATE INTERACTION TOTAL ON MODEL CHANGE ----------------- */
 /**
  * When the table rowModel is updated, the total interaction count for each
  * tree node is updated. Interactions filtered out will not be included in the totals.
@@ -422,43 +428,30 @@ function hideUnusedColFilterMenus() {
  */
 function onModelUpdated() {
     if (!tblState.api) { return; }
-    const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);  //console.log("-----new total ints = ", ttlInts);
+    const ttlInts = updateRowsAndGetIntCounts(tblState.api.getModel().rootNode);
     updateTotalCountDisplay(ttlInts);
 }
 /**
- * Sets new interaction totals for each tree node @getChildrenCnt and then
- * calls the table's softRefresh method, which refreshes any rows with "volatile"
- * set "true" in the columnDefs - currently only "Count".
+ * Note: softRefreshView refreshes any columns with "volatile" set "true" in the
+ * columnDefs - currently only "Count"
  */
-function updateTotalRowIntCounts(rootNode) {
-    const ttlInts = getChildrenCnt(rootNode.childrenAfterFilter);
+function updateRowsAndGetIntCounts(root) {
+    const ttls = root.childrenAfterFilter.map(row => updateTotalRowIntCounts(0, row));
     tblState.api.softRefreshView();
-    return ttlInts;
+    return ttls.reduce((ttl, cnt) => ttl += cnt, 0);
 }
-function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
-    var nodeCnt, ttl = 0;
-    nodeChildren.forEach(function(child) {
-        nodeCnt = 0;
-        nodeCnt += addSubNodeInteractions(child);
-        ttl += nodeCnt;
-        if (nodeCnt !== 0 && child.data.intCnt !== null) { child.data.intCnt = nodeCnt; }
-    });
-    return ttl;
+/** Sets new interaction totals for each tree node and returns count. */
+function updateTotalRowIntCounts(total, row) {                      /*dbug-log*///console.log('updateTotalRowIntCounts. total [%s], row = %O', total, row);
+    if (!row.childrenAfterFilter) { return total; }
+    const rowCnt = ifChildRowsAreInteractions(row) ?
+        row.childrenAfterFilter.length :
+        row.childrenAfterFilter.reduce(updateTotalRowIntCounts, 0);
+    row.data.intCnt = rowCnt;
+    return total += rowCnt;
 }
-/**
- * Interaction records are identified by their lack of any children, specifically
- * their lack of a "childrenAfterFilter" property.
- */
-function addSubNodeInteractions(child) {
-    var cnt = 0;
-    if (child.childrenAfterFilter) {
-        cnt += getChildrenCnt(child.childrenAfterFilter);
-        if (cnt !== 0) { child.data.intCnt = cnt; }
-    } else { /* Interaction record row */
-        ++cnt;
-        child.data.intCnt = null;
-    }
-    return cnt;
+function ifChildRowsAreInteractions(row) {
+    return !row.childrenAfterFilter.length ||
+        !row.childrenAfterFilter[0].childrenAfterFilter;
 }
 function updateTotalCountDisplay(cnt) {
     $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);

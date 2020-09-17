@@ -42,7 +42,7 @@ export function resetStoredData(reset) {
 export function resetLocalDb() {
     const confg = {
         html: '<center>Click "Reset" to redownload all data.</center>',
-        elem: '#data-help', dir: 'left', submit: resetDb, bttn: 'Reset'
+        selector: '#data-help', dir: 'left', submit: resetDb, bttn: 'Reset'
     }
     _modal('showSaveModal', [confg]);
 

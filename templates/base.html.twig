@@ -77,7 +77,10 @@
                             <div id="headln-txt">
                                 {% block headline %}{% endblock %}
                             </div>
-                            <div id="hdr-right">{% block headerright %}{% endblock %}</div>
+                            <div id="hdr-right">
+                                <div id='hdr-stats'>{% block headerstats %}{% endblock %}</div>
+                                {% block headerright %}{% endblock %}
+                            </div>
                         </div>
                     </div>
                 {% endblock %}

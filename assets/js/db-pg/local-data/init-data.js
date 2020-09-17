@@ -235,7 +235,6 @@ function addInteractionTotalsToLocs(locs) {
     }
 } /* End addInteractionTotalsToLocs */
 /* ------------------------- SOURCE DATA ------------------------------------ */
-/** Note: Top regions are the trunk of the location data tree. */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
  * [entity]Sources - an array with of all source records for the entity type.
@@ -259,38 +258,17 @@ function deriveInteractionData(data) {
     db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
     db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));
     db.deleteMmryData('tag');
+    addObjRealmIdProp(data.interaction);
 }
-/** Returns an object with a record (value) for each id (key) in passed array.*/
-function getEntityRcrds(ids, rcrds) {
-    const data = {};
-    ids.forEach(id => data[id] = rcrds[id]);
-    return data;
-}
-/** Returns an object with each entity record's displayName (key) and id. */
-function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
-    const data = {};
-    ids.forEach(id => data[rcrds[id].displayName] = id);            //console.log("nameDataObj = %O", data);
-    return data;
-}
-/** Returns an object with each entity types's displayName (key) and id. */
-function getTypeNameData(typeObj) {
-    const data = {};
-    for (var id in typeObj) {
-        data[typeObj[id].displayName] = id;
+function addObjRealmIdProp(ints) {
+    const taxa = db.getMmryData('taxon');
+    Object.keys(ints).forEach(i => addObjectRealmId(ints[i]));
+    db.setDataInMemory('interaction', ints);
+
+    function addObjectRealmId(int) {
+        int.objRealm = taxa[int.object].realm.id.toString();
     }
-    return data;
 }
-// --> SAVE FOR A TIME WHEN MULTIPLE ENTITIES ARE USING TAGS IN THIS WAY <---
-// /** Returns an object with each entity tag's displayName (key) and id. */
-// function getTagData(tags, entity) {
-//     const data = {};
-//     for (var id in tags) {
-//         if ( tags[id].constrainedToEntity === entity ) {
-//             data[tags[id].displayName] = id;
-//         }
-//     }
-//     return data;
-// }
 /* ---------------------- USER LIST DATA ------------------------------------ */
 /**
  * [type] - array of user created interaction and filter sets.
@@ -345,3 +323,34 @@ function getTypeObj(types, type, collection) {
         if (types[t].slug === type) { return types[t][collection]; }
     }
 }
+/** Returns an object with a record (value) for each id (key) in passed array.*/
+function getEntityRcrds(ids, rcrds) {
+    const data = {};
+    ids.forEach(id => data[id] = rcrds[id]);
+    return data;
+}
+/** Returns an object with each entity record's displayName (key) and id. */
+function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
+    const data = {};
+    ids.forEach(id => data[rcrds[id].displayName] = id);            //console.log("nameDataObj = %O", data);
+    return data;
+}
+/** Returns an object with each entity types's displayName (key) and id. */
+function getTypeNameData(typeObj) {
+    const data = {};
+    for (var id in typeObj) {
+        data[typeObj[id].displayName] = id;
+    }
+    return data;
+}
+// --> SAVE FOR A TIME WHEN MULTIPLE ENTITIES ARE USING TAGS IN THIS WAY <---
+// /** Returns an object with each entity tag's displayName (key) and id. */
+// function getTagData(tags, entity) {
+//     const data = {};
+//     for (var id in tags) {
+//         if ( tags[id].constrainedToEntity === entity ) {
+//             data[tags[id].displayName] = id;
+//         }
+//     }
+//     return data;
+// }

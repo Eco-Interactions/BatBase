@@ -147,7 +147,7 @@ class Location
     /**
      * @var \App\Entity\GeoJson
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\GeoJson", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="App\Entity\GeoJson", cascade={"persist"}, orphanRemoval=true)
      * @ORM\JoinColumn(name="geo_json", referencedColumnName="id", nullable=true)
      * @JMS\Expose
      * @Groups({"flattened"})
@@ -622,7 +622,7 @@ class Location
      */
     public function getCountryData()
     {
-        $locType = $this->locationType; //print("Country loc Type = ".$locType->getId()." for ".$this->displayName);
+        $locType = $this->locationType; //print("\n[".$this->displayName."] locationType = [".$locType->getDisplayName()."]");
         if ($locType->getSlug() === 'region') { return false; }
         if ($locType->getSlug() === 'country') { return $this->getLocObj($this); }
         return $this->findParentLocType($this, 'country');
@@ -657,7 +657,7 @@ class Location
      *
      * @return Source
      */
-    public function setGeoJson(\App\Entity\GeoJson $geoJson)
+    public function setGeoJson(\App\Entity\GeoJson $geoJson= null)
     {
         $this->geoJson = $geoJson;
 

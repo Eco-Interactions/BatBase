@@ -20,7 +20,7 @@ security:
             anonymous:    true
             remember_me:
                 secret: '%env(APP_SECRET)%'
-                lifetime: 604800 # 1 week in seconds
+                lifetime: 604800000
                 path: /
 
     role_hierarchy:

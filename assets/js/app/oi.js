@@ -17,12 +17,17 @@
 import initTosPopup from './misc/tos.js';
 import initSiteNav from './header/nav.js';
 import initSlider from './header/img-slider.js';
+import initHeaderStats from './header/site-stats.js';
 import { initSentry } from './misc/alert-issue.js';
 
-initSentryIssueTracking();
-requireStyles();
-setGlobalJquery();
-initUi();
+initPage();
+
+function initPage() {
+    initSentryIssueTracking();
+    requireStyles();
+    setGlobalJquery();                                                          //console.log('window width [%s]', window.outerWidth);
+    initUi();
+}
 /* ================= SENTRY ERROR TRACKING ================================== */
 function initSentryIssueTracking() {
     if ($('body').data('env') !== 'prod') { return; }
@@ -98,9 +103,15 @@ function initFeedbackUi() {
 }
 /* ========================== PAGE SPECIFIC ================================= */
 function handlePageSpecificUiInit() {
+    loadSiteStatisticsHeader();
     initPageTable();
     clearFieldForPdfSubmissions();
     showOverlayOnMobile();
+}
+/* ----------------------- SITE STATISTICS HEADER --------------------------- */
+function loadSiteStatisticsHeader() {
+    const pg = window.location.pathname.split('/').pop();
+    initHeaderStats(pg);
 }
 /* ----------------------- DATATABLES --------------------------------------- */
 /**

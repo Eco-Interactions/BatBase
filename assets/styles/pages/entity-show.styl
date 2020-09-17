@@ -2,11 +2,25 @@
  * Entty show page stylus code.
  *
  * TOC:
+ *    CSV BUTTON
  *    DATA SECTION
- *      DATA-ROW CELL
- *    RESPONSIVE STYLES
+ *      SECTON ROW
+ *      ROW CELL
+ *      SPECILIZED STYLES
+ *    MEDIA
  */
 @import '../util/*'
+
+/* =========================== CSV BUTTON ================================= */
+#entity-csv
+    opacity: .4
+    cursor: wait
+    margin-left: 1em
+
+#entity-csv:before
+    content: embedurl('../../images/icons/file-download.svg', 'utf8')
+    width: 12px
+
 /* =========================== DATA SECTION ================================= */
 .data-sect
     @extend .flex-col
@@ -30,38 +44,65 @@
     font-weight: 600
 
 .data-sect > div
-    margin-left: 1em
+    margin-left: .5em
 
 .cell-data
-    margin: .5em 0
+    margin: .5em
     line-height: 1.4
 
 .cell-data > *
-    margin: 0 .5em
+    // margin: 0 .5em
+    margin: .25em
 
 .cell-data > div
     min-width: 122px
-/* --------------------------- UTIL CLASSES --------------------------------- */
+
 .max-cntnt
     width: max-content
 .r-mgn2
     margin-right: 2em
-/* ------------- UTIL CLASSES ------------------------- */
+/* -------------------------- SPECIALIZED STYLES ---------------------------- */
+/* -------------- INTERACTION PAGE ----------------- */
 #Citation-cell
     max-width: 42vw
 
-#InteractionDetails-data-sect #sect-row1
+.interaction-show > #data-sect-1 > #sect-row1
     justify-content: flex-start
 
-#InteractionDetails-data-sect #sect-row1 > div
+.interaction-show > #data-sect-1 > #sect-row1 > div
     margin-right: 5em
 
+/* -------------- TAXON PAGE ----------------- */
+.show-int-cnt
+    // display: inline-block;
+    padding: .2em .7em .4em 0
 
+.taxon-show
+    flex-direction: row
+
+.taxon-show #data-sect-2 #sect-row1
+    justify-content: initial
+
+.taxon-show #data-sect-1
+    // min-width: 1em
+    margin-right: 5em
+
+/* =============================== MEDIA ==================================== */
+/* NOTE: ONLY SINGLE LINE COMMENTS CAN BE INSIDE MEDIA QUERY */
 @media $mqTablet
-    .sect-row
+    .sect-row, .taxon-show   //------- FLEX -----
         flex-wrap: wrap
 
-    #Citation-cell
+    .sect-row, .sect-row > div, .group-col > div, .taxon-show #data-sect-2 #sect-row1
+        flex-direction: column
+
+    .cell-data > *  // ------ MISC ------
+        margin: .25em 0
+
+    .cell-data > div[id$='-data']
+        margin-left: 1em
+
+    #Citation-cell   // ----- UNSET ----
         max-width: unset
 
     #InteractionDetails-data-sect #sect-row1 > div
@@ -69,3 +110,9 @@
 
     .max-cntnt
         width: unset
+
+    .taxon-show #data-sect-2 #sect-row1
+        justify-content: unset
+
+    .interaction-show > #data-sect-1 > #sect-row1 > div, .taxon-show #data-sect-1
+        margin-right: unset

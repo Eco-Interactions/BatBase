@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Source.
@@ -88,6 +89,7 @@ class Source
      * @var string
      *
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
+     * @Assert\Url
      * @JMS\Expose
      * @JMS\SerializedName("linkUrl")
      * @Groups({"normalized", "flattened"})

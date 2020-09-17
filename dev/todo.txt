@@ -6,25 +6,35 @@
 ### __________________________ CURRENT _____________________________________ ###
 > ____ LOGS ____
 SINCE LAST TEAM UPDATE:
+    - Forms
+
+    - DB Page
+
+    - Data
+
+    - Bugs
+
+    - QUESTIONS
 
 SINCE LAST SERVER UPDATE:
 
 SINCE LAST USER UPDATE:
     - Publication upload
     - Site designed for mobile use
-    - Data entry forms improved
-        - Added mapping to location forms
     - Ability to save set of filters and lists of interactions
     - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
-    - Added Interaction show page
+    - Added Interaction and Taxon pages
+    - Data Entry
+        - Error reporting feature
+        - Forms improved
+            - Added mapping to location forms
+            - Tutorials added to forms
 
     Upcoming:
         - Data review features
-        - Figure out how to get Logs in UI for new editors
 
 
 > ____ QUESTIONS _____
-
 TEAM:
     - Fully remove pdf files when deleted through UI
         - or eventually add another layer where "trash" could be emptied
@@ -34,40 +44,45 @@ TEAM:
         - feedback
         - unique logins
         - records added/edited
-    - logos need updating with batbase
 
 TAYLOR:
-- Reach out to users who experience issues/bugs that get resolved to thank them
-for inadvertantly leading to sloving a bug in the code and invite them to check back
+    - Reach out to users who experience issues/bugs that get resolved to thank them
+        for inadvertantly leading to sloving a bug in the code and invite them to check back?
+
+    2083-2085?
+
 
 > ____ TASKS _____
+rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
-    - Add globi to 'partners' section on about page
-    - Add Totals (number of interactions, number of citations, etc.) to Home Page, registration, and about database.
-    - 4.4 upgrade:
-        - Fix doctrine migrations
-    - Create Taxon show page
-        - Display taxon page
-            - heirarchy
-            - related interactions?
-                - group by interaction type
-    - Add interaction type verbs
-        - Use active verbs on interaction show page header
-        - "" in form detail panel
-    - Add confirmation popup to citation and location forms
-    - Add form hints
-    - Add object realm and name filters to bat filter panel
+    - Bugs
+
+    - Site text update
+        - future devs
+        - Project ->
+            - announcements
+            - team page
+
+    - Adding form hints
+        - addFinalInfoStep about info in tooltips on fields
+
+    - Sort invalid urls by the editor who created the source
+
+    - Data: see Data Cleanup below
 
     - fix cronjob to clean up hourly backups
-    - optimize data sync downloads. It takes almost as long as full download,
-        depending on how much needs to be updated
     - testing
         - add interaction show page to tests
+        - page stat headers: about, db, home
+        - test editor report form
+        - test data reset
         - test all validation 'error' handlers
         - csv
-        - wysiwyg
-    - add input type to form confg (handle all number inputs)
+
     - Add multiple realm root functionality
+
+    - optimize data sync downloads. It takes almost as long as full download,
+        depending on how much needs to be updated
 
 NEXT:
     - Review Data
@@ -80,12 +95,7 @@ NEXT:
     - Edit form
         - allow selection of another location and merging of all data and
             deletion of location being edited
-    - Features
-        - UI - Draw areas and select as parent location
-        - UI - Adjust display point for country
-        - Replace agGrid with MIT alternative
-    - Refactor Source data
-        - merge detail and core data on client side
+
     - Handle potential source name duplication
         - duplicate display names for entities with unique name fields
             - source: if duplicate name is for a soft-deleted entity.
@@ -99,6 +109,7 @@ NEXT:
                             - submit, restoring the deleted record.
                         - and to indicate they are creating a distinct record
                             - submit, append '-deleted' to deleted record to eliminate conflict.
+
     - Create model of local storage
         - of entity relations
 
@@ -106,6 +117,10 @@ NEXT:
     - forms - Add 'trim' to all values before submitting
         - Check for elevation field val when elev-max value entered.
         - Loop through all entities that could have random spaces in fields
+        - Fix all URLs entered without http
+    - tags- leaf = external, wood = internal
+    - Visitation - removing 'flower' from verb forms
+    - update all saved filter sets into current format
 
 > ==== MEETING NOTES ====
 Prep:
@@ -122,7 +137,7 @@ Next/future rounds:
     Future:
 ### _____________________ DEV INTERNAL TASKS _______________________________ ###
 Sort:
-    - remove all unused properties from serialization (eg, slug)
+    - Move filter sets into filter folder
     - when clicking reset local data button on menu bar, figure out how to get
         a diff between the old and new stored data to better track down errors/bugs
     - REFACTOR FORM-MEMORY, all submit and ui files  (dry)
@@ -135,7 +150,9 @@ Sort:
     - Database doesn't work with IE. Notify user.
     - move db-pg util elem builders to js/util/elems
     - Add responsive styling testing
-    - FOS registration email is not using the template found in src/app/resources/translations/*
+    - REFACTOR - Filter rows to interaction list in row-data-filters instead of during row build
+    - Refactor Source data
+        - merge detail and core data on client side
 
 TODOs:
 ##(Category){priority}[difficulty]##

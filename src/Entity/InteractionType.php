@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation as JMS;
  * InteractionType.
  *
  * @ORM\Table(name="interaction_type")
- * @ORM\Entity(readOnly=true)
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
@@ -48,6 +48,24 @@ class InteractionType
      * @JMS\SerializedName("displayName")
      */
     private $displayName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="active_form", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("activeForm")
+     */
+    private $activeForm;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="passive_form", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("passiveForm")
+     */
+    private $passiveForm;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -191,6 +209,54 @@ class InteractionType
     }
 
     /**
+     * Set activeForm.
+     *
+     * @param string $activeForm
+     *
+     * @return InteractionType
+     */
+    public function setActiveForm($activeForm)
+    {
+        $this->activeForm = $activeForm;
+
+        return $this;
+    }
+
+    /**
+     * Get activeForm.
+     *
+     * @return string
+     */
+    public function getActiveForm()
+    {
+        return $this->activeForm;
+    }
+
+    /**
+     * Set passiveForm.
+     *
+     * @param string $passiveForm
+     *
+     * @return InteractionType
+     */
+    public function setPassiveForm($passiveForm)
+    {
+        $this->passiveForm = $passiveForm;
+
+        return $this;
+    }
+
+    /**
+     * Get passiveForm.
+     *
+     * @return string
+     */
+    public function getPassiveForm()
+    {
+        return $this->passiveForm;
+    }
+
+    /**
      * Add interactions.
      *
      * @param \App\Entity\Interaction $interactions
@@ -224,19 +290,19 @@ class InteractionType
         return $this->interactions;
     }
 
-    /**
-     * Returns an array of interactions ids.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("interactions")
-     */
-    public function getInteractionIds()
-    {
-        $allIntIds = [];
-        foreach ($this->interactions as $interaction) {
-            array_push($allIntIds, $interaction->getId());
-        }
-        return $allIntIds;
-    }
+    // /**
+    //  * Returns an array of interactions ids.
+    //  * @JMS\VirtualProperty
+    //  * @JMS\SerializedName("interactions")
+    //  */
+    // public function getInteractionIds()
+    // {
+    //     $allIntIds = [];
+    //     foreach ($this->interactions as $interaction) {
+    //         array_push($allIntIds, $interaction->getId());
+    //     }
+    //     return $allIntIds;
+    // }
 
     /**
      * Add validTags.

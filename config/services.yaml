@@ -4,9 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    app.sentry.release: '%env(SENTRY_RELEASE)%'
     google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
     publication_file_dir: '%kernel.project_dir%/public/uploads/publications'
-    app.sentry.release: '20200626_BB'
 
 services:
     # default configuration for services in *this* file
@@ -37,17 +37,17 @@ services:
         tags:
             - { name: form.type, alias: app_user_profile }
 
-    App\EventListener\ActivityListener:
+    App\EventSubscriber\ActivityListener:
         arguments:
             - '@security.token_storage'
             - '@doctrine'
         tags:
-            - { name: kernel.event_listener, 
+            - { name: kernel.event_listener,
                 event: kernel.controller,
                 method: onCoreController }
 
     app.add_example_data:
-        class: App\EventListener\AddExampleDataAfterRegistration
+        class: App\EventSubscriber\AddExampleDataAfterRegistration
         tags:
             - { name: kernel.event_subscriber }
 
@@ -59,3 +59,8 @@ services:
 
     Monolog\Processor\PsrLogMessageProcessor:
         tags: { name: monolog.processor, handler: sentry }
+
+    Doctrine\Migrations\Version\DbalMigrationFactory: ~
+    App\Migrations\Factory\MigrationFactoryDecorator:
+        decorates: Doctrine\Migrations\Version\DbalMigrationFactory
+        arguments: ['@App\Migrations\Factory\MigrationFactoryDecorator.inner', '@service_container']

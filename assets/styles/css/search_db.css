@@ -456,12 +456,8 @@ select[id$="txn-lvl"] + div {
     color: slategrey;
     margin-top: 3px;
 }
-.new-loc-popup {
+.form-loc-popup {
     font-size: 1.1em;
-}
-.new-loc-popup #err {
-    color: red;
-    padding: 5px 5px 5px 10px;
 }
 /* ------------- Map Markers ------------- */
 .single-marker {

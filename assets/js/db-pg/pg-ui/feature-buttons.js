@@ -46,7 +46,7 @@ export function authDependentInit(userRole) {
     const initFetaures = {
         visitor: disableUserFeatures, user: initUserFeatures,
         editor: initEditorFeatures, admin: initEditorFeatures,
-        super: initEditorFeatures
+        super: initSuperFeatures
     };
     app.enabledSelectors = initFetaures[userRole]();
 }
@@ -76,6 +76,10 @@ function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
     $('#new-data').addClass('adminbttn').click(openDataEntryForm);
     $('#rvw-data').addClass('adminbttn');
+}
+function initSuperFeatures() {
+    $('#data-help').css({'z-index': 99999999});
+    return initEditorFeatures();
 }
 /* ===================== DATABASE INIT UI =================================== */
 /** While the database is being initialized, all options are disabled. */
@@ -127,8 +131,8 @@ function enableMapFeatures() {
 /* ================= TOGGLE TABLE BUTTONS  ================================== */
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing || testingDbInit()) { updateUiAfterBaseDatabaseInit(); }
-    enableButtonsAndUpdateCursors();
     unfadeButtons();
+    enableButtonsAndUpdateCursors();
 }
 function testingDbInit() {
     return app.dbInitializing && $('body').data('env') === 'test';

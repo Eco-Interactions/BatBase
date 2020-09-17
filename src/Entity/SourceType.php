@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * SourceType.
  *
  * @ORM\Table(name="source_type")
- * @ORM\Entity(readOnly=true)
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */

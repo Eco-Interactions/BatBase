@@ -117,20 +117,20 @@ export function buildSrcRowData(tree, tblState) {
 }
 function getSrcRowData(src, treeLvl, idx, tblState) {               /*dbug-log*///console.log("getSrcRowData. source = %O", src);
     const entity = src.sourceType.displayName;
-    const pubType =  entity === "Publication" ? src.publication.publicationType.id : null;
+    const pubTypeId =  entity === "Publication" ? src.publication.publicationType.id : null;
     const displayName = src.displayName.includes('(citation)') ?
         'Whole work cited.' : src.displayName;
     return {
         id: src.id,
         entity: entity,
-        type: pubType,
+        type: pubTypeId,  // used for publication type filter
         name: displayName,
         isParent: true,
         parentSource: src.parent,
         open: tblState.openRows.indexOf(src.id.toString()) !== -1,
         children: getChildSrcRowData(src, treeLvl, idx),
         treeLvl: treeLvl,
-        interactions: src.isDirect,   //Only rows with interaction are colored
+        interactions: src.isDirect || false,   //Only rows with interaction are colored
         rowColorIdx: idx,
         updatedBy: src.updatedBy,
     };
@@ -179,6 +179,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,
+        realm: taxon.realm.id, // Used for the object realm filter in Bat view
         taxonLvl: taxon.level.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
@@ -295,24 +296,25 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
     return [];
 }
 /** Returns an interaction rowData object with flat data in table-ready format. */
-function buildIntRowData(intRcrd, treeLvl, idx){
+function buildIntRowData(intRcrd, treeLvl, idx){                                //console.log('buildIntRowData. int = %O', intRcrd);
     const rowData = {
         citation: getEntityData('source', 'description'),
         entity: 'Interaction',       //Not sure what this is all used for...
         id: intRcrd.id,
         interactionType: intRcrd.interactionType.displayName,   //Table data
-        isParent: false,  //Tell grid and various code not to expect sub-nodes
-        name: '',           // Blank tree field
-        note: intRcrd.note,    //Table data
+        isParent: false,        //Tell grid and various code not to expect sub-nodes
+        name: '',               // Blank tree field
+        note: intRcrd.note,     //Table data
         object: getEntityData('taxon', 'displayName', 'object'),
+        objRealm: intRcrd.objRealm.toString(),//Used for the Object Realm filter in taxon->bat view
         rowColorIdx: idx,       //Not sure what this is all used for...
         subject: getEntityData('taxon', 'displayName', 'subject'),
-        tags: intRcrd.tags,   //Table data
+        tags: intRcrd.tags,     //Table data
         treeLvl: treeLvl,       //Influences row coloring
         type: 'intRcrd',        //Not sure what this is all used for...
         updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
         updatedBy: intRcrd.updatedBy === 'Sarah' ? null : intRcrd.updatedBy,
-        year: getEntityData('source', 'year')       //When filtering interactions by publication date
+        year: getEntityData('source', 'year').replace(/\D/g,'')       //When filtering interactions by publication date
     };
 
     if (intRcrd.location) { getLocationData(intRcrd.location); }  //Table & csv export data

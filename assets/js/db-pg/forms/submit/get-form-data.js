@@ -49,9 +49,6 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     function removeInfoTextFromLabel (text) {
         return text.split(' (m)')[0].split(' (Bat)')[0];
     }
-    function isElevationField (field) {
-        return field.innerText.includes('(m)');
-    }
     function getMultiFieldRowData(cntnr) {
         cntnr.children.forEach(fieldElem => getInputData(fieldElem));
     }

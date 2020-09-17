@@ -1,22 +1,8 @@
-{% extends "layout.html.twig" %}
+{% extends "Entity/show-layout.html.twig" %}
 
 {% block headline %}
-    Interaction {{ id }}
+    {{ subject }} <i> {{ type }} </i> {{ object }}
+    {% if tags %}
+    	( {{ tags }} )
+    {% endif %}
 {% endblock headline %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('build/show.css') }}" />
-{% endblock stylesheets %}
-
-{% block detail %}
-    <div id='entity-show' class='flex-col' data-entity='{{ entity }}'>
-        <a href="{{ baseurl }}search">Browse Database</a>
-        <br>
-    </div>
-{% endblock detail %}
-
-{% block javascripts %}
-    {{ parent() }}
-    {{ encore_entry_script_tags('show') }}
-{% endblock javascripts %}

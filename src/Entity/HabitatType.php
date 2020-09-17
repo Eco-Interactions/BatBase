@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
  * HabitatType.
  *
  * @ORM\Table(name="habitat_type")
- * @ORM\Entity(readOnly=true)
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */

@@ -308,14 +308,33 @@ class Interaction
      * Get the Interaction Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactionType")
-     * @Groups({"normalized", "flattened"})
+     * @Groups({"normalized"})
      */
-    public function getInteractionTypeData()
+    public function getInteractionTypeSummaryData()
     {
         if ($this->interactionType) {
             return [
                 'id' => $this->interactionType->getId(),
                 'displayName' => $this->interactionType->getDisplayName()
+            ];
+        }
+        return null;
+    }
+
+    /**
+     * Get the Interaction Type id and displayName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactionType")
+     * @Groups({"flattened"})
+     */
+    public function getAllInteractionTypeData()
+    {
+        if ($this->interactionType) {
+            return [
+                'id' => $this->interactionType->getId(),
+                'displayName' => $this->interactionType->getDisplayName(),
+                'activeForm' => $this->interactionType->getActiveForm(),
+                'passiveForm' => $this->interactionType->getPassiveForm()
             ];
         }
         return null;
@@ -353,7 +372,7 @@ class Interaction
      */
     public function getLocationId()
     {
-        return $this->location ? $this->location->getId() : null;
+        return $this->location->getId();
     }
 
     /**
@@ -497,7 +516,7 @@ class Interaction
     }
 
     /**
-     * Get comma separated tag names.
+     * Get comma separated tag names. If 'Secondary' present, it is listed last.
      *
      * @return array
      */
@@ -508,6 +527,12 @@ class Interaction
         if ($this->tags) {
             foreach ($this->tags as $tag) { array_push($names, $tag->getDisplayName()); }
         }
+        uasort($names, function($a, $b)
+        {
+            if ($a == 'Secondary') return 1;
+            if ($b == 'Secondary') return -1;
+            return 0;
+        });
         return join(', ', $names);
     }
 

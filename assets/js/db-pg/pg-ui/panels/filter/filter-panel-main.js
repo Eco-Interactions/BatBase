@@ -103,7 +103,7 @@ function getLeftSplitPos() {
     return pnlL > (tabL - 2) ? pnlL : tabL;
 }
 /** Adds the focus to the filter panel header, "[Focus] and Date Filters" */
-export function updateFilterPanelHeader(focus) {
+export function updateFilterPanelHeader(focus) {                    /*dbug-log*///console.log('updateFilterPanelHeader. focus [%s]', focus);  console.trace();
     const map = {
         locs: 'Location', srcs: 'Source', taxa: 'Taxon'
     };
@@ -133,18 +133,18 @@ export function toggleFilterPanel() {
         sizeFilterPanelTab();
     } else { pM.togglePanel('filter', 'close'); }
 }
-function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           +--buildAndShowFilterPanel')
+function buildAndShowFilterPanel() {                                /*dbug-log*///console.log('           +--buildAndShowFilterPanel')
     pM.togglePanel('filter', 'open');
     _u('getOptsFromStoredData', ['savedFilterNames']).then(fSets.updateFilterSetSel);
 }
 /* ======================= CLEAR FILTERS ==================================== */
 /* -------------------- RESET BUTTON ---------------------------------------- */
-export function enableClearFiltersButton() {
+export function enableClearFiltersButton() {                        /*dbug-log*///console.log('enableClearFiltersButton')
     const noFilters = !_filter('isFilterActive');
     const opac = noFilters ? .5 : 1;
     const cursor = noFilters ? 'inherit' : 'pointer';
     $('button[name="reset-tbl"]')
-        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('slow', opac);
+        .attr('disabled', noFilters).css('cursor', cursor).fadeTo('fast', opac);
 }
 /* ----------------------- RESET UI ----------------------------------------- */
 export function clearFilterUi() {
@@ -155,12 +155,21 @@ export function clearFilterUi() {
 }
 function resetFilterUi() {
     resetFilterStatus();
-    $('#focus-filters input').val('');
+    $('#focus-filters input[type="select-one"]').val('');
+    $('label.txtLbl input[type="text"]').val('');
+    if ($('div.selectize-control.multi').length) { clearMultiComboboxes() }
     if ($('#shw-chngd').prop('checked')) { _filter('clearDateFilter'); }
 }
 function resetFilterStatus() {
     $('#filter-status').text('No Active Filters.');
     updateTaxonFilterViewMsg('');
+}
+function clearMultiComboboxes() {
+    $('div.selectize-control.multi input').each(clearMultiCombo);
+}
+function clearMultiCombo(i, el) {  
+    const selId = el.id.split('-selectized')[0]
+    $('#'+selId)[0].selectize.clear('silent');
 }
 function resetStoredFiltersUi() {
     if (!$('#selSavedFilters')[0].selectize) { return; }

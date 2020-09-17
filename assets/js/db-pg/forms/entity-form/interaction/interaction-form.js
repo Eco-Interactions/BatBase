@@ -11,6 +11,8 @@
  *         RESET CREATE FORM AFTER SUBMIT
  *     EDIT FORM
  *     ON FORM INIT COMPLETE
+ *         REFERENCE GUIDE BUTTON
+ *         LOCATION OPTIONS NOTE
  *         FORM COMBOBOXES
  *     FORM FIELD HANDLERS
  *         PUBLICATION
@@ -28,8 +30,8 @@
  *         INTERACTION TYPE & TAGS
  *     HELPERS
  */
-import { _u } from '../../../db-main.js';
-import { _state, _elems, _panel, _cmbx, _form, _val, getSubFormLvl } from '../../forms-main.js';
+import { _modal, _u } from '../../../db-main.js';
+import { _confg, _state, _elems, _panel, _cmbx, _form, _val, submitForm, getSubFormLvl } from '../../forms-main.js';
 
 /** ====================== CREATE FORM ====================================== */
 /**
@@ -44,6 +46,7 @@ export function initCreateForm(entity) {                                        
     .then(getInteractionFormFields)
     .then(fields => _elems('buildAndAppendForm', [fields]))
     .then(finishInteractionFormBuild)
+    .then(addConfirmationBeforeSubmit)
     .then(() => _state('setOnFormCloseHandler', ['top', resetInteractionForm]));
 }
 /** Builds and returns all interaction-form elements. */
@@ -145,7 +148,20 @@ function modifyFormDisplay() {
     $('.all-fields-cntnr').hide();
     $('#Subject-lbl').text('Subject (Bat)');
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
+    addReferenceGuideButton();
 }
+/* ----------------------- REFERENCE GUIDE BUTTON --------------------------- */
+function addReferenceGuideButton() {
+    const bttnTxt = 'Reference Guide';
+    const attr = { class: 'ag-fresh', type: 'button', value: bttnTxt };
+    const bttn = _u('buildElem', ['input', attr]);
+    $(bttn).click(openReferenceGuideInNewTab);
+    $('#top-help').prepend(bttn);
+}
+function openReferenceGuideInNewTab() {
+    //window.open(pathString, target);
+}
+/* ---------------------- LOCATION OPTIONS NOTE ----------------------------- */
 /** Adds a message above the location fields in interaction forms. */
 function addLocationSelectionMethodsNote() {
     const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
@@ -177,6 +193,7 @@ function finishComboboxInit() {
     initFormCombos('interaction', 'top');
     _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
+    _cmbx('enableCombobox', ['#InteractionType-sel', false]);
     _cmbx('enableCombobox', ['#InteractionTags-sel', false]);
     focusPubFieldIfNewRecord();
 }
@@ -245,6 +262,31 @@ function addTaxonFocusListener(role) {
     const elem = '#'+role+'-sel + div div.selectize-input';
     const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
     $('#form-main').on('focus', elem, showSelectForm);
+}
+/* -------------------- SUBMIT CONFIRMATION MODAL --------------------------- */
+function addConfirmationBeforeSubmit() {
+    $('#top-submit').off('click').click(showSubmitModal);
+}
+function showSubmitModal() {
+    const modalConfg = {
+        html: buildConfirmationModalHtml(),
+        selector: '#top-submit',
+        dir: 'left',
+        submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
+        bttn: 'Submit Interaction'
+    };
+    _modal('showSaveModal', [ modalConfg ]);
+    window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
+}
+function buildConfirmationModalHtml() {
+    const subj = $('#Subject-sel')[0].innerText;
+    const obj = $('#Object-sel')[0].innerText;
+    const typeVerb = getIntTypeVerbForm(_cmbx('getSelVal', ['#InteractionType-sel']));
+    return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
+}
+function getIntTypeVerbForm(typeId) {
+    const types = _state('getEntityRcrds', ['interactionType']);
+    return types[typeId].activeForm;
 }
 /** ====================== FORM FIELD HANDLERS ============================== */
 /*------------------ PUBLICATION ---------------------------------------------*/
@@ -383,10 +425,10 @@ function initSubjectSelect() {                                                  
 function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
     initTaxonSelectForm('Object', getObjectRealm());
 }
-function getObjectRealm() {
+function getObjectRealm(prop = 'id') {
     const prevSelectedId = $('#Object-sel').data('selTaxon');
     if (!prevSelectedId) { return 2; } //default: Plants (2)
-    return getRcrd('taxon', prevSelectedId).realm.id;
+    return getRcrd('taxon', prevSelectedId).realm[prop];
 }
 /**
  * Removes any previous realm comboboxes. Shows a combobox for each level present
@@ -406,6 +448,7 @@ function onRealmSelection(val) {                                                
         $('#Realm_row').after(rows);
         _state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
+        _elems('toggleSubmitBttn', ['#sub-submit', false]);
         /* Binds the current realm to the 'Select Unspecified' button */
         $('#select-realm').off('click');
         $('#select-realm').click(selectRoleTaxon.bind(null, null, getRealmData('realmTaxon')));
@@ -420,10 +463,18 @@ function ifLevelComboRemoveCombo(i, elem) {
 /* ------------------- ROLE SHARED HELPERS --------------- */
 /* ------- initTaxonSelectForm --------- */
 function initTaxonSelectForm(role, realmId) {
-    if (ifFormAlreadyOpenAtLevel('sub')) { return throwAndCatchSubFormErr(role, 'sub'); }
+    if (ifSubFormAlreadyInUse(role)) { return throwAndCatchSubFormErr(role, 'sub'); }
+    $('#'+role+'-sel').data('loading', true);
     return buildTaxonSelectForm(role, realmId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));
+}
+function ifSubFormAlreadyInUse(role) {
+    return ifFormAlreadyOpenAtLevel('sub') || ifOppositeRoleFormLoading(role);
+}
+function ifOppositeRoleFormLoading(role) {
+    const oppRole = getRealmData('oppositeRole');
+    return $('#'+oppRole+'-sel').data('loading');
 }
 function buildTaxonSelectForm(role, realmId) {                                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     addNewFormState(role);
@@ -444,6 +495,7 @@ function finishTaxonSelectBuild(role) {
     customizeElemsForTaxonSelectForm(role);
     selectInitTaxonOrFocusFirstCombo(role);
     _u('replaceSelOpts', ['#'+role+'-sel', []]);
+    $('#'+role+'-sel').data('loading', false);
 }
 /* --------- SELECT UNSPECIFIED BUTTON -------------- */
 function addSelectRealmBttn() {
@@ -764,6 +816,7 @@ function onTaxonRoleSelection(role, val) {                                      
     $('#'+getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);
     enableTaxonCombos();
+    ifBothTaxaSelectedEnableInteractionTypes(role);
     focusPinAndEnableSubmitIfFormValid(role);
 }
 function enableTaxonCombos() {
@@ -773,17 +826,81 @@ function enableTaxonCombos() {
 function getRealmData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getRealmState');
 }
+function ifBothTaxaSelectedEnableInteractionTypes(role) {
+    if (ifOppositeRoleTaxonNull(role)) { return; }
+    // const objectRealm = ;
+    loadInteractionTypesForObjectRealm(getObjectRealm('displayName'));
+}
+function ifOppositeRoleTaxonNull(role) {
+    const oppRole = getRealmData('oppositeRole') || 
+        (role === 'Subject' ? 'Object' : 'Subject');  //Auto-filling for edit form
+    return !_cmbx('getSelVal', [`#${oppRole}-sel`]);
+}
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
+/**
+ * Interaction Types are restricted by the Object Realm.
+ * Ex:
+        'Visitation': ['Plant'],
+        'Pollination': ['Plant'],
+        'Seed Dispersal': ['Plant'],
+        'Consumption': ['Plant', 'Fungi'],
+        'Transport': ['Plant', 'Arthropod'],
+        'Roost': ['Plant'],
+        'Predation': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
+        'Prey': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
+        'Host': ['Arthropod', 'Virus', 'Fungi', 'Bacteria', 'Other Parasite'],
+        'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
+        'Hematophagy': ['Bird', 'Mammal'],
+ */
+function loadInteractionTypesForObjectRealm(objectRealm) {                      //console.log('loadInteractionTypesForObjectRealm = [%s]', objectRealm);
+    const types = _confg('getRealmInteractionTypes')[objectRealm];
+    _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
+    .then(opts => {
+        _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
+        ifEditFormSelectInitValElseFocusCombo('InteractionType', opts);
+    })
+    .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
+}
+/** Note: init-val is set during edit form build. */
+function ifEditFormSelectInitValElseFocusCombo(field, typeOpts) {
+    const initVal = $(`#${field}-sel`).data('init-val');                        //console.log('initVal = [%s] typeOpts = %O', initVal, typeOpts);//array
+    if (!initVal) { return _cmbx('focusCombobox', [`#${field}-sel`, true]); }
+    if (field.includes('Type')) {
+        selectInitValIfValidType(initVal, typeOpts);
+    } else {  console.log('tags = %O', $('#InteractionTags-sel')[0]);
+        _cmbx('setSelVal', ['#InteractionTags-sel', initVal.split(', ')]);
+    }
+}
+function selectInitValIfValidType(initVal, typeOpts) {  
+    const validType = typeOpts.find(opt => opt.value == initVal);               //console.log('validType = ', validType)
+    if (validType) {
+        _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
+    } else { 
+        onInteractionTypeSelection(null);
+    }
+}
 function onInteractionTypeSelection(val) {
-    if (!val) { return; }
+    if (!val) { return clearTypeRelatedTags(); }
     fillAndEnableTags(val);
     focusPinAndEnableSubmitIfFormValid('InteractionType');
+}
+function clearTypeRelatedTags() {
+    let opts = getPersistedTags($(`#InteractionTags-sel`)[0].selectize.options);
+    _cmbx('updateComboboxOptions', ['#InteractionTags-sel', opts]);
+    ifEditFormSelectInitValElseFocusCombo('InteractionTags');
+}
+function getPersistedTags(opts) {
+    const persist = ['Secondary'];
+    const newVals = Object.keys(opts).filter(k => persist.indexOf(opts[k].text) !== -1);
+    const newOpts = newVals.map(k=>opts[k]);  console.log('opts = %O', newOpts)
+    return newOpts;
 }
 function fillAndEnableTags(id) {
     const tagOpts = buildTagOpts(id);
     _cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
     _cmbx('enableCombobox', ['#InteractionTags-sel', true]);
     handleRequiredTagForType(tagOpts);
+    ifEditFormSelectInitValElseFocusCombo('InteractionTags');
 }
 function buildTagOpts(id) {
     const type = getRcrd('interactionType', id);

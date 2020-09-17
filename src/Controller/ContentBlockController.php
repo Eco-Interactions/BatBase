@@ -122,7 +122,7 @@ class ContentBlockController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $repo = $em->getRepository('App:ContentBlock');
+        // $repo = $em->getRepository('App:ContentBlock');
 
         return $this->render('ContentBlock/search/search.html.twig', array());
     }
@@ -313,6 +313,44 @@ class ContentBlockController extends AbstractController
             'form' => $form->createView(),
             'contentblock' => $block
         ]);
+    }
+    /**
+     * Edits an existing Content Block entity from the WYSIWYG editor.
+     *
+     * @Route(
+     *      "/admin/contentblock/{slug}/update",
+     *      name="admin_content_block_update",
+     *      methods={"PUT", "POST"}
+     * )
+     */
+    public function updateAction(Request $request, $slug)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $em->getRepository('App:ContentBlock')
+                ->findOneBy(array('slug' => $slug));
+
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Content Block entity.');
+        }
+
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+        $content = $pushedData->content;
+
+        $entity->setContent($content);
+        $em->flush();
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'contentblock' => "success",
+        ));
+
+        return $response;
     }
 
     /**

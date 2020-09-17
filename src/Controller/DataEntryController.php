@@ -476,8 +476,8 @@ class DataEntryController extends AbstractController
     }
     private function ifNotDuplicateEntityError($e)
     {
-        return !strpos($e->getMessage(), 'Duplicate Entry') ||
-            !strpos($e->getTraceAsString(), 'Duplicate Entry');
+        return !strpos($e->getMessage(), 'Duplicate entry') ||
+            !strpos($e->getTraceAsString(), 'Duplicate entry');
     }
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($entityData)
@@ -524,7 +524,7 @@ class DataEntryController extends AbstractController
         $entity = $em->getRepository('App:SystemDate')
             ->findOneBy(['description' => $name]);
         if (!$entity) { return; }
-        $entity->setDateVal(new \DateTime('now'));
+        $entity->setDateVal(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
         $em->persist($entity);
     }
 }

@@ -4,6 +4,8 @@
 
 {% block headline %}The Project{% endblock %}
 
+{% block headerstats %} 000 Users | 00 Editors | Est. 2002{% endblock %}
+
 {% block detail %}
 	<div id="about-pg" class="top-pgs">
 		{% embed 'two_cols_sect.html.twig' %}
@@ -24,6 +26,13 @@
 				</div>
 				<div id="about-pg-acknowledgements" class="wysiwyg">
 					{{ blocks["about-pg-acknowledgements"]|raw }}
+				</div>
+				<div id="project-partners" class="wysiwyg">
+					<h3>Partners</h3><br>
+					<a href="https://www.globalbioticinteractions.org/">
+					   <img alt="GLOBI logo" src="{{ asset('build/images/globi_long.svg') }}"
+					        width="150" height="70">
+					</a>
 				</div>
 			{% endblock %}
 		{% endembed %}

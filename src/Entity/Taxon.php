@@ -475,9 +475,9 @@ class Taxon
     }
 
     /**
-     * Get id.
+     * Get Taxon Realm.
      *
-     * @return int
+     * @return Realm
      */
     public function getTaxonRealm()
     {
@@ -486,9 +486,8 @@ class Taxon
 
     private function findRealmAndReturnObj($taxon)
     {
-        if ($taxon->getSlug() === 'animalia') { return false; }
-        $realm = $taxon->getRealm();
-        if ($realm) { return $realm; }
+        if ($taxon->getSlug() === 'kingdom-animalia') { return false; }
+        if ($taxon->getIsRoot()) { return $taxon->getRealm(); }
         $parent = $taxon->getParentTaxon();
         if (!$parent) { return false; }
         return $this->findRealmAndReturnObj($parent);
@@ -710,7 +709,7 @@ class Taxon
     public function removeSubjectRole(\App\Entity\Interaction $subjectRole)
     {
         $this->subjectRoles->removeElement($subjectRole);
-        $this->updated = new \DateTime('now');
+        $this->updated = new \DateTime('now', new \DateTimeZone('America/Los_Angeles'));
     }
 
     /**
@@ -727,12 +726,23 @@ class Taxon
      * Returns an array of ids for all interactions where the taxon was the subject.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("subjectRoles")
-     * @Groups({"normalized", "flattened"})
+     * @Groups({"normalized"})
      */
     public function getSubjectRoleIds()
     {
         $interactions = $this->subjectRoles;
         return $this->getInteractionIds($interactions);
+    }
+
+    /**
+     * Returns flattened interactions where the taxon was the subject.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("subjectRoles")
+     * @Groups({"flattened"})
+     */
+    public function flattenSubjectRoles()
+    {
+        return $this->flattenTaxonInteractions($this->subjectRoles);
     }
 
     /**
@@ -757,7 +767,7 @@ class Taxon
     public function removeObjectRole(\App\Entity\Interaction $objectRoles)
     {
         $this->objectRoles->removeElement($objectRoles);
-        $this->updated = new \DateTime('now');
+        $this->updated = new \DateTime('now', new \DateTimeZone('America/Los_Angeles'));
     }
 
     /**
@@ -774,21 +784,24 @@ class Taxon
      * Returns an array of ids for all interactions where the taxon was the object.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("objectRoles")
-     * @Groups({"normalized", "flattened"})
+     * @Groups({"normalized"})
      */
     public function getObjectRoleIds()
     {
         $interactions = $this->objectRoles;
         return $this->getInteractionIds($interactions);
     }
-    // // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS
-    // public function getInteractions()
-    // {
-    //     $subj = $this->getSubjectRoles();
-    //     $obj = $this->getObjectRoles();
 
-    //     return count($subj) > 0 ? $subj : $obj;
-    // }
+    /**
+     * Returns flattened interactions where the taxon was the object.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("objectRoles")
+     * @Groups({"flattened"})
+     */
+    public function flattenObjectRoles()
+    {
+        return $this->flattenTaxonInteractions($this->objectRoles);
+    }
 
     /**
      * Returns an array of ids for all passed interactions.
@@ -806,6 +819,23 @@ class Taxon
     public function getAllInteractionIds()
     {
         return array_merge($this->getObjectRoleIds(), $this->getSubjectRoleIds());
+    }
+
+    public function flattenTaxonInteractions($interactions)
+    {
+        $flattened = [];
+        foreach ($interactions as $int) {  //print("\n    COUNTRY [".$int->getLocation()->getCountryData()."]    \n");
+            $flatInt = [
+                'country' => !$int->getLocation()->getCountryData() ? 'Unspecified' :
+                    explode('[', $int->getLocation()->getCountryData()['displayName'])[0],
+                'id' => $int->getId(),
+                'interactionType' => $int->getInteractionType()->getDisplayName(),
+                'publication' => $int->getSource()->getParentSource()->getDisplayName(),
+                'region' => $int->getLocation()->getRegionData()['displayName'],
+            ];
+            array_push($flattened, $flatInt);
+        }
+        return $flattened;
     }
 
     /**

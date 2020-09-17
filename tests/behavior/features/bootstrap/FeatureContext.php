@@ -198,7 +198,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iToggleTheFilterPanel($state)
     {
         $isClosed = $this->getUserSession()->evaluateScript("$('#filter-pnl').hasClass('closed');");
-        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return true; }
         $toggleBttn = $this->getUserSession()->getPage()->find('css', '#filter');
         if (!$toggleBttn) { $this->iPutABreakpoint('"Filters" button not found.'); }
         $toggleBttn->click();
@@ -208,6 +208,8 @@ class FeatureContext extends RawMinkContext implements Context
             $closed = $this->getUserSession()->evaluateScript("$('#filter-pnl').hasClass('closed');");
             if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
         }, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+
+        return true;
     }
 
     /**
@@ -274,7 +276,10 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iFilterTheTableToInteractionsCreatedToday()
     {
-        $this->iToggleTheFilterPanel('open');
+        $this->spin(function() {
+            return $this->iToggleTheFilterPanel('open');
+        }, 'Problem opening filter panel');
+    
         $this->iSetTheDateFilterTo('updated', 'today');
         $this->iToggleTheFilterPanel('close');
 
@@ -779,7 +784,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'SGenus', 'Species' => 'OGenus Species'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Consumption', 'Leaf', 'Detailed interaction notes.'];
+        $miscData = [ 'Host', 'Secondary', 'Detailed interaction notes.'];
         $this->fillMiscIntFields($miscData);
     }
 
@@ -872,7 +877,7 @@ class FeatureContext extends RawMinkContext implements Context
         $initialCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
         $this->setDateFilterDefault($date);
         $this->toggleTheDateFilter(true);
-        $this->iSelectFromTheDropdown($type, 'Date Filter');
+        $this->iSelectFromTheDropdown($type, 'Date Filter Type');
         $this->clickOnPageElement('#filter-col1');
         $this->spin(function() use ($initialCount) {
             $postCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
@@ -1119,7 +1124,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iWaitForTheFormToClose($level)
     {
         $this->spin(function() use ($level) {
-            $form = $this->getUserSession()->getPage()->find('css', "#$level-form");
+            $form = $this->getUserSession()->getPage()->find('css', "#$level-form");    //fwrite(STDOUT, "\niWaitForTheFormToClose ? ". (!!$form === true ? 'true' : 'false'));
             return !$form;
         }, "Form [$level] did not close.");
     }
@@ -1154,12 +1159,7 @@ class FeatureContext extends RawMinkContext implements Context
         if (stripos($bttnText, "Update") !== false ||
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
 
-        $this->spin(function() use ($bttnText) {  //fwrite(STDOUT, "bttnText = [$bttnText]");
-            try {
-                $this->getUserSession()->getPage()->pressButton($bttnText);
-            } catch(Exception $e) { return false;
-            } finally { return true; }
-        }, "Couldn't interact with button [$bttnText]");
+        $this->pressTheButton($bttnText);
 
         if ($bttnText === 'Update Interaction') {
             $this->ensureThatFormClosed();
@@ -1168,7 +1168,30 @@ class FeatureContext extends RawMinkContext implements Context
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
-
+    private function pressTheButton($bttnText)
+    {
+        $this->spin(function() use ($bttnText) {  //fwrite(STDOUT, "bttnText = [$bttnText]");
+            try {
+                $this->getUserSession()->getPage()->pressButton($bttnText);
+            } catch(Exception $e) { return false;
+            } finally { return true; }
+        }, "Couldn't interact with button [$bttnText]");
+    }
+    /**
+     * @When I press submit in the confirmation popup
+     */
+    public function iPressSubmitInTheConfirmationPopup()
+    {
+        $this->spin(function() {  
+            try {
+                $this->ensureConfirmationModalOpened();
+                $this->getUserSession()->executeScript("$('.introjs-donebutton').click();");
+                $closed = $this->getUserSession()->evaluateScript("!$('.modal-msg').length;"); 
+                return $closed;
+            } catch(Exception $e) { return false;
+            } finally { return true; }
+        }, "Confirmation popup did not close.");
+    }
 /** -------------------- Error Handling ------------------------------------- */
     /**
      * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
@@ -1214,9 +1237,9 @@ class FeatureContext extends RawMinkContext implements Context
     private function setDateFilterDefault($date, $reset = false)
     {
         if ($reset) {
-            $this->getUserSession()->executeScript("$('#selDateFilter').data('default', false);");
+            $this->getUserSession()->executeScript("$('#selDateFilterType').data('default', false);");
         } else {
-            $this->getUserSession()->executeScript("$('#selDateFilter').data('default', '$date');");
+            $this->getUserSession()->executeScript("$('#selDateFilterType').data('default', '$date');");
         }
     }
 
@@ -1373,7 +1396,7 @@ class FeatureContext extends RawMinkContext implements Context
      * Replace with spin and @ifContainsText
      */
     private function handleContainsAssert($ndl, $hystk, $isIn, $msg)
-    {                                                                           //print('Haystack = '.$hystk.', needle = '.$ndl);
+    {                                                                           //fwrite(STDOUT, 'Haystack = '.$hystk.', needle = '.$ndl);
         if ($isIn && strpos($hystk, $ndl) === false || !$isIn && strpos($hystk, $ndl) != false) {
             $this->iPutABreakpoint($msg);
         }
@@ -1423,8 +1446,10 @@ class FeatureContext extends RawMinkContext implements Context
     private function ensureThatFormClosed()
     {
         $this->spin(function() {
-            try {
-                $this->assertSession()->pageTextNotContains('Editing Interaction');
+            try {    
+                $form = $this->getUserSession()->getPage()->find('css', '.form-popup'); 
+                if ($form) { $this->pressTheButton('Update Interaction'); }
+                return !$form;
             } catch (Exception $e) { return false;
             } finally { return true; }
         }, "Form did not submit/close as expected.");
@@ -1433,6 +1458,14 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $checkbox = $row->find('css', 'span.ag-group-expanded');
         return $checkbox == null ? false : $checkbox->isVisible();
+    }
+    private function ensureConfirmationModalOpened()
+    {
+        $this->spin(function() {
+            try {
+                return $this->getUserSession()->getPage()->find('css', '.introjs-tooltiptext');
+            } catch (Exception $e) { return; }
+        }, "Confirmation modal did not open");
     }
 /** ---------------------------- Misc Util ---------------------------------- */
     private function spin ($lambda, $errMsg, $wait = 3)
@@ -1605,9 +1638,10 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Sphingidae'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
+        $miscData = [ 'Prey', 'Secondary', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
+        $this->iPressSubmitInTheConfirmationPopup();
         $this->waitForInteractionFormToReset();
     }
     private function waitForInteractionFormToReset()

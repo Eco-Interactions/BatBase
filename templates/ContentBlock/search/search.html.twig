@@ -1,10 +1,12 @@
 {% extends "layout.html.twig" %}
 
-{# {% set interaction = entity %} #}
-
 {% block stylesheets %}
     {{parent()}}
     {{ encore_entry_link_tags('db') }}
+{% endblock %}
+
+{% block headerstats %}
+    000 Interactions | 000 Citations | 000 Locations in 00 Countries | 000 Bat Species | 000 Other Species
 {% endblock %}
 
 {# Javascript after detail block. #}

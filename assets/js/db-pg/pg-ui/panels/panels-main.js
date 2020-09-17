@@ -83,9 +83,9 @@ export function addPanelEventsAndStyles(userRole) {
     if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
 }
 function setInfoButtonClickEvents() {
-    $('#svd-list-hlp').click(_modal.bind(null, 'showHelpModal', ['saved-lists']));
-    $('#svd-fltr-hlp').click(_modal.bind(null, 'showHelpModal', ['selSavedFilters']));
-    $('#fltr-pnl-hlp').click(_modal.bind(null, 'showHelpModal', ['filter-panel']));
+    $('#svd-list-hlp').click(_modal.bind(null, 'showInfoModal', ['saved-lists']));
+    $('#svd-fltr-hlp').click(_modal.bind(null, 'showInfoModal', ['selSavedFilters']));
+    $('#fltr-pnl-hlp').click(_modal.bind(null, 'showInfoModal', ['filter-panel']));
 }
 export function updateSubmitEvent(id, event) {
     $(id).off('click').click(event);

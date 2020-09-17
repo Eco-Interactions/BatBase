@@ -1,4 +1,11 @@
-const exports = module.exports = { init: init };
+/**
+ * Handles displaying and submitting the user-feedback form.
+ *
+ * Exports:
+ *     init
+ */
+import { sendAjaxQuery } from '../util/util-main.js';
+
 var minTopicChars = 3;
 var minContentChars = 10;
 var maxTopicChars = 50;
@@ -10,7 +17,7 @@ var feedbackUrl = $body.data('base-url') + 'feedback/post';
 var thisUrl = $body.data('this-url');
 
 /** Creates the "Leave Feedback" menu option for all registered users. */
-function init() {
+export function init() {
     if (feedbackUrl == "false") { return; }
     const fdbkElem = '<li id="feedback-menu"><a href="#">Leave Feedback</a></li>';
     $('#oimenu>.last>ul').prepend(fdbkElem);
@@ -34,18 +41,6 @@ function postFeedback() {
         };
     closePopup() && sendAjaxQuery(data, feedbackUrl, feedbackSubmitted);
 }
-function sendAjaxQuery(dataPkg, url, successCb, errCb) {                        console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
-    return $.ajax({
-        method: "POST",
-        url: url,
-        success: successCb || dataSubmitSucess,
-        error: errCb || ajaxError,
-        data: JSON.stringify(dataPkg)
-    });
-    function ajaxError(jqXHR, textStatus, errorThrown) {
-        console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-    }
-}
 function closePopup() {
     $('#b-overlay').fadeOut("slow", () => {
         $('#b-overlay-popup').empty();
@@ -54,8 +49,7 @@ function closePopup() {
     });
     return true;
 }
-function feedbackSubmitted(data, textStatus, jqXHR) {
-    console.log("feedbackSubmitted - data = %O", data);
+function feedbackSubmitted(data, textStatus, jqXHR) {                           console.log("feedbackSubmitted - data = %O", data);
     $('.feedback-popup>textarea').val('');
     $('.feedback-popup input').val('');
     setTopicsChars(0);
