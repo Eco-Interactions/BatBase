@@ -124,6 +124,7 @@ export function enableSubmitBttn(bttnId) {
 }
 function isFormValid(bttnId) {
     const fLvl = bttnId.split('-')[0];
+    if ($(`${fLvl}-hdr`)[0].innerText.includes('Select')) { return true; } //Taxon parent select forms
     const valid = $(fLvl+'-form')[0].checkValidity();
     if (valid) { return true; }
     $(fLvl+'-form')[0].reportValidity();
