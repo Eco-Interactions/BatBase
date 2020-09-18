@@ -32,6 +32,7 @@
  */
 import { _modal, _u } from '../../../db-main.js';
 import { _confg, _state, _elems, _panel, _cmbx, _form, _val, submitForm, getSubFormLvl } from '../../forms-main.js';
+import referenceGuide from '../../../../../files/form-reference-guide.pdf';
 
 /** ====================== CREATE FORM ====================================== */
 /**
@@ -152,14 +153,13 @@ function modifyFormDisplay() {
 }
 /* ----------------------- REFERENCE GUIDE BUTTON --------------------------- */
 function addReferenceGuideButton() {
-    const bttnTxt = 'Reference Guide';
-    const attr = { class: 'ag-fresh', type: 'button', value: bttnTxt };
+    const attr = { class: 'ag-fresh', type: 'button', value: 'Reference Guide' };
     const bttn = _u('buildElem', ['input', attr]);
     $(bttn).click(openReferenceGuideInNewTab);
     $('#top-help').prepend(bttn);
 }
 function openReferenceGuideInNewTab() {
-    //window.open(pathString, target);
+    return window.open(referenceGuide,'_blank');
 }
 /* ---------------------- LOCATION OPTIONS NOTE ----------------------------- */
 /** Adds a message above the location fields in interaction forms. */

@@ -45,8 +45,16 @@ Encore
     //     loaderRule.test = /\.(png|svg|jpe?g|gif)$/;
     //     loaderRule.options = { name: 'images/[name].[hash:8].[ext]' };
     // })
-    // .addLoader({ test: /\.(pdf)$/, loader: 'file-loader',
-    //     options: { name: '../uploads/publications/[name].[ext]' } })
+    .addLoader({ 
+        test: /\.(pdf)$/, 
+        use: [ { 
+            loader: 'file-loader', 
+            options: { 
+                name: '[name].[ext]', 
+                outputPath: './assets/images/' 
+            } 
+        }] 
+    })
     /** ------- Files to process ----------------- */
     .copyFiles([{
         from: './assets/images',
