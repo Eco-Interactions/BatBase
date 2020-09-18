@@ -18,9 +18,6 @@ let timeout;
 export function isFilterSetActive() {
     return fSets.isFilterSetActive();
 }
-export function updateFilterSetSel(filterOpts) {
-    fSets.updateFilterSetSel(filterOpts);
-}
 export function newFilterSet(val) {
     return fSets.newFilterSet(val);
 }
@@ -35,13 +32,12 @@ export function initFilterPanel() {
     require('../../../../../styles/pages/db/panels/filters.styl');
     addFilterPanelEvents();
     _filter('initDateFilterUi');
-    fSets.disableFilterSetInputs();
+    fSets.initFilterSetsFeature();
 }
 export function addFilterPanelEvents() {
     $('#filter').click(toggleFilterPanel);
     $('button[name="reset-tbl"]').click(buildTable.bind(null, false, false));
     window.addEventListener('resize', resizeFilterPanelTab);
-    fSets.setFilterSetEventListeners();
 }
 /* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
 function resizeFilterPanelTab() {
@@ -135,7 +131,7 @@ export function toggleFilterPanel() {
 }
 function buildAndShowFilterPanel() {                                /*dbug-log*///console.log('           +--buildAndShowFilterPanel')
     pM.togglePanel('filter', 'open');
-    _u('getOptsFromStoredData', ['savedFilterNames']).then(fSets.updateFilterSetSel);
+    if (isFilterSetActive()) { return; }
 }
 /* ======================= CLEAR FILTERS ==================================== */
 /* -------------------- RESET BUTTON ---------------------------------------- */
