@@ -28,6 +28,7 @@
 					{{ blocks["about-pg-acknowledgements"]|raw }}
 				</div>
 				<div id="project-partners" class="wysiwyg">
+					<br>
 					<h3>Partners</h3><br>
 					<a href="https://www.globalbioticinteractions.org/">
 					   <img alt="GLOBI logo" src="{{ asset('build/images/globi_long.svg') }}"
@@ -49,21 +50,6 @@
 				</div>
 			{% endblock %}
 			{% block secondcol %}
-				<div class="bio-img"><img src="{{ asset('build/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
-				<div id="team-tuli" class="wysiwyg">
-					{{ blocks["team-tuli"]|raw }}
-				</div>
-			{% endblock %}
-		{% endembed %}
-		<br>
-		{% embed 'two_cols_sect.html.twig' %}
-			{% block firstcol %}
-				<div class="bio-img"><img src="{{ asset('build/images/team-chanda.jpg') }}" alt="Chanda Image"></div>
-				<div id="team-chanda" class="wysiwyg">
-					{{ blocks["team-chanda"]|raw }}
-				</div>
-			{% endblock %}
-			{% block secondcol %}
 				<div class="bio-img"><img src="{{ asset('build/images/team-kelly.jpg') }}" alt="Kelly Image"></div>
 				<div id="team-kelly" class="wysiwyg">
 					{{ blocks["team-kelly"]|raw }}
@@ -82,6 +68,22 @@
 				<div class="bio-img"><img src="{{ asset('build/images/team-sarah.jpg') }}" alt="Sarah Image"></div>
 				<div id="team-sarah" class="wysiwyg">
 					{{ blocks["team-sarah"]|raw }}
+				</div>
+			{% endblock %}
+		{% endembed %}
+		<br>
+		<div id="team-hdr"><h4>Special Thanks</h4></div>
+		{% embed 'two_cols_sect.html.twig' %}
+			{% block secondcol %}
+				<div class="bio-img"><img src="{{ asset('build/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
+				<div id="team-tuli" class="wysiwyg">
+					{{ blocks["team-tuli"]|raw }}
+				</div>
+			{% endblock %}
+			{% block firstcol %}
+				<div class="bio-img"><img src="{{ asset('build/images/team-chanda.jpg') }}" alt="Chanda Image"></div>
+				<div id="team-chanda" class="wysiwyg">
+					{{ blocks["team-chanda"]|raw }}
 				</div>
 			{% endblock %}
 		{% endembed %}
