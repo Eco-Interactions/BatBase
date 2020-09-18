@@ -7,7 +7,7 @@
  *     initSrcViewOpts
  *     initTxnViewOpts
  */
-import * as pg from '../db-main.js';
+import { accessTableState as tState, _u, onSrcViewChange, onLocViewChange, onTxnViewChange } from '../db-main.js';
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
  * Builds location view html and initializes table load. Either builds the table
@@ -17,17 +17,17 @@ import * as pg from '../db-main.js';
 export function initLocViewOpts(view) {                             /*Perm-log*/console.log("       --Init Location UI. view ? [%s]", view);
     loadLocationViewOpts();
     if (view) { setLocView(view);
-    } else { pg._u('getData', ['curView']).then(setLocView); }
+    } else { _u('getData', ['curView']).then(setLocView); }
 }
 function loadLocationViewOpts() {
     if ($('#sel-view').data('focus') === 'locs') { return; }
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
-    pg._u('replaceSelOpts', ['#sel-view', opts, pg.onLocViewChange]);
+    _u('replaceSelOpts', ['#sel-view', opts, onLocViewChange]);
     $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
-    pg._u('setSelVal', ['View', view, 'silent']);
+    _u('setSelVal', ['View', view, 'silent']);
 }
 /* ---------------------------- SOURCE VIEW ------------------------------------------------------------------------- */
 /**
@@ -43,19 +43,19 @@ function loadSourceViewOpts() {
     const opts = [{ value: "auths", text: "Authors" },
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
-    pg._u('replaceSelOpts', ['#sel-view', opts, pg.onSrcViewChange]);
+    _u('replaceSelOpts', ['#sel-view', opts, onSrcViewChange]);
     $('#sel-view').data('focus', 'srcs');
 }
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView(view) {
-    pg.accessTableState().set({'curView': view});
-    if (!pg._u('setSelVal', ['View'])) { pg._u('setSelVal', ['View', view, 'silent']); }
+    tState().set({'curView': view});
+    if (!_u('setSelVal', ['View'])) { _u('setSelVal', ['View', view, 'silent']); }
 }
 
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTxnViewOpts(view, reset) {                             //console.log("initTxnViewOpts. realms = %O", realms);
-    pg._u('getData', ['realm']).then( realms => {                                       //console.log('--initTxnViewOpts. realms = %O', realms)
+    _u('getData', ['realm']).then( realms => {                                       //console.log('--initTxnViewOpts. realms = %O', realms)
         loadTxnViewOpts(realms, reset);
         setTaxonView(view);
     });
@@ -66,15 +66,15 @@ function loadTxnViewOpts(realms, reset) {
 }
 function buildAndLoadTxnOpts(realms) {
     const opts = getViewOpts(realms);
-    pg._u('replaceSelOpts', ['#sel-view', opts, pg.onTxnViewChange]);
+    _u('replaceSelOpts', ['#sel-view', opts, onTxnViewChange]);
     $('#sel-view').data('focus', 'taxa');
 }
 function getViewOpts(realms) {
-    const taxa = pg.accessTableState().get('rcrdsById');
+    const taxa = tState().get('rcrdsById');
     const optsAry = [];
     Object.keys(realms).forEach(buildRealmOpt);
-    return optsAry;
-
+    return optsAry.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    
     function buildRealmOpt(id) {
         const rootTxn = taxa[realms[id].taxon];
         const val = rootTxn ? rootTxn.id : id+'temp';                           //console.log('realm = %O rootTxn = %O', realms[id], rootTxn);
@@ -89,8 +89,8 @@ function getViewOpts(realms) {
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */
 function setTaxonView(view) {
-    if (!pg._u('getSelVal', ['View'])) {
+    if (!_u('getSelVal', ['View'])) {
         const realmVal = view ? view : '2';
-        pg._u('setSelVal', ['View', realmVal, 'silent']);
+        _u('setSelVal', ['View', realmVal, 'silent']);
     }
 }

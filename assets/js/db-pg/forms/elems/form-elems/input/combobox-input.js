@@ -371,7 +371,7 @@ export function getTaxonOpts(level, field, r) {
 function getRealmOpts(prop, field) {
     const realms = _state('getTaxonProp', ['realms']);
     const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);
-    return opts;
+    return opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
 
     function getRealmOpt(name) {
         if (name === 'Bat') { return null; }
