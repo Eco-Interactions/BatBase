@@ -13,7 +13,7 @@
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
-import { accessTableState as tState, getCurrentFilterState } from '../../db-pg/db-main.js';
+import { _u, accessTableState as tState, getCurrentFilterState } from '../../db-pg/db-main.js';
 import { ExtraErrorData } from '@sentry/integrations';
 
 /* --------------------- INIT SENTRY ---------------------------------------- */
@@ -47,7 +47,7 @@ export function reportErr(e) {
  *     TestIssue null (no browser alert)
  *     undefiendDataKey {key}
  */
-export function alertIssue(tag, errData = {}) {
+export function alertIssue(tag, errData = {}) {                                 _u('logInDevEnv', ['!!ALERT ISSUE [%s] = %O', tag, errData]);
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
     if (tag == 'editorReport') { return submitEditorIssue(errData); }
     setSentryDebugContext(errData);

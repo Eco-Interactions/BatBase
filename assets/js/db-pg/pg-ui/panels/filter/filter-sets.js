@@ -3,9 +3,9 @@
  * Handles the right section of the filter panel, saved filter set managment.
  *
  * Exports:
- *      disableFilterSetInputs
  *      reloadTableThenApplyFilters
  *      isFilterSetActive
+ *      initFilterSetsFeature
  *      selFilterSet
  *      newFilterSet
  *      updateFilterSetSel
@@ -30,13 +30,18 @@ export function isFilterSetActive() {
     return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
 }
 /* ============================= INIT UI ==================================== */
-export function setFilterSetEventListeners() {
+export function initFilterSetsFeature() {
+    setFilterSetEventListeners();
+    _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
+    disableFilterSetInputs();
+}
+function setFilterSetEventListeners() {
     $('#delete-filter').click(showCnfrmDeleteBttns);
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
 }
-export function updateFilterSetSel(filterOpts) {                    /*dbug-log*///console.log('updateFilterSetSel. filterNames = %O', filterNames);
+function updateFilterSetSel(filterOpts) {                           /*dbug-log*///console.log('updateFilterSetSel. filterNames = %O', filterNames);
     const opts = getSavedFilterOpts(filterOpts);
     const optGroups = buildOptGroups(opts);                         /*dbug-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
@@ -176,6 +181,7 @@ function setView(filters) {
 }
 function onTableReloadComplete(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
     setFiltersThatResetTableThenApplyRemaining(filters)
+    .then(onAllFiltersApplied)
     .then(() => ifActiveSetResetVal(id));
 }
 function ifActiveSetResetVal(id) {
@@ -185,11 +191,8 @@ function ifActiveSetResetVal(id) {
 }
 /* ------------ SET IN FILTER MEMORY -------------- */
 function addFiltersToMemoryAndUi(filters) {
-    window.setTimeout(waitThenHandle, 500);
+    ['direct', 'rebuild'].forEach(handleFilters);
 
-    function waitThenHandle() {
-        ['direct', 'rebuild'].forEach(handleFilters);
-    }
     function handleFilters(group) {
         if (!filters[group]) { return; }
         Object.keys(filters[group]).forEach(handleFilter);
@@ -216,7 +219,7 @@ function setNameTextInput(type, val) {
 function setComboElem(type, val) {
     const field = Object.keys(val)[0];
     const id = getComboId(field);
-    _u('setSelVal', [field, val[field], 'silent'])
+    _u('setSelVal', [field, val[field], 'silent']);
 }
 function getComboId(field) {
     const map = {
@@ -235,7 +238,6 @@ function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
     return setComboboxFilter(filters.rebuild.combo)
     .then(applyDirectFilters)
     .then(applyColumnFilters.bind(null, filters.table))
-    .then(onAllFiltersApplied);
     
     function applyDirectFilters() {                                             //console.log('applyDirectFilters. args = %O', arguments)
         addFiltersToMemoryAndUi(filters);
@@ -350,7 +352,7 @@ function clearFilterDetailFields() {
     $('#filter-set-name + input').val('');
     $('.filter-set-details textarea').val('');
 }
-export function disableFilterSetInputs() {
+function disableFilterSetInputs() {
     $('.filter-set-details input, .filter-set-details textarea').val('');
     $(`.filter-set-details input, .filter-set-details span, #delete-filter,
         .filter-set-details textarea, #save-filter, #apply-filter`)
