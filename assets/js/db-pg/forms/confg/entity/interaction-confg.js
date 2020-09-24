@@ -15,9 +15,12 @@ export default function() {
                 'If the name in the publication is no longer accepted, use the currently' +
                 'accepted name and note the name used in the publication in the Notes Field.',
             },
-            'InteractionType': `[IN PROGRESS]`,
-            'InteractionTags': 'Tags indicate the part of the object organism in the' +
-                'interaction, usually related to Plants.'
+            'InteractionType': {
+                tooltip: 'Read about Interaction Types on the About->Definitions page.',
+                intro: `Read about Interaction Types on the <a href="/definitions"
+                    target="_blank">Definitions page</a>.`
+            },
+            'InteractionTags': 'Tags indicate the part of the object organism in the interaction'
         },
         'optional': [],
         'order': {
