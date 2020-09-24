@@ -2,6 +2,8 @@
  * Contains code specific to the interaction form.
  *
  * EXPORTS:
+ *     checkIntFieldsAndEnableSubmit
+ *     focusPinAndEnableSubmitIfFormValid
  *     initCreateForm
  *     getSelectedTaxon
  *     onLevelSelection
@@ -32,6 +34,7 @@
  */
 import { _modal, _u } from '../../../db-main.js';
 import { _confg, _state, _elems, _panel, _cmbx, _form, _val, submitForm, getSubFormLvl } from '../../forms-main.js';
+import { initTypeField, onTagSelection, onTypeSelectionInitTagField } from './int-type-tag-fields.js';
 import referenceGuide from '../../../../../files/form-reference-guide.pdf';
 
 /** ====================== CREATE FORM ====================================== */
@@ -208,8 +211,8 @@ function getEntityComboEvents(entity) {
         'interaction': {
             'CitationTitle': { change: onCitSelection, add: create('citation', 'sub') },
             'Country-Region': { change: onCntryRegSelection },
-            'InteractionType': { change: onInteractionTypeSelection },
-            'InteractionTags': { change: validateIntTagsAndEnableSubmit },
+            'InteractionType': { change: onTypeSelectionInitTagField },
+            'InteractionTags': { change: onTagSelection },
             'Location': { change: onLocSelection, add: create('location', 'sub')},
             'Publication': { change: onPubSelection, add: create('publication', 'sub')},
             'Subject': { change: onTaxonRoleSelection.bind(null, 'Subject') },
@@ -816,7 +819,7 @@ function onTaxonRoleSelection(role, val) {                                      
     $('#'+getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);
     enableTaxonCombos();
-    if (role === 'Object') { initInteractionTypeField(getObjectRealm('displayName')); }
+    if (role === 'Object') { initTypeField(getObjectRealm('displayName')); }
     focusPinAndEnableSubmitIfFormValid(role);
 }
 function enableTaxonCombos() {
@@ -826,118 +829,8 @@ function enableTaxonCombos() {
 function getRealmData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getRealmState');
 }
-/* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
-/**
- * Interaction Types are restricted by the Object Realm.
- * Ex:
-        'Visitation': ['Plant'],
-        'Pollination': ['Plant'],
-        'Seed Dispersal': ['Plant'],
-        'Consumption': ['Plant', 'Fungi'],
-        'Transport': ['Plant', 'Arthropod'],
-        'Roost': ['Plant'],
-        'Predation': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
-        'Prey': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
-        'Host': ['Arthropod', 'Virus', 'Fungi', 'Bacteria', 'Other Parasite'],
-        'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
-        'Hematophagy': ['Bird', 'Mammal'],
- */
-function initInteractionTypeField(objectRealm) {                                console.log(        '+--initInteractionTypeField = [%s]', objectRealm);
-    if ($('#InteractionType-sel').data('objRealm') === 'objectRealm') { return; }
-    const types = _confg('getRealmInteractionTypes')[objectRealm];              //console.log('types = %O', types)
-    _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
-    .then(loadComboOptionsForType)
-    .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
-    .then(() => $('#InteractionType-sel').data('objRealm', objectRealm));
-}
-function loadComboOptionsForType(opts) {                                        //console.log('opts = %O', opts)
-    const prevType = _cmbx('getSelVal', [`#InteractionType-sel`])
-    _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
-    const initVal = getInitValOrFocusCombo('InteractionType', prevType);
-    if (!initVal) { return; }
-    selectInitValIfValidType(initVal, opts);
-}
-/**
- * Init-val is set when the field data is persistsed across new interactions or
- * during edit form build.
- */
-function getInitValOrFocusCombo(field, prevVal) {
-    const initVal = $(`#${field}-sel`).data('init-val') || prevVal;             //console.log('initVal = ', initVal)                      //console.log('initVal = [%s] typeOpts = %O', initVal, typeOpts);//array
-    return initVal ? initVal : _cmbx('focusCombobox', [`#${field}-sel`, true]);
-}
-function selectInitValIfValidType(initVal, typeOpts) {  
-    const validType = typeOpts.find(opt => opt.value == initVal);               //console.log('validType = ', validType)
-    if (validType) {
-        _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
-    } else { 
-        onInteractionTypeSelection(null);
-        _cmbx('focusCombobox', [`#InteractionType-sel`, true])
-    }
-}
-/* ------------------------ INTERACTION TAGS -------------------------------- */
-function onInteractionTypeSelection(val) {
-    if (!val) { return clearTypeRelatedTags(); }
-    fillAndEnableTags(val, getObjectRealm('displayName'));
-    focusPinAndEnableSubmitIfFormValid('InteractionType');
-}
-function clearTypeRelatedTags() {                                               //console.log('clearTypeRelatedTags')
-    const opts = getPersistedTags($(`#InteractionTags-sel`)[0].selectize.options);
-    _cmbx('updateComboboxOptions', ['#InteractionTags-sel', opts]);
-}
-function getPersistedTags(opts) {
-    const persist = ['Secondary'];
-    const newVals = Object.keys(opts).filter(k => persist.indexOf(opts[k].text) !== -1);
-    const newOpts = newVals.map(k=>opts[k]);
-    return newOpts;
-}
-function fillAndEnableTags(id, objRealm) {
-    const tagOpts = buildTagOpts(id, objRealm);
-    _cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
-    _cmbx('enableCombobox', ['#InteractionTags-sel', true]);
-    selectInitValOrFocusCombo();
-}
-/**
- * Init-val is set when the field data is persistsed across new interactions or
- * during edit form build.
- */
-function selectInitValOrFocusCombo() {
-    const initVal = getInitValOrFocusCombo('InteractionTags');
-    if (!initVal) { return; }                                                   
-    _cmbx('setSelVal', ['#InteractionTags-sel', initVal]);
-}
-function buildTagOpts(id, objRealm) {
-    const type = getRcrd('interactionType', id);
-    handleRequiredTagForType(type.tags);
-    type.tags = type.tags.filter(getTagsFormRealm);
-    handleRequiredTagForType(type.tags);
-    return type.tags.map(t => { return {value: t.id, text: t.displayName}; })
-
-    function getTagsFormRealm(tag) {                                                
-        return !tag.realm || tag.realm === objRealm;
-    }
-}
-function handleRequiredTagForType(tags) {
-    const defaultTag = getDefaultTag(tags);
-    $('#InteractionTags-sel').data('default', defaultTag);
-    $('#InteractionTags-sel').data('init-val', defaultTag);
-    if (!defaultTag) { return; }
-    _cmbx('setSelVal', ['#InteractionTags-sel', defaultTag]);
-}
-function getDefaultTag(tags) {
-    const tag = tags.find(t => t.required);
-    return tag ? tag.id : false;
-}
-function validateIntTagsAndEnableSubmit(tags) {                                 //console.log('tags = ', tags)
-    ensureDefaultTagStaysSelected(tags);
-    checkIntFieldsAndEnableSubmit();
-}
-function ensureDefaultTagStaysSelected(tags) {
-    const defaultTagId = $('#InteractionTags-sel').data('default');
-    if (!defaultTagId || tags.indexOf(defaultTagId) !== -1 ) { return; }
-    _cmbx('setSelVal', ['#InteractionTags-sel', defaultTagId, 'silent']);
-}
 /* ========================== HELPERS ======================================= */
-function focusPinAndEnableSubmitIfFormValid(field) {
+export function focusPinAndEnableSubmitIfFormValid(field) {
     const editing = _state('getFormProp', ['top', 'action']) === 'edit';
     if (!editing) { $('#'+field+'_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
@@ -949,7 +842,7 @@ function focusPinAndEnableSubmitIfFormValid(field) {
  * any change happens in the form, if the required fields are filled. Also
  * removes the success message from the form.
  */
-function checkIntFieldsAndEnableSubmit() {
+export function checkIntFieldsAndEnableSubmit() {
     _elems('checkReqFieldsAndToggleSubmitBttn', ['top']);
     resetIfFormWaitingOnChanges(); //After interaction form submit, the submit button is disabled until form data changes
 }
