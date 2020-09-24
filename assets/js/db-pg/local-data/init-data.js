@@ -253,12 +253,15 @@ function deriveSourceData(data) {                                               
 /* -------------------- INTERACTION DATA ------------------------------------ */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
+ * Adds the object realm to each interaction record.
+ * Handles required tags and tags restricted to a specific object realm. 
  */
 function deriveInteractionData(data) {
     db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
     db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));
     db.deleteMmryData('tag');
     addObjRealmIdProp(data.interaction);
+    modifyInteractionTypeTagData(data.interactionType);
 }
 function addObjRealmIdProp(ints) {
     const taxa = db.getMmryData('taxon');
@@ -268,6 +271,35 @@ function addObjRealmIdProp(ints) {
     function addObjectRealmId(int) {
         int.objRealm = taxa[int.object].realm.id.toString();
     }
+}
+function modifyInteractionTypeTagData(intTypes) {
+    for (let type in intTypes) {
+        handleTagDataModification(intTypes[type]);
+    }
+}
+function handleTagDataModification(intType) {
+    handleRequiredTag(intType);
+    handleRealmRestrictions(intType);
+}
+function handleRequiredTag(intType) {
+    const map = {
+        'Visitation': 'Flower'
+    };
+    if (!map[intType.displayName]) { return; }
+    intType.tags = intType.tags.map(t => {
+        if (map[intType.displayName] === t.displayName) { t.required = true; }
+        return t;
+    })
+}
+function handleRealmRestrictions(intType) {
+    const map = {
+        'Bryophyte Fragment': 'Plant',
+        'Arthropod': 'Arthropod'
+    };
+    intType.tags = intType.tags.map(t => {
+        if (map[t.displayName]) { t.realm = map[t.displayName]; }
+        return t;
+    })
 }
 /* ---------------------- USER LIST DATA ------------------------------------ */
 /**

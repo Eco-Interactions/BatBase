@@ -816,7 +816,7 @@ function onTaxonRoleSelection(role, val) {                                      
     $('#'+getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);
     enableTaxonCombos();
-    ifBothTaxaSelectedEnableInteractionTypes(role);
+    if (role === 'Object') { initInteractionTypeField(getObjectRealm('displayName')); }
     focusPinAndEnableSubmitIfFormValid(role);
 }
 function enableTaxonCombos() {
@@ -825,16 +825,6 @@ function enableTaxonCombos() {
 }
 function getRealmData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getRealmState');
-}
-function ifBothTaxaSelectedEnableInteractionTypes(role) {
-    if (ifOppositeRoleTaxonNull(role)) { return; }
-    // const objectRealm = ;
-    loadInteractionTypesForObjectRealm(getObjectRealm('displayName'));
-}
-function ifOppositeRoleTaxonNull(role) {
-    const oppRole = getRealmData('oppositeRole') || 
-        (role === 'Subject' ? 'Object' : 'Subject');  //Auto-filling for edit form
-    return !_cmbx('getSelVal', [`#${oppRole}-sel`]);
 }
 /* ------------------- INTERACTION TYPE & TAGS ------------------------------ */
 /**
@@ -852,24 +842,28 @@ function ifOppositeRoleTaxonNull(role) {
         'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
         'Hematophagy': ['Bird', 'Mammal'],
  */
-function loadInteractionTypesForObjectRealm(objectRealm) {                      //console.log('loadInteractionTypesForObjectRealm = [%s]', objectRealm);
-    const types = _confg('getRealmInteractionTypes')[objectRealm];
+function initInteractionTypeField(objectRealm) {                                console.log(        '+--initInteractionTypeField = [%s]', objectRealm);
+    if ($('#InteractionType-sel').data('objRealm') === 'objectRealm') { return; }
+    const types = _confg('getRealmInteractionTypes')[objectRealm];              //console.log('types = %O', types)
     _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
-    .then(opts => {
-        _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
-        ifEditFormSelectInitValElseFocusCombo('InteractionType', opts);
-    })
+    .then(loadComboOptionsForType)
     .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
+    .then(() => $('#InteractionType-sel').data('objRealm', objectRealm));
 }
-/** Note: init-val is set during edit form build. */
-function ifEditFormSelectInitValElseFocusCombo(field, typeOpts) {
-    const initVal = $(`#${field}-sel`).data('init-val');                        //console.log('initVal = [%s] typeOpts = %O', initVal, typeOpts);//array
-    if (!initVal) { return _cmbx('focusCombobox', [`#${field}-sel`, true]); }
-    if (field.includes('Type')) {
-        selectInitValIfValidType(initVal, typeOpts);
-    } else {  console.log('tags = %O', $('#InteractionTags-sel')[0]);
-        _cmbx('setSelVal', ['#InteractionTags-sel', initVal.split(', ')]);
-    }
+function loadComboOptionsForType(opts) {                                        //console.log('opts = %O', opts)
+    const prevType = _cmbx('getSelVal', [`#InteractionType-sel`])
+    _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
+    const initVal = getInitValOrFocusCombo('InteractionType', prevType);
+    if (!initVal) { return; }
+    selectInitValIfValidType(initVal, opts);
+}
+/**
+ * Init-val is set when the field data is persistsed across new interactions or
+ * during edit form build.
+ */
+function getInitValOrFocusCombo(field, prevVal) {
+    const initVal = $(`#${field}-sel`).data('init-val') || prevVal;             //console.log('initVal = ', initVal)                      //console.log('initVal = [%s] typeOpts = %O', initVal, typeOpts);//array
+    return initVal ? initVal : _cmbx('focusCombobox', [`#${field}-sel`, true]);
 }
 function selectInitValIfValidType(initVal, typeOpts) {  
     const validType = typeOpts.find(opt => opt.value == initVal);               //console.log('validType = ', validType)
@@ -877,50 +871,67 @@ function selectInitValIfValidType(initVal, typeOpts) {
         _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
     } else { 
         onInteractionTypeSelection(null);
+        _cmbx('focusCombobox', [`#InteractionType-sel`, true])
     }
 }
+/* ------------------------ INTERACTION TAGS -------------------------------- */
 function onInteractionTypeSelection(val) {
     if (!val) { return clearTypeRelatedTags(); }
-    fillAndEnableTags(val);
+    fillAndEnableTags(val, getObjectRealm('displayName'));
     focusPinAndEnableSubmitIfFormValid('InteractionType');
 }
-function clearTypeRelatedTags() {
-    let opts = getPersistedTags($(`#InteractionTags-sel`)[0].selectize.options);
+function clearTypeRelatedTags() {                                               //console.log('clearTypeRelatedTags')
+    const opts = getPersistedTags($(`#InteractionTags-sel`)[0].selectize.options);
     _cmbx('updateComboboxOptions', ['#InteractionTags-sel', opts]);
-    ifEditFormSelectInitValElseFocusCombo('InteractionTags');
 }
 function getPersistedTags(opts) {
     const persist = ['Secondary'];
     const newVals = Object.keys(opts).filter(k => persist.indexOf(opts[k].text) !== -1);
-    const newOpts = newVals.map(k=>opts[k]);  console.log('opts = %O', newOpts)
+    const newOpts = newVals.map(k=>opts[k]);
     return newOpts;
 }
-function fillAndEnableTags(id) {
-    const tagOpts = buildTagOpts(id);
+function fillAndEnableTags(id, objRealm) {
+    const tagOpts = buildTagOpts(id, objRealm);
     _cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
     _cmbx('enableCombobox', ['#InteractionTags-sel', true]);
-    handleRequiredTagForType(tagOpts);
-    ifEditFormSelectInitValElseFocusCombo('InteractionTags');
+    selectInitValOrFocusCombo();
 }
-function buildTagOpts(id) {
+/**
+ * Init-val is set when the field data is persistsed across new interactions or
+ * during edit form build.
+ */
+function selectInitValOrFocusCombo() {
+    const initVal = getInitValOrFocusCombo('InteractionTags');
+    if (!initVal) { return; }                                                   
+    _cmbx('setSelVal', ['#InteractionTags-sel', initVal]);
+}
+function buildTagOpts(id, objRealm) {
     const type = getRcrd('interactionType', id);
+    handleRequiredTagForType(type.tags);
+    type.tags = type.tags.filter(getTagsFormRealm);
+    handleRequiredTagForType(type.tags);
     return type.tags.map(t => { return {value: t.id, text: t.displayName}; })
+
+    function getTagsFormRealm(tag) {                                                
+        return !tag.realm || tag.realm === objRealm;
+    }
 }
-function handleRequiredTagForType(tagOpts) {
-    if (tagOpts.length !== 2) { return $('#InteractionTags-sel').data('default', false); }
-    const defaultTagId = getDefaultTag(tagOpts);
-    _cmbx('setSelVal', ['#InteractionTags-sel', defaultTagId]);
-    $('#InteractionTags-sel').data('default', defaultTagId);
+function handleRequiredTagForType(tags) {
+    const defaultTag = getDefaultTag(tags);
+    $('#InteractionTags-sel').data('default', defaultTag);
+    $('#InteractionTags-sel').data('init-val', defaultTag);
+    if (!defaultTag) { return; }
+    _cmbx('setSelVal', ['#InteractionTags-sel', defaultTag]);
 }
 function getDefaultTag(tags) {
-    const tag = tags.find(t => t.text !== 'Secondary');
-    return tag.value;
+    const tag = tags.find(t => t.required);
+    return tag ? tag.id : false;
 }
-function validateIntTagsAndEnableSubmit(tags) {
-    validateIntTags(tags);
+function validateIntTagsAndEnableSubmit(tags) {                                 //console.log('tags = ', tags)
+    ensureDefaultTagStaysSelected(tags);
     checkIntFieldsAndEnableSubmit();
 }
-function validateIntTags(tags) {
+function ensureDefaultTagStaysSelected(tags) {
     const defaultTagId = $('#InteractionTags-sel').data('default');
     if (!defaultTagId || tags.indexOf(defaultTagId) !== -1 ) { return; }
     _cmbx('setSelVal', ['#InteractionTags-sel', defaultTagId, 'silent']);
