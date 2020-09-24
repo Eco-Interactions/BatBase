@@ -92,44 +92,72 @@ function getPinnedFieldVals() {
         vals[fieldName] = false;
     }
 }
+/* -------------------- CLEAR/PERSIST FIELD DATA --------------- */
 /**
  * Resets the top-form in preparation for another entry. Pinned field values are
  * persisted. All other fields will be reset.
  */
-function resetIntFields(vals) {                                                 console.log('           --resetIntFields. vals = %O', vals);
+function resetIntFields(vals) {                                                 //console.log('           --resetIntFields. vals = %O', vals);
     _elems('toggleSubmitBttn', ['#top-submit', false]);
-    resetUnpinnedFields(vals);
-    fillPubDetailsIfPinned(vals.Publication);
+    handleFieldDataReset(vals);
 }
-function resetUnpinnedFields(vals) {
-    for (let field in vals) {                                                   //console.log("field %s val %s", field, vals[field]);
-        if (!vals[field]) { clearField(field, vals); }
-        if (field === 'Publication') { fillPubDetailsIfPinned(vals[field]); }
+function handleFieldDataReset(vals) {
+    const persisted = [];
+    handleFieldClearing();
+    handlePersistedFields();
+
+    function handleFieldClearing() {
+        for (let field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
+            if (!vals[field]) { clearField(field, vals);
+            } else { persisted.push(field); }
+        }
+    }
+    function handlePersistedFields() {
+        persisted.forEach(f => handePersistedField(f, vals[f]));
     }
 }
+/* ----------------- CLEAR FIELD DATA --------------- */
 function clearField(field, vals) {
-    clearFieldMemory(field);
+    _state('setFormFieldData', ['top', field, null]);
     if (field === 'Note') { return $('#Note-txt').val(""); }
     _panel('clearFieldDetails', [field]);
     _cmbx('clearCombobox', ['#'+field+'-sel']);
-    if (field === 'Location') { syncWithCountryField(vals['Country-Region']); }
+    handleClearedField(field, vals);
 }
-function clearFieldMemory(field) {
-    _state('setFormFieldData', ['top', field, null]);
-    ifTaxonFieldClearData(field);
+function handleClearedField(field, vals) {
+    const map = {
+        'Location': syncWithCountryField.bind(null, vals['Country-Region']),
+        'Subject': clearTaxonField,
+        'Object': clearTaxonField
+    }
+    if (!map[field]) { return; }
+    map[field](field);
 }
-function ifTaxonFieldClearData(field) {
+function clearTaxonField(field) {
     if (['Subject', 'Object'].indexOf(field) === -1) { return; }
     _cmbx('updateComboboxOptions', ['#'+field+'-sel', []]);
     $('#'+field+'-sel').data('selTaxon', false);
 }
-function syncWithCountryField(cntryId) {
+function syncWithCountryField(cntryId, field) {
     const cntry = cntryId ? getRcrd('location', cntryId) : null;
     fillLocationSelect(cntry);
 }
-function fillPubDetailsIfPinned(pub) {
+/* ----------------- PERSIST FIELD DATA --------------- */
+function handePersistedField(field, data) {
+    const map = {
+        'Publication': fillPubDetails,
+        'InteractionType': setFieldInitVal,
+        'InteractionTags': setFieldInitVal
+    }
+    if (!map[field]) { return; }
+    map[field](field, data);
+}
+function fillPubDetails(pub) {
     if (pub) { _panel('updateSrcDetails', ['pub']);
     } else { _cmbx('enableCombobox', ['#CitationTitle-sel', false]); }
+}
+function setFieldInitVal(field, data) {
+    $(`#${field}-sel`).data('init-val', data);
 }
 /** ======================== EDIT FORM ====================================== */
 export function finishEditFormBuild(entity) {
