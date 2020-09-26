@@ -15,7 +15,7 @@ import * as fM from '../filters-main.js';
 let timeout, totalObjectRealmCnt;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectRealmCombobox() {
-    _u('getOptsFromStoredData', ['realmNames'])
+    return _u('getOptsFromStoredData', ['realmNames'])
     .then(setRealmCnt)
     .then(buildObjectRealmCombo)
     .then(finishRealmComboInit);

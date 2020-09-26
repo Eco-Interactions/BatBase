@@ -22,7 +22,7 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     loadTxnLevelComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    if (tblState.realmName === 'Bat') { initObjectRealmCombobox(); }
+    if (tblState.realmName === 'Bat') { return initObjectRealmCombobox(); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {

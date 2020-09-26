@@ -41,7 +41,7 @@ function initFilterStateObj(persisted = {}) {
 export function setFilterState(key, value, filterGroup, fObj) {
     if (!fObj) { fObj = fS.filters[filterGroup]; }
     if (value === false) { delete fObj[key];
-    } else if (key === 'combo') { return setComboFilterState(...Object.keys(value)); 
+    } else if (key === 'combo') { return setComboFilterState(...Object.keys(value));
     } else { fObj[key] = value; }
 
     function setComboFilterState(comboKey) {
@@ -59,10 +59,10 @@ export function getFilterStateKey(key, filterGroup = 'direct') {
     return key ? fS.filters[filterGroup][key] : fS.filters[filterGroup];
 }
 export function getFilterState() {
-    return {
-        panel: getPanelFilters(_u('snapshot', [fS.filters])),
-        table: getActiveTableFilterObj()
-    };
+    return Object.assign(
+        { table: getActiveTableFilterObj()},
+        getPanelFilters(_u('snapshot', [fS.filters]))
+    );
 }
 function getPanelFilters(filters) {
     filters.direct = getRowDataFilters(filters.direct)
@@ -89,7 +89,7 @@ export function getActiveFilterVals() {
 /* ------------------- FILTER SET STATUS ------------------------------------ */
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = getFilterDisplayNames(set.direct, set.rebuild); 
+    const pnlFltrs = getFilterDisplayNames(set.direct, set.rebuild);
     return pnlFltrs.concat(tblFltrs);
 }
 /* ------------------- PAGE FILTERS ----------------------------------------- */
@@ -99,7 +99,7 @@ function getPageActiveFilters () {
 }
 /* ----------------------- PANEL FILTERS ------------------------------------ */
 /**
- * There are two groups of filters, ones that require the table to rebuild, and 
+ * There are two groups of filters, ones that require the table to rebuild, and
  * the other can be applied to the row data directly.
  */
 function getFilterDisplayNames(dFilters, rFilters) {                            //console.log('getFilterDisplayNames. detail = %O, rebuild = %O', dFilters, rFilters);
@@ -107,10 +107,10 @@ function getFilterDisplayNames(dFilters, rFilters) {                            
     getActivePanelFilterDisplayNames(dFilters, 'direct');
     getActivePanelFilterDisplayNames(rFilters, 'rebuild');
     return names.filter(t=>t);
-    
+
     function getActivePanelFilterDisplayNames(gFilters, group) {
         Object.keys(gFilters).forEach(addActiveFilterType);
-        
+
         function addActiveFilterType(type) {
             const edgeCase = {
                 date: getDateFltrString,
@@ -121,7 +121,7 @@ function getFilterDisplayNames(dFilters, rFilters) {                            
             names.push(name);
 
             function getFilterName(edgeCases) {
-                return edgeCases.indexOf(type) === -1 ? 
+                return edgeCases.indexOf(type) === -1 ?
                     gFilters[type] : edgeCase[type](gFilters[type], group);
             }
         }

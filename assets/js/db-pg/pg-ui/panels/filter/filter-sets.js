@@ -133,9 +133,9 @@ function buildFilterData() {
 function getFilterSetJson(tState) {
     const fState = _filter('getFilterState');
     const filters = {
-        direct: fState.panel.direct,
+        direct: fState.direct,
         focus: tState.curFocus,
-        rebuild: fState.panel.rebuild,
+        rebuild: fState.rebuild,
         table: fState.table,
         view: tState.curView,
     };

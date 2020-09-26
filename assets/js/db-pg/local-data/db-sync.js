@@ -18,7 +18,7 @@
  *         ADD DATA
  *             CORE ENTITY DATA
  *                 MODIFY FOR LOCAL DB
- *             CORE DATA HANDLERS 
+ *             CORE DATA HANDLERS
  *             DETAIL ENTITY DATA HANDLERS
  *             DATA SETTERS
  *         REMOVE DATA
@@ -279,7 +279,7 @@ function getTaxonRealm(taxon, taxa) {
 function addObjRealmIdToRcrd(prop, rcrd, entity) {
     const ints = db.getMmryData('interaction');
     const taxa = db.getMmryData('taxon');
-    const taxon = taxa[rcrd.object];  
+    const taxon = taxa[rcrd.object];
     rcrd.objRealm = taxon.realm.id;
     db.setDataInMemory('interaction', ints);
 }

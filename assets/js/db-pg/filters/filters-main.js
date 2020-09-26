@@ -42,19 +42,19 @@ export function showTodaysUpdates(focus) {
 }
 /* ===================== DYNAMIC FILTERS ==================================== */
 export function loadLocFilters(tblState) {
-    fLoc.loadLocFilters(tblState);
+    return fLoc.loadLocFilters(tblState);
 }
 export function applyLocFilter() {
     return fLoc.applyLocFilter(...arguments);
 }
 export function loadSrcFilters(realm) {
-    fSrc.loadSrcFilters(realm);
+    return fSrc.loadSrcFilters(realm);
 }
 export function applyPubFilter() {
     return fSrc.applyPubFilter(...arguments);
 }
 export function loadTxnFilters(tblState) {
-    fTxn.loadTxnFilters(tblState);
+    return fTxn.loadTxnFilters(tblState);
 }
 export function applyTxnFilter() {
     return fTxn.applyTxnFilter(...arguments);
@@ -67,7 +67,7 @@ export function getRowDataForCurrentFilters(rowData) {
 }
 /** If filter cleared, filters all table rows, else applies on top of current filters. */
 export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
-    if (!Object.keys(fState.getRowDataFilters()).length) { return resetDataTable(); }              
+    if (!Object.keys(fState.getRowDataFilters()).length) { return resetDataTable(); }
     const rowData = getRowDataForCurrentFilters(tState().get('rowData'));
     _ui('enableClearFiltersButton');
     setCurrentRowData(rowData);
