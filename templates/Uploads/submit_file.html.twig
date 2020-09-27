@@ -8,8 +8,8 @@
     <div id="pub-sbmt-pg" class="top-pgs">
         {% embed 'two_cols_sect.html.twig' %}
             {% block firstcol %}
-                <h4> The Bat Eco-Interactions Database currently has over 7500 interactions
-                    from over 375 citations, and we are adding more every day. You can contribute
+                <h4> The Bat Eco-Interactions Database currently has over 11600 interactions
+                    from over 540 citations, and we are adding more every day. You can contribute
                     to this effort by submitting publications to be entered into the database.
                 </h4>
                 <br>
@@ -24,13 +24,17 @@
                 {% elseif success %}
                     <p style="color: green; font-weight: 600;">Thank you for your submission!</p>
                 {% endif %}
-                <div id="top-form-container">
-                    {{ form_start(form) }}
-                        {{ form_row(form.pdfFile) }}
-                        {{ form_row(form.title) }}
-                        {{ form_row(form.description) }}
-                    {{ form_end(form) }}
-                </div>
+                {% if is_granted('ROLE_USER') %}
+                    <div id="top-form-container">
+                        {{ form_start(form) }}
+                            {{ form_row(form.pdfFile) }}
+                            {{ form_row(form.title) }}
+                            {{ form_row(form.description) }}
+                        {{ form_end(form) }}
+                    </div>
+                {% else %}
+                    <p><a href="/register">Register</a> to gain access to this and many other features!</p>
+                {% endif %}
             {% endblock firstcol %}
             {% block secondcol %}
                 {% if is_full_view() %}
