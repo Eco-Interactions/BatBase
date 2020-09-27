@@ -8,9 +8,13 @@
  *    active filters, filter set/data list) | Table Column Toggle (future feature)
  *
  * EXPORTS:
+ *   authDependentInit
  *   disableTableButtons
  *   enableTableButtons
+ *   enableViewOpts
  *   initFeatureButtons
+ *   showTipsPopup
+ *   onDataDownloadCompleteEnableUiFeatures
  *   updateUiForDatabaseInit
  *
  * TOC:
@@ -117,11 +121,18 @@ function updateUiAfterBaseDatabaseInit(allDataAvailable) {
     toggleSearchOptions('enable');
     $('#filter-status').css('color', 'black').data('loading', false);
     if (app.userRole === 'visitor') { disableUserFeatures(); }
+    if (app.userRole === 'editor') { toggleEditorFeatures(false); }
     delete app.dbInitializing;
 }
-export function onDataDownloadCompleteEnableTableFeatures() {
+function toggleEditorFeatures(enable = true) {
+    const opac = enable ? 1 : .6;
+    const c = enable ? 'pointer' : 'wait';
+    $('#data-opts button').css({opacity: opac, cursor: c}).prop('disabled', !enable);
+}
+export function onDataDownloadCompleteEnableUiFeatures() {
     $('.tree-show').fadeTo('fast', 1);
     enableMapFeatures();
+    toggleEditorFeatures(true);
 }
 function enableMapFeatures() {
     $('#shw-map').prop('disabled', false).fadeTo('fast', 1)

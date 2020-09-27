@@ -100,8 +100,8 @@ export function init() {
 export function updateUiForDatabaseInit() {
     bttns.updateUiForDatabaseInit();
 }
-export function onDataDownloadCompleteEnableTableFeatures() {
-    bttns.onDataDownloadCompleteEnableTableFeatures();
+export function onDataDownloadCompleteEnableUiFeatures() {
+    bttns.onDataDownloadCompleteEnableUiFeatures();
 }
 /* =========== DATABASE ENTITY FOCUS/VIEW UI ================================ */
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */

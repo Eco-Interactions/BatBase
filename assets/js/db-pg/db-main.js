@@ -104,7 +104,7 @@ export function reportErr() {
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
- * {str} realmName      Stores Taxon view Realm name 
+ * {str} realmName      Stores Taxon view Realm name
  * {obj} selectedOpts   K: Combobox key V: value selected
  * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
  * {str} userRole       Stores the role of the user.
@@ -177,7 +177,7 @@ function setTableInitState(focus, isAllDataAvailable) {
 }
 export function onDataDownloadComplete () {
     if ($('.map-dsbl').prop('disabled')) { return window.setTimeout(onDataDownloadComplete, 500); }
-    ui.onDataDownloadCompleteEnableTableFeatures();
+    ui.onDataDownloadCompleteEnableUiFeatures();
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
