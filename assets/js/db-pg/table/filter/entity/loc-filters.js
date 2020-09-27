@@ -10,8 +10,8 @@
  *      UI
  *      FILTER
  */
-import * as fM from './filters-main.js';
-import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../db-main.js';
+import * as fM from '../filters-main.js';
+import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../../../db-main.js';
  /* ========================= UI ============================================ */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter.
@@ -49,6 +49,7 @@ function buildLocSelectOpts(tblState, data) {
     const opts = { Region: [], Country: [] };
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     modifyOpts();
+    updateFilterMemory();
     return opts;
     /**
      * Recurses through the tree and builds a option object for each unique
@@ -120,8 +121,15 @@ function buildLocSelectOpts(tblState, data) {
     }
     function addAllOption() {
         Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
-            opts[type].unshift({value: 'all', text: '- All -'})
+            opts[type].unshift({value: 'all', text: '- All -'});
         });
+    }
+    function updateFilterMemory() {
+        const selTypes = Object.keys(tblState.selectedOpts);
+        fM.setFilterState('combo', false, 'rebuild')
+        if (!selTypes.length) { return; }
+        const filterType = selTypes.length === 1 ? selTypes[0] : 'Country';
+        updateLocComboFilter(filterType, tblState.selectedOpts[filterType]);
     }
 } /* End buildLocSelectOpts */
 function alphaOptionObjs(a, b) {
@@ -181,6 +189,8 @@ function updateLocFilterMemory(loc, locType) {
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
+}
+function updateLocComboFilter(locType, selVal) {                                //console.log('updateLocComboFilter type [%s] val [%s]', locType, selVal);
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
     fM.setFilterState('combo', filter, 'rebuild');

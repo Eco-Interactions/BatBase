@@ -1,10 +1,10 @@
 /**
  * Formats the tree data into the row-data format used in ag-grid.
  *
- * Exports:                Imported by:
- *     buildLocRowData         db-page
- *     buildSrcRowData         db-page
- *     buildTxnRowData         db-page
+ * Exports:
+ *     buildLocRowData
+ *     buildSrcRowData
+ *     buildTxnRowData
  *
  * TOC:
  *     LOCATION ROW DATA

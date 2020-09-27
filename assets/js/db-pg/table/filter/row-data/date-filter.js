@@ -23,8 +23,8 @@
  *          TAXON
  *          TREE-TEXT
  */
-import * as fM from './filters-main.js';
-import { resetDataTable, _filter, _ui, _u, accessTableState as tState } from '../db-main.js';
+import * as fM from '../filters-main.js';
+import { resetDataTable, _filter, _ui, _u, accessTableState as tState } from '../../../db-main.js';
 let tblState;
 /*
  * {obj} cal    Stores the flatpickr calendar instance.
@@ -68,11 +68,11 @@ function initCal() {
     if (app.cal) { app.cal.destroy(); }
     const flatpickr = require('flatpickr');
     const calOpts = {
-        altInput: true, maxDate: "today", 
+        altInput: true, maxDate: "today",
         disableMobile: true,
         enableTime: ifFilteringByUpdates(),
         onClose: filterByTime,
-        onReady: getCalOnReadyMethod(), 
+        onReady: getCalOnReadyMethod(),
         plugins: getCalPlugins(ifFilteringByUpdates()),
     };
     addDefaultTimeIfTesting(calOpts);
@@ -82,7 +82,7 @@ function ifFilteringByUpdates() {
     return app.date && app.date.type === 'updated';
 }
 function getCalPlugins(filterByDbUpdatedAt) {
-    return filterByDbUpdatedAt ? getConfirmDatePlugin() : getMonthPlugin(); 
+    return filterByDbUpdatedAt ? getConfirmDatePlugin() : getMonthPlugin();
 }
 function getConfirmDatePlugin() {
     const confirmDatePlugin = require('flatpickr/dist/plugins/confirmDate/confirmDate.js');
