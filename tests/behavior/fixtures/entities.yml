@@ -408,6 +408,24 @@ App\Entity\ContentBlock:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-10-10 15:21:04", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
+    ContentBlock-30:
+        slug: team-kelly
+        name: 'Team Kelly'
+        page: about
+        content: 'kelly bio'
+        created: '<(new \DateTime("2016-01-08 23:20:35", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-27 22:24:02", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ContentBlock-31:
+        slug: team-chanda
+        name: 'Team Chanda'
+        page: about
+        content: 'Chanda bio'
+        created: '<(new \DateTime("2016-01-08 23:20:35", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-27 22:24:02", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
 App\Entity\Contribution:
     Contribution-1:  #517
         workSource: '@Source-1' #1
@@ -706,7 +724,7 @@ App\Entity\InteractionType:
     InteractionType-1:
         slug: visitation
         displayName: Visitation
-        activeForm: visited 
+        activeForm: visited
         passiveForm: visited by
         validTags: ['@Tag-3']
         interactions: ['@Interaction-8']
@@ -717,7 +735,7 @@ App\Entity\InteractionType:
     InteractionType-2:
         slug: consumption
         displayName: Consumption
-        activeForm: consumed 
+        activeForm: consumed
         passiveForm: consumed by
         interactions: ['@Interaction-2', '@Interaction-6']
         validTags: ['@Tag-2', '@Tag-3', '@Tag-4', '@Tag-5']
@@ -738,7 +756,7 @@ App\Entity\InteractionType:
     InteractionType-4:
         slug: pollination
         displayName: Pollination
-        activeForm: pollinated flowers of 
+        activeForm: pollinated flowers of
         passiveForm: pollinated by
         validTags: ['@Tag-3']
         interactions: ['@Interaction-1']
@@ -749,7 +767,7 @@ App\Entity\InteractionType:
     InteractionType-5:
         slug: transport
         displayName: Transport
-        activeForm: transported 
+        activeForm: transported
         passiveForm: transported by
         interactions: ['@Interaction-4', '@Interaction-7']
         validTags: ['@Tag-6', '@Tag-7']
@@ -760,7 +778,7 @@ App\Entity\InteractionType:
     InteractionType-6:
         slug: cohabitation
         displayName: Cohabitation
-        activeForm: cohabitated with 
+        activeForm: cohabitated with
         passiveForm: cohabitated with
         interactions: []
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -770,7 +788,7 @@ App\Entity\InteractionType:
     InteractionType-7:
         slug: host
         displayName: Host
-        activeForm: host of 
+        activeForm: host of
         passiveForm: hosted by
         interactions: ['@Interaction-3']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -780,7 +798,7 @@ App\Entity\InteractionType:
     InteractionType-8:
         slug: roost
         displayName: Roost
-        activeForm: roosted in 
+        activeForm: roosted in
         passiveForm: roosted in by
         interactions: ['@Interaction-5', '@Interaction-9']
         validTags: ['@Tag-5', '@Tag-8']
@@ -791,7 +809,7 @@ App\Entity\InteractionType:
     InteractionType-9:
         slug: prey
         displayName: Prey
-        activeForm: preyed upon by 
+        activeForm: preyed upon by
         passiveForm: preyed upon
         interactions: ['@Interaction-10']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -801,7 +819,7 @@ App\Entity\InteractionType:
     InteractionType-10:
         slug: hematophagy
         displayName: Hematophagy
-        activeForm: fed on the blood of 
+        activeForm: fed on the blood of
         passiveForm: blood was fed upon by
         interactions: []
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
