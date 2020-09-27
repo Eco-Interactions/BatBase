@@ -1902,6 +1902,7 @@ App\Entity\Source:
         description: 'Cockle, A. 1997. Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise. Ph.D. Dissertation. Université de Paris 6, Paris.'
         year: '1997'
         isDirect: true
+        linkUrl: www.google.com
         parentSource: '@Source-7'  #74
         sourceType: '@SourceType-2'  #
         interactions: ['@Interaction-6'] #56

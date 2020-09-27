@@ -1,3 +1,4 @@
+@db-init
 Feature: Search Page Database Initialization
     In order to find data about bat eco-interactions
     As a web visitor

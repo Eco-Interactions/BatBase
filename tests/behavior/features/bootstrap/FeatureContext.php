@@ -131,7 +131,6 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
 
-
 /** ====================== DATABASE PAGE ==================================== */
 /** ------------------------- Database Methods -------------------------------*/
     /**
@@ -1423,12 +1422,16 @@ class FeatureContext extends RawMinkContext implements Context
      */
     private function changeTableSort($elemId, $newVal, $newElemSel)
     {                                                                           //$this->log("\nchangeTableSort\n");
-        $elem = $this->evaluate("$('$elemId').length;");
         $this->spin(function() use ($elemId, $newVal, $newElemSel){
             $this->getUserSession()->
                 executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
 
+            // $this->spin(function()
+            // {
+            //     return $this->evaluate("$('$newElemSel').length;");
+            // }, 'Inner-loop spin. Press Enter to continue.');
             return $this->evaluate("$('$newElemSel').length;");
+
         }, "UI did not update as expected. Did not find [$newElemSel].");
     }
     private function clickRowEditPencil($row)
