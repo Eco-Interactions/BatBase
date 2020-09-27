@@ -254,7 +254,7 @@ function deriveSourceData(data) {                                               
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
  * Adds the object realm to each interaction record.
- * Handles required tags and tags restricted to a specific object realm. 
+ * Handles required tags and tags restricted to a specific object realm.
  */
 function deriveInteractionData(data) {
     db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
@@ -283,11 +283,12 @@ function handleTagDataModification(intType) {
 }
 function handleRequiredTag(intType) {
     const map = {
-        'Visitation': 'Flower'
+        'Visitation': ['Flower'],
+        'Transport': ['Arthropod', 'Bryophyte Fragment']
     };
     if (!map[intType.displayName]) { return; }
     intType.tags = intType.tags.map(t => {
-        if (map[intType.displayName] === t.displayName) { t.required = true; }
+        if (map[intType.displayName].indexOf(t.displayName) !== -1) { t.required = true; }
         return t;
     })
 }
