@@ -2,12 +2,16 @@
 
 {% block headline %}Join BatBase.org{% endblock %}
 
+{% block headerstats %}
+	000 Interactions | 000 Citations | 000 Locations in 00 Countries | 000 Bat Species | 000 Other Species | 00 Users | 00 Editors | Est. 2002
+{% endblock %}
+
 {% block fos_user_content %}
 	<div id="register-pg" class="two-col-outer top-pgs flex-row flex-wrap">
 		<div class="first-col">
 				<h3>Our Project</h3>
 				<p>This is an on-going project with the goal of capturing all published
-					interactions observed between bats and other organisms 
+					interactions observed between bats and other organisms
 					to facilitate additional studies on the subject.</p>
 				<h3>How to get involved</h3>
 				<p>Our database is open sourced and continually updated by experts and
@@ -15,9 +19,9 @@
 					to broaden our ability to invite collaboration and active engagement
 					with this project.</p>
 				<p class="top-em-mrg">We are collecting titles and pdfs of articles that
-					should be added to the database. <a href="/future-developments">
+					should be added to the database. <a href="{{ path('app_future_dev')}}">
 					Click here</a> to see a list of the publications currently being added.
-					Once registered, you can <a href="upload/publication"> submit
+					Once registered, you can <a href="{{ path('app_submit_pub') }}"> submit
 					new publications to the project</a>.
 				<h3>Become a member</h3>
 				<p>Sign up to submit publications to be added to the database, save

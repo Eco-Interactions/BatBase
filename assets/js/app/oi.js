@@ -110,7 +110,9 @@ function handlePageSpecificUiInit() {
 }
 /* ----------------------- SITE STATISTICS HEADER --------------------------- */
 function loadSiteStatisticsHeader() {
-    const pg = window.location.pathname.split('/').pop();
+    const path = window.location.pathname.split('/');
+    let pg = path.pop();
+    if (path.pop() === 'register') { pg = 'register'; }
     initHeaderStats(pg);
 }
 /* ----------------------- DATATABLES --------------------------------------- */

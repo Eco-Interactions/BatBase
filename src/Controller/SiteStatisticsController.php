@@ -44,6 +44,7 @@ class SiteStatisticsController extends AbstractController
     private function getPageStats($tag)
     {
         $map = [
+            "all" => function() { return $this->buildAllStatData(); },
             "core" => function() { return $this->buildCoreStatData(); },
             "db" => function() { return $this->buildAboutDatabaseStatData(); },
             "project" => function() { return $this->buildAboutProjectStatData(); },
@@ -85,6 +86,13 @@ class SiteStatisticsController extends AbstractController
             'ints' => count($this->em->getRepository('App:Interaction')->findAll()),
             'locs' => $locs,
         ];
+    }
+
+    private function buildAllStatData()
+    {
+        $project = $this->buildAboutProjectStatData();
+        $db = $this->buildAboutDatabaseStatData();
+        return array_merge($project, $db);
     }
 
 /* =========================== GET COUNTS =================================== */
