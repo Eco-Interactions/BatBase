@@ -14,7 +14,7 @@
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
-import * as fM from '../../filters-main.js';
+import * as fM from '../../filter-main.js';
 import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../../../../db-main.js';
 import { initObjectRealmCombobox, filterTableByObjectRealm } from './obj-realm-filter.js';
 /* ========================== UI ============================================ */

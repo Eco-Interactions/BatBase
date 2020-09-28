@@ -1,22 +1,22 @@
 /**
  * Entity-table facade.
  *
- * Exports:
- *     initEntityTable
- *
  * TOC
- *
- *
+ *     ENTITY TABLE
+ *         LOCATION
+ *         SOURCE
+ *         TAXON
+ *     FORMAT DATA
+ *         DATA TREE
+ *         AGGRID ROW-DATA
+ *     INIT AGGRID TABLE
  */
-import * as entity from './entity/entity-table-main.js';
 import * as format from './format/aggrid-format.js';
 import * as init from './init-table.js';
+import * as loc from './entity/loc-table.js';
+import * as src from './entity/src-table.js';
 import * as tree from './format/data-tree.js';
-
-export function initTable(tblName, rowData, tState) {
-    return init.initTable(...arguments);
-}
-
+import * as txn from './entity/txn-table.js';
 
 /* ======================== ENTITY TABLE ==================================== */
 /* -------------------------- LOCATION -------------------------------------- */
@@ -47,6 +47,7 @@ export function rebuildTxnTable() {
     return txn.rebuildTxnTable(...arguments);
 }
 /* ========================= FORMAT DATA ==================================== */
+/* ------------------------- DATA TREE -------------------------------------- */
 export function buildLocTree() {
     return tree.buildLocTree(...arguments)
 }
@@ -56,7 +57,7 @@ export function buildSrcTree() {
 export function buildTxnTree() {
     return tree.buildTxnTree(...arguments)
 }
-
+/* ----------------------- AGGRID ROW-DATA ---------------------------------- */
 export function buildLocRowData() {
     return format.buildLocRowData(...arguments)
 }
@@ -65,4 +66,8 @@ export function buildSrcRowData() {
 }
 export function buildTxnRowData() {
     return format.buildTxnRowData(...arguments)
+}
+/* ===================== INIT AGGRID TABLE ================================== */
+export function initTable(tblName, rowData, tState) {
+    return init.initTable(...arguments);
 }

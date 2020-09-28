@@ -10,7 +10,7 @@
  *          PANEL FILTERS
  *          TABLE FILTERS
  */
-import { _u, _ui, accessTableState as tState } from '../../db-main.js';
+import { _u, _ui, accessTableState as tState } from '../../../db-main.js';
 
 let fS;
 

@@ -10,7 +10,7 @@
  *      UI
  *      FILTER
  */
-import * as fM from '../filters-main.js';
+import * as fM from '../filter-main.js';
 import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../../../db-main.js';
  /* ========================= UI ============================================ */
 /**

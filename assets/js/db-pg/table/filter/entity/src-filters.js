@@ -10,7 +10,7 @@
  *      UI
  *      FILTER
  */
-import * as fM from '../filters-main.js';
+import * as fM from '../filter-main.js';
 import { _ui, _u,  accessTableState as tState } from '../../../db-main.js';
 /* ========================= UI ============================================ */
 export function loadSrcFilters(realm) {                             /*Perm-log*/console.log("       --Loading source [%s] filters.", realm);

@@ -10,7 +10,7 @@
  *      BUILS FILTER ELEM
  *      SYNC WITH ACTIVE FILTERS
  */
-import * as fM from '../filters-main.js';
+import * as fM from '../filter-main.js';
 import { _ui, _u, accessTableState as tState } from '../../../db-main.js';
 /* ====================== BUILD FILTER ELEM ================================= */
 /** Returns a text input with submit button that will filter tree by text string. */

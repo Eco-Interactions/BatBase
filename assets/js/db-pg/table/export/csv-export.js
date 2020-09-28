@@ -3,24 +3,21 @@
  * tree rows and flattening tree data where possible: currently only taxon.
  * For taxon csv export: The relevant tree columns are shown and also exported.
  *
- * CODE SECTIONS:
+ * Export:
+ *     exportCsvData
+ *
+ * TOC
  *     FILL EXPORT DATA
  *     SET UP TABLE
  *     EXPORT
  *     RESET
  *     HELPERS
- *
- * Export default:
- *     exportCsvData
  */
-import * as _u from '../../util/util.js';
-import { accessTableState as tState } from '../../db-main.js';
-import { collapseTree, expandTreeByOne, fadeTable, showTable } from '../../pg-ui/ui-main.js';
-
+import { accessTableState as tState, _u, _ui } from '../../db-main.js';
 let tblState;
 
-export default function exportCsvData() {                                       console.log('       /--exportCsvData')
-    fadeTable();
+export function exportCsvData() {                                               console.log('       /--exportCsvData')
+    _ui('fadeTable');
     tblState = tState().get();
     fillTableWithExportOnlyData()
     .then(exportTableDataThenResetTable);
@@ -38,7 +35,7 @@ function exportTableDataThenResetTable() {
  *     Location - Elevation, Elevation Max, Latitude, and Longitude
  */
 function fillTableWithExportOnlyData() {
-    return _u.getData(['interaction', 'taxon'])
+    return _u('getData', [['interaction', 'taxon']])
     .then(fillInteractionsWithExportData);
 }
 function fillInteractionsWithExportData(rcrds) {
@@ -125,12 +122,12 @@ function exportCsv() {
 }
 /* ------------------------------ RESET ------------------------------------- */
 function returnTableState() {
-    collapseTree();
+    _ui('collapseTree');
     hideExportOnlyColumns();
     toggleUiTableColumns(true);
-    showTable();
+    _ui('showTable');
     if (tblState.curFocus === 'taxa') {
-        expandTreeByOne();
+        _ui('expandTreeByOne');
     }
 }
 function hideExportOnlyColumns() {

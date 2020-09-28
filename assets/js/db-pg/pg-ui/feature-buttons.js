@@ -22,9 +22,8 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { openDataEntryForm } from '../db-main.js';
+import { openDataEntryForm, _table } from '../db-main.js';
 import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
-import exportCsvData from '../table/export/csv-export.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
 import { showTableRecordsOnMap } from './ui-map-state.js';
@@ -74,7 +73,7 @@ function initEditorFeatures() {                                                 
     return '.map-dsbl';
 }
 function initUserButtons() {
-    $('button[name="csv"]').click(exportCsvData);
+    $('button[name="csv"]').click(_table.bind(null, 'exportCsvData'));
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);

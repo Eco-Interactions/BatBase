@@ -17,7 +17,7 @@ import { accessTableState as tState, resetDataTable, _ui, _u } from '../../db-ma
 import * as fDate from './row-data/date-filter.js';
 import * as fLoc from './entity/loc-filters.js';
 import * as fSrc from './entity/src-filters.js';
-import * as fState from './filter-state.js';
+import * as fState from './etc/filter-state.js';
 import * as fTree from './row-data/tree-filter.js';
 import * as fTxn from './entity/taxon/txn-filters.js';
 import * as fRows from './row-data/row-data-filter.js';

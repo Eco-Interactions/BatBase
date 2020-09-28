@@ -20,6 +20,7 @@
 import * as db from './local-data/local-data-main.js';
 import * as forms from './forms/forms-main.js';
 import * as map from './map/map-main.js';
+import * as table from './table/table-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
 import * as u from './util/util.js';
@@ -28,10 +29,6 @@ import * as alert from '../app/misc/alert-issue.js';
 import * as ui from './pg-ui/ui-main.js';
 import * as modal from '../misc/intro-modals.js';
 
-import * as table from './table/table-main.js';
-import * as filter from './table/filter/filters-main.js';
-// import * as format from './table/format-data/aggrid-format.js';
-// import * as tree from './table/format-data/data-tree.js';
 
 /*NOTE: Not sure why this page is getting loaded on external pages. It could be something tangled with webpack.*/
 if (window.location.pathname.includes('search')) {
@@ -39,6 +36,7 @@ if (window.location.pathname.includes('search')) {
 }
 /** ==================== FACADE ============================================= */
 export function executeMethod(funcName, mod, modName, caller, params = []) {
+    if (!Array.isArray(params)) { params = [params]; }  //Catches events typically.
     try {
         return mod[funcName](...params);
     } catch(e) {
@@ -63,7 +61,7 @@ export function _tutorial(funcName, params = []) {
     return moduleMethod(funcName, tutorial, 'tutorial', params);
 }
 export function _filter(funcName, params = []) {
-    return moduleMethod(funcName, filter, 'filter', params);
+    return moduleMethod(funcName, table, 'filter', params);
 }
 export function _forms(funcName, params = []) {
     return moduleMethod(funcName, forms, 'forms', params);
@@ -71,9 +69,9 @@ export function _forms(funcName, params = []) {
 export function _map(funcName, params = []) {
     return moduleMethod(funcName, map, 'map', params);
 }
-// export function _table(funcName, params = []) {
-//     return moduleMethod(funcName, table, 'table', params);
-// }
+export function _table(funcName, params = []) {
+    return moduleMethod(funcName, table, 'table', params);
+}
 export function openDataEntryForm() {
     ui.showPopupMsg();
     forms.initNewDataForm()
@@ -123,7 +121,7 @@ export function getCurrentFilterState() {
     return getActiveFilters();
 
     function getActiveFilters() {
-        const st = filter.getFilterState();
+        const st = table.getFilterState();
         Object.keys(st.table).forEach(col => {
             if (!st.table[col]) { delete st.table[col]; }});
         if (!Object.keys(st.table).length) { delete st.table; }
@@ -231,7 +229,7 @@ export function resetTableState() {
     resetCurTreeStorageProps();
     ui.setTreeToggleData(false);
     ui.clearFilterUi();
-    filter.resetFilterState();
+    table.resetFilterState();
 }
 export function resetCurTreeStorageProps() {
     delete tState.curTree;
@@ -239,7 +237,7 @@ export function resetCurTreeStorageProps() {
 }
 /* ==================== TABLE (RE)BUILDS ============================================================================ */
 export function reloadTableWithCurrentFilters() {
-    const filters = filter.getFilterState();
+    const filters = table.getFilterState();
     ui.reloadTableThenApplyFilters(filters);
 }
 /**
@@ -281,7 +279,7 @@ function buildDataTable(focus, view, fChange) {
     return builders[focus](view);
 }
 export function showTodaysUpdates(focus) {
-    filter.showTodaysUpdates(focus);
+    table.showTodaysUpdates(focus);
 }
 /* -------------------------- LOCATION -------------------------------------- */
 export function buildLocTable() {

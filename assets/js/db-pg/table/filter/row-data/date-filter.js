@@ -23,7 +23,7 @@
  *          TAXON
  *          TREE-TEXT
  */
-import * as fM from '../filters-main.js';
+import * as fM from '../filter-main.js';
 import { resetDataTable, _filter, _ui, _u, accessTableState as tState } from '../../../db-main.js';
 let tblState;
 /*
