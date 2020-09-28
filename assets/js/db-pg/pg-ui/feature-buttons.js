@@ -22,11 +22,10 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { _forms, _table } from '../db-main.js';
+import { _forms, _map, _table } from '../db-main.js';
 import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
-import { showTableRecordsOnMap } from './ui-map-state.js';
 
 
 /* userRole, enabledSelectors, dbInitializing */
@@ -37,7 +36,7 @@ export function initFeatureButtons(userRole) {
     authDependentInit(userRole);
 }
 function initBaseFeatures() {
-    $('#shw-map').click(showTableRecordsOnMap);
+    $('#shw-map').click(_map.bind(null, 'showTableRecordsOnMap'));
     $("#show-tips").click(showTips);
 }
 export function showTipsPopup() {
@@ -81,7 +80,7 @@ function initEditorButtons() {
     $('#rvw-data').addClass('adminbttn');
 }
 function openNewDataForm() {
-    _form('initNewDataForm');
+    _forms('initNewDataForm');
 }
 function initSuperFeatures() {
     $('#data-help').css({'z-index': 99999999});

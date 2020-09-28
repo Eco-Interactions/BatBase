@@ -35,7 +35,6 @@ import * as pM from './panels/panels-main.js';
 import * as bttns from './feature-buttons.js';
 import * as rowToggle from './table-row-toggle.js';
 import * as views from './view-opts.js';
-import * as mapUi from './ui-map-state.js';
 
 export function showTips() {
     bttns.showTipsPopup();
@@ -140,14 +139,42 @@ export function initSrcViewOpts(view) {
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =================== */
 export function updateUiForMapView(noPopup) {
     bttns.disableTableButtons();
-    mapUi.updateMapUiForMapView();
+    updateMapUiForMapView();
     pM.closeOpenPanels();
     if (noPopup) { return; }
     showPopupMsg();
 }
 export function updateUiForTableView() {
     bttns.enableTableButtons();
-    mapUi.updateMapUiForTableView();
+    updateMapUiForTableView();
+}
+function updateMapUiForMapView() {
+    updateBttnToReturnRcrdsToTable();
+    $('#tool-bar').fadeTo('fast', 1);
+    $('#search-tbl').hide();
+    $('#map').show();
+}
+function updateMapUiForTableView() {
+    $('#search-tbl').fadeTo('fast', 1);
+    $('#map, #filter-in-tbl-msg').hide();
+    updateBttnToShowRcrdsOnMap();
+}
+function updateBttnToReturnRcrdsToTable() {
+    $('#shw-map').text('Return to Table');
+    $('#shw-map').off('click').on('click', returnRcrdsToTable)
+        .prop('title', 'Close map and reopen records in table.');
+}
+function updateBttnToShowRcrdsOnMap() {
+    $('#shw-map').text('Map Interactions');
+    $('#shw-map').off('click').on('click', showRcrdsOnMap)
+        .prop('title', 'Show interactions on a map.');
+}
+function showRcrdsOnMap() {
+    _map('showTableRecordsOnMap');
+}
+function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
+    updateUiForTableView();
+    if (_u('getSelVal', ['View']) === 'map') { _u('setSelVal', ['View', 'tree']); }
 }
 /* ==================== UTILITY ============================================= */
 export function enableTableButtonsIfDataLoaded() {

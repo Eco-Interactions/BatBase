@@ -756,3 +756,17 @@ export function showLocOnMap(locId, zoom) {                          /*Perm-log*
     showLoc(locId, zoom, _table('tableState').get('rcrdsById'));
     $('#tbl-filter-status').html('No Active Filters.');
 }
+export function showTableRecordsOnMap() {                                       console.log('       +--showTableRecordsOnMap');
+    const tblState = _table('tableState').get(null, ['curFocus', 'rcrdsById']);
+    $('#search-tbl').fadeTo('fast', 0.3, () => {
+        _ui('updateUiForMapView');
+        getLocRcrds().then( rcrds => {
+            showInts(tblState.curFocus, tblState.rcrdsById, rcrds);
+        });
+    });
+
+    function getLocRcrds() {
+        return Promise.resolve(tblState.curFocus !== 'locs' ?
+            _u('getData', ['location']) : tblState.rcrdsById);
+    }
+}

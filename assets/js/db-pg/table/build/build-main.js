@@ -94,7 +94,7 @@ export function reloadTableWithCurrentFilters() {
 export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     resetTableState();
     return buildTable(focus)
-        .then(ui.updateUiForTableView);
+        .then(() => _ui('updateUiForTableView'));
 }
 export function buildTable(f, view = false) {
     if (f === '') { return Promise.resolve(); } //Combobox cleared by user
@@ -103,7 +103,7 @@ export function buildTable(f, view = false) {
     return updateFocusAndBuildTable(focus, view, tableState().get('curFocus'));
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
-function updateFocusAndBuildTable(focus, view, curFocus) {                                //console.log("updateFocusAndBuildTable called. focus = [%s], view = [%s", focus, view)
+function updateFocusAndBuildTable(focus, view, curFocus) {                      //console.log("updateFocusAndBuildTable called. focus = [%s], view = [%s", focus, view)
     if (focus === curFocus) { return buildDataTable(focus, view); }
     return onFocusChanged(focus, view)
         .then(() => buildDataTable(focus, view));

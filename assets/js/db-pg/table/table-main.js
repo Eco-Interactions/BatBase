@@ -48,6 +48,12 @@ export function exportCsvData() {
 export function buildTable() {
     return build.buildTable(...arguments);
 }
+export function resetDataTable() {
+    return build.resetDataTable(...arguments);
+}
+export function reloadTableWithCurrentFilters() {
+    return build.reloadTableWithCurrentFilters(...arguments);
+}
 /* -------------------------- LOCATION -------------------------------------- */
 export function buildLocTable() {
     return build.buildLocTable(...arguments);

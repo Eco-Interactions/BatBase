@@ -27,7 +27,7 @@
 import * as pM from './panels-main.js';
 import { _table, _u, _ui } from '../../db-main.js';
 
-const tState = _table('tableState');
+const tState = _table.bind(null, 'tableState');
 /**
  * list - List open in panel
  * listLoaded - List loaded in table
