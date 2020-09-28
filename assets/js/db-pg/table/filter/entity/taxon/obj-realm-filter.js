@@ -9,7 +9,7 @@
  * 		INIT COMBOBOX
  * 		APPLY FILTER
  */
-import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../../../../db-main.js';
+import { _ui, _u } from '../../../../db-main.js';
 import * as fM from '../../filter-main.js';
 
 let timeout, totalObjectRealmCnt;

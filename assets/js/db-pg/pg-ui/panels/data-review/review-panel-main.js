@@ -9,7 +9,7 @@
  * Exports:                     Imported By:
  *     addDataReviewEvents          panels-main
  */
-import { accessTableState as tState } from '../../../db-main.js';
+import { _table } from '../../../db-main.js';
 // import * as _u from '../../../util/util.js';
 // import * as pM from '../panels-main.js';
 
@@ -19,7 +19,7 @@ export function initReviewPanel() {
 }
 
 function toggleEditorColumn() {
-    const tblState = tState().get();
+    const tblState = _table('tableState').get();
     const shown = $('#rvw-data').data('shown');
     tblState.columnApi.setColumnsVisible(['updatedBy'], !shown);
     $('#rvw-data').data('shown', !shown);

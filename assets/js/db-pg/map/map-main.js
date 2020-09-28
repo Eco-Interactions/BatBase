@@ -3,15 +3,15 @@
  * Displays the map on the search database page.
  */
 /**
- * Exports:                 Imported by:
- *   addVolatileMapPin          forms
- *   clearMemory                forms
- *   initFormMap                forms
- *   initMap                    db_page
- *   showInts                   db_page, db_ui
- *   showLoc                    db_page
+ * Exports:
+ *   addVolatileMapPin
+ *   clearMemory
+ *   initFormMap
+ *   showInts
+ *   showLocOnMap
+ *   buildLocMap
  */
-import { accessTableState as tState, _db, _u, _ui} from '../db-main.js';
+import { _db, _table, _u, _ui} from '../db-main.js';
 import * as MM from './map-markers.js';
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
@@ -105,7 +105,7 @@ function getMapInstance(mapId) {
  * Either displays coordinates at click location; or drops a new map pin and updates
  * the form.
  */
-function onMapClick(type, e) {  
+function onMapClick(type, e) {
     if (ifClickOnMapTool(e)) { return; }
     showLatLngPopup(type, e);
 }
@@ -118,11 +118,11 @@ function getClickedElemClass(elem) {
     return elem.className ? elem.className :
         elem._container ? elem._container.className : '';
 }
-function showLatLngPopup(type, e) {  
+function showLatLngPopup(type, e) {
     if (['create', 'edit'].indexOf(type) === -1) { return showCoordPopup(e); }
     return geocodeAndShowPopup(type, e);
 }
-function showCoordPopup(e) {  
+function showCoordPopup(e) {
     const latLngTxt = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
     new L.Popup().setLatLng(e.latlng).setContent(latLngTxt).openOn(app.map);
 }
@@ -263,14 +263,14 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(data, fltrd) {                                          console.log('               //--initMap. data = %O', data);
+function initMap(data, fltrd) {                                          console.log('               //--initMap. data = %O', data);
     app.data.locs = data;
     const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
     downloadDataAndBuildMap(dispFunc, 'map');
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
-export function showLoc(id, zoom, data) {
+function showLoc(id, zoom, data) {
     app.data.locs = data;
     downloadDataAndBuildMap(showLocInMap, 'map');
 
@@ -727,4 +727,29 @@ function getChildLocData(prnt) {
     return prnt.children.map(id => app.data.locs[id]).filter(loc => {
         return loc.locationType.displayName !== 'Habitat' || loc.totalInts > 0;
     });
+}
+/** Initializes the google map in the data table. */
+export function buildLocMap() {
+    const tState = _table('tableState').get(['intSet', 'rcrdsById']);
+    _ui('updateUiForMapView');
+    if (tState.intSet) { return showLocsInSetOnMap(tState.rcrdsById); }
+    initMap(tState.rcrdsById);
+    return Promise.resolve();
+}
+/**
+ * When displaying a user-made set "list" of interactions focused on locations in
+ * "Map Data" view, the locations displayed on the map are only those in the set
+ * and their popup data reflects the data of the set.
+ */
+function showLocsInSetOnMap(rcrds) {
+    _table('buildLocTree', [getTopRegionIds()])
+    .then(tree => initMap(rcrds, tree));
+}
+/** Switches to map view and centeres map on selected location. */
+export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
+    if ($('#shw-map').prop('loading')) { return; }
+    _ui('updateUiForMapView');
+    _u('setSelVal', ['View', 'map', 'silent']);
+    showLoc(locId, zoom, tState.rcrdsById);
+    $('#tbl-filter-status').html('No Active Filters.');
 }

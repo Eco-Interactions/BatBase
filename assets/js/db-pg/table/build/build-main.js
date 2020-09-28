@@ -1,5 +1,9 @@
 /**
- * Entity-table facade.
+ * Handles the focus-entity's data-table (re)build.
+ *
+ * Note: Refactor to using a formal stack array for table builds to be able to
+ * cancel table build if another table-rebuild action is initated. The asynchronous
+ * local database calls make this process difficult to cancel.
  *
  * TOC
  *     ENTITY TABLE
@@ -10,7 +14,10 @@
  *         DATA TREE
  *         AGGRID ROW-DATA
  *     INIT AGGRID TABLE
+ *     REBUILD TABLE
  */
+import { _u, _ui } from '../../db-main.js';
+import { getFilterState, resetTableState, resetTableParams, tableState } from '../table-main.js';
 import * as format from './format/aggrid-format.js';
 import * as init from './init-table.js';
 import * as loc from './entity/loc-table.js';
@@ -70,4 +77,48 @@ export function buildTxnRowData() {
 /* ===================== INIT AGGRID TABLE ================================== */
 export function initTable(tblName, rowData, tState) {
     return init.initTable(...arguments);
+}
+/* ==================== TABLE REBUILD ======================================= */
+export function reloadTableWithCurrentFilters() {
+    const filters = getFilterState();
+    buildTable(filters.focus, filters.view)
+    .then(() => _ui('onTableReloadCompleteApplyFilters', [filters]));
+}
+/**
+ * Table-rebuild entry point after local database updates, filter clears, and
+ * after edit-form close.
+ */
+export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
+    resetTableState();
+    return buildTable(focus)
+        .then(ui.updateUiForTableView);
+}
+export function buildTable(f, view = false) {
+    if (f === '') { return Promise.resolve(); } //Combobox cleared by user
+    const focus = f ? f : _u('getSelVal', ['Focus']);                 /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view);
+    resetTableState();
+    return updateFocusAndBuildTable(focus, view, tableState().get('curFocus'));
+}
+/** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
+function updateFocusAndBuildTable(focus, view, curFocus) {                                //console.log("updateFocusAndBuildTable called. focus = [%s], view = [%s", focus, view)
+    if (focus === curFocus) { return buildDataTable(focus, view); }
+    return onFocusChanged(focus, view)
+        .then(() => buildDataTable(focus, view));
+}
+function onFocusChanged(focus, view) {
+    _u('setData', ['curFocus', focus]);
+    _u('setData', ['curView', view]);
+    resetFilterPanel(focus);
+    return resetTableParams(focus);
+}
+function resetFilterPanel(focus) {
+    _ui('updateFilterPanelHeader', [focus]);
+    $('#focus-filters').empty();
+}
+function buildDataTable(focus, view) {
+    const builders = {
+        'locs': buildLocTable, 'srcs': buildSrcTable,
+        'taxa': buildTxnTable
+    };
+    return builders[focus](view);
 }

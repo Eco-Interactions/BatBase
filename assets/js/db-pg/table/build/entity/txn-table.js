@@ -10,9 +10,10 @@
  *
  *
  */
-import { accessTableState as tState, resetTableState, _filter, _u, _ui } from '../../../db-main.js';
+import { _filter, _table, _u, _ui } from '../../../db-main.js';
 import * as build from '../build-main.js';
 
+const tState = _table.bind(null, 'tableState');
 /**
  * Get all data needed for the Taxon-focused table from data storage and send
  * to @initTxnViewOpts to begin the data-table build.
@@ -41,7 +42,7 @@ export function onTxnViewChange(val) {                              /*Perm-log*/
 }
 function buildTaxonTable(val) {
     const realmTaxon = storeAndReturnRealmRcrd(val);
-    resetTableState();
+    _table('resetTableState');
     return startTxnTableBuildChain(realmTaxon, true);
 }
 /**

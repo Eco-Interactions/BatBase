@@ -9,9 +9,10 @@
  *
  *
  */
-import { accessTableState as tState, resetTableState, _filter, _u, _ui } from '../../../db-main.js';
+import { _table, _u, _ui } from '../../../db-main.js';
 import * as build from '../build-main.js';
 
+const tState = _table.bind(null, 'tableState');
 /**
  * Get all data needed for the Source-focused table from data storage and send
  * to @initSrcViewOpts to begin the data-table build.
@@ -38,7 +39,7 @@ export function onSrcViewChange(val) {                              /*Perm-log*/
 }
 function rebuildSrcTable(val) {                                     /*Perm-log*/console.log('       --rebuildSrcTable. view ? [%s]', val)
     _ui('fadeTable');
-    resetTableState();
+    _table('resetTableState');
     _ui('setTreeToggleData', [false]);
     return startSrcTableBuildChain(val);
 }
@@ -47,9 +48,9 @@ function startSrcTableBuildChain(val) {
     const tS = tState().get();
     return build.buildSrcTree(view)
         .then(tree => build.buildSrcRowData(tree, tS))
-        .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
+        .then(rowData => _table('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Source Tree', rowData, tS))
-        .then(() => _filter('loadSrcFilters', [view]));
+        .then(() => _table('loadSrcFilters', [view]));
 }
 function getAndStoreSrcView(val) {
     const viewVal = val || _u('getSelVal', ['View']);                           //console.log("getAndStoreSrcView. viewVal = ", viewVal)

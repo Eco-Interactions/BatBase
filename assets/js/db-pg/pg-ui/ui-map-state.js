@@ -7,8 +7,9 @@
  *   updateUiForTableView
  */
 import { updateUiForTableView, updateUiForMapView } from './ui-main.js';
-import { _u, accessTableState as tState } from '../db-main.js';
-import { showInts } from '../map/map-main.js';
+import { _map, _table, _u } from '../db-main.js';
+
+const tState = _table('tableState');
 
 export function updateMapUiForMapView() {
     updateBttnToReturnRcrdsToTable();
@@ -26,7 +27,7 @@ export function showTableRecordsOnMap() {                                       
     $('#search-tbl').fadeTo('fast', 0.3, () => {
         updateUiForMapView();
         getLocRcrds().then( rcrds => {
-            showInts(tblState.curFocus, tblState.rcrdsById, rcrds);
+            _map('showInts', [tblState.curFocus, tblState.rcrdsById, rcrds]);
         });
     });
 

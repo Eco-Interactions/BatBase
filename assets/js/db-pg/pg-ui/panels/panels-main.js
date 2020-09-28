@@ -40,6 +40,9 @@ const panels = {
 
 /* ************************* FACADE ***************************************** */
 /* ======================== FILTER PANEL ==================================== */
+export function resetFilterPanelOnFocusChange() {
+    fM.resetFilterPanelOnFocusChange();
+}
 export function updateFilterPanelHeader(focus) {
     fM.updateFilterPanelHeader(focus);
 }
@@ -59,8 +62,8 @@ export function updateTaxonFilterViewMsg(realmName) {
 export function isFilterSetActive() {
     return fM.isFilterSetActive();
 }
-export function reloadTableThenApplyFilters(filters) {
-    fM.reloadTableThenApplyFilters(filters);
+export function onTableReloadCompleteApplyFilters(filters) {
+    fM.onTableReloadCompleteApplyFilters(filters);
 }
 /* -------- INTERACTION LISTS ------------- */
 export function isSavedIntListLoaded() {

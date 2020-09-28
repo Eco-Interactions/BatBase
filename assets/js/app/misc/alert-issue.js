@@ -13,7 +13,7 @@
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
-import { _u, accessTableState as tState, getCurrentFilterState } from '../../db-pg/db-main.js';
+import { _table, _u } from '../../db-pg/db-main.js';
 import { ExtraErrorData } from '@sentry/integrations';
 
 /* --------------------- INIT SENTRY ---------------------------------------- */
@@ -60,9 +60,9 @@ function setSentryDebugContext(errData) {
 }
 function setBasicStateContext() {
     if ($('body').data('this-url') !== '/search') { return; }
-    const state = tState().get();
+    const state = _table('tableState').get();
     const base = {focus: state.curFocus, view: state.curView};
-    Sentry.setContext('filter_state', Object.assign(base, getCurrentFilterState()));
+    Sentry.setContext('filter_state', Object.assign(base, _table('getCurrentFilterState')));
 }
 function setErrorContext (errData) {
     Sentry.setContext('error_data', errData);

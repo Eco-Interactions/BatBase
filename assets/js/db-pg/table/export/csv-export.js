@@ -13,12 +13,12 @@
  *     RESET
  *     HELPERS
  */
-import { accessTableState as tState, _u, _ui } from '../../db-main.js';
+import { _table, _u, _ui } from '../../db-main.js';
 let tblState;
 
 export function exportCsvData() {                                               console.log('       /--exportCsvData')
     _ui('fadeTable');
-    tblState = tState().get();
+    tblState = _table('tableState').get();
     fillTableWithExportOnlyData()
     .then(exportTableDataThenResetTable);
 }

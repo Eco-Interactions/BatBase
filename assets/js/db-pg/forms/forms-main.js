@@ -47,7 +47,9 @@ export function create(entity, name) {
     return form.createEntity(entity, name);
 }
 export function initNewDataForm() {
-    return create('interaction');
+    _ui('showPopupMsg');
+    return create('interaction')
+        .then(() => _ui('hidePopupMsg'));
 }
 export function edit(id, entity) {
     state.initFormState('edit', entity, id)

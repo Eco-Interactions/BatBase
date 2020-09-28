@@ -13,7 +13,7 @@
  *         GET
  *             FILTER STATUS TEXT
  */
-import { accessTableState as tState, resetDataTable, _ui, _u } from '../../db-main.js';
+import { _table, _ui, _u } from '../../db-main.js';
 import * as fDate from './row-data/date-filter.js';
 import * as fLoc from './entity/loc-filters.js';
 import * as fSrc from './entity/src-filters.js';
@@ -67,13 +67,13 @@ export function getRowDataForCurrentFilters(rowData) {                          
 }
 /** If filter cleared, filters all table rows, else applies on top of current filters. */
 export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
-    if (!Object.keys(fState.getRowDataFilters()).length) { return resetDataTable(); }
-    const rowData = getRowDataForCurrentFilters(tState().get('rowData'));
+    if (!Object.keys(fState.getRowDataFilters()).length) { return _table('resetDataTable'); }
+    const rowData = getRowDataForCurrentFilters(_table('tableState').get('rowData'));
     _ui('enableClearFiltersButton');
     setCurrentRowData(rowData);
 }
 function setCurrentRowData(rowData) {
-    const tblState = tState().get(['api', 'curFocus']);
+    const tblState = _table('tableState').get(['api', 'curFocus']);
     tblState.api.setRowData(rowData);
     _ui('updateFilterStatusMsg');
     _ui('setTreeToggleData', [false]);
@@ -85,6 +85,9 @@ export function setFilterState() {
 }
 export function resetFilterState() {
     fState.resetFilterState();
+}
+export function getFilterStateForSentryErrorReport() {
+    return fState.getFilterStateForSentryErrorReport();
 }
 /* --------------------------- GET ----------------------------------------- */
 export function getFilterStateKey() {

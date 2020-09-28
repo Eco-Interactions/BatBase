@@ -5,11 +5,10 @@
  * Export defaut:        Imported by:
  *     buildMapDataObj      db_map
  */
-import * as _u from '../util/util.js';
-import { accessTableState as tState } from '../db-main.js';
+import { _table, _u } from '../db-main.js';
 
 export default function buildMapDataObj(viewRcrds, rcrds) {
-    const tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);
+    const tblState = _table('tableState').get(null, ['api', 'curFocus', 'curView', 'rowData']);
     const mapData = { 'none': { ttl: 0, ints: {}, locs: null }};
     let curBaseNodeName; //used for Source rows
     tblState.api.forEachNodeAfterFilter(getIntMapData);
@@ -18,7 +17,8 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
     function getIntMapData(row) {
         if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }
         if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
-        buildInteractionMapData(row, row.data, _u.getDetachedRcrd(row.data.id, viewRcrds));
+        const rcrd = _u('getDetachedRcrd', [row.data.id, viewRcrds]);
+        buildInteractionMapData(row, row.data, rcrd);
     }
     function buildInteractionMapData(row, rowData, rcrd) {  //console.log('buildIntMapData row = %O rowData = %O', rowData)
         const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
@@ -33,8 +33,8 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
         /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
         function addRowData(intRow) {
             if (!intRow.data.location) { return ++noLocCnt; }
-            const intRcrd = _u.getDetachedRcrd(intRow.data.id, rcrds.ints);       //console.log('----intRow = %O, intRcd = %O, rcrds.locs = %O', intRow, intRcrd, rcrds.locs);
-            const loc = _u.getDetachedRcrd(intRcrd.location, rcrds.locs);
+            const intRcrd = _u('getDetachedRcrd', [intRow.data.id, rcrds.ints]);//console.log('----intRow = %O, intRcd = %O, rcrds.locs = %O', intRow, intRcrd, rcrds.locs);
+            const loc = _u('getDetachedRcrd', [intRcrd.location, rcrds.locs]);
             addLocAndIntData(loc, intRcrd);
             ++data.intCnt;
         }

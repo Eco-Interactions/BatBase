@@ -1,7 +1,8 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
-import { _forms, _ui, _u, showLocOnMap, accessTableState as tState } from '../../db-main.js';
+import { tableState } from '../table-main.js';
+import { _forms, _map, _ui, _u } from '../../db-main.js';
 import * as agGrid from '../../../../libs/grid/ag-grid.js';
 import unqVals from '../filter/aggrid/ag-grid-unique-filter.js';
 let tblState;
@@ -292,8 +293,11 @@ function addMapIcon(params) {                                                   
     const id = params.data.id;
     $('#search-tbl').off('click', '#map'+id);
     $('#search-tbl').on('click', '#map'+id,
-        showLocOnMap.bind(null, params.data.onMap, getZoomLvl(params.data)));
+        showLocOnPageMap.bind(null, params.data.onMap, params.data));
     return getMapIcon(id);
+}
+function showLocOnPageMap(id, loc) {
+    _map('showLocOnMap', [id, getZoomLvl(loc)]);
 }
 function getMapIcon(id) {
     const path = require('../../../../images/icons/marker-icon.png').default;
@@ -375,12 +379,12 @@ function getNodeChildDetails(rcrd) {                                            
 /* -------------------------------------------------------------------------- */
 function updateTableState(tblOpts, rowData) {
     tblState.api = tblOpts.api;
-    tState().set(
+    tableState().set(
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
 }
 function onTableInitComplete(rowData) {
     _ui('hidePopupMsg');
-    _ui('enableTableButtons', [tblState.flags.allDataAvailable]);
+    _ui('enableTableButtonsIfDataLoaded', [tblState.flags.allDataAvailable]);
     hideUnusedColFilterMenus();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
     _ui('updateFilterStatusMsg');

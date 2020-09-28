@@ -25,7 +25,9 @@
  *             Table Methods
  */
 import * as pM from './panels-main.js';
-import { _u, _filter, _ui, resetDataTable, accessTableState as tState } from '../../db-main.js';
+import { _table, _u, _ui } from '../../db-main.js';
+
+const tState = _table('tableState');
 /**
  * list - List open in panel
  * listLoaded - List loaded in table
@@ -215,7 +217,7 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*perm-log*/console.log('           +--Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    resetDataTable()
+    _table('resetDataTable')
     .then(updateRelatedListUi);
 }
 function prepareMemoryForTableLoad() {
@@ -419,7 +421,7 @@ function resetPrevListUiState() {
 function resetTable() {
     tState().set({'intSet': false});
     delete app.listLoaded;
-    resetDataTable()
+    _table('resetDataTable')
     .then(updateUiAfterTableReset);
 }
 function updateUiAfterTableReset() {

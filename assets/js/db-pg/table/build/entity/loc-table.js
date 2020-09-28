@@ -10,10 +10,12 @@
  *
  *
  */
-import { accessTableState as tState, buildLocMap, resetCurTreeStorageProps, resetTableState, _filter, _u, _ui } from '../../../db-main.js';
+import { _map, _table, _u, _ui } from '../../../db-main.js';
 import * as build from '../build-main.js';
 
-export function buildLocTable(v) {                                    /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
+const tState = _table.bind(null, 'tableState');
+
+export function buildLocTable(v) {                                  /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
     return _u('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
 
@@ -37,9 +39,9 @@ export function onLocViewChange(val) {
  * Event fired when the source view select box has been changed.
  */
 function updateLocView(v) {
-    const val = v || _u('getSelVal', ['View']);                          /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
+    const val = v || _u('getSelVal', ['View']);                     /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
     resetLocUi(val);
-    resetTableState();
+    _table('resetTableState');
     _ui('setTreeToggleData', [false]);
     return showLocInteractionData(val);
 }
@@ -49,7 +51,7 @@ function resetLocUi(view) {
 }
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     _u('setData', ['curView', view]);
-    return view === 'tree' ? rebuildLocTable() : buildLocMap();
+    return view === 'tree' ? rebuildLocTable() : _map('buildLocMap');
 }
 /** --------------- LOCATION TABLE ------------------------------------------ */
 /**
@@ -60,7 +62,7 @@ function showLocInteractionData(view) {                                         
  */
 export function rebuildLocTable(topLoc, textFltr) {                 /*Perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
     const topLocs = topLoc || getTopRegionIds();
-    resetCurTreeStorageProps();
+    _table('resetCurTreeStorageProps');
     tState().set({openRows: topLocs.length === 1 ? topLocs : []});
     _ui('fadeTable');
     return startLocTableBuildChain(topLocs, textFltr);
@@ -75,7 +77,16 @@ function startLocTableBuildChain(topLocs) {
     const tS = tState().get();
     return build.buildLocTree(topLocs)
         .then(tree => build.buildLocRowData(tree, tS))
-        .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
+        .then(rowData => _table('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Location Tree', rowData, tS))
-        .then(() => _filter('loadLocFilters', [tS]));
+        .then(() => _table('loadLocFilters', [tS]));
+}
+
+/** Reloads the data-table with the location selected from the map view. */
+export function showLocInDataTable(loc) {                          /*Perm-log*/console.log("       --Showing Location in Table");
+    _ui('updateUiForTableView');
+    _u('setSelVal', ['View', 'tree', 'silent']);
+    table.rebuildLocTable([loc.id])
+    .then(() => _ui('updateFilterStatusMsg'))
+    .then(() => _ui('enableClearFiltersButton'));
 }

@@ -17,7 +17,8 @@
  *     FILTER BY TEXT
  *     FILTER BY INTERACTION SET
  */
-import { accessTableState as tState, alertIssue, _u } from '../../../db-main.js';
+import { alertIssue, _table, _u } from '../../../db-main.js';
+const tState = _table.bind(null, 'tableState');
 let tblState;
 /* ========================= LOCATION TREE ========================================================================== */
 /**

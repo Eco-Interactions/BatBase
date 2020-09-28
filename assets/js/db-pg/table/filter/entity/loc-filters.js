@@ -11,7 +11,9 @@
  *      FILTER
  */
 import * as fM from '../filter-main.js';
-import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../../../db-main.js';
+import { _table, _ui, _u } from '../../../db-main.js';
+
+const tState = _table.bind(null, 'tableState');
  /* ========================= UI ============================================ */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter.
@@ -168,7 +170,7 @@ export function applyLocFilter(val) {
     const root = getNewLocRoot();
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
-    return rebuildLocTable(root);
+    return _table('rebuildLocTable', [root]);
 
     function getNewLocRoot() {
         return isNaN(parseInt(val)) ?

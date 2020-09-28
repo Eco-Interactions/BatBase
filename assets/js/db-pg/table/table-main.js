@@ -5,6 +5,7 @@
  *     buildLocTable
  *
  * TOC
+ *     STATE
  *     EXPORT
  *     BUILD
  *         LOCATION
@@ -16,15 +17,37 @@
  *         FILTER ROW-DATA
  *         FILTER STATE
  */
+import { _ui } from '../db-main.js';
 import * as build from './build/build-main.js';
-import * as filter from './filter/filter-main.js';
 import * as csv from './export/csv-export.js';
+import * as filter from './filter/filter-main.js';
+import * as state from './etc/table-state.js';
 
+/* ========================= STATE ========================================== */
+export function tableState() {
+    return state.tableState();
+}
+export function resetCurTreeStorageProps() {
+    state.resetCurTreeStorageProps();
+}
+export function resetTableParams() {
+    return state.resetTableParams(...arguments);
+}
+/** Resets storage props, buttons, and filters. */
+export function resetTableState() {
+    state.resetCurTreeStorageProps();
+    _ui('setTreeToggleData', [false]);
+    _ui('clearFilterUi');
+    filter.resetFilterState();
+}
 /* ======================== EXPORT ========================================== */
 export function exportCsvData() {
     csv.exportCsvData();
 }
 /* ========================= BUILD ========================================== */
+export function buildTable() {
+    return build.buildTable(...arguments);
+}
 /* -------------------------- LOCATION -------------------------------------- */
 export function buildLocTable() {
     return build.buildLocTable(...arguments);
@@ -34,6 +57,9 @@ export function onLocViewChange() {
 }
 export function rebuildLocTable() {
     return build.rebuildLocTable(...arguments);
+}
+export function buildLocTree() {
+    return build.buildLocTree(...arguments);
 }
 /* ---------------------------- SOURCE -------------------------------------- */
 export function onSrcViewChange() {
@@ -54,7 +80,7 @@ export function rebuildTxnTable() {
 }
 /* ======================== FILTER ========================================== */
 export function getTreeTextFilterElem() {
-    return filter.getTreeTextFilterElem((...arguments);
+    return filter.getTreeTextFilterElem(...arguments);
 }
 /* ------------------ DATE FILTER ------------------------------------------- */
 export function initDateFilterUi() {
@@ -67,23 +93,23 @@ export function toggleDateFilter() {
     filter.toggleDateFilter(...arguments);
 }
 export function showTodaysUpdates() {
-    filter.showTodaysUpdates((...arguments);
+    filter.showTodaysUpdates(...arguments);
 }
 /* -------------------- DYNAMIC FILTERS ------------------------------------- */
 export function loadLocFilters() {
-    return filter.loadLocFilters((...arguments);
+    return filter.loadLocFilters(...arguments);
 }
 export function applyLocFilter() {
     return filter.applyLocFilter(...arguments);
 }
 export function loadSrcFilters() {
-    return filter.loadSrcFilters((...arguments);
+    return filter.loadSrcFilters(...arguments);
 }
 export function applyPubFilter() {
     return filter.applyPubFilter(...arguments);
 }
 export function loadTxnFilters() {
-    return filter.loadTxnFilters((...arguments);
+    return filter.loadTxnFilters(...arguments);
 }
 export function applyTxnFilter() {
     return filter.applyTxnFilter(...arguments);
@@ -92,7 +118,6 @@ export function applyTxnFilter() {
 export function getRowDataForCurrentFilters() {
     return filter.getRowDataForCurrentFilters(...arguments)
 }
-/** If filter cleared, filters all table rows, else applies on top of current filters. */
 export function onFilterChangeUpdateRowData() {
     filter.onFilterChangeUpdateRowData(...arguments);
 }
@@ -114,4 +139,7 @@ export function isFilterActive() {
 }
 export function getActiveFilterVals() {
     return filter.getActiveFilterVals();
+}
+export function getFilterStateForSentryErrorReport() {
+    return filter.getFilterStateForSentryErrorReport();
 }

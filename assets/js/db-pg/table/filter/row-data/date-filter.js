@@ -24,7 +24,7 @@
  *          TREE-TEXT
  */
 import * as fM from '../filter-main.js';
-import { resetDataTable, _filter, _ui, _u, accessTableState as tState } from '../../../db-main.js';
+import { _table, _ui, _u } from '../../../db-main.js';
 let tblState;
 /*
  * {obj} cal    Stores the flatpickr calendar instance.
@@ -55,7 +55,7 @@ function onSelDateFilterTypeChange(val) {
 export function toggleDateFilter(state, dateTime, skipSync) {       /*dbug-log*///console.log('       +-toggleDateFilter. state = %s, time? ', state, dateTime);
     app.cal = initCal();
     app.date = fM.getFilterStateKey('date');
-    tblState = tState().get();
+    tblState = _table('tableState').get();
     const filtering = ifDateFilterActive(state);
     updateDateFilterState(dateTime, filtering);
     applyDateFilterStyles(filtering);

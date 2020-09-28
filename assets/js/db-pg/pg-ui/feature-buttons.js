@@ -22,7 +22,7 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { openDataEntryForm, _table } from '../db-main.js';
+import { _forms, _table } from '../db-main.js';
 import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
@@ -77,8 +77,11 @@ function initUserButtons() {
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
-    $('#new-data').addClass('adminbttn').click(openDataEntryForm);
+    $('#new-data').addClass('adminbttn').click(openNewDataForm);
     $('#rvw-data').addClass('adminbttn');
+}
+function openNewDataForm() {
+    _form('initNewDataForm');
 }
 function initSuperFeatures() {
     $('#data-help').css({'z-index': 99999999});
@@ -139,6 +142,10 @@ function enableMapFeatures() {
     $('.map-ico').fadeTo('fast', 1);
 }
 /* ================= TOGGLE TABLE BUTTONS  ================================== */
+export function enableTableButtonsIfDataLoaded(allDataAvailable) {
+    if (!allDataAvailable) { return enableViewOpts(); }
+    enableTableButtons();
+}
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing || testingDbInit()) { updateUiAfterBaseDatabaseInit(); }
     unfadeButtons();
