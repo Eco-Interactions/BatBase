@@ -42,7 +42,7 @@ export function showTips() {
 /* =========================== PANELS ======================================= */
 /* -------------------- FILTERS --------------------------------------------- */
 export function resetFilterPanelOnFocusChange() {
-    pM.resetFilterPanelOnFocusChange();
+    pM.resetFilterPanelOnFocusChange(...arguments);
 }
 export function updateFilterPanelHeader(focus) {
     pM.updateFilterPanelHeader(focus);
@@ -55,6 +55,9 @@ export function enableClearFiltersButton() {
 }
 export function updateFilterStatusMsg() {
     pM.updateFilterStatusMsg();
+}
+export function updateTaxonFilterViewMsg() {
+    pM.updateTaxonFilterViewMsg(...arguments);
 }
 export function onTableReloadCompleteApplyFilters(filters) {
     pM.onTableReloadCompleteApplyFilters(filters);

@@ -41,7 +41,7 @@ const panels = {
 /* ************************* FACADE ***************************************** */
 /* ======================== FILTER PANEL ==================================== */
 export function resetFilterPanelOnFocusChange() {
-    fM.resetFilterPanelOnFocusChange();
+    fM.resetFilterPanelOnFocusChange(...arguments);
 }
 export function updateFilterPanelHeader(focus) {
     fM.updateFilterPanelHeader(focus);

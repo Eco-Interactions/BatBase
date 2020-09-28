@@ -141,5 +141,5 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 }
 function setTableInitState(focus, isAllDataAvailable) {
     ui.resetFilterPanelOnFocusChange(focus);
-    _table('resetTableParams', [focus, isAllDataAvailable]);
+    table.resetTableParams(focus, isAllDataAvailable);
 }

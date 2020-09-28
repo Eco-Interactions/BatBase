@@ -176,7 +176,7 @@ function openCalendar() {
  */
 export function showTodaysUpdates(focus) {                                      //console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
     _u('setSelVal', ['Focus', focus, 'silent']);
-    resetDataTable(focus)
+    _table('resetDataTable', [focus])
     .then(showUpdatesAfterTableLoad);
 }
 function showUpdatesAfterTableLoad() {

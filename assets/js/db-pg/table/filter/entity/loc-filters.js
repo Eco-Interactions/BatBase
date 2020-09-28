@@ -177,7 +177,6 @@ export function applyLocFilter(val) {
             getRegionIdAndUpdateType(locType) : [parseInt(val)];
     }
     function getRegionIdAndUpdateType (comboType) {
-        fM.setFilterState('combo', false, 'rebuild');
         locType = 'Region';
         return getRegionId(comboType);
     }
@@ -187,14 +186,16 @@ export function applyLocFilter(val) {
             [selectedOpts['Region']];
     }
 }
-function updateLocFilterMemory(loc, locType) {
+function updateLocFilterMemory(loc, locType) {                                  console.log('updateLocFilterMemory. [%s] loc = %O', locType, loc);
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
+    updateLocComboFilter(locType, selVal);
 }
 function updateLocComboFilter(locType, selVal) {                                //console.log('updateLocComboFilter type [%s] val [%s]', locType, selVal);
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
+    fM.setFilterState('combo', false, 'rebuild');
     fM.setFilterState('combo', filter, 'rebuild');
 }
 function resetLocComboMemory() {

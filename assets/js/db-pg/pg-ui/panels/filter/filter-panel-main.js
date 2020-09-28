@@ -14,7 +14,7 @@ import * as fSets from './filter-sets.js';
 
 let timeout;
 
-export function resetFilterPanelOnFocusChange() {
+export function resetFilterPanelOnFocusChange(focus) {
     updateFilterPanelHeader(focus);
     $('#focus-filters').empty();
 }
@@ -87,7 +87,7 @@ function getSplitPseudoBorderStyle() {
     const panelT = $('#filter-pnl').position().top;
     const tabL = getLeftSplitPos();
     const tabW = $('#filter-opts').innerWidth();
-    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*dbug-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);/*dbug-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-fltr-bttm-border-vert:before {
         position: absolute;
         content: '';

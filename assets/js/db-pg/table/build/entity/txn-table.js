@@ -61,7 +61,7 @@ function updateRealmTableState(realmId, realmTaxonRcrd) {
     tState().set({
         realmLvl: realmTaxonRcrd.level,
         curView: realmId,
-        realmName: realmTaxonRcrd.realm.displayName
+        realmName: realmTaxonRcrd.realm.pluralName
     });
 }
 /** This catches errors in realm value caused by exiting mid-tutorial. TODO */

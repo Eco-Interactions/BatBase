@@ -24,7 +24,8 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     loadTxnLevelComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    if (tblState.realmName === 'Bat') { return initObjectRealmCombobox(); }
+    _ui('updateTaxonFilterViewMsg', [tblState.realmName]);
+    if (tblState.realmName === 'Bats') { return initObjectRealmCombobox(); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {

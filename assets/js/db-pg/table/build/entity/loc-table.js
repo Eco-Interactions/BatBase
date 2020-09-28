@@ -60,12 +60,12 @@ function showLocInteractionData(view) {                                         
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  * Note: This is also the entry point for filter-related table rebuilds.
  */
-export function rebuildLocTable(topLoc, textFltr) {                 /*Perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
+export function rebuildLocTable(topLoc) {                            /*Perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
     const topLocs = topLoc || getTopRegionIds();
     _table('resetCurTreeStorageProps');
     tState().set({openRows: topLocs.length === 1 ? topLocs : []});
     _ui('fadeTable');
-    return startLocTableBuildChain(topLocs, textFltr);
+    return startLocTableBuildChain(topLocs);
 }
 function getTopRegionIds() {
     const ids = [];
