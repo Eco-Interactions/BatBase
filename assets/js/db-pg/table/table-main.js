@@ -61,6 +61,9 @@ export function rebuildLocTable() {
 export function buildLocTree() {
     return build.buildLocTree(...arguments);
 }
+export function showLocInDataTable() {
+    return build.showLocInDataTable(...arguments);
+}
 /* ---------------------------- SOURCE -------------------------------------- */
 export function onSrcViewChange() {
     return build.onSrcViewChange(...arguments);

@@ -36,6 +36,9 @@ export function onLocViewChange() {
 export function rebuildLocTable() {
     return loc.rebuildLocTable(...arguments);
 }
+export function showLocInDataTable() {
+    return loc.showLocInDataTable(...arguments);
+}
 /* ---------------------------- SOURCE -------------------------------------- */
 export function onSrcViewChange() {
     return src.onSrcViewChange(...arguments);

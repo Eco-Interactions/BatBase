@@ -86,7 +86,7 @@ function startLocTableBuildChain(topLocs) {
 export function showLocInDataTable(loc) {                          /*Perm-log*/console.log("       --Showing Location in Table");
     _ui('updateUiForTableView');
     _u('setSelVal', ['View', 'tree', 'silent']);
-    table.rebuildLocTable([loc.id])
+    rebuildLocTable([loc.id])
     .then(() => _ui('updateFilterStatusMsg'))
     .then(() => _ui('enableClearFiltersButton'));
 }

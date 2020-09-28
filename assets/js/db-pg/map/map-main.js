@@ -137,12 +137,15 @@ function getMapBounds() {
     return L.latLngBounds(southWest, northEast);
 }
 function addMapTiles(mapId) {
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         minZoom: mapId === 'form-map' ? 1 : 3, //Don't zoom out passed
         maxZoom: 16,
-        id: 'mapbox.run-bike-hike',
-        accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
+        tileSize: 512,
+        id: 'mapbox/satellite-streets-v11',
+        zoomOffset: -1,
+        accessToken: 'pk.eyJ1IjoieXF1ZXNlcmFzYXJhaCIsImEiOiJja2ZteWVxMXAxazZ3MnNvMGluZ283aWp3In0.X0eZqTze66E9PI5y8FBmmg',
+        // accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
     }).addTo(app.map);
 }
 /** A Map Tips legend in the bottom left of the map. Tips toggle open on click. */
@@ -750,6 +753,6 @@ export function showLocOnMap(locId, zoom) {                          /*Perm-log*
     if ($('#shw-map').prop('loading')) { return; }
     _ui('updateUiForMapView');
     _u('setSelVal', ['View', 'map', 'silent']);
-    showLoc(locId, zoom, tState.rcrdsById);
+    showLoc(locId, zoom, _table('tableState').get('rcrdsById'));
     $('#tbl-filter-status').html('No Active Filters.');
 }

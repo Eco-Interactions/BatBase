@@ -623,7 +623,7 @@ function getLoadInTableButton(loc) {
     return bttn;
 }
 function loadLocInTable(loc) {
-    _table('loadLocInTable', [loc]);
+    _table('showLocInDataTable', [loc]);
 }
 function buildLoadInTableBttn() {
     const attr = {type: 'button', class:'ag-fresh', value: 'Show Interactions In Data-Table'}
