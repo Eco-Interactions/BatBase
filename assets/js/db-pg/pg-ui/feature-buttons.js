@@ -22,12 +22,10 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { openDataEntryForm } from '../db-main.js';
+import { _forms, _map, _table } from '../db-main.js';
 import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
-import exportCsvData from '../table/export/csv-export.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
-import { showTableRecordsOnMap } from './ui-map-state.js';
 
 
 /* userRole, enabledSelectors, dbInitializing */
@@ -38,7 +36,7 @@ export function initFeatureButtons(userRole) {
     authDependentInit(userRole);
 }
 function initBaseFeatures() {
-    $('#shw-map').click(showTableRecordsOnMap);
+    $('#shw-map').click(_map.bind(null, 'showTableRecordsOnMap'));
     $("#show-tips").click(showTips);
 }
 export function showTipsPopup() {
@@ -74,12 +72,15 @@ function initEditorFeatures() {                                                 
     return '.map-dsbl';
 }
 function initUserButtons() {
-    $('button[name="csv"]').click(exportCsvData);
+    $('button[name="csv"]').click(_table.bind(null, 'exportCsvData'));
 }
 function initEditorButtons() {
     $('#data-help').addClass('adminbttn').click(showEditorHelpModal);
-    $('#new-data').addClass('adminbttn').click(openDataEntryForm);
+    $('#new-data').addClass('adminbttn').click(openNewDataForm);
     $('#rvw-data').addClass('adminbttn');
+}
+function openNewDataForm() {
+    _forms('initNewDataForm');
 }
 function initSuperFeatures() {
     $('#data-help').css({'z-index': 99999999});
@@ -140,6 +141,10 @@ function enableMapFeatures() {
     $('.map-ico').fadeTo('fast', 1);
 }
 /* ================= TOGGLE TABLE BUTTONS  ================================== */
+export function enableTableButtonsIfDataLoaded(allDataAvailable) {
+    if (!allDataAvailable) { return enableViewOpts(); }
+    enableTableButtons();
+}
 export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing || testingDbInit()) { updateUiAfterBaseDatabaseInit(); }
     unfadeButtons();

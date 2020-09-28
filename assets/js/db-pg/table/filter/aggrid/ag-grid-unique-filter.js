@@ -1,4 +1,4 @@
-import { accessTableState as tState } from '../db-main.js';
+import { _table } from '../../../db-main.js';
 /** This filter presents all unique values of column to potentially filter on. */
 export default function UniqueValues() {}
 UniqueValues.prototype.init = function (params) {                               //console.log("UniqueValues.prototype.init. params = %O", params)
@@ -347,7 +347,7 @@ UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
             } else {
                 console.warn('Value [' + value + '] is not a valid value for filter');
                 if (model.length == 1) {
-                    tState().get('api').showNoRowsOverlay();
+                    _table('tableState').get('api').showNoRowsOverlay();
                 }
             }
         });

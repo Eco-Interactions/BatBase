@@ -14,15 +14,18 @@
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
-import * as fM from '../filters-main.js';
-import { _ui, _u, rebuildTxnTable, accessTableState as tState } from '../../db-main.js';
+import * as fM from '../../filter-main.js';
+import { _table, _ui, _u } from '../../../../db-main.js';
 import { initObjectRealmCombobox, filterTableByObjectRealm } from './obj-realm-filter.js';
+
+const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
     loadTxnLevelComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    if (tblState.realmName === 'Bat') { return initObjectRealmCombobox(); }
+    _ui('updateTaxonFilterViewMsg', [tblState.realmName]);
+    if (tblState.realmName === 'Bats') { return initObjectRealmCombobox(); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {
@@ -141,7 +144,7 @@ export function applyTxnFilter(val) {
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});
     addToFilterState();
-    return rebuildTxnTable(rcrd);
+    return _table('rebuildTxnTable', [rcrd]);
 
     function addToFilterState() {
         const filter = {};

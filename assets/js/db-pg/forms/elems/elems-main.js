@@ -31,7 +31,7 @@
  *         TOGGLE FORM-FILDS
  *         EXIT FORM
  */
-import { _filter, _u, executeMethod, reloadTableWithCurrentFilters } from '../../db-main.js';
+import { executeMethod, _table, _u } from '../../db-main.js';
 import { _form, _state, getNextFormLevel, clearFormMemory } from '../forms-main.js';
 import * as panel from './detail-panel/detail-panel.js';
 import * as cmbx from './form-elems/input/combobox-input.js';
@@ -265,12 +265,12 @@ function refocusTableIfFormWasSubmitted() {
     const submitData = _state('getStateProp', ['submit']);                      //console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
     if (!submitData) { return; }
     if (submitData.entity === 'interaction') { return refocusAndShowUpdates(submitData); }
-    reloadTableWithCurrentFilters();
+    _table('reloadTableWithCurrentFilters');
 }
 function refocusAndShowUpdates(submitData) {                                    //console.log('refocusAndShowUpdates.')
     if (_state('getFormProp', ['top', 'action']) === 'create') {
-        _filter('showTodaysUpdates', ['srcs']);
+        _table('showTodaysUpdates', ['srcs']);
     } else {
-        reloadTableWithCurrentFilters();
+        _table('reloadTableWithCurrentFilters');
     }
 }

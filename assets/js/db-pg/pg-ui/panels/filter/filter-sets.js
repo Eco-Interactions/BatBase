@@ -1,9 +1,8 @@
-        $('#save-filter').html('Update');
 /*
  * Handles the right section of the filter panel, saved filter set managment.
  *
  * Exports:
- *      reloadTableThenApplyFilters
+ *      onTableReloadCompleteApplyFilters
  *      isFilterSetActive
  *      initFilterSetsFeature
  *      selFilterSet
@@ -22,10 +21,10 @@
  *          RESET & ENABLE/DISABLE UI
  */
 import * as pM from '../panels-main.js';
-import { buildTable, _filter, _modal, _ui, _u, accessTableState as tState } from '../../../db-main.js';
+import { _modal, _table, _ui, _u } from '../../../db-main.js';
 /* Holds selected filter data and table state. */
 let app = {};
-
+const tState = _table.bind(null, 'tableState');
 export function isFilterSetActive() {
     return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
 }
@@ -131,7 +130,7 @@ function buildFilterData() {
  * direct (applied to row data directly).
  */
 function getFilterSetJson(tState) {
-    const fState = _filter('getFilterState');
+    const fState = _table('getFilterState');
     const filters = {
         direct: fState.direct,
         focus: tState.curFocus,
@@ -164,10 +163,10 @@ function applyFilterSet() {
     app.fltr.active = true;
     reloadTableThenApplyFilters(filters, app.fltr.id);
 }
-export function reloadTableThenApplyFilters(filters, id) {
+function reloadTableThenApplyFilters(filters, id) {
     if (id) { setSavedFilterFocusAndView(filters); } //If no id, reapplying filters after form closed.
-    buildTable(filters.focus, filters.view)
-    .then(onTableReloadComplete.bind(null, filters, id));
+    _table('buildTable', [filters.focus, filters.view])
+    .then(onTableReloadCompleteApplyFilters.bind(null, filters, id));
 }
 function setSavedFilterFocusAndView(filters) {
     _u('setSelVal', ['Focus', filters.focus, 'silent']);
@@ -179,7 +178,7 @@ function setView(filters) {
     _u('setData', ['curView', view]);
     _u('setSelVal', ['View', filters.view, 'silent']);
 }
-function onTableReloadComplete(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
+export function onTableReloadCompleteApplyFilters(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
     setFiltersThatResetTableThenApplyRemaining(filters)
     .then(onAllFiltersApplied)
     .then(() => ifActiveSetResetVal(id));
@@ -199,7 +198,7 @@ function addFiltersToMemoryAndUi(filters) {
 
         function handleFilter(type) {
             handleUiUpdate(type, filters[group][type]);
-            _filter('setFilterState', [type, filters[group][type], group]);
+            _table('setFilterState', [type, filters[group][type], group]);
         }
     }
 }
@@ -230,7 +229,7 @@ function getComboId(field) {
 }
 function setDateElems(type, val) {
     _u('setSelVal', ['Date Filter', type, 'silent']);
-    _filter('toggleDateFilter', [true, val.time, 'skipSync']);
+    _table('toggleDateFilter', [true, val.time, 'skipSync']);
 }
 /* --------------- FILTERS THAT REBUILD TABLE ------- */
 function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
@@ -238,10 +237,10 @@ function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
     return setComboboxFilter(filters.rebuild.combo)
     .then(applyDirectFilters)
     .then(applyColumnFilters.bind(null, filters.table))
-    
+
     function applyDirectFilters() {                                             //console.log('applyDirectFilters. args = %O', arguments)
         addFiltersToMemoryAndUi(filters);
-        _filter('onFilterChangeUpdateRowData');
+        _table('onFilterChangeUpdateRowData');
     }
 }
 function setComboboxFilter(filter) {

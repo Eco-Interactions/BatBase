@@ -13,14 +13,14 @@
  *         GET
  *             FILTER STATUS TEXT
  */
-import { accessTableState as tState, resetDataTable, _ui, _u } from '../db-main.js';
-import * as fDate from './date-filter.js';
-import * as fLoc from './loc-filters.js';
-import * as fSrc from './src-filters.js';
-import * as fState from './filter-state.js';
-import * as fTree from './tree-filter.js';
-import * as fTxn from './taxon/txn-filters.js';
-import * as fRows from './row-data-filter.js';
+import { _table, _ui, _u } from '../../db-main.js';
+import * as fDate from './row-data/date-filter.js';
+import * as fLoc from './entity/loc-filters.js';
+import * as fSrc from './entity/src-filters.js';
+import * as fState from './etc/filter-state.js';
+import * as fTree from './row-data/tree-filter.js';
+import * as fTxn from './entity/taxon/txn-filters.js';
+import * as fRows from './row-data/row-data-filter.js';
 
 /* ====================== STATIC FILTERS ==================================== */
 /* ------------------ TREE-TEXT FILTER -------------------------------------- */
@@ -60,20 +60,20 @@ export function applyTxnFilter() {
     return fTxn.applyTxnFilter(...arguments);
 }
 /* ====================== FILTER ROW DATA =================================== */
-export function getRowDataForCurrentFilters(rowData) {
+export function getRowDataForCurrentFilters(rowData) {                          //console.log('getRowDataForCurrentFilters. rowData = %O', rowData);
     const filters = fState.getRowDataFilters();
     if (!Object.keys(filters).length) { return rowData; }                       //console.log('getRowDataForCurrentFilters = %O', filters);
     return fRows.getFilteredRowData(filters, rowData);
 }
 /** If filter cleared, filters all table rows, else applies on top of current filters. */
 export function onFilterChangeUpdateRowData() {                                 //console.log('onFilterChangeUpdateRowData')
-    if (!Object.keys(fState.getRowDataFilters()).length) { return resetDataTable(); }
-    const rowData = getRowDataForCurrentFilters(tState().get('rowData'));
+    if (!Object.keys(fState.getRowDataFilters()).length) { return _table('resetDataTable'); }
+    const rowData = getRowDataForCurrentFilters(_table('tableState').get('rowData'));
     _ui('enableClearFiltersButton');
     setCurrentRowData(rowData);
 }
 function setCurrentRowData(rowData) {
-    const tblState = tState().get(['api', 'curFocus']);
+    const tblState = _table('tableState').get(['api', 'curFocus']);
     tblState.api.setRowData(rowData);
     _ui('updateFilterStatusMsg');
     _ui('setTreeToggleData', [false]);
@@ -85,6 +85,9 @@ export function setFilterState() {
 }
 export function resetFilterState() {
     fState.resetFilterState();
+}
+export function getFilterStateForSentryErrorReport() {
+    return fState.getFilterStateForSentryErrorReport();
 }
 /* --------------------------- GET ----------------------------------------- */
 export function getFilterStateKey() {

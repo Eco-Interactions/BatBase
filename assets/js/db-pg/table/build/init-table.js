@@ -1,25 +1,26 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  */
-import { _forms, _ui, _u, showLocOnMap, accessTableState as tState } from '../db-main.js';
-import * as agGrid from '../../../libs/grid/ag-grid.js';
-import unqVals from './ag-grid-unique-filter.js';
+import { tableState } from '../table-main.js';
+import { _forms, _map, _ui, _u } from '../../db-main.js';
+import * as agGrid from '../../../../libs/grid/ag-grid.js';
+import unqVals from '../filter/aggrid/ag-grid-unique-filter.js';
 let tblState;
 
 /**
  * Builds the table options object and passes everyting into agGrid, which
  * creates and shows the table.
  */
-export default function init(view, rowData, state) {                /*Perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
+export function initTable(view, rowData, state) {                /*Perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
-    return initTable(view, rowData)
+    return init(view, rowData)
         .then(() => onTableInitComplete(rowData));
 }
 function destroyPreviousTable(tblApi) {
     if (tblApi) { tblApi.destroy(); }
 }
-function initTable(view, rowData) {
+function init(view, rowData) {
     return getBaseTableConfg(view).then(tblOpts => {
         tblOpts.rowData = rowData;
         new agGrid.Grid($('#search-tbl')[0], tblOpts);
@@ -191,7 +192,7 @@ function addShowIcon (entity, id) {
     return `<a href="${getShowLink(entity, id)}">${icon}</a>`;
 }
 function getShowIconHtml (entity) {
-    const path = require('../../../images/icons/search.svg').default;
+    const path = require('../../../../images/icons/search.svg').default;
     const opac = tblState.flags.allDataAvailable ? 1 : 0;
     return`<img src=${path} class="tree-show" title="Show ${entity} Details"
         alt="Show ${entity} Details" style="opacity:${opac}">`;
@@ -275,7 +276,7 @@ function uneditableEntityRow(params) {                                          
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity) {
-    const path = require('../../../images/icons/eif.pencil.svg').default;
+    const path = require('../../../../images/icons/eif.pencil.svg').default;
     var editPencil = `<img src=${path} id="edit${entity}${id}"
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
@@ -292,11 +293,14 @@ function addMapIcon(params) {                                                   
     const id = params.data.id;
     $('#search-tbl').off('click', '#map'+id);
     $('#search-tbl').on('click', '#map'+id,
-        showLocOnMap.bind(null, params.data.onMap, getZoomLvl(params.data)));
+        showLocOnPageMap.bind(null, params.data.onMap, params.data));
     return getMapIcon(id);
 }
+function showLocOnPageMap(id, loc) {
+    _map('showLocOnMap', [id, getZoomLvl(loc)]);
+}
 function getMapIcon(id) {
-    const path = require('../../../images/icons/marker-icon.png').default;
+    const path = require('../../../../images/icons/marker-icon.png').default;
     return `<img src='${path}' id='map${id}' alt='Map Icon' class='map-ico'
         title='Show on Map' style='${getMapIconStyles()}'>`;
 }
@@ -375,12 +379,12 @@ function getNodeChildDetails(rcrd) {                                            
 /* -------------------------------------------------------------------------- */
 function updateTableState(tblOpts, rowData) {
     tblState.api = tblOpts.api;
-    tState().set(
+    tableState().set(
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
 }
 function onTableInitComplete(rowData) {
     _ui('hidePopupMsg');
-    _ui('enableTableButtons', [tblState.flags.allDataAvailable]);
+    _ui('enableTableButtonsIfDataLoaded', [tblState.flags.allDataAvailable]);
     hideUnusedColFilterMenus();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
     _ui('updateFilterStatusMsg');

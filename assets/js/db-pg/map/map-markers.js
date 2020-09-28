@@ -1,7 +1,7 @@
 /*
  *
  */
-import { _forms, showLocInDataTable, _u} from '../db-main.js';
+import { _forms, _table, _u} from '../db-main.js';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -618,9 +618,12 @@ function finishLocTop3ReportString(str, ttl, tabs) {
 /** --- Button to show interactions in the data-table --- */
 function getLoadInTableButton(loc) {
     const bttn = buildLoadInTableBttn();
-    $(bttn).click(showLocInDataTable.bind(null, loc));
+    $(bttn).click(loadLocInTable.bind(null, loc));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
+}
+function loadLocInTable(loc) {
+    _table('showLocInDataTable', [loc]);
 }
 function buildLoadInTableBttn() {
     const attr = {type: 'button', class:'ag-fresh', value: 'Show Interactions In Data-Table'}

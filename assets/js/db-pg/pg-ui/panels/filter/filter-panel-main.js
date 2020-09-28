@@ -9,11 +9,15 @@
  *     SHOW/HIDE PANEL
  */
 import * as pM from '../panels-main.js';
-import { buildTable, _filter, _ui, _u, accessTableState as tState } from '../../../db-main.js';
+import { _filter, _table, _ui, _u } from '../../../db-main.js';
 import * as fSets from './filter-sets.js';
 
 let timeout;
 
+export function resetFilterPanelOnFocusChange(focus) {
+    updateFilterPanelHeader(focus);
+    $('#focus-filters').empty();
+}
 /* ========================= FILTER SETS ==================================== */
 export function isFilterSetActive() {
     return fSets.isFilterSetActive();
@@ -24,8 +28,8 @@ export function newFilterSet(val) {
 export function selFilterSet(val) {
     fSets.selFilterSet(val);
 }
-export function reloadTableThenApplyFilters(filters, id) {
-    fSets.reloadTableThenApplyFilters(filters, id);
+export function onTableReloadCompleteApplyFilters(filters, id) {
+    fSets.onTableReloadCompleteApplyFilters(filters, id);
 }
 /* ================================ Init ==================================== */
 export function initFilterPanel() {
@@ -36,8 +40,11 @@ export function initFilterPanel() {
 }
 export function addFilterPanelEvents() {
     $('#filter').click(toggleFilterPanel);
-    $('button[name="reset-tbl"]').click(buildTable.bind(null, false, false));
+    $('button[name="reset-tbl"]').click(handleTableRebuild);
     window.addEventListener('resize', resizeFilterPanelTab);
+}
+function handleTableRebuild() {
+    _table('buildTable', [false, false]);
 }
 /* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
 function resizeFilterPanelTab() {
@@ -80,7 +87,7 @@ function getSplitPseudoBorderStyle() {
     const panelT = $('#filter-pnl').position().top;
     const tabL = getLeftSplitPos();
     const tabW = $('#filter-opts').innerWidth();
-    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*dbug-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);/*dbug-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-fltr-bttm-border-vert:before {
         position: absolute;
         content: '';
@@ -163,7 +170,7 @@ function resetFilterStatus() {
 function clearMultiComboboxes() {
     $('div.selectize-control.multi input').each(clearMultiCombo);
 }
-function clearMultiCombo(i, el) {  
+function clearMultiCombo(i, el) {
     const selId = el.id.split('-selectized')[0]
     $('#'+selId)[0].selectize.clear('silent');
 }
@@ -182,7 +189,7 @@ export function updateTaxonFilterViewMsg(view) {
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.");
-    const tblState = tState().get(['api', 'intSet', 'flags']);
+    const tblState = _table('tableState').get(['api', 'intSet', 'flags']);
     if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
     setFilterStatus(_filter('getActiveFilterVals'), tblState.intSet);
     enableClearFiltersButton();

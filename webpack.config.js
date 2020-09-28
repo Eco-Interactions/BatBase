@@ -14,7 +14,7 @@ Encore
 /* -------- PROD ------- */
     /* Sends source maps to Sentry for bug/issue tracking. */
     // .addPlugin(new SentryWebpackPlugin({
-    //     include: '.', test: [/\.js$/], release: '20200918_BB',
+    //     include: '.', test: [/\.js$/], release: '20200926_BB',
     //     debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',
     //         'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
     // }))
@@ -45,15 +45,15 @@ Encore
     //     loaderRule.test = /\.(png|svg|jpe?g|gif)$/;
     //     loaderRule.options = { name: 'images/[name].[hash:8].[ext]' };
     // })
-    .addLoader({ 
-        test: /\.(pdf)$/, 
-        use: [ { 
-            loader: 'file-loader', 
-            options: { 
-                name: '[name].[ext]', 
-                outputPath: './assets/files/' 
-            } 
-        }] 
+    .addLoader({
+        test: /\.(pdf)$/,
+        use: [ {
+            loader: 'file-loader',
+            options: {
+                name: '[name].[ext]',
+                outputPath: './assets/files/'
+            }
+        }]
     })
     /** ------- Files to process ----------------- */
     .copyFiles([{

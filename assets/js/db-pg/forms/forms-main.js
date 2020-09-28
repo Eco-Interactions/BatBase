@@ -10,7 +10,7 @@
  *         VALIDATION & SUBMIT
  *     BUNDLE HELPERS
  */
-import { _alert, _map, executeMethod } from '../db-main.js';
+import { _alert, _map, _ui, executeMethod } from '../db-main.js';
 import * as confg from './confg/confg-main.js';
 import * as form from './entity-form/entity-form-main.js';
 import * as state from './etc/form-state.js';
@@ -47,7 +47,9 @@ export function create(entity, name) {
     return form.createEntity(entity, name);
 }
 export function initNewDataForm() {
-    return create('interaction');
+    _ui('showPopupMsg');
+    return create('interaction')
+        .then(() => _ui('hidePopupMsg'));
 }
 export function edit(id, entity) {
     state.initFormState('edit', entity, id)

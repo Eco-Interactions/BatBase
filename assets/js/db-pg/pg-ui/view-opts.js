@@ -7,7 +7,7 @@
  *     initSrcViewOpts
  *     initTxnViewOpts
  */
-import { accessTableState as tState, _u, onSrcViewChange, onLocViewChange, onTxnViewChange } from '../db-main.js';
+import { _table, _u } from '../db-main.js';
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
  * Builds location view html and initializes table load. Either builds the table
@@ -23,7 +23,7 @@ function loadLocationViewOpts() {
     if ($('#sel-view').data('focus') === 'locs') { return; }
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
-    _u('replaceSelOpts', ['#sel-view', opts, onLocViewChange]);
+    _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onLocViewChange')]);
     $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
@@ -43,12 +43,12 @@ function loadSourceViewOpts() {
     const opts = [{ value: "auths", text: "Authors" },
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
-    _u('replaceSelOpts', ['#sel-view', opts, onSrcViewChange]);
+    _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onSrcViewChange')]);
     $('#sel-view').data('focus', 'srcs');
 }
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView(view) {
-    tState().set({'curView': view});
+    _table('tableState').set({'curView': view});
     if (!_u('setSelVal', ['View'])) { _u('setSelVal', ['View', view, 'silent']); }
 }
 
@@ -66,15 +66,15 @@ function loadTxnViewOpts(realms, reset) {
 }
 function buildAndLoadTxnOpts(realms) {
     const opts = getViewOpts(realms);
-    _u('replaceSelOpts', ['#sel-view', opts, onTxnViewChange]);
+    _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onTxnViewChange')]);
     $('#sel-view').data('focus', 'taxa');
 }
 function getViewOpts(realms) {
-    const taxa = tState().get('rcrdsById');
+    const taxa = _table('tableState').get('rcrdsById');
     const optsAry = [];
     Object.keys(realms).forEach(buildRealmOpt);
     return optsAry.sort((a, b) => _u('alphaOptionObjs', [a, b]));
-    
+
     function buildRealmOpt(id) {
         const rootTxn = taxa[realms[id].taxon];
         const val = rootTxn ? rootTxn.id : id+'temp';                           //console.log('realm = %O rootTxn = %O', realms[id], rootTxn);

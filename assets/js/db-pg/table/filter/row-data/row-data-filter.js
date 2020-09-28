@@ -14,10 +14,10 @@
  *  		PUBLICATION TYPE
  *  		DATE/TIME
  */
-import { _u } from '../db-main.js';
+import { _u } from '../../../db-main.js';
 let filters, rows;
 /**
- * These filters directly modify the rowData after the table is built based on 
+ * These filters directly modify the rowData after the table is built based on
  * the tree root row, all tree rows, or on interactions.
  */
 const filterFuncs = {
@@ -51,7 +51,7 @@ function getFuncsForActiveFiltersInGroup(group, filterObj = filters) {
 	const active = {};
 	Object.keys(funcObj).forEach(ifFilterTypeActive);
 	return Object.keys(active).length ? active : false;
-	
+
 	function ifFilterTypeActive(type) {  										//console.log('type = [%s] funcs = %O filters = %O', type, funcObj, filterObj);
 		if (type !== 'combo') { return addFilterFuncIfActive(type, filterObj[type]); }
 		const subGroup = getFuncsForActiveFiltersInGroup(funcObj.combo, filters.combo);
@@ -70,21 +70,21 @@ function handleTreeFilters() {
 function filterOnRootLevel() {
 	const funcs = getFuncsForActiveFiltersInGroup('root');  					//console.log('root funcs = %O', funcs)
 	if (!funcs) { return; }
-	rows = filterTreeRows(funcs);  																	
+	rows = filterTreeRows(funcs);
 }
 function filterOnAllTreeLevels() {
 	const funcs = getFuncsForActiveFiltersInGroup('tree');						//console.log('tree funcs = %O', funcs)
 	if (!funcs) { return; }
-	rows = filterTreeRows(funcs);  								
+	rows = filterTreeRows(funcs);
 }
 function filterTreeRows(funcs) {
 	return 	rows.map(row => getRowsThatPassAllTreeFilters(row, funcs))
 		.filter(r=>r);
 }
-function getRowsThatPassAllTreeFilters(row, funcs) {  
+function getRowsThatPassAllTreeFilters(row, funcs) {
 	return getRowIfAllFiltersPass(row);
 	/** @return row */
-	function getRowIfAllFiltersPass(row) {   
+	function getRowIfAllFiltersPass(row) {
 		if (!row.name) { return row; }
 		let rowPasses = ifRowPassesFilters(row, funcs);             /*dbug-log*///console.log('getRowIfAllFiltersPass. rowPasses %s, row = %O', rowPasses, row)
 		if (rowPasses) { return row; }
@@ -128,7 +128,7 @@ function handlePersistedDateFilterObj() {
 function ifRowPassesFilters(row, funcs) {						    /*dbug-log*///console.log('ifRowPassesFilters row = %O, filters = %O', row, funcs);
  	return Object.keys(filters).every(ifRowPassesFilter);
 
-	function ifRowPassesFilter(type) {   
+	function ifRowPassesFilter(type) {
 		return funcs[type] ? applyFilter(type) : true;
 	}
 	function applyFilter(type) {

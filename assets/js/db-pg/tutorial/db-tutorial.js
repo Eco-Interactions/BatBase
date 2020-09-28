@@ -20,9 +20,7 @@
  *     TUTORIAL STEP CONFIG
  *         HELP MODAL STEPS
  */
-import * as _u from '../util/util.js';
-import { resetDataTable, _db } from '../db-main.js';
-import { showTips } from '../pg-ui/ui-main.js';
+import { _db, _table, _ui } from '../db-main.js';
 
 let intro, focus, isMapDataAvailable = false;
 
@@ -171,14 +169,14 @@ function updateUiIfAllTableDataAvailable() {
     _db('getData', ['interaction', true]).then(interactions => {
         if (!interactions) {return;}
         $('#search-focus')[0].selectize.enable();
-        resetDataTable(focus);
+        _table('resetDataTable', [focus]);
     });
 }
 function resetUi() {                                                            //console.log('resetUiAndReloadTable')
     focus = focus || "taxa";
     intro = null;
     $('#db-view').css("height", "888px");
-    $('#show-tips').click(showTips);
+    $('#show-tips').click(_ui.bind(null, 'showTips'));
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
     $('#sel-view')[0].selectize.enable();
 }

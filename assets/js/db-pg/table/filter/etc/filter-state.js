@@ -1,6 +1,15 @@
 /**
  * Handles tracking and reporting of the filter state.
  *
+ * Exports:
+ *     getActiveFilterVals
+ *     getFilterState
+ *     getFilterStateKey
+ *     getRowDataFilters
+ *     isFilterActive
+ *     resetFilterState
+ *     setFilterState
+ *
  * TOC:
  *      SET
  *      GET
@@ -10,7 +19,7 @@
  *          PANEL FILTERS
  *          TABLE FILTERS
  */
-import { _u, _ui, accessTableState as tState } from '../db-main.js';
+import { _table, _u, _ui } from '../../../db-main.js';
 
 let fS;
 
@@ -75,6 +84,14 @@ export function getRowDataFilters(f) {
     const filters = f || _u('snapshot', [fS.filters.direct]);
     if (filters.date && !filters.date.active) { delete filters.date; }
     return filters;
+}
+export function getFilterStateForSentryErrorReport() {
+    const st = getFilterState();
+    Object.keys(st.table).forEach(col => {
+        if (!st.table[col]) { delete st.table[col]; }});
+    if (!Object.keys(st.table).length) { delete st.table; }
+    if (!Object.keys(st.panel).length) { delete st.panel; }
+    return st;
 }
 /* =================== FILTER STATUS TEXT =================================== */
 /**
@@ -144,7 +161,7 @@ function getTblFilterNames() {
 }
 /** Returns an obj with the ag-grid filter models. */
 function getActiveTableFilterObj() {
-    const tblApi = tState().get('api');
+    const tblApi = _table('tableState').get('api');
     if (!tblApi) { return {}; }
     const models = getColFilterModels(tblApi);
     return getActiveTblFilters(models);

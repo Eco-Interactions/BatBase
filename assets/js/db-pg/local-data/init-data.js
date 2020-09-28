@@ -16,7 +16,7 @@
  *         HELPERS
  */
 import * as db from './local-data-main.js';
-import { initSearchStateAndTable, onDataDownloadComplete } from '../db-main.js';
+import { initSearchStateAndTable, _ui } from '../db-main.js';
 
 /* ======================= DOWNLOAD DATA ==================================== */
 /**
@@ -57,7 +57,7 @@ function downloadRemainingDataAndFullyEnableDb() {
     return getAndSetData('geoJson')
         .then(() => getAndSetData('lists'))
         .then(() => db.setUpdatedDataInLocalDb())
-        .then(() => onDataDownloadComplete());
+        .then(() => _ui('onDataDownloadCompleteEnableUiFeatures'));
 }
 /* -------------------------- HELPERS --------------------------------------- */
 function getAndSetData(url) {

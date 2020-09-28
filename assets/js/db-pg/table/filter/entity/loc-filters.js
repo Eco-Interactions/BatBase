@@ -10,8 +10,10 @@
  *      UI
  *      FILTER
  */
-import * as fM from './filters-main.js';
-import { _ui, _u, rebuildLocTable, accessTableState as tState } from '../db-main.js';
+import * as fM from '../filter-main.js';
+import { _table, _ui, _u } from '../../../db-main.js';
+
+const tState = _table.bind(null, 'tableState');
  /* ========================= UI ============================================ */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter.
@@ -49,6 +51,7 @@ function buildLocSelectOpts(tblState, data) {
     const opts = { Region: [], Country: [] };
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     modifyOpts();
+    updateFilterMemory();
     return opts;
     /**
      * Recurses through the tree and builds a option object for each unique
@@ -120,8 +123,15 @@ function buildLocSelectOpts(tblState, data) {
     }
     function addAllOption() {
         Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
-            opts[type].unshift({value: 'all', text: '- All -'})
+            opts[type].unshift({value: 'all', text: '- All -'});
         });
+    }
+    function updateFilterMemory() {
+        const selTypes = Object.keys(tblState.selectedOpts);
+        fM.setFilterState('combo', false, 'rebuild')
+        if (!selTypes.length) { return; }
+        const filterType = selTypes.length === 1 ? selTypes[0] : 'Country';
+        updateLocComboFilter(filterType, tblState.selectedOpts[filterType]);
     }
 } /* End buildLocSelectOpts */
 function alphaOptionObjs(a, b) {
@@ -160,14 +170,13 @@ export function applyLocFilter(val) {
     const root = getNewLocRoot();
     updateLocFilterMemory(root, locType);
     _ui('setTreeToggleData', [false]);
-    return rebuildLocTable(root);
+    return _table('rebuildLocTable', [root]);
 
     function getNewLocRoot() {
         return isNaN(parseInt(val)) ?
             getRegionIdAndUpdateType(locType) : [parseInt(val)];
     }
     function getRegionIdAndUpdateType (comboType) {
-        fM.setFilterState('combo', false, 'rebuild');
         locType = 'Region';
         return getRegionId(comboType);
     }
@@ -177,12 +186,16 @@ export function applyLocFilter(val) {
             [selectedOpts['Region']];
     }
 }
-function updateLocFilterMemory(loc, locType) {
+function updateLocFilterMemory(loc, locType) {                                  console.log('updateLocFilterMemory. [%s] loc = %O', locType, loc);
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
+    updateLocComboFilter(locType, selVal);
+}
+function updateLocComboFilter(locType, selVal) {                                //console.log('updateLocComboFilter type [%s] val [%s]', locType, selVal);
     const filter = {};
     filter[locType] = { text: locType, value: selVal };
+    fM.setFilterState('combo', false, 'rebuild');
     fM.setFilterState('combo', filter, 'rebuild');
 }
 function resetLocComboMemory() {

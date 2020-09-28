@@ -1,40 +1,49 @@
 /**
  * Handles UI related to the database search page.
  *
- * Exports:                         Imported by:
- *     addDomEventListeners             _pg
- *     collapseTree                     csv-export
- *     expandTreeByOne                  csv-export
- *     fadeTable                        db-page
- *     init                             _pg
- *     initLocViewOpts                  _pg
- *     initSrcViewOpts                  _pg
- *     initTxnViewOpts                _pg
- *     loadLocFilterPanelElems          db-page, db-filters
- *     loadSrcFilterPanelElems          db-page, db-filters
- *     loadTxnFilterPanelElems          db-page, db-filters
- *     setTreeToggleData              _pg, init-table
- *     selectInitialSearchFocus         db-page
- *     updateUiForDatabaseInit             util
- *     showTips                         intro
+ * Exports:
+ *     addDomEventListeners
+ *     collapseTree
+ *     expandTreeByOne
+ *     fadeTable
+ *     init
+ *     initLocViewOpts
+ *     initSrcViewOpts
+ *     initTxnViewOpts
+ *     loadLocFilterPanelElems
+ *     loadSrcFilterPanelElems
+ *     loadTxnFilterPanelElems
+ *     setTreeToggleData
+ *     selectInitialSearchFocus
+ *     updateUiForDatabaseInit
+ *     showTips
  *     updateFilterStatusMsg
- *     updateUiForTableView             db-page
- *     updateUiForMapView               db-page
+ *     updateUiForTableView
+ *     updateUiForMapView
+ *
+ * TOC
+ *     FACADE
+ *     PANELS
+ *         FILTERS
+ *         DATA LISTS
+ *     TABLE ROW TOGGLE
+ *     UTILITY
+ *
  */
-import { accessTableState as tState, _u } from '../db-main.js';
+import { _table, _u } from '../db-main.js';
 import * as pM from './panels/panels-main.js';
 import * as bttns from './feature-buttons.js';
 import * as rowToggle from './table-row-toggle.js';
 import * as views from './view-opts.js';
-import * as mapUi from './ui-map-state.js';
 
-/* ************************** FACADE **************************************** */
-/* ======================== EXTERNAL USE ==================================== */
 export function showTips() {
     bttns.showTipsPopup();
 }
 /* =========================== PANELS ======================================= */
 /* -------------------- FILTERS --------------------------------------------- */
+export function resetFilterPanelOnFocusChange() {
+    pM.resetFilterPanelOnFocusChange(...arguments);
+}
 export function updateFilterPanelHeader(focus) {
     pM.updateFilterPanelHeader(focus);
 }
@@ -47,8 +56,11 @@ export function enableClearFiltersButton() {
 export function updateFilterStatusMsg() {
     pM.updateFilterStatusMsg();
 }
-export function reloadTableThenApplyFilters(filters) {
-    pM.reloadTableThenApplyFilters(filters);
+export function updateTaxonFilterViewMsg() {
+    pM.updateTaxonFilterViewMsg(...arguments);
+}
+export function onTableReloadCompleteApplyFilters(filters) {
+    pM.onTableReloadCompleteApplyFilters(filters);
 }
 /* -------------------- DATA LISTS ------------------------------------------- */
 export function isSavedIntListLoaded() {
@@ -60,11 +72,7 @@ export function isFilterSetActive() {
 export function enableListResetBttn() {
     return pM.enableListResetBttn();
 }
-/* ==================== DATABASE OPTIONS BAR ================================ */
-/* -------------------- FILTERS --------------------------------------------- */
-
-/* ================= TABLE STATUS BAR ======================================= */
-/* -------------------- ROW TOGGLE ------------------------------------------ */
+/* -------------------- TABLE ROW TOGGLE ------------------------------------ */
 export function setTreeToggleData(state) {
     rowToggle.setTreeToggleData(state);
 }
@@ -81,7 +89,7 @@ function toggleAllRows() {
     toggleTreeRows(!$("#xpand-all").data('xpanded'));
 }
 function getTblApi() {
-    return tState().get('api');
+    return _table('tableState').get('api');
 }
 function setRowToggleEvents() {
     $('button[name="xpand-all"]').click(toggleAllRows);
@@ -96,6 +104,10 @@ export function init() {
     setRowToggleEvents();
     pM.addPanelEventsAndStyles(userRole);
     bttns.initFeatureButtons(userRole);
+    _u('initComboboxes', [{'Focus': buildTable, 'View': Function.prototype}]);
+}
+function buildTable() {
+    _table('buildTable')
 }
 export function updateUiForDatabaseInit() {
     bttns.updateUiForDatabaseInit();
@@ -130,19 +142,46 @@ export function initSrcViewOpts(view) {
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =================== */
 export function updateUiForMapView(noPopup) {
     bttns.disableTableButtons();
-    mapUi.updateMapUiForMapView();
+    updateMapUiForMapView();
     pM.closeOpenPanels();
     if (noPopup) { return; }
     showPopupMsg();
 }
 export function updateUiForTableView() {
     bttns.enableTableButtons();
-    mapUi.updateMapUiForTableView();
+    updateMapUiForTableView();
+}
+function updateMapUiForMapView() {
+    updateBttnToReturnRcrdsToTable();
+    $('#tool-bar').fadeTo('fast', 1);
+    $('#search-tbl').hide();
+    $('#map').show();
+}
+function updateMapUiForTableView() {
+    $('#search-tbl').fadeTo('fast', 1);
+    $('#map, #filter-in-tbl-msg').hide();
+    updateBttnToShowRcrdsOnMap();
+}
+function updateBttnToReturnRcrdsToTable() {
+    $('#shw-map').text('Return to Table');
+    $('#shw-map').off('click').on('click', returnRcrdsToTable)
+        .prop('title', 'Close map and reopen records in table.');
+}
+function updateBttnToShowRcrdsOnMap() {
+    $('#shw-map').text('Map Interactions');
+    $('#shw-map').off('click').on('click', showRcrdsOnMap)
+        .prop('title', 'Show interactions on a map.');
+}
+function showRcrdsOnMap() {
+    _map('showTableRecordsOnMap');
+}
+function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
+    updateUiForTableView();
+    if (_u('getSelVal', ['View']) === 'map') { _u('setSelVal', ['View', 'tree']); }
 }
 /* ==================== UTILITY ============================================= */
-export function enableTableButtons(allDataAvailable) {
-    if (!allDataAvailable) { return bttns.enableViewOpts(); }
-    bttns.enableTableButtons();
+export function enableTableButtonsIfDataLoaded() {
+    bttns.enableTableButtonsIfDataLoaded(...arguments);
 }
 export function fadeTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
