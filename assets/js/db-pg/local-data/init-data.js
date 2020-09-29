@@ -99,7 +99,7 @@ function parseData(data) {
 /**
  * levelNames - an object with each level name (k) and it's id and ordinal (v).
  * realmNames - an object with each realm name (k) and it's id, role, and levels (v).
- * [realm][level]Names - object with all taxa in realm at the level: name (k) id (v)
+ * [realm][group][level]Names - object with all taxa in realm group at the level: name (k) id (v)
  * *realm - resaved with 'uiLevelsShown' filled with the level display names.
  */
 /** Stores an object of taxon names and ids for each level in each realm. */
@@ -128,31 +128,35 @@ function storeLevelData(levelData) {
 }
 /* --------- Taxa by Realm & Level ------------- */
 function storeTaxaByLevelAndRealm(taxa, realms, roots) {
-    for (let rootId in roots) {
-        const root = roots[rootId];
-        const realm = realms[root.realm];
-        const taxon = taxa[root.taxon];
-        realm.taxon = root.taxon;
-        addRealmDataToTaxon(taxon, realm);
-        separateAndStoreRealmTaxa(taxon, realm);
+    for (let realmId in realms) {
+        const realm = realms[realmId];
+        sortRealmTaxaByGroup(realm, realm.taxa);
     }
     db.setDataInMemory('realm', realms);
     db.setDataInMemory('taxon', taxa);
 
-    function separateAndStoreRealmTaxa(taxon, realm) {
-        const data = {};
-        separateRealmTaxaByLevel(taxon.children, data, realm, taxa);
-        storeTaxaByLvl(realm.displayName, data);
+    function sortRealmTaxaByGroup(realm, gTaxa) {
+        for (let group in gTaxa) {
+            const gTaxon = taxa[gTaxa[group]];
+            separateAndStoreRealmTaxa(gTaxon, group, realm);
+        }
+    }
+
+    function separateAndStoreRealmTaxa(taxon, group, realm) {                   //console.log('[%s] taxon = %O realm = %O', group, taxon, realm)
+        addRealmDataToTaxon(taxon, group, realm);
+        const data = separateRealmTaxaByLevel(taxon.children, group, realm, taxa);
+        storeTaxaByGroupAndLvl(data, group, realm.displayName);
     }
 }
-function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {
-    taxa.forEach(separateTaxonAndChildren);
+function separateRealmTaxaByLevel(cTaxa, group, realm, rcrds) {
+    const data = {};
+    cTaxa.forEach(separateTaxonAndChildren);
     return data;
 
     function separateTaxonAndChildren(id) {
         const taxon = rcrds[id];
         addToRealmLevel(taxon, taxon.level.displayName);
-        addRealmDataToTaxon(taxon, realm);
+        addRealmDataToTaxon(taxon, group, realm);
         taxon.children.forEach(separateTaxonAndChildren);
     }
     function addToRealmLevel(taxon, level) {
@@ -160,19 +164,21 @@ function separateRealmTaxaByLevel(taxa, data, realm, rcrds) {
         data[level][taxon.name] = taxon.id;
     }
 }
-function addRealmDataToTaxon(taxon, realm) {
+function addRealmDataToTaxon(taxon, group, realm) {
     taxon.realm = {
-        id: realm.id, displayName: realm.displayName, pluralName: realm.pluralName
+        id: realm.id,
+        displayName: realm.displayName,
+        pluralName: realm.pluralName,
+        group: group
     };
 }
-function storeTaxaByLvl(realm, taxonObj) {
-    for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
-        db.setDataInMemory(realm+level+'Names', taxonObj[level]);
-        //TODO: Check for previously sorted taxa for realms with multiple roots
+function storeTaxaByGroupAndLvl(taxonObj, group, realm) {
+    for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+group+level+'Names', taxonObj[level]);
+        db.setDataInMemory(realm+group+level+'Names', taxonObj[level]);
     }
 }
 /* ---------- Modify Realm Data -------------- */
-function modifyRealmData(realms, levels) {                                              //console.log('realms = %O', realms);
+function modifyRealmData(realms, levels) {                                      //console.log('realms = %O', realms);
     modifyRealms(Object.keys(realms));
     db.setDataInMemory('realm', realms);
 
