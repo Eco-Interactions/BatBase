@@ -257,6 +257,25 @@ class Realm
     }
 
     /**
+     * Get Taxa for serialization.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("taxa")
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function serializeTaxa()
+    {
+        $taxa = [];
+
+        foreach ($this->taxa as $realmRoot) {
+            $taxon = $realmRoot->getTaxon();
+            $taxa = array_merge($taxa, [$taxon->getName() => $taxon->getId()]);
+        }
+
+        return $taxa;
+    }
+
+    /**
      * Set created datetime.
      *
      * @param \DateTime $createdAt
