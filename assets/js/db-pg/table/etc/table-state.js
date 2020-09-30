@@ -26,10 +26,15 @@ import { _db } from '../../db-main.js';
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
- * {str} realmName      Stores Taxon view Realm name
  * {obj} selectedOpts   K: Combobox key V: value selected
- * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
  * {str} userRole       Stores the role of the user.
+ *
+ * In Taxon views:
+ * {ary} allRealmLvls   Array of all levels present in the current realm tree.
+ * {obj} realms         Realm records keyed by id.
+ * {obj} allLevels
+ * {str} realmName      Stores Taxon view Realm name
+ * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
  */
 let tState = { flags: {}};
 /* -------------------------- ACCESS ---------------------------------------- */
@@ -48,7 +53,7 @@ function getTableState(k, keys) {                                               
 }
 function getStateObj(keys) {
     const obj = {};
-    keys.forEach(k => obj[k] = tState[k] || null);                             //console.log('stateObj = %O', obj)
+    keys.forEach(k => obj[k] = tState[k] || null);                              //console.log('stateObj = %O', obj)
     return obj;
 }
 /* ----------------------------- SET ---------------------------------------- */

@@ -131,17 +131,17 @@ function storeTaxaByLevelAndRealm(taxa, realms, roots) {
     for (let realmId in realms) {
         const realm = realms[realmId];
         sortRealmTaxaByGroup(realm, realm.taxa);
+        storeRealmGroupTaxa(realm, taxa);
     }
     db.setDataInMemory('realm', realms);
     db.setDataInMemory('taxon', taxa);
 
     function sortRealmTaxaByGroup(realm, gTaxa) {
-        for (let group in gTaxa) {
-            const gTaxon = taxa[gTaxa[group]];
-            separateAndStoreRealmTaxa(gTaxon, group, realm);
+        for (let gName in gTaxa) {
+            const gTaxon = taxa[gTaxa[gName].id];
+            separateAndStoreRealmTaxa(gTaxon, gTaxon.name, realm);
         }
     }
-
     function separateAndStoreRealmTaxa(taxon, group, realm) {                   //console.log('[%s] taxon = %O realm = %O', group, taxon, realm)
         addRealmDataToTaxon(taxon, group, realm);
         const data = separateRealmTaxaByLevel(taxon.children, group, realm, taxa);
@@ -176,6 +176,10 @@ function storeTaxaByGroupAndLvl(taxonObj, group, realm) {
     for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+group+level+'Names', taxonObj[level]);
         db.setDataInMemory(realm+group+level+'Names', taxonObj[level]);
     }
+}
+function storeRealmGroupTaxa(realm, taxonRcrds) {
+    const gIds = Object.values(realm.taxa).map(t => t.id);
+    db.setDataInMemory(realm.displayName+'GroupNames', getNameDataObj(gIds, taxonRcrds));
 }
 /* ---------- Modify Realm Data -------------- */
 function modifyRealmData(realms, levels) {                                      //console.log('realms = %O', realms);

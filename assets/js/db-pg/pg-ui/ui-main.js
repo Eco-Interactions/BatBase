@@ -30,7 +30,7 @@
  *     UTILITY
  *
  */
-import { _table, _u } from '../db-main.js';
+import { _map, _table, _u } from '../db-main.js';
 import * as pM from './panels/panels-main.js';
 import * as bttns from './feature-buttons.js';
 import * as rowToggle from './table-row-toggle.js';
