@@ -51,14 +51,11 @@ function setSrcView(view) {
     _table('tableState').set({'curView': view});
     if (!_u('setSelVal', ['View'])) { _u('setSelVal', ['View', view, 'silent']); }
 }
-
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTxnViewOpts(view, reset) {                             //console.log("initTxnViewOpts. realms = %O", realms);
-    _u('getData', ['realm']).then( realms => {                                       //console.log('--initTxnViewOpts. realms = %O', realms)
-        loadTxnViewOpts(realms, reset);
-        setTaxonView(view);
-    });
+export function initTxnViewOpts(view, reset) {
+    loadTxnViewOpts(_table('tableState').get('realms'), reset);
+    setTaxonView(view);
 }
 function loadTxnViewOpts(realms, reset) {
     if ($('#sel-view').data('focus') === 'taxa' && !reset) { return; }
@@ -76,12 +73,13 @@ function getViewOpts(realms) {
     return optsAry.sort((a, b) => _u('alphaOptionObjs', [a, b]));
 
     function buildRealmOpt(id) {
-        const rootTxn = taxa[realms[id].taxon];
-        const val = rootTxn ? rootTxn.id : id+'temp';                           //console.log('realm = %O rootTxn = %O', realms[id], rootTxn);
-        if (Number.isInteger(val) && !ifTxnHasInts(rootTxn.id)) { return; }
-        optsAry.push({ value: val, text: realms[id].pluralName });
+        if (!ifRealmHasInts(realms[id].taxa)) { return; }
+        optsAry.push({ value: id, text: realms[id].pluralName });
     }
-    function ifTxnHasInts(id) {
+    function ifRealmHasInts(rootTaxa) {
+        return Object.values(rootTaxa).find(t => ifTxnHasInts(t.id));
+    }
+    function ifTxnHasInts(id){
         const taxon = taxa[id];
         const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
         return hasInts || taxon.children.find(ifTxnHasInts);
@@ -90,7 +88,7 @@ function getViewOpts(realms) {
 /** Restores stored realm from previous session or sets the default 'Bats'. */
 function setTaxonView(view) {
     if (!_u('getSelVal', ['View'])) {
-        const realmVal = view ? view : '2';
+        const realmVal = view ? view : '1';
         _u('setSelVal', ['View', realmVal, 'silent']);
     }
 }

@@ -42,7 +42,6 @@ function initTxnNameSearchElem(tblState) {
 function loadTxnLevelComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
-    if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
     updateTxnLevelComboboxes(lvlOptsObj, levels, tblState);
 }
 /**
@@ -144,7 +143,7 @@ export function applyTxnFilter(val) {
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, tblState.rcrdsById)});
     addToFilterState();
-    return _table('rebuildTxnTable', [rcrd]);
+    return _table('rebuildTxnTable', [[rcrd]]);
 
     function addToFilterState() {
         const filter = {};

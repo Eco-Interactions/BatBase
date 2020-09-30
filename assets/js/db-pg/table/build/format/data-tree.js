@@ -188,20 +188,19 @@ function buildAuthTree(authSrcRcrds, data) {                                    
 } /* End buildAuthTree */
 /* ========================= TAXON TREE ============================================================================= */
 /**
- * Returns a heirarchical tree of taxon record data from the top, parent,
- * realm taxon through all children. The taxon levels present in the tree are
- * stored in tblState.
+ * Returns a heirarchical tree of taxon record data from the root taxa through
+ * all children. The taxon levels present are stored in tblState.
  */
-export function buildTxnTree(topTaxon, init) {                                  //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
-    tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags']);
-    const tree = buildTxnDataTree(topTaxon);
-    storeTaxonLevelData(topTaxon, init);
+export function buildTxnTree(taxa) {                                            //console.log("buildTaxonTree called for taxa = %O", taxa);
+    tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags', 'allLevels']);
+    const tree = buildTxnDataTree(taxa);
+    updateTaxaByLvl(taxa, tblState.allLevels);
     if (!tblState.flags.allDataAvailable) { return Promise.resolve(tree); }
     return fillTreeWithInteractions('taxa', tree);
 }
-function buildTxnDataTree(topTaxon) {
+function buildTxnDataTree(roots) {
     let tree = {};                                                              //console.log("tree = %O", tree);
-    tree[topTaxon.displayName] = buildTaxonBranch(topTaxon);
+    roots.forEach(taxon => { tree[taxon.displayName] = buildTaxonBranch(taxon); });
     tree = filterTreeToInteractionSet(tree, 'taxa');
     return tree;
 
@@ -217,32 +216,15 @@ function buildTxnDataTree(topTaxon) {
         if (taxa === null) { return []; }
         return getTreeRcrds(taxa, tblState.rcrdsById, 'taxon').map(buildTaxonBranch);
     }
-} /* End buildTaxonTree */
-function storeTaxonLevelData(topTaxon, init) {
-    _u('getData', [['levelNames', 'realm']]).then(data => {  console.log('data = %O', data)
-        if (init) { storeLevelData(topTaxon, data);
-        } else { updateTaxaByLvl(topTaxon, data.levelNames); }
-    });
 }
-/**
- * Stores in the global tblState obj:
- * > taxonByLvl - object with taxon records in the current tree organized by
- *   level and keyed under their display name.
- * > allRealmLvls - array of all levels present in the current realm tree.
- */
-function storeLevelData(topTaxon, data) {                                       //console.log('storeLevelData. topTaxon = %O, data = %O', topTaxon, data)
-    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, data.levelNames);
-    const allRealmLvls = data.realm[topTaxon.realm.id].uiLevelsShown;           //console.log('taxaByLvl = %O, allRealmLvls = %O', _u('snapshot', [taxaByLvl]), _u('snapshot', [allRealmLvls]));
-    tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
-}
-function updateTaxaByLvl(topTaxon, levels) {
-    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                 //console.log("taxaByLvl = %O", taxaByLvl)
+function updateTaxaByLvl(taxa, levels) {
+    const taxaByLvl = seperateTaxonTreeByLvl(taxa, levels);                     //console.log("taxaByLvl = %O", taxaByLvl)
     tState().set({'taxaByLvl': taxaByLvl});
 }
 /** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(topTaxon, levels) {                             //console.log('seperateTaxonTreeByLvl. taxon = %O, levels = %O', topTaxon, levels);
+function seperateTaxonTreeByLvl(taxa, levels) {                                 //console.log('seperateTaxonTreeByLvl. taxon = %O, levels = %O', topTaxon, levels);
     const separated = {};
-    separate(topTaxon);
+    taxa.forEach(t => t.children.forEach(separate));
     return sortObjByLevelRank(separated);
 
     function separate(taxon) {                                                  //console.log('taxon = %O', taxon)
@@ -261,7 +243,7 @@ function seperateTaxonTreeByLvl(topTaxon, levels) {                             
         });
         return obj;
     }
-} /* End seperateTaxonTreeByLvl */
+}
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
