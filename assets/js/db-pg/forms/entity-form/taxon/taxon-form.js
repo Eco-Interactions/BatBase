@@ -89,8 +89,9 @@ function fieldErr(level, tag) {
 export function getTaxonEditFields(id) {
     const taxa = _state('getEntityRcrds', ['taxon']);
     const realm = taxa[id].realm;
+    const group = taxa[id].realm;
     const role = realm.displayName === 'Bat' ? 'Subject' : 'Object';
-    return _state('initRealmState', [role, realm.id])
+    return _state('initRealmState', [role, realm.id, group])
         .then(realmState => {
             setScopeTaxonMemory(taxa, realmState);
             return buildTaxonEditFields(taxa[id]);
@@ -191,22 +192,30 @@ function buildEditParentHdr() {
 function getParentEditFields(prnt) {
     const realm = _u('lcfirst', [prnt.realm.displayName]);
     _state('addEntityFormState', [realm, 'sub', null, 'edit']);
-    return _elems('buildFormRows', ['subject', {}, 'sub', null])
+    return _elems('buildFormRows', ['object', {}, 'sub', null])
         .then(modifyAndReturnPrntRows);
 
-    function modifyAndReturnPrntRows(rows) {
-        const realmSelRow = getRealmLvlRow(prnt);
-        return [realmSelRow, rows];
+    function modifyAndReturnPrntRows(rows) {                                    //console.log('modifyAndReturnPrntRows = %O', rows);
+        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Realm row
+        const realmSelRow = getRealmLvlRow(prnt, rows);
+        return [realmSelRow, rows].filter(r=>r);
     }
 }
 /** ------- REALM DISPLAY NAME ------ */
-function getRealmLvlRow(taxon) {
-    const lbl = _u('buildElem', ['label', { text: realmData.rootLvl }]);
-    const span = buildRealmNameSpan(taxon.realm.displayName);
-    return buildTaxonEditFormRow(realmData.rootLvl, [lbl, span], 'sub');
+function getRealmLvlRow(taxon, rows) {
+    const groups = Object.keys(realmData.groups);
+    if (groups.length > 1) { return; }
+    $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
+    return buildTaxonParentRow(groups[0]);
 }
-function buildRealmNameSpan(realmName) {
-    const span = _u('buildElem', ['span', { text: realmName }]);
+function buildTaxonParentRow(displayName) {
+    const realmLvl = displayName.split(' ')[0];
+    const lbl = _u('buildElem', ['label', { text: realmLvl }]);
+    const realmParent = buildRealmNameSpan(displayName.split(' ')[1]);
+    return buildTaxonEditFormRow(realmLvl, [lbl, realmParent], 'sub');
+}
+function buildRealmNameSpan(name) {
+    const span = _u('buildElem', ['span', { text: name }]);
     $(span).css({ 'padding-top': '.55em' });
     return span;
 }
@@ -255,7 +264,9 @@ function finishParentSelectFormUi() {
     updateSubmitBttns();
 }
 function alignRealmLevelText() {
-    $('#'+realmData.rootLvl+'_row .field-row')[0].className += ' realm-row';
+    if ($('#Group_row').length) { return; } //Group combobox used rather than single-group span.
+    const rootLvl = Object.keys(realmData.groups)[0].split(' ')[0];
+    $('#'+rootLvl+'_row .field-row')[0].className += ' realm-row';
 }
 function clearAndDisableTopFormParentFields() {
     $('#txn-prnt span').text('');

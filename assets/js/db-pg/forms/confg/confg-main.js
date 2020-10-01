@@ -70,11 +70,13 @@ function getRoleConfg(role) {
     };
 }
 function ifObjectFormAddRealmSelect(role) {
-    return role === 'subject' || $('#Realm_row').length ? {} : {'Realm': 'select'};
+    const objFields = {'Realm': 'select', 'Group': 'select'};
+    return role === 'subject' || $('#Realm_row').length ? {'Group': 'select'} : objFields;
 }
 function getTaxonSelectFields(addField) {
     const lvls = _state('getTaxonProp', ['realmLvls']);
-    return Object.keys(addField).length  ? ['Realm', ...lvls] : lvls;
+    const addedFields = Object.keys(addField);
+    return !addedFields.length ? lvls : [...addedFields, ...lvls];
 }
 /* --------------- CORE-ENTITY CONFG ----------------- */
 /**

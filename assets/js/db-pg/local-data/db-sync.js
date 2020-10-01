@@ -395,8 +395,9 @@ function addToParentRcrd(prop, rcrd, entity) {
 function addToTaxonNames(prop, rcrd, entity) {                                  //console.log('addToTaxonNames. prop = [%s] rcrd = %O', prop, rcrd);
     const taxon = db.getMmryData('taxon')[rcrd.id];
     const realm = taxon.realm.displayName;
+    const group = taxon.realm.group;
     const level = taxon.level.displayName;
-    const nameProp = realm+level+"Names";
+    const nameProp = realm+group+level+"Names";
     let data = db.getMmryData(nameProp) || {};
     data[taxon.name] = taxon.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
     db.setDataInMemory(nameProp, data);
@@ -560,8 +561,12 @@ function getTaxonName(edits, rcrd) {
     return edits.name ? edits.name.old : rcrd.name;
 }
 function getNameProp(edits, rcrd) {
+    const group = getGroup(edits.group, rcrd);
     const level = getLevel(edits.level, rcrd);
-    return rcrd.realm.displayName + level + 'Names';
+    return rcrd.realm.displayName + group + level + 'Names';
+}
+function getGroup(groupEdits, rcrd) {
+    return !groupEdits ? rcrd.realm.group : groupEdits.old;
 }
 function getLevel(lvlEdits, rcrd) {
     return !lvlEdits ? rcrd.level.displayName :

@@ -454,7 +454,8 @@ function initSubjectSelect() {                                                  
 /* -------------- OBJECT ---------------------- */
 /** Note: The selected realm's level combos are built @onRealmSelection. */
 function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
-    initTaxonSelectForm('Object', getObjectRealm());
+    initTaxonSelectForm('Object', getObjectRealm())
+    .then(removeGroupRowIfRealmHasSingleRoot);
 }
 function getObjectRealm(prop = 'id') {
     const prevSelectedId = $('#Object-sel').data('selTaxon');
@@ -476,6 +477,7 @@ function onRealmSelection(val) {                                                
         .then(appendRealmRowsAndFinishBuild);
     }
     function appendRealmRowsAndFinishBuild(rows) {
+        removeGroupRowIfRealmHasSingleRoot(rows);
         $('#Realm_row').after(rows);
         _state('setFormFieldData', ['sub', 'Realm', null, 'select']);
         initFormCombos('taxon', 'sub');
@@ -483,6 +485,15 @@ function onRealmSelection(val) {                                                
         /* Binds the current realm to the 'Select Unspecified' button */
         $('#select-realm').off('click');
         $('#select-realm').click(selectRoleTaxon.bind(null, null, getRealmData('realmTaxon')));
+    }
+}
+function removeGroupRowIfRealmHasSingleRoot(rows = false) {
+    const groups = Object.keys(getRealmData('groupNames'));                     //console.log('removeGroupRowIfRealmHasSingleRoot. groups = %O, rows = %O', groups, rows)
+    if (groups.length > 1) { return; }  console.log('removing row')
+    if (!rows) {
+        $('#Group_row').remove();
+    } else {
+        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
     }
 }
 function clearPreviousRealmLevelCombos() {
@@ -614,7 +625,7 @@ function resetPrevTaxonSelection(id, role) {
     selectPrevTaxon(taxon, role);
 }
 function ifSelectedTaxonIsRootTaxon(taxon) {
-    return getRealmData('rootLvl') == taxon.level.displayName;
+    return getRealmData('rootTaxa').indexOf(taxon.name) !== -1;
 }
 function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
@@ -664,13 +675,13 @@ function syncTaxonCombos(elem) {
 function resetChildLevelCombos(selTxn) {
     const lvlName = selTxn ? selTxn.level.displayName : getRealmTopSubLevel();
     if (lvlName == 'Species') { return; }
-    getChildlevelOpts(lvlName)
+    getChildlevelOpts(lvlName, selTxn.realm.group)
     .then(opts => repopulateLevelCombos(opts, {}));
 }
 function getRealmTopSubLevel() {
     return getRealmData('realmLvls').map(l => l).pop();
 }
-function getChildlevelOpts(lvlName) {
+function getChildlevelOpts(lvlName, group) {
     const opts = {};
     return buildChildLvlOpts().then(() => opts);
 
@@ -684,7 +695,7 @@ function getChildlevelOpts(lvlName) {
         return lvls.slice(0, lvls.indexOf(lvlName));
     }
     function getTaxonOpts(level) {
-        return _cmbx('getTaxonOpts', [level, null, getRealmData('realmName')])
+        return _cmbx('getTaxonOpts', [level, null, getRealmData('realmName'), group])
             .then(lvlOpts => opts[level] = lvlOpts);
     }
 }
@@ -699,6 +710,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
     const opts = {}, selected = {};
     const taxon = getRcrd('taxon', selId);                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
     const realm = getRealmData('realmName');
+    const group = taxon.realm.group;
     if (!taxon) { return; } //issue alerted to developer and editor
     taxon.children.forEach(addRelatedChild);
     return buildUpdatedTaxonOpts()
@@ -721,7 +733,8 @@ function repopulateCombosWithRelatedTaxa(selId) {
         .then(addCreateOpts);
     }
     function getSiblingOpts(taxon) {
-        return _cmbx('getTaxonOpts', [taxon.level.displayName, null, realm])
+        const lvl = taxon.level.displayName;
+        return _cmbx('getTaxonOpts', [lvl, null, realm, group])
             .then(o => {                                                        //console.log('getSiblingOpts. taxon = %O', taxon);
                 opts[taxon.level.displayName] = o;
                 selected[taxon.level.displayName] = taxon.id;
@@ -734,7 +747,8 @@ function repopulateCombosWithRelatedTaxa(selId) {
         return buildAncestorOpts(prntTaxon);
     }
     function buildAncestorOpts(prntTaxon) {
-        return _cmbx('getTaxonOpts', [prntTaxon.level.displayName, null, realm])
+        const lvl = prntTaxon.level.displayName;
+        return _cmbx('getTaxonOpts', [lvl, null, realm, group])
             .then(o => {                                                        //console.log("--getAncestorOpts - setting lvl = ", prntTaxon.level)
                 opts[prntTaxon.level.displayName] = o;
                 return getAncestorOpts(prntTaxon.parent);
@@ -759,7 +773,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
         }
         function buildAncestorOpts(lvl) {
             selected[lvl] = 'none';
-            proms.push(_cmbx('getTaxonOpts', [lvl, null, realm])
+            proms.push(_cmbx('getTaxonOpts', [lvl, null, realm, group])
                 .then(o => opts[lvl] = o ));
         }
     }
