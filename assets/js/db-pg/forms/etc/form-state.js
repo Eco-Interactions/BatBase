@@ -118,23 +118,30 @@ export function addEntityFormState(entity, level, pSel, action) {
     };                                                                          //console.log("   /addEntityFormState. formState = %O, arguments = %O", formState, arguments)
 }
 /*------------- Taxon Params --------------------*/
-export function initRealmState(role, realmId) {
+export function initRealmState(role, realmId, groupName) {
     return _db('getData', [['realm', 'realmNames', 'levelNames']])
-        .then(data => setTxnState(data.realm, data.realmNames, data.levelNames));
+        .then(data => getRealmGroupNames(data))
+        .then(data => setTxnState(data.realm, data.realmNames, data.levelNames, data.groups));
 
-    function setTxnState(realms, realmNames, levels) {
+    function getRealmGroupNames(data) {
+        const realmName = data.realm[realmId].displayName;
+        return _db('getData', [realmName+'GroupNames'])
+            .then(groups => {data.groups = groups; return data;})
+    }
+
+    function setTxnState(realms, realmNames, levels, groupNames) {
         const realm = realms[realmId];
-        const taxon = formState.records.taxon[realm.taxon];
 
         formState.forms.realmData = {
             lvls: levels, //Object with each (k) level name and it's (v) id and order
             realmLvls: realm.uiLevelsShown,
             realmName: realm.displayName,
             realms: realmNames,
-            realmTaxon: taxon,
+            group: groupName || Object.keys(groupNames)[0].split(' ')[1],
+            groups: realm.taxa,
+            groupNames: groupNames,
             role: role,
             oppositeRole: role === 'Subject' ? 'Object' : 'Subject',
-            rootLvl: taxon.level.displayName,
         };                                                                      console.log('           /--taxon params = %O', formState.forms.realmData)
         return formState.forms.realmData;
     }

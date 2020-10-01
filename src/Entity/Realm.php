@@ -269,7 +269,11 @@ class Realm
 
         foreach ($this->taxa as $realmRoot) {
             $taxon = $realmRoot->getTaxon();
-            $taxa = array_merge($taxa, [$taxon->getName() => $taxon->getId()]);
+            $taxa = array_merge($taxa, [ $taxon->getDisplayName() => [
+                'name' => $taxon->getName(),
+                'id' => $taxon->getId(),
+                'displayName' => $taxon->getDisplayName()
+            ]]);
         }
 
         return $taxa;

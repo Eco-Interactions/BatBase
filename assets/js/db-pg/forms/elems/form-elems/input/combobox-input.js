@@ -135,7 +135,7 @@ export function getSelTxt(id) {                                                 
 export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
     const $selApi = $(id)[0].selectize;
     if ($(id)[0].multiple) {
-        $selApi.setValue(val, silent);    
+        $selApi.setValue(val, silent);
     } else {
         $selApi.addItem(val, silent);
     }
@@ -280,6 +280,7 @@ function getSelectOpts(field) {                                                 
         'Editors': [ getSrcOpts, 'authSrcs'],
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
+        'Group': [ getRealmGroupOpts, null ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
         // 'InteractionTags': [ getTagOpts, 'interaction' ],
         // 'InteractionType': [ getSelectStoredOpts, 'intTypeNames' ],
@@ -358,9 +359,10 @@ function getCitTypeOpts(prop, field) {
 } /* End getCitTypeOpts */
 /* -------------------------- TAXON ----------------------------------------- */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
-export function getTaxonOpts(level, field, r) {
-    let realm = r ? r : _state('getTaxonProp', ['realmName']);
-    return _u('getOptsFromStoredData', [realm+level+'Names'])
+export function getTaxonOpts(level, field, r, g) {
+    const realm = r ? r : _state('getTaxonProp', ['realmName']);
+    const group = g ? g : _state('getTaxonProp', ['group']);
+    return _u('getOptsFromStoredData', [realm+group+level+'Names'])
         .then(buildTaxonOpts);
 
         function buildTaxonOpts(opts) {
@@ -377,6 +379,10 @@ function getRealmOpts(prop, field) {
         if (name === 'Bat') { return null; }
         return { value: realms[name], text: name };
     }
+}
+function getRealmGroupOpts(prop, field) {
+    const realm = _state('getTaxonProp', ['realmName']);
+    return _u('getOptsFromStoredData', [realm+'GroupNames']);
 }
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */

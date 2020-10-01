@@ -195,7 +195,7 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
         const lvls = fS.forms.realmData.realmLvls;
         const parentLvl = lvls[lvls.indexOf(lvl)+1];
         if (ifParentIsRootTaxon(lvl, parentLvl)) {
-            return fS.forms.realmData.realmTaxon.id;
+            return fS.forms.realmData.realmTaxa[id];
         }
         return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
 
