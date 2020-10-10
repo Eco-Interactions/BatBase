@@ -17,17 +17,17 @@ import { _confg, _cmbx, _state } from '../../forms-main.js';
 import { checkIntFieldsAndEnableSubmit, focusPinAndEnableSubmitIfFormValid } from './interaction-form.js';
 /**
  * defaultTag:      Required tag id for the selected interaction type.
- * objectRealm:     Realm of the object taxon when selected in the form.
+ * objectGroup:     The object taxon group when selected in the form.
  * secondaryTagId:  This tag is always available regardless of the type selected.
  */
 const app = {
     defaultTag: null,
-    objectRealm: null,
+    objectGroup: null,
     secondaryTagId: null
 }
 /* ========================= INTERACTION TYPE =============================== */
 /**
- * Interaction Types are restricted by the Object Realm.
+ * Interaction Types are restricted by the Object Group.
  * Ex:
         'Visitation': ['Plant'],
         'Pollination': ['Plant'],
@@ -41,13 +41,13 @@ const app = {
         'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
         'Hematophagy': ['Bird', 'Mammal'],
  */
-export function initTypeField(objectRealm) {                                    console.log(        '+--initTypeField = [%s]', objectRealm);
-    if (app.objectRealm === 'objectRealm') { return; }
-    app.objectRealm = objectRealm;
+export function initTypeField(objectGroup) {                                    console.log(        '+--initTypeField = [%s]', objectGroup);
+    if (app.objectGroup === 'objectGroup') { return; }
+    app.objectGroup = objectGroup;
     loadIntTypeOptions();
 }
 function loadIntTypeOptions() {
-    const types = _confg('getRealmInteractionTypes')[app.objectRealm];          //console.log('types = %O', types)
+    const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];    //console.log('types = %O', types)
     _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
     .then(loadComboOptionsForType)
     .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
@@ -104,12 +104,12 @@ function selectTagInitVal() {
     _cmbx('setSelVal', ['#InteractionTags-sel', initVal]);
 }
 function buildTagOpts(type) {
-    filterTagsForObjectRealm(type, type.tags);
+    filterTagsForObjectGroup(type, type.tags);
     handleRequiredTagForType(type.tags);
     return type.tags.map(buildTagOpt)
 }
-function filterTagsForObjectRealm(type, tags) {
-    type.tags = tags.filter(t => !t.realm || t.realm === app.objectRealm);
+function filterTagsForObjectGroup(type, tags) {
+    type.tags = tags.filter(t => !t.group || t.group === app.objectGroup);
 }
 function handleRequiredTagForType(typeTags) {
     app.defaultTag = getDefaultTag(typeTags);

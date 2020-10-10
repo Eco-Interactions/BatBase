@@ -73,13 +73,13 @@ class FetchController extends AbstractController
         $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
 
         $level = $this->serializeEntityRecords('Level');
-        $realm = $this->serializeEntityRecords('Realm');
-        $realmRoot = $this->serializeEntityRecords('RealmRoot');
+        $group = $this->serializeEntityRecords('Group');
+        $groupRoot = $this->serializeEntityRecords('GroupRoot');
         $taxa = $this->serializeEntityRecords('Taxon', 'normalized');
 
         $response = new JsonResponse();
         $response->setData(array(
-            'level' => $level,  'realm' => $realm,  'realmRoot' => $realmRoot,
+            'level' => $level,  'group' => $group,  'groupRoot' => $groupRoot,
             'taxon' => $taxa
         ));
         return $response;

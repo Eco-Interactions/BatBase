@@ -1,6 +1,6 @@
 /**
  * Filters the table rowData by any active external filters: name text, date/time
- * a record was published/updated, and object realms in Taxon->Bat view.
+ * a record was published/updated, and Object Groups in Taxon->Bat view.
  *
  * 	Exports:
  * 		filterRowData
@@ -28,7 +28,7 @@ const filterFuncs = {
 		name: 	ifRowNameContainsText
 	},
 	int: {
-		combo: 	{ 'Object Realm': ifIntWithRealm },
+		combo: 	{ 'Object Group': ifIntWithGroup },
 		date: 	ifRowAfterDate
 	}
 };
@@ -164,7 +164,7 @@ function ifRowAfterDate(row, dateObj) {
         return rowTime.getTime();
     }
 }
-/* ------------------------ OBJECT REALM ------------------------------------ */
-function ifIntWithRealm(row, realmIds) {  							/*dbug-log*///console.log('ifIntWithRealms = %O, row = %O', realmIds, row);
-	return realmIds.indexOf(row.objRealm) !== -1;
+/* ------------------------ Object Group ------------------------------------ */
+function ifIntWithGroup(row, groupIds) {  							/*dbug-log*///console.log('ifIntWithGroups = %O, row = %O', groupIds, row);
+	return groupIds.indexOf(row.objGroup) !== -1;
 }

@@ -280,7 +280,7 @@ function getSelectOpts(field) {                                                 
         'Editors': [ getSrcOpts, 'authSrcs'],
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
-        'Group': [ getRealmGroupOpts, null ],
+        'Group': [ getGroupOpts, null ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
         // 'InteractionTags': [ getTagOpts, 'interaction' ],
         // 'InteractionType': [ getSelectStoredOpts, 'intTypeNames' ],
@@ -290,7 +290,7 @@ function getSelectOpts(field) {                                                 
         'Publication': [ getSrcOpts, 'pubSrcs'],
         'PublicationType': [ getStoredOpts, 'pubTypeNames'],
         'Publisher': [ getSrcOpts, 'publSrcs'],
-        'Realm': [ getRealmOpts, null ],
+        'Sub-Group': [ getSubGroupOpts, null ],
         'Species': [ getTaxonOpts, 'Species' ],
         'Subject': [() => []]
         // "Tags": [ getTagOpts, 'source' ],
@@ -358,11 +358,11 @@ function getCitTypeOpts(prop, field) {
     }
 } /* End getCitTypeOpts */
 /* -------------------------- TAXON ----------------------------------------- */
-/** Returns an array of taxonyms for the passed level and the form's realm. */
+/** Returns an array of taxonyms for the passed rank and the form's taxon group. */
 export function getTaxonOpts(level, field, r, g) {
-    const realm = r ? r : _state('getTaxonProp', ['realmName']);
-    const group = g ? g : _state('getTaxonProp', ['group']);
-    return _u('getOptsFromStoredData', [realm+group+level+'Names'])
+    const group = r ? r : _state('getTaxonProp', ['groupName']);
+    const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);
+    return _u('getOptsFromStoredData', [group+subGroup+level+'Names'])
         .then(buildTaxonOpts);
 
         function buildTaxonOpts(opts) {
@@ -370,19 +370,19 @@ export function getTaxonOpts(level, field, r, g) {
             return opts;
         }
 }
-function getRealmOpts(prop, field) {
-    const realms = _state('getTaxonProp', ['realms']);
-    const opts = Object.keys(realms).map(getRealmOpt).filter(o => o);
+function getSubGroupOpts(prop, field) {
+    const groups = _state('getTaxonProp', ['groups']);
+    const opts = Object.keys(groups).map(getGroupOpt).filter(o => o);
     return opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
 
-    function getRealmOpt(name) {
+    function getGroupOpt(name) {
         if (name === 'Bat') { return null; }
-        return { value: realms[name], text: name };
+        return { value: groups[name], text: name };
     }
 }
-function getRealmGroupOpts(prop, field) {
-    const realm = _state('getTaxonProp', ['realmName']);
-    return _u('getOptsFromStoredData', [realm+'GroupNames']);
+function getGroupOpts(prop, field) {
+    const group = _state('getTaxonProp', ['groupName']);
+    return _u('getOptsFromStoredData', [group+'SubGroupNames']);
 }
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */

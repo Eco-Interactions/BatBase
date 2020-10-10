@@ -209,7 +209,7 @@ function getSteps() {
                 <br>Location, Source, or Taxon.<center></h3><br><b>Location</b>
                 - View by region/country or view all on a map.
                 <br><br><b>Source</b> - View by publication, publisher, or author.
-                <br><br><b>Taxon</b> - View by the taxa of the selected realm.
+                <br><br><b>Taxon</b> - View by the taxa of the selected group.
                 <br><br><center>This tutorial will begin with the default Taxon table.`,
             position: 'top'
         },
@@ -217,7 +217,7 @@ function getSteps() {
             element:'#focus-opts',
             intro: `<h3><center>Select the Table Tree view.<center></h3>
                 <br>Once "Taxon" has been selected in the “Group Interactions by”
-                box, select a 'realm' of taxa to view.<br><br>
+                box, select a group of taxa to view.<br><br>
                 <center>We have selected the "Plant" view for this tutorial.</center>`,
             position: 'right'
         },
@@ -271,7 +271,7 @@ function getSteps() {
         {
             element: '#filter-col1',
             intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns
-                show all taxa in the selected realm present in the table.</b><br><br>
+                show all taxa in the selected group present in the table.</b><br><br>
                  - Select a specific taxon from the dropdown menu and the table will
                 update to show it at the top of the data tree. The other dropdowns will
                 populate with related taxa.<br>(Filters will not work until the database

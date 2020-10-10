@@ -179,7 +179,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,
-        realm: taxon.realm.id, // Used for the object realm filter in Bat view
+        group: taxon.group.id, // Used for the Object Group filter in Bat view
         taxonLvl: taxon.level.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
@@ -217,13 +217,13 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
 
     function handleUnspecifiedInts(curTreeLvl) {
         if (taxon.failedFltr || getIntCount(taxon) === null) { return; }
-        const name = taxon.isRoot ? taxon.realm.displayName : taxon.name;
+        const name = taxon.isRoot ? taxon.group.displayName : taxon.name;
         addUnspecifiedTaxonIntsRow(name, curTreeLvl);
     }
     /**
      * Groups interactions attributed directly to a taxon with child-taxa
      * and adds them as it's first child row.
-     * Note: Realm interactions are built closed, otherwise they would be expanded
+     * Note: Group interactions are built closed, otherwise they would be expanded
      * by default
      */
     function addUnspecifiedTaxonIntsRow(taxonName, treeLvl) {
@@ -306,7 +306,7 @@ function buildIntRowData(intRcrd, treeLvl, idx){                                
         name: '',               // Blank tree field
         note: intRcrd.note,     //Table data
         object: getEntityData('taxon', 'displayName', 'object'),
-        objRealm: intRcrd.objRealm.toString(),//Used for the Object Realm filter in taxon->bat view
+        objGroup: intRcrd.objGroup.toString(),//Used for the Object Group filter in taxon->bat view
         rowColorIdx: idx,       //Not sure what this is all used for...
         subject: getEntityData('taxon', 'displayName', 'subject'),
         tags: intRcrd.tags,     //Table data

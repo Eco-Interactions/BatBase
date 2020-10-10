@@ -30,10 +30,10 @@ import { _db } from '../../db-main.js';
  * {str} userRole       Stores the role of the user.
  *
  * In Taxon views:
- * {ary} allRealmLvls   Array of all levels present in the current realm tree.
- * {obj} realms         Realm records keyed by id.
+ * {ary} allgroupRanks   Array of all levels present in the current tree.
+ * {obj} groups         Group records keyed by id.
  * {obj} allLevels
- * {str} realmName      Stores Taxon view Realm name
+ * {str} groupName      Stores Taxon view Group name
  * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
  */
 let tState = { flags: {}};

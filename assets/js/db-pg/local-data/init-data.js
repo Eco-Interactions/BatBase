@@ -24,7 +24,7 @@ import { initSearchStateAndTable, _ui } from '../db-main.js';
  * from the server and stored locally @storeEntityData. Database search page
  * table build begins @initSearchStateAndTable.
  * Entities downloaded with each ajax call:
- *   /taxon - Taxon, Realm, Level
+ *   /taxon - Taxon, Group, Level
  *   /location - HabitatType, Location, LocationType, GeoJson
  *   /source - Author, Citation, CitationType, Publication, PublicationType,
  *       Source, SourceType
@@ -98,17 +98,17 @@ function parseData(data) {
 /* -------------------------- TAXON DATA ------------------------------------ */
 /**
  * levelNames - an object with each level name (k) and it's id and ordinal (v).
- * realmNames - an object with each realm name (k) and it's id, role, and levels (v).
- * [realm][group][level]Names - object with all taxa in realm group at the level: name (k) id (v)
- * *realm - resaved with 'uiLevelsShown' filled with the level display names.
+ * groupNames - an object with each group name (k) and it's id, role, and levels (v).
+ * [group][subGroup][level]Names - object with all taxa in subGroup at the level: name (k) id (v)
+ * *group - resaved with 'uiLevelsShown' filled with the level display names.
  */
-/** Stores an object of taxon names and ids for each level in each realm. */
+/** Stores an object of taxon names and ids for each level in each group. */
 function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
-    db.setDataInMemory('realmNames', getNameDataObj(Object.keys(data.realm), data.realm));
-    storeTaxaByLevelAndRealm(data.taxon, data.realm, data.realmRoot);
-    modifyRealmData(data.realm, data.level);
+    db.setDataInMemory('groupNames', getNameDataObj(Object.keys(data.group), data.group));
+    storeTaxaByLevelAndGroup(data.taxon, data.group, data.groupRoot);
+    modifyGroupData(data.group, data.level);
     storeLevelData(data.level);
-    db.deleteMmryData('realmRoot');
+    db.deleteMmryData('groupRoot');
 }
 /* --------------- Levels ------------------ */
 function storeLevelData(levelData) {
@@ -126,70 +126,70 @@ function storeLevelData(levelData) {
         return levels[levelData[id].displayName] = {id: id, ord: i+1};
     }
 }
-/* --------- Taxa by Realm & Level ------------- */
-function storeTaxaByLevelAndRealm(taxa, realms, roots) {
-    for (let realmId in realms) {
-        const realm = realms[realmId];
-        sortRealmTaxaByGroup(realm, realm.taxa);
-        storeRealmGroupTaxa(realm, taxa);
+/* --------- Taxa by Group & Level ------------- */
+function storeTaxaByLevelAndGroup(taxa, groups, roots) {
+    for (let groupId in groups) {
+        const group = groups[groupId];
+        sortTaxaByGroupRoot(group, group.taxa);
+        storeGroupTaxa(group, taxa);
     }
-    db.setDataInMemory('realm', realms);
+    db.setDataInMemory('group', groups);
     db.setDataInMemory('taxon', taxa);
 
-    function sortRealmTaxaByGroup(realm, gTaxa) {
+    function sortTaxaByGroupRoot(group, gTaxa) {
         for (let gName in gTaxa) {
             const gTaxon = taxa[gTaxa[gName].id];
-            separateAndStoreRealmTaxa(gTaxon, gTaxon.name, realm);
+            separateAndStoreGroupTaxa(gTaxon, gTaxon.name, group);
         }
     }
-    function separateAndStoreRealmTaxa(taxon, group, realm) {                   //console.log('[%s] taxon = %O realm = %O', group, taxon, realm)
-        addRealmDataToTaxon(taxon, group, realm);
-        const data = separateRealmTaxaByLevel(taxon.children, group, realm, taxa);
-        storeTaxaByGroupAndLvl(data, group, realm.displayName);
+    function separateAndStoreGroupTaxa(taxon, subGroup, group) {                //console.log('[%s] taxon = %O group = %O', subGroup, taxon, group)
+        addGroupDataToTaxon(taxon, subGroup, group);
+        const data = separateGroupTaxaByLevel(taxon.children, subGroup, group, taxa);
+        storeTaxaByGroupAndLvl(data, subGroup, group.displayName);
     }
 }
-function separateRealmTaxaByLevel(cTaxa, group, realm, rcrds) {
+function separateGroupTaxaByLevel(cTaxa, subGroup, group, rcrds) {
     const data = {};
     cTaxa.forEach(separateTaxonAndChildren);
     return data;
 
     function separateTaxonAndChildren(id) {
         const taxon = rcrds[id];
-        addToRealmLevel(taxon, taxon.level.displayName);
-        addRealmDataToTaxon(taxon, group, realm);
+        addToGroupLevel(taxon, taxon.level.displayName);
+        addGroupDataToTaxon(taxon, subGroup, group);
         taxon.children.forEach(separateTaxonAndChildren);
     }
-    function addToRealmLevel(taxon, level) {
+    function addToGroupLevel(taxon, level) {
         if (!data[level]) { data[level] = {}; };
         data[level][taxon.name] = taxon.id;
     }
 }
-function addRealmDataToTaxon(taxon, group, realm) {
-    taxon.realm = {
-        id: realm.id,
-        displayName: realm.displayName,
-        pluralName: realm.pluralName,
-        group: group
+function addGroupDataToTaxon(taxon, subGroup, group) {
+    taxon.group = {
+        id: group.id,
+        displayName: group.displayName,
+        pluralName: group.pluralName,
+        subGroup: subGroup
     };
 }
-function storeTaxaByGroupAndLvl(taxonObj, group, realm) {
-    for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+group+level+'Names', taxonObj[level]);
-        db.setDataInMemory(realm+group+level+'Names', taxonObj[level]);
+function storeTaxaByGroupAndLvl(taxonObj, subGroup, group) {
+    for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", group+subGroup+level+'Names', taxonObj[level]);
+        db.setDataInMemory(group+subGroup+level+'Names', taxonObj[level]);
     }
 }
-function storeRealmGroupTaxa(realm, taxonRcrds) {
-    const gIds = Object.values(realm.taxa).map(t => t.id);
-    db.setDataInMemory(realm.displayName+'GroupNames', getNameDataObj(gIds, taxonRcrds));
+function storeGroupTaxa(group, taxonRcrds) {
+    const gIds = Object.values(group.taxa).map(t => t.id);
+    db.setDataInMemory(group.displayName+'SubGroupNames', getNameDataObj(gIds, taxonRcrds));
 }
-/* ---------- Modify Realm Data -------------- */
-function modifyRealmData(realms, levels) {                                      //console.log('realms = %O', realms);
-    modifyRealms(Object.keys(realms));
-    db.setDataInMemory('realm', realms);
+/* ---------- Modify Group Data -------------- */
+function modifyGroupData(groups, levels) {                                      //console.log('groups = %O', groups);
+    modifyGroups(Object.keys(groups));
+    db.setDataInMemory('group', groups);
 
-    function modifyRealms(ids) {
+    function modifyGroups(ids) {
         ids.forEach(id => {
-            let realm = realms[id]
-            realm.uiLevelsShown = fillLevelNames(JSON.parse(realm.uiLevelsShown));
+            let group = groups[id]
+            group.uiLevelsShown = fillLevelNames(JSON.parse(group.uiLevelsShown));
         });
     }
     function fillLevelNames(lvlAry) {
@@ -263,23 +263,23 @@ function deriveSourceData(data) {                                               
 /* -------------------- INTERACTION DATA ------------------------------------ */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
- * Adds the object realm to each interaction record.
- * Handles required tags and tags restricted to a specific object realm.
+ * Adds the Object Group to each interaction record.
+ * Handles required tags and tags restricted to a specific Object Group.
  */
 function deriveInteractionData(data) {
     db.setDataInMemory('intTypeNames', getTypeNameData(data.interactionType));
     db.setDataInMemory('tagNames', getNameDataObj(Object.keys(data.tag), data.tag));
     db.deleteMmryData('tag');
-    addObjRealmIdProp(data.interaction);
+    addObjGroupIdProp(data.interaction);
     modifyInteractionTypeTagData(data.interactionType);
 }
-function addObjRealmIdProp(ints) {
+function addObjGroupIdProp(ints) {
     const taxa = db.getMmryData('taxon');
-    Object.keys(ints).forEach(i => addObjectRealmId(ints[i]));
+    Object.keys(ints).forEach(i => addObjectGroupId(ints[i]));
     db.setDataInMemory('interaction', ints);
 
-    function addObjectRealmId(int) {
-        int.objRealm = taxa[int.object].realm.id.toString();
+    function addObjectGroupId(int) {
+        int.objGroup = taxa[int.object].group.id.toString();
     }
 }
 function modifyInteractionTypeTagData(intTypes) {
@@ -289,7 +289,7 @@ function modifyInteractionTypeTagData(intTypes) {
 }
 function handleTagDataModification(intType) {
     handleRequiredTag(intType);
-    handleRealmRestrictions(intType);
+    handleGroupRestrictions(intType);
 }
 function handleRequiredTag(intType) {
     const map = {
@@ -302,13 +302,13 @@ function handleRequiredTag(intType) {
         return t;
     })
 }
-function handleRealmRestrictions(intType) {
+function handleGroupRestrictions(intType) {
     const map = {
         'Bryophyte Fragment': 'Plant',
         'Arthropod': 'Arthropod'
     };
     intType.tags = intType.tags.map(t => {
-        if (map[t.displayName]) { t.realm = map[t.displayName]; }
+        if (map[t.displayName]) { t.group = map[t.displayName]; }
         return t;
     })
 }

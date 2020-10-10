@@ -101,7 +101,7 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Citation forms: rcrds - { src: pubSrc, pub: pub } (parent publication)
  * > Interaction create form: unchanged - exists after form submit and before any changes
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
- * > Taxon forms: realmData - added to formState.forms (see props @initTaxonParams)
+ * > Taxon forms: groupData - added to formState.forms (see props @initTaxonParams)
  */
 export function addEntityFormState(entity, level, pSel, action) {
     formState.forms[entity] = level;
@@ -118,32 +118,32 @@ export function addEntityFormState(entity, level, pSel, action) {
     };                                                                          //console.log("   /addEntityFormState. formState = %O, arguments = %O", formState, arguments)
 }
 /*------------- Taxon Params --------------------*/
-export function initRealmState(role, realmId, groupName) {
-    return _db('getData', [['realm', 'realmNames', 'levelNames']])
-        .then(data => getRealmGroupNames(data))
-        .then(data => setTxnState(data.realm, data.realmNames, data.levelNames, data.groups));
+export function initGroupState(role, groupId, subGroupName) {
+    return _db('getData', [['group', 'groupNames', 'levelNames']])
+        .then(data => getGroupSubGroupNames(data))
+        .then(data => setTxnState(data.group, data.groupNames, data.levelNames, data.subGroups));
 
-    function getRealmGroupNames(data) {
-        const realmName = data.realm[realmId].displayName;
-        return _db('getData', [realmName+'GroupNames'])
-            .then(groups => {data.groups = groups; return data;})
+    function getGroupSubGroupNames(data) {
+        const groupName = data.group[groupId].displayName;
+        return _db('getData', [groupName+'SubGroupNames'])
+            .then(subGroups => {data.subGroups = subGroups; return data;})
     }
 
-    function setTxnState(realms, realmNames, levels, groupNames) {
-        const realm = realms[realmId];
+    function setTxnState(groups, groupNames, levels, subGroupNames) {
+        const group = groups[groupId];
 
-        formState.forms.realmData = {
+        formState.forms.groupData = {
             lvls: levels, //Object with each (k) level name and it's (v) id and order
-            realmLvls: realm.uiLevelsShown,
-            realmName: realm.displayName,
-            realms: realmNames,
-            group: groupName || Object.keys(groupNames)[0].split(' ')[1],
-            groups: realm.taxa,
-            groupNames: groupNames,
+            groupRanks: group.uiLevelsShown,
+            groupName: group.displayName,
+            groups: groupNames,
+            subGroup: subGroupName || Object.keys(subGroupNames)[0].split(' ')[1],
+            subGroups: group.taxa,
+            subGroupNames: subGroupNames,
             role: role,
             oppositeRole: role === 'Subject' ? 'Object' : 'Subject',
-        };                                                                      console.log('           /--taxon params = %O', formState.forms.realmData)
-        return formState.forms.realmData;
+        };                                                                      console.log('           /--taxon params = %O', formState.forms.groupData)
+        return formState.forms.groupData;
     }
 }
 /* ---------------------------- Getters ------------------------------------- */
@@ -172,10 +172,10 @@ export function getFormParentId(fLvl) {
     return formState.forms[fLvl] ? formState.forms[fLvl].pSelId : false;
 }
 export function getTaxonProp(prop) {
-    return formState.forms.realmData ? formState.forms.realmData[prop] : false;
+    return formState.forms.groupData ? formState.forms.groupData[prop] : false;
 }
-export function getRealmState() {
-    return formState.forms.realmData;
+export function getGroupState() {
+    return formState.forms.groupData;
 }
 export function getFormFieldData(fLvl, field) {
     return formState.forms[fLvl].fieldData[field];
@@ -217,8 +217,8 @@ export function setStateProp(prop, val) {
 export function setFormProp(fLvl, prop, val) {
     formState.forms[fLvl][prop] = val;
 }
-export function setRealmProp(prop, val) {
-    return formState.forms.realmData[prop] = val;
+export function setGroupProp(prop, val) {
+    return formState.forms.groupData[prop] = val;
 }
 export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = formState.forms[fLvl].fieldData;

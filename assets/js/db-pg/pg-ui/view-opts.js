@@ -1,6 +1,6 @@
 /**
  * Fills the View combobox with the options for the selected focus: Source ->
- * Source Types, Location -> Region & Country, Taxon -> all realms with interactions.
+ * Source Types, Location -> Region & Country, Taxon -> all groups with interactions.
  *
  * Exports:
  *     initLocViewOpts
@@ -54,29 +54,29 @@ function setSrcView(view) {
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTxnViewOpts(view, reset) {
-    loadTxnViewOpts(_table('tableState').get('realms'), reset);
+    loadTxnViewOpts(_table('tableState').get('groups'), reset);
     setTaxonView(view);
 }
-function loadTxnViewOpts(realms, reset) {
+function loadTxnViewOpts(groups, reset) {
     if ($('#sel-view').data('focus') === 'taxa' && !reset) { return; }
-    buildAndLoadTxnOpts(realms);
+    buildAndLoadTxnOpts(groups);
 }
-function buildAndLoadTxnOpts(realms) {
-    const opts = getViewOpts(realms);
+function buildAndLoadTxnOpts(groups) {
+    const opts = getViewOpts(groups);
     _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onTxnViewChange')]);
     $('#sel-view').data('focus', 'taxa');
 }
-function getViewOpts(realms) {
+function getViewOpts(groups) {
     const taxa = _table('tableState').get('rcrdsById');
     const optsAry = [];
-    Object.keys(realms).forEach(buildRealmOpt);
+    Object.keys(groups).forEach(buildGroupOpt);
     return optsAry.sort((a, b) => _u('alphaOptionObjs', [a, b]));
 
-    function buildRealmOpt(id) {
-        if (!ifRealmHasInts(realms[id].taxa)) { return; }
-        optsAry.push({ value: id, text: realms[id].pluralName });
+    function buildGroupOpt(id) {
+        if (!ifGroupHasInts(groups[id].taxa)) { return; }
+        optsAry.push({ value: id, text: groups[id].pluralName });
     }
-    function ifRealmHasInts(rootTaxa) {
+    function ifGroupHasInts(rootTaxa) {
         return Object.values(rootTaxa).find(t => ifTxnHasInts(t.id));
     }
     function ifTxnHasInts(id){
@@ -85,10 +85,10 @@ function getViewOpts(realms) {
         return hasInts || taxon.children.find(ifTxnHasInts);
     }
 }
-/** Restores stored realm from previous session or sets the default 'Bats'. */
+/** Restores stored group from previous session or sets the default 'Bats'. */
 function setTaxonView(view) {
     if (!_u('getSelVal', ['View'])) {
-        const realmVal = view ? view : '1';
-        _u('setSelVal', ['View', realmVal, 'silent']);
+        const groupVal = view ? view : '1';
+        _u('setSelVal', ['View', groupVal, 'silent']);
     }
 }

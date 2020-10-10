@@ -52,12 +52,9 @@ export function getFormConfg(entity) {
 function getEntityConfg(entity) {
     return require(`./entity/${entity}-confg.js`).default();
 }
-export function getRealmInteractionTypes() {
-    return require(`./entity/realm-confg.js`).default(...arguments);
-}
 /* ------------------ TAXON SELECT FORM CONFG ------------------------------- */
 function getRoleConfg(role) {
-    const addField = ifObjectFormAddRealmSelect(role);
+    const addField = ifObjectAddGroupFields(role);
     const fields = getTaxonSelectFields(addField);
     return {
         'add': addField,
@@ -69,12 +66,12 @@ function getRoleConfg(role) {
             'opt': false },
     };
 }
-function ifObjectFormAddRealmSelect(role) {
-    const objFields = {'Realm': 'select', 'Group': 'select'};
-    return role === 'subject' || $('#Realm_row').length ? {'Group': 'select'} : objFields;
+function ifObjectAddGroupFields(role) {
+    const objFields = {'Group': 'select', 'Sub-Group': 'select'};
+    return role === 'subject' || $('#Group_row').length ? {'Group': 'select'} : objFields;
 }
 function getTaxonSelectFields(addField) {
-    const lvls = _state('getTaxonProp', ['realmLvls']);
+    const lvls = _state('getTaxonProp', ['groupRanks']);
     const addedFields = Object.keys(addField);
     return !addedFields.length ? lvls : [...addedFields, ...lvls];
 }
@@ -200,7 +197,7 @@ export function getRelationshipFields(entity) {
         'publication': ['publicationType', 'contributor', 'publisher',
             'publisher/University'],
         'publisher': [],
-        'taxon': ['level', 'parentTaxon', 'realm'],
+        'taxon': ['level', 'parentTaxon', 'group'],
         'interaction': ['citationTitle', 'location', 'subject', 'object',
             'interactionTags', 'interactionType' ]
     };
