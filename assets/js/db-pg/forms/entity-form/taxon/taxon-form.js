@@ -25,7 +25,7 @@
 import { _u } from '../../../db-main.js';
 import { _state, _elems, _cmbx, _form, _val, formatAndSubmitData, submitForm } from '../../forms-main.js';
 
-let realmData;
+let groupData;
 
 export function initFormCombos(entity, fLvl) {} //No combos in this form.
 
@@ -36,7 +36,7 @@ export function initCreateForm(lvl, value) {                                    
     return showNewTaxonForm(val, level);
 }
 function showNewTaxonForm(val, level) {
-    _state('setRealmProp', ['formTaxonLvl', level]);  //used for data validation/submit
+    _state('setGroupProp', ['formTaxonLvl', level]);  //used for data validation/submit
     return buildTaxonForm()
     .then(() => _elems('toggleSubmitBttn', ['#sub2-submit', true]));
 
@@ -88,18 +88,17 @@ function fieldErr(level, tag) {
  */
 export function getTaxonEditFields(id) {
     const taxa = _state('getEntityRcrds', ['taxon']);
-    const realm = taxa[id].realm;
-    const group = taxa[id].realm;
-    const role = realm.displayName === 'Bat' ? 'Subject' : 'Object';
-    return _state('initRealmState', [role, realm.id, group])
-        .then(realmState => {
-            setScopeTaxonMemory(taxa, realmState);
+    const group = taxa[id].group;
+    const role = group.displayName === 'Bat' ? 'Subject' : 'Object';
+    return _state('initGroupState', [role, group.id, group])
+        .then(groupState => {
+            setScopeTaxonMemory(taxa, groupState);
             return buildTaxonEditFields(taxa[id]);
         });
 }
-function setScopeTaxonMemory(taxaRcrds, realmState) {
-    realmData = realmState;
-    realmData.rcrds = taxaRcrds;
+function setScopeTaxonMemory(taxaRcrds, groupState) {
+    groupData = groupState;
+    groupData.rcrds = taxaRcrds;
 }
 /** ======================== FIELDS ========================================= */
 function buildTaxonEditFields(taxon) {
@@ -126,12 +125,12 @@ function buildLvlSel(taxon) {
     return sel;
 }
 function getLvlVal(lvl) {
-    return realmData.lvls[lvl].ord;
+    return groupData.lvls[lvl].ord;
 }
-/** Returns an array of options for the levels in the taxon's realm. */
+/** Returns an array of options for the levels in the taxon's group. */
 function getTaxonLvlOpts() {
-    return realmData.realmLvls.reverse().map(lvl => {
-        return { value: realmData.lvls[lvl].ord, text: lvl };
+    return groupData.groupRanks.reverse().map(lvl => {
+        return { value: groupData.lvls[lvl].ord, text: lvl };
     });
 }
 /** ----------------- PARENT TAXON ELEMS ------------------------------------ */
@@ -140,7 +139,7 @@ function getTaxonLvlOpts() {
  * Button calls @showParentTaxonSelectForm.
  */
 function getPrntTaxonElems(taxon) {                                             //console.log("getPrntTaxonElems for %O", taxon);
-    const prnt = realmData.rcrds[taxon.parent];
+    const prnt = groupData.rcrds[taxon.parent];
     const elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt)];
     return [ buildTaxonEditFormRow('Parent', elems, 'top')];
 }
@@ -167,7 +166,7 @@ function buildEditPrntBttn(prnt) {
 }
 /** ============= TAXON PARENT SELECT FORM ================================== */
 /**
- * <select>[Realm Levels]</> <select>[Taxa at selected level]</>
+ * <select>[Group Levels]</> <select>[Taxa at selected level]</>
  * Changing the level select repopulates the taxon select with taxa at this level.
  * Entering a taxon that does not already exists will open the 'create' form.
  * Current parent data is selected upon init.
@@ -179,7 +178,7 @@ function showParentTaxonSelectForm() {
 }
 /** ------------------ LEVEL COMBO ELEMS ------------------------------------ */
 function buildParentTaxonEditElems(prntId) {
-    const prnt = realmData.rcrds[prntId];
+    const prnt = groupData.rcrds[prntId];
     const hdr = [ buildEditParentHdr()];
     const bttns = [ _elems('getFormFooter', ['taxon', 'sub', 'edit'])];
     return getParentEditFields(prnt)
@@ -190,31 +189,31 @@ function buildEditParentHdr() {
     return _u('buildElem', ['h3', attr]);
 }
 function getParentEditFields(prnt) {
-    const realm = _u('lcfirst', [prnt.realm.displayName]);
-    _state('addEntityFormState', [realm, 'sub', null, 'edit']);
+    const group = _u('lcfirst', [prnt.group.displayName]);
+    _state('addEntityFormState', [group, 'sub', null, 'edit']);
     return _elems('buildFormRows', ['object', {}, 'sub', null])
         .then(modifyAndReturnPrntRows);
 
     function modifyAndReturnPrntRows(rows) {                                    //console.log('modifyAndReturnPrntRows = %O', rows);
-        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Realm row
-        const realmSelRow = getRealmLvlRow(prnt, rows);
-        return [realmSelRow, rows].filter(r=>r);
+        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
+        const groupSelRow = getGroupLvlRow(prnt, rows);
+        return [groupSelRow, rows].filter(r=>r);
     }
 }
 /** ------- REALM DISPLAY NAME ------ */
-function getRealmLvlRow(taxon, rows) {
-    const groups = Object.keys(realmData.groups);
-    if (groups.length > 1) { return; }
+function getGroupLvlRow(taxon, rows) {
+    const subGroup = Object.keys(groupData.subGroup);
+    if (subGroup.length > 1) { return; }
     $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
-    return buildTaxonParentRow(groups[0]);
+    return buildTaxonParentRow(subGroup[0]);
 }
 function buildTaxonParentRow(displayName) {
-    const realmLvl = displayName.split(' ')[0];
-    const lbl = _u('buildElem', ['label', { text: realmLvl }]);
-    const realmParent = buildRealmNameSpan(displayName.split(' ')[1]);
-    return buildTaxonEditFormRow(realmLvl, [lbl, realmParent], 'sub');
+    const groupLvl = displayName.split(' ')[0];
+    const lbl = _u('buildElem', ['label', { text: groupLvl }]);
+    const groupParent = buildGroupNameSpan(displayName.split(' ')[1]);
+    return buildTaxonEditFormRow(groupLvl, [lbl, groupParent], 'sub');
 }
-function buildRealmNameSpan(name) {
+function buildGroupNameSpan(name) {
     const span = _u('buildElem', ['span', { text: name }]);
     $(span).css({ 'padding-top': '.55em' });
     return span;
@@ -244,29 +243,29 @@ function getSelectParentComboEvents() {
         'Family': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'family') },
         'Genus': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'genus') },
         'Order': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'order') },
-        'Realm': { change: onParentLevelSelection },
+        'Group': { change: onParentLevelSelection },
         'Species': { change: onParentLevelSelection, add: initCreateForm.bind(null, 'species') },
     }
 }
 function onParentLevelSelection(val) {
     _form('onLevelSelection', [val, this.$input[0]]);
 }
-export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, realmData.rcrds);
-    const prntTxn = realmData.rcrds[prntId];
+export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, groupData.rcrds);
+    const prntTxn = groupData.rcrds[prntId];
     if (prntTxn.isRoot) { return; }
     const prntLvl = prntTxn.level.displayName;
     _cmbx('setSelVal', ['#'+prntLvl+'-sel', prntId]);
 }
 function finishParentSelectFormUi() {
-    alignRealmLevelText();
+    alignGroupLevelText();
     clearAndDisableTopFormParentFields();
     $('#Species_row').hide();
     updateSubmitBttns();
 }
-function alignRealmLevelText() {
-    if ($('#Group_row').length) { return; } //Group combobox used rather than single-group span.
-    const rootLvl = Object.keys(realmData.groups)[0].split(' ')[0];
-    $('#'+rootLvl+'_row .field-row')[0].className += ' realm-row';
+function alignGroupLevelText() {
+    if ($('#Sub-Group_row').length) { return; }
+    const groupLvl = Object.keys(groupData.subGroup)[0].split(' ')[0];
+    $('#'+groupLvl+'_row .field-row')[0].className += ' group-row';
 }
 function clearAndDisableTopFormParentFields() {
     $('#txn-prnt span').text('');
@@ -280,12 +279,12 @@ function updateSubmitBttns() {
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectTaxonParent() {
-    const prnt =  _form('getSelectedTaxon') || realmData.realmTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
+    const prnt =  _form('getSelectedTaxon') || groupData.groupTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
     if (ifParentSelectErrs(getLvlVal(prnt.level.displayName))) { return; }
     exitPrntEdit(prnt);
 }
 function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
-    const prnt = realmData.rcrds[$('#txn-prnt').data('txn')];
+    const prnt = groupData.rcrds[$('#txn-prnt').data('txn')];
     exitPrntEdit(prnt);
 }
 function exitPrntEdit(prnt) {
@@ -394,12 +393,12 @@ function lvlIsLowerThanKidLvls(txnLvl) {
     return txnLvl >= highLvl;
 }
 function getHighestChildLvl(taxonId) {
-    let high = realmData.lvls.Species.ord;
-    realmData.rcrds[taxonId].children.forEach(checkChildLvl);
+    let high = groupData.lvls.Species.ord;
+    groupData.rcrds[taxonId].children.forEach(checkChildLvl);
     return high;
 
     function checkChildLvl(id) {
-        const child = realmData.rcrds[id]
+        const child = groupData.rcrds[id]
         if (child.level.ord < high) { high = child.level.ord; }
     }
 }

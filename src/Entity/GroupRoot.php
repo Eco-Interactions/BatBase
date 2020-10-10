@@ -7,14 +7,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * Realm Root.
+ * Group Root.
  *
- * @ORM\Table(name="realm_root")
+ * @ORM\Table(name="group_root")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
-class RealmRoot
+class GroupRoot
 {
     /**
      * @var int
@@ -26,13 +26,13 @@ class RealmRoot
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Realm", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity="Group", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
-    private $realm;
+    private $group;
 
     /**
-     * @ORM\OneToOne(targetEntity="Taxon", inversedBy="realm", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Taxon", inversedBy="group", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $taxon;
@@ -82,39 +82,39 @@ class RealmRoot
     }
 
     /**
-     * Set realm.
+     * Set group.
      *
-     * @param \App\Entity\Realm $realm
+     * @param \App\Entity\Group $group
      *
-     * @return RealmRoot
+     * @return GroupRoot
      */
-    public function setRealm(\App\Entity\Realm $realm)
+    public function setGroup(\App\Entity\Group $group)
     {
-        $this->realm = $realm;
+        $this->group = $group;
 
-        $realm->addTaxon($this);
+        $group->addTaxon($this);
 
         return $this;
     }
 
     /**
-     * Get realm.
+     * Get group.
      *
-     * @return \App\Entity\Realm
+     * @return \App\Entity\Group
      */
-    public function getRealm()
+    public function getGroup()
     {
-        return $this->realm;
+        return $this->group;
     }
 
     /**
-     * Get Realm Id
+     * Get Group Id
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("realm")
+     * @JMS\SerializedName("group")
      */
-    public function getRealmId()
+    public function getGroupId()
     {
-        return $this->realm->getId();
+        return $this->group->getId();
     }
 
     /**
@@ -122,13 +122,13 @@ class RealmRoot
      *
      * @param \App\Entity\Taxon $taxon
      *
-     * @return RealmRoot
+     * @return GroupRoot
      */
     public function setTaxon(\App\Entity\Taxon $taxon)
     {
         $this->taxon = $taxon;
 
-        $taxon->setRealm($this);
+        $taxon->setGroup($this);
 
         return $this;
     }
@@ -158,7 +158,7 @@ class RealmRoot
      *
      * @param \DateTime $createdAt
      *
-     * @return RealmRoot
+     * @return GroupRoot
      */
     public function setCreated(\DateTime $createdAt)
     {
@@ -202,7 +202,7 @@ class RealmRoot
      *
      * @param \DateTime $updatedAt
      *
-     * @return RealmRoot
+     * @return GroupRoot
      */
     public function setUpdated(\DateTime $updatedAt)
     {
@@ -248,6 +248,6 @@ class RealmRoot
      */
     public function __toString()
     {
-        return $realm->getDisplayName() . ' ' . $taxon->getDisplayName();
+        return $group->getDisplayName() . ' ' . $taxon->getDisplayName();
     }
 }

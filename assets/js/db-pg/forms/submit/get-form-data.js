@@ -182,25 +182,25 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     } /* End addContributorData */
     /** ---- Additional Taxon data ------ */
     function getTaxonData() {
-        const formTaxonLvl = fS.forms.realmData.formTaxonLvl;
+        const formTaxonLvl = fS.forms.groupData.formTaxonLvl;
         formVals.parentTaxon = getParentTaxon(formTaxonLvl);
         formVals.level = formTaxonLvl;
     }
     /** -------------------- Additional Taxon Data -----------------------*/
     /**
-     * Checks each parent-level combo for a selected taxon. If none, the realm
+     * Checks each parent-level combo for a selected taxon. If none, the group
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(lvl) {
-        const lvls = fS.forms.realmData.realmLvls;
+        const lvls = fS.forms.groupData.groupRanks;
         const parentLvl = lvls[lvls.indexOf(lvl)+1];
         if (ifParentIsRootTaxon(lvl, parentLvl)) {
-            return fS.forms.realmData.realmTaxa[id];
+            return fS.forms.groupData.groupTaxa[id];
         }
         return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
 
         function ifParentIsRootTaxon(lvl, parentLvl) {
-            return lvl === fS.forms.realmData.rootLvl || !parentLvl;
+            return lvl === fS.forms.groupData.rootLvl || !parentLvl;
         }
     }
 }

@@ -26,20 +26,20 @@ export function buildTxnTable(v) {
     });
 }
 function getTxnDataAndBuildTable(view) {
-    return _u('getData', [['levelNames', 'realm', 'taxon']])
+    return _u('getData', [['levelNames', 'group', 'taxon']])
         .then(beginTaxonLoad.bind(null, view));
 }
-function beginTaxonLoad(realmId, data) {
+function beginTaxonLoad(groupId, data) {
     updateTaxonTableState(data);                                                //console.log('Building Taxon Table. data = %O', _u('snapshot', [(data)]);
-    const realmRoots = storeRealmAndReturnRootTaxa(realmId);
-    _ui('initTxnViewOpts', [realmId, tState().get('flags').allDataAvailable]);
+    const groupRoots = storeGroupAndReturnRootTaxa(groupId);
+    _ui('initTxnViewOpts', [groupId, tState().get('flags').allDataAvailable]);
 
-    return startTxnTableBuildChain(realmRoots, true);
+    return startTxnTableBuildChain(groupRoots, true);
 }
 function updateTaxonTableState(data) {
     tState().set({
         rcrdsById: data.taxon,
-        realms: data.realm,
+        groups: data.group,
         allLevels: data.levelNames
     });
 }
@@ -50,34 +50,34 @@ export function onTxnViewChange(val) {                              /*Perm-log*/
     buildTaxonTable(val);
 }
 function buildTaxonTable(val) {
-    const realmRoots = storeRealmAndReturnRootTaxa(val);
+    const groupRoots = storeGroupAndReturnRootTaxa(val);
     _table('resetTableState');
-    return startTxnTableBuildChain(realmRoots);  //, true
+    return startTxnTableBuildChain(groupRoots);  //, true
 }
 /**
- * Gets the currently selected taxon realm/view's id, gets the record for the taxon,
+ * Gets the currently selected taxon group/view's id, gets the record for the taxon,
  * stores both it's id and level in the global focusStorage, and returns
  * the taxon's record.
  */
-function storeRealmAndReturnRootTaxa(val) {
-    const realmId = val || getSelValOrDefault(_u('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
-    const realm = _u('getDetachedRcrd', [realmId, tState().get('realms'), 'realm']);/*dbug-log*///console.log("realmTaxon = %O", realm);
-    updateRealmTableState(realmId, realm);
-    return Object.values(realm.taxa).map(getRootTaxonRcrd);
+function storeGroupAndReturnRootTaxa(val) {
+    const groupId = val || getSelValOrDefault(_u('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], groupId [%s]', val, groupId)
+    const group = _u('getDetachedRcrd', [groupId, tState().get('groups'), 'group']);/*dbug-log*///console.log("groupTaxon = %O", group);
+    updateGroupTableState(groupId, group);
+    return Object.values(group.taxa).map(getRootTaxonRcrd);
 }
 function getRootTaxonRcrd(root) {
     return _u('getDetachedRcrd', [root.id, tState().get('rcrdsById'), 'taxon']);
 }
-function updateRealmTableState(realmId, realm) {
-    _u('setData', ['curView', realmId]);
+function updateGroupTableState(groupId, group) {
+    _u('setData', ['curView', groupId]);
     tState().set({
-        // realmLvl: realmTaxonRcrd.level,
-        curView: realmId,
-        realmName: realm.pluralName,
-        allRealmLvls: realm.uiLevelsShown,
+        // groupLvl: groupTaxonRcrd.level,
+        curView: groupId,
+        groupName: group.pluralName,
+        allgroupRanks: group.uiLevelsShown,
     });
 }
-/** This catches errors in realm value caused by exiting mid-tutorial. TODO */
+/** This catches errors in group value caused by exiting mid-tutorial. TODO */
 function getSelValOrDefault(val) {
     return !val ? 1 : isNaN(val) ? 1 : val;
 }
@@ -104,5 +104,5 @@ function startTxnTableBuildChain(taxa) {   //, init = false
         .then(tree => build.buildTxnRowData(tree, tS))
         .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Taxon Tree', rowData, tS))
-        .then(() => _filter('loadTxnFilters', [tS, tS.realmName]));
+        .then(() => _filter('loadTxnFilters', [tS, tS.groupName]));
 }

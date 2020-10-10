@@ -259,28 +259,28 @@ function addToRcrdProp(prop, rcrd, entity) {
 /* ------------ MODIFY FOR LOCAL DB ------------------ */
 function handleEntityLocalDataUpdates(entity, rcrd) {
     const update = {
-        'taxon': { 'realm': addRealmDataToRcrd },
-        'interaction': { 'objRealm': addObjRealmIdToRcrd }
+        'taxon': { 'group': addGroupDataToRcrd },
+        'interaction': { 'objGroup': addObjGroupIdToRcrd }
     };
     if (!update[entity]) { return; }
     updateDataProps(entity, rcrd, update[entity]);
 }
-function addRealmDataToRcrd(prop, rcrd, entity) {
+function addGroupDataToRcrd(prop, rcrd, entity) {
     const taxa = db.getMmryData('taxon');
     const taxon = taxa[rcrd.id];
-    taxon.realm = getTaxonRealm(taxon, taxa);
+    taxon.group = getTaxonGroup(taxon, taxa);
     db.setDataInMemory('taxon', taxa);
 }
-function getTaxonRealm(taxon, taxa) {
+function getTaxonGroup(taxon, taxa) {
     const parent = taxa[taxon.parent];
-    if (parent.realm) { return parent.realm; }
-    return getTaxonRealm(parent, taxa);
+    if (parent.group) { return parent.group; }
+    return getTaxonGroup(parent, taxa);
 }
-function addObjRealmIdToRcrd(prop, rcrd, entity) {
+function addObjGroupIdToRcrd(prop, rcrd, entity) {
     const ints = db.getMmryData('interaction');
     const taxa = db.getMmryData('taxon');
     const taxon = taxa[rcrd.object];
-    rcrd.objRealm = taxon.realm.id;
+    rcrd.objGroup = taxon.group.id;
     db.setDataInMemory('interaction', ints);
 }
 /* ------------ CORE DATA HANDLERS ------------------ */
@@ -389,15 +389,15 @@ function addToParentRcrd(prop, rcrd, entity) {
 //     db.setDataInMemory(prop, tagObj);
 // }
 /**
- * Adds the Taxon's name to the stored names for it's realm and level.
- * Note: 'realm' is added above, so the taxon from storage is used rather than the rcrd.
+ * Adds the Taxon's name to the stored names for it's group and level.
+ * Note: 'group' is added above, so the taxon from storage is used rather than the rcrd.
  */
 function addToTaxonNames(prop, rcrd, entity) {                                  //console.log('addToTaxonNames. prop = [%s] rcrd = %O', prop, rcrd);
     const taxon = db.getMmryData('taxon')[rcrd.id];
-    const realm = taxon.realm.displayName;
-    const group = taxon.realm.group;
+    const group = taxon.group.displayName;
+    const subGroup = taxon.group.subGroup;
     const level = taxon.level.displayName;
-    const nameProp = realm+group+level+"Names";
+    const nameProp = group+subGroup+level+"Names";
     let data = db.getMmryData(nameProp) || {};
     data[taxon.name] = taxon.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
     db.setDataInMemory(nameProp, data);
@@ -561,12 +561,12 @@ function getTaxonName(edits, rcrd) {
     return edits.name ? edits.name.old : rcrd.name;
 }
 function getNameProp(edits, rcrd) {
-    const group = getGroup(edits.group, rcrd);
+    const subGroup = getSubGroup(edits.subGroup, rcrd);
     const level = getLevel(edits.level, rcrd);
-    return rcrd.realm.displayName + group + level + 'Names';
+    return rcrd.group.displayName + subGroup + level + 'Names';
 }
-function getGroup(groupEdits, rcrd) {
-    return !groupEdits ? rcrd.realm.group : groupEdits.old;
+function getSubGroup(subGroupEdits, rcrd) {
+    return !subGroupEdits ? rcrd.group.subGroup : subGroupEdits.old;
 }
 function getLevel(lvlEdits, rcrd) {
     return !lvlEdits ? rcrd.level.displayName :

@@ -30,7 +30,7 @@ function exportTableDataThenResetTable() {
 /* ----------- ------- FILL EXPORT DATA ------------------------------------- */
 /**
  * Adds export-only data to the interaction data:
- *     Taxon - A data-point is added for each realm-level in both roles, and
+ *     Taxon - A data-point is added for each group-level in both roles, and
  *         stores the ancestry for the taxa in each interaction.
  *     Location - Elevation, Elevation Max, Latitude, and Longitude
  */

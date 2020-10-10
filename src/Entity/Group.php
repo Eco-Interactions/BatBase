@@ -7,14 +7,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * Realm.
+ * Group.
  *
- * @ORM\Table(name="realm")
+ * @ORM\Table(name="group")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
-class Realm
+class Group
 {
     /**
      * @var int
@@ -51,7 +51,7 @@ class Realm
 
     /**
      * @var string
-     * JSON array with the level IDs for each level to display for the realm.
+     * JSON array with the level IDs for each level to display for the group.
      *
      * @ORM\Column(name="ui_levels", type="string", length=255, nullable=false)
      * @JMS\Expose
@@ -63,8 +63,8 @@ class Realm
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
-     *     targetEntity="App\Entity\RealmRoot",
-     *     mappedBy="realm",
+     *     targetEntity="App\Entity\GroupRoot",
+     *     mappedBy="group",
      *     cascade={"remove"},
      *     orphanRemoval=true,
      *     fetch="EXTRA_LAZY"
@@ -147,7 +147,7 @@ class Realm
      *
      * @param string $displayName
      *
-     * @return Realm
+     * @return Group
      */
     public function setDisplayName($displayName)
     {
@@ -171,7 +171,7 @@ class Realm
      *
      * @param string $pluralName
      *
-     * @return Realm
+     * @return Group
      */
     public function setPluralName($pluralName)
     {
@@ -195,7 +195,7 @@ class Realm
      *
      * @param string $uiLevelsShown
      *
-     * @return Realm
+     * @return Group
      */
     public function setUiLevelsShown($uiLevelsShown)
     {
@@ -217,13 +217,13 @@ class Realm
     /**
      * Add a Taxon.
      *
-     * @param \App\Entity\RealmRoot $realmRoot
+     * @param \App\Entity\GroupRoot $groupRoot
      *
-     * @return Realm
+     * @return Group
      */
-    public function addTaxon(\App\Entity\RealmRoot $realmRoot)
+    public function addTaxon(\App\Entity\GroupRoot $groupRoot)
     {
-        $this->taxa[] = $realmRoot;
+        $this->taxa[] = $groupRoot;
 
         return $this;
     }
@@ -231,11 +231,11 @@ class Realm
     /**
      * Remove a Taxon.
      *
-     * @param \App\Entity\RealmRoot $realmRoot
+     * @param \App\Entity\GroupRoot $groupRoot
      */
-    public function removeTaxon(\App\Entity\RealmRoot $realmRoot)
+    public function removeTaxon(\App\Entity\GroupRoot $groupRoot)
     {
-        $this->taxa->removeElement($realmRoot);
+        $this->taxa->removeElement($groupRoot);
     }
 
     /**
@@ -249,8 +249,8 @@ class Realm
 
         if (!is_array($this->taxa)) { return [];}
 
-        foreach ($this->taxa as $realmRoot) {
-            array_push($taxa, $realmRoot->getTaxon());
+        foreach ($this->taxa as $groupRoot) {
+            array_push($taxa, $groupRoot->getTaxon());
         }
 
         return $this->taxa;
@@ -267,8 +267,8 @@ class Realm
     {
         $taxa = [];
 
-        foreach ($this->taxa as $realmRoot) {
-            $taxon = $realmRoot->getTaxon();
+        foreach ($this->taxa as $groupRoot) {
+            $taxon = $groupRoot->getTaxon();
             $taxa = array_merge($taxa, [ $taxon->getDisplayName() => [
                 'name' => $taxon->getName(),
                 'id' => $taxon->getId(),
@@ -284,7 +284,7 @@ class Realm
      *
      * @param \DateTime $createdAt
      *
-     * @return Realm
+     * @return Group
      */
     public function setCreated(\DateTime $createdAt)
     {
@@ -328,7 +328,7 @@ class Realm
      *
      * @param \DateTime $updatedAt
      *
-     * @return Realm
+     * @return Group
      */
     public function setUpdated(\DateTime $updatedAt)
     {

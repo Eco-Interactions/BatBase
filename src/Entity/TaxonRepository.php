@@ -15,8 +15,8 @@ class TaxonRepository extends EntityRepository
     public function findAllNonBatTaxa($batRealm)
     {
         return $this->createQueryBuilder('taxon')
-            ->leftJoin('taxon.realm', 'realm_taxon')
-            ->andWhere('realm_taxon.realm != :batRealm')
+            ->leftJoin('taxon.group', 'group_taxon')
+            ->andWhere('group_taxon.group != :batRealm')
             ->setParameter('batRealm', $batRealm)
             ->getQuery()
             ->execute();

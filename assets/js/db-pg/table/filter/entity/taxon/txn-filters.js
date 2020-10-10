@@ -10,13 +10,13 @@
  *      UI
  *          NAME FILTER
  *          LEVEL TAXON
- *          OBJECT REALM
+ *          Object Group
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
 import * as fM from '../../filter-main.js';
 import { _table, _ui, _u } from '../../../../db-main.js';
-import { initObjectRealmCombobox, filterTableByObjectRealm } from './obj-realm-filter.js';
+import { initObjectGroupCombobox, filterTableByobjectGroup } from './obj-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
@@ -24,8 +24,8 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     loadTxnLevelComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    _ui('updateTaxonFilterViewMsg', [tblState.realmName]);
-    if (tblState.realmName === 'Bats') { return initObjectRealmCombobox(); }
+    _ui('updateTaxonFilterViewMsg', [tblState.groupName]);
+    if (tblState.groupName === 'Bats') { return initObjectGroupCombobox(); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {
@@ -35,7 +35,7 @@ function initTxnNameSearchElem(tblState) {
 /* ------------------------ LEVEL TAXON ------------------------------------- */
 /**
  * Builds and initializes a search-combobox for each level present in the
- * the unfiltered realm tree. Each level's box is populated with the names
+ * the unfiltered group tree. Each level's box is populated with the names
  * of every taxon at that level in the displayed, filtered, table-tree. After
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
@@ -45,14 +45,14 @@ function loadTxnLevelComboboxes(tblState) {
     updateTxnLevelComboboxes(lvlOptsObj, levels, tblState);
 }
 /**
- * Builds select options for each level with taxon data in the current realm.
+ * Builds select options for each level with taxon data in the current group.
  * If there is no data after filtering at a level, a 'none' option obj is built
  * and will be selected.
  */
 function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts levels = %O", tblState.taxaByLvl);
     const optsObj = {};
     const taxaByLvl = tblState.taxaByLvl;
-    tblState.allRealmLvls.forEach(buildLvlOptions);
+    tblState.allgroupRanks.forEach(buildLvlOptions);
     return optsObj;
 
     function buildLvlOptions(lvl) {
@@ -97,7 +97,7 @@ function updateTxnLevelComboboxes(lvlOptsObj, levels, tblState) {
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
     $('#focus-filters').append(elems);
-    initLevelComboboxes(tblState.allRealmLvls);
+    initLevelComboboxes(tblState.allgroupRanks);
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 
     function buildTaxonSelects(opts, levels) {
@@ -112,9 +112,9 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
         return elems;
     }
 }
-function initLevelComboboxes(realmLvls) {
+function initLevelComboboxes(groupRanks) {
     const confg = {};
-    realmLvls.forEach(lvl => {confg[lvl] = applyTxnFilter});
+    groupRanks.forEach(lvl => {confg[lvl] = applyTxnFilter});
     _u('initComboboxes', [confg]);
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O, levels = %O, tblState = %O", lvlOptsObj, levels, tblState)
@@ -125,7 +125,7 @@ function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  
 }
 function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    tblState.allRealmLvls.forEach(lvl => {
+    tblState.allgroupRanks.forEach(lvl => {
         if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
         _u('setSelVal', [lvl, selected[lvl], 'silent']);
     });
@@ -164,7 +164,7 @@ function clearSelection(elem) {
 }
 /**
  * When a taxon is selected from the filter comboboxes, the record is returned.
- * When 'all' is selected, the selected parent is returned, or the realm record.
+ * When 'all' is selected, the selected parent is returned, or the group record.
  * When the tree-text filter is being applied, returns the most specific taxon selected.
  */
 function getTaxonTreeRootRcrd(val, rcrds, that) {
@@ -195,7 +195,7 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
     const selected = {};
     selectAncestorTaxa(selTaxonObj);
     return selected;
-    /** Adds parent taxa to selected object, until the realm parent. */
+    /** Adds parent taxa to selected object, until the group parent. */
     function selectAncestorTaxa(taxon) {
         if (taxon.isRoot) { return; }
         selected[taxon.level.displayName] = taxon.id;

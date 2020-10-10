@@ -114,7 +114,7 @@ function getTxnDisplayData(data) {
     return [
         {
             section:  {
-                name: data.realm.displayName + ' Hierarchy - ' + data.name,
+                name: data.group.displayName + ' Hierarchy - ' + data.name,
             },
             rows: [
                [  //row 1
@@ -163,7 +163,7 @@ function getEntityLinkHtml(entity, id, displayTxt) {
 /**
  * Returns the taxonomic heirachy for the group:
  *     full - All related taxa from the root down with the core taxon bolded
- *     parent - From the core taxon up through the realm
+ *     parent - From the core taxon up through the group
  */
 function getTxnHierarchy (taxon, group) {
     const txnNameHtml = `<strong>${taxon.displayName}</strong>`;

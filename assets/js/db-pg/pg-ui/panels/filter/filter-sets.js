@@ -222,7 +222,7 @@ function setComboElem(type, val) {
 }
 function getComboId(field) {
     const map = {
-        'Object Realm': '#selObjRealm',
+        'Object Group': '#selObjRealm',
         'Publication Type': '#selPubType'
     }
     return map[field];

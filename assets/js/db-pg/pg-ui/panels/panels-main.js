@@ -55,8 +55,8 @@ export function clearFilterUi() {
 export function updateFilterStatusMsg() {
     fM.updateFilterStatusMsg();
 }
-export function updateTaxonFilterViewMsg(realmName) {
-    fM.updateTaxonFilterViewMsg(realmName);
+export function updateTaxonFilterViewMsg(groupName) {
+    fM.updateTaxonFilterViewMsg(groupName);
 }
 /* ------------- FILTER SETS ------------- */
 export function isFilterSetActive() {
