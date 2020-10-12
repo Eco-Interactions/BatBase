@@ -431,7 +431,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .group-row {
     justify-content: flex-start !important;
 }
-select[id$="txn-lvl"] + div {
+select[id$="txn-rank"] + div {
     width: 150px;
 }
 /*------------- Loc Map Styles ----------------*/

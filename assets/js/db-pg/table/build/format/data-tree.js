@@ -50,39 +50,39 @@ function fillLocChildren(rcrd) {
     return rcrd;
 }
 /* ========================= SOURCE TREE ============================================================================ */
-/** (Re)builds source tree for the selected source realm. */
-export async function buildSrcTree(realm) {
+/** (Re)builds source tree for the selected source-type. */
+export async function buildSrcTree(type) {
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
-    const tree = await buildSrcRealmTree(realm);
+    const tree = await buildSrcTypeTree(type);
     return fillTreeWithInteractions('srcs', tree);
 }
 /**
- * Builds the source data tree for the selected source realm (source type)
- * NOTE: Sources have three realms and tree-data structures:
+ * Builds the source data tree for the selected source type.
+ * NOTE: Sources have three types and tree-data structures:
  * Authors->Citations/Publications->Interactions
  * Publications->Citations->Interactions.
  * Publishers->Publications->Citations->Interactions.
  */
-function buildSrcRealmTree(realm) {
-    return Promise.all(getSrcTreeData(realm))
-        .then(data => buildSourceTree(data, realm));
+function buildSrcTypeTree(type) {
+    return Promise.all(getSrcTreeData(type))
+        .then(data => buildSourceTree(data, type));
 }
-function getSrcTreeData(realm) {
-    const realmSrcKey = getSrcRcrdKey(realm);
-    return [ _u('getData', [['publication', 'author']]), _u('getData', [realmSrcKey])];
+function getSrcTreeData(type) {
+    const typeKey = getSrcRcrdKey(type);
+    return [ _u('getData', [['publication', 'author']]), _u('getData', [typeKey])];
 }
-function getSrcRcrdKey(realm) {
+function getSrcRcrdKey(type) {
     const keys = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
-    return keys[realm];
+    return keys[type];
 }
-function buildSourceTree(data, realm) {
-    let tree = buildRealmTree(realm, getTreeRcrds(data[1], tblState.rcrdsById, 'source'), data[0]);
+function buildSourceTree(data, type) {
+    let tree = buildTypeTree(type, getTreeRcrds(data[1], tblState.rcrdsById, 'source'), data[0]);
     tree = filterTreeToInteractionSet(tree, 'srcs');
     return sortDataTree(tree);
 }
-function buildRealmTree(realm, srcData, detailData) {
+function buildTypeTree(type, srcData, detailData) {
     const bldr = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
-    return bldr[realm](srcData, detailData);
+    return bldr[type](srcData, detailData);
 }
 /*-------------- Publication Source Tree -------------------------------------------*/
 /**
@@ -189,12 +189,12 @@ function buildAuthTree(authSrcRcrds, data) {                                    
 /* ========================= TAXON TREE ============================================================================= */
 /**
  * Returns a heirarchical tree of taxon record data from the root taxa through
- * all children. The taxon levels present are stored in tblState.
+ * all children. The taxon ranks present are stored in tblState.
  */
 export function buildTxnTree(taxa) {                                            //console.log("buildTaxonTree called for taxa = %O", taxa);
-    tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags', 'allLevels']);
+    tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags', 'allRanks']);
     const tree = buildTxnDataTree(taxa);
-    updateTaxaByLvl(taxa, tblState.allLevels);
+    updateTaxaByRank(taxa, tblState.allRanks);
     if (!tblState.flags.allDataAvailable) { return Promise.resolve(tree); }
     return fillTreeWithInteractions('taxa', tree);
 }
@@ -217,29 +217,29 @@ function buildTxnDataTree(roots) {
         return getTreeRcrds(taxa, tblState.rcrdsById, 'taxon').map(buildTaxonBranch);
     }
 }
-function updateTaxaByLvl(taxa, levels) {
-    const taxaByLvl = seperateTaxonTreeByLvl(taxa, levels);                     //console.log("taxaByLvl = %O", taxaByLvl)
-    tState().set({'taxaByLvl': taxaByLvl});
+function updateTaxaByRank(taxa, ranks) {
+    const taxaByRank = seperateTaxonTreeByRank(taxa, ranks);                     //console.log("taxaByRank = %O", taxaByRank)
+    tState().set({'taxaByRank': taxaByRank});
 }
-/** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(taxa, levels) {                                 //console.log('seperateTaxonTreeByLvl. taxon = %O, levels = %O', topTaxon, levels);
+/** Returns an object with taxon records by rank and keyed with display names. */
+function seperateTaxonTreeByRank(taxa, ranks) {                                 //console.log('seperateTaxonTreeByRank. taxon = %O, ranks = %O', topTaxon, ranks);
     const separated = {};
     taxa.forEach(t => t.children.forEach(separate));
-    return sortObjByLevelRank(separated);
+    return sortObjByRank(separated);
 
     function separate(taxon) {                                                  //console.log('taxon = %O', taxon)
-        const lvl = taxon.level.displayName;
-        if (!separated[lvl]) { separated[lvl] = {}; }
-        separated[lvl][taxon.name] = taxon.id;
+        const rank = taxon.rank.displayName;
+        if (!separated[rank]) { separated[rank] = {}; }
+        separated[rank][taxon.name] = taxon.id;
 
         if (taxon.children) {
             taxon.children.forEach(child => separate(child));
         }
     }
-    function sortObjByLevelRank(taxonObj) {
+    function sortObjByRank(taxonObj) {
         const obj = {};
-        Object.keys(levels).forEach(lvl => {
-            if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
+        Object.keys(ranks).forEach(rank => {
+            if (rank in taxonObj) { obj[rank] = taxonObj[rank]; }
         });
         return obj;
     }

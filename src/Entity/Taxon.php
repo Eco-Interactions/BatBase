@@ -114,12 +114,12 @@ class Taxon
     private $group;
 
     /**
-     * @var \App\Entity\Level
+     * @var \App\Entity\Rank
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumn(name="level_id", referencedColumnName="id", nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Rank", inversedBy="taxons")
+     * @ORM\JoinColumn(name="rank_id", referencedColumnName="id", nullable=false)
      */
-    private $level;
+    private $rank;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -494,40 +494,40 @@ class Taxon
     }
 
     /**
-     * Set level.
+     * Set rank.
      *
-     * @param \App\Entity\Level $level
+     * @param \App\Entity\Rank $rank
      *
      * @return Taxon
      */
-    public function setLevel(\App\Entity\Level $level)
+    public function setRank(\App\Entity\Rank $rank)
     {
-        $this->level = $level;
+        $this->rank = $rank;
 
         return $this;
     }
 
     /**
-     * Get level.
+     * Get rank.
      *
-     * @return \App\Entity\Level
+     * @return \App\Entity\Rank
      */
-    public function getLevel()
+    public function getRank()
     {
-        return $this->level;
+        return $this->rank;
     }
 
     /**
-     * Get level id and displayName.
+     * Get rank id and displayName.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("level")
+     * @JMS\SerializedName("rank")
      * @Groups({"normalized", "flattened"})
      */
-    public function getLevelData()
+    public function getRankData()
     {
         return [
-            "id" => $this->level->getId(),
-            "displayName" => $this->level->getDisplayName()
+            "id" => $this->rank->getId(),
+            "displayName" => $this->rank->getDisplayName()
         ];
     }
 

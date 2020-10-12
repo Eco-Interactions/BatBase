@@ -57,8 +57,8 @@ export function selectIntLoc(id) {
 export function enableCountryRegionField() {
     int.enableCountryRegionField();
 }
-export function onLevelSelection() {
-    int.onLevelSelection(...arguments);
+export function onRankSelection() {
+    int.onRankSelection(...arguments);
 }
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {
@@ -74,8 +74,8 @@ export function autofillCoordinateFields() {
     loc.autofillCoordinateFields(...arguments);
 }
 /** ------------------------ TAXON ------------------------------------------ */
-export function createTaxon(level, val) {
-    return txn.initCreateForm(level, val);
+export function createTaxon(rank, val) {
+    return txn.initCreateForm(rank, val);
 }
 export function getSelectedTaxon() {
     return int.getSelectedTaxon();

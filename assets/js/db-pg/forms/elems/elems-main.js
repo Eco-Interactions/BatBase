@@ -142,7 +142,7 @@ export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
 function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
     return fields.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl);
 }
-/** Returns true if the next sub-level form exists in the dom. */
+/** Returns true if the next sub-rank form exists in the dom. */
 function hasOpenSubForm(fLvl) {
     const childFormLvl = getNextFormLevel('child', fLvl);
     return $('#'+childFormLvl+'-form').length > 0;

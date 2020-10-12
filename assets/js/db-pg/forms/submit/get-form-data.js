@@ -182,25 +182,25 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     } /* End addContributorData */
     /** ---- Additional Taxon data ------ */
     function getTaxonData() {
-        const formTaxonLvl = fS.forms.groupData.formTaxonLvl;
-        formVals.parentTaxon = getParentTaxon(formTaxonLvl);
-        formVals.level = formTaxonLvl;
+        const formTaxonRank = fS.forms.taxonData.formTaxonRank;
+        formVals.parentTaxon = getParentTaxon(formTaxonRank);
+        formVals.level = formTaxonRank;
     }
     /** -------------------- Additional Taxon Data -----------------------*/
     /**
      * Checks each parent-level combo for a selected taxon. If none, the group
      * taxon is added as the new Taxon's parent.
      */
-    function getParentTaxon(lvl) {
-        const lvls = fS.forms.groupData.groupRanks;
-        const parentLvl = lvls[lvls.indexOf(lvl)+1];
-        if (ifParentIsRootTaxon(lvl, parentLvl)) {
-            return fS.forms.groupData.groupTaxa[id];
+    function getParentTaxon(rank) {
+        const ranks = fS.forms.taxonData.groupRanks;
+        const parentRank = ranks[ranks.indexOf(rank)+1];
+        if (ifParentIsRootTaxon(rank, parentRank)) {
+            return fS.forms.taxonData.groupTaxa[id];
         }
-        return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
+        return $('#'+parentRank+'-sel').val() || getParentTaxon(parentRank);
 
-        function ifParentIsRootTaxon(lvl, parentLvl) {
-            return lvl === fS.forms.groupData.rootLvl || !parentLvl;
+        function ifParentIsRootTaxon(rank, parentRank) {
+            return rank === fS.forms.taxonData.rootRank || !parentRank;
         }
     }
 }

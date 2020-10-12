@@ -30,7 +30,7 @@ function exportTableDataThenResetTable() {
 /* ----------- ------- FILL EXPORT DATA ------------------------------------- */
 /**
  * Adds export-only data to the interaction data:
- *     Taxon - A data-point is added for each group-level in both roles, and
+ *     Taxon - A data-point is added for each group-rank in both roles, and
  *         stores the ancestry for the taxa in each interaction.
  *     Location - Elevation, Elevation Max, Latitude, and Longitude
  */
@@ -86,7 +86,7 @@ function fillInteractionsWithExportData(rcrds) {
             }
             function getColName() {
                 const prefix = role == 'subject' ? 'subj' : 'obj';
-                return  prefix + txn.level.displayName;
+                return  prefix + txn.rank.displayName;
             }
         }
     }
@@ -145,12 +145,12 @@ function toggleTxnExportData(showing) {
         'objDomain', 'objectKingdom', 'objPhylum', 'objClass', 'objOrder',
         'objGenus', 'objFamily', 'objSpecies'];
     // toggleTxnUiCols(!showing);
-    // const cols = getCurTaxonLvlCols(tblState.taxaByLvl);
+    // const cols = getCurTaxonRankCols(tblState.taxaByRank);
     toggleTableColumns(cols, showing);
 }
-function getCurTaxonLvlCols(taxaByLvl) {                                        //console.log("taxaByLvl = %O", tParams.taxaByLvl)
-    const lvls = Object.keys(taxaByLvl);
-    return lvls.map(lvl => 'tree' + lvl);
+function getCurTaxonRankCols(taxaByRank) {                                        //console.log("taxaByRank = %O", tParams.taxaByRank)
+    const ranks = Object.keys(taxaByRank);
+    return ranks.map(rank => 'tree' + rank);
 }
 
 function toggleTableColumns(cols, showing) {

@@ -41,7 +41,7 @@ const app = {
         'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
         'Hematophagy': ['Bird', 'Mammal'],
  */
-export function initTypeField(objectGroup) {                                    console.log(        '+--initTypeField = [%s]', objectGroup);
+export function initTypeField(objectGroup) {                                    //console.log(        '+--initTypeField = [%s]', objectGroup);
     if (app.objectGroup === 'objectGroup') { return; }
     app.objectGroup = objectGroup;
     loadIntTypeOptions();

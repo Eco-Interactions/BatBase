@@ -54,7 +54,7 @@ function getEntityConfg(entity) {
 }
 /* ------------------ TAXON SELECT FORM CONFG ------------------------------- */
 function getRoleConfg(role) {
-    const addField = ifObjectAddGroupFields(role);
+    const addField = role === 'subject' ? {} : ifObjectAddGroupFields(role);
     const fields = getTaxonSelectFields(addField);
     return {
         'add': addField,
@@ -68,7 +68,7 @@ function getRoleConfg(role) {
 }
 function ifObjectAddGroupFields(role) {
     const objFields = {'Group': 'select', 'Sub-Group': 'select'};
-    return role === 'subject' || $('#Group_row').length ? {'Group': 'select'} : objFields;
+    return $('#Group_row').length ? {'Sub-Group': 'select'} : objFields;
 }
 function getTaxonSelectFields(addField) {
     const lvls = _state('getTaxonProp', ['groupRanks']);
@@ -84,10 +84,10 @@ export function getCoreFieldDefs(entity) {
     const coreEntityMap = {
         'author': 'source',         'citation': 'source',
         'publication': 'source',    'publisher': 'source',
-        'location': 'location',     'subject': 'taxonLvls',
-        'object': 'taxonLvls',      'plant': 'taxonLvls',
-        'arthropod': 'taxonLvls',   'taxon': 'taxon',
-        'interaction': 'interaction','bat': 'taxonLvls',
+        'location': 'location',     'subject': 'taxonRanks',
+        'object': 'taxonRanks',      'plant': 'taxonRanks',
+        'arthropod': 'taxonRanks',   'taxon': 'taxon',
+        'interaction': 'interaction','bat': 'taxonRanks',
         'editor': 'source',
     };
     const fields = {
@@ -104,7 +104,7 @@ export function getCoreFieldDefs(entity) {
             'Year': 'year', 'Doi': 'doi','Website': 'url',
             'Authors': 'multiSelect', 'Editors': 'multiSelect'
         },
-        'taxonLvls': {
+        'taxonRanks': {
             'Class': 'select', 'Order': 'select', 'Family': 'select',
             'Genus': 'select', 'Species': 'select'
         },
@@ -197,7 +197,7 @@ export function getRelationshipFields(entity) {
         'publication': ['publicationType', 'contributor', 'publisher',
             'publisher/University'],
         'publisher': [],
-        'taxon': ['level', 'parentTaxon', 'group'],
+        'taxon': ['rank', 'parentTaxon', 'group'],
         'interaction': ['citationTitle', 'location', 'subject', 'object',
             'interactionTags', 'interactionType' ]
     };

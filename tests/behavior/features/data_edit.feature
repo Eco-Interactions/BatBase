@@ -282,13 +282,13 @@ Feature: Edit data in the database
 
   ## -------------------------- Taxon ----------------------------------------##
     @javascript
-    Scenario:  I should be able to edit the name and level of an existing taxon
+    Scenario:  I should be able to edit the name and rank of an existing taxon
         Given the database table is in "Taxon" view
         And I group interactions by "Arthropoda"
         And I click on the edit pencil for the "Order Lepidoptera" row
         And I see "Editing Taxon"
         When I change the "taxon name" field "input" to "Leopardil"
-        When I change the "taxon level" form dropdown to "Class"
+        When I change the "taxon rank" form dropdown to "Class"
         And I press the "Update Taxon" button
         And I wait for the "top" form to close
         Then I should see "Class Leopardil" in the tree

@@ -131,7 +131,7 @@ class SiteStatisticsController extends AbstractController
 
     private function getSpeciesTaxa($taxon)
     {
-        if ($taxon->getLevel()->getDisplayName() === 'Species') { return 1; }
+        if ($taxon->getRank()->getDisplayName() === 'Species') { return 1; }
         $subCount = 0;
 
         foreach ($taxon->getChildTaxa() as $childTaxon) {
@@ -143,7 +143,7 @@ class SiteStatisticsController extends AbstractController
 /* ------------------------- OTHER SPECIES ---------------------------------- */
     private function getAllNonBatSpeciesCount($batSpeciesCount)
     {
-        $species = $this->em->getRepository('App:Level')
+        $species = $this->em->getRepository('App:Rank')
             ->findOneBy(['displayName' => 'Species']);
 
         return count($species->getTaxa()) - $batSpeciesCount;

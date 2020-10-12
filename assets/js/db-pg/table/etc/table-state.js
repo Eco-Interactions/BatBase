@@ -32,9 +32,9 @@ import { _db } from '../../db-main.js';
  * In Taxon views:
  * {ary} allgroupRanks   Array of all levels present in the current tree.
  * {obj} groups         Group records keyed by id.
- * {obj} allLevels
+ * {obj} allRanks
  * {str} groupName      Stores Taxon view Group name
- * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
+ * {obj} taxaByRank      Taxon records in curTree organized by level and keyed under their display name.
  */
 let tState = { flags: {}};
 /* -------------------------- ACCESS ---------------------------------------- */

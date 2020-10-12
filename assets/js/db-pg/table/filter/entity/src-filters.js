@@ -13,14 +13,14 @@
 import * as fM from '../filter-main.js';
 import { _ui, _u } from '../../../db-main.js';
 /* ========================= UI ============================================ */
-export function loadSrcFilters(realm) {                             /*Perm-log*/console.log("       --Loading source [%s] filters.", realm);
-    if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
+export function loadSrcFilters(type) {                              /*Perm-log*/console.log("       --Loading source [%s] filters.", type);
+    if ($('#focus-filters label').length) { return clearPanelCombos(type); }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml,
         'publ':loadPublSearchHtml };
-    return buildUi[realm]();
+    return buildUi[type]();
 }
-function clearPanelCombos(realm) {
-    if (realm !== 'pubs') { return Promise.resolve(); }
+function clearPanelCombos(type) {
+    if (type !== 'pubs') { return Promise.resolve(); }
     return Promise.resolve($('#selPubType')[0].selectize.clear('silent'));
 }
 /** Builds a text input for searching author names. */

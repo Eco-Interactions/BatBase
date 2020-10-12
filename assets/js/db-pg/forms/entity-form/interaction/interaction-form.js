@@ -6,7 +6,7 @@
  *     focusPinAndEnableSubmitIfFormValid
  *     initCreateForm
  *     getSelectedTaxon
- *     onLevelSelection
+ *     onRankSelection
  *
  * TOC
  *     CREATE FORM
@@ -27,7 +27,7 @@
  *             ROLE SHARED HELPERS
  *                 initTaxonSelectForm
  *                 resetTaxonSelectForm
- *                 onLevelSelection
+ *                 onRankSelection
  *                 selectRoleTaxon
  *         INTERACTION TYPE & TAGS
  *     HELPERS
@@ -247,12 +247,12 @@ function getEntityComboEvents(entity) {
             'Object': { change: onTaxonRoleSelection.bind(null, 'Object') },
         },
         'taxon': {
-            'Class': { change: onLevelSelection, add: create('class') },
-            'Family': { change: onLevelSelection, add: create('family') },
-            'Genus': { change: onLevelSelection, add: create('genus') },
-            'Order': { change: onLevelSelection, add: create('order') },
+            'Class': { change: onRankSelection, add: create('class') },
+            'Family': { change: onRankSelection, add: create('family') },
+            'Genus': { change: onRankSelection, add: create('genus') },
+            'Order': { change: onRankSelection, add: create('order') },
             'Group': { change: onGroupSelection },
-            'Species': { change: onLevelSelection, add: create('species') },
+            'Species': { change: onRankSelection, add: create('species') },
         }
     };
     return events[entity] || events.taxon;
@@ -260,11 +260,11 @@ function getEntityComboEvents(entity) {
 function create(entity, fLvl) {
     return createSubEntity.bind(null, entity, fLvl);
 }
-function createTaxon(lvl) {
+function createTaxon(rank) {
     return (val) => {
-        createSubEntity(null, lvl, 'sub2')
-        .then(() => _state('setOnFormCloseHandler', ['sub2', enableTaxonLvls]))
-        .then(() => enableTaxonLvls(false));
+        createSubEntity(null, rank, 'sub2')
+        .then(() => _state('setOnFormCloseHandler', ['sub2', enableTaxonRanks]))
+        .then(() => enableTaxonRanks(false));
     }
 }
 function createSubEntity(entity, fLvl, val) {
@@ -444,15 +444,15 @@ function removeLocMap() {
 /* -------------- SUBJECT ---------------------- */
 /**
  * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
- * each level present in the group, (eg: Bat - Family, Genus, and Species), filled
- * with the taxa at that level. When one is selected, the remaining boxes
+ * each rank present in the group, (eg: Bat - Family, Genus, and Species), filled
+ * with the taxa at that rank. When one is selected, the remaining boxes
  * are repopulated with related taxa and the 'select' button is enabled.
  */
 function initSubjectSelect() {                                                  console.log('       +--initSubjectSelect (selected ? [%s])', $('#Subject-sel').val());
     initTaxonSelectForm('Subject', 1);
 }
 /* -------------- OBJECT ---------------------- */
-/** Note: The selected group's level combos are built @onGroupSelection. */
+/** Note: The selected group's rank combos are built @onGroupSelection. */
 function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
     initTaxonSelectForm('Object', getObjectGroup())
     .then(ifNoSubGroupsRemoveCombo);
@@ -463,15 +463,15 @@ function getObjectGroup(prop = 'id') {
     return getRcrd('taxon', prevSelectedId).group[prop];
 }
 /**
- * Removes any previous group comboboxes. Shows a combobox for each level present
- * in the selected Taxon group filled with the taxa at that level.
+ * Removes any previous group comboboxes. Shows a combobox for each rank present
+ * in the selected Taxon group filled with the taxa at that rank.
  */
 function onGroupSelection(val) {                                                //console.log("               --onGroupSelection. val = ", val)
     if (val === '' || isNaN(parseInt(val))) { return; }
-    clearPreviousGroupLevelCombos();
+    clearPreviousGroupRankCombos();
     _state('initGroupState', ['Object', val])
     .then(buildAndAppendGroupRows);
-    /** A row for each level present in the group filled with the taxa at that level.  */
+    /** A row for each rank present in the group filled with the taxa at that rank.  */
     function buildAndAppendGroupRows() {
         _elems('buildFormRows', ['object', {}, 'sub'])
         .then(appendGroupRowsAndFinishBuild);
@@ -484,22 +484,22 @@ function onGroupSelection(val) {                                                
         _elems('toggleSubmitBttn', ['#sub-submit', false]);
         /* Binds the current group to the 'Select Unspecified' button */
         $('#select-group').off('click');
-        $('#select-group').click(selectRoleTaxon.bind(null, null, getGroupData('groupTaxon')));
+        $('#select-group').click(selectRoleTaxon.bind(null, null, getTaxonData('groupTaxon')));
     }
 }
 function ifNoSubGroupsRemoveCombo(rows = false) {
-    const subGroups = Object.keys(getGroupData('SubGroupNames'));               console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
-    if (subGroups.length > 1) { return; }  console.log('removing row')
+    const subGroups = Object.keys(getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
+    if (subGroups.length > 1) { return; }
     if (!rows) {
         $('#Sub-Group_row').remove();
     } else {
         $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
     }
 }
-function clearPreviousGroupLevelCombos() {
-    $('#object_Rows>div').each(ifLevelComboRemoveCombo);
+function clearPreviousGroupRankCombos() {
+    $('#object_Rows>div').each(ifRankComboRemoveCombo);
 }
-function ifLevelComboRemoveCombo(i, elem) {
+function ifRankComboRemoveCombo(i, elem) {
     if (i !== 0) { elem.remove(); }
 }
 /* ------------------- ROLE SHARED HELPERS --------------- */
@@ -515,7 +515,7 @@ function ifSubFormAlreadyInUse(role) {
     return ifFormAlreadyOpenAtLevel('sub') || ifOppositeRoleFormLoading(role);
 }
 function ifOppositeRoleFormLoading(role) {
-    const oppRole = getGroupData('oppositeRole');
+    const oppRole = role === 'Subject' ? 'Object' : 'Subject';
     return $('#'+oppRole+'-sel').data('loading');
 }
 function buildTaxonSelectForm(role, groupId) {                                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
@@ -530,7 +530,7 @@ function addNewFormState(role) {
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
- * or brings the first level-combo into focus. Clears the [role]'s' combobox.
+ * or brings the first rank-combo into focus. Clears the [role]'s' combobox.
  */
 function finishTaxonSelectBuild(role) {
     addSelectGroupBttn();
@@ -547,7 +547,7 @@ function addSelectGroupBttn() {
 function buildSelectUnspecifedBttn() {
     const attr = { id: 'select-group', class: 'ag-fresh', type: 'button', value: 'Select Unspecified' }
     const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(selectRoleTaxon.bind(null, null, getGroupData('groupTaxon')));
+    $(bttn).click(selectRoleTaxon.bind(null, null, getTaxonData('groupTaxon')));
     return bttn;
 }
 /* --------- SELECT PREVIOUS TAXON OR FOCUS COMBO -------------- */
@@ -559,13 +559,13 @@ function buildSelectUnspecifedBttn() {
 function selectInitTaxonOrFocusFirstCombo(role) {
     const selId = getPrevSelId(role);
     if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { focusFirstLevelCombobox(_u('lcfirst', [role])); }
+    } else { focusFirstRankCombobox(_u('lcfirst', [role])); }
 }
 function getPrevSelId(role) {
     return $('#'+role+'-sel').val() || $('#'+role+'-sel').data('reset') ?
         $('#'+role+'-sel').data('selTaxon') : null;
 }
-function focusFirstLevelCombobox(lcRole) {
+function focusFirstRankCombobox(lcRole) {
     _cmbx('focusFirstCombobox', ['#'+lcRole+'_Rows']);
 }
 function appendTxnFormAndInitCombos(role, form) {
@@ -604,7 +604,7 @@ function resetTaxonCombobox(role, prevTaxonId) {
 function getTaxonym(id) {
     return getRcrd('taxon', id).displayName;
 }
-function enableTaxonLvls(enable = true) {
+function enableTaxonRanks(enable = true) {
     $.each($('#sub-form select'), (i, sel) => {
         _cmbx('enableCombobox', ['#'+sel.id, enable])
     });
@@ -612,7 +612,7 @@ function enableTaxonLvls(enable = true) {
 /* ------- resetTaxonSelectForm --------- */
 /** Removes and replaces the taxon form. */
 function resetTaxonSelectForm(role) {
-    const group = getGroupData('groupName');
+    const group = getTaxonData('groupName');
     const reset =  group == 'Bat' ? initSubjectSelect : initObjectSelect;
     $('#'+role+'-sel').data('reset', true);
     $('#sub-form').remove();
@@ -621,16 +621,13 @@ function resetTaxonSelectForm(role) {
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(id, role) {
     const taxon = getRcrd('taxon', id);
-    if (ifSelectedTaxonIsRootTaxon(taxon)) { return; }                          console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
+    if (taxon.isRoot) { return; }                                               console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
     selectPrevTaxon(taxon, role);
-}
-function ifSelectedTaxonIsRootTaxon(taxon) {
-    return getGroupData('rootTaxa').indexOf(taxon.name) !== -1;
 }
 function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
     if (ifTaxonInDifferentGroup(taxon.group)) { return selectTaxonGroup(taxon); }
-    _cmbx('setSelVal', ['#'+taxon.level.displayName+'-sel', taxon.id]);
+    _cmbx('setSelVal', ['#'+taxon.rank.displayName+'-sel', taxon.id]);
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
@@ -645,14 +642,14 @@ function selectTaxonGroup(taxon) {
 function deleteResetFlag(role) {
     $('#'+role+'-sel').removeData('reset');
 }
- /* ------- OnLevelSelection --------- */
+ /* ------- OnRankSelection --------- */
 /**
- * When a taxon at a level is selected, all child level comboboxes are
+ * When a taxon at a rank is selected, all child rank comboboxes are
  * repopulated with related taxa and the 'select' button is enabled. If the
  * combo was cleared, ensure the remaining dropdowns are in sync or, if they
  * are all empty, disable the 'select' button.
  */
-export function onLevelSelection(val, input) {                                  console.log("           --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
+export function onRankSelection(val, input) {                                  console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
     const fLvl = getSubFormLvl('sub');
     const elem = input || this.$input[0];
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
@@ -661,159 +658,159 @@ export function onLevelSelection(val, input) {                                  
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
 }
 function openTaxonCreateForm(selElem, fLvl) {
-    const level = selElem.id.split('-sel')[0];
-    if (level === 'Species' && !$('#Genus-sel').val()) {
-        return _val('formInitErr', [level, 'noGenus', fLvl]);
-    } else if (level === 'Genus' && !$('#Family-sel').val()) {
-        return _val('formInitErr', [level, 'noFamily', fLvl]);
+    const rank = selElem.id.split('-sel')[0];
+    if (rank === 'Species' && !$('#Genus-sel').val()) {
+        return _val('formInitErr', [rank, 'noGenus', fLvl]);
+    } else if (rank === 'Genus' && !$('#Family-sel').val()) {
+        return _val('formInitErr', [rank, 'noFamily', fLvl]);
     }
     selElem.selectize.createItem('create');
 }
 function syncTaxonCombos(elem) {
-    resetChildLevelCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
+    resetChildRankCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
 }
-function resetChildLevelCombos(selTxn) {
-    const lvlName = selTxn ? selTxn.level.displayName : getGroupTopSubLevel();
-    if (lvlName == 'Species') { return; }
-    getChildlevelOpts(lvlName, selTxn.group.subGroup)
-    .then(opts => repopulateLevelCombos(opts, {}));
+function resetChildRankCombos(selTxn) {
+    const rankName = selTxn ? selTxn.rank.displayName : getGroupTopSubRank();
+    if (rankName == 'Species') { return; }
+    getChildRankOpts(rankName, selTxn.group.subGroup)
+    .then(opts => repopulateRankCombos(opts, {}));
 }
-function getGroupTopSubLevel() {
-    return getGroupData('groupRanks').map(l => l).pop();
+function getGroupTopSubRank() {
+    return getTaxonData('groupRanks').map(l => l).pop();
 }
-function getChildlevelOpts(lvlName, subGroup) {
+function getChildRankOpts(rankName, subGroup) {
     const opts = {};
-    return buildChildLvlOpts().then(() => opts);
+    return buildChildRankOpts().then(() => opts);
 
-    function buildChildLvlOpts() {
-        const lvls = getChildLvls();
-        const optProms = lvls.map(lvl => getTaxonOpts(lvl))
+    function buildChildRankOpts() {
+        const ranks = getChildRanks();
+        const optProms = ranks.map(rank => getTaxonOpts(rank))
         return Promise.all(optProms);
     }
-    function getChildLvls() {
-        const lvls = getGroupData('groupRanks');
-        return lvls.slice(0, lvls.indexOf(lvlName));
+    function getChildRanks() {
+        const ranks = getTaxonData('groupRanks');
+        return ranks.slice(0, ranks.indexOf(rankName));
     }
-    function getTaxonOpts(level) {
-        return _cmbx('getTaxonOpts', [level, null, getGroupData('groupName'), subGroup])
-            .then(lvlOpts => opts[level] = lvlOpts);
+    function getTaxonOpts(rank) {
+        return _cmbx('getTaxonOpts', [rank, null, getTaxonData('groupName'), subGroup])
+            .then(rankOpts => opts[rank] = rankOpts);
     }
 }
 /**
- * Repopulates the comboboxes of child levels when a taxon is selected. Selected
- * and ancestor levels are populated with all taxa at the level and the direct
- * ancestors selected. Child levels populate with only decendant taxa and
+ * Repopulates the comboboxes of child ranks when a taxon is selected. Selected
+ * and ancestor ranks are populated with all taxa at the rank and the direct
+ * ancestors selected. Child ranks populate with only decendant taxa and
  * have no initial selection.
  * TODO: Fix bug with child taxa opt refill sometimes filling with all taxa.
  */
 function repopulateCombosWithRelatedTaxa(selId) {
     const opts = {}, selected = {};
     const taxon = getRcrd('taxon', selId);                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
-    const group = getGroupData('groupName');
+    const group = getTaxonData('groupName');
     const subGroup = taxon.group.subGroup;
     if (!taxon) { return; } //issue alerted to developer and editor
     taxon.children.forEach(addRelatedChild);
     return buildUpdatedTaxonOpts()
-        .then(repopulateLevelCombos.bind(null, opts, selected));
+        .then(repopulateRankCombos.bind(null, opts, selected));
 
     function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
         const childTxn = getRcrd('taxon', id);
         if (!childTxn) { return; } //issue alerted to developer and editor
-        const level = childTxn.level.displayName;
-        addOptToLevelAry(childTxn, level);
+        const rank = childTxn.rank.displayName;
+        addOptToRankAry(childTxn, rank);
         childTxn.children.forEach(addRelatedChild);
     }
-    function addOptToLevelAry(childTxn, level) {
-        if (!opts[level]) { opts[level] = []; }                                 //console.log("setting lvl = ", taxon.level)
-        opts[level].push({ value: childTxn.id, text: childTxn.name });
+    function addOptToRankAry(childTxn, rank) {
+        if (!opts[rank]) { opts[rank] = []; }                                 //console.log("setting rank = ", taxon.rank)
+        opts[rank].push({ value: childTxn.id, text: childTxn.name });
     }
     function buildUpdatedTaxonOpts() {
         return Promise.all([getSiblingOpts(taxon), getAncestorOpts(taxon.parent)])
-        .then(buildOptsForEmptyLevels)
+        .then(buildOptsForEmptyRanks)
         .then(addCreateOpts);
     }
     function getSiblingOpts(taxon) {
-        const lvl = taxon.level.displayName;
-        return _cmbx('getTaxonOpts', [lvl, null, group, subGroup])
+        const rank = taxon.rank.displayName;
+        return _cmbx('getTaxonOpts', [rank, null, group, subGroup])
             .then(o => {                                                        //console.log('getSiblingOpts. taxon = %O', taxon);
-                opts[taxon.level.displayName] = o;
-                selected[taxon.level.displayName] = taxon.id;
+                opts[taxon.rank.displayName] = o;
+                selected[taxon.rank.displayName] = taxon.id;
             });
     }
     function getAncestorOpts(prntId) {                                          //console.log('getAncestorOpts. prntId = [%s]', prntId);
         const prntTaxon = getRcrd('taxon', prntId);
         if (prntTaxon.isRoot) { return Promise.resolve();}
-        selected[prntTaxon.level.displayName] = prntTaxon.id;
+        selected[prntTaxon.rank.displayName] = prntTaxon.id;
         return buildAncestorOpts(prntTaxon);
     }
     function buildAncestorOpts(prntTaxon) {
-        const lvl = prntTaxon.level.displayName;
-        return _cmbx('getTaxonOpts', [lvl, null, group, subGroup])
-            .then(o => {                                                        //console.log("--getAncestorOpts - setting lvl = ", prntTaxon.level)
-                opts[prntTaxon.level.displayName] = o;
+        const rank = prntTaxon.rank.displayName;
+        return _cmbx('getTaxonOpts', [rank, null, group, subGroup])
+            .then(o => {                                                        //console.log("--getAncestorOpts - setting rank = ", prntTaxon.rank)
+                opts[prntTaxon.rank.displayName] = o;
                 return getAncestorOpts(prntTaxon.parent);
             });
     }
     /**
-     * Builds the opts for each level without taxa related to the selected taxon.
-     * Ancestor levels are populated with all taxa at the level and will have
+     * Builds the opts for each rank without taxa related to the selected taxon.
+     * Ancestor ranks are populated with all taxa at the rank and will have
      * the 'none' value selected.
      */
-    function buildOptsForEmptyLevels() {
-        const lvls = getGroupData('groupRanks');
+    function buildOptsForEmptyRanks() {
+        const ranks = getTaxonData('groupRanks');
         const proms = [];
-        fillOptsForEmptyLevels();
+        fillOptsForEmptyRanks();
         return Promise.all(proms);
 
-        function fillOptsForEmptyLevels() {
-            lvls.forEach(lvl => {
-                if (opts[lvl] || lvl == taxon.level.displayName) { return; }
-                buildAncestorOpts(lvl);
+        function fillOptsForEmptyRanks() {
+            ranks.forEach(rank => {
+                if (opts[rank] || rank == taxon.rank.displayName) { return; }
+                buildAncestorOpts(rank);
             });
         }
-        function buildAncestorOpts(lvl) {
-            selected[lvl] = 'none';
-            proms.push(_cmbx('getTaxonOpts', [lvl, null, group, subGroup])
-                .then(o => opts[lvl] = o ));
+        function buildAncestorOpts(rank) {
+            selected[rank] = 'none';
+            proms.push(_cmbx('getTaxonOpts', [rank, null, group, subGroup])
+                .then(o => opts[rank] = o ));
         }
     }
     function addCreateOpts() {
-        for (let lvl in opts) {                                                 //console.log("lvl = %s, name = ", lvl, lvls[lvl-1]);
-            opts[lvl].unshift({ value: 'create', text: 'Add a new '+lvl+'...'});
+        for (let rank in opts) {                                                 //console.log("rank = %s, name = ", rank, ranks[rank-1]);
+            opts[rank].unshift({ value: 'create', text: 'Add a new '+rank+'...'});
         }
         return Promise.resolve();
     }
 } /* End fillAncestorTaxa */
-function repopulateLevelCombos(optsObj, selected) {                             //console.log('repopulateLevelCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
-    Object.keys(optsObj).forEach(lvl => {                                       //console.log("lvl = %s, name = ", l, lvls[l-1]);
-        repopulateLevelCombo(optsObj[lvl], lvl, selected)
+function repopulateRankCombos(optsObj, selected) {                             //console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
+    Object.keys(optsObj).forEach(rank => {                                       //console.log("rank = %s, name = ", l, ranks[l-1]);
+        repopulateRankCombo(optsObj[rank], rank, selected)
     });
 }
 /**
- * Replaces the options for the level combo. Selects the selected taxon and
+ * Replaces the options for the rank combo. Selects the selected taxon and
  * its direct ancestors.
  */
-function repopulateLevelCombo(opts, lvl, selected) {                            //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName);
-    updateComboOpts(lvl, opts);
-    if (!lvl in selected) { return; }
-    if (selected[lvl] == 'none') { return resetPlaceholer(lvl); }
-    _cmbx('setSelVal', ['#'+lvl+'-sel', selected[lvl], 'silent']);
+function repopulateRankCombo(opts, rank, selected) {                            //console.log("repopulateRankCombo for rank = %s (%s)", rank, rankName);
+    updateComboOpts(rank, opts);
+    if (!rank in selected) { return; }
+    if (selected[rank] == 'none') { return resetPlaceholer(rank); }
+    _cmbx('setSelVal', ['#'+rank+'-sel', selected[rank], 'silent']);
 }
 /**
  * Change event is fired when options are replaced, so the event is removed and
  * restored after the options are updated.
  */
-function updateComboOpts(lvl, opts) {
-    _u('replaceSelOpts', ['#'+lvl+'-sel', opts, () => {}]);
-    $('#'+lvl+'-sel')[0].selectize.on('change', onLevelSelection);
+function updateComboOpts(rank, opts) {
+    _u('replaceSelOpts', ['#'+rank+'-sel', opts, () => {}]);
+    $('#'+rank+'-sel')[0].selectize.on('change', onRankSelection);
 }
-function resetPlaceholer(lvl) {
-    _u('updatePlaceholderText', ['#'+lvl+'-sel', null, 0]);
+function resetPlaceholer(rank) {
+    _u('updatePlaceholderText', ['#'+rank+'-sel', null, 0]);
 }
 /* ------- selectRoleTaxon --------- */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 function selectRoleTaxon(e, groupTaxon) {
-    const role = getGroupData('groupName') === 'Bat' ? 'Subject' : 'Object';
+    const role = getTaxonData('groupName') === 'Bat' ? 'Subject' : 'Object';
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
@@ -826,11 +823,11 @@ function getSelectedTaxonOption(groupTaxon) {
     if (!taxon) { return; } //issue alerted to developer and editor
     return { value: taxon.id, text:taxon.displayName };
 }
-/** Finds the most specific level with a selection and returns that taxon record. */
-export function getSelectedTaxon(aboveLvl) {
+/** Finds the most specific rank with a selection and returns that taxon record. */
+export function getSelectedTaxon(aboveRank) {
     const selElems = $('#sub-form .selectized').toArray();
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
-    const selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
+    const selected = selElems.find(isSelectedTaxon.bind(null, aboveRank));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
     return !selected ? false : _state('getRcrd', ['taxon', $(selected).val()]);
 
     function ifEditingTaxon() {
@@ -839,17 +836,17 @@ export function getSelectedTaxon(aboveLvl) {
         return action == 'edit' && entity == 'taxon';
     }
 }
-function isSelectedTaxon(resetLvl, elem) {
-    if (!ifIsLevelComboElem(elem)) { return false; }
-    if (resetLvl && isLevelChildOfResetLevel(resetLvl, elem)) { return false; }
+function isSelectedTaxon(resetRank, elem) {
+    if (!ifIsRankComboElem(elem)) { return false; }
+    if (resetRank && isRankChildOfResetRank(resetRank, elem)) { return false; }
     return $(elem).val();
 }
-function isLevelChildOfResetLevel(resetLvl, elem) {
-    const allLevels = getGroupData('groupRanks');
-    const level = elem.id.split('-sel')[0];
-    return allLevels.indexOf(level) < allLevels.indexOf(resetLvl);
+function isRankChildOfResetRank(resetRank, elem) {
+    const allRanks = getTaxonData('groupRanks');
+    const rank = elem.id.split('-sel')[0];
+    return allRanks.indexOf(rank) < allRanks.indexOf(resetRank);
 }
-function ifIsLevelComboElem(elem) {
+function ifIsRankComboElem(elem) {
     return elem.id.includes('-sel') && !elem.id.includes('Group');
  }
 /**
@@ -868,7 +865,7 @@ function enableTaxonCombos() {
     _cmbx('enableCombobox', ['#Subject-sel']);
     _cmbx('enableCombobox', ['#Object-sel']);
 }
-function getGroupData(prop) {
+function getTaxonData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getGroupState');
 }
 /* ========================== HELPERS ======================================= */

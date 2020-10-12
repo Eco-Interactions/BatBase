@@ -389,17 +389,17 @@ function addToParentRcrd(prop, rcrd, entity) {
 //     db.setDataInMemory(prop, tagObj);
 // }
 /**
- * Adds the Taxon's name to the stored names for it's group and level.
+ * Adds the Taxon's name to the stored names for it's group and rank.
  * Note: 'group' is added above, so the taxon from storage is used rather than the rcrd.
  */
 function addToTaxonNames(prop, rcrd, entity) {                                  //console.log('addToTaxonNames. prop = [%s] rcrd = %O', prop, rcrd);
     const taxon = db.getMmryData('taxon')[rcrd.id];
     const group = taxon.group.displayName;
     const subGroup = taxon.group.subGroup;
-    const level = taxon.level.displayName;
-    const nameProp = group+subGroup+level+"Names";
+    const rank = taxon.rank.displayName;
+    const nameProp = group+subGroup+rank+"Names";
     let data = db.getMmryData(nameProp) || {};
-    data[taxon.name] = taxon.id; //done here because taxa use a base 'name' property, as they display typically with the level prepended
+    data[taxon.name] = taxon.id; //done here because taxa use a base 'name' property, as they display typically with the rank prepended
     db.setDataInMemory(nameProp, data);
 }
 /** Adds the Interaction to the stored entity's collection.  */
@@ -562,15 +562,15 @@ function getTaxonName(edits, rcrd) {
 }
 function getNameProp(edits, rcrd) {
     const subGroup = getSubGroup(edits.subGroup, rcrd);
-    const level = getLevel(edits.level, rcrd);
-    return rcrd.group.displayName + subGroup + level + 'Names';
+    const rank = getRank(edits.rank, rcrd);
+    return rcrd.group.displayName + subGroup + rank + 'Names';
 }
 function getSubGroup(subGroupEdits, rcrd) {
     return !subGroupEdits ? rcrd.group.subGroup : subGroupEdits.old;
 }
-function getLevel(lvlEdits, rcrd) {
-    return !lvlEdits ? rcrd.level.displayName :
-        db.getMmryData('level')[lvlEdits.old].displayName;
+function getRank(rankEdits, rcrd) {
+    return !rankEdits ? rcrd.rank.displayName :
+        db.getMmryData('rank')[rankEdits.old].displayName;
 }
 /** ---------------------- UPDATE RELATED DATA ------------------------------ */
 // function ifEditedSourceDataUpdatedCitations(data) {

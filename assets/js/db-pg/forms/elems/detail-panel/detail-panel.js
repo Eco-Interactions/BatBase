@@ -152,15 +152,15 @@ function fillTxnDetailData(entity, rcrd) {
         txn.children.forEach(id => addChildRefData(txnRcrds[id]));
     }
     function addChildRefData(child) {
-        const lvlK = getLevelKey(child)
-        refs[lvlK] += 1;
+        const key = getRankKey(child)
+        refs[key] += 1;
         getTaxonChildRefs(child);
     }
-    function getLevelKey(taxon) {
-        const lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
-        const lvlK = lvlKeys[taxon.level.displayName];
-        if (!refs[lvlK]) { refs[lvlK] = 0; }
-        return lvlK;
+    function getRankKey(taxon) {
+        const ranks = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
+        const key = ranks[taxon.rank.displayName];
+        if (!refs[key]) { refs[key] = 0; }
+        return key;
     }
 }
 function adjustDetailPanelElems() {

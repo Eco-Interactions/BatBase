@@ -108,45 +108,43 @@ function softRefresh() { tblState.api.refreshView(); }
  * plants and arthropods.
  */
 function getColumnDefs(mainCol) {
-    const realm = tblState.curRealm || false;
-    return _u('getData', ['tagNames', true]).then(buildColDefs);
-
-    function buildColDefs(tags) {
-
-        return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-                    cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 },
-                    cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
-                {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
-                {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
-                {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
-                {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },
-                {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
-                {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
-                {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
-                {headerName: "Object Class", field: "objClass", width: 10, hide: true },
-                {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
-                {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
-                {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
-                {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
-                {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-                {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
-                {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
-                {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-                {headerName: "Subject Taxon", field: "subject", width: respW('sub'), cellRenderer: addTitle, comparator: sortByRankThenName },
-                {headerName: "Object Taxon", field: "object", width: respW('ob'), cellRenderer: addTitle, comparator: sortByRankThenName },
-                {headerName: "Type", field: "interactionType", width: respW('typ'), cellRenderer: addTitle, filter: unqVals },
-                getTagColDef(tags),
-                {headerName: "Citation", field: "citation", width: respW('cit'), cellRenderer: addTitle},
-                {headerName: "Habitat", field: "habitat", width: respW('hab'), cellRenderer: addTitle, filter: unqVals },
-                {headerName: "Location", field: "location", width: respW('loc'), hide: ifLocView(), cellRenderer: addTitle },
-                {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
-                {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
-                {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
-                {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
-                {headerName: "Country", field: "country", width: respW('cty'), cellRenderer: addTitle, filter: unqVals },
-                {headerName: "Region", field: "region", width: respW('reg'), cellRenderer: addTitle, filter: unqVals },
-                {headerName: "Note", field: "note", width: respW('nt'), cellRenderer: addTitle} ];
-    }
+    return _u('getData', ['tagNames', true])
+        .then(tags => buildColDefs(mainCol, tags));
+}
+function buildColDefs(mainCol, tags) {
+    return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
+                cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 },
+                cellClass: getCellStyleClass, comparator: sortByRankThenName },
+            {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
+            {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
+            {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
+            {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },
+            {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
+            {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
+            {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
+            {headerName: "Object Class", field: "objClass", width: 10, hide: true },
+            {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
+            {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
+            {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
+            {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
+            {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
+            {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
+            {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
+            {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
+            {headerName: "Subject Taxon", field: "subject", width: respW('sub'), cellRenderer: addTitle, comparator: sortByRankThenName },
+            {headerName: "Object Taxon", field: "object", width: respW('ob'), cellRenderer: addTitle, comparator: sortByRankThenName },
+            {headerName: "Type", field: "interactionType", width: respW('typ'), cellRenderer: addTitle, filter: unqVals },
+            getTagColDef(tags),
+            {headerName: "Citation", field: "citation", width: respW('cit'), cellRenderer: addTitle},
+            {headerName: "Habitat", field: "habitat", width: respW('hab'), cellRenderer: addTitle, filter: unqVals },
+            {headerName: "Location", field: "location", width: respW('loc'), hide: ifLocView(), cellRenderer: addTitle },
+            {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+            {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
+            {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+            {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+            {headerName: "Country", field: "country", width: respW('cty'), cellRenderer: addTitle, filter: unqVals },
+            {headerName: "Region", field: "region", width: respW('reg'), cellRenderer: addTitle, filter: unqVals },
+            {headerName: "Note", field: "note", width: respW('nt'), cellRenderer: addTitle} ];
 }
 function respW(col) {
     const pgW = $(window).width() < 1500 ? 'sml' : 'reg';
@@ -231,32 +229,32 @@ function sortTreeColumnIfTaxonFocused() {
  * source taxon.
  */
 function sortTaxonRows(a, b) {
-    var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
+    var ranks = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
     var aParts = a.split(" ");
-    var aLvl = aParts[0];
+    var aRank = aParts[0];
     var aName = aParts[1];
     var bParts = b.split(" ");
-    var bLvl = bParts[0];
+    var bRank = bParts[0];
     var bName = bParts[1];
-    return  bLvl === "Unspecified" ? 1 : compareRankThenName();
+    return  bRank === "Unspecified" ? 1 : compareRankThenName();
 
     function compareRankThenName() {
         return sortByRank() || sortByName();
     }
     function sortByRank() {
-        if (lvls.indexOf(aLvl) === -1 || lvls.indexOf(bLvl) === -1) { return alphaSpecies(); }
-        return lvls.indexOf(aLvl) === lvls.indexOf(bLvl) ? false :
-            lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1;
+        if (ranks.indexOf(aRank) === -1 || ranks.indexOf(bRank) === -1) { return alphaSpecies(); }
+        return ranks.indexOf(aRank) === ranks.indexOf(bRank) ? false :
+            ranks.indexOf(aRank) > ranks.indexOf(bRank) ? 1 : -1;
     }
     function sortByName() {
         return aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
     }
     function alphaSpecies() {
-        return lvls.indexOf(aLvl) !== -1 ? 1 :
-            lvls.indexOf(bLvl) !== -1 ? -1 :
+        return ranks.indexOf(aRank) !== -1 ? 1 :
+            ranks.indexOf(bRank) !== -1 ? -1 :
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
-}  /* End sortTaxonRows */
+}
 /** -------------------------- Edit(or) Column(s) --------------------------- */
 function isNotEditor() {
     return ['admin', 'editor', 'super'].indexOf(tblState.userRole) === -1;
@@ -270,8 +268,8 @@ function uneditableEntityRow(params) {                                          
     const uneditables = [
         tblState.curFocus === 'locs' &&
             (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
-        tblState.curFocus === 'taxa' && //Realm Taxa
-            (!params.data.parentTaxon && !params.data.interactionType),
+        tblState.curFocus === 'taxa' &&
+            (!params.data.parentTaxon && !params.data.interactionType), //Group-Root Taxa
         tblState.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
     return uneditables.some(test => test);
 }
@@ -342,7 +340,7 @@ function isOpenRowWithChildInts(params) {
     };
 }
 function txnHasIntsAfterFilters(params) {
-    if (params.data.taxonLvl === 'Species') { return true; }
+    if (params.data.taxonRank === 'Species') { return true; }
     return params.node.childrenAfterFilter.some(childRow => {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });

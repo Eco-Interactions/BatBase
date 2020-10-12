@@ -9,7 +9,7 @@ use JMS\Serializer\Annotation as JMS;
 /**
  * Group.
  *
- * @ORM\Table(name="group")
+ * @ORM\Table(name="`group`")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
@@ -51,13 +51,13 @@ class Group
 
     /**
      * @var string
-     * JSON array with the level IDs for each level to display for the group.
+     * JSON array with the rank IDs for each rank to display for the group.
      *
-     * @ORM\Column(name="ui_levels", type="string", length=255, nullable=false)
+     * @ORM\Column(name="ui_ranks", type="string", length=255, nullable=false)
      * @JMS\Expose
-     * @JMS\SerializedName("uiLevelsShown")
+     * @JMS\SerializedName("uiRanksShown")
      */
-    private $uiLevelsShown;
+    private $uiRanksShown;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -191,27 +191,27 @@ class Group
     }
 
     /**
-     * Set uiLevelsShown.
+     * Set uiRanksShown.
      *
-     * @param string $uiLevelsShown
+     * @param string $uiRanksShown
      *
      * @return Group
      */
-    public function setUiLevelsShown($uiLevelsShown)
+    public function setUiRanksShown($uiRanksShown)
     {
-        $this->uiLevelsShown = $uiLevelsShown;
+        $this->uiRanksShown = $uiRanksShown;
 
         return $this;
     }
 
     /**
-     * Get uiLevelsShown.
+     * Get uiRanksShown.
      *
      * @return string
      */
-    public function getUiLevelsShown()
+    public function getUiRanksShown()
     {
-        return $this->uiLevelsShown;
+        return $this->uiRanksShown;
     }
 
     /**
@@ -269,7 +269,7 @@ class Group
 
         foreach ($this->taxa as $groupRoot) {
             $taxon = $groupRoot->getTaxon();
-            $taxa = array_merge($taxa, [ $taxon->getDisplayName() => [
+            $taxa = array_merge($taxa, [ $taxon->getName() => [
                 'name' => $taxon->getName(),
                 'id' => $taxon->getId(),
                 'displayName' => $taxon->getDisplayName()

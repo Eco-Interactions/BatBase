@@ -7,14 +7,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * Level.
+ * Rank.
  *
- * @ORM\Table(name="level")
+ * @ORM\Table(name="rank")
  * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
-class Level
+class Rank
 {
     /**
      * @var int
@@ -54,7 +54,7 @@ class Level
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Taxon", mappedBy="level", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="App\Entity\Taxon", mappedBy="rank", fetch="EXTRA_LAZY")
      */
     private $taxa;
 
@@ -117,7 +117,7 @@ class Level
      *
      * @param string $displayName
      *
-     * @return Level
+     * @return Rank
      */
     public function setDisplayName($displayName)
     {
@@ -141,7 +141,7 @@ class Level
      *
      * @param int $ordinal
      *
-     * @return Level
+     * @return Rank
      */
     public function setOrdinal($ordinal)
     {
@@ -165,7 +165,7 @@ class Level
      *
      * @param string $pluralName
      *
-     * @return Level
+     * @return Rank
      */
     public function setPluralName($pluralName)
     {
@@ -189,7 +189,7 @@ class Level
      *
      * @param \App\Entity\Taxon $taxon
      *
-     * @return Level
+     * @return Rank
      */
     public function addTaxon(\App\Entity\Taxon $taxon)
     {
@@ -223,7 +223,7 @@ class Level
      *
      * @param \DateTime $createdAt
      *
-     * @return Level
+     * @return Rank
      */
     public function setCreated(\DateTime $createdAt)
     {
@@ -267,7 +267,7 @@ class Level
      *
      * @param \DateTime $updatedAt
      *
-     * @return Level
+     * @return Rank
      */
     public function setUpdated(\DateTime $updatedAt)
     {
