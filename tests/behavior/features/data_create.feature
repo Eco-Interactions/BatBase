@@ -200,7 +200,7 @@ Feature: Add new data to the database
         ### Object Class ##
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        And I select "Arthropod" from the "Realm" form dropdown
+        And I select "Arthropod" from the "Group" form dropdown
         And I enter "Object Class" in the "Class" form dropdown
         And I see "New Taxon Class"
         And I press the "Create Taxon" button
@@ -624,7 +624,7 @@ Feature: Add new data to the database
     #     And I see "New Interaction"
     #     And I focus on the "Object" taxon field
     #     And I see "Select Object Taxon"
-    #     When I select "Arthropod" from the "Realm" form dropdown
+    #     When I select "Arthropod" from the "Group" form dropdown
     #     And I enter "Object Class" in the "Class" form dropdown
     #     And I see "New Taxon Class"
     #     And I press the "Create Taxon" button
@@ -636,7 +636,7 @@ Feature: Add new data to the database
     #     And I see "New Interaction"
     #     And I focus on the "Object" taxon field
     #     And I see "Select Object Taxon"
-    #     When I select "Arthropod" from the "Realm" form dropdown
+    #     When I select "Arthropod" from the "Group" form dropdown
     #     And I select "Object Class" from the "Class" form dropdown
     #     And I enter "Object Order" in the "Order" form dropdown
     #     And I see "New Taxon Order"
@@ -650,7 +650,7 @@ Feature: Add new data to the database
     #     And I see "New Interaction"
     #     And I focus on the "Object" taxon field
     #     And I see "Select Object Taxon"
-    #     When I select "Arthropod" from the "Realm" form dropdown
+    #     When I select "Arthropod" from the "Group" form dropdown
     #     And I select "Object Order" from the "Order" form dropdown
     #     And I enter "Object Family" in the "Family" form dropdown
     #     And I see "New Taxon Family"
@@ -665,7 +665,7 @@ Feature: Add new data to the database
     #     And I see "New Interaction"
     #     And I focus on the "Object" taxon field
     #     And I see "Select Object Taxon"
-    #     When I select "Arthropod" from the "Realm" form dropdown
+    #     When I select "Arthropod" from the "Group" form dropdown
     #     And I select "Object Family" from the "Family" form dropdown
     #     When I enter "OGenus" in the "Genus" form dropdown
     #     And I see "New Taxon Genus"
@@ -681,7 +681,7 @@ Feature: Add new data to the database
     #     And I see "New Interaction"
     #     And I focus on the "Object" taxon field
     #     And I see "Select Object Taxon"
-    #     When I select "Arthropod" from the "Realm" form dropdown
+    #     When I select "Arthropod" from the "Group" form dropdown
     #     And I select "OGenus" from the "Genus" form dropdown
     #     When I enter "OGenus Species" in the "Species" form dropdown
     #     And I see "New Taxon Species"
@@ -698,7 +698,7 @@ Feature: Add new data to the database
     #     And I see "New Interaction"
     #     And I focus on the "Object" taxon field
     #     And I see "Select Object Taxon"
-    #     When I select "Arthropod" from the "Realm" form dropdown
+    #     When I select "Arthropod" from the "Group" form dropdown
     #     And I select "OGenus Species" from the "Species" form dropdown
     #     When I press the "Confirm" button
     #     Then I should see "OGenus Species" in the "Object" form dropdown

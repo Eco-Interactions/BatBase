@@ -101,7 +101,7 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Citation forms: rcrds - { src: pubSrc, pub: pub } (parent publication)
  * > Interaction create form: unchanged - exists after form submit and before any changes
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
- * > Taxon forms: groupData - added to formState.forms (see props @initTaxonParams)
+ * > Taxon forms: taxonData - added to formState.forms (see props @initTaxonParams)
  */
 export function addEntityFormState(entity, level, pSel, action) {
     formState.forms[entity] = level;
@@ -119,31 +119,23 @@ export function addEntityFormState(entity, level, pSel, action) {
 }
 /*------------- Taxon Params --------------------*/
 export function initGroupState(role, groupId, subGroupName) {
-    return _db('getData', [['group', 'groupNames', 'levelNames']])
-        .then(data => getGroupSubGroupNames(data))
-        .then(data => setTxnState(data.group, data.groupNames, data.levelNames, data.subGroups));
+    return _db('getData', [['group', 'groupNames', 'rankNames']])
+        .then(data => setTxnState(data.group, data.groupNames, data.rankNames));
 
-    function getGroupSubGroupNames(data) {
-        const groupName = data.group[groupId].displayName;
-        return _db('getData', [groupName+'SubGroupNames'])
-            .then(subGroups => {data.subGroups = subGroups; return data;})
-    }
-
-    function setTxnState(groups, groupNames, levels, subGroupNames) {
+    function setTxnState(groups, groupNames, ranks) {  //, subGroupNames
         const group = groups[groupId];
-
-        formState.forms.groupData = {
-            lvls: levels, //Object with each (k) level name and it's (v) id and order
-            groupRanks: group.uiLevelsShown,
+        const data = {
+            groupRanks: group.uiRanksShown,
             groupName: group.displayName,
             groups: groupNames,
-            subGroup: subGroupName || Object.keys(subGroupNames)[0].split(' ')[1],
-            subGroups: group.taxa,
-            subGroupNames: subGroupNames,
+            ranks: ranks, //Object with each (k) rank name and it's (v) id and order
             role: role,
-            oppositeRole: role === 'Subject' ? 'Object' : 'Subject',
-        };                                                                      console.log('           /--taxon params = %O', formState.forms.groupData)
-        return formState.forms.groupData;
+            subGroup: subGroupName || Object.keys(group.taxa)[0],
+            subGroups: group.taxa,
+        };
+        data.groupTaxon = formState.records.taxon[group.taxa[data.subGroup].id];
+        formState.forms.taxonData = data;                                       console.log('       --[%s] data = %O', data.subGroup, data);
+        return data;
     }
 }
 /* ---------------------------- Getters ------------------------------------- */
@@ -172,10 +164,10 @@ export function getFormParentId(fLvl) {
     return formState.forms[fLvl] ? formState.forms[fLvl].pSelId : false;
 }
 export function getTaxonProp(prop) {
-    return formState.forms.groupData ? formState.forms.groupData[prop] : false;
+    return formState.forms.taxonData ? formState.forms.taxonData[prop] : false;
 }
 export function getGroupState() {
-    return formState.forms.groupData;
+    return formState.forms.taxonData;
 }
 export function getFormFieldData(fLvl, field) {
     return formState.forms[fLvl].fieldData[field];
@@ -218,7 +210,7 @@ export function setFormProp(fLvl, prop, val) {
     formState.forms[fLvl][prop] = val;
 }
 export function setGroupProp(prop, val) {
-    return formState.forms.groupData[prop] = val;
+    return formState.forms.taxonData[prop] = val;
 }
 export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = formState.forms[fLvl].fieldData;

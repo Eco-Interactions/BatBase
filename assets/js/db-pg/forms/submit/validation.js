@@ -6,7 +6,7 @@
  *     formSubmitError
  *     openSubFormErr
  *     clearErrElemAndEnableSubmit
- *     clrNeedsHigherLvl
+ *     clrNeedsHigherRank
  *     clrContribFieldErr
  *
  * TOC
@@ -120,8 +120,8 @@ export function reportFormFieldErr(fieldName, errTag, fLvl) {                   
         'isGenusPrnt': handleIsGenusPrnt,
         'needsGenusName': handleNeedsGenusName,
         'needsGenusPrnt': handleNeedsGenusParent,
-        'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
-        'needsHigherLvl': handleNeedsHigherLvl,
+        'needsHigherRankPrnt': handleNeedsHigherRankPrnt,
+        'needsHigherRank': handleNeedsHigherRank,
         'needsName': handleNeedsName,
         'noFamily': handleNoFamily,
         'noGenus': handleNoGenus,
@@ -147,7 +147,7 @@ function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrIsGenusPrnt(elem, fLvl, e) {
-    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
+    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
@@ -168,7 +168,7 @@ function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
 function clrNeedsGenusPrntErr(elem, fLvl, e) {
-    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
+    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank')]);
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /* ------------------- NEEDS FAMILY ----------------------------------------- */
@@ -203,29 +203,29 @@ function clrNoGenusErr(elem, fLvl, e) {
 }
 /* -------------- PARENT MUST BE HIGHER RANK -------------------------------- */
 /** Note: error for the edit-taxon form. */
-function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) {
-    const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
+function handleNeedsHigherRankPrnt(elem, errTag, fLvl, fieldName) {
+    const msg = '<span>The parent taxon must be at a higher taxonomic rank.</span>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
 }
-/** Clears the cause, either the parent-selection process or the taxon's level. */
-function clrNeedsHigherLvlPrnt(elem, fLvl, e) {
-    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl')]);
+/** Clears the cause, either the parent-selection process or the taxon's rank. */
+function clrNeedsHigherRankPrnt(elem, fLvl, e) {
+    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank')]);
     clearErrElemAndEnableSubmit(elem, fLvl);
     if ($('#sub-form').length) {
         return _form('selectParentTaxon', [ $('#txn-prnt').data('txn') ]);
     }
-    $('#txn-lvl').data('lvl', $('#txn-lvl').val());
+    $('#txn-rank').data('rank', $('#txn-rank').val());
 }
 /** Note: error for the edit-taxon form. */
-function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {
-    const msg = '<div>Taxon level must be higher than that of child taxa.</div>';
+function handleNeedsHigherRank(elem, errTag, fLvl, fieldName) {
+    const msg = '<div>Taxon rank must be higher than that of child taxa.</div>';
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
 }
-export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {
-    var txnLvl = taxonLvl || $('#txn-lvl').data('lvl');
-    _cmbx('setSelVal', ['#txn-lvl', $('#txn-lvl').data('lvl'), 'silent']);
-    $('#txn-lvl').data('lvl', txnLvl);
+export function clrNeedsHigherRank(elem, fLvl, e, taxonRank) {
+    var txnRank = taxonRank || $('#txn-rank').data('rank');
+    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank'), 'silent']);
+    $('#txn-rank').data('rank', txnRank);
     clearErrElemAndEnableSubmit($('#Taxon_errs')[0], fLvl);
     enableChngPrntBtttn();
 }
@@ -299,7 +299,7 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'isGenusPrnt': clrIsGenusPrnt,
         'needsGenusName': clrNeedsGenusName,    'needsName': clrNeedsName,
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr,
-        'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
+        'needsHigherRank': clrNeedsHigherRank, 'needsHigherRankPrnt': clrNeedsHigherRankPrnt,
         'openSubForm': clrOpenSubForm,
         'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr,

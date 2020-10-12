@@ -106,12 +106,12 @@ function addAllRemainingData(entity, formVals, data) {
         }
     }
     function ifEntityHasGeoJsonEntity(editing) {
-        return formVals.latitude || formVals.longitude || (editing && editing.detail); 
+        return formVals.latitude || formVals.longitude || (editing && editing.detail);
     }
     function addTaxonDisplayName() {
-        const isSpecies = formVals.level == 'Species';
+        const isSpecies = formVals.rank == 'Species';
         data.taxon.flat.displayName = isSpecies ? formVals.displayName :
-            formVals.level + ' ' + formVals.displayName;
+            formVals.rank + ' ' + formVals.displayName;
     }
     function ifNoLocationAssignedToUnspecified() {
         formVals.location = formVals.location || 439; //Unspecified region

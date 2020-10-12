@@ -35,7 +35,7 @@ const filterFuncs = {
 
 /**
  * These are handled before table rebuild starts:
- *   Level combos, Region and Country combos
+ *   Rank combos, Region and Country combos
  */
 export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('getFilteredRowData filters = %O, rowData = %O', f, rowData);
 	if (!Object.keys(f).length) { return rowData; }

@@ -124,7 +124,7 @@ function debugUpdate() {
         ImageUpload: "2017-02-04 11:24:08",
         Interaction: "2019-11-11 00:40:46",
         InteractionType: "2017-02-04 11:24:08",
-        Level: "2017-02-04 11:24:08",
+        Rank: "2017-02-04 11:24:08",
         Location: "2019-11-11 22:59:09",
         LocationType: "2017-05-18 14:27:27",
         Naming: "2017-02-04 11:24:08",

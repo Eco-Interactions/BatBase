@@ -47,8 +47,8 @@ export function loadLocFilters(tblState) {
 export function applyLocFilter() {
     return fLoc.applyLocFilter(...arguments);
 }
-export function loadSrcFilters(realm) {
-    return fSrc.loadSrcFilters(realm);
+export function loadSrcFilters(type) {
+    return fSrc.loadSrcFilters(type);
 }
 export function applyPubFilter() {
     return fSrc.applyPubFilter(...arguments);

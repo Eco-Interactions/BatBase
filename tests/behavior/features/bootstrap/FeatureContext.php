@@ -773,7 +773,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iChangeTheFormDropdownTo($prop, $text)
     {
-        $map = [ "taxon level" => "#txn-lvl" ];
+        $map = [ "taxon rank" => "#txn-rank" ];
         $selId = array_key_exists($prop, $map) ? $map[$prop] :
             '#'.str_replace(' ','',$prop).'-sel';
         $this->selectValueInCombobox($selId, $text);
@@ -1711,14 +1711,14 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function fillTaxaFields($data)
     {                                                                           $this->log("\n        Filling Taxa fields.\n");
-        $lvls = array_keys($data);
+        $ranks = array_keys($data);
         $this->iFocusOnTheTaxonField('Subject');
-        $this->iSelectFromTheFormDropdown($data[$lvls[0]], $lvls[0]);
+        $this->iSelectFromTheFormDropdown($data[$ranks[0]], $ranks[0]);
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheFormDropdown('Arthropod', 'Realm');
-        $this->iSelectFromTheFormDropdown($data[$lvls[1]], $lvls[1]);
+        $this->iSelectFromTheFormDropdown('Arthropod', 'Group');
+        $this->iSelectFromTheFormDropdown($data[$ranks[1]], $ranks[1]);
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
     }
@@ -1787,7 +1787,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheFormDropdown('Arthropod', 'Realm');
+        $this->iSelectFromTheFormDropdown('Arthropod', 'Group');
         $this->iSelectFromTheFormDropdown('Sphingidaey', 'Family');
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');

@@ -180,7 +180,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,
         group: taxon.group.id, // Used for the Object Group filter in Bat view
-        taxonLvl: taxon.level.displayName,
+        taxonRank: taxon.rank.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
     };
@@ -203,7 +203,7 @@ function getIntCount(taxon) {
  */
 function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
     let rows = [];
-    if (taxon.level.displayName !== 'Species'){
+    if (taxon.rank.displayName !== 'Species'){
         handleTaxonWithPotentialChildren();
     } else { rows = getTaxonIntRows(taxon, curTreeLvl, tblState); }
     return rows;
@@ -237,7 +237,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
             isParent: true,
             name: `Unspecified ${taxonName} Interactions`,
             open: !taxon.isRoot && tblState.openRows.indexOf(taxon.id.toString()) !== -1,
-            taxonLvl: taxon.level.displayName,
+            taxonRank: taxon.rank.displayName,
             treeLvl: treeLvl,
         });
     }
@@ -273,14 +273,13 @@ function getPendingDataRow(treeLvl) {
 /** Adds the taxon heirarchical data to the interactions row data. */
 function getTxnIntRow(intRcrd, treeLvl, tblState) {
     const rowData = buildIntRowData(intRcrd, treeLvl);
-    getCurTaxonLvlCols(tblState).forEach(colName => {
+    getCurTaxonRankCols(tblState).forEach(colName => {
         rowData[colName] = intRcrd[colName];
     });
     return rowData;
 }
-function getCurTaxonLvlCols(tblState) {
-    var lvls = Object.keys(tblState.taxaByLvl);
-    return lvls.map(function(lvl){ return 'tree' + lvl; });
+function getCurTaxonRankCols(tblState) {
+    return Object.keys(tblState.taxaByRank).map(r => 'tree' + r);
 }
 /*------------------------ INTERACTION ROW DATA ----------------------------- */
 /**

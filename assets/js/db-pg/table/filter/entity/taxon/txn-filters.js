@@ -21,7 +21,7 @@ import { initObjectGroupCombobox, filterTableByobjectGroup } from './obj-group-f
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
-    loadTxnLevelComboboxes(tblState);
+    loadTxnRankComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
     _ui('updateTaxonFilterViewMsg', [tblState.groupName]);
@@ -34,35 +34,35 @@ function initTxnNameSearchElem(tblState) {
 }
 /* ------------------------ LEVEL TAXON ------------------------------------- */
 /**
- * Builds and initializes a search-combobox for each level present in the
- * the unfiltered group tree. Each level's box is populated with the names
- * of every taxon at that level in the displayed, filtered, table-tree. After
+ * Builds and initializes a search-combobox for each rank present in the
+ * the unfiltered group tree. Each rank's box is populated with the names
+ * of every taxon at that rank in the displayed, filtered, table-tree. After
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
-function loadTxnLevelComboboxes(tblState) {
-    const lvlOptsObj = buildTaxonSelectOpts(tblState);
-    const levels = Object.keys(lvlOptsObj);
-    updateTxnLevelComboboxes(lvlOptsObj, levels, tblState);
+function loadTxnRankComboboxes(tblState) {
+    const rankOptsObj = buildTaxonSelectOpts(tblState);
+    const ranks = Object.keys(rankOptsObj);
+    updateTxnRankComboboxes(rankOptsObj, ranks, tblState);
 }
 /**
- * Builds select options for each level with taxon data in the current group.
- * If there is no data after filtering at a level, a 'none' option obj is built
+ * Builds select options for each rank with taxon data in the current group.
+ * If there is no data after filtering at a rank, a 'none' option obj is built
  * and will be selected.
  */
-function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts levels = %O", tblState.taxaByLvl);
+function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts ranks = %O", tblState.taxaByRank);
     const optsObj = {};
-    const taxaByLvl = tblState.taxaByLvl;
-    tblState.allgroupRanks.forEach(buildLvlOptions);
+    const taxaByRank = tblState.taxaByRank;
+    tblState.allgroupRanks.forEach(buildRankOptions);
     return optsObj;
 
-    function buildLvlOptions(lvl) {
-        return lvl in taxaByLvl ?
-            getTaxaOptsAtLvl(taxaByLvl[lvl], lvl) : fillInLvlOpts(lvl)
+    function buildRankOptions(rank) {
+        return rank in taxaByRank ?
+            getTaxaOptsAtRank(taxaByRank[rank], rank) : fillInRankOpts(rank)
     }
-    /** Child levels can have multiple taxa.  */
-    function getTaxaOptsAtLvl(rcrds, lvl) {
-        const taxonNames = Object.keys(taxaByLvl[lvl]).sort();                  //console.log("taxonNames = %O", taxonNames);
-        optsObj[lvl] = buildTaxonOptions(taxonNames, taxaByLvl[lvl]);
+    /** Child ranks can have multiple taxa.  */
+    function getTaxaOptsAtRank(rcrds, rank) {
+        const taxonNames = Object.keys(taxaByRank[rank]).sort();                  //console.log("taxonNames = %O", taxonNames);
+        optsObj[rank] = buildTaxonOptions(taxonNames, taxaByRank[rank]);
     }
     function buildTaxonOptions(taxonNames, data) {
         if (!taxonNames.length) { return []; }
@@ -78,62 +78,62 @@ function buildTaxonSelectOpts(tblState) {                                       
         if (Object.keys(tblState.selectedOpts).length > 2) { return; }
         return Object.keys(tblState.selectedOpts).some(k => id == tblState.selectedOpts[k]);
     }
-    function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-        if (lvl in tblState.selectedOpts) {
-            const taxon = _u('getDetachedRcrd', [tblState.selectedOpts[lvl], tblState.rcrdsById]);
-            optsObj[lvl] = [
+    function fillInRankOpts(rank) {                                               //console.log("fillInEmptyAncestorRanks. rank = ", rank);
+        if (rank in tblState.selectedOpts) {
+            const taxon = _u('getDetachedRcrd', [tblState.selectedOpts[rank], tblState.rcrdsById]);
+            optsObj[rank] = [
                 {value: 'all', text: '- All -'},
                 {value: taxon.id, text: taxon.name}];
-        } else { optsObj[lvl] = []; }
+        } else { optsObj[rank] = []; }
     }
 } /* End buildTaxonSelectOpts */
-function updateTxnLevelComboboxes(lvlOptsObj, levels, tblState) {
+function updateTxnRankComboboxes(rankOptsObj, ranks, tblState) {
     if ($('#focus-filters label').length) {
-        updateTaxonSelOptions(lvlOptsObj, levels, tblState);
+        updateTaxonSelOptions(rankOptsObj, ranks, tblState);
     } else {
-        loadLevelSelects(lvlOptsObj, levels, tblState);
+        loadRankSelects(rankOptsObj, ranks, tblState);
     }
 }
-function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
-    const elems = buildTaxonSelects(levelOptsObj, levels);
+function loadRankSelects(rankOptsObj, ranks, tblState) {                     //console.log("loadRankSelectElems. rankObj = %O", rankOptsObj)
+    const elems = buildTaxonSelects(rankOptsObj, ranks);
     $('#focus-filters').append(elems);
-    initLevelComboboxes(tblState.allgroupRanks);
+    initRankComboboxes(tblState.allgroupRanks);
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 
-    function buildTaxonSelects(opts, levels) {
+    function buildTaxonSelects(opts, ranks) {
         const elems = [];
-        levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
+        ranks.forEach(function(rank) {                                        //console.log('----- building select box for rank = [%s]', rank);
             const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
-            const span = _u('buildElem', ['span', { text: level + ': ' }]);
-            const sel = fM.newSel(opts[level], 'opts-box taxonSel', 'sel' + level, level);
+            const span = _u('buildElem', ['span', { text: rank + ': ' }]);
+            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', 'sel' + rank, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
         return elems;
     }
 }
-function initLevelComboboxes(groupRanks) {
+function initRankComboboxes(groupRanks) {
     const confg = {};
-    groupRanks.forEach(lvl => {confg[lvl] = applyTxnFilter});
+    groupRanks.forEach(rank => {confg[rank] = applyTxnFilter});
     _u('initComboboxes', [confg]);
 }
-function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O, levels = %O, tblState = %O", lvlOptsObj, levels, tblState)
-    levels.forEach(level => {
-        _u('replaceSelOpts', ['#sel'+level, lvlOptsObj[level], null, level]);
+function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {                  //console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
+    ranks.forEach(rank => {
+        _u('replaceSelOpts', ['#sel'+rank, rankOptsObj[rank], null, rank]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
 function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    tblState.allgroupRanks.forEach(lvl => {
-        if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
-        _u('setSelVal', [lvl, selected[lvl], 'silent']);
+    tblState.allgroupRanks.forEach(rank => {
+        if (!selected[rank]) { return; }                                         //console.log("selecting [%s] = ", rank, selected[rank])
+        _u('setSelVal', [rank, selected[rank], 'silent']);
     });
 }
 /* ====================== FILTER ============================================ */
 /**
- * When a taxon is selected from one of the taxon-level comboboxes, the table
- * is updated with the taxon as the top of the new tree. The remaining level
+ * When a taxon is selected from one of the taxon-rank comboboxes, the table
+ * is updated with the taxon as the top of the new tree. The remaining rank
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
 export function applyTxnFilter(val) {
@@ -147,11 +147,11 @@ export function applyTxnFilter(val) {
 
     function addToFilterState() {
         const filter = {};
-        const curLevel = rcrd.level.displayName;
-        filter[curLevel] = getLevelFilterState()
+        const curRank = rcrd.rank.displayName;
+        filter[curRank] = getRankFilterState()
         fM.setFilterState('combo', filter, 'rebuild');
 
-        function getLevelFilterState() {
+        function getRankFilterState() {
             if (!rcrd.parent || rcrd.parent == 1) { return false; }
             return { text: rcrd.displayName, value: val };
         }
@@ -181,16 +181,16 @@ function getTaxonTreeRootRcrd(val, rcrds, that) {
     }
     function getSelectedTxn() {
         const selected = tState().get('selectedOpts');
-        const id = selected[getSelectedTaxonLvl(selected)] || _u('getSelVal', ['View']);
+        const id = selected[getSelectedTaxonRank(selected)] || _u('getSelVal', ['View']);
         return _u('getDetachedRcrd', [id, rcrds]);
     }
 }
-function getSelectedTaxonLvl(selected) {
+function getSelectedTaxonRank(selected) {
     if (Object.keys(selected).length == 0) { return; }
-    const lvls = ['Class', 'Order', 'Family', 'Genus', 'Species'];
-    return lvls.reverse().find(lvl => selected[lvl]);
+    const ranks = ['Class', 'Order', 'Family', 'Genus', 'Species'];
+    return ranks.reverse().find(rank => selected[rank]);
 }
-/** The selected taxon's ancestors will be selected in their levels combobox. */
+/** The selected taxon's ancestors will be selected in their ranks combobox. */
 function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
     const selected = {};
     selectAncestorTaxa(selTaxonObj);
@@ -198,42 +198,42 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
     /** Adds parent taxa to selected object, until the group parent. */
     function selectAncestorTaxa(taxon) {
         if (taxon.isRoot) { return; }
-        selected[taxon.level.displayName] = taxon.id;
+        selected[taxon.rank.displayName] = taxon.id;
         selectAncestorTaxa(_u('getDetachedRcrd', [taxon.parent, taxonRcrds]));
     }
 }
 /* --------------- UPDATE COMBOBOXES AFTER FILTER CHANGE -------------------- */
 /**
- * When the date-updated filter is updated, the taxa-by-level property has to be
+ * When the date-updated filter is updated, the taxa-by-rank property has to be
  * updated based on the rows displayed in the grid so that the combobox options
  * show only taxa in the filtered tree.
  */
 export function updateTaxonComboboxes(rd) {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
     const rowData = _u('snapshot', [rd]);
-    _u('getData', ['levelNames']).then(lvls => {
-        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
-        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
+    _u('getData', ['rankNames']).then(ranks => {
+        const taxaByRank = seperateTaxonTreeByRank(ranks, rowData);
+        tState().set({'taxaByRank': taxaByRank});                                 //console.log("taxaByRank = %O", taxaByRank)
         loadTxnFilters(tState().get());
     });
 }
-/** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(lvls, rowData) {
+/** Returns an object with taxon records by rank and keyed with display names. */
+function seperateTaxonTreeByRank(ranks, rowData) {
     const separated = {};
     rowData.forEach(data => separate(data));
-    return sortObjByLevelRank();
+    return sortObjByRank();
 
     function separate(row) {                                                    //console.log('taxon = %O', taxon)
-        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
-        separated[row.taxonLvl][row.name] = row.id;
+        if (!separated[row.taxonRank]) { separated[row.taxonRank] = {}; }
+        separated[row.taxonRank][row.name] = row.id;
 
         if (row.children) {
             row.children.forEach(child => separate(child));
         }
     }
-    function sortObjByLevelRank() {
+    function sortObjByRank() {
         const obj = {};
-        Object.keys(lvls).forEach(lvl => {
-            if (lvl in separated) { obj[lvl] = separated[lvl]; }
+        Object.keys(ranks).forEach(rank => {
+            if (rank in separated) { obj[rank] = separated[rank]; }
         });
         return obj;
     }

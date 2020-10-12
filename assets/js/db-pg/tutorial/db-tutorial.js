@@ -239,7 +239,7 @@ function getSteps() {
                 attributed to.<br><br>
                 <b>"Object Taxon"</b> shows the taxon interacted with.
                 <br><br>Note on Taxon names: Aside from genus species binomials,
-                names at all other taxonomic levels begin with the level (e.g.,
+                names at all other taxonomic ranks begin with the rank (e.g.,
                 Family Acanthaceae for the plant family Acanthaceae).`,
             position: 'top'
         },

@@ -34,10 +34,10 @@ initFilterStateObj();
  *              {str} time  Datetime
  *              {str} type  'cited' or 'updated' (in the database)
  *          {str} name      Name text
- *          {obj} combo     (objRealm, pubType)
+ *          {obj} combo     (objGroup, subGroup, pubType)
  *              {obj} field value(v)
  *     {obj} rebuild        Filters rebuild the table: type (k) value (v)
- *          {obj} combo     (Taxon levels, country||region)
+ *          {obj} combo     (Taxon ranks, country||region)
  *              {obj} field text(k) and value(v) (Will set the combo and trigger the table rebuild)
  *
  *

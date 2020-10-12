@@ -26,7 +26,7 @@ export function buildTxnTable(v) {
     });
 }
 function getTxnDataAndBuildTable(view) {
-    return _u('getData', [['levelNames', 'group', 'taxon']])
+    return _u('getData', [['rankNames', 'group', 'taxon']])
         .then(beginTaxonLoad.bind(null, view));
 }
 function beginTaxonLoad(groupId, data) {
@@ -40,7 +40,7 @@ function updateTaxonTableState(data) {
     tState().set({
         rcrdsById: data.taxon,
         groups: data.group,
-        allLevels: data.levelNames
+        allRanks: data.rankNames
     });
 }
 /** Event fired when the taxon view select box has been changed. */
@@ -56,7 +56,7 @@ function buildTaxonTable(val) {
 }
 /**
  * Gets the currently selected taxon group/view's id, gets the record for the taxon,
- * stores both it's id and level in the global focusStorage, and returns
+ * stores both it's id and rank in the global focusStorage, and returns
  * the taxon's record.
  */
 function storeGroupAndReturnRootTaxa(val) {
@@ -71,10 +71,10 @@ function getRootTaxonRcrd(root) {
 function updateGroupTableState(groupId, group) {
     _u('setData', ['curView', groupId]);
     tState().set({
-        // groupLvl: groupTaxonRcrd.level,
+        // groupRank: groupTaxonRcrd.rank,
         curView: groupId,
         groupName: group.pluralName,
-        allgroupRanks: group.uiLevelsShown,
+        allgroupRanks: group.uiRanksShown,
     });
 }
 /** This catches errors in group value caused by exiting mid-tutorial. TODO */
@@ -82,7 +82,7 @@ function getSelValOrDefault(val) {
     return !val ? 1 : isNaN(val) ? 1 : val;
 }
 /**
- * Builds a taxon data-tree for the passed taxon. The taxon levels present in
+ * Builds a taxon data-tree for the passed taxon. The taxon ranks present in
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
@@ -97,10 +97,10 @@ export function rebuildTxnTable(taxa) {                             /*Perm-log*/
  * The root ids are added to the global focus storage obj's 'openRows'  and will
  * be expanded on table load.
  */
-function startTxnTableBuildChain(taxa) {   //, init = false
+function startTxnTableBuildChain(taxa) {
     tState().set({openRows: [...taxa.map(t => t.id.toString())]});
     const tS = tState().get();
-    return build.buildTxnTree(taxa)  //, init
+    return build.buildTxnTree(taxa)
         .then(tree => build.buildTxnRowData(tree, tS))
         .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Taxon Tree', rowData, tS))

@@ -24,7 +24,7 @@ import { initSearchStateAndTable, _ui } from '../db-main.js';
  * from the server and stored locally @storeEntityData. Database search page
  * table build begins @initSearchStateAndTable.
  * Entities downloaded with each ajax call:
- *   /taxon - Taxon, Group, Level
+ *   /taxon - Taxon, Group, Rank
  *   /location - HabitatType, Location, LocationType, GeoJson
  *   /source - Author, Citation, CitationType, Publication, PublicationType,
  *       Source, SourceType
@@ -97,37 +97,37 @@ function parseData(data) {
 /* ======================= DERIVE DATA ====================================== */
 /* -------------------------- TAXON DATA ------------------------------------ */
 /**
- * levelNames - an object with each level name (k) and it's id and ordinal (v).
- * groupNames - an object with each group name (k) and it's id, role, and levels (v).
- * [group][subGroup][level]Names - object with all taxa in subGroup at the level: name (k) id (v)
- * *group - resaved with 'uiLevelsShown' filled with the level display names.
+ * rankNames - an object with each rank name (k) and it's id and ordinal (v).
+ * groupNames - an object with each group name (k) and it's id, role, and ranks (v).
+ * [group][subGroup][rank]Names - object with all taxa in subGroup at the rank: name (k) id (v)
+ * *group - resaved with 'uiRanksShown' filled with the rank display names.
  */
-/** Stores an object of taxon names and ids for each level in each group. */
+/** Stores an object of taxon names and ids for each rank in each group. */
 function deriveTaxonData(data) {                                                //console.log("deriveTaxonData called. data = %O", data);
     db.setDataInMemory('groupNames', getNameDataObj(Object.keys(data.group), data.group));
-    storeTaxaByLevelAndGroup(data.taxon, data.group, data.groupRoot);
-    modifyGroupData(data.group, data.level);
-    storeLevelData(data.level);
+    storeTaxaByRankAndGroup(data.taxon, data.group, data.groupRoot);
+    modifyGroupData(data.group, data.rank);
+    storeRankData(data.rank);
     db.deleteMmryData('groupRoot');
 }
-/* --------------- Levels ------------------ */
-function storeLevelData(levelData) {
-    const levels = {};
-    const order = Object.keys(levelData).sort(orderLevels);
-    $(order).each(addLevelData);
-    db.setDataInMemory('levelNames', levels);
+/* --------------- Ranks ------------------ */
+function storeRankData(rankData) {
+    const ranks = {};
+    const order = Object.keys(rankData).sort(orderRanks);
+    $(order).each(addRankData);
+    db.setDataInMemory('rankNames', ranks);
 
-    function orderLevels(a, b) {
-        const x = levelData[a].ordinal;
-        const y = levelData[b].ordinal;
+    function orderRanks(a, b) {
+        const x = rankData[a].ordinal;
+        const y = rankData[b].ordinal;
         return x<y ? -1 : x>y ? 1 : 0;
     }
-    function addLevelData(i, id) {
-        return levels[levelData[id].displayName] = {id: id, ord: i+1};
+    function addRankData(i, id) {
+        return ranks[rankData[id].displayName] = {id: id, ord: i+1};
     }
 }
-/* --------- Taxa by Group & Level ------------- */
-function storeTaxaByLevelAndGroup(taxa, groups, roots) {
+/* --------- Taxa by Group & Rank ------------- */
+function storeTaxaByRankAndGroup(taxa, groups, roots) {
     for (let groupId in groups) {
         const group = groups[groupId];
         sortTaxaByGroupRoot(group, group.taxa);
@@ -144,24 +144,24 @@ function storeTaxaByLevelAndGroup(taxa, groups, roots) {
     }
     function separateAndStoreGroupTaxa(taxon, subGroup, group) {                //console.log('[%s] taxon = %O group = %O', subGroup, taxon, group)
         addGroupDataToTaxon(taxon, subGroup, group);
-        const data = separateGroupTaxaByLevel(taxon.children, subGroup, group, taxa);
-        storeTaxaByGroupAndLvl(data, subGroup, group.displayName);
+        const data = separateGroupTaxaByRank(taxon.children, subGroup, group, taxa);
+        storeTaxaByGroupAndRank(data, subGroup, group.displayName);
     }
 }
-function separateGroupTaxaByLevel(cTaxa, subGroup, group, rcrds) {
+function separateGroupTaxaByRank(cTaxa, subGroup, group, rcrds) {
     const data = {};
     cTaxa.forEach(separateTaxonAndChildren);
     return data;
 
     function separateTaxonAndChildren(id) {
         const taxon = rcrds[id];
-        addToGroupLevel(taxon, taxon.level.displayName);
+        addToGroupRank(taxon, taxon.rank.displayName);
         addGroupDataToTaxon(taxon, subGroup, group);
         taxon.children.forEach(separateTaxonAndChildren);
     }
-    function addToGroupLevel(taxon, level) {
-        if (!data[level]) { data[level] = {}; };
-        data[level][taxon.name] = taxon.id;
+    function addToGroupRank(taxon, rank) {
+        if (!data[rank]) { data[rank] = {}; };
+        data[rank][taxon.name] = taxon.id;
     }
 }
 function addGroupDataToTaxon(taxon, subGroup, group) {
@@ -172,9 +172,9 @@ function addGroupDataToTaxon(taxon, subGroup, group) {
         subGroup: subGroup
     };
 }
-function storeTaxaByGroupAndLvl(taxonObj, subGroup, group) {
-    for (let level in taxonObj) {                                               //console.log("storing as [%s] = %O", group+subGroup+level+'Names', taxonObj[level]);
-        db.setDataInMemory(group+subGroup+level+'Names', taxonObj[level]);
+function storeTaxaByGroupAndRank(taxonObj, subGroup, group) {
+    for (let rank in taxonObj) {                                               //console.log("storing as [%s] = %O", group+subGroup+rank+'Names', taxonObj[rank]);
+        db.setDataInMemory(group+subGroup+rank+'Names', taxonObj[rank]);
     }
 }
 function storeGroupTaxa(group, taxonRcrds) {
@@ -182,18 +182,18 @@ function storeGroupTaxa(group, taxonRcrds) {
     db.setDataInMemory(group.displayName+'SubGroupNames', getNameDataObj(gIds, taxonRcrds));
 }
 /* ---------- Modify Group Data -------------- */
-function modifyGroupData(groups, levels) {                                      //console.log('groups = %O', groups);
+function modifyGroupData(groups, ranks) {                                      //console.log('groups = %O', groups);
     modifyGroups(Object.keys(groups));
     db.setDataInMemory('group', groups);
 
     function modifyGroups(ids) {
         ids.forEach(id => {
             let group = groups[id]
-            group.uiLevelsShown = fillLevelNames(JSON.parse(group.uiLevelsShown));
+            group.uiRanksShown = fillRankNames(JSON.parse(group.uiRanksShown));
         });
     }
-    function fillLevelNames(lvlAry) {
-        return lvlAry.map(id => levels[id].displayName);
+    function fillRankNames(rankAry) {
+        return rankAry.map(id => ranks[id].displayName);
     }
 }
 /* ----------------------- LOCATION DATA ------------------------------------ */

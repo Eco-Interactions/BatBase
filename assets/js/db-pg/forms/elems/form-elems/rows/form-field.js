@@ -51,7 +51,7 @@ function buildFieldLabel(input, field) {
         return $(input).data('fLvl') ? 'required' : '';
     }
     function getFieldName() {
-        const fieldName = field.replace(/([A-Z])/g, ' $1'); //Adds space between pascal-cased words
+        const fieldName = field.includes('-') ? field : field.replace(/([A-Z])/g, ' $1'); //Adds space between pascal-cased words
         return _u('ucfirst', [fieldName]).trim();
     }
 }

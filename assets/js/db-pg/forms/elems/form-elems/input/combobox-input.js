@@ -359,18 +359,18 @@ function getCitTypeOpts(prop, field) {
 } /* End getCitTypeOpts */
 /* -------------------------- TAXON ----------------------------------------- */
 /** Returns an array of taxonyms for the passed rank and the form's taxon group. */
-export function getTaxonOpts(level, field, r, g) {
+export function getTaxonOpts(rank, field, r, g) {
     const group = r ? r : _state('getTaxonProp', ['groupName']);
     const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);
-    return _u('getOptsFromStoredData', [group+subGroup+level+'Names'])
+    return _u('getOptsFromStoredData', [group+subGroup+rank+'Names'])
         .then(buildTaxonOpts);
 
         function buildTaxonOpts(opts) {
-            opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
+            opts.unshift({ value: 'create', text: 'Add a new '+rank+'...'});
             return opts;
         }
 }
-function getSubGroupOpts(prop, field) {
+function getGroupOpts(prop, field) {
     const groups = _state('getTaxonProp', ['groups']);
     const opts = Object.keys(groups).map(getGroupOpt).filter(o => o);
     return opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
@@ -380,7 +380,7 @@ function getSubGroupOpts(prop, field) {
         return { value: groups[name], text: name };
     }
 }
-function getGroupOpts(prop, field) {
+function getSubGroupOpts(prop, field) {
     const group = _state('getTaxonProp', ['groupName']);
     return _u('getOptsFromStoredData', [group+'SubGroupNames']);
 }
