@@ -36,7 +36,7 @@ export function initCreateForm(rank, value) {                                   
     return showNewTaxonForm(val, ucRank);
 }
 function showNewTaxonForm(val, rank) {
-    _state('setGroupProp', ['formTaxonLvl', rank]);  //used for data validation/submit
+    _state('setTaxonProp', ['formTaxonLvl', rank]);  //used for data validation/submit
     return buildTaxonForm()
     .then(() => _elems('toggleSubmitBttn', ['#sub2-submit', true]));
 
@@ -90,7 +90,7 @@ export function getTaxonEditFields(id) {
     const taxa = _state('getEntityRcrds', ['taxon']);
     const group = taxa[id].group;
     const role = group.displayName === 'Bat' ? 'Subject' : 'Object';
-    return _state('initGroupState', [role, group.id, group])
+    return _state('initTaxonState', [role, group.id, group])
         .then(groupState => {
             setScopeTaxonMemory(taxa, groupState);
             return buildTaxonEditFields(taxa[id]);
@@ -242,13 +242,16 @@ function getSelectParentComboEvents() {
         'Class': { change: onParentRankSelection, add: initCreateForm.bind(null, 'class') },
         'Family': { change: onParentRankSelection, add: initCreateForm.bind(null, 'family') },
         'Genus': { change: onParentRankSelection, add: initCreateForm.bind(null, 'genus') },
+        'Sub-Group': { change: handleOnSubGroupSelection },
         'Order': { change: onParentRankSelection, add: initCreateForm.bind(null, 'order') },
-        'Group': { change: onParentRankSelection },
         'Species': { change: onParentRankSelection, add: initCreateForm.bind(null, 'species') },
     }
 }
 function onParentRankSelection(val) {
     _form('onRankSelection', [val, this.$input[0]]);
+}
+function handleOnSubGroupSelection(val) {
+    _form('onSubGroupSelection', [val]);
 }
 export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, taxonData.rcrds);
     const prntTxn = taxonData.rcrds[prntId];
@@ -306,8 +309,7 @@ function ifParentSelectErrs(prntRank) {
     const hasErrs = checkEachPossibleParentErr(prntRank);
     if (!hasErrs) { clearRankErrs('#Parent_errs', 'sub'); }
     return hasErrs;
-
-} /* End ifParentSelectErrs */
+}
 function checkEachPossibleParentErr(prntRank) {
     const txnRank = $('#txn-rank').val();                                       //console.log("ifParentSelectErrs. taxon = %s. parent = %s", txnRank, prntRank);
     const errs = [
