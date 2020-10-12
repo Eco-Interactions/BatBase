@@ -118,11 +118,11 @@ export function addEntityFormState(entity, level, pSel, action) {
     };                                                                          //console.log("   /addEntityFormState. formState = %O, arguments = %O", formState, arguments)
 }
 /*------------- Taxon Params --------------------*/
-export function initGroupState(role, groupId, subGroupName) {
+export function initTaxonState(role, groupId, subGroupName) {
     return _db('getData', [['group', 'groupNames', 'rankNames']])
         .then(data => setTxnState(data.group, data.groupNames, data.rankNames));
 
-    function setTxnState(groups, groupNames, ranks) {  //, subGroupNames
+    function setTxnState(groups, groupNames, ranks) {
         const group = groups[groupId];
         const data = {
             groupRanks: group.uiRanksShown,
@@ -209,7 +209,7 @@ export function setStateProp(prop, val) {
 export function setFormProp(fLvl, prop, val) {
     formState.forms[fLvl][prop] = val;
 }
-export function setGroupProp(prop, val) {
+export function setTaxonProp(prop, val) {
     return formState.forms.taxonData[prop] = val;
 }
 export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);

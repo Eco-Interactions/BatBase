@@ -60,6 +60,9 @@ export function enableCountryRegionField() {
 export function onRankSelection() {
     int.onRankSelection(...arguments);
 }
+export function onSubGroupSelection() {
+    int.onSubGroupSelection(...arguments);
+}
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {
     return loc.addMapToLocationEditForm(...arguments);

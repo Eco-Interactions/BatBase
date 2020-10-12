@@ -7,6 +7,7 @@
  *     initCreateForm
  *     getSelectedTaxon
  *     onRankSelection
+ *     onSubGroupSelection
  *
  * TOC
  *     CREATE FORM
@@ -22,14 +23,10 @@
  *         COUNTRY/REGION
  *         LOCATION
  *         TAXON ROLES
- *             SUBJECT
- *             OBJECT
- *             ROLE SHARED HELPERS
- *                 initTaxonSelectForm
- *                 resetTaxonSelectForm
- *                 onRankSelection
- *                 selectRoleTaxon
- *         INTERACTION TYPE & TAGS
+ *             INIT
+ *             onGroupSelection
+ *             onRankSelection
+ *             selectRoleTaxon
  *     HELPERS
  */
 import { _modal, _u } from '../../../db-main.js';
@@ -252,6 +249,7 @@ function getEntityComboEvents(entity) {
             'Genus': { change: onRankSelection, add: create('genus') },
             'Order': { change: onRankSelection, add: create('order') },
             'Group': { change: onGroupSelection },
+            'Sub-Group': { change: onSubGroupSelection },
             'Species': { change: onRankSelection, add: create('species') },
         }
     };
@@ -441,7 +439,7 @@ function removeLocMap() {
     $('#form-map').fadeTo(400, 0, () => $('#form-map').remove());
 }
 /*--------------------- TAXON ROLES ------------------------------------------*/
-/* -------------- SUBJECT ---------------------- */
+/* ------------------------ INIT ---------------------- */
 /**
  * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
  * each rank present in the group, (eg: Bat - Family, Genus, and Species), filled
@@ -451,7 +449,6 @@ function removeLocMap() {
 function initSubjectSelect() {                                                  console.log('       +--initSubjectSelect (selected ? [%s])', $('#Subject-sel').val());
     initTaxonSelectForm('Subject', 1);
 }
-/* -------------- OBJECT ---------------------- */
 /** Note: The selected group's rank combos are built @onGroupSelection. */
 function initObjectSelect() {                                                   console.log('       +--initObjectSelect (selected ? [%s])', $('#Object-sel').val());
     initTaxonSelectForm('Object', getObjectGroup())
@@ -462,48 +459,7 @@ function getObjectGroup(prop = 'id') {
     if (!prevSelectedId) { return 2; } //default: Plants (2)
     return getRcrd('taxon', prevSelectedId).group[prop];
 }
-/**
- * Removes any previous group comboboxes. Shows a combobox for each rank present
- * in the selected Taxon group filled with the taxa at that rank.
- */
-function onGroupSelection(val) {                                                //console.log("               --onGroupSelection. val = ", val)
-    if (val === '' || isNaN(parseInt(val))) { return; }
-    clearPreviousGroupRankCombos();
-    _state('initGroupState', ['Object', val])
-    .then(buildAndAppendGroupRows);
-    /** A row for each rank present in the group filled with the taxa at that rank.  */
-    function buildAndAppendGroupRows() {
-        _elems('buildFormRows', ['object', {}, 'sub'])
-        .then(appendGroupRowsAndFinishBuild);
-    }
-    function appendGroupRowsAndFinishBuild(rows) {
-        ifNoSubGroupsRemoveCombo(rows);
-        $('#Group_row').after(rows);
-        _state('setFormFieldData', ['sub', 'Group', null, 'select']);
-        initFormCombos('taxon', 'sub');
-        _elems('toggleSubmitBttn', ['#sub-submit', false]);
-        /* Binds the current group to the 'Select Unspecified' button */
-        $('#select-group').off('click');
-        $('#select-group').click(selectRoleTaxon.bind(null, null, getTaxonData('groupTaxon')));
-    }
-}
-function ifNoSubGroupsRemoveCombo(rows = false) {
-    const subGroups = Object.keys(getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
-    if (subGroups.length > 1) { return; }
-    if (!rows) {
-        $('#Sub-Group_row').remove();
-    } else {
-        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
-    }
-}
-function clearPreviousGroupRankCombos() {
-    $('#object_Rows>div').each(ifRankComboRemoveCombo);
-}
-function ifRankComboRemoveCombo(i, elem) {
-    if (i !== 0) { elem.remove(); }
-}
-/* ------------------- ROLE SHARED HELPERS --------------- */
-/* ------- initTaxonSelectForm --------- */
+/* ------------- SELECT FORM --------------- */
 function initTaxonSelectForm(role, groupId) {
     if (ifSubFormAlreadyInUse(role)) { return throwAndCatchSubFormErr(role, 'sub'); }
     $('#'+role+'-sel').data('loading', true);
@@ -520,9 +476,9 @@ function ifOppositeRoleFormLoading(role) {
 }
 function buildTaxonSelectForm(role, groupId) {                                  //console.log('-------------buildTaxonSelectForm. args = %O', arguments);
     addNewFormState(role);
-    return _state('initGroupState', [role, groupId])
-        .then(() => _elems('initSubForm',
-            ['sub', 'sml-sub-form', {Group: groupId}, '#'+role+'-sel']));
+    return _state('initTaxonState', [role, groupId])
+        .then(data => _elems('initSubForm', ['sub', 'sml-sub-form',
+            {Group: groupId, 'Sub-Group': data.groupTaxon.id}, '#'+role+'-sel']));
 }
 function addNewFormState(role) {
     const lcRole = _u('lcfirst', [role]);
@@ -631,7 +587,7 @@ function selectPrevTaxon(taxon, role) {
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
-    _state('setGroupProp', ['prevSel', {val: taxon.id, text: taxon.displayName }]);
+    _state('setTaxonProp', ['prevSel', {val: taxon.id, text: taxon.displayName }]);
 }
 function ifTaxonInDifferentGroup(group) {
     return group.displayName !== 'Bat' && $('#Group-sel').val() != group.id;
@@ -642,7 +598,60 @@ function selectTaxonGroup(taxon) {
 function deleteResetFlag(role) {
     $('#'+role+'-sel').removeData('reset');
 }
- /* ------- OnRankSelection --------- */
+/* ------------------ onGroupSelect ------------- */
+/**
+ * Removes any previous group comboboxes. Shows a combobox for each rank present
+ * in the selected Taxon group filled with the taxa at that rank.
+ */
+function onGroupSelection(val) {                                                //console.log("               --onGroupSelection. val = ", val)
+    if (val === '' || isNaN(parseInt(val))) { return; }
+    clearPreviousGroupRankCombos();
+    _state('initTaxonState', ['Object', val])
+    .then(taxonData => buildAndAppendGroupRows(taxonData.groupTaxon.id));
+}
+/** A row for each rank present in the group filled with the taxa at that rank.  */
+function buildAndAppendGroupRows(rootId) {
+    _elems('buildFormRows', ['object', {'Sub-Group': rootId}, 'sub'])
+    .then(appendGroupRowsAndFinishBuild);
+}
+function appendGroupRowsAndFinishBuild(rows) {
+    ifNoSubGroupsRemoveCombo(rows);
+    $('#Sub-Group_row').after(rows);
+    _state('setFormFieldData', ['sub', 'Group', null, 'select']);
+    initFormCombos('taxon', 'sub');
+    _elems('toggleSubmitBttn', ['#sub-submit', false]);
+    /* Binds the current group to the 'Select Unspecified' button */
+    $('#select-group').off('click');
+    $('#select-group').click(selectRoleTaxon.bind(null, null, getTaxonData('groupTaxon')));
+}
+function ifNoSubGroupsRemoveCombo(rows = false) {
+    const subGroups = Object.keys(getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
+    if (subGroups.length > 1) { return; }
+    if (!rows) {
+        $('#Sub-Group_row').remove();
+    } else {
+        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
+    }
+}
+function clearPreviousGroupRankCombos() {
+    $('#object_Rows>div').each(ifRankComboRemoveCombo);
+}
+function ifRankComboRemoveCombo(i, elem) {
+    if (i !== 0) { elem.remove(); }
+}
+/* ------------ onSubGroupSelection ---------- */
+export function onSubGroupSelection(val) {
+    const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];
+    _state('setTaxonProp', ['subGroup', subGroup]);
+    clearPreviousSubGroupCombos();
+    buildAndAppendGroupRows(val)
+}
+function clearPreviousSubGroupCombos() {
+    const groupRows = $('#Group_row, #Sub-Group_row').detach();
+    $('#object_Rows').empty();
+    $('#object_Rows').append(groupRows);
+}
+ /* --------------------------- OnRankSelection ------------------------ */
 /**
  * When a taxon at a rank is selected, all child rank comboboxes are
  * repopulated with related taxa and the 'select' button is enabled. If the
