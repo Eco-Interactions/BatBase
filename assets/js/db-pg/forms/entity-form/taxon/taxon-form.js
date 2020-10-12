@@ -90,7 +90,7 @@ export function getTaxonEditFields(id) {
     const taxa = _state('getEntityRcrds', ['taxon']);
     const group = taxa[id].group;
     const role = group.displayName === 'Bat' ? 'Subject' : 'Object';
-    return _state('initTaxonState', [role, group.id, group])
+    return _state('initTaxonState', [role, group.id, group.name])
         .then(groupState => {
             setScopeTaxonMemory(taxa, groupState);
             return buildTaxonEditFields(taxa[id]);
@@ -202,10 +202,10 @@ function getParentEditFields(prnt) {
 }
 /** ------- GROUP DISPLAY NAME ------ */
 function getGroupRankRow(taxon, rows) {
-    const subGroup = Object.keys(taxonData.subGroup);
-    if (subGroup.length > 1) { return; }
-    $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
-    return buildTaxonParentRow(subGroup[0]);
+    const subGroups = Object.keys(taxonData.subGroups);
+    if (subGroups.length > 1) { return; }
+    $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
+    return buildTaxonParentRow(taxonData.subGroups[subGroups[0]].displayName);
 }
 function buildTaxonParentRow(displayName) {
     const groupRank = displayName.split(' ')[0];
@@ -251,7 +251,12 @@ function onParentRankSelection(val) {
     _form('onRankSelection', [val, this.$input[0]]);
 }
 function handleOnSubGroupSelection(val) {
-    _form('onSubGroupSelection', [val]);
+    _form('onSubGroupSelection', [val])
+    .then(hideSpeciesCombo);
+}
+/** Note: Species combo needs to stay in DOM for the combo change methods. */
+function hideSpeciesCombo() {
+    $('#Species_row').hide();
 }
 export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, taxonData.rcrds);
     const prntTxn = taxonData.rcrds[prntId];
@@ -267,7 +272,7 @@ function finishParentSelectFormUi() {
 }
 function alignGroupRankText() {
     if ($('#Sub-Group_row').length) { return; }
-    const groupRank = Object.keys(taxonData.subGroup)[0].split(' ')[0];
+    const groupRank = $('#txn-prnt span')[0].innerText.split(' ')[1];
     $('#'+groupRank+'_row .field-row')[0].className += ' group-row';
 }
 function clearAndDisableTopFormParentFields() {

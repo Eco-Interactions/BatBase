@@ -611,7 +611,7 @@ function onGroupSelection(val) {                                                
 }
 /** A row for each rank present in the group filled with the taxa at that rank.  */
 function buildAndAppendGroupRows(rootId) {
-    _elems('buildFormRows', ['object', {'Sub-Group': rootId}, 'sub'])
+    return _elems('buildFormRows', ['object', {'Sub-Group': rootId}, 'sub'])
     .then(appendGroupRowsAndFinishBuild);
 }
 function appendGroupRowsAndFinishBuild(rows) {
@@ -644,7 +644,7 @@ export function onSubGroupSelection(val) {
     const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];
     _state('setTaxonProp', ['subGroup', subGroup]);
     clearPreviousSubGroupCombos();
-    buildAndAppendGroupRows(val)
+    return buildAndAppendGroupRows(val);
 }
 function clearPreviousSubGroupCombos() {
     const groupRows = $('#Group_row, #Sub-Group_row').detach();
@@ -790,8 +790,8 @@ function repopulateCombosWithRelatedTaxa(selId) {
         return Promise.resolve();
     }
 } /* End fillAncestorTaxa */
-function repopulateRankCombos(optsObj, selected) {                             //console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
-    Object.keys(optsObj).forEach(rank => {                                       //console.log("rank = %s, name = ", l, ranks[l-1]);
+function repopulateRankCombos(optsObj, selected) {                              //console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
+    Object.keys(optsObj).forEach(rank => {                                      //console.log("rank = %s, name = ", rank, optsObj[rank]);
         repopulateRankCombo(optsObj[rank], rank, selected)
     });
 }
