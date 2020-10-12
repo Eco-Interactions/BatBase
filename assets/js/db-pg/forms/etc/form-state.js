@@ -118,7 +118,7 @@ export function addEntityFormState(entity, level, pSel, action) {
     };                                                                          //console.log("   /addEntityFormState. formState = %O, arguments = %O", formState, arguments)
 }
 /*------------- Taxon Params --------------------*/
-export function initTaxonState(role, groupId, subGroupName) {
+export function initTaxonState(role, groupId, subGroupName) {                   //console.log('initTaxonState args = %O', arguments);
     return _db('getData', [['group', 'groupNames', 'rankNames']])
         .then(data => setTxnState(data.group, data.groupNames, data.rankNames));
 

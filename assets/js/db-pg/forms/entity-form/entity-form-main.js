@@ -61,7 +61,7 @@ export function onRankSelection() {
     int.onRankSelection(...arguments);
 }
 export function onSubGroupSelection() {
-    int.onSubGroupSelection(...arguments);
+    return int.onSubGroupSelection(...arguments);
 }
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {
