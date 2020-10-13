@@ -465,14 +465,20 @@ class DataEntryController extends AbstractController
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
-    {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+    {
         if ($this->ifNotDuplicateEntityError($e)) {
-            $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData($e->getMessage());
         return $response;
+    }
+    private function logErr($lineNum, $msg, $trace)
+    {
+        $this->logger->error("\n\n### Error @ [$line] = $msg\n$trace\n");
+        if ($this->getParameter('env') === 'prod') { return; };
+        print("\n\n### Error @ [$line] = $msg\n$trace\n");
     }
     private function ifNotDuplicateEntityError($e)
     {
