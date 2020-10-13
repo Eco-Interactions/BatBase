@@ -173,7 +173,7 @@ function addGroupDataToTaxon(taxon, subGroup, group) {
     };
 }
 function storeTaxaByGroupAndRank(taxonObj, subGroup, group) {
-    for (let rank in taxonObj) {                                               //console.log("storing as [%s] = %O", group+subGroup+rank+'Names', taxonObj[rank]);
+    for (let rank in taxonObj) {                                                //console.log("storing as [%s] = %O", group+subGroup+rank+'Names', taxonObj[rank]);
         db.setDataInMemory(group+subGroup+rank+'Names', taxonObj[rank]);
     }
 }
@@ -182,7 +182,7 @@ function storeGroupTaxa(group, taxonRcrds) {
     db.setDataInMemory(group.displayName+'SubGroupNames', getNameDataObj(gIds, taxonRcrds));
 }
 /* ---------- Modify Group Data -------------- */
-function modifyGroupData(groups, ranks) {                                      //console.log('groups = %O', groups);
+function modifyGroupData(groups, ranks) {                                       //console.log('groups = %O', groups);
     modifyGroups(Object.keys(groups));
     db.setDataInMemory('group', groups);
 

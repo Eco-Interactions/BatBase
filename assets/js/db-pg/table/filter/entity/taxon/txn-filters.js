@@ -16,8 +16,8 @@
  */
 import * as fM from '../../filter-main.js';
 import { _table, _ui, _u } from '../../../../db-main.js';
-import { initObjectGroupCombobox, filterTableByobjectGroup } from './obj-group-filter.js';
-import { loadSubGroupFilter } from './sub-group-filter.js';
+import { initObjectGroupCombobox } from './obj-group-filter.js';
+import { initSubGroupFilter } from './sub-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
@@ -25,12 +25,12 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     loadTxnRankComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    _ui('updateTaxonFilterViewMsg', [tblState.groupName]);
+    _ui('updateTaxonFilterViewMsg', [tblState.pluralGroupName]);
     return loadAsyncFilters(tblState);
 }
 function loadAsyncFilters(tblState) {
-    if (tblState.groupName === 'Bats') { return initObjectGroupCombobox(); }
-    if (Object.keys(tblState.subGroups).length > 1) { return loadSubGroupFilter(tblState); }
+    if (tblState.groupName === 'Bat') { return initObjectGroupCombobox(); }
+    if (Object.keys(tblState.subGroups).length == 1) { return initSubGroupFilter(tblState); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {

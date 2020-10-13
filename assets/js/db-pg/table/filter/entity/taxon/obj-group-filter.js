@@ -3,7 +3,6 @@
  *
  * Exports
  * 		initObjectGroupCombobox
- * 		filterTableByObjectGroup
  *
  * TOC
  * 		INIT COMBOBOX
@@ -12,17 +11,12 @@
 import { _ui, _u } from '../../../../db-main.js';
 import * as fM from '../../filter-main.js';
 
-let timeout, totalObjectGroupCnt;
+let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectGroupCombobox() {
     return _u('getOptsFromStoredData', ['groupNames'])
-    .then(setGroupCnt)
     .then(buildObjectGroupCombo)
     .then(finishGroupComboInit);
-}
-function setGroupCnt(groups) {
-    totalObjectGroupCnt = groups.length - 1; //All but the Bat group can be objects
-    return groups;
 }
 function buildObjectGroupCombo(groups) {
     const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
@@ -41,25 +35,27 @@ function finishGroupComboInit(filterEl) {
  * When viewing by publication, interactions can be filtered by the publication type.
  * Handles synchronizing with the tree-text filter.
  */
-export function filterTableByObjectGroup(groupIds) {                            //console.log('filterTableByObjectGroup args = %O', arguments);
-	_ui('fadeTable');
+function filterTableByObjectGroup(groupIds) {                                   //console.log('filterTableByObjectGroup args = %O', arguments);
+    if (!groupIds.length) { return; }
+    _ui('fadeTable');
 	if (!timeout) { timeout = setTimeout(filterByObjGroups, 1000); }
 }
 function filterByObjGroups() {
 	timeout = null;
     const groupIds = _u('getSelVal', ['Object Group']);
-    if (groupIds.length) { ifAllGroupsSelectedClearFilter(groupIds.length); }
-    const filterObj = buildObjGroupFilterObj(groupIds);
-	fM.setFilterState('combo', filterObj, 'direct');
+    if (!groupIds.length) { return; }
+    ifAllGroupsSelectedClearFilterCombo(groupIds.length);
+    updateObjGroupFilterState(groupIds);
 	fM.onFilterChangeUpdateRowData();
     _ui('showTable');
 
-    function ifAllGroupsSelectedClearFilter(selectedGroupCnt) {                 //console.log('selectedGroupCnt [%s] !== totalObjectGroupCnt [%s]', selectedGroupCnt, totalObjectGroupCnt, selectedGroupCnt !== totalObjectGroupCnt)
-        if (selectedGroupCnt !== totalObjectGroupCnt) { return; }
-        filterObj['Object Group'] = false;
+    function ifAllGroupsSelectedClearFilterCombo(selectedGroupCnt) {
+        const total = $('#selObjGroup')[0].selectize.currentResults.total;      //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total)
+        if (selectedGroupCnt !== total) { return; }
         $('#selObjGroup')[0].selectize.clear();
     }
 }
-function buildObjGroupFilterObj(groupIds) {
-    return { 'Object Group': groupIds.length ? groupIds : false };
+function updateObjGroupFilterState(groupIds) {
+    const state = { 'Object Group': groupIds.length ? groupIds : false };
+    fM.setFilterState('combo', state, 'direct');
 }

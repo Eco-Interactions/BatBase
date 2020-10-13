@@ -83,9 +83,8 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                /*dbug-log*/
         function getChildLocData(childLoc) {
             childRows.push(getLocRowData(childLoc, pTreeLvl + 1, tblState));
         }
-    } /* End getLocRowDataForChildren */
-
-} /* End getLocRowData */
+    }
+}
 function hasGroupedInteractionsRow(locRcrd) {
     return locRcrd.children.length > 0 && locRcrd.interactions.length > 0;
 }
@@ -179,12 +178,13 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,
-        group: taxon.group.id, // Used for the Object Group filter in Bat view
+        // group: taxon.group.id, // Used for the Object Group filter in Bat view
+        subGroup: taxon.group.subGroup,  //Used for the Sub-Group filter
         taxonRank: taxon.rank.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
     };
-} /* End getTaxonRowData */
+}
 /**
  * Checks whether this taxon has interactions in either the subject or object
  * roles. Returns the interaction count if any records are found, null otherwise.
@@ -246,7 +246,7 @@ function getTaxonAndChildTaxaRowData(taxon, curTreeLvl, tblState) {
             rows.push(getTaxonRowData(childTaxon, curTreeLvl + 1, tblState));
         });
     }
-} /* End getTaxonAndChildTaxaRowData */
+}
 function getTaxonIntRows(taxon, treeLvl, tblState) {                /*dbug-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
     const ints = [];
     ['sub', 'ob'].forEach(prfx => taxon[prfx+'jectRoles'].forEach(buildTxnIntRow));
@@ -350,10 +350,10 @@ function buildIntRowData(intRcrd, treeLvl, idx){                                
                 return p === 'region' && locObj[props[p]].displayName === 'Unspecified';
             }
         }
-    } /* End getLocationData */
+    }
     function getEntityData(entity, prop, intProp) {
         const rcrdKey = intProp || entity;
         return prop in intRcrd[rcrdKey] ? intRcrd[rcrdKey][prop] :
             !Object.keys(intRcrd[rcrdKey]).length ? '[ Loading... ]' : '';
     }
-} /* End buildIntRowData */
+}

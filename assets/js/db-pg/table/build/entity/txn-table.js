@@ -72,7 +72,8 @@ function updateGroupTableState(groupId, group) {
     tState().set({
         // groupRank: groupTaxonRcrd.rank,
         curView: groupId,
-        groupName: group.pluralName,
+        groupName: group.displayName,
+        groupPluralName: group.pluralName,
         subGroups: group.taxa,
         allgroupRanks: group.uiRanksShown,
     });
