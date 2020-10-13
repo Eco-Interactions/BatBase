@@ -13,6 +13,8 @@
  *  		NAME TEXT
  *  		PUBLICATION TYPE
  *  		DATE/TIME
+ *  		OBJECT GROUP
+ *  		SUB-GROUP
  */
 import { _u } from '../../../db-main.js';
 let filters, rows;
@@ -22,7 +24,10 @@ let filters, rows;
  */
 const filterFuncs = {
 	root: {
-		combo: 	{ 'Publication Type': ifRowFromPubType }
+		combo: 	{
+			'Publication Type': ifRowFromPubType,
+			'Sub-Group': ifIntWithSubGroup
+		}
 	},
 	tree: {
 		name: 	ifRowNameContainsText
@@ -49,17 +54,18 @@ export function getFilteredRowData(f, rowData) {					/*dbug-log*///console.log('
 function getFuncsForActiveFiltersInGroup(group, filterObj = filters) {
 	const funcObj = typeof group === 'string' ? filterFuncs[group] : group;
 	const active = {};
-	Object.keys(funcObj).forEach(ifFilterTypeActive);
+	Object.keys(funcObj).forEach(addActiveFilters);
 	return Object.keys(active).length ? active : false;
 
-	function ifFilterTypeActive(type) {  										//console.log('type = [%s] funcs = %O filters = %O', type, funcObj, filterObj);
+	function addActiveFilters(type) {  											//console.log('addActiveFilters type = [%s] funcs = %O filters = %O', type, funcObj, filterObj);
 		if (type !== 'combo') { return addFilterFuncIfActive(type, filterObj[type]); }
-		const subGroup = getFuncsForActiveFiltersInGroup(funcObj.combo, filters.combo);
-		addFilterFuncIfActive(type, subGroup);
+		const comboFilters = getFuncsForActiveFiltersInGroup(funcObj.combo, filters.combo);
+		if (!comboFilters) { return }
+		active.combo = comboFilters;
 	}
-	function addFilterFuncIfActive(type, fData) {
+	function addFilterFuncIfActive(type, fData) {   							//console.log('addFilterFuncIfActive [%s] [%O]', type, fData);
 		if (!fData) { return; }
-		 active[type] = funcObj[type];
+		active[type] = funcObj[type];
 	}
 }
 /* ------------------------- TREE FILTERS ----------------------------------- */
@@ -164,7 +170,11 @@ function ifRowAfterDate(row, dateObj) {
         return rowTime.getTime();
     }
 }
-/* ------------------------ Object Group ------------------------------------ */
+/* ------------------------ OBJECT GROUP ------------------------------------ */
 function ifIntWithGroup(row, groupIds) {  							/*dbug-log*///console.log('ifIntWithGroups = %O, row = %O', groupIds, row);
 	return groupIds.indexOf(row.objGroup) !== -1;
+}
+/* -------------------------- SUB-GROUP ------------------------------------- */
+function ifIntWithSubGroup(row, groupNames) { 						/*dbug-log*///console.log('ifIntWithSubGroups = %O, row = %O', groupNames, row);
+	return groupNames.indexOf(row.subGroup) !== -1;
 }
