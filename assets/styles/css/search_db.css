@@ -500,9 +500,9 @@ select[id$="txn-rank"] + div {
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) {
     /*--------------- Search Page ---------------------*/
-    #db-opts {
-        /*margin: 1em auto 0 .5em;*/
-    }
+    /*#db-opts {
+        margin: 1em auto 0 .5em;
+    }*/
     #fltr-int-pnl-cntnr #filter-pnl.vert {
         width: 604px;
     }
@@ -515,12 +515,12 @@ select[id$="txn-rank"] + div {
     #set-submit-msg+span {
         display: none;
     }
-    #focus-filters .taxonLbl {
+    /*#focus-filters .taxonLbl {
         width: 257px;
     }
     #focus-filters .taxonSel {
         width: 186px;
-    }
+    }*/
     #focus-filters .locLbl {
         width: 267px;
     }

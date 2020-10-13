@@ -25,10 +25,10 @@ function setGroupCnt(groups) {
     return groups;
 }
 function buildObjectGroupCombo(groups) {
-    const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row objLbl' }]);
+    const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
     const span = _u('buildElem', ['span', { text: 'Groups: ' }]);
     const opts = groups.filter(r => r.text !== 'Bat');  						//console.log('groups = %O', groups)
-    const sel = fM.newSel(opts, 'opts-box objSel', 'selObjGroup', 'ObjGroup');
+    const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'selObjGroup');
     $(lbl).append([span, sel]);
     return lbl;
 }
