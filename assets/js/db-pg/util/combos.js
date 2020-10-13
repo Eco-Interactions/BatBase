@@ -14,7 +14,6 @@ import * as _pg from '../db-main.js';
 
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
-
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
@@ -43,6 +42,7 @@ function getBaseConfgObj(field, onChange) {
         'Publication Type' : {name: field, id: '#selPubType', change: onChange, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: onChange, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: onChange, blur: true },
+        'Sub-Group' : { name: field, id: '#sel'+field, change: onChange },
         'Date Filter': { name: 'Filter', id: '#selDateFilterType' },
         // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', change: onChange },

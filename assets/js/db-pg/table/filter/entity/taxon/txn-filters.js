@@ -17,7 +17,7 @@
 import * as fM from '../../filter-main.js';
 import { _table, _ui, _u } from '../../../../db-main.js';
 import { initObjectGroupCombobox, filterTableByobjectGroup } from './obj-group-filter.js';
-import { ifSubGroupsLoadFilter } from './sub-group-filter.js';
+import { loadSubGroupFilter } from './sub-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
@@ -26,8 +26,11 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
     _ui('updateTaxonFilterViewMsg', [tblState.groupName]);
+    return loadAsyncFilters(tblState);
+}
+function loadAsyncFilters(tblState) {
     if (tblState.groupName === 'Bats') { return initObjectGroupCombobox(); }
-    ifSubGroupsLoadFilter(tblState);
+    if (Object.keys(tblState.subGroups).length > 1) { return loadSubGroupFilter(tblState); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {
