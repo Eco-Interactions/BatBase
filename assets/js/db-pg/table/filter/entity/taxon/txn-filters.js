@@ -17,6 +17,7 @@
 import * as fM from '../../filter-main.js';
 import { _table, _ui, _u } from '../../../../db-main.js';
 import { initObjectGroupCombobox, filterTableByobjectGroup } from './obj-group-filter.js';
+import { ifSubGroupsLoadFilter } from './sub-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
@@ -26,6 +27,7 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     initTxnNameSearchElem(tblState);
     _ui('updateTaxonFilterViewMsg', [tblState.groupName]);
     if (tblState.groupName === 'Bats') { return initObjectGroupCombobox(); }
+    ifSubGroupsLoadFilter(tblState);
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {

@@ -33,7 +33,6 @@ function beginTaxonLoad(groupId, data) {
     updateTaxonTableState(data);                                                //console.log('Building Taxon Table. data = %O', _u('snapshot', [(data)]);
     const groupRoots = storeGroupAndReturnRootTaxa(groupId);
     _ui('initTxnViewOpts', [groupId, tState().get('flags').allDataAvailable]);
-
     return startTxnTableBuildChain(groupRoots, true);
 }
 function updateTaxonTableState(data) {
@@ -52,7 +51,7 @@ export function onTxnViewChange(val) {                              /*Perm-log*/
 function buildTaxonTable(val) {
     const groupRoots = storeGroupAndReturnRootTaxa(val);
     _table('resetTableState');
-    return startTxnTableBuildChain(groupRoots);  //, true
+    return startTxnTableBuildChain(groupRoots);
 }
 /**
  * Gets the currently selected taxon group/view's id, gets the record for the taxon,
@@ -74,6 +73,7 @@ function updateGroupTableState(groupId, group) {
         // groupRank: groupTaxonRcrd.rank,
         curView: groupId,
         groupName: group.pluralName,
+        subGroups: group.taxa,
         allgroupRanks: group.uiRanksShown,
     });
 }
