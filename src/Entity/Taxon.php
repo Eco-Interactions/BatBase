@@ -486,11 +486,28 @@ class Taxon
 
     private function findGroupAndReturnObj($taxon)
     {
+        $root = $this->getRootTaxon($taxon);
+        return $root ? $root->getGroup() : false;
+    }
+
+    private function getRootTaxon($taxon)
+    {
         if ($taxon->getSlug() === 'kingdom-animalia') { return false; }
-        if ($taxon->getIsRoot()) { return $taxon->getGroup(); }
+        if ($taxon->getIsRoot()) { return $taxon; }
         $parent = $taxon->getParentTaxon();
         if (!$parent) { return false; }
-        return $this->findGroupAndReturnObj($parent);
+        return $this->getRootTaxon($parent);
+    }
+
+    /**
+     * Get Group data.
+     *
+     * @return \App\Entity\Group
+     */
+    public function getSubGroup()
+    {
+        $groupRoot = $this->getRootTaxon($this);
+        return $groupRoot->getName();
     }
 
     /**
