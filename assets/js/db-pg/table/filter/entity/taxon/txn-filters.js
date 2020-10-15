@@ -9,7 +9,7 @@
  * TOC:
  *      UI
  *          NAME FILTER
- *          LEVEL TAXON
+ *          RANK TAXON
  *          Object Group
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
@@ -25,7 +25,7 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
     loadTxnRankComboboxes(tblState);
     if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
-    _ui('updateTaxonFilterViewMsg', [tblState.pluralGroupName]);
+    _ui('updateTaxonFilterViewMsg', [tblState.groupPluralName]);
     return loadAsyncFilters(tblState);
 }
 function loadAsyncFilters(tblState) {
@@ -37,7 +37,7 @@ function initTxnNameSearchElem(tblState) {
     const searchTreeElem = fM.getTreeTextFilterElem('Taxon');
     $('#focus-filters').append(searchTreeElem);
 }
-/* ------------------------ LEVEL TAXON ------------------------------------- */
+/* ------------------------ RANK TAXON ------------------------------------- */
 /**
  * Builds and initializes a search-combobox for each rank present in the
  * the unfiltered group tree. Each rank's box is populated with the names

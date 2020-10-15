@@ -53,7 +53,7 @@ Feature: Search page features and database table controls
         Given I see "2" rows in the table data tree
         When I press "xpand-1" "3" times
         Then I should see "22" rows in the table data tree
-        And I should see "Collapse All"
+        And i see "Collapse All"
 
     @javascript
     Scenario:  The toggle tree button text should sync with tree state.
@@ -61,29 +61,29 @@ Feature: Search page features and database table controls
         And I see "22" rows in the table data tree
         And I see "Collapse All"
         When I press "collapse-1"
-        Then I should see "Expand All"
+        Then i see "Expand All"
 ## ------------------ SHOW SEARCH TIPS -------------------------------------- ##
     @javascript
     Scenario:  I should be able to show the search tips
         When I press "Tips"
-        Then I should see "Tips for searching"
+        Then i see "Tips for searching"
 # ------------------ START TUTORIAL ---------------------------------------- ##
     @javascript
     Scenario:  I should be able to start the tutorial
         When I press "Tutorial"
-        Then I should see "Full Tutorial"
+        Then i see "Full Tutorial"
 
     @javascript
     Scenario:  I should be able to jump to the map section of the tutorial
         When I press "Tutorial"
         And I press the "Map View" button
-        Then I should see "Interactions in the table can be displayed on a map"
+        Then i see "Interactions in the table can be displayed on a map"
 ## --------- DISPLAY INTERACTIONS IN TABLE ON MAP --------------------------- ##
     @javascript
     Scenario:  I should be able to show interactions with gps data on the map
       Given the database table is in "Source" view
       When I select "Journal" from the "Pub Type" dropdown
-      And I should see "Journal of Mammalogy"
+      And i see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
       And I press the "Map Interactions" button
       Then I should see "1" interactions shown on the map
@@ -111,5 +111,5 @@ Feature: Search page features and database table controls
         And I expand "Panama" in the data tree
         And I click on the map pin for "Summit Experimental Gardens"
         Then I should see the map with the location summary popup
-        And I should see "Habitat: forest"
-        And I should see "Cited bats: Artibeus lituratus"
+        And i see "Habitat: forest"
+        And i see "Cited bats: Artibeus lituratus"

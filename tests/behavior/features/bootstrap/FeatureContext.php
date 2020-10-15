@@ -682,6 +682,18 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Then I should see :text in the taxon filter status bar
+     */
+    public function iShouldSeeInTheTaxonFilterStatusBar($text)
+    {
+        $this->spin(function() use ($text) {
+                $filterMsg = $this->evaluate("$('#view-fltr').text();");
+                return strpos(strtolower($filterMsg), strtolower($text)) !== false;
+            }, "Did not find [$text] in the filter status bar."
+        );
+    }
+
+    /**
      * @Then I should see :text in the filter status bar
      */
     public function iShouldSeeInTheFilterStatusBar($text)
