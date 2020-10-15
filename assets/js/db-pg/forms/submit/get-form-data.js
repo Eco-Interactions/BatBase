@@ -184,23 +184,24 @@ export default function getValidatedFormData(entity, fLvl, submitting) {
     function getTaxonData() {
         const formTaxonRank = fS.forms.taxonData.formTaxonRank;
         formVals.parentTaxon = getParentTaxon(formTaxonRank);
-        formVals.level = formTaxonRank;
+        formVals.rank = formTaxonRank;
     }
     /** -------------------- Additional Taxon Data -----------------------*/
     /**
-     * Checks each parent-level combo for a selected taxon. If none, the group
+     * Checks each parent-rank combo for a selected taxon. If none, the group
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(rank) {
         const ranks = fS.forms.taxonData.groupRanks;
         const parentRank = ranks[ranks.indexOf(rank)+1];
         if (ifParentIsRootTaxon(rank, parentRank)) {
-            return fS.forms.taxonData.groupTaxa[id];
+            return fS.forms.taxonData.groupTaxon.id;
         }
         return $('#'+parentRank+'-sel').val() || getParentTaxon(parentRank);
 
         function ifParentIsRootTaxon(rank, parentRank) {
-            return rank === fS.forms.taxonData.rootRank || !parentRank;
+            const subGroupRank = fS.forms.taxonData.groupTaxon.rank.displayName;
+            return rank === subGroupRank || !parentRank;
         }
     }
 }

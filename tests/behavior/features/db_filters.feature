@@ -1,7 +1,7 @@
-@db-tbl-filter
+@db-filters
 Feature: Filtering the data displayed in the database table
     In order to find specific data about bat eco-interactions
-    As a web visitor
+    As a user
     I should be able to use the various view and filter options of the search page
 
     ### WHAT IS BEING TESTED ###
@@ -9,12 +9,17 @@ Feature: Filtering the data displayed in the database table
           # Comboboxes: Select option and reset combobox.
           # Text filters
           # Time-published  (Time-updated needs to be worked on)
+        # FILTER-SET: Create, Edit, Delete
         ## TODO: Test table column filters
 
     Background:
-        Given I am on "/search"
-        Given the database has loaded
-        Then I exit the tutorial
+        Given I am on "/login"
+        And I fill in "Username" with "TestUser"
+        And I fill in "Password" with "passwordhere"
+        And I press the "_submit" button
+        And I am on "/search"
+        And the database has loaded
+        And I exit the tutorial
     ## -------------------------- Date Filter ---------------------------------##
     @javascript
     Scenario:  I should be able to filter the data by date published.
@@ -43,6 +48,7 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to filter the data tree to a specific country.
         Given the database table is in "Location" view
         And I toggle "open" the filter panel
+        And I see "Location and Date Filters"
         When I select "Costa Rica" from the "Country" dropdown
         Then I should see "Central America" in the "Region" dropdown
         And I should see "3" rows in the table data tree
@@ -54,8 +60,9 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to filter the data tree to a specific publication type.
       Given the database table is in "Source" view
       And I toggle "open" the filter panel
+      And I see "Source and Date Filters"
       When I select "Journal" from the "Pub Type" dropdown
-      Then I should see "Journal of Mammalogy"
+      Then i see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
       And data in the interaction rows
       And I should see "Publication Type." in the filter status bar
@@ -86,9 +93,72 @@ Feature: Filtering the data displayed in the database table
       Given the database table is in "Taxon" view
       And I group interactions by "Bats"
       And I toggle "open" the filter panel
+      And I see "Taxon and Date Filters"
       When I select "Artibeus lituratus" from the "Species" dropdown
       Then I should see "Artibeus" in the "Genus" dropdown
       And I should see "Phyllostomidae" in the "Family" dropdown
       And I should see "2" rows in the table data tree
+      And I should see "Bats" in the taxon filter status bar
       And data in the interaction rows
       And I should see "Artibeus lituratus" in the filter status bar
+
+    @javascript
+    Scenario:  I should be able to filter the data tree to specific object groups.
+      Given the database table is in "Taxon" view
+      And I group interactions by "Bats"
+      And I toggle "open" the filter panel
+      # When I select "Artibeus lituratus" from the "Species" dropdown
+
+    @javascript
+    Scenario:  I should be able to filter the data tree to taxon sub-groups.
+      Given the database table is in "Taxon" view
+      And I group interactions by "Bats"
+      And I toggle "open" the filter panel
+      # When I select "Artibeus lituratus" from the "Species" dropdown
+
+## --------------- FILTER-SET CREATE --------------- ##
+    @javascript
+    Scenario:  I should be able to CREATE a set of filters.
+        Given the database table is in "Location" view
+        And I toggle "open" the filter panel
+        And I select "Costa Rica" from the "Country" dropdown
+        And I set the date "cited" filter to "January 1, 1977"
+        When I enter "Test Filter Set" in the "Saved Filters" dropdown
+        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        And I press the "Save" button
+        And I should see "Date Published, Country." in the save modal
+        And I press the "Submit" button
+        Then I should see "(SET) Date Published, Country." in the filter status bar
+        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+
+## --------------- FILTER-SET EDIT --------------- ##
+    @javascript
+    Scenario:  I should be able to APPLY and EDIT a set of filters.
+        Given the database table is in "Source" view
+        And I toggle "open" the filter panel
+        When I select "Test Filter Set" from the "Saved Filters" dropdown
+        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        And I press the "Apply" button
+        Then I should see the table displayed in "Location" view
+        And I should see "(SET) Date Published, Country." in the filter status bar
+        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        When I select "all" from the "Country" dropdown
+        And I press the "Update" button
+        And I should see "Date Published, Region." in the save modal
+        And I press the "Submit" button
+        Then I should see "(SET) Date Published, Region." in the filter status bar
+        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+
+## --------------- FILTER-SET DELETE  --------------- ##
+ ##The first "Given" step is only needed because sometimes the tutorial isn't fully closed and this was easier than adding another wait
+    @javascript
+    Scenario:  I should be able to DELETE a set of filters.
+        Given the database table is in "Source" view
+        And I toggle "open" the filter panel
+        When I select "Test Filter Set" from the "Saved Filters" dropdown
+        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        And I break "Press Delete and make sure it works. Tests not interacting with these buttons easily."
+        And I press the "Delete" button
+        And I press the "Confirm" button
+        Then I should see "No Active Filters" in the filter status bar
+        And I should see "" in the "Saved Filters" dropdown

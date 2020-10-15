@@ -36,7 +36,7 @@ export function initCreateForm(rank, value) {                                   
     return showNewTaxonForm(val, ucRank);
 }
 function showNewTaxonForm(val, rank) {
-    _state('setTaxonProp', ['formTaxonLvl', rank]);  //used for data validation/submit
+    _state('setTaxonProp', ['formTaxonRank', rank]);  //used for data validation/submit
     return buildTaxonForm()
     .then(() => _elems('toggleSubmitBttn', ['#sub2-submit', true]));
 

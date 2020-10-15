@@ -125,7 +125,7 @@ function hideNonFormElems() {
     $(selectors).css({'z-index': 0});
 }
 function refreshIntro() {
-    window.setTimeout(() => {intro.refresh()}, 250);
+    window.setTimeout(() => {intro ? intro.refresh() : null}, 250);
 }
 function resetPgElems() {
     $('nav').css({'z-index': 1});

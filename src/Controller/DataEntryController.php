@@ -133,7 +133,7 @@ class DataEntryController extends AbstractController
     }
     private function checkForTaxonGroupEdit(&$edits)
     {
-        if (!$edits->parentTaxon) { return; }
+        if (!property_exists($edits, 'parentTaxon')) { return; }
         $old = $this->getEntity('Taxon', $edits->parentTaxon['old']);
         $new = $this->getEntity('Taxon', $edits->parentTaxon['new']);
         if ($old->getSubGroup() === $new->getSubGroup()) { return; }

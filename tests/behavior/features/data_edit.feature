@@ -5,6 +5,7 @@ Feature: Edit data in the database
     I need to be able to edit the data in the database
 
     ### WHAT IS BEING TESTED ###
+        # THE EDITOR ISSUE-REPORT FORM
         # ENTITY EDITS AND RELATED UPDATES TO STORED DATA AND TABLE DISPLAY
         ## TODO
         # Test form error handling
@@ -17,15 +18,22 @@ Feature: Edit data in the database
         And I fill in "Password" with "passwordhere"
         And I press the "_submit" button
         And I am on "/search"
-        And I should see "TestEditor"
+        And I see "TestEditor"
         Given the database has loaded
         And I exit the tutorial
+  ## ------------------------- ISSUE REPORT ----------------------------------##
+    @javascript
+    Scenario:  I should be able to open the issue-report form
+        Given I break "Open console"
+        And I press the "data-help" button
+        And I see "Experiencing issues?"
+        When I press the "Report A Bug" button
+        Then I see "Upload screenshots if relevant:"
 
   ## -------------------------- Interaction ----------------------------------##
     @javascript
     Scenario:  I should be able to change an interaction's location
         Given the database table is in "Location" view
-        And I break "Open console"
         And I expand "Central America" in the data tree
         And I expand "Panama" in the data tree
         And I click on the edit pencil for the first interaction of "Summit Experimental Gardens"

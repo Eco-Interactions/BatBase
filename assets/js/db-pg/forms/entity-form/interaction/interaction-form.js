@@ -616,7 +616,7 @@ function buildAndAppendGroupRows(rootId) {
 }
 function appendGroupRowsAndFinishBuild(rows) {
     ifNoSubGroupsRemoveCombo(rows);
-    $('#Sub-Group_row').after(rows);
+    $('#object_Rows').append(rows);
     _state('setFormFieldData', ['sub', 'Group', null, 'select']);
     initFormCombos('taxon', 'sub');
     _elems('toggleSubmitBttn', ['#sub-submit', false]);
@@ -626,12 +626,8 @@ function appendGroupRowsAndFinishBuild(rows) {
 }
 function ifNoSubGroupsRemoveCombo(rows = false) {
     const subGroups = Object.keys(getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
-    if (subGroups.length > 1) { return; }
-    if (!rows) {
-        $('#Sub-Group_row').remove();
-    } else {
-        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
-    }
+    if (subGroups.length > 1 || rows) { return; }
+    $('#Sub-Group_row').remove();
 }
 function clearPreviousGroupRankCombos() {
     $('#object_Rows>div').each(ifRankComboRemoveCombo);
@@ -641,7 +637,7 @@ function ifRankComboRemoveCombo(i, elem) {
 }
 /* ------------ onSubGroupSelection ---------- */
 export function onSubGroupSelection(val) {
-    const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];
+    const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];            //console.log('onSubGroupSelection [%s]', subGroup);
     _state('setTaxonProp', ['subGroup', subGroup]);
     clearPreviousSubGroupCombos();
     return buildAndAppendGroupRows(val);

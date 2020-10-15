@@ -19,7 +19,7 @@ Feature: Add new data to the database
         And I fill in "Password" with "passwordhere"
         And I press the "_submit" button
         And I am on "/search"
-        And I should see "TestEditor"
+        And i see "TestEditor"
         Given the database has loaded
         And I exit the tutorial
 
@@ -154,7 +154,7 @@ Feature: Add new data to the database
         ## With GPS ##
         And I click on "use the map interface" link
         And I press the "New Location" button in the map
-        And I should see "New Location"
+        And i see "New Location"
         # And I press the "Click to select position" button in the map
         And I type "9.79026" in the "Latitude" field "input"
         And I type "-83.91546" in the "Longitude" field "input"
@@ -169,7 +169,7 @@ Feature: Add new data to the database
         And I wait for the "sub" form to close
         ## Without GPS ##
         And I enter "Test Location Without GPS" in the "Location" form dropdown
-        And I should see "New Location"
+        And i see "New Location"
         And I type "Test Description" in the "Description" field "textarea"
         And I select "Costa Rica" from the "Country" form dropdown
         And I select "Savanna" from the "Habitat Type" form dropdown
