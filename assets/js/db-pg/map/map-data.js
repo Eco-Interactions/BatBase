@@ -2,8 +2,8 @@
  * Builds an object sorted by geoJsonId with all interaction data at that location.
  * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## }
  *
- * Export defaut:        Imported by:
- *     buildMapDataObj      db_map
+ * Export defaut:
+ *     buildMapDataObj
  */
 import { _table, _u } from '../db-main.js';
 
@@ -20,7 +20,7 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
         const rcrd = _u('getDetachedRcrd', [row.data.id, viewRcrds]);
         buildInteractionMapData(row, row.data, rcrd);
     }
-    function buildInteractionMapData(row, rowData, rcrd) {  //console.log('buildIntMapData row = %O rowData = %O', rowData)
+    function buildInteractionMapData(row, rowData, rcrd) {                      //console.log('buildIntMapData row = %O rowData = %O', rowData)
         const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
         let noLocCnt = 0;
         const data = {
@@ -89,7 +89,7 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
             mapData[geoId].ints[auths] = mapData[geoId].ints[keyName];
             delete mapData[geoId].ints[keyName];
         }
-    } /* End addIntData */
+    }
     function initIntDataObj(entData, geoId) {
         mapData[geoId].ints[entData.name] = [];
     }
@@ -119,4 +119,4 @@ export default function buildMapDataObj(viewRcrds, rcrds) {
     function getRcrdDisplayName(displayName, rcrd) {
         return displayName === 'Whole work cited.' ? rcrd.name : displayName;
     }
-} /* End buildTableLocDataObj */
+}

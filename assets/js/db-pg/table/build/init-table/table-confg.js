@@ -19,7 +19,7 @@ export function getBaseTableConfg(viewTitle, state) {
             enableSorting: true,
             getHeaderCellTemplate: getHeaderCellTemplate,
             getNodeChildDetails: getNodeChildDetails,
-            getRowClass: getRowStyleClass.bind(null, tblState.curFous),
+            getRowClass: getRowStyleClass.bind(null, tblState.curFocus),
             onBeforeFilterChanged: beforeFilterChange,
             onAfterFilterChanged: afterFilterChanged,
             onBeforeSortChanged: onBeforeSortChanged,
@@ -41,7 +41,7 @@ function beforeFilterChange() {                                                 
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
 function onBeforeSortChanged() {
     if (tblState.curFocus !== "taxa") { return; }
-    var sortModel = tblState.api.getSortModel();                             //console.log("model obj = %O", sortModel)
+    var sortModel = tblState.api.getSortModel();                                //console.log("model obj = %O", sortModel)
     if (!sortModel.length) { return tblState.api.setSortModel([{colId: "name", sort: "asc"}]); }
     ifNameUnsorted(sortModel);
 }

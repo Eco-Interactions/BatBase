@@ -101,11 +101,15 @@ export function rebuildTxnTable(taxa) {                             /*Perm-log*/
  * be expanded on table load.
  */
 function startTxnTableBuildChain(taxa) {
-    tState().set({openRows: [...taxa.map(t => t.id.toString())]});
+    setTaxonOpenRows(taxa);
     const tS = tState().get();
     return build.buildTxnTree(taxa, tState)
         .then(tree => build.buildTxnRowData(tree, tS))
         .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Taxon Tree', rowData, tS))
         .then(() => _filter('loadTxnFilters', [tS, tS.groupName]));
+}
+function setTaxonOpenRows(taxa) {
+    if (taxa.length > 1) { return; }
+    tState().set({openRows: [taxa[0].id.toString()]});
 }
