@@ -15,6 +15,7 @@
  *  		DATE/TIME
  *  		OBJECT GROUP
  *  		SUB-GROUP
+ *  		USER INTERACTION-LIST
  */
 import { _u } from '../../../db-main.js';
 let filters, rows;
@@ -34,7 +35,8 @@ const filterFuncs = {
 	},
 	int: {
 		combo: 	{ 'Object Group': ifIntWithGroup },
-		date: 	ifRowAfterDate
+		date: 	ifRowAfterDate,
+		list: 	ifIntInUserList
 	}
 };
 
@@ -177,4 +179,8 @@ function ifIntWithGroup(row, groupIds) {  							/*dbug-log*///console.log('ifIn
 /* -------------------------- SUB-GROUP ------------------------------------- */
 function ifIntWithSubGroup(row, groupNames) { 						/*dbug-log*///console.log('ifIntWithSubGroups = %O, row = %O', groupNames, row);
 	return groupNames.indexOf(row.subGroup) !== -1;
+}
+/* --------------------- USER INTERACTION-LIST ------------------------------ */
+function ifIntInUserList(row, intIds) {
+	return intIds.indexOf(row.id) !== -1;
 }

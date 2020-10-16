@@ -189,26 +189,23 @@ export function updateTaxonFilterViewMsg(view) {
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.");
-    const tblState = _table('tableState').get(['api', 'intSet', 'flags']);
+    const tblState = _table('tableState').get(['api', 'flags']);
     if (!tblState.api || !tblState.flags.allDataAvailable) { return; }
-    setFilterStatus(_filter('getActiveFilterVals'), tblState.intSet);
+    setFilterStatus(_filter('getActiveFilterVals'));
     enableClearFiltersButton();
 }
 
-function setFilterStatus(filters, intSet) {
-    if (filters.length > 0 || intSet) {
-        setStatus(getStatus(filters, intSet));
+function setFilterStatus(filters) {
+    if (filters.length > 0) {
+        setStatus(getStatus(filters));
     } else {
         resetFilterUi()
     }
 }
-function getStatus(filters, intSet) {
-    const list = intSet ? '(LIST)' : '';
-    const set = fSets.isFilterSetActive() ? '(SET)' : '';
-    const loaded = [list, set].filter(f=>f).join(' ');
-    const fltrs = filters.join(', ');
-    return loaded !== '' & fltrs !== '' ? `${loaded} ${fltrs}.` :
-        loaded ? loaded : fltrs+'.';
+function getStatus(filters) {
+    let status = filters.join(', ') + '.';
+    if (fSets.isFilterSetActive()) { status += ' (SET)'; }
+    return status;
 }
 function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
     $('#filter-status').text(status);

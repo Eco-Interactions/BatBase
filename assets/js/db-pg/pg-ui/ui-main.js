@@ -62,13 +62,10 @@ export function updateTaxonFilterViewMsg() {
 export function onTableReloadCompleteApplyFilters(filters) {
     pM.onTableReloadCompleteApplyFilters(filters);
 }
-/* -------------------- DATA LISTS ------------------------------------------- */
-export function isSavedIntListLoaded() {
-    return pM.isSavedIntListLoaded();
-}
 export function isFilterSetActive() {
     return pM.isFilterSetActive();
 }
+/* -------------------- DATA LISTS ------------------------------------------- */
 export function enableListResetBttn() {
     return pM.enableListResetBttn();
 }

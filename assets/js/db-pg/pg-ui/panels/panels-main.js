@@ -66,9 +66,6 @@ export function onTableReloadCompleteApplyFilters(filters) {
     fM.onTableReloadCompleteApplyFilters(filters);
 }
 /* -------- INTERACTION LISTS ------------- */
-export function isSavedIntListLoaded() {
-    return iM.isSavedIntListLoaded();
-}
 export function enableListResetBttn() {
     return iM.enableListResetBttn();
 }

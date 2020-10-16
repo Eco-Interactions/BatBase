@@ -60,8 +60,16 @@ export function setFilterState(key, value, filterGroup, fObj) {
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
 export function resetFilterState() {
-    const persistedDate = fS.filters.direct.date ? { date: fS.filters.direct.date } : {};
+    const persistedDate = getFiltersThatPersistThroughTableRebuild(fS.filters.direct);
     initFilterStateObj(persistedDate);
+}
+function getFiltersThatPersistThroughTableRebuild(dFilters) {
+    const filters = {};
+    ['date', 'list'].forEach(f => {
+        if (!dFilters[f]) { return; }
+        filters[f] = dFilters[f];
+    });
+    return filters;
 }
 /* =========================== GET ========================================== */
 export function getFilterStateKey(key, filterGroup = 'direct') {
@@ -78,7 +86,9 @@ function getPanelFilters(filters) {
     return filters;
 }
 export function isFilterActive() {
-    return !!getPageActiveFilters().length;
+    const filters = getPageActiveFilters();
+    filters.splice(filters.indexOf('List'), 1);
+    return !!filters.length;
 }
 export function getRowDataFilters(f) {
     const filters = f || _u('snapshot', [fS.filters.direct]);
@@ -107,6 +117,7 @@ export function getActiveFilterVals() {
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
     const pnlFltrs = getFilterDisplayNames(set.direct, set.rebuild);
+    if (fS.filters.direct.list) { pnlFltrs.unshift('List'); }
     return pnlFltrs.concat(tblFltrs);
 }
 /* ------------------- PAGE FILTERS ----------------------------------------- */
@@ -132,6 +143,7 @@ function getFilterDisplayNames(dFilters, rFilters) {                            
             const edgeCase = {
                 date: getDateFltrString,
                 combo: addComboValues,
+                list: () => 'List'
             };
             const name = getFilterName(Object.keys(edgeCase));
             if (Array.isArray(name)) { return names.push(...name); }

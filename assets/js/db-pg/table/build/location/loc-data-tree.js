@@ -11,8 +11,6 @@ let locRcrds;
 /**
  * Builds a tree of location data with passed locations at the top level, and
  * sub-locations as nested children.
- * Note: If loading a user-named data set (intSet), only the entities within
- * those interactions are added to the data tree.
  */
 export function buildLocTree(topLocs, rcrds) {
     locRcrds = rcrds;

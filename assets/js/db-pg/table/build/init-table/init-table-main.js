@@ -52,13 +52,8 @@ function onTableInitComplete(rowData) {
     _ui('hidePopupMsg');
     _ui('enableTableButtonsIfDataLoaded', [tblState.flags.allDataAvailable]);
     hideUnusedColFilterMenus();
-    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
-    _ui('updateFilterStatusMsg');
-}
-function updateDisplayForShowingInteractionSet(rowData) {
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
-    tblState.api.expandAll();
-    _ui('setTreeToggleData', [true]);
+    _ui('updateFilterStatusMsg');
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group
@@ -97,9 +92,6 @@ export function getRowStyleClass() {
 export function getCellStyleClass() {
     return style.getCellStyleClass(...arguments);
 }
-export function getTableApi() {
-    return tblState.api;
-}
 export function onModelUpdated() {
-    model.onModelUpdated(tableState.api);
+    model.onModelUpdated(tblState.api);
 }
