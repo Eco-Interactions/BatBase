@@ -5,14 +5,15 @@
  *     getCellStyleClass
  *     getRowStyleClass
  */
+let curFocus;
 /*================== Row Styling =========================================*/
 /**
  * Adds a css background-color class to interaction record rows. Source-focused
  * interaction rows are not colored, their name rows are colored instead.
  */
-export function getRowStyleClass(params) {                                             //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
+export function getRowStyleClass(focus, params) {                               //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
     if (params.data.name !== "") { return; }
-    return tblState.curFocus === "srcs" ?
+    return focus === "srcs" ?
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
 }
 /**
@@ -21,17 +22,18 @@ export function getRowStyleClass(params) {                                      
  * for Africa will be highlighted, as well as the 'Unspecified Africa Interactions'
  * cell Africa's interaction record rows are still grouped within.
  */
-export function getCellStyleClass(params) {                                            //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
+export function getCellStyleClass(focus, params) {                              //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
+    curFocus = focus;
     if ((params.node.expanded === true && isOpenRowWithChildInts(params)) ||
         isNameRowforClosedGroupedInts(params)) {                                //console.log("setting style class")
-        return tblState.curFocus === "srcs" ?
+        return curFocus === "srcs" ?
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
     }
 }
 function isOpenRowWithChildInts(params) {
     if (params.data.locGroupedInts) { return locHasIntsAfterFilters(params); }     //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
     if (params.data.interactions === true && params.data.name !== "") {
-        return tblState.curFocus === "taxa" ? txnHasIntsAfterFilters(params) : true;
+        return curFocus === "taxa" ? txnHasIntsAfterFilters(params) : true;
     };
 }
 function txnHasIntsAfterFilters(params) {

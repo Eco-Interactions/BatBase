@@ -28,7 +28,7 @@ export function getColumnConfg(mainCol, state) {
 function buildColDefs(mainCol, tags) {
     return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                 cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 },
-                cellClass: getCellStyleClass, comparator: sortByRankThenName },
+                cellClass: getCellStyleClass.bind(null, tblState.curFocus), comparator: sortByRankThenName },
             {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
             {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
             {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
