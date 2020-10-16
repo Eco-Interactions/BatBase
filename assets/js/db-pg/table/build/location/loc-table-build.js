@@ -7,30 +7,14 @@
  *     rebuildLocTable
  *
  * TOC
- *
- *
+ *     LOCATION VIEW
+ *     LOCATION TABLE
  */
 import { _map, _table, _u, _ui } from '../../../db-main.js';
 import * as build from '../build-main.js';
 
 const tState = _table.bind(null, 'tableState');
-
-export function buildLocTable(v) {                                  /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
-    const view = v || 'tree';
-    return _u('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
-
-    function beginLocationLoad(data) {
-        addLocDataToTableParams(data);
-        _ui('initLocViewOpts', [view]);
-        return updateLocView(view);
-    }
-}
-function addLocDataToTableParams(data) {
-    tState().set({
-        data:  data,
-        rcrdsById: data.location
-    });
-}
+/** ================ LOCATION VIEW ========================================== */
 export function onLocViewChange(val) {
     if (!val) { return; }
     updateLocView(val);
@@ -53,7 +37,24 @@ function showLocInteractionData(view) {                                         
     _u('setData', ['curView', view]);
     return view === 'tree' ? rebuildLocTable() : _map('buildLocMap');
 }
-/** --------------- LOCATION TABLE ------------------------------------------ */
+/** =============== LOCATION TABLE ========================================== */
+export function buildLocTable(v) {                                  /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
+    const view = v || 'tree';
+    return _u('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
+
+    function beginLocationLoad(data) {
+        addLocDataToTableParams(data);
+        _ui('initLocViewOpts', [view]);
+        return updateLocView(view);
+    }
+}
+function addLocDataToTableParams(data) {
+    tState().set({
+        data:  data,
+        rcrdsById: data.location
+    });
+}
+/* --------------------------- BUILD CHAIN ---------------------------------- */
 /**
  * Rebuilds loc tree with passed location, or the default top regions, as the
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
@@ -75,7 +76,7 @@ function getTopRegionIds() {
 }
 function startLocTableBuildChain(topLocs) {
     const tS = tState().get();
-    return build.buildLocTree(topLocs)
+    return build.buildLocTree(topLocs, tS.rcrdsById)
         .then(tree => build.buildLocRowData(tree, tS))
         .then(rowData => _table('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Location Tree', rowData, tS))
