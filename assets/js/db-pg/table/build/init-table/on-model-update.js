@@ -6,8 +6,6 @@
  * Export
  *     onModelUpdated
  */
-import { getTableApi } from './init-table-main.js';
-
 let tblApi;
 
 export function onModelUpdated(api) {
@@ -22,7 +20,7 @@ export function onModelUpdated(api) {
  */
 function updateRowsAndGetIntCounts(root) {
     const ttls = root.childrenAfterFilter.map(row => updateTotalRowIntCounts(0, row));
-    tblState.tblApi.softRefreshView();
+    tblApi.softRefreshView();
     return ttls.reduce((ttl, cnt) => ttl += cnt, 0);
 }
 /** Sets new interaction totals for each tree node and returns count. */

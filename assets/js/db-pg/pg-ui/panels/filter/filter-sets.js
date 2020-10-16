@@ -80,7 +80,7 @@ function buildOptGroups(opts) {
 /* ============================== CREATE ==================================== */
 export function newFilterSet(val) {                                 /*dbug-log*///console.log('newFilterSet. val = %s', val);
     enableFilterSetInputs('create');
-    updateSubmitButton(createFilterSet, pM.isSavedIntListLoaded());
+    updateSubmitButton(createFilterSet);
     $('#filter-set-name + input').val(val).focus();
     return { value: 'new', text: val ? val : "Creating New Filter Set" };
 }
@@ -96,7 +96,7 @@ export function selFilterSet(val) {
     if (val === 'create') { return newFilterSet(); }
     if (!val) { return;  }                                          /*dbug-log*///console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
-    updateSubmitButton(editFilterSet, pM.isSavedIntListLoaded());
+    updateSubmitButton(editFilterSet);
     _u('getData', ['savedFilters']).then(filters => fillFilterData(val, filters));
 }
 function editFilterSet() {
@@ -132,13 +132,17 @@ function buildFilterData() {
 function getFilterSetJson(tState) {
     const fState = _table('getFilterState');
     const filters = {
-        direct: fState.direct,
+        direct: getDirectFitlersForSet(fState.direct),
         focus: tState.curFocus,
         rebuild: fState.rebuild,
         table: fState.table,
         view: tState.curView,
     };
     return JSON.stringify(filters);
+}
+function getDirectFitlersForSet(filters) {
+    delete filters.list; //Active interaction list not saved in set.
+    return filters;
 }
 /* ============================== DELETE ==================================== */
 function showCnfrmDeleteBttns() {                                   /*dbug-log*///console.log('deleteInteractionList')
@@ -217,15 +221,7 @@ function setNameTextInput(type, val) {
 }
 function setComboElem(type, val) {
     const field = Object.keys(val)[0];
-    const id = getComboId(field);
     _u('setSelVal', [field, val[field], 'silent']);
-}
-function getComboId(field) {
-    const map = {
-        'Object Group': '#selObjGroup',
-        'Publication Type': '#selPubType'
-    }
-    return map[field];
 }
 function setDateElems(type, val) {
     _u('setSelVal', ['Date Filter', type, 'silent']);
@@ -287,9 +283,9 @@ function showSaveFilterModal(success) {
     }
 }
 function getActiveFilters(statusMsg) {
-    const pieces = statusMsg.split(') ');
-    if (pieces.length > 1) { pieces.shift(); }
-    return pieces.join('');
+    ['List, ', ', List.', 'List.'].forEach(l => statusMsg = statusMsg.replace(l, ''));
+    if (!statusMsg) { statusMsg = 'No Active Filters.'; }
+    return statusMsg;
 }
 function submitFilterSet(data, action, successFunc) {
     const envUrl = $('body').data("base-url");
@@ -369,11 +365,6 @@ function enableFilterSetInputs(create) {
         $('#save-filter').html('Save');
     }
 }
-function updateSubmitButton(func, listLoaded) {
-    if (listLoaded) {
-        $(`#save-filter`).css('opacity', '.5')
-            .attr({'disabled': true, 'title': 'Set can not be changed while interaction list loaded.'});
-    } else {
-        pM.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
-    }
+function updateSubmitButton(func) {
+    pM.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
 }

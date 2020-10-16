@@ -22,7 +22,6 @@ import { _db } from '../../db-main.js';
  * {str} curView        Sub-sort of table data. Eg: bats, auths, etc
  * {obj} filters        Current filter state.
  * {obj} flags          allDataAvailable, tutorialActive
- * {ary} intSet         An array of interactions saved and loaded in the table by the user
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
@@ -68,7 +67,6 @@ export function resetTableParams(f, dataAvailableFlag) {
     return Promise.resolve(_db('getData', ['curFocus']).then(resetTblParams));
 
     function resetTblParams(focus) {
-        const intSet =  tState.intSet;
         const prevApi = tState.api; //will be destroyed before new table loads. Visually jarring to remove before the new one is ready.
         const flags = tState.flags ? tState.flags : {};
         if (dataAvailableFlag !== undefined) { tState.flags.allDataAvailable = dataAvailableFlag }
@@ -80,7 +78,6 @@ export function resetTableParams(f, dataAvailableFlag) {
             selectedOpts: {},
             userRole: $('body').data("user-role")
         };
-        if (intSet) { tState.intSet = intSet; }
     }
 }
 export function resetCurTreeStorageProps() {

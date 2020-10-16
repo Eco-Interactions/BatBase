@@ -14,7 +14,7 @@ let tState, tblState;
  */
 export function buildTxnTree(taxa, state) {                                            //console.log("buildTaxonTree called for taxa = %O", taxa);
     tState = state;
-    tblState = tState().get(null, ['rcrdsById', 'intSet', 'flags', 'allRanks']);
+    tblState = tState().get(null, ['rcrdsById', 'flags', 'allRanks']);
     const tree = buildTxnDataTree(taxa);
     updateTaxaByRank(taxa, tblState.allRanks);
     if (!tblState.flags.allDataAvailable) { return Promise.resolve(tree); }

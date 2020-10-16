@@ -60,7 +60,7 @@ export function setMapState(data, k) {
 }
 /** =================== Init Methods ======================================== */
 function requireCss() {
-    require('leaflet/dist/leaflet.css'); //../../../../node_modules/
+    require('leaflet/dist/leaflet.css');
     require('leaflet.markercluster/dist/MarkerCluster.Default.css');
     require('leaflet.markercluster/dist/MarkerCluster.css');
     require('leaflet-control-geocoder/dist/Control.Geocoder.css');
@@ -77,7 +77,7 @@ function fixLeafletBug() {
 /*=========================== Shared Methods =================================*/
 function downloadDataAndBuildMap(loadFunc, mapId, type) {
     const map = { geoJson: 'geo', interaction: 'ints', taxon: 'taxa' };
-    _db('getData', [Object.keys(map)]).then(data => {
+    return _db('getData', [Object.keys(map)]).then(data => {
         Object.keys(data).forEach(k => {app.data[map[k]] = data[k]});
         buildAndShowMap(loadFunc, mapId, type);
     });
@@ -264,12 +264,6 @@ function fillIntCntLegend(shown, notShown) {
     legend.innerHTML = `<h4>${shown + notShown} Interactions Total </h4>`;
     legend.innerHTML += `<span><b>${shown} shown on map</b></span><span>
         ${notShown} without GPS data</span>`;
-}
-/** ---------------- Init Map ----------------------------------------------- */
-function initMap(data, fltrd) {                                          console.log('               //--initMap. data = %O', data);
-    app.data.locs = data;
-    const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
-    downloadDataAndBuildMap(dispFunc, 'map');
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
@@ -733,21 +727,9 @@ function getChildLocData(prnt) {
 }
 /** Initializes the google map in the data table. */
 export function buildLocMap() {
-    const tState = _table('tableState').get(['intSet', 'rcrdsById']);
     _ui('updateUiForMapView');
-    if (tState.intSet) { return showLocsInSetOnMap(tState.rcrdsById); }
-    initMap(tState.rcrdsById);
-    return Promise.resolve();
-}
-/**
- * When displaying a user-made set "list" of interactions focused on locations in
- * "Map Data" view, the locations displayed on the map are only those in the set
- * and their popup data reflects the data of the set.
- */
-function showLocsInSetOnMap(rcrds) {
-    const locRcrds = _table('tableState').get('rcrdsById');
-    _table('buildLocTree', [getTopRegionIds(), locRcrds])
-    .then(tree => initMap(rcrds, tree));
+    app.data.locs = _table('tableState').get('rcrdsById');
+    return downloadDataAndBuildMap(addAllIntMrkrsToMap, 'map');
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");

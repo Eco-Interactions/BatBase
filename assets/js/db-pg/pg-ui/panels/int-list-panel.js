@@ -4,7 +4,6 @@
  * Exports:
  *     addListPanelEvents
  *     newIntList
- *     isSavedIntListLoaded
  *     selIntList
  *     toggleListPanelOrientation
  *     enableListResetBttn
@@ -38,11 +37,10 @@ const tState = _table.bind(null, 'tableState');
  * tblState - state data for table and search page
  * timeout - present when window is being resized.
  */
-let app = {};
+let app = {
+    rowSelMode: 'some'
+};
 
-export function isSavedIntListLoaded() {
-    return app.listLoaded;
-}
 export function initListPanel() {
     if ($('body').data('user-role') === 'visitor') { return; }
     require('../../../../styles/pages/db/panels/lists.styl');
@@ -69,18 +67,15 @@ function toggleSaveIntsPanel() {
 }
 function buildAndShowIntPanel() {                                   /*perm-log*/console.log('           +--buildAndShowIntPanel')
     pM.togglePanel('lists', 'open');
-    if (!tState().get('intSet')) {
-        initListCombobox();
-        expandAllTableRows();
-    }
+    initListCombobox();
 }
 export function enableListResetBttn() {
     if (!app.listLoaded) {
         $('button[name="clear-list"]')
-            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('slow', .5);
+            .attr('disabled', true).css({'cursor': 'inherit'}).fadeTo('fast', .5);
     } else {
         $('button[name="clear-list"]')
-            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('slow', 1);
+            .attr('disabled', false).css({'cursor': 'pointer'}).fadeTo('fast', 1);
     }
 }
 /* --------------- Toggle Panel Vertically or Horizontally ------------------ */
@@ -90,19 +85,18 @@ export function toggleListPanelOrientation(style) {
 }
 /* --- Vertical Stacking --- */
 function stackIntListPanel() {
-    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
-    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
-        #list-sel-cntnr, #list-count`).addClass('vert');
+    $(`#list-sel-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
+    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #list-sel-cntnr,
+        #load-list, #list-count`).addClass('vert');
     stackListElems();
-    if (window.outerWidth < 1313) { $('#load-list-cntnr div').text('(Filters reset)'); }
 }
 function stackListElems() {
     $('#top-details').append($('#list-count').detach());
 }
 /* --- Horizontal Spreading --- */
 function spreadIntListPanel() {
-    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
-    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+    $(`#list-sel-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
+    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list,
         #list-sel-cntnr, #list-count`).removeClass('vert');
     $('#list-details').append($('#list-count').detach());
 }
@@ -217,11 +211,11 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*perm-log*/console.log('           +--Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    _table('resetDataTable')
-    .then(updateRelatedListUi);
+    _table('onFilterChangeUpdateRowData');
+    updateRelatedListUi();
 }
 function prepareMemoryForTableLoad() {
-    tState().set({'intSet': app.list.details});
+    _table('setFilterState', ['list', app.list.details, 'direct']);
     app.tblState = tState().get();
     app.listLoaded = true;
 }
@@ -284,6 +278,7 @@ function hideSavedMsg() {
 }
 /* =============================== UI ======================================= */
 function initListCombobox() {
+    if ($('#list-details>span').text() !== 'List Details') { return; }
     _u('initCombobox', ['Int-lists', selIntList, {add: newIntList}]);
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
@@ -390,6 +385,7 @@ function enableModUi(m) {
     $('#mod-mode').html(label).css({'font-weight': 600, 'font-size': '.9em'});
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
     app.modMode = mode;
+    toggleInstructions();
 }
 function disableModUi() {
     $(`#mod-radios input`).prop('checked', false);
@@ -419,10 +415,10 @@ function resetPrevListUiState() {
 /* --- Table Methods --- */
 /** Resets interactions displayed to the full default set of the current focus. */
 function resetTable() {
-    tState().set({'intSet': false});
+    _table('setFilterState', ['list', false, 'direct']);
     delete app.listLoaded;
-    _table('resetDataTable')
-    .then(updateUiAfterTableReset);
+    _table('onFilterChangeUpdateRowData');
+    updateUiAfterTableReset();
 }
 function updateUiAfterTableReset() {
     enableModUi('add');
