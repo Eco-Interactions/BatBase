@@ -18,13 +18,11 @@
  */
 import { _u, _ui } from '../../db-main.js';
 import { getFilterState, resetTableState, resetTableParams, tableState } from '../table-main.js';
-import * as format from './format/aggrid-format.js';
 import * as init from './init-table.js';
-import * as loc from './entity/loc-table.js';
-import * as src from './entity/src-table.js';
-import * as tree from './format/data-tree.js';
-import * as txn from './entity/txn-table.js';
-
+import * as loc from './location/loc-table-main.js';
+import * as src from './source/src-table-main.js';
+import * as int from './interaction/table-int-main.js';
+import * as txn from './taxon/txn-table-main.js';
 /* ======================== ENTITY TABLE ==================================== */
 /* -------------------------- LOCATION -------------------------------------- */
 export function buildLocTable() {
@@ -56,26 +54,36 @@ export function buildTxnTable() {
 export function rebuildTxnTable() {
     return txn.rebuildTxnTable(...arguments);
 }
+/* -------------------------- INTERACTION ----------------------------------- */
+export function getIntRowData() {
+    return int.getIntRowData(...arguments);
+}
+export function buildIntRowData() {
+    return int.buildIntRowData(...arguments);
+}
+export function fillTreeWithInteractions() {
+    return int.fillTreeWithInteractions(...arguments);
+}
 /* ========================= FORMAT DATA ==================================== */
 /* ------------------------- DATA TREE -------------------------------------- */
 export function buildLocTree() {
-    return tree.buildLocTree(...arguments)
+    return loc.buildLocTree(...arguments)
 }
 export function buildSrcTree() {
-    return tree.buildSrcTree(...arguments)
+    return src.buildSrcTree(...arguments)
 }
 export function buildTxnTree() {
-    return tree.buildTxnTree(...arguments)
+    return txn.buildTxnTree(...arguments)
 }
 /* ----------------------- AGGRID ROW-DATA ---------------------------------- */
 export function buildLocRowData() {
-    return format.buildLocRowData(...arguments)
+    return loc.buildLocRowData(...arguments)
 }
 export function buildSrcRowData() {
-    return format.buildSrcRowData(...arguments)
+    return src.buildSrcRowData(...arguments)
 }
 export function buildTxnRowData() {
-    return format.buildTxnRowData(...arguments)
+    return txn.buildTxnRowData(...arguments)
 }
 /* ===================== INIT AGGRID TABLE ================================== */
 export function initTable(tblName, rowData, tState) {
@@ -124,4 +132,39 @@ function buildDataTable(focus, view) {
         'taxa': buildTxnTable
     };
     return builders[focus](view);
+}
+/* ================================ UTILITY ========================================================================= */
+
+/** Sorts the all levels of the data tree alphabetically. */
+export function sortDataTree(tree) {
+    const sortedTree = {};
+    const keys = Object.keys(tree).sort(alphaBranchNames);
+
+    for (var i=0; i<keys.length; i++){
+        sortedTree[keys[i]] = sortNodeChildren(tree[keys[i]]);
+    }
+    return sortedTree;
+
+    function sortNodeChildren(node) {
+        if (node.children) {
+            node.children = node.children.sort(alphaEntityNames);
+            node.children.forEach(sortNodeChildren);
+        }
+        return node;
+    }
+    function alphaBranchNames(a, b) {
+        if (a.includes('Unspecified')) { return 1; }
+        var x = a.toLowerCase();
+        var y = b.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
+}
+/** Alphabetizes array via sort method. */
+function alphaEntityNames(a, b) {                                               //console.log("alphaSrcNames a = %O b = %O", a, b);
+    var x = a.displayName.toLowerCase();
+    var y = b.displayName.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
+}
+export function getTreeRcrds(idAry, rcrds, entity) {                                   //console.log('getTreeRcrds. args = %O', arguments);
+    return idAry.map(id => _u('getDetachedRcrd', [id, rcrds, entity])).filter(r => r);
 }

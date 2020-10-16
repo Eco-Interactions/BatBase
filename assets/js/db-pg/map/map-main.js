@@ -745,7 +745,8 @@ export function buildLocMap() {
  * and their popup data reflects the data of the set.
  */
 function showLocsInSetOnMap(rcrds) {
-    _table('buildLocTree', [getTopRegionIds()])
+    const locRcrds = _table('tableState').get('rcrdsById');
+    _table('buildLocTree', [getTopRegionIds(), locRcrds])
     .then(tree => initMap(rcrds, tree));
 }
 /** Switches to map view and centeres map on selected location. */
