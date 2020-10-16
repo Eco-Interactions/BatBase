@@ -302,9 +302,10 @@ function showSubmitModal() {
         selector: '#top-submit',
         dir: 'left',
         submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
-        bttn: 'Submit Interaction'
+        bttn: 'SUBMIT INTERACTION'
     };
     _modal('showSaveModal', [ modalConfg ]);
+    $('#top-submit').css({'opacity': .5, cursor: 'not-allowed'})
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }
 function buildConfirmationModalHtml() {
@@ -626,8 +627,12 @@ function appendGroupRowsAndFinishBuild(rows) {
 }
 function ifNoSubGroupsRemoveCombo(rows = false) {
     const subGroups = Object.keys(getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
-    if (subGroups.length > 1 || rows) { return; }
-    $('#Sub-Group_row').remove();
+    if (subGroups.length > 1) { return; }
+    if (!rows) {
+        $('#Sub-Group_row').remove();
+    } else {
+        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
+    }
 }
 function clearPreviousGroupRankCombos() {
     $('#object_Rows>div').each(ifRankComboRemoveCombo);

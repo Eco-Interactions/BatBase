@@ -48,6 +48,9 @@ export default function() {
                 'Prey',
                 'Cohabitation'
             ],
+            'Other Parasite': [
+                'Host'
+            ],
             'Plant': [
                 'Visitation',
                 'Pollination',

@@ -68,7 +68,8 @@ function getRoleConfg(role) {
 }
 function ifObjectAddGroupFields(role) {
     const objFields = {'Group': 'select', 'Sub-Group': 'select'};
-    return $('#Group_row').length ? {} : objFields;
+    return $('#Group_row').length && $('#Sub-Group_row').length ? {} :
+        $('#Group_row').length ? { 'Sub-Group': 'select' } : objFields;
 }
 function getTaxonSelectFields(addField) {
     const lvls = _state('getTaxonProp', ['groupRanks']);
