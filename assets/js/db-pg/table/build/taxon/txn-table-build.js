@@ -43,7 +43,6 @@ function getRootTaxonRcrd(root) {
 function updateGroupTableState(groupId, group) {
     _u('setData', ['curView', groupId]);
     tState().set({
-        // groupRank: groupTaxonRcrd.rank,
         curView: groupId,
         groupName: group.displayName,
         groupPluralName: group.pluralName,

@@ -14,11 +14,12 @@
  *         DATA TREE
  *         AGGRID ROW-DATA
  *     INIT AGGRID TABLE
- *     REBUILD TABLE
+ *     TABLE REBUILD
+ *     UTILITY
  */
 import { _u, _ui } from '../../db-main.js';
 import { getFilterState, resetTableState, resetTableParams, tableState } from '../table-main.js';
-import * as init from './init-table.js';
+import * as init from './init-table/init-table-main.js';
 import * as loc from './location/loc-table-main.js';
 import * as src from './source/src-table-main.js';
 import * as int from './interaction/table-int-main.js';
@@ -133,8 +134,7 @@ function buildDataTable(focus, view) {
     };
     return builders[focus](view);
 }
-/* ================================ UTILITY ========================================================================= */
-
+/* ================== UTILITY =============================================== */
 /** Sorts the all levels of the data tree alphabetically. */
 export function sortDataTree(tree) {
     const sortedTree = {};

@@ -55,9 +55,6 @@ export function reloadTableWithCurrentFilters() {
     return build.reloadTableWithCurrentFilters(...arguments);
 }
 /* -------------------------- LOCATION -------------------------------------- */
-export function buildLocTable() {
-    return build.buildLocTable(...arguments);
-}
 export function onLocViewChange() {
     return build.onLocViewChange(...arguments);
 }
@@ -74,15 +71,9 @@ export function showLocInDataTable() {
 export function onSrcViewChange() {
     return build.onSrcViewChange(...arguments);
 }
-export function buildSrcTable() {
-    return build.buildSrcTable(...arguments);
-}
 /* ----------------------------- TAXON -------------------------------------- */
 export function onTxnViewChange() {
     return build.onTxnViewChange(...arguments);
-}
-export function buildTxnTable() {
-    return build.buildTxnTable(...arguments);
 }
 export function rebuildTxnTable() {
     return build.rebuildTxnTable(...arguments);
