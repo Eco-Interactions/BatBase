@@ -45,36 +45,19 @@ import { _state } from '../forms-main.js';
 
 /* *************************** FORM CONFG *********************************** */
 export function getFormConfg(entity) {
-    if (['subject', 'object'].indexOf(entity) >= 0) { return getRoleConfg(entity); }
-    const confgEntity = entity === 'editor' ? 'author' : entity;
-    return getEntityConfg(confgEntity);
+    const confgName = getFormConfgName(entity);
+    return getEntityConfg(confgName);
 }
-function getEntityConfg(entity) {
-    return require(`./entity/${entity}-confg.js`).default();
-}
-/* ------------------ TAXON SELECT FORM CONFG ------------------------------- */
-function getRoleConfg(role) {
-    const addField = role === 'subject' ? {} : ifObjectAddGroupFields(role);
-    const fields = getTaxonSelectFields(addField);
-    return {
-        'add': addField,
-        'required': [],
-        'suggested': fields,
-        'optional': [],
-        'order': {
-            'sug': fields,
-            'opt': false },
+function getFormConfgName(entity) {
+    const map = {
+        subject: 'role',
+        object: 'role',
+        editor: 'author'
     };
+    return map[entity] ? map[entity] : entity;
 }
-function ifObjectAddGroupFields(role) {
-    const objFields = {'Group': 'select', 'Sub-Group': 'select'};
-    return $('#Group_row').length && $('#Sub-Group_row').length ? {} :
-        $('#Group_row').length ? { 'Sub-Group': 'select' } : objFields;
-}
-function getTaxonSelectFields(addField) {
-    const lvls = _state('getTaxonProp', ['groupRanks']);
-    const addedFields = Object.keys(addField);
-    return !addedFields.length ? lvls : [...addedFields, ...lvls];
+function getEntityConfg(confgName) {
+    return require(`./entity/${confgName}-confg.js`).default();
 }
 /* --------------- CORE-ENTITY CONFG ----------------- */
 /**
