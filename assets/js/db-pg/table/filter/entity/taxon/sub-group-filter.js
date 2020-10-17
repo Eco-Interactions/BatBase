@@ -30,7 +30,7 @@ function buildSubGroupOpts(subGroups) {
 }
 function buildSubGroupCombo(opts) {
     const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
-    const span = _u('buildElem', ['span', { text: 'Roots: ' }]);
+    const span = _u('buildElem', ['span', { text: '' }]);
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'selSub-Group');
     $(lbl).append([span, sel]);
     return lbl;
@@ -47,10 +47,10 @@ function filterTableBySubGroup(vals) {                                          
 }
 function filterBySubGroups() {
     timeout = null;
-    const groupIds = _u('getSelVal', ['Sub-Group']);
+    const groupNames = _u('getSelVal', ['Sub-Group']);
     const totalGroups = $('#selSub-Group')[0].selectize.currentResults.total;   //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total);
-    ifAllGroupsSelectedClearFilterCombo(groupIds.length, totalGroups);
-    updateSubGroupFilterState(groupIds, totalGroups);
+    ifAllGroupsSelectedClearFilterCombo(groupNames.length, totalGroups);
+    updateSubGroupFilterState(groupNames, totalGroups);
     fM.onFilterChangeUpdateRowData();
     _ui('showTable');
 
@@ -59,8 +59,8 @@ function filterBySubGroups() {
         $('#selSub-Group')[0].selectize.clear();
     }
 }
-function updateSubGroupFilterState(gIds, totalGroups) {
-    const selected = gIds.length && gIds.length !== totalGroups ? gIds : false;
-    const state = { 'Sub-Group': selected };  console.log('state = %O', state)
+function updateSubGroupFilterState(gNames, totalGroups) {
+    const selected = gNames.length && gNames.length !== totalGroups ? gNames : false;
+    const state = { 'Sub-Group': selected };
     fM.setFilterState('combo', state, 'direct');
 }

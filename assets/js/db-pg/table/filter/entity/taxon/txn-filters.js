@@ -30,7 +30,7 @@ export function loadTxnFilters(tblState) {                          /*Perm-log*/
 }
 function loadAsyncFilters(tblState) {
     if (tblState.groupName === 'Bat') { return initObjectGroupCombobox(); }
-    if (Object.keys(tblState.subGroups).length == 1) { return initSubGroupFilter(tblState); }
+    if (Object.keys(tblState.subGroups).length > 1) { return initSubGroupFilter(tblState); }
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {
