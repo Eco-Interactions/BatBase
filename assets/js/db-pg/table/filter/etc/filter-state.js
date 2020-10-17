@@ -87,8 +87,12 @@ function getPanelFilters(filters) {
 }
 export function isFilterActive() {
     const filters = getPageActiveFilters();
-    filters.splice(filters.indexOf('List'), 1);
+    removeListIfActive(filters);
     return !!filters.length;
+}
+function removeListIfActive(filters) {
+    if (filters.indexOf('List') === -1) { return; }
+    filters.splice(filters.indexOf('List'), 1);
 }
 export function getRowDataFilters(f) {
     const filters = f || _u('snapshot', [fS.filters.direct]);

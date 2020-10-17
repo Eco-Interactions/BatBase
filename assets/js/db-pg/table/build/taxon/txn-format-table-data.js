@@ -29,7 +29,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,
-        subGroup: taxon.group.subGroup,  //Used for the Sub-Group filter
+        subGroup: taxon.group.subGroup.name,  //Used for the Sub-Group filter
         taxonRank: taxon.rank.displayName,
         treeLvl: treeLvl,
         updatedBy: taxon.updatedBy
