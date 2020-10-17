@@ -6,7 +6,7 @@
  *     setDataInMemory
  *     clearTempMmry
  */
-import { setData } from './local-data-main.js';
+import { setData } from '../local-data-main.js';
 
 let mmryData;
 
