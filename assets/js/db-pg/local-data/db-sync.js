@@ -395,7 +395,7 @@ function addToParentRcrd(prop, rcrd, entity) {
 function addToTaxonNames(prop, rcrd, entity) {                                  //console.log('addToTaxonNames. prop = [%s] rcrd = %O', prop, rcrd);
     const taxon = db.getMmryData('taxon')[rcrd.id];
     const group = taxon.group.displayName;
-    const subGroup = taxon.group.subGroup;
+    const subGroup = taxon.group.subGroup.name;
     const rank = taxon.rank.displayName;
     const nameProp = group+subGroup+rank+"Names";
     let data = db.getMmryData(nameProp) || {};
