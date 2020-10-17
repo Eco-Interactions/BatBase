@@ -169,7 +169,7 @@ function addGroupDataToTaxon(taxon, subGroup, group) {
         id: group.id,
         displayName: group.displayName,
         pluralName: group.pluralName,
-        subGroup: subGroup
+        subGroup: { id: group.taxa[subGroup].id, name: group.taxa[subGroup].name }
     };
 }
 function storeTaxaByGroupAndRank(taxonObj, subGroup, group) {

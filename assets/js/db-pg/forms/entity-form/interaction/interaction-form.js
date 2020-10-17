@@ -612,7 +612,7 @@ function onGroupSelection(val) {                                                
 }
 /** A row for each rank present in the group filled with the taxa at that rank.  */
 function buildAndAppendGroupRows(rootId) {
-    return _elems('buildFormRows', ['object', {'Sub-Group': rootId}, 'sub'])
+    return _elems('getFormFieldRows', ['object', {'Sub-Group': rootId}, 'sub'])
     .then(appendGroupRowsAndFinishBuild);
 }
 function appendGroupRowsAndFinishBuild(rows) {
@@ -642,10 +642,15 @@ function ifRankComboRemoveCombo(i, elem) {
 }
 /* ------------ onSubGroupSelection ---------- */
 export function onSubGroupSelection(val) {
-    const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];            //console.log('onSubGroupSelection [%s]', subGroup);
-    _state('setTaxonProp', ['subGroup', subGroup]);
+    updateSubGroupState();
     clearPreviousSubGroupCombos();
     return buildAndAppendGroupRows(val);
+}
+function updateSubGroupState() {
+    const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];            //console.log('onSubGroupSelection [%s]', subGroup);
+    const subGroupTaxon = getRcrd('taxon', getTaxonData('subGroups')[subGroup].id);
+    _state('setTaxonProp', ['subGroup', subGroup]);
+    _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
 }
 function clearPreviousSubGroupCombos() {
     const groupRows = $('#Group_row, #Sub-Group_row').detach();
@@ -659,7 +664,7 @@ function clearPreviousSubGroupCombos() {
  * combo was cleared, ensure the remaining dropdowns are in sync or, if they
  * are all empty, disable the 'select' button.
  */
-export function onRankSelection(val, input) {                                  console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
+export function onRankSelection(val, input) {                                   console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
     const fLvl = getSubFormLvl('sub');
     const elem = input || this.$input[0];
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
@@ -682,7 +687,7 @@ function syncTaxonCombos(elem) {
 function resetChildRankCombos(selTxn) {
     const rankName = selTxn ? selTxn.rank.displayName : getGroupTopSubRank();
     if (rankName == 'Species') { return; }
-    getChildRankOpts(rankName, selTxn.group.subGroup)
+    getChildRankOpts(rankName, selTxn.group.subGroup.name)
     .then(opts => repopulateRankCombos(opts, {}));
 }
 function getGroupTopSubRank() {
@@ -717,7 +722,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
     const opts = {}, selected = {};
     const taxon = getRcrd('taxon', selId);                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
     const group = getTaxonData('groupName');
-    const subGroup = taxon.group.subGroup;
+    const subGroup = taxon.group.subGroup.name;
     if (!taxon) { return; } //issue alerted to developer and editor
     taxon.children.forEach(addRelatedChild);
     return buildUpdatedTaxonOpts()
@@ -846,6 +851,9 @@ export function getSelectedTaxon(aboveRank) {
         return action == 'edit' && entity == 'taxon';
     }
 }
+/**
+ * Note: On rank combo reset, the most specific taxon above the resetRank is selected.
+ */
 function isSelectedTaxon(resetRank, elem) {
     if (!ifIsRankComboElem(elem)) { return false; }
     if (resetRank && isRankChildOfResetRank(resetRank, elem)) { return false; }

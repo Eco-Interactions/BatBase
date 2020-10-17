@@ -252,17 +252,26 @@ function onParentRankSelection(val) {
 }
 function handleOnSubGroupSelection(val) {
     _form('onSubGroupSelection', [val])
-    .then(hideSpeciesCombo);
+    .then(hideGroupAndSpeciesCombo)
+    .then(enableChangeParentSubmitBttn);
 }
 /** Note: Species combo needs to stay in DOM for the combo change methods. */
-function hideSpeciesCombo() {
-    $('#Species_row').hide();
+function hideGroupAndSpeciesCombo() {
+    $('#Group_row, #Species_row').hide();
 }
-export function selectParentTaxon(prntId) {                                     //console.log('selectParentTaxon. prntId [%s], taxa [%O]', prntId, taxonData.rcrds);
-    const prntTxn = taxonData.rcrds[prntId];
+function enableChangeParentSubmitBttn() {
+    _elems('toggleSubmitBttn', ['#sub-submit', true]);
+}
+export function selectParentTaxon(prntId) {
+    const prntTxn = taxonData.rcrds[prntId];                                    //console.log('selectParentTaxon = ', prntTxn);
+    ifSubGroupSelect(prntTxn);
     if (prntTxn.isRoot) { return; }
     const prntRank = prntTxn.rank.displayName;
     _cmbx('setSelVal', ['#'+prntRank+'-sel', prntId]);
+}
+function ifSubGroupSelect(parentTaxon) {
+    if (!$('#Sub-Group_row').length) { return; }
+    _cmbx('setSelVal', ['#Sub-Group-sel', parentTaxon.group.subGroup.id, 'silent']);
 }
 function finishParentSelectFormUi() {
     alignGroupRankText();
@@ -281,13 +290,13 @@ function clearAndDisableTopFormParentFields() {
 }
 function updateSubmitBttns() {
     $('#sub-submit').attr('disabled', false).css('opacity', '1');
-    $('#sub-submit').off('click').click(selectTaxonParent);
+    $('#sub-submit').off('click').click(selectNewTaxonParent);
     $('#sub-cancel').off('click').click(cancelPrntEdit);
     _elems('toggleSubmitBttn', ['#top-submit', false]);
     $('#sub-submit')[0].value = 'Select Taxon';
 }
-function selectTaxonParent() {
-    const prnt =  _form('getSelectedTaxon') || taxonData.groupTaxon;             //console.log("selectTaxonParent called. prnt = %O", prnt);
+function selectNewTaxonParent() {
+    const prnt = _form('getSelectedTaxon') || _state('getTaxonProp', ['groupTaxon']);//console.log("selectNewTaxonParent called. prnt = %O", prnt);
     if (ifParentSelectErrs(getRankVal(prnt.rank.displayName))) { return; }
     exitPrntEdit(prnt);
 }
