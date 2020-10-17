@@ -13,10 +13,10 @@
  *     DATA UTIL
  */
 import { _modal, alertIssue, showIntroAndLoadingMsg } from '../db-main.js';
-import * as idb from './idb-util.js';
-import * as sync from './db-sync.js';
-import * as temp from './temp-data.js';
-import * as init from './init-data.js';
+import * as idb from './etc/idb-util.js';
+import * as sync from './sync/db-sync-main.js';
+import * as temp from './etc/temp-data.js';
+import { initLocalDatabase } from './init/db-init-main.js';
 
 /* ========================== FACADE ======================================== */
 export function initDb(argument) {
@@ -78,7 +78,7 @@ export function syncLocalDbWithServer(lclDataUpdatedAt) {
  */
 export function initStoredData(reset) {
     showIntroAndLoadingMsg(reset);
-    return require('./init-data.js').default(reset);
+    return initLocalDatabase(reset);
 }
 export function deriveUserData() {
     return init.deriveUserData(...arguments);

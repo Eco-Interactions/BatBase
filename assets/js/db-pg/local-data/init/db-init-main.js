@@ -15,8 +15,8 @@
  *         USER LIST DATA
  *         HELPERS
  */
-import * as db from './local-data-main.js';
-import { initSearchStateAndTable, _ui } from '../db-main.js';
+import * as db from '../local-data-main.js';
+import { initSearchStateAndTable, _ui } from '../../db-main.js';
 
 /* ======================= DOWNLOAD DATA ==================================== */
 /**
@@ -30,7 +30,7 @@ import { initSearchStateAndTable, _ui } from '../db-main.js';
  *       Source, SourceType
  *   /interaction - Interaction, InteractionType, Tag
  */
-export default function (reset) {                                               console.log("   *-initLocalData");
+export function initLocalDatabase(reset) {                                      console.log("   *--initLocalDatabase");
     return db.fetchServerData('data-state')
         .then(data => db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initTaxonDataAndLoadTable(reset))

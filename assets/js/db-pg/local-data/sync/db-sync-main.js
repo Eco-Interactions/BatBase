@@ -28,8 +28,8 @@
  *         ERRS
  *
  */
-import * as db from './local-data-main.js';
-import { _forms, _u, alertIssue, initSearchStateAndTable } from '../db-main.js';
+import * as db from '../local-data-main.js';
+import { _forms, _u, alertIssue, initSearchStateAndTable } from '../../db-main.js';
 
 let failed = { data: [], retryQueue: {}};
 

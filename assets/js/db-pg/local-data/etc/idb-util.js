@@ -12,8 +12,8 @@
  *     getData              util
  *     setData              util
  */
-import { initStoredData, syncLocalDbWithServer } from './local-data-main.js';
-import { alertIssue } from '../db-main.js';
+import { initStoredData, syncLocalDbWithServer } from '../local-data-main.js';
+import { alertIssue } from '../../db-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
 const db_v = '.53'; //prod: .53
