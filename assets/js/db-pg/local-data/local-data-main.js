@@ -3,14 +3,17 @@
  *
  * EXPORT:
  *     fetchData
- *
+ *     parseData
  *
  * TOC:
  *     FACADE
  *         IDB
  *         DATA SYNC
  *         DATA INIT
- *     DATA UTIL
+ *     LOCAL-DATA INTERNAL FACADE
+ *         DATA INIT
+ *         DATA SYNC
+ *         TEMP DATA
  */
 import { _modal, alertIssue, showIntroAndLoadingMsg } from '../db-main.js';
 import * as idb from './etc/idb-util.js';
@@ -29,8 +32,8 @@ export function getData(props, returnUndefined) {
     return idb.getData(props, returnUndefined);
 }
 /* -------------------------- DATA SYNC ------------------------------------- */
-export function updateLocalDb(data) {
-    return sync.updateLocalDb(data);
+export function afterFormSubmitUpdateLocalDatabase(data) {
+    return sync.afterFormSubmitUpdateLocalDatabase(data);
 }
 export function updateUserNamedList() {
     return sync.updateUserNamedList(...arguments);
@@ -66,6 +69,15 @@ function alertFetchIssue(url, responseText) {
 export function getAllStoredData() {
     return idb.getAllStoredData();
 }
+/**
+ * Loops through the passed data object to parse the nested objects. This is
+ * because the data comes back from the server having been double JSON-encoded,
+ * due to the 'serialize' library and the JSONResponse object.
+ */
+export function parseData(data) {
+    for (let k in data) { data[k] = JSON.parse(data[k]); }
+    return data;
+}
 /* -------------------------- DATA SYNC ------------------------------------- */
 export function syncLocalDbWithServer(lclDataUpdatedAt) {
     sync.syncLocalDbWithServer(lclDataUpdatedAt);
@@ -83,7 +95,7 @@ export function initStoredData(reset) {
 export function deriveUserData() {
     return init.deriveUserData(...arguments);
 }
-/** ------------------- DATA IN MEMORY -------------------------------------- */
+/** ----------------------- TEMP DATA --------------------------------------- */
 export function getMmryData() {
     return temp.getMmryData(...arguments);
 }
@@ -99,6 +111,7 @@ export function setMmryDataObj() {
 export function deleteMmryData() {
     return temp.deleteMmryData(...arguments);
 }
-export function clearTempMmry() {
-    return temp.clearTempMmry();
+export function clearTempMemory() {
+    sync.clearFailedMmry();
+    temp.clearTempMmry();
 }

@@ -19,6 +19,7 @@
  *   initComboboxes
  *   init_db
  *   lcfirst
+ *   logInDevEnv
  *   replaceSelOpts
  *   sendAjaxQuery
  *   setSelVal
