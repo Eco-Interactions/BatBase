@@ -20,7 +20,7 @@ export function setMmryDataObj(obj) {
     mmryData = obj;
 }
 /** Stores passed data under the key in dataStorage. */
-export function setDataInMemory(key, data) {                                    //console.log('Adding to mmryData [%s] = [%O]', key, data);
+export function setDataInMemory(key, data) {                        /*dbug-log*///console.log('Adding to mmryData [%s] = [%O]', key, data);
     if (!mmryData) { mmryData = {} }
     if (!mmryData[key]) { mmryData[key] = {} }
     mmryData[key].value = data;
@@ -28,11 +28,11 @@ export function setDataInMemory(key, data) {                                    
 }
 export function setUpdatedDataInLocalDb() {
     return Object.keys(mmryData).reduce((p, prop) => {
-        if (!mmryData[prop].changed) { return p; }                              //console.log('               --setting [%s] data = [%O]', prop, mmryData[prop].value);
+        if (!mmryData[prop].changed) { return p; }                  /*dbug-log*///console.log('               --setting [%s] data = [%O]', prop, mmryData[prop].value);
         mmryData[prop].changed = false;
         return p.then(() => setData(prop, mmryData[prop].value));
     }, Promise.resolve());
 }
 export function clearTempMmry(dataUpdatedAt) {
-    mmryData = null;
+    mmryData = {};
 }

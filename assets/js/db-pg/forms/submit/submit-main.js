@@ -60,7 +60,7 @@ function storeParamsData(entity, fLvl) {
 }
 /* ----------------- ON SUBMIT SUCCESS ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                                   _u('logAjaxData', [data, arguments]);
-    _db('afterFormSubmitUpdateLocalDatabase', [data.results])
+    _db('afterServerDataUpdateSyncLocalDatabase', [data.results])
     .then(onDataSynced);
 }
 function onDataSynced(data) {                                                   console.log('       --onDataSynced.');

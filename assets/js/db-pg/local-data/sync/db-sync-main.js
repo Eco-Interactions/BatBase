@@ -14,19 +14,25 @@ import * as pgLoad from './pg-load/pg-load-main.js';
 export function updateUserNamedList() {
     return entry.updateUserNamedList(...arguments);
 }
-export function afterFormSubmitUpdateLocalDatabase() {
-    return entry.afterFormSubmitUpdateLocalDatabase(...arguments);
+export function afterServerDataUpdateSyncLocalDatabase() {
+    return entry.afterServerDataUpdateSyncLocalDatabase(...arguments);
 }
 /* ========================= PAGE-LOAD SYNC ================================= */
 export function syncLocalDbWithServer() {
     return pgLoad.syncLocalDbWithServer(...arguments);
 }
 /* ========================= INTERNAL FACADE ================================ */
+export function updateLocalEntityData() {
+    return entry.updateLocalEntityData(...arguments);
+}
 export function addCoreEntityData() {
     return h.addCoreEntityData(...arguments);
 }
 export function addDetailEntityData() {
     return h.addDetailEntityData(...arguments);
+}
+export function hasEdits() {
+    return h.hasEdits(...arguments);
 }
 export function reportDataSyncFailures() {
     return h.reportDataSyncFailures(...arguments);

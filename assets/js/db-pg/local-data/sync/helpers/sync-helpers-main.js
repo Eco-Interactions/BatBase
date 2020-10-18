@@ -20,6 +20,9 @@ export function addDetailEntityData() {
 export function removeInvalidatedData() {
     return rmv.removeInvalidatedData(...arguments);
 }
+export function hasEdits() {
+    return rmv.hasEdits(...arguments);
+}
 /* ------------------------- FAILURES --------------------------------------- */
 export function clearFailedMmry() {
     x.clearFailedMmry();

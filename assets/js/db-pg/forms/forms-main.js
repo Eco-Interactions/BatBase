@@ -61,6 +61,9 @@ export function selectIntLoc(id) {
 export function autofillCoordinateFields() {
     form.autofillCoordinateFields(...arguments);
 }
+export function rebuildCitationText() {
+    return form.rebuildCitationText(...arguments);
+}
 /** --------------------------- FORM UI ------------------------------------- */
 export function _elems(funcName, params = []) {
     return executeMethod(funcName, elems, 'elems', 'forms-main', getParams(params));
