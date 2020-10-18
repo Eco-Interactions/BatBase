@@ -33,7 +33,7 @@ export function initLocalDatabase(reset) {                          /*Perm-log*/
         .then(() => initTaxonDataAndLoadTable(reset))
         .then(downloadRemainingTableData)
         .then(downloadRemainingDataAndFullyEnableDb)
-        .then(db.clearTempMmry);
+        .then(db.clearTempMemory);
 }
 /* ---------------- INIT BASE TABLE ----------------------------------------- */
 function initTaxonDataAndLoadTable(reset) {
@@ -80,17 +80,6 @@ function setData(url, data) {                                       /*Perm-log*/
 function storeServerData(data) {                                    /*dbug-log*///console.log("storeServerData = %O", data);
     const ents = Object.keys(data);
     return ents.reduce((p, entity) => {                             /*dbug-log*///console.log("     entity = %s, data = %O", entity, data[entity]);
-        return p.then(p => db.setDataInMemory(entity, parseData(data[entity])));
+        return p.then(p => db.setDataInMemory(entity, db.parseData(data[entity])));
     }, Promise.resolve());
-}
-/**
- * Loops through the passed data object to parse the nested objects. This is
- * because the data comes back from the server having been double JSON-encoded,
- * due to the 'serialize' library and the JSONResponse object.
- */
-function parseData(data) {
-    for (let k in data) {                                           /*dbug-log*///console.log('parse[%s]Data = %O', k, data);
-        data[k] = JSON.parse(data[k]);
-    }
-    return data;
 }
