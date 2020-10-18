@@ -3,6 +3,7 @@
  *
  * Export
  *     removeInvalidatedData
+ *     hasEdits
  *
  * TOC
  *     REMOVE ENTITY DATA
@@ -26,7 +27,7 @@ function updateRelatedDetailData(data) {
     if (!hasEdits(data.detailEdits)) { return; }
     removeInvalidatedDataProps(data.detail, data.detailEntity, data.detailEdits);
 }
-function hasEdits(editObj) {
+export function hasEdits(editObj) {
     return editObj && Object.keys(editObj).length > 0;
 }
 /** Updates relational storage props for the entity. */

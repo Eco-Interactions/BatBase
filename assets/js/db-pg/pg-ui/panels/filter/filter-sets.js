@@ -234,7 +234,8 @@ function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
     .then(applyDirectFilters)
     .then(applyColumnFilters.bind(null, filters.table))
 
-    function applyDirectFilters() {                                             //console.log('applyDirectFilters. args = %O', arguments)
+    function applyDirectFilters() {                                 /*dbug-log*///console.log('applyDirectFilters. args = %O', arguments)
+        if (!Object.keys(filters.direct).length) { return; }
         addFiltersToMemoryAndUi(filters);
         _table('onFilterChangeUpdateRowData');
     }

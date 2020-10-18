@@ -32,8 +32,8 @@ export function getData(props, returnUndefined) {
     return idb.getData(props, returnUndefined);
 }
 /* -------------------------- DATA SYNC ------------------------------------- */
-export function afterFormSubmitUpdateLocalDatabase(data) {
-    return sync.afterFormSubmitUpdateLocalDatabase(data);
+export function afterServerDataUpdateSyncLocalDatabase(data) {
+    return sync.afterServerDataUpdateSyncLocalDatabase(data);
 }
 export function updateUserNamedList() {
     return sync.updateUserNamedList(...arguments);
