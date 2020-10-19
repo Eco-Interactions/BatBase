@@ -1,0 +1,95 @@
+/**
+ * Manages the location fields in the interaction form, Country/Region and Location.
+ *
+ * Export
+ *     enableCountryRegionField
+ *     fillLocCombo
+ *     selectLoc
+ *     onCntryRegSelection
+ *     onLocSelection
+ *
+ * TOC
+ *     COUNTRY/REGION
+ *     LOCATION
+ *         FILL COMBOBOX
+ *         SELECT LOCATION
+ */
+
+import { _u } from '../../../../db-main.js';
+import { _panel, _cmbx, _form } from '../../../forms-main.js';
+import * as iForm from '../interaction-form-main.js';
+
+/* ======================= COUNTRY/REGION =================================== */
+/**
+ * When a country or region is selected, the location dropdown is repopulated
+ * with it's child-locations and, for regions, all habitat types. When cleared,
+ * the combobox is repopulated with all locations.
+ * If the map is open, the country is outlined and all existing locations within
+ * are displayed @focusParentAndShowChildLocs
+ */
+export function onCntryRegSelection(val) {                          /*perm-log*/console.log("       +--onCntryRegSelection [%s]", val);
+    if (val === "" || isNaN(parseInt(val))) { return fillLocCombo(null); }
+    const loc = iForm.getRcrd('location', val);
+    fillLocCombo(loc);
+    iForm.focusPinAndEnableSubmitIfFormValid('Country-Region');
+    if ($('#form-map').length) { showCountryDataOnMap(val); }
+}
+function showCountryDataOnMap(val) {
+    _form('focusParentAndShowChildLocs', ['int', val]);
+}
+/** When the Location sub-form is exited, the Country/Region combo is reenabled. */
+export function enableCountryRegionField() {
+    _cmbx('enableCombobox', ['#Country-Region-sel']);
+    $('#loc-note').fadeTo(400, 1);
+}
+/* ========================== LOCATION ====================================== */
+/* ---------------------- FILL COMBOBOX ------------------------------------- */
+/**
+ * When a country/region is selected, the location combobox is repopulated with its
+ * child-locations and all habitat types. When cleared, the combobox is
+ * repopulated with all locations.
+ */
+export function fillLocCombo(loc) {
+    const opts = loc ? getOptsForLoc(loc) : _cmbx('getLocationOpts');
+    _cmbx('updateComboboxOptions', ['#Location-sel', opts]);
+}
+/** Returns an array of options for the locations of the passed country/region. */
+function getOptsForLoc(loc) {
+    let opts = getChildLocOpts(loc.children)
+    opts.push({ value: loc.id, text: loc.displayName });
+    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    opts.unshift({ value: 'create', text: 'Add a new Location...'});
+    return opts;
+}
+function getChildLocOpts(children) {
+    return children.map(id => {
+        const loc = iForm.getRcrd('location', id);  //error alerted to developer and editor
+        return loc ? { value: id, text: loc.displayName } : null
+    }).filter(l => l);
+}
+/* ---------------------- SELECT LOCATION ----------------------------------- */
+export function selectLoc(id) {
+    $('#sub-form').remove();
+    _cmbx('setSelVal', ['#Location-sel', id]);
+    enableCountryRegionField();
+    _cmbx('enableCombobox', ['#Location-sel']);
+}
+/**
+ * When a location is selected, its country/region is selected in the top-form
+ * combobox and the location record's data is added to the detail panel. If
+ * the location was cleared, the detail panel is cleared.
+ */
+export function onLocSelection(val) {                               /*perm-log*/console.log('       +--onLocSelection [%s]', val);
+    if (val === 'create') { return iForm.createSubEntity('location', 'sub'); }
+    if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['loc']); }
+    if ($('#form-map').length) { removeLocMap(); }
+    const locRcrd = iForm.getRcrd('location', val);
+    if (!locRcrd) { return; } //error alerted to developer and editor
+    const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
+    _cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
+    _panel('fillLocDataInDetailPanel', [locRcrd]);
+    iForm.focusPinAndEnableSubmitIfFormValid('Location');
+}
+function removeLocMap() {
+    $('#form-map').fadeTo(400, 0, () => $('#form-map').remove());
+}

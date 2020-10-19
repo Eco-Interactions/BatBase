@@ -1,5 +1,5 @@
 /**
- * Mangages the Interaction Type and Interaction Tag fields.
+ * Mangages the Interaction Type and Interaction Tag fields in the interaction form.
  *
  * Exports:
  *     initTypeField
@@ -8,13 +8,16 @@
  *
  * TOC
  *     INTERACTION TYPE
+ *         LOAD COMBOBOX
  *     INTERACTION TAG
  *         CLEAR TYPE-TAGS
  *         INIT FIELD
  *         ON TAG SELECTION
+ *     SHARED
+ *         FIELD INIT-VAL
  */
-import { _confg, _cmbx, _state } from '../../forms-main.js';
-import { checkIntFieldsAndEnableSubmit, focusPinAndEnableSubmitIfFormValid } from './interaction-form.js';
+import { _confg, _cmbx, _state } from '../../../forms-main.js';
+import * as iForm from '../interaction-form-main.js';
 /**
  * defaultTag:      Required tag id for the selected interaction type.
  * objectGroup:     The object taxon group when selected in the form.
@@ -41,48 +44,33 @@ const app = {
         'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
         'Hematophagy': ['Bird', 'Mammal'],
  */
-export function initTypeField(objectGroup) {                                    //console.log(        '+--initTypeField = [%s]', objectGroup);
+export function initTypeField(objectGroup) {                        /*dbug-log*///console.log(        '+--initTypeField = [%s]', objectGroup);
     if (app.objectGroup === 'objectGroup') { return; }
     app.objectGroup = objectGroup;
     loadIntTypeOptions();
 }
+/* ---------------------- LOAD OPTIONS -------------------------------------- */
 function loadIntTypeOptions() {
-    const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];    //console.log('types = %O', types)
+    const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];/*dbug-log*///console.log('types = %O', types)
     _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
     .then(loadComboOptionsForType)
     .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
 }
-function loadComboOptionsForType(opts) {                                        //console.log('opts = %O', opts)
+function loadComboOptionsForType(opts) {                            /*dbug-log*///console.log('opts = %O', opts)
     const prevType = _cmbx('getSelVal', [`#InteractionType-sel`])
     _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
     const initVal = getInitVal('InteractionType', prevType);
     if (!initVal) { return _cmbx('focusCombobox', [`#InteractionType-sel`, true]); }
     selectInitValIfValidType(initVal, opts);
 }
-/**
- * Init-val is set when the field data is persistsed across new interactions or
- * during edit form build.
- */
-function getInitVal(field, prevVal) {
-    return $(`#${field}-sel`).data('init-val') || prevVal;
-}
-function selectInitValIfValidType(initVal, typeOpts) {
-    const validType = typeOpts.find(opt => opt.value == initVal);               //console.log('validType = ', validType)
-    if (validType) {
-        _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
-    } else {
-        clearTypeRelatedTags();
-        _cmbx('focusCombobox', [`#InteractionType-sel`, true])
-    }
-}
 /* ========================= INTERACTION TAGS =============================== */
 export function onTypeSelectionInitTagField(val) {
     if (!val) { return clearTypeRelatedTags(); }
     fillAndEnableTags(val);
-    focusPinAndEnableSubmitIfFormValid('InteractionType');
+    iForm.focusPinAndEnableSubmitIfFormValid('InteractionType');
 }
 /* -------------------------- CLEAR TYPE-TAGS ------------------------------- */
-function clearTypeRelatedTags() {                                               //console.log('clearTypeRelatedTags')
+function clearTypeRelatedTags() {                                   /*dbug-log*///console.log('clearTypeRelatedTags')
     const opts = [{ text: 'Secondary', value: app.secondaryTagId }];
     _cmbx('updateComboboxOptions', ['#InteractionTags-sel', opts]);
     app.defaultTag = null;
@@ -126,11 +114,29 @@ function buildTagOpt(tag) {
     return {value: tag.id, text: tag.displayName};
 }
 /* ------------------------ ON TAG SELECTION -------------------------------- */
-export function onTagSelection(tags) {                                          //console.log('tags = ', tags);
+export function onTagSelection(tags) {                              /*dbug-log*///console.log('tags = ', tags);
     ensureDefaultTagStaysSelected(tags);
-    checkIntFieldsAndEnableSubmit();
+    iForm.checkIntFieldsAndEnableSubmit();
 }
 function ensureDefaultTagStaysSelected(tags) {
     if (!app.defaultTag || tags.indexOf(app.defaultTag) !== -1 ) { return; }
     $('#InteractionTags-sel')[0].selectize.addItem(app.defaultTag, 'silent');
+}
+/* ========================= SHARED ========================================= */
+/* --------------------- FIELD INIT-VAL ------------------------------------- */
+/**
+ * Init-val is set when the field data is persistsed across new interactions or
+ * during edit form build.
+ */
+function getInitVal(field, prevVal) {
+    return $(`#${field}-sel`).data('init-val') || prevVal;
+}
+function selectInitValIfValidType(initVal, typeOpts) {
+    const validType = typeOpts.find(opt => opt.value == initVal);   /*dbug-log*///console.log('validType = ', validType)
+    if (validType) {
+        _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
+    } else {
+        clearTypeRelatedTags();
+        _cmbx('focusCombobox', [`#InteractionType-sel`, true])
+    }
 }

@@ -818,7 +818,7 @@ export function finishSourceToggleAllFields(entity, fVals, fLvl) {
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
     _cmbx('enableCombobox', ['#Publication-sel']);
-    _form('fillCitationField', [$('#Publication-sel').val()]);
+    _form('fillCitationCombo', [$('#Publication-sel').val()]);
 }
 function initEntitySubForm(entity, fLvl, fVals, pSel) {
     _state('addEntityFormState', [entity, fLvl, pSel, 'create']);
