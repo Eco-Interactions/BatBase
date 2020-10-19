@@ -17,7 +17,6 @@ import * as int from './interaction/interaction-form.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/source-forms.js';
 import * as txn from './taxon/taxon-form.js';
-import * as autoCite from './source/auto-citation.js';
 
 const forms = {
     'author': src, 'citation': src, 'interaction': int, 'location': loc,
@@ -104,10 +103,4 @@ export function selectExistingAuthors() {
 /** ---------- CITATION ------------------------- */
 export function handleCitText(formLvl) {
     src.handleCitText(formLvl);
-}
-export function getCitationText(fLvl) {
-    return autoCite.getCitationText(fLvl);
-}
-export function rebuildCitationText(params) {
-    return autoCite.rebuildCitationText(params);
 }

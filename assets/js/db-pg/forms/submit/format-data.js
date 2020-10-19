@@ -37,7 +37,7 @@ function buildFormData(entity, formVals, fLvl) {
         data[cEntity].rel[cEntity+'Type'] = entity;
         data[cEntity].hasDetail = true;
     }
-} /* End buildFormData */
+}
 function addDirectFormFieldData(entity, formVals, cEntity, data) {
     const fieldTrans = _confg('getFieldTranslations', [entity]);
     const rels = _confg('getRelationshipFields', [entity]);

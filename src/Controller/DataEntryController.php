@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
-
 /**
  * Date-entry/edit form controller.
  *
@@ -43,6 +42,11 @@ class DataEntryController extends AbstractController
         $data->coreEdits = $this->getEditsObj($formData, 'core');
         $data->detailEdits = $this->getEditsObj($formData, 'detail');
         return $data;
+    }
+    private function returnEntity($class, $val, $prop = 'id')
+    {
+        return $this->em->getRepository("App:".$class)
+            ->findOneBy([$prop => $val]);
     }
 /*------------------------------ CREATE --------------------------------------*/
     /**
@@ -284,7 +288,7 @@ class DataEntryController extends AbstractController
     {
         $relClass = $this->getEntityClass($relField);
         $prop = is_numeric($val) ? 'id'  : 'displayName';
-        return $this->returnEntity($relClass, $prop, $val);
+        return $this->returnEntity($relClass, $val, $prop);
     }
     /** Handles field name to class name translations. */
     private function getEntityClass($relField)
@@ -293,11 +297,6 @@ class DataEntryController extends AbstractController
             "parentTaxon" => "Taxon", "subject" => "Taxon", "object" => "Taxon" ];
         return array_key_exists($relField, $classMap) ?
             $classMap[$relField] : ucfirst($relField);
-    }
-    private function returnEntity($class, $prop, $val)
-    {
-        return $this->em->getRepository("App:".$class)
-            ->findOneBy([$prop => $val]);
     }
     private function handleContributors($ary, &$entity, &$edits)
     {

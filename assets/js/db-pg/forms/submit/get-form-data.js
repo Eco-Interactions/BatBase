@@ -1,7 +1,7 @@
 /**
  * Returns an object with (k) the form field and (v) value.
  *
- * Exports
+ * Export
  *     getValidatedFormData
  */
 import { _u } from '../../db-main.js';
@@ -14,7 +14,7 @@ let fS; //form state
  * of the form values. Entity data not contained in an input on the form is
  * added @handleAdditionalEntityData.
  */
-export default function getValidatedFormData(entity, fLvl, submitting) {
+export function getValidatedFormData(entity, fLvl, submitting = false) {
     fS = _state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
     const elems = getFormFieldElems(entity, fLvl);
     const formVals = {};

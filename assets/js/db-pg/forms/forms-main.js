@@ -61,9 +61,6 @@ export function selectIntLoc(id) {
 export function autofillCoordinateFields() {
     form.autofillCoordinateFields(...arguments);
 }
-export function rebuildCitationText() {
-    return form.rebuildCitationText(...arguments);
-}
 /** --------------------------- FORM UI ------------------------------------- */
 export function _elems(funcName, params = []) {
     return executeMethod(funcName, elems, 'elems', 'forms-main', getParams(params));
@@ -81,8 +78,8 @@ export function exitFormLevel() {
 export function _val(funcName, params = []) {
     return submit._validation(funcName, params);
 }
-export function getFormValData() {
-    return submit.getFormValData(...arguments);
+export function getValidatedFormData() {
+    return submit.getValidatedFormData(...arguments);
 }
 export function submitForm(formId, fLvl, entity) {
     $('#'+fLvl+'-submit').attr('disabled', true).fadeTo('fast', .6);

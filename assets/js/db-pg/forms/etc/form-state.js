@@ -178,7 +178,7 @@ export function getEntityRcrds(entity) {
 }
 function buildRcrdsObj(entities) {
     const rcrds = {};
-    entities.forEach(ent => { rcrds[ent] = formState.records[entity]});
+    entities.forEach(ent => { rcrds[ent] = formState.records[ent]});
     return rcrds;
 }/** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {
