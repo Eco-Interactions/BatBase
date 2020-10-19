@@ -22,7 +22,8 @@ export default function ifSourceDataEditedUpdatedCitations(data) {  /*dbug-log*/
     return updateRelatedCitations(data);
 }
 function isSrcDataEdited(data) {
-    return data.core == 'source' && (hasEdits(data.coreEdits) || hasEdits(data.detailEdits));
+    return data.core == 'source' && data.detail !== 'citation' &&
+        ( hasEdits(data.coreEdits) || hasEdits(data.detailEdits) );
 }
 /* -------------------- UPDATE RELATED CITATIONS ---------------------------- */
 /** Updates the citations for edited Authors, Publications or Publishers. */
@@ -61,15 +62,17 @@ function updateCitations(citIds, rcrds) {                           /*dbug-log*/
     function updateCitText(id) {
         const citSrc = srcRcrds[id];
         const params = {
-            authRcrds: rcrds.author,
             cit: rcrds.citation[citSrc.citation],
-            citRcrds: rcrds.citation,
             citSrc: citSrc,
-            pub: srcRcrds[citSrc.parent],
-            publisherRcrds: rcrds.publisher,
-            srcRcrds: srcRcrds
+            pubSrc: srcRcrds[citSrc.parent],
+            rcrds: {
+                author: rcrds.author,
+                publisher: rcrds.publisher,
+                citation: rcrds.citation,
+                source: srcRcrds
+            }
         };
-        const citText = _forms('rebuildCitationText', [params]);    /*dbug-log*///console.log('citText = %O', citText)
+        const citText = _u('generateCitationText', [params]);       /*dbug-log*///console.log('citText = %O', citText)
         return updateCitationData(citSrc, citText);
     }
 }
@@ -78,7 +81,10 @@ function updateCitations(citIds, rcrds) {                           /*dbug-log*/
 function updateCitationData(citSrc, text) {
     const data = { srcId: citSrc.id, text: text };
     return _u('sendAjaxQuery', [
-        data, 'crud/citation/edit', Function.prototype, _forms.bind(null, '_val', ['formSubmitError'])]);
+        data, 'crud/citation/edit', Function.prototype, citUpdateErr]);
+}
+function citUpdateErr(e) {
+     _forms('_val', ['formSubmitError', e]);
 }
 /* --------------------- LOCAL-DATA UPDATE ---------------------------------- */
 function onUpdateSuccess(ajaxData) {

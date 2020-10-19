@@ -32,15 +32,15 @@
  *     HELPERS
  */
 import { _modal, _u } from '../../../db-main.js';
-import { _state, _elems, _cmbx, _form, _panel, _val, getSubFormLvl, getNextFormLevel, submitForm } from '../../forms-main.js';
+import { _state, _elems, _cmbx, _form, _panel, _val, getSubFormLvl, getNextFormLevel, submitForm, getValidatedFormData } from '../../forms-main.js';
 
 let timeout = null; //Prevents citation text being generated multiple times.
 let rmvdAuthField = {};
 
 /** Inits comboboxes for the source forms. */
-export function initFormCombos(entity, fLvl) { 
+export function initFormCombos(entity, fLvl) {
     const events = getEntityComboEvents(entity);                                //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
-    if (!events) { return; } 
+    if (!events) { return; }
     _cmbx('initFormCombos', [entity, fLvl, events]);
 }
 function getEntityComboEvents(entity) {
@@ -129,7 +129,7 @@ function setPubComboLabelWidth() {
     $('#Authors-lbl').css('min-width', '109px');
 }
 function ifThesisDissertationModifyLabel() {
-    const type = $('#PublicationType-sel')[0].innerText; 
+    const type = $('#PublicationType-sel')[0].innerText;
     if (type !== 'Thesis/Dissertation') { return; }
     $('#Publisher-lbl').css({'flex': '0 0 157px'});
 }
@@ -383,12 +383,38 @@ function getCitationFieldText($elem, fLvl, reqFieldsFilled) {
 
     function getCitationText() {
         return ifNoChildFormOpen(fLvl) && reqFieldsFilled ?
-           _form('getCitationText', [fLvl]) :
+            buildCitationText(fLvl) :
            ($elem.val() === dfault ? false : dfault);
     }
 }
 function ifNoChildFormOpen(fLvl) {
    return $('#'+getNextFormLevel('child', fLvl)+'-form').length == 0;
+}
+function buildCitationText(fLvl) {
+    return getValidatedFormData('citation', fLvl, null)
+        .then(fData => _u('generateCitationText', [getDataForCitation(fData, fLvl), true]));
+}
+function getDataForCitation(fData, fLvl) {                          /*dbug-log*///console.log('getDataForCitation [%s] fData = %O', fLvl, fData)
+    const data = {
+        pubSrc: _state('getFormProp', [fLvl, 'rcrds']).src,
+        citSrc: { authors: fData.authors, year: fData.year },
+        cit: buildCitData(fData),
+        showWarnings: true
+    };
+    return Object.assign(data, addEntityRecords());
+}
+function buildCitData(fData) {
+    return {
+        citationType: { displayName: $('#CitationType-sel')[0].innerText },
+        title: fData.title,
+        publicationPages: fData.pages,
+        publicationIssue: fData.issue,
+        publicationVolume: fData.volume,
+    };
+}
+function addEntityRecords() {
+    const entities = ['author', 'citation', 'publisher', 'source'];
+    return { rcrds: _state('getEntityRcrds', [entities])};
 }
 /* ---------------- HIGHTLIGHT EMPTY CITATION FIELDS ------------------------ */
 /**
@@ -539,24 +565,25 @@ function setInputType (fieldName, type) {
 }
 /* -------------------- SUBMIT CONFIRMATION MODAL --------------------------- */
 /**
- * If a URL is entered in the form, a modal is shown prompting the editor to 
+ * If a URL is entered in the form, a modal is shown prompting the editor to
  * double check the links work before submitting.
  */
 function addConfirmationBeforeSubmit(entity, fLvl) {
     $(`#${fLvl}-submit`).off('click').click(showSubmitModal.bind(null, entity, fLvl));
 }
-function showSubmitModal(entity, fLvl) {  
+function showSubmitModal(entity, fLvl) {
     const linkHtml = buildConfirmationModalHtml(fLvl);
     const submit = submitForm.bind(null, `#${fLvl}-form`, fLvl, entity);
     if (!linkHtml) { return submit(); }
     _modal('showSaveModal', [ buildModalConfg(fLvl, linkHtml, submit) ]);
+    $(`#${fLvl}-submit`).css({'opacity': .5, cursor: 'not-allowed'})
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }
 function buildConfirmationModalHtml(fLvl) {
     const hdr = '<b>Please double-check URLs before submitting.</b><br><br>';
     const links = ['Doi', 'Website'].map(buildLinkHtmlForValues).filter(l=>l);
     return links.length ? hdr + links.join('<br><br>') : false;
-    
+
     function buildLinkHtmlForValues(field) {
         const url = $(`#${fLvl}-form #${field}_row input`).val();
         return url ? buildUrlLink(field, url) : null;
@@ -571,7 +598,7 @@ function buildModalConfg(fLvl, linkHtml, submit) {
         selector: `#${fLvl}-submit`,
         dir: 'left',
         submit: submit,
-        bttn: 'Submit'
+        bttn: 'SUBMIT'
     };
 }
 /* ========================== PUBLISHER ===================================== */

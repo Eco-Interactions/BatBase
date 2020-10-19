@@ -11,6 +11,7 @@
  *   buildSelectElem
  *   buildSimpleOpts
  *   buildOptsObj
+ *   generateCitationText
  *   getDataFromStorage
  *   getDetachedRcrd
  *   getOptsFromStoredData
@@ -29,6 +30,7 @@
  *   ucfirst
  *
  * TOC:
+ *     GENERATE CITATION TEXT
  *     UTIL FACADE
  *         SELECTIZE COMBOBOXES
  *         IDB STORAGE METHODS
@@ -43,9 +45,14 @@ import * as coreUtil from '../../app/util/util-main.js';
 import { alertIssue as _alertIssue, _db } from '../db-main.js';
 import * as cmbx from './combos.js';
 import * as elems from './elems-util.js';
+import * as cite from './generate-citation.js';
 import extendPrototypes from './extend.js';
 
 extendPrototypes();
+/** ================ GENERATE CITATION TEXT ================================= */
+export function generateCitationText() {
+    return cite.generateCitationText(...arguments);
+}
 /** ==================== CORE APP FACADE ==================================== */
 export function sendAjaxQuery() {
     return coreUtil.sendAjaxQuery(...arguments);

@@ -3,7 +3,7 @@
  *
  * EXPORTS
  *     _validation
- *     getFormValData
+ *     getValidatedFormData
  *     valAndSubmitFormData
  *
  * TOC
@@ -17,14 +17,14 @@ import { executeMethod, _db, _u } from '../../db-main.js';
 import { _state, _elems, _confg, clearFormMemory } from '../forms-main.js';
 import * as val from './validation.js';
 import formatDataForServer from './format-data.js';
-import getValidatedFormData from './get-form-data.js';
+import * as data from './get-form-data.js';
 
 export function _validation(funcName, params = []) {
     return executeMethod(funcName, val, 'val', 'submit-main', params);
 }
 /** ----------------------- VALIDATE DATA ----------------------------------- */
-export function getFormValData(entity, fLvl, submitting) {
-    return getValidatedFormData(entity, fLvl, submitting);
+export function getValidatedFormData(entity, fLvl, submitting) {
+    return data.getValidatedFormData(entity, fLvl, submitting);
 }
 export function valAndSubmitFormData(formId, fLvl, entity) {                    //console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
     getValidatedFormData(entity, fLvl, true)
