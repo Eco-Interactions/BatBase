@@ -13,7 +13,7 @@
  *         AUTHOR
  *         CITATION
  */
-import * as int from './interaction/interaction-form.js';
+import * as int from './interaction/interaction-form-main.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/source-forms.js';
 import * as txn from './taxon/taxon-form.js';
@@ -47,8 +47,8 @@ export function finishEditFormInit(entity, id) {
     return Promise.resolve(cmplxFnshrs[entity](id));
 }
 /** ------------------------ INTERACTION ------------------------------------ */
-export function fillCitationField() {
-    int.fillCitationField(...arguments);
+export function fillCitationCombo() {
+    int.fillCitationCombo(...arguments);
 }
 export function selectIntLoc(id) {
     int.selectLoc(id);
