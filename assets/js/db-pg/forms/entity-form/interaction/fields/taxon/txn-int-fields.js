@@ -12,10 +12,14 @@
  *
  * TOC
  */
-import { _u } from '../../../../db-main.js';
-import { _state, _elems, _cmbx, _val, getSubFormLvl } from '../../../forms-main.js';
-import * as iForm from '../interaction-form-main.js';
+import { _u } from '../../../../../db-main.js';
+import { _state, _elems, _cmbx, _val, getSubFormLvl } from '../../../../forms-main.js';
+import * as iForm from '../../interaction-form-main.js';
+import * as rank from './rank/txn-rank-main.js';
 
+export function onRankSelection() {
+    return rank.onRankSelection.bind(this)(...arguments);
+}
 /*--------------------- TAXON ROLES ------------------------------------------*/
 /* ------------------------ INIT ---------------------- */
 /**
@@ -81,7 +85,7 @@ function addSelectGroupBttn() {
 function buildSelectUnspecifedBttn() {
     const attr = { id: 'select-group', class: 'ag-fresh', type: 'button', value: 'Select Unspecified' }
     const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(selectRoleTaxon.bind(null, null, getTaxonData('groupTaxon')));
+    $(bttn).click(selectRoleTaxon.bind(null, null, iForm.getTaxonData('groupTaxon')));
     return bttn;
 }
 /* --------- SELECT PREVIOUS TAXON OR FOCUS COMBO -------------- */
@@ -146,7 +150,7 @@ function enableTaxonRanks(enable = true) {
 /* ------- resetTaxonSelectForm --------- */
 /** Removes and replaces the taxon form. */
 function resetTaxonSelectForm(role) {
-    const group = getTaxonData('groupName');
+    const group = iForm.getTaxonData('groupName');
     const reset =  group == 'Bat' ? initSubjectSelect : initObjectSelect;
     $('#'+role+'-sel').data('reset', true);
     $('#sub-form').remove();
@@ -200,10 +204,10 @@ function appendGroupRowsAndFinishBuild(rows) {
     _elems('toggleSubmitBttn', ['#sub-submit', false]);
     /* Binds the current group to the 'Select Unspecified' button */
     $('#select-group').off('click');
-    $('#select-group').click(selectRoleTaxon.bind(null, null, getTaxonData('groupTaxon')));
+    $('#select-group').click(selectRoleTaxon.bind(null, null, iForm.getTaxonData('groupTaxon')));
 }
 function ifNoSubGroupsRemoveCombo(rows = false) {
-    const subGroups = Object.keys(getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
+    const subGroups = Object.keys(iForm.getTaxonData('subGroups'));                   //console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
     if (subGroups.length > 1) { return; }
     if (!rows) {
         $('#Sub-Group_row').remove();
@@ -225,7 +229,7 @@ export function onSubGroupSelection(val) {
 }
 function updateSubGroupState() {
     const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];            //console.log('onSubGroupSelection [%s]', subGroup);
-    const subGroupTaxon = iForm.getRcrd('taxon', getTaxonData('subGroups')[subGroup].id);
+    const subGroupTaxon = iForm.getRcrd('taxon', iForm.getTaxonData('subGroups')[subGroup].id);
     _state('setTaxonProp', ['subGroup', subGroup]);
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
 }
@@ -234,175 +238,10 @@ function clearPreviousSubGroupCombos() {
     $('#object_Rows').empty();
     $('#object_Rows').append(groupRows);
 }
- /* --------------------------- OnRankSelection ------------------------ */
-/**
- * When a taxon at a rank is selected, all child rank comboboxes are
- * repopulated with related taxa and the 'select' button is enabled. If the
- * combo was cleared, ensure the remaining dropdowns are in sync or, if they
- * are all empty, disable the 'select' button.
- */
-export function onRankSelection(val, input) {                                   console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
-    const fLvl = getSubFormLvl('sub');
-    const elem = input || this.$input[0];
-    if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
-    if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
-    repopulateCombosWithRelatedTaxa(val);
-    _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
-}
-function openTaxonCreateForm(selElem, fLvl) {
-    const rank = selElem.id.split('-sel')[0];
-    if (rank === 'Species' && !$('#Genus-sel').val()) {
-        return _val('formInitErr', [rank, 'noGenus', fLvl]);
-    } else if (rank === 'Genus' && !$('#Family-sel').val()) {
-        return _val('formInitErr', [rank, 'noFamily', fLvl]);
-    }
-    selElem.selectize.createItem('create');
-}
-function syncTaxonCombos(elem) {
-    resetChildRankCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
-}
-function resetChildRankCombos(selTxn) {
-    const rankName = selTxn ? selTxn.rank.displayName : getGroupTopSubRank();
-    if (rankName == 'Species') { return; }
-    getChildRankOpts(rankName, selTxn.group.subGroup.name)
-    .then(opts => repopulateRankCombos(opts, {}));
-}
-function getGroupTopSubRank() {
-    return getTaxonData('groupRanks').map(l => l).pop();
-}
-function getChildRankOpts(rankName, subGroup) {
-    const opts = {};
-    return buildChildRankOpts().then(() => opts);
-
-    function buildChildRankOpts() {
-        const ranks = getChildRanks();
-        const optProms = ranks.map(rank => getTaxonOpts(rank))
-        return Promise.all(optProms);
-    }
-    function getChildRanks() {
-        const ranks = getTaxonData('groupRanks');
-        return ranks.slice(0, ranks.indexOf(rankName));
-    }
-    function getTaxonOpts(rank) {
-        return _cmbx('getTaxonOpts', [rank, null, getTaxonData('groupName'), subGroup])
-            .then(rankOpts => opts[rank] = rankOpts);
-    }
-}
-/**
- * Repopulates the comboboxes of child ranks when a taxon is selected. Selected
- * and ancestor ranks are populated with all taxa at the rank and the direct
- * ancestors selected. Child ranks populate with only decendant taxa and
- * have no initial selection.
- * TODO: Fix bug with child taxa opt refill sometimes filling with all taxa.
- */
-function repopulateCombosWithRelatedTaxa(selId) {
-    const opts = {}, selected = {};
-    const taxon = iForm.getRcrd('taxon', selId);                                      //console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", taxon, opts, selected);
-    const group = getTaxonData('groupName');
-    const subGroup = taxon.group.subGroup.name;
-    if (!taxon) { return; } //issue alerted to developer and editor
-    taxon.children.forEach(addRelatedChild);
-    return buildUpdatedTaxonOpts()
-        .then(repopulateRankCombos.bind(null, opts, selected));
-
-    function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
-        const childTxn = iForm.getRcrd('taxon', id);
-        if (!childTxn) { return; } //issue alerted to developer and editor
-        const rank = childTxn.rank.displayName;
-        addOptToRankAry(childTxn, rank);
-        childTxn.children.forEach(addRelatedChild);
-    }
-    function addOptToRankAry(childTxn, rank) {
-        if (!opts[rank]) { opts[rank] = []; }                                 //console.log("setting rank = ", taxon.rank)
-        opts[rank].push({ value: childTxn.id, text: childTxn.name });
-    }
-    function buildUpdatedTaxonOpts() {
-        return Promise.all([getSiblingOpts(taxon), getAncestorOpts(taxon.parent)])
-        .then(buildOptsForEmptyRanks)
-        .then(addCreateOpts);
-    }
-    function getSiblingOpts(taxon) {
-        const rank = taxon.rank.displayName;
-        return _cmbx('getTaxonOpts', [rank, null, group, subGroup])
-            .then(o => {                                                        //console.log('getSiblingOpts. taxon = %O', taxon);
-                opts[taxon.rank.displayName] = o;
-                selected[taxon.rank.displayName] = taxon.id;
-            });
-    }
-    function getAncestorOpts(prntId) {                                          //console.log('getAncestorOpts. prntId = [%s]', prntId);
-        const prntTaxon = iForm.getRcrd('taxon', prntId);
-        if (prntTaxon.isRoot) { return Promise.resolve();}
-        selected[prntTaxon.rank.displayName] = prntTaxon.id;
-        return buildAncestorOpts(prntTaxon);
-    }
-    function buildAncestorOpts(prntTaxon) {
-        const rank = prntTaxon.rank.displayName;
-        return _cmbx('getTaxonOpts', [rank, null, group, subGroup])
-            .then(o => {                                                        //console.log("--getAncestorOpts - setting rank = ", prntTaxon.rank)
-                opts[prntTaxon.rank.displayName] = o;
-                return getAncestorOpts(prntTaxon.parent);
-            });
-    }
-    /**
-     * Builds the opts for each rank without taxa related to the selected taxon.
-     * Ancestor ranks are populated with all taxa at the rank and will have
-     * the 'none' value selected.
-     */
-    function buildOptsForEmptyRanks() {
-        const ranks = getTaxonData('groupRanks');
-        const proms = [];
-        fillOptsForEmptyRanks();
-        return Promise.all(proms);
-
-        function fillOptsForEmptyRanks() {
-            ranks.forEach(rank => {
-                if (opts[rank] || rank == taxon.rank.displayName) { return; }
-                buildAncestorOpts(rank);
-            });
-        }
-        function buildAncestorOpts(rank) {
-            selected[rank] = 'none';
-            proms.push(_cmbx('getTaxonOpts', [rank, null, group, subGroup])
-                .then(o => opts[rank] = o ));
-        }
-    }
-    function addCreateOpts() {
-        for (let rank in opts) {                                                 //console.log("rank = %s, name = ", rank, ranks[rank-1]);
-            opts[rank].unshift({ value: 'create', text: 'Add a new '+rank+'...'});
-        }
-        return Promise.resolve();
-    }
-} /* End fillAncestorTaxa */
-function repopulateRankCombos(optsObj, selected) {                              //console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
-    Object.keys(optsObj).forEach(rank => {                                      //console.log("rank = %s, name = ", rank, optsObj[rank]);
-        repopulateRankCombo(optsObj[rank], rank, selected)
-    });
-}
-/**
- * Replaces the options for the rank combo. Selects the selected taxon and
- * its direct ancestors.
- */
-function repopulateRankCombo(opts, rank, selected) {                            //console.log("repopulateRankCombo for rank = %s (%s)", rank, rankName);
-    updateComboOpts(rank, opts);
-    if (!rank in selected) { return; }
-    if (selected[rank] == 'none') { return resetPlaceholer(rank); }
-    _cmbx('setSelVal', ['#'+rank+'-sel', selected[rank], 'silent']);
-}
-/**
- * Change event is fired when options are replaced, so the event is removed and
- * restored after the options are updated.
- */
-function updateComboOpts(rank, opts) {
-    _u('replaceSelOpts', ['#'+rank+'-sel', opts, () => {}]);
-    $('#'+rank+'-sel')[0].selectize.on('change', onRankSelection);
-}
-function resetPlaceholer(rank) {
-    _u('updatePlaceholderText', ['#'+rank+'-sel', null, 0]);
-}
 /* ------- selectRoleTaxon --------- */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 function selectRoleTaxon(e, groupTaxon) {
-    const role = getTaxonData('groupName') === 'Bat' ? 'Subject' : 'Object';
+    const role = iForm.getTaxonData('groupName') === 'Bat' ? 'Subject' : 'Object';
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
@@ -437,7 +276,7 @@ function isSelectedTaxon(resetRank, elem) {
     return $(elem).val();
 }
 function isRankChildOfResetRank(resetRank, elem) {
-    const allRanks = getTaxonData('groupRanks');
+    const allRanks = iForm.getTaxonData('groupRanks');
     const rank = elem.id.split('-sel')[0];
     return allRanks.indexOf(rank) < allRanks.indexOf(resetRank);
 }
@@ -459,7 +298,4 @@ export function onTaxonRoleSelection(role, val) {                               
 function enableTaxonCombos() {
     _cmbx('enableCombobox', ['#Subject-sel']);
     _cmbx('enableCombobox', ['#Object-sel']);
-}
-function getTaxonData(prop) {
-    return prop ? _state('getTaxonProp', [prop]) : _state('getGroupState');
 }
