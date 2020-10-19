@@ -361,7 +361,7 @@ function getCitTypeOpts(prop, field) {
 /** Returns an array of taxonyms for the passed rank and the form's taxon group. */
 export function getTaxonOpts(rank, field, r, g) {
     const group = r ? r : _state('getTaxonProp', ['groupName']);
-    const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);
+    const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);  /*dbug-log*///console.log('getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
     return _u('getOptsFromStoredData', [group+subGroup+rank+'Names'])
         .then(buildTaxonOpts);
 

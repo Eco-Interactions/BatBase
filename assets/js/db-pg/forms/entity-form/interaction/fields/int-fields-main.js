@@ -9,7 +9,7 @@
  */
 import * as src from './src-int-fields.js';
 import * as loc from './loc-int-fields.js';
-import * as txn from './txn-int-fields.js';
+import * as txn from './taxon/txn-int-fields.js';
 import * as type from './type-tag-int-fields.js';
 
 /* ------------------ SOURCE ------------------------------------------------ */

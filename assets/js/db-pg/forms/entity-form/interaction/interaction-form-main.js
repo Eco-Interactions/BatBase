@@ -381,3 +381,8 @@ export function getRcrd(entity, id) {
 export function getRcrds(entity) {
     return _state('getEntityRcrds', [entity]);
 }
+/* -------------------- MODULE INTERNAL USE --------------------------------- */
+
+export function getTaxonData(prop) {
+    return prop ? _state('getTaxonProp', [prop]) : _state('getGroupState');
+}
