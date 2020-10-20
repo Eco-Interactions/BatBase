@@ -1,7 +1,7 @@
 /**
  * Author form configuration.
  */
-export default function() {
+export default function(entity) {
 	return {
         'add': {
             'FirstName': 'text',

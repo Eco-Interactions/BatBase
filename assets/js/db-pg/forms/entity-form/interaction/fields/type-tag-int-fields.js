@@ -8,7 +8,7 @@
  *
  * TOC
  *     INTERACTION TYPE
- *         LOAD COMBOBOX
+ *         LOAD OPTIONS
  *     INTERACTION TAG
  *         CLEAR TYPE-TAGS
  *         INIT FIELD
@@ -44,8 +44,8 @@ const app = {
         'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
         'Hematophagy': ['Bird', 'Mammal'],
  */
-export function initTypeField(objectGroup) {                        /*dbug-log*///console.log(        '+--initTypeField = [%s]', objectGroup);
-    if (app.objectGroup === 'objectGroup') { return; }
+export function initTypeField(objectGroup) {                        /*perm-log*/console.log(        '+--initTypeField = [%s]', objectGroup);
+    if (app.objectGroup === objectGroup) { return; }
     app.objectGroup = objectGroup;
     loadIntTypeOptions();
 }
@@ -60,7 +60,6 @@ function loadComboOptionsForType(opts) {                            /*dbug-log*/
     const prevType = _cmbx('getSelVal', [`#InteractionType-sel`])
     _cmbx('updateComboboxOptions', ['#InteractionType-sel', opts, true]);
     const initVal = getInitVal('InteractionType', prevType);
-    if (!initVal) { return _cmbx('focusCombobox', [`#InteractionType-sel`, true]); }
     selectInitValIfValidType(initVal, opts);
 }
 /* ========================= INTERACTION TAGS =============================== */
@@ -137,6 +136,5 @@ function selectInitValIfValidType(initVal, typeOpts) {
         _cmbx('setSelVal', ['#InteractionType-sel', initVal]);
     } else {
         clearTypeRelatedTags();
-        _cmbx('focusCombobox', [`#InteractionType-sel`, true])
     }
 }
