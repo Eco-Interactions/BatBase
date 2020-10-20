@@ -6,7 +6,7 @@
  *
  */
 import * as auth from './author-src-form.js';
-// import * as auth from './author-src-form.js';
+import * as publisher from './publisher-src-form.js';
 // import * as auth from './author-src-form.js';
 // import * as auth from './author-src-form.js';
 
@@ -19,4 +19,11 @@ export function onAuthAndEdSelection() {
 }
 export function initAuthOrEdForm() {
     return auth.initAuthOrEdForm(...arguments);
+}
+/* ------------------------ PUBLISHER --------------------------------------- */
+export function initPublisherForm() {
+    return publisher.initPublisherForm(...arguments);
+}
+export function onPublSelection() {
+    return publisher.onPublSelection(...arguments);
 }

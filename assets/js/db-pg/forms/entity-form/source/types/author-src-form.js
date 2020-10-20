@@ -23,7 +23,7 @@ import * as sForm from '../src-form-main.js';
  * When a user enters a new author|editor into the combobox, a create form is built
  * and appended to the field's row.
  */
-export function initAuthOrEdForm(authCnt, value, authType) {        /*dbug-log*///console.log('           /--initAuthOrEdForm [%s][%s] - [%s]', authType, authCnt, value);
+export function initAuthOrEdForm(authCnt, value, authType) {        /*perm-log*/console.log('           /--init [%s][%s] Form - [%s]', authType, authCnt, value);
     const pId = '#'+authType+'-sel'+authCnt;
     const fLvl = getSubFormLvl('sub2');
     if ($('#'+fLvl+'-form').length !== 0) {
