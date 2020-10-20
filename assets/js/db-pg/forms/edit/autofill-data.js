@@ -208,7 +208,7 @@ function setMultiSelect(fieldId, prop, rcrd) {                      /*dbug-log*/
     const ucProp = _u('ucfirst', [prop]);
     _state('setFormFieldData', ['top', ucProp, rcrd[prop]]);
     if (!$('#'+ucProp+'-sel-cntnr').length) { return; } //can this be the first line here?
-    _form('selectExistingAuthors', [ucProp, rcrd[prop], 'top']);
+    _form('selectExistingAuthsOrEds', [ucProp, rcrd[prop], 'top']);
 }
 function setInput(fieldId, prop, rcrd) {                            /*dbug-log*///console.log("setInputField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);

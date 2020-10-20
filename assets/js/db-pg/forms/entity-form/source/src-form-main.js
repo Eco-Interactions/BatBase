@@ -8,7 +8,7 @@
  *     handleSpecialCaseTypeUpdates
  *     initCreateForm
  *     loadSrcTypeFields
- *     selectExistingAuthors
+ *     selectExistingAuthsOrEds
  *
  * TOC:
  *     COMBOBOX INIT
@@ -33,6 +33,8 @@
  */
 import { _modal, _u } from '../../../db-main.js';
 import { _state, _elems, _cmbx, _form, _panel, _val, getSubFormLvl, getNextFormLevel, submitForm, getValidatedFormData } from '../../forms-main.js';
+import * as typeForm from './types/src-type-form-main.js'
+
 
 let timeout = null; //Prevents citation text being generated multiple times.
 let rmvdAuthField = {};
@@ -49,8 +51,9 @@ function getEntityComboEvents(entity) {
             'CitationType': {
                 change: loadCitTypeFields },
             'Authors': {
-                add: initAuthForm.bind(null, 1),
-                change: onAuthSelection },
+                add: typeForm.initAuthOrEdForm.bind(null, 1, 'Authors'),
+                change: typeForm.onAuthAndEdSelection.bind(null, 1, 'Authors')
+            },
         },
         'publication': {
             'PublicationType': {
@@ -59,19 +62,21 @@ function getEntityComboEvents(entity) {
                 add: initPublisherForm,
                 change: onPublSelection },
             'Authors': {
-                add: initAuthForm.bind(null, 1),
-                change: onAuthSelection },
+                add: typeForm.initAuthOrEdForm.bind(null, 1, 'Authors'),
+                change: typeForm.onAuthAndEdSelection.bind(null, 1, 'Authors')
+            },
             'Editors': {
-                change: onEdSelection,
-                add: initEdForm.bind(null, 1) }
+                add: typeForm.initAuthOrEdForm.bind(null, 1, 'Editors'),
+                change: typeForm.onAuthAndEdSelection.bind(null, 1, 'Editors')
+            }
         }
     }[entity];
 }
 /* ************************* ENTITY FORMS *********************************** */
 export function initCreateForm(entity, name) {                                  //console.log('entity [%s], name [%s]', entity, name)
     const funcs = {
-        'author': initAuthForm,
-        'editor': initEdForm,
+        'author': typeForm.initAuthOrEdForm.bind(null, 1, 'Authors'),
+        'editor': typeForm.initAuthOrEdForm.bind(null, 1, 'Editors'),
         'citation': initCitForm,
         'publication': initPubForm,
         'publisher': initPublisherForm
@@ -301,7 +306,7 @@ function handleSpecialCaseTypeUpdates(type, fLvl) {                             
     function enableTitleField() {
         $('#Title_row input').prop('disabled', false);
     }
-} /* End handleSpecialCaseTypeUpdates */
+}
 /** Adds or removes publication data from the form's values, depending on type. */
 function addPubData(typeId, type, fLvl) {
     // const type = citTypeElem.innerText;
@@ -568,7 +573,7 @@ function setInputType (fieldName, type) {
  * If a URL is entered in the form, a modal is shown prompting the editor to
  * double check the links work before submitting.
  */
-function addConfirmationBeforeSubmit(entity, fLvl) {
+export function addConfirmationBeforeSubmit(entity, fLvl) {
     $(`#${fLvl}-submit`).off('click').click(showSubmitModal.bind(null, entity, fLvl));
 }
 function showSubmitModal(entity, fLvl) {
@@ -632,134 +637,8 @@ function initPublisherForm(value) {                                             
     }
 }
 /* ========================== AUTHOR ======================================== */
-/* ----------------------------- AUTHOR SELECTION --------------------------- */
-/** Loops through author object and adds each author/editor to the form. */
-export function selectExistingAuthors(field, authObj, fLvl) {                   //console.log('selectExistingAuthors. args = %O', arguments);
-    if (ifFieldNotShownOrNoValToSelect(field, authObj)) { return Promise.resolve(); }
-    toggleOtherAuthorTypeSelect(field, false);
-    return Object.keys(authObj).reduce((p, ord) => { //p(romise), (author-)ord(er)
-        const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
-        return p.then(selNextAuth);
-    }, Promise.resolve());
-}
-function ifFieldNotShownOrNoValToSelect(field, authObj) {
-    return !Object.keys(authObj).length || !$('#'+field+'-sel-cntnr').length;
-}
-/** Selects the passed author and builds a new, empty author combobox. */
-function selectAuthor(cnt, authId, field, fLvl) {                               //console.log('selectAuthor. args = %O', arguments)
-    if (!$('#'+field+'-sel'+ cnt).length) { return Promise.resolve(); } //field hidden for certain citation types
-    _cmbx('setSelVal', ['#'+field+'-sel'+ cnt, authId, 'silent']);
-    return buildNewAuthorSelect(++cnt, authId, fLvl, field);
-}
-/**
- * When an author is selected, a new author combobox is initialized underneath
- * the last author combobox, unless the last is empty. The total count of
- * authors is added to the new id.
- */
-function onAuthSelection(val) {
-    handleAuthSelect(val, null, this.$input[0].id.substr(-1));
-}
-function onEdSelection(val) {
-    handleAuthSelect(val, 'editor', this.$input[0].id.substr(-1));
-}
-/** Note: If create form selected from dropdown, the count of that combo is used. */
-function handleAuthSelect(val, ed, selCnt) {
-    const authType = ed ? 'Editors' : 'Authors';
-    let cnt = $('#'+authType+'-sel-cntnr').data('cnt');
-    if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
-    const fLvl = getSubFormLvl('sub');
-    if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }
-    if (val === 'create') { return handleNewAuthForm(selCnt, val, authType); }
-    if (lastAuthComboEmpty(cnt, authType)) { return; }
-    buildNewAuthorSelect(cnt+1, val, fLvl, authType);
-
-    function handleFieldCleared(authType, cnt) {
-        syncWithOtherAuthorTypeSelect(authType);
-        handleCitText(fLvl);
-        if ($('#'+authType+'-sel'+(cnt-1)).val() === '') {
-            removeFinalEmptySelectField(authType, cnt);
-        }
-    }
-}
-function syncWithOtherAuthorTypeSelect(authType) {
-    if ($('#'+authType+'-sel1').val()) { return; } //There are no selections in this type.
-    toggleOtherAuthorTypeSelect(authType, true);
-}
-function removeFinalEmptySelectField(authType, cnt) {
-    $('#'+authType+'-sel'+cnt)[0].selectize.destroy();
-    $('#'+authType+'-sel'+cnt)[0].parentNode.remove();
-    $('#'+authType+'-sel-cntnr').data('cnt', --cnt);
-}
-function toggleOtherAuthorTypeSelect(type, enable) {
-    const entity = type === 'Authors' ? 'Editors' : 'Authors';
-    if (!$('#'+entity+'-sel-cntnr').length) { return; }
-    _cmbx('enableFirstCombobox', ['#'+entity+'-sel-cntnr', enable]);
-}
-/** Stops the form from adding multiple empty combos to the end of the field. */
-function lastAuthComboEmpty(cnt, authType) {
-    return $('#'+authType+'-sel'+cnt).val() === '';
-}
-/** Builds a new, empty author combobox */
-function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log('buildNewAuthorSelect')
-    return _cmbx('buildMultiSelectElem', [null, authType, prntLvl, cnt])
-        .then(appendNewAuthSelect);
-
-    function appendNewAuthSelect(sel) {
-        $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
-        _cmbx('initSingle', [getAuthSelConfg(authType, cnt), prntLvl]);
-    }
-}
-function getAuthSelConfg(authType, cnt) {
-    return {
-        add: getAuthAddFunc(authType, cnt), change: getAuthChngFnc(authType),
-        id: '#'+authType+'-sel'+cnt,        name: authType.slice(0, -1) //removes 's' for singular type
-    };
-}
-function getAuthChngFnc(authType) {
-    return authType === 'Editors' ? onEdSelection : onAuthSelection;
-}
-function getAuthAddFunc(authType, cnt) {
-    const add = authType === 'Editors' ? initEdForm : initAuthForm;
-    return add.bind(null, cnt);
-}
-/* ------------------------ AUTHOR CREATE ----------------------------------- */
-function initAuthForm(selCnt, val) {                                            //console.log("Adding new auth! val = %s, e ? ", val, arguments);
-    return handleNewAuthForm(selCnt, val, 'Authors');
-}
-function initEdForm(selCnt, val) {                                              //console.log("Adding new editor! val = %s, e ? ", val, arguments);
-    return handleNewAuthForm(selCnt, val, 'Editors');
-}
-/**
- * When a user enters a new author (or editor) into the combobox, a create
- * form is built and appended to the field row. An option object is returned
- * to be selected in the combobox. If there is already an open form at
- * this level , a message will be shown telling the user to complete the open
- * form and the form init will be canceled.
- */
-function handleNewAuthForm(authCnt, value, authType) {                          //console.log('           /--handleNewAuthForm [%s][%s] - [%s]', authType, authCnt, value);
-    const pId = '#'+authType+'-sel'+authCnt;
-    const fLvl = getSubFormLvl('sub2');
-    if ($('#'+fLvl+'-form').length !== 0) {
-        return _val('openSubFormErr', [authType, pId, fLvl]);
-    }
-    const val = value === 'create' ? '' : value;
-    const singular = _u('lcfirst', [authType.slice(0, -1)]);
-    return initEntitySubForm(singular, fLvl, {'LastName': val}, pId)
-    .then(appendAuthFormAndFinishBuild);
-
-    function appendAuthFormAndFinishBuild(form) {
-        $('#'+authType+'_row').append(form);
-        handleSubmitBttns();
-        $('#'+fLvl+'-cancel').click(_cmbx.bind(null, 'clearCombobox', ['#'+authType+'-sel'+authCnt]))
-        $('#FirstName_row input').focus();
-        addConfirmationBeforeSubmit(singular, fLvl);
-    }
-    function handleSubmitBttns() {
-        const prntLvl = getNextFormLevel('parent', fLvl);
-        _elems('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
-        _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
-        $('#'+fLvl+'-cancel').click(toggleOtherAuthorTypeSelect.bind(null, authType, true));
-    }
+export function selectExistingAuthsOrEds() {
+    return typeForm.selectExistingAuthsOrEds(...arguments);
 }
 /* *************************** EDIT FORMS *********************************** */
 export function getSrcTypeFields(entity, id) {
@@ -820,7 +699,7 @@ function enablePubField() {
     _cmbx('enableCombobox', ['#Publication-sel']);
     _form('fillCitationCombo', [$('#Publication-sel').val()]);
 }
-function initEntitySubForm(entity, fLvl, fVals, pSel) {
+export function initEntitySubForm(entity, fLvl, fVals, pSel) {
     _state('addEntityFormState', [entity, fLvl, pSel, 'create']);
     return _elems('initSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
 }
