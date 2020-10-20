@@ -9,7 +9,7 @@
  */
 import * as src from './src-int-fields.js';
 import * as loc from './loc-int-fields.js';
-import * as txn from './taxon/txn-int-fields.js';
+import * as txn from './taxon/txn-int-fields-main.js';
 import * as type from './type-tag-int-fields.js';
 
 /* ------------------ SOURCE ------------------------------------------------ */
@@ -42,14 +42,17 @@ export function onCntryRegSelection() {
     return loc.onCntryRegSelection(...arguments);
 }
 /* -------------------- TAXON ROLES ----------------------------------------- */
+export function initObjectSelect() {
+    return txn.initObjectSelect(...arguments);
+}
+export function initSubjectSelect() {
+    return txn.initSubjectSelect(...arguments);
+}
 export function getSelectedTaxon() {
     return txn.getSelectedTaxon(...arguments);
 }
-export function onSubGroupSelection() {
-    return txn.onSubGroupSelection(...arguments);
-}
-export function onRankSelection() {
-    return txn.onRankSelection.bind(this)(...arguments);
+export function selectRoleTaxon() {
+    return txn.selectRoleTaxon(...arguments);
 }
 export function onTaxonRoleSelection() {
     return txn.onTaxonRoleSelection(...arguments);
@@ -57,11 +60,11 @@ export function onTaxonRoleSelection() {
 export function onGroupSelection() {
     return txn.onGroupSelection(...arguments);
 }
-export function initObjectSelect() {
-    return txn.initObjectSelect(...arguments);
+export function onSubGroupSelection() {
+    return txn.onSubGroupSelection(...arguments);
 }
-export function initSubjectSelect() {
-    return txn.initSubjectSelect(...arguments);
+export function onRankSelection() {
+    return txn.onRankSelection.bind(this)(...arguments);
 }
 /* -------------------- TYPE & TAGS ----------------------------------------- */
 export function initTypeField() {

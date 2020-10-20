@@ -382,7 +382,26 @@ export function getRcrds(entity) {
     return _state('getEntityRcrds', [entity]);
 }
 /* -------------------- MODULE INTERNAL USE --------------------------------- */
-
 export function getTaxonData(prop) {
     return prop ? _state('getTaxonProp', [prop]) : _state('getGroupState');
+}
+/* ------------------ GROUP AND SUB-GROUP FIELDS ---------------------------- */
+export function onGroupSelection() {
+    return fields.onGroupSelection(...arguments);
+}
+/* ------------------ SELECT ROLE-TAXON ------------------------------------- */
+export function selectRoleTaxon() {
+    return fields.selectRoleTaxon(...arguments);
+}
+export function onTaxonRoleSelection() {
+    return fields.onTaxonRoleSelection(...arguments);
+}
+export function enableRoleTaxonFieldCombos() {
+    _cmbx('enableCombobox', ['#Subject-sel']);
+    _cmbx('enableCombobox', ['#Object-sel']);
+}
+function enableTaxonRanks(enable = true) {
+    $.each($('#sub-form select'), (i, sel) => {
+        _cmbx('enableCombobox', ['#'+sel.id, enable])
+    });
 }

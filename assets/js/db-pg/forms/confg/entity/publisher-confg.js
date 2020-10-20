@@ -1,7 +1,7 @@
 /**
  * Publisher form configuration.
  */
-export default function() {
+export default function(entity) {
 	return {
         'add': {
             'City': 'text',

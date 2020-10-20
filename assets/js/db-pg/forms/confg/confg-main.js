@@ -46,7 +46,7 @@ import { _state } from '../forms-main.js';
 /* *************************** FORM CONFG *********************************** */
 export function getFormConfg(entity) {
     const confgName = getFormConfgName(entity);
-    return getEntityConfg(confgName);
+    return getEntityConfg(confgName, entity);
 }
 function getFormConfgName(entity) {
     const map = {
@@ -56,8 +56,8 @@ function getFormConfgName(entity) {
     };
     return map[entity] ? map[entity] : entity;
 }
-function getEntityConfg(confgName) {
-    return require(`./entity/${confgName}-confg.js`).default();
+function getEntityConfg(confgName, entity) {
+    return require(`./entity/${confgName}-confg.js`).default(entity);
 }
 /* --------------- CORE-ENTITY CONFG ----------------- */
 /**

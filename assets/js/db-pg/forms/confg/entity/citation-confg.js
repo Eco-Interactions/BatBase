@@ -1,7 +1,7 @@
 /**
  * Citation form configuration.
  */
-export default function() {
+export default function(entity) {
 	return {
         'add': {
         	'Title': 'text',
