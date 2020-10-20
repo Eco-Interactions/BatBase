@@ -14,9 +14,9 @@
  *         REFERENCE-GUIDE BUTTON
  *         FORM COMBOBOXES
  */
-import { _modal, _u } from '../../../db-main.js';
-import { _state, _elems, _cmbx, submitForm } from '../../forms-main.js';
-import { addLocationSelectionMethodsNote, addRoleTaxonFocusListeners } from './interaction-form-main.js';
+import { _modal, _u } from '../../../../db-main.js';
+import { _state, _elems, _cmbx, submitForm } from '../../../forms-main.js';
+import * as iForm from '../int-form-main.js';
 
 /* ======================= CREATE-FORM BUILD ================================ */
 export function initCreateForm(entity) {                            /*perm-log*/console.log('   //Building New Interaction Form');
@@ -26,7 +26,7 @@ export function initCreateForm(entity) {                            /*perm-log*/
     .then(fields => _elems('buildAndAppendForm', [fields]))
     .then(finishInteractionFormBuild)
     .then(addConfirmationBeforeSubmit)
-    .then(() => _state('setOnFormCloseHandler', ['top', resetInteractionForm]));
+    .then(() => _state('setOnFormCloseHandler', ['top', iForm.resetInteractionForm]));
 }
 /** Builds and returns all interaction-form elements. */
 function getInteractionFormFields() {
@@ -38,9 +38,9 @@ function getInteractionFormFields() {
  * required field elems to the form's config object.
  */
 export function finishInteractionFormBuild() {                      /*dbug-log*///console.log('           --finishIntFormBuild');
-    $('#Note-txt').change(focusPinAndEnableSubmitIfFormValid.bind(null, 'Note'));
+    $('#Note-txt').change(iForm.focusPinAndEnableSubmitIfFormValid.bind(null, 'Note'));
     modifyFormDisplay();
-    addLocationSelectionMethodsNote();
+    iForm.addLocationSelectionMethodsNote();
     finishComboboxInit();
 }
 function modifyFormDisplay() {
@@ -63,9 +63,9 @@ function openReferenceGuideInNewTab() {
 }
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
-    initFormCombos('interaction', 'top');
+    iForm.initFormCombos('interaction', 'top');
     _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
-    addRoleTaxonFocusListeners();
+    iForm.addRoleTaxonFocusListeners();
     _cmbx('enableCombobox', ['#InteractionType-sel', false]);
     _cmbx('enableCombobox', ['#InteractionTags-sel', false]);
     focusPubFieldIfNewRecord();

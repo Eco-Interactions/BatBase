@@ -21,15 +21,14 @@
  */
 import { _u } from '../../../db-main.js';
 import { _state, _elems, _cmbx, _form, _val } from '../../forms-main.js';
-import { resetInteractionForm } from './reset-int-form.js';
-import * as formBuild from './int-form-build.js';
+import * as build from './build/int-build-main.js';
 import * as fields from './fields/int-fields-main.js';
 /** ======================= BUILD FORM ====================================== */
 export function initCreateForm(entity) {
-    return formBuild.initCreateForm();
+    return build.initCreateForm();
 }
 export function finishEditFormBuild(entity) {
-    finishInteractionFormBuild();
+    build.finishInteractionFormBuild();
 }
 /** ------------------ FORM COMBOBOXES -------------------------------------- */
 export function initFormCombos(entity) {
@@ -67,6 +66,9 @@ export function onSubGroupSelection() {
 export function create(entity, fLvl) {
     return createSubEntity.bind(null, entity, fLvl);
 }
+export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
+    return build.resetInteractionForm();
+}
 export function createSubEntity(entity, fLvl, val) {
     if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormErr(entity, fLvl); }
     _form('createEntity', [entity, val]);
@@ -98,7 +100,7 @@ export function fillLocCombo() {
     return fields.fillLocCombo(...arguments);
 }
 export function addLocationSelectionMethodsNote() {
-    return loc.addLocationSelectionMethodsNote(...arguments);
+    return fields.addLocationSelectionMethodsNote(...arguments);
 }
 /* --------------------- SUBJECT|OBJECT ------------------------------------- */
 export function selectRoleTaxon() {
@@ -109,6 +111,9 @@ export function onGroupSelection() {
 }
 export function onTaxonRoleSelection() {
     return fields.onTaxonRoleSelection(...arguments);
+}
+export function addRoleTaxonFocusListeners() {
+    return fields.addRoleTaxonFocusListeners(...arguments);
 }
 export function enableRoleTaxonFieldCombos() {
     _cmbx('enableCombobox', ['#Subject-sel']);

@@ -7,7 +7,7 @@
  *     TAXON ROLES
  *     TYPE & TAG
  */
-import { create } from '../../interaction-form-main.js';
+import { create } from '../int-form-main.js';
 import * as src from './src-int-fields.js';
 import * as loc from './loc-int-fields.js';
 import * as txn from './taxon/txn-int-fields-main.js';
@@ -85,8 +85,8 @@ export function onRankSelection() {
 export function initRankCombos() {
     return txn.initRankCombos(...arguments);
 }
-export function addRoleTaxonFocusListener() {
-    return txn.addRoleTaxonFocusListener(...arguments);
+export function addRoleTaxonFocusListeners() {
+    return txn.addRoleTaxonFocusListeners(...arguments);
 }
 /* -------------------- TYPE & TAGS ----------------------------------------- */
 export function initTypeField() {

@@ -14,7 +14,7 @@
  *     CREATE OPTION
  */
 import { _cmbx, _state } from '../../../../../forms-main.js';
-import * as iForm from '../../../interaction-form-main.js';
+import * as iForm from '../../../int-form-main.js';
 /**
  * All data needed to build the rank options.
  * {obj} opts     Arrays of options (v) for each rank's (k) taxa {value: id, text: name}

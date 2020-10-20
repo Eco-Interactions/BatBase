@@ -16,8 +16,8 @@
  *     SHARED
  *         FIELD INIT-VAL
  */
-import { _confg, _cmbx, _state } from '../../../forms-main.js';
-import * as iForm from '../interaction-form-main.js';
+import { _cmbx, _confg, _state } from '../../../forms-main.js';
+import * as iForm from '../int-form-main.js';
 /**
  * defaultTag:      Required tag id for the selected interaction type.
  * objectGroup:     The object taxon group when selected in the form.

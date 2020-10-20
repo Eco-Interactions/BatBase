@@ -99,7 +99,7 @@ function updateEditDetailMemory(detailId) {
 }
 /* ------------- INTERACTION ----------------- */
 function fillIntData(entity, id, rcrd, dEntity) {
-    const fields = getInteractionFieldFillTypes();   
+    const fields = getInteractionFieldFillTypes();
     setTypeAndTagInitValuesAsDataFieldElems(rcrd);
     fillFields(rcrd, fields, true);
 }
@@ -119,11 +119,13 @@ function removeFieldsWithSpecialHandling(fieldTypes) {
  */
 function setTypeAndTagInitValuesAsDataFieldElems(rcrd) {
     $('#InteractionType-sel').data('init-val', rcrd.interactionType.id);
+    $('#InteractionType-sel').data('init-val', rcrd.interactionType.id);
     $('#InteractionTags-sel').data('init-val', rcrd.tags.map(t => t.id).join(', '));
 }
 function addTaxon(fieldId, prop, rcrd) {
     const selApi = $('#'+ fieldId + '-sel')[0].selectize;
     const taxon = _state('getRcrd', ['taxon', rcrd[prop]]);
+    _state('setTaxonProp', ['groupName', taxon.group.displayName]);
     selApi.addOption({ value: taxon.id, text: taxon.displayName });
     selApi.addItem(taxon.id);
 }
@@ -149,7 +151,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
         _cmbx('setSelVal', ['#Country-sel', rcrd.country.id, 'silent']);
     }
     function setCoordField(prefix) {
-        const value = rcrd[`${prefix}itude`];  
+        const value = rcrd[`${prefix}itude`];
         if (!value) { return; }
         const $input = $(`#${_u('ucfirst', [prefix])}itude_row input`);
         $input.val(parseFloat(value));

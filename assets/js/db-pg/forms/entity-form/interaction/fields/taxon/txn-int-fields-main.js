@@ -9,8 +9,8 @@
  *     RANK FIELDS
  *     SELECT ROLE-TAXON
  */
-import { _state } from '../../../../../db-main.js';
-import * as iForm from '../../interaction-form-main.js';
+import {  _cmbx, _state } from '../../../../forms-main.js';
+import * as iForm from '../../int-form-main.js';
 import * as txnSelect from './txn-select-form.js';
 import * as rankFields from './rank/txn-rank-main.js';
 import * as groupFields from './group-fields.js';
@@ -33,7 +33,8 @@ export function initSubjectSelect() {
 export function initObjectSelect() {
     const groupInitId = getObjectGroupId();
     txnSelect.initTaxonSelectForm('Object', groupInitId)
-    .then(() => groupFields.onGroupSelection(groupInitId));
+    .then(() => groupFields.onGroupSelection(groupInitId))
+    .then(() => txnSelect.selectPrevTaxonAndResetRoleField('Object'));
 }
 function getObjectGroupId() {
     const prevSelectedId = $('#Object-sel').data('selTaxon');

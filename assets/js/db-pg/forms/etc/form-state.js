@@ -211,6 +211,7 @@ export function setFormProp(fLvl, prop, val) {
     formState.forms[fLvl][prop] = val;
 }
 export function setTaxonProp(prop, val) {
+    if (!formState.forms.taxonData) { formState.forms.taxonData = {}; } //Edit-forms need specific props
     return formState.forms.taxonData[prop] = val;
 }
 export function setFormFieldData(fLvl, field, val, type) {                      //console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);

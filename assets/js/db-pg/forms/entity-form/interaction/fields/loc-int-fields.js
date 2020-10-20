@@ -19,7 +19,7 @@
 
 import { _u } from '../../../../db-main.js';
 import { _cmbx, _form, _panel, _state } from '../../../forms-main.js';
-import * as iForm from '../interaction-form-main.js';
+import * as iForm from '../int-form-main.js';
 
 /* ======================= COUNTRY/REGION =================================== */
 /**
