@@ -47,13 +47,13 @@ function appendGroupRowsAndFinishBuild(rows) {
     bindGroupRootTaxonToSelectUnspecfiedBttn();
 }
 function bindGroupRootTaxonToSelectUnspecfiedBttn() {
-    const gTaxon = iForm.getTaxonData('groupTaxon');
+    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
     $('#select-group').off('click');
     $('#select-group').click(iForm.selectRoleTaxon.bind(null, null, gTaxon));
 }
 /* ------------------- IF NO SUB-GROUPS REMOVE COMBO ------------------------ */
 function ifNoSubGroupsRemoveCombo(rows = false) {
-    const subGroups = Object.keys(iForm.getTaxonData('subGroups')); /*dbug-log*///console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
+    const subGroups = Object.keys(_state('getTaxonProp', ['subGroups'])); /*dbug-log*///console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
     if (subGroups.length > 1) { return; }                           /*dbug-log*///console.log('     --removing sub-group combo');
     if (!rows) { // Taxon edit-form parent select-form
         $('#Sub-Group_row').remove();
@@ -69,7 +69,7 @@ export function onSubGroupSelection(val) {
 }
 function updateSubGroupState() {
     const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];/*temp-log*/console.log('onSubGroupSelection [%s]', subGroup);
-    const subGroupTaxon = iForm.getRcrd('taxon', iForm.getTaxonData('subGroups')[subGroup].id);
+    const subGroupTaxon = _state('getRcrd', ['taxon', _state('getTaxonProp', ['subGroups'])[subGroup].id]);
     _state('setTaxonProp', ['subGroup', subGroup]);
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
 }

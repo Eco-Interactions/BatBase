@@ -183,9 +183,10 @@ function buildRcrdsObj(entities) {
 }/** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {
     if (!formState.records || !formState.records[entity]) { return; }
-    return formState.records[entity][id] ?
+    const rcrd = formState.records[entity][id] ?
         _u('snapshot', [formState.records[entity][id]]) :
         alertIssue('noRcrdFound', {id: id, entity: entity });
+    return rcrd ? rcrd : false;
 }
 /* ---------------------------- Setters ------------------------------------- */
 /**

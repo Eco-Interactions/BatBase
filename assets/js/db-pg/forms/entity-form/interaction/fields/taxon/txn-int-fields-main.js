@@ -3,16 +3,28 @@
  * to select a new parent taxon in the taxon edit-form.
  *
  * TOC
+ *     ROLE-FIELD FOCUS LISTENERS
  *     ROLE-TAXON SELECT-FORM INIT
  *     GROUP AND SUB-GROUP FIELDS
  *     RANK FIELDS
  *     SELECT ROLE-TAXON
  */
+import { _state } from '../../../../../db-main.js';
 import * as iForm from '../../interaction-form-main.js';
 import * as txnSelect from './txn-select-form.js';
 import * as rankFields from './rank/txn-rank-main.js';
 import * as groupFields from './group-fields.js';
 import * as role from './role-taxon.js';
+/* ----------------- ROLE-FIELD FOCUS LISTENER ------------------------------ */
+/** Displays the [Role] Taxon select form when the field gains focus. */
+export function addRoleTaxonFocusListeners() {
+    ['Subject', 'Object'].forEach(addRoleFocusListener);
+}
+function addRoleFocusListener(role) {
+    const elem = '#'+role+'-sel + div div.selectize-input';
+    const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
+    $('#form-main').on('focus', elem, showSelectForm);
+}
 /* ----------------- ROLE-TAXON SELECT-FORM INIT ---------------------------- */
 export function initSubjectSelect() {
     txnSelect.initTaxonSelectForm('Subject', 1);
@@ -26,7 +38,17 @@ export function initObjectSelect() {
 function getObjectGroupId() {
     const prevSelectedId = $('#Object-sel').data('selTaxon');
     if (!prevSelectedId) { return 2; } //default: Plants (2)
-    return iForm.getRcrd('taxon', prevSelectedId).group.id;
+    return _state('getRcrd', ['taxon', prevSelectedId]).group.id;
+}
+/* ------------------ SELECT ROLE-TAXON ------------------------------------- */
+export function selectRoleTaxon() {
+    return role.selectRoleTaxon(...arguments);
+}
+export function onTaxonRoleSelection() {
+    return role.onTaxonRoleSelection(...arguments);
+}
+export function getSelectedTaxon() {
+    return role.getSelectedTaxon(...arguments);
 }
 /* ------------------ GROUP AND SUB-GROUP FIELDS ---------------------------- */
 export function onGroupSelection() {
@@ -39,13 +61,18 @@ export function onSubGroupSelection() {
 export function onRankSelection() {
     return rankFields.onRankSelection.bind(this)(...arguments);
 }
-/* ------------------ SELECT ROLE-TAXON ------------------------------------- */
-export function selectRoleTaxon() {
-    return role.selectRoleTaxon(...arguments);
+export function initRankCombos() {
+    const events = getRankComboEvents();
+    _cmbx('initFormCombos', ['taxon', 'sub', events]);
 }
-export function onTaxonRoleSelection() {
-    return role.onTaxonRoleSelection(...arguments);
-}
-export function getSelectedTaxon() {
-    return role.getSelectedTaxon(...arguments);
+function getRankComboEvents() {
+    return {
+        'Class': { change: onRankSelection, add: iForm.create('class') },
+        'Family': { change: onRankSelection, add: iForm.create('family') },
+        'Genus': { change: onRankSelection, add: iForm.create('genus') },
+        'Order': { change: onRankSelection, add: iForm.create('order') },
+        'Group': { change: onGroupSelection },
+        'Sub-Group': { change: onSubGroupSelection },
+        'Species': { change: onRankSelection, add: iForm.create('species') },
+    };
 }

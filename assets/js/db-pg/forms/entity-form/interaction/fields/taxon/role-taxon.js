@@ -22,12 +22,12 @@ export function onTaxonRoleSelection(role, val) {                   /*perm-log*/
     $('#'+getSubFormLvl('sub')+'-form').remove();
     $('#'+role+'-sel').data('selTaxon', val);
     iForm.enableRoleTaxonFieldCombos();
-    if (role === 'Object') { iForm.initTypeField(iForm.getTaxonData('groupName')); }
+    if (role === 'Object') { iForm.initTypeField(_state('getTaxonProp', ['groupName'])); }
     iForm.focusPinAndEnableSubmitIfFormValid(role);
 }
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 export function selectRoleTaxon(e, groupTaxon) {
-    const role = iForm.getTaxonData('groupName') === 'Bat' ? 'Subject' : 'Object';
+    const role = _state('getTaxonProp', ['groupName']) === 'Bat' ? 'Subject' : 'Object';
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
@@ -46,7 +46,7 @@ export function getSelectedTaxon(aboveRank) {
     const selElems = $('#sub-form .selectized').toArray();
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
     const selected = selElems.find(isSelectedTaxon.bind(null, aboveRank));/*dbug-log*///console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
-    return !selected ? false : iForm.getRcrd('taxon', $(selected).val());
+    return !selected ? false : _state('getRcrd', ['taxon', $(selected).val()]);
 
     function ifEditingTaxon() {
         const action = _state('getFormProp', ['top', 'action']);
@@ -61,7 +61,7 @@ function isSelectedTaxon(resetRank, elem) {
     return $(elem).val();
 }
 function isRankChildOfResetRank(resetRank, elem) {
-    const allRanks = iForm.getTaxonData('groupRanks');
+    const allRanks = _state('getTaxonProp', ['groupRanks']);
     const rank = elem.id.split('-sel')[0];
     return allRanks.indexOf(rank) < allRanks.indexOf(resetRank);
 }

@@ -73,7 +73,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
             'interaction': [ handleUnspecifiedLocs ],
             'location': [ addElevUnits, padLatLong, getLocType ],
             'publication': [ addContributorData ],
-            'taxon': [ getTaxonData ],
+            'taxon': [ getTaxonRankData ],
         };
         if (!dataHndlrs[entity]) { return Promise.resolve(); }
         return Promise.all(dataHndlrs[entity].map(func => Promise.resolve(func())));
@@ -181,7 +181,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
         }
     } /* End addContributorData */
     /** ---- Additional Taxon data ------ */
-    function getTaxonData() {
+    function getTaxonRankData() {
         const formTaxonRank = fS.forms.taxonData.formTaxonRank;
         formVals.parentTaxon = getParentTaxon(formTaxonRank);
         formVals.rank = formTaxonRank;

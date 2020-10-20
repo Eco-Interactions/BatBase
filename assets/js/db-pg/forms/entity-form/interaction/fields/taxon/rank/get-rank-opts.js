@@ -13,7 +13,7 @@
  *     ANCESTOR RANKS
  *     CREATE OPTION
  */
-import { _cmbx } from '../../../../../forms-main.js';
+import { _cmbx, _state } from '../../../../../forms-main.js';
 import * as iForm from '../../../interaction-form-main.js';
 /**
  * All data needed to build the rank options.
@@ -32,7 +32,7 @@ function resetOptMemory() {
 }
 /* ------------------- GET ALL OPTS FOR RELATED TAXA ------------------------ */
 export function getAllRankAndSelectedOpts(selId, selTaxon = null) {
-    d.taxon = selTaxon || iForm.getRcrd('taxon', selId);            /*dbug-log*///console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", d.taxon, d.opts, d.selected);
+    d.taxon = selTaxon || _state('getRcrd', ['taxon', selId]);      /*dbug-log*///console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", d.taxon, d.opts, d.selected);
     if (!d.taxon) { return; } //issue alerted to developer and editor
     d.group = d.taxon.group.name;
     d.subGroup = d.taxon.group.subGroup.name;
@@ -55,7 +55,7 @@ function buildUpdatedTaxonOpts() {
 }
 /* -------------------------- CHILD RANKS ----------------------------------- */
 export function getChildRankOpts(pRank, children) {
-    buildChildRankOpts(pRank, children);  console.log('opts = %O', d.opts)
+    buildChildRankOpts(pRank, children);
     addCreateOpts();
     return getDecoupledOptsAndClearMmry();
 }
@@ -65,11 +65,11 @@ function buildChildRankOpts(pRank, children) {
     handleEmptyChildRanks(childRanks);
 }
 function getChildRanks(rankName) {
-    const ranks = iForm.getTaxonData('groupRanks');
+    const ranks = _state('getTaxonProp', ['groupRanks']);
     return ranks.slice(0, ranks.indexOf(rankName));
 }
 function addRelatedChild(id) {                                      /*dbug-log*///console.log('addRelatedChild. id = ', id);
-    const childTxn = iForm.getRcrd('taxon', id);
+    const childTxn = _state('getRcrd', ['taxon', id]);
     if (!childTxn) { return; } //issue alerted to developer and editor
     const rank = childTxn.rank.displayName;
     addOptToRankAry(childTxn, rank);
@@ -96,7 +96,7 @@ function getSiblingOpts(taxon) {
 }
 /* ----------------------- ANCESTOR RANKS ----------------------------------- */
 function getAncestorOpts(pId) {
-    const pTaxon = iForm.getRcrd('taxon', pId);                     /*dbug-log*///console.log('getAncestorOpts. parent = [%s]', pTaxon);
+    const pTaxon = _state('getRcrd', ['taxon', pId]);               /*dbug-log*///console.log('getAncestorOpts. parent = [%s]', pTaxon);
     if (pTaxon.isRoot) { return Promise.resolve();}
     d.selected[pTaxon.rank.displayName] = pTaxon.id;
     return buildAncestorOpts(pTaxon);
@@ -115,7 +115,7 @@ function buildAncestorOpts(pTaxon) {
  * the 'none' value selected.
  */
 function buildOptsForEmptyRanks() {
-    const ranks = iForm.getTaxonData('groupRanks');
+    const ranks = _state('getTaxonProp', ['groupRanks']);
     const proms = [];
     fillOptsForEmptyRanks();
     return Promise.all(proms);

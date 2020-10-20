@@ -7,11 +7,24 @@
  *     TAXON ROLES
  *     TYPE & TAG
  */
+import { create } from '../../interaction-form-main.js';
 import * as src from './src-int-fields.js';
 import * as loc from './loc-int-fields.js';
 import * as txn from './taxon/txn-int-fields-main.js';
 import * as type from './type-tag-int-fields.js';
 
+export function getIntFormFieldComboEvents(argument) {
+    return {
+        'CitationTitle': { change: src.onCitSelection, add: create('citation', 'sub') },
+        'Country-Region': { change: loc.onCntryRegSelection },
+        'InteractionType': { change: type.onTypeSelectionInitTagField },
+        'InteractionTags': { change: type.onTagSelection },
+        'Location': { change: loc.onLocSelection, add: create('location', 'sub')},
+        'Publication': { change: src.onPubSelection, add: create('publication', 'sub')},
+        'Subject': { change: txn.onTaxonRoleSelection.bind(null, 'Subject') },
+        'Object': { change: txn.onTaxonRoleSelection.bind(null, 'Object') },
+    };
+}
 /* ------------------ SOURCE ------------------------------------------------ */
 export function fillCitationCombo() {
     return src.fillCitationCombo(...arguments);
@@ -41,6 +54,9 @@ export function onLocSelection() {
 export function onCntryRegSelection() {
     return loc.onCntryRegSelection(...arguments);
 }
+export function addLocationSelectionMethodsNote() {
+    return loc.addLocationSelectionMethodsNote(...arguments);
+}
 /* -------------------- TAXON ROLES ----------------------------------------- */
 export function initObjectSelect() {
     return txn.initObjectSelect(...arguments);
@@ -65,6 +81,12 @@ export function onSubGroupSelection() {
 }
 export function onRankSelection() {
     return txn.onRankSelection.bind(this)(...arguments);
+}
+export function initRankCombos() {
+    return txn.initRankCombos(...arguments);
+}
+export function addRoleTaxonFocusListener() {
+    return txn.addRoleTaxonFocusListener(...arguments);
 }
 /* -------------------- TYPE & TAGS ----------------------------------------- */
 export function initTypeField() {
