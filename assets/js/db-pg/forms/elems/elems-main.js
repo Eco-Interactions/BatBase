@@ -220,7 +220,7 @@ export function fillComplexFormFields(fLvl) {
     }
 } /* End fillComplexFormFields */
 function getMultiSelectHandler() {
-    return _form.bind(null, 'selectExistingAuthors');
+    return _form.bind(null, 'selectExistingAuthsOrEds');
 }
 export function ifFieldIsDisplayed(field, fLvl) {
     return !!_state('getFormFieldData', [fLvl, field]);

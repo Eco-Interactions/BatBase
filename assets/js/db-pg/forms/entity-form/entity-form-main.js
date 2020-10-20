@@ -15,21 +15,21 @@
  */
 import * as int from './interaction/int-form-main.js';
 import * as loc from './location/location-form.js';
-import * as src from './source/source-forms.js';
+import * as src from './source/src-form-main.js';
 import * as txn from './taxon/taxon-form.js';
 
 const forms = {
-    'author': src, 'citation': src, 'interaction': int, 'location': loc,
-    'publication': src, 'publisher': src, 'taxon': txn, 'subject': int,
-    'object': int, 'species': txn, 'genus': txn, 'family': txn, 'order': txn,
-    'class': txn
+    'interaction': int, 'object': int, 'subject': int,
+    'location': loc,
+    'author': src, 'citation': src, 'editor': src, 'publication': src, 'publisher': src,
+    'taxon': txn,'species': txn, 'genus': txn, 'family': txn, 'order': txn, 'class': txn
 };
 
-export function createEntity(entity, name) {                                    //console.log('createEntity. args = %O', arguments)
-    return forms[entity].initCreateForm(entity, name);
+export function createEntity(entity) {
+    return forms[entity].initCreateForm(...arguments);
 }
-export function initFormCombos(entity, fLvl) {
-    forms[entity].initFormCombos(entity, fLvl);
+export function initFormCombos(entity, fLvl) {                      /*dbug-log*///console.log('initFormCombos [%s][%s]', fLvl, entity)
+    forms[entity].initFormCombos(...arguments);
 }
 /* -------------------------- EDIT FORMS ------------------------------------ */
 /** Used by complex forms: citation, interaction, location, taxon. */
@@ -97,8 +97,8 @@ export function getSrcTypeFields() {
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */
-export function selectExistingAuthors() {
-    return src.selectExistingAuthors(...arguments);
+export function selectExistingAuthsOrEds() {
+    return src.selectExistingAuthsOrEds(...arguments);
 }
 /** ---------- CITATION ------------------------- */
 export function handleCitText(formLvl) {
