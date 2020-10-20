@@ -12,8 +12,8 @@
  *         HANDLE PERSISTED FIELDS
  *     RESET FORM UI
  */
-import { _state, _elems, _panel, _cmbx } from '../../forms-main.js';
-import * as iForm from './interaction-form-main.js';
+import { _state, _elems, _panel, _cmbx } from '../../../forms-main.js';
+import * as iForm from '../int-form-main.js';
 
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
     _elems('showSuccessMsg', ['New Interaction successfully created.']);
@@ -89,7 +89,7 @@ function clearTaxonField(field) {
     $('#'+field+'-sel').data('selTaxon', false);
 }
 function syncWithCountryField(cntryId, field) {
-    const cntry = cntryId ? getRcrd('location', cntryId) : null;
+    const cntry = cntryId ? _state('getRcrd', ['location', cntryId]) : null;
     iForm.fillLocCombo(cntry);
 }
 /* --------------------- HANDLE PERSISTED FIELDS ---------------------------- */

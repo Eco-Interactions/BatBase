@@ -13,7 +13,7 @@
  *     SELECT SUB-GROUP
  */
 import { _state, _elems } from '../../../../forms-main.js';
-import * as iForm from '../../interaction-form-main.js';
+import * as iForm from '../../int-form-main.js';
 /**
  * Removes any previous group comboboxes. Shows a combobox for each rank present
  * in the selected Taxon group filled with the taxa at that rank and sub-group
@@ -22,7 +22,7 @@ import * as iForm from '../../interaction-form-main.js';
 export function onGroupSelection(val) {                             /*temp-log*/console.log("               --onGroupSelection. [%s]", val)
     if (val === '' || isNaN(parseInt(val))) { return; }
     clearPreviousGroupCombos();
-    _state('initTaxonState', ['Object', val])
+    return _state('initTaxonState', ['Object', val])
     .then(taxonData => buildAndAppendGroupRows(taxonData.groupTaxon.id));
 }
 /* ------------------- CLEAR PREVIOUS GROUP COMBOS -------------------------- */

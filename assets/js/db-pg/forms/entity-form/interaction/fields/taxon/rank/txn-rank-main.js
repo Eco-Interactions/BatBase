@@ -19,7 +19,7 @@
  */
 import { _u } from '../../../../../../db-main.js';
 import { _elems, _cmbx, _val, getSubFormLvl } from '../../../../../forms-main.js';
-import * as iForm from '../../../interaction-form-main.js';
+import * as iForm from '../../../int-form-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
 
 export function onRankSelection(val, input) {                       /*dbug-log*///console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));

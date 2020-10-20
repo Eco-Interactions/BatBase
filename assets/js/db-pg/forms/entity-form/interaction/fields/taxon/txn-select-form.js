@@ -10,6 +10,7 @@
  *
  * Export
  *     initTaxonSelectForm
+ *     selectPrevTaxonAndResetRoleField
  *
  * TOC
  *     IF OPEN SUB-FORM ERROR
@@ -21,7 +22,7 @@
  */
 import { _u } from '../../../../../db-main.js';
 import { _state, _elems, _cmbx } from '../../../../forms-main.js';
-import * as iForm from '../../interaction-form-main.js';
+import * as iForm from '../../int-form-main.js';
 
 export function initTaxonSelectForm(role, groupId) {                /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
     if (ifSubFormAlreadyInUse(role)) { return iForm.throwAndCatchSubFormErr(role, 'sub'); }
@@ -56,6 +57,10 @@ function addNewFormState(role) {
 function finishTaxonSelectBuild(role) {
     addSelectRootTaxonBttn();
     customizeElemsForTaxonSelectForm(role);
+    if (role === 'Object') { return; } //For Object, called after group-selection builds rank rows.
+    selectPrevTaxonAndResetRoleField(role);
+}
+export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*///console.log('selectPrevTaxonAndResetRoleField [%s]', role)
     selectInitTaxonOrFocusFirstCombo(role);
     _u('replaceSelOpts', ['#'+role+'-sel', []]);
     $('#'+role+'-sel').data('loading', false);

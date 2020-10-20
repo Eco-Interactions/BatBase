@@ -11,7 +11,7 @@
  *     GET TAXON SELECTED IN ROLE COMBOBOX
  */
 import { _state, _cmbx, getSubFormLvl } from '../../../../forms-main.js';
-import * as iForm from '../../interaction-form-main.js';
+import * as iForm from '../../int-form-main.js';
 /* ------------------- SELECT TAXON IN ROLE COMBOBOX ------------------------ */
 /**
  * When complete, the select form is removed and the most specific taxon is displayed
