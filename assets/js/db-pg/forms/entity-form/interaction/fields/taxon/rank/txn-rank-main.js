@@ -49,7 +49,7 @@ function resetChildRankCombos(selTxn) {
     repopulateRankCombos(optData.opts, optData.selected);
 }
 function getAllGroupRankOpts() {
-    const gTaxon = iForm.getTaxonData('groupTaxon');
+    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
     return getAllRankAndSelectedOpts(gTaxon);
 }
 function getChildOpts(selTxn) {

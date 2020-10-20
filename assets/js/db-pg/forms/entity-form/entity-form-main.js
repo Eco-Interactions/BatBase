@@ -13,7 +13,7 @@
  *         AUTHOR
  *         CITATION
  */
-import * as int from './interaction/interaction-form-main.js';
+import * as int from './interaction/int-form-main.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/source-forms.js';
 import * as txn from './taxon/taxon-form.js';

@@ -89,7 +89,7 @@ export function submitForm(formId, fLvl, entity) {
 export function formatAndSubmitData(entity, fLvl, formVals) {
     return submit.buildFormDataAndSubmit(entity, fLvl, formVals);
 }
-/* ======================= BUNDLE HELPERS =================================== */
+/* ======================= MODULE HELPERS =================================== */
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
     const fLvls = state.getStateProp('formLevels');

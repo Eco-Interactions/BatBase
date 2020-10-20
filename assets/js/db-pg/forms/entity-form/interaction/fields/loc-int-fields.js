@@ -18,7 +18,7 @@
  */
 
 import { _u } from '../../../../db-main.js';
-import { _panel, _cmbx, _form } from '../../../forms-main.js';
+import { _cmbx, _form, _panel, _state } from '../../../forms-main.js';
 import * as iForm from '../interaction-form-main.js';
 
 /* ======================= COUNTRY/REGION =================================== */
@@ -31,7 +31,7 @@ import * as iForm from '../interaction-form-main.js';
  */
 export function onCntryRegSelection(val) {                          /*perm-log*/console.log("       +--onCntryRegSelection [%s]", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocCombo(null); }
-    const loc = iForm.getRcrd('location', val);
+    const loc = _state('getRcrd', ['location', val]);
     fillLocCombo(loc);
     iForm.focusPinAndEnableSubmitIfFormValid('Country-Region');
     if ($('#form-map').length) { showCountryDataOnMap(val); }
@@ -65,7 +65,7 @@ function getOptsForLoc(loc) {
 }
 function getChildLocOpts(children) {
     return children.map(id => {
-        const loc = iForm.getRcrd('location', id);  //error alerted to developer and editor
+        const loc = _state('getRcrd', ['location', id]);  //error alerted to developer and editor
         return loc ? { value: id, text: loc.displayName } : null
     }).filter(l => l);
 }
@@ -85,7 +85,7 @@ export function onLocSelection(val) {                               /*perm-log*/
     if (val === 'create') { return iForm.createSubEntity('location', 'sub'); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['loc']); }
     if ($('#form-map').length) { removeLocMap(); }
-    const locRcrd = iForm.getRcrd('location', val);
+    const locRcrd = _state('getRcrd', ['location', val]);
     if (!locRcrd) { return; } //error alerted to developer and editor
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);

@@ -66,7 +66,7 @@ function addSelectRootTaxonBttn() {
     $('#sub-form .bttn-cntnr').prepend(bttn);
 }
 function buildSelectUnspecifedBttn() {
-    const gTaxon = iForm.getTaxonData('groupTaxon');
+    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
     const bttn = _u('buildElem', ['input', getUnspecifiedBttnAttrs()]);
     $(bttn).click(iForm.selectRoleTaxon.bind(null, null, gTaxon));
     return bttn;
@@ -108,7 +108,7 @@ function resetTaxonCombobox(role, prevTaxonId) {
     _cmbx('setSelVal', ['#'+role+'-sel', prevTaxonId]);
 }
 function getTaxonym(id) {
-    return iForm.getRcrd('taxon', id).displayName;
+    return _state('getRcrd', ['taxon', id]).displayName;
 }
 /* -------------- SELECT CURRENT ROLE-TAXON OR FOCUS COMBO ------------------ */
 /**
@@ -139,7 +139,7 @@ function appendTxnFormAndInitCombos(role, form) {
  * to the default taxon-group for the role.
  */
 function resetTaxonSelectForm(role) {
-    const group = iForm.getTaxonData('groupName');
+    const group = _state('getTaxonProp', ['groupName']);
     const reset =  group == 'Bat' ? initSubjectSelect : initObjectSelect;
     $('#'+role+'-sel').data('reset', true);
     $('#sub-form').remove();
@@ -147,7 +147,7 @@ function resetTaxonSelectForm(role) {
 }
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(id, role) {
-    const taxon = iForm.getRcrd('taxon', id);
+    const taxon = _state('getRcrd', ['taxon', id]);
     if (taxon.isRoot) { return; }                                   /*dbug-log*///console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
     selectPrevTaxon(taxon, role);
 }

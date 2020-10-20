@@ -32,7 +32,7 @@ export function onPubSelection(val) {                               /*perm-log*/
     iForm.focusPinAndEnableSubmitIfFormValid('Publication');
 }
 function hasCitation(val) {
-    const pub = iForm.getRcrd('source', val);
+    const pub = _state('getRcrd', ['source', val]);
     return pub ? pub.children.length : null; //If no pub found, the issue was alerted to developer and editor
 }
 export function onPubClear() {
@@ -49,9 +49,9 @@ export function fillCitationCombo(pubId) {
 }
 /** Returns an array of option objects with citations for this publication.  */
 function getPubCitationOpts(pubId) {
-    const pubRcrd = iForm.getRcrd('source', pubId);
+    const pubRcrd = _state('getRcrd', ['source', pubId]);
     if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
-    const opts = _cmbx('getRcrdOpts', [pubRcrd.children, iForm.getRcrds('source')]);
+    const opts = _cmbx('getRcrdOpts', [pubRcrd.children, _state('getEntityRcrds', ['source'])]);
     opts.unshift({ value: 'create', text: 'Add a new Citation...'});
     return opts;
 }
