@@ -2,6 +2,7 @@
  * Manages the location fields in the interaction form, Country/Region and Location.
  *
  * Export
+ *     addLocationSelectionMethodsNote
  *     enableCountryRegionField
  *     fillLocCombo
  *     selectLoc
@@ -13,6 +14,7 @@
  *     LOCATION
  *         FILL COMBOBOX
  *         SELECT LOCATION
+ *     WAYS TO SELECT LOCATION NOTE
  */
 
 import { _u } from '../../../../db-main.js';
@@ -92,4 +94,31 @@ export function onLocSelection(val) {                               /*perm-log*/
 }
 function removeLocMap() {
     $('#form-map').fadeTo(400, 0, () => $('#form-map').remove());
+}
+/* =================== WAYS TO SELECT LOCATION NOTE ========================= */
+/** Adds a message above the location fields in interaction forms. */
+export function addLocationSelectionMethodsNote() {
+    const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
+    const mapInfo = getMapInfoText();
+    $(cntnr).append(mapInfo);
+    $('#Country-Region_row')[0].parentNode.before(cntnr);
+}
+function getMapInfoText() {
+    const text = `<span>Select or create a location using the fields below or </span>`;
+    const link = getInfoLinkTextToOpenMap();
+    return [ text, link ];
+}
+function getInfoLinkTextToOpenMap(argument) {
+    const attr = {class:'map-link', text: 'click here to use the map interface.'};
+    const span = _u('buildElem', ['span', attr]);
+    $(span).click(showInteractionFormMap);
+    return span;
+}
+/** Open popup with the map interface for location selection. */
+function showInteractionFormMap() {                                 /*dbug-log*///console.log('showInteractionFormMap')
+    if ($('#form-map').length) { return; }
+    const pElem = $('#Location_row')[0].parentNode;
+    _form('addMapToLocForm', ['int', $(pElem)]);
+    if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
+    _cmbx('focusCombobox', ['#Country-Region-sel', true]);
 }

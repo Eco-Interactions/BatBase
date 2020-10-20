@@ -35,6 +35,7 @@ import referenceGuide from '../../../../../files/form-reference-guide.pdf';
 
 
 import * as fields from './fields/int-fields-main.js';
+import { resetInteractionForm } from './reset-int-form.js';
 
 /** ====================== CREATE FORM ====================================== */
 /**
@@ -55,109 +56,6 @@ export function initCreateForm(entity) {                                        
 /** Builds and returns all interaction-form elements. */
 function getInteractionFormFields() {
     return _elems('getFormFieldRows', ['Interaction', {}, 'top']);
-}
-/** ------------- RESET CREATE FORM AFTER SUBMIT ---------------------------- */
-/**
- * Resets the interactions form leaving only the pinned values. Displays a
- * success message. Disables submit button until any field is changed.
- */
-function resetInteractionForm() {
-    const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
-    _elems('showSuccessMsg', ['New Interaction successfully created.']);
-    resetIntFields(vals);
-    resetFormUi();
-    _state('setOnFormCloseHandler', ['top', resetInteractionForm]);
-}
-function resetFormUi() {
-    $('#top-cancel').val(' Close ');
-    _elems('toggleSubmitBttn', ['#top-submit', false]);
-    _state('setFormProp', ['top', 'unchanged', true]);
-}
-/** Returns an obj with the form fields and either their pinned values or false. */
-function getPinnedFieldVals() {
-    const pins = $('form[name="top"] [id$="_pin"]').toArray();                  //console.log("pins = %O", pins);
-    const vals = {};
-    pins.forEach(pin => {
-        if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]);
-        } else { addFalseValue(pin.id.split("_pin")[0]); }
-    });
-    return vals;
-
-    function getFieldVal(fieldName) {                                           //console.log("fieldName = [%s]", fieldName)
-        const suffx = fieldName === 'Note' ? '-txt' : '-sel';
-        vals[fieldName] = $('#'+fieldName+suffx).val();
-    }
-    function addFalseValue(fieldName) {
-        vals[fieldName] = false;
-    }
-}
-/* -------------------- CLEAR/PERSIST FIELD DATA --------------- */
-/**
- * Resets the top-form in preparation for another entry. Pinned field values are
- * persisted. All other fields will be reset.
- */
-function resetIntFields(vals) {                                                 //console.log('           --resetIntFields. vals = %O', vals);
-    _elems('toggleSubmitBttn', ['#top-submit', false]);
-    handleFieldDataReset(vals);
-}
-function handleFieldDataReset(vals) {
-    const persisted = [];
-    handleFieldClearing();
-    handlePersistedFields();
-
-    function handleFieldClearing() {
-        for (let field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
-            if (!vals[field]) { clearField(field, vals);
-            } else { persisted.push(field); }
-        }
-    }
-    function handlePersistedFields() {
-        persisted.forEach(f => handePersistedField(f, vals[f]));
-    }
-}
-/* ----------------- CLEAR FIELD DATA --------------- */
-function clearField(field, vals) {
-    _state('setFormFieldData', ['top', field, null]);
-    if (field === 'Note') { return $('#Note-txt').val(""); }
-    _panel('clearFieldDetails', [field]);
-    _cmbx('clearCombobox', ['#'+field+'-sel']);
-    handleClearedField(field, vals);
-}
-function handleClearedField(field, vals) {
-    const map = {
-        'Location': syncWithCountryField.bind(null, vals['Country-Region']),
-        'Subject': clearTaxonField,
-        'Object': clearTaxonField,
-        'Publication': fields.onPubClear
-    }
-    if (!map[field]) { return; }
-    map[field](field);
-}
-function clearTaxonField(field) {
-    if (['Subject', 'Object'].indexOf(field) === -1) { return; }
-    _cmbx('updateComboboxOptions', ['#'+field+'-sel', []]);
-    $('#'+field+'-sel').data('selTaxon', false);
-}
-function syncWithCountryField(cntryId, field) {
-    const cntry = cntryId ? getRcrd('location', cntryId) : null;
-    fields.fillLocCombo(cntry);
-}
-/* ----------------- PERSIST FIELD DATA --------------- */
-function handePersistedField(field, data) {
-    const map = {
-        'Publication': fillPubDetails,
-        'InteractionType': setFieldInitVal,
-        'InteractionTags': setFieldInitVal
-    }
-    if (!map[field]) { return; }
-    map[field](field, data);
-}
-function fillPubDetails(pub) {
-    if (pub) { _panel('updateSrcDetails', ['pub']);
-    } else { _cmbx('enableCombobox', ['#CitationTitle-sel', false]); }
-}
-function setFieldInitVal(field, data) {
-    $(`#${field}-sel`).data('init-val', data);
 }
 /** ======================== EDIT FORM ====================================== */
 export function finishEditFormBuild(entity) {
@@ -328,8 +226,7 @@ function getIntTypeVerbForm(typeId) {
     return types[typeId].activeForm;
 }
 /** ====================== FORM FIELD HANDLERS ============================== */
-// /*------------------ CITATION ------------------------------------------------*/
-// * Fills the citation combobox with all citations for the selected publication.
+/*------------------ CITATION ------------------------------------------------*/
 export function fillCitationCombo() {
     return fields.fillCitationCombo(...arguments);
 }
@@ -404,4 +301,11 @@ function enableTaxonRanks(enable = true) {
     $.each($('#sub-form select'), (i, sel) => {
         _cmbx('enableCombobox', ['#'+sel.id, enable])
     });
+}
+
+export function onPubClear() {
+    fields.onPubClear();
+}
+export function fillLocCombo() {
+    return fields.fillLocCombo(...arguments);
 }
