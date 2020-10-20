@@ -16,7 +16,7 @@ import * as form from './entity-form/entity-form-main.js';
 import * as state from './etc/form-state.js';
 import * as submit from './submit/submit-main.js';
 import * as elems from './elems/elems-main.js';
-import editEntity from './edit/edit-forms.js';
+import editEntity from './edit/edit-forms-main.js';
 
 /* Handles captures of event objects and returns wrapped in array. */
 function getParams(params) {
