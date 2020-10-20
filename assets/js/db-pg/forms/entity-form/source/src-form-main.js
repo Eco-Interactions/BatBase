@@ -59,8 +59,8 @@ function getEntityComboEvents(entity) {
             'PublicationType': {
                 change: loadPubTypeFields },
             'Publisher': {
-                add: initPublisherForm,
-                change: onPublSelection },
+                add: typeForm.initPublisherForm,
+                change: typeForm.onPublSelection },
             'Authors': {
                 add: typeForm.initAuthOrEdForm.bind(null, 1, 'Authors'),
                 change: typeForm.onAuthAndEdSelection.bind(null, 1, 'Authors')
@@ -79,7 +79,7 @@ export function initCreateForm(entity, name) {                                  
         'editor': typeForm.initAuthOrEdForm.bind(null, 1, 'Editors'),
         'citation': initCitForm,
         'publication': initPubForm,
-        'publisher': initPublisherForm
+        'publisher': typeForm.initPublisherForm
     };
     return funcs[entity](name);
 }
@@ -607,35 +607,6 @@ function buildModalConfg(fLvl, linkHtml, submit) {
     };
 }
 /* ========================== PUBLISHER ===================================== */
-function onPublSelection(val) {
-    if (val === 'create') { return initPublisherForm(val); }
-}
-/**
- * When a user enters a new publisher into the combobox, a create-publisher
- * form is built, appended to the publisher field row and an option object is
- * returned to be selected in the combobox. Unless there is already a sub2Form,
- * where a message will be shown telling the user to complete the open sub2 form
- * and the form init canceled.
- * Note: The publisher form inits with the submit button enabled, as display
- *     name, aka val, is it's only required field.
- */
-function initPublisherForm(value) {                                             console.log('       /--initPublisherForm [%s]', value);
-    const val = value === 'create' ? '' : value;
-    const fLvl = getSubFormLvl('sub2');
-    const prntLvl = getNextFormLevel('parent', fLvl);
-    if ($('#'+fLvl+'-form').length !== 0) {
-        return _val('openSubFormErr', ['Publisher', null, fLvl]);
-    }
-    return initEntitySubForm('publisher', fLvl, {'DisplayName': val}, '#Publisher-sel')
-    .then(appendPublFormAndFinishBuild);
-
-    function appendPublFormAndFinishBuild(form) {
-        $('#Publisher_row').append(form);
-        _elems('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
-        $('#DisplayName_row input').focus();
-        addConfirmationBeforeSubmit('publisher', fLvl);
-    }
-}
 /* ========================== AUTHOR ======================================== */
 export function selectExistingAuthsOrEds() {
     return typeForm.selectExistingAuthsOrEds(...arguments);
