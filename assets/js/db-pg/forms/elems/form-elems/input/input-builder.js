@@ -157,13 +157,13 @@ function resetValidityMsg(fLvl, e) {
 }
 /* --------------------- CHANGE HANDLER ------------------------------------- */
 function addFieldOnChangeHandler(entity, input, field, fLvl) {
-    ifCitationFormAutoGenerateCitationOnChange(entity, input);
+    ifCitationFormAutoGenerateCitationOnChange(entity, input, fLvl);
     if (input.id.includes('-sel-cntnr')) { return; } //change event added during combo build
     $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));
 }
-function ifCitationFormAutoGenerateCitationOnChange(entity, input) {
+function ifCitationFormAutoGenerateCitationOnChange(entity, input, fLvl) {
     if (entity === 'citation'){
-        $(input).change(_form.bind(null, 'handleCitText', []));
+        $(input).change(_form.bind(null, 'handleCitText', [fLvl]));
     }
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {                     //console.log('fieldName [%s] field = %O', fieldName, elem);

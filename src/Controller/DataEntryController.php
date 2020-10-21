@@ -496,7 +496,7 @@ class DataEntryController extends AbstractController
         $response->setData($e->getMessage());
         return $response;
     }
-    private function logErr($lineNum, $msg, $trace)
+    private function logErr($line, $msg, $trace)
     {
         $this->logger->error("\n\n### Error @ [$line] = $msg\n$trace\n");
         if ($this->getParameter('env') === 'prod') { return; };

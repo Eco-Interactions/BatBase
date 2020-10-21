@@ -172,7 +172,7 @@ function toggleShowAllFields(entity, fLvl) {                                    
     function finishComplexForms() {
         const complex = ['citation', 'publication', 'location'];
         if (complex.indexOf(entity) === -1) { return; }
-        if (entity !== 'location') { _form('onSrcToggleFields', [entity, fVals, fLvl]); }
+        if (entity !== 'location') { _form('finishSrcFieldLoad', [entity, fVals, fLvl]); }
         setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
