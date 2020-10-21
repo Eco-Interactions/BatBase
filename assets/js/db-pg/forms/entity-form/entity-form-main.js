@@ -24,7 +24,6 @@ const forms = {
     'author': src, 'citation': src, 'editor': src, 'publication': src, 'publisher': src,
     'taxon': txn,'species': txn, 'genus': txn, 'family': txn, 'order': txn, 'class': txn
 };
-
 export function createEntity(entity) {
     return forms[entity].initCreateForm(...arguments);
 }
@@ -89,11 +88,11 @@ export function selectParentTaxon(id) {
     return txn.selectParentTaxon(id);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
-export function onSrcToggleFields() {
-    src.finishSourceToggleAllFields(...arguments);
+export function finishSrcFieldLoad() {
+    src.finishSrcFieldLoad(...arguments);
 }
-export function getSrcTypeFields() {
-    return src.getSrcTypeFields(...arguments);
+export function getPubOrCitFields() {
+    return src.getPubOrCitFields(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */

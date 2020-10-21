@@ -33,16 +33,16 @@ function getEditFormFields(id, entity) {
     _state('setFormProp', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
     return buildEditFields(entity, id);
 }
+
 function buildEditFields(entity, id) {
     const complxBldrs = {
-        'citation': 'getSrcTypeFields', 'publication': 'getSrcTypeFields',
+        'citation': 'getPubOrCitEditFields',
+        'publication': 'getPubOrCitEditFields',
         'taxon': 'getTaxonEditFields'
     };
-    return complxBldrs[entity] ? getCmplxEditFields() : getEditFields(entity, id);
-
-    function getCmplxEditFields() {
-        return _form(complxBldrs[entity], [entity, id]);
-    }
+    const builder = complxBldrs[entity] ? complxBldrs[entity] : getEditFields;
+    return typeof builder === 'string' ?
+        _form(builder, [entity, id]) : builder(entity, id);
 }
 /** Returns the passed entity's form fields. */
 function getEditFields(entity, id) {
