@@ -3,7 +3,7 @@
  * disabled textarea field. Default text displays Until required fields are filled.
  *
  * Export
- *     handleCitText
+ *     buildCitTextAndUpdateField
  *
  * TOC
  *     GET CITATION TEXT
