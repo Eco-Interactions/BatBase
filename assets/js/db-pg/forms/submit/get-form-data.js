@@ -97,7 +97,6 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
         formVals.displayName = displayName;
 
         function addToDisplayName(namePiece) {
-            if (namePiece.length === 1) { namePiece += '.'; }
             displayName += ' '+namePiece;
          }
     } /* End getAuthDisplayName */
@@ -192,8 +191,8 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
      * taxon is added as the new Taxon's parent.
      */
     function getParentTaxon(rank) {
-        const ranks = fS.forms.taxonData.groupRanks;
-        const parentRank = ranks[ranks.indexOf(rank)+1];
+        const ranks = Object.keys(fS.forms.taxonData.ranks);
+        const parentRank = ranks[ranks.indexOf(rank)-1];
         if (ifParentIsRootTaxon(rank, parentRank)) {
             return fS.forms.taxonData.groupTaxon.id;
         }
@@ -227,7 +226,7 @@ function getFormFieldElems(entity, fLvl) {
 //     const opts = cntnr.selectize.options;
 //     const dup = checkForDuplicate(opts, vals.displayName);
 //     if (!dup) { return; }
-//     _val.reportFormFieldErr('FirstName', 'dupAuth', fLvl);
+//     _val.showFormValAlert('FirstName', 'dupAuth', fLvl);
 //     vals.err = true;
 // }
 // function checkForDuplicate(opts, name) {

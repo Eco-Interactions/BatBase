@@ -7,7 +7,7 @@
  * the 'select' button is enabled. When a rank combo is cleared, child-rank combos
  * are reset with children of the next selected ancestor, or the root taxon. If
  * the 'create' option is selected, the taxon create-form is opened for the rank if
- * all required ancestor-rank taxa are selected in the form or shows an error message.
+ * all required ancestor-rank taxa are selected in the form or shows an alert.
  *
  * Export
  *     onRankSelection
@@ -18,7 +18,7 @@
  *     FILL RANK COMBOS WITH RELATED TAXA
  */
 import { _u } from '../../../../../../db-main.js';
-import { _elems, _cmbx, _val, getSubFormLvl } from '../../../../../forms-main.js';
+import { _elems, _cmbx, _state, _val, getSubFormLvl } from '../../../../../forms-main.js';
 import * as iForm from '../../../int-form-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
 
@@ -34,9 +34,9 @@ export function onRankSelection(val, input) {                       /*dbug-log*/
 function openTaxonCreateForm(selElem, fLvl) {
     const rank = selElem.id.split('-sel')[0];
     if (rank === 'Species' && !$('#Genus-sel').val()) {
-        return _val('formInitErr', [rank, 'noGenus', fLvl]);
+        return _val('formInitAlert', [rank, 'noGenus', fLvl]);
     } else if (rank === 'Genus' && !$('#Family-sel').val()) {
-        return _val('formInitErr', [rank, 'noFamily', fLvl]);
+        return _val('formInitAlert', [rank, 'noFamily', fLvl]);
     }
     selElem.selectize.createItem('create');
 }
@@ -45,12 +45,16 @@ function syncTaxonCombos(elem) {
     resetChildRankCombos(iForm.getSelectedTaxon(elem.id.split('-sel')[0]));
 }
 function resetChildRankCombos(selTxn) {
-    const optData = !selTxn ? getAllGroupRankOpts() : getChildOpts(selTxn);
-    repopulateRankCombos(optData.opts, optData.selected);
+    getOptsForSelectedChildren(selTxn)
+    .then(optData => repopulateRankCombos(optData.opts, optData.selected));
+}
+function getOptsForSelectedChildren(selTxn) {
+    if (!selTxn) { return getAllGroupRankOpts() }
+    return Promise.resolve(getChildOpts(selTxn));
 }
 function getAllGroupRankOpts() {
     const gTaxon = _state('getTaxonProp', ['groupTaxon']);
-    return getAllRankAndSelectedOpts(gTaxon);
+    return getAllRankAndSelectedOpts(null, gTaxon);
 }
 function getChildOpts(selTxn) {
     if (selTxn.rank.displayName === 'Species') { return false; }

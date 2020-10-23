@@ -77,7 +77,7 @@ export function setCoreRowStyles(formId, rowClass) {
     const w = $(formId).innerWidth() / 2 - 3;
     $(rowClass).css({'flex': '0 1 '+w+'px', 'max-width': w});
 }
-/* used by form-errors & submit-main */
+/* used by form-alerts & submit-main */
 export function toggleWaitOverlay(waiting) {                                    //console.log("toggling wait overlay")
     if (waiting) { appendWaitingOverlay();
     } else { $('#c-overlay').remove(); }
@@ -156,7 +156,7 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
  * default (required and suggested) fields.
  */
 function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all [%s] [%s] Fields [%s] -------', entity, fLvl, this.checked);
-    if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
+    if (ifOpenSubForm(fLvl)) { return showOpenSubFormAlert(fLvl); }
     updateFormMemoryOnFieldToggle(this.checked, fLvl);
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', _u('snapshot', [fVals]));
     $('#'+entity+'_Rows').empty();
@@ -184,11 +184,11 @@ function ifOpenSubForm(fLvl) {
     const subLvl = getNextFormLevel('child', fLvl);
     return $('#'+subLvl+'-form').length !== 0;
 }
-function showOpenSubFormErr(fLvl) {
+function showOpenSubFormAlert(fLvl) {
     const subLvl = getNextFormLevel('child', fLvl);
     let entity = _u('ucfirst', [_state('getFormProp', [fLvl, entity])]);
     if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
-    _val('openSubFormErr', [entity, null, subLvl, true]);
+    _val('openSubFormAlert', [entity, null, subLvl, true]);
     $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
 }
 /*------------ Fill Form Fields -----------------*/

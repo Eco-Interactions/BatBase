@@ -15,7 +15,7 @@
  */
 import { executeMethod, _db, _u } from '../../db-main.js';
 import { _state, _elems, _confg, clearFormMemory } from '../forms-main.js';
-import * as val from './validation.js';
+import * as val from './validation-alerts.js';
 import formatDataForServer from './format-data.js';
 import * as data from './get-form-data.js';
 
@@ -40,7 +40,7 @@ function submitFormData(data, fLvl, entity) {                                   
     const coreEntity = _confg('getCoreFormEntity', [entity]);
     const url = getEntityAjaxUrl(_state('getFormProp', [fLvl, 'action']));
     addEntityDataToFormData(data, coreEntity, fLvl);
-    storeParamsData(coreEntity, fLvl);
+    storeParamsData(entity, coreEntity, fLvl);
     _elems('toggleWaitOverlay', [true]);
     _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);
 }
@@ -55,8 +55,13 @@ function addEntityDataToFormData(data, coreEntity, fLvl) {
     if (editingIds) { data.ids = editingIds; }
 }
 /** Stores data relevant to the form submission that will be used later. */
-function storeParamsData(entity, fLvl) {
-    _state('setStateProp', ['submit', { fLvl: fLvl, entity: entity }]);
+function storeParamsData(entity, coreEntity, fLvl) {
+    const data = {
+        detailEntity: entity === coreEntity ? false : entity,
+        entity: coreEntity,
+        fLvl: fLvl
+    };
+    _state('setStateProp', ['submit', data]);
 }
 /* ----------------- ON SUBMIT SUCCESS ---------------------------- */
 function onSuccess(data, textStatus, jqXHR) {                                   _u('logAjaxData', [data, arguments]);

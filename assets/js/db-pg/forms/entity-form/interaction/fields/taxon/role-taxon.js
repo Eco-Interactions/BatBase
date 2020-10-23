@@ -45,7 +45,7 @@ function getSelectedTaxonOption(groupTaxon) {
 export function getSelectedTaxon(aboveRank) {
     const selElems = $('#sub-form .selectized').toArray();
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon parent edit form.
-    const selected = selElems.find(isSelectedTaxon.bind(null, aboveRank));/*dbug-log*///console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
+    const selected = selElems.find(isSelectedTaxon.bind(null, aboveRank));/*dbug-log*///console.log("getSelectedTaxon above [%s]. selElems = %O selected = %O", aboveRank, selElems, selected);
     return !selected ? false : _state('getRcrd', ['taxon', $(selected).val()]);
 
     function ifEditingTaxon() {
@@ -61,9 +61,9 @@ function isSelectedTaxon(resetRank, elem) {
     return $(elem).val();
 }
 function isRankChildOfResetRank(resetRank, elem) {
-    const allRanks = _state('getTaxonProp', ['groupRanks']);
-    const rank = elem.id.split('-sel')[0];
-    return allRanks.indexOf(rank) < allRanks.indexOf(resetRank);
+    const allRanks = Object.keys(_state('getTaxonProp', ['ranks']));
+    const rank = elem.id.split('-sel')[0];                          /*dbug-log*///console.log('is [%s] sub-rank to [%s]', rank, resetRank, allRanks.indexOf(rank) < allRanks.indexOf(resetRank));
+    return allRanks.indexOf(rank) > allRanks.indexOf(resetRank);
 }
 function ifIsRankComboElem(elem) {
     return elem.id.includes('-sel') && !elem.id.includes('Group');

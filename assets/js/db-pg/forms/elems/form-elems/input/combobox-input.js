@@ -240,12 +240,12 @@ function storeMultiSelectValue(fLvl, cnt, field, e) {                           
 }
 /**
  * Author/editor fields must have all fields filled continuously. There can
- * be no blanks in the selected order. If found, an error is shown to the user.
+ * be no blanks in the selected order. If found, an alert is shown to the user.
  */
 function checkForBlanksInOrder(vals, field, fLvl) {                             //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
     let blank = checkForBlanks(vals);
-    if (blank === 'found') { return reportFieldErr(field, fLvl); }
-    ifPreviousErrClearIt(field, fLvl);
+    if (blank === 'found') { return alertBlank(field, fLvl); }
+    ifPreviousAlertClearIt(field, fLvl);
 }
 function checkForBlanks(vals) {
     let blanks = false;
@@ -259,13 +259,13 @@ function checkForBlanks(vals) {
         }
     }
 }
-function reportFieldErr(field, fLvl) {
-    const errTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
-     _val('reportFormFieldErr', [field, errTags[field], fLvl]);
+function alertBlank(field, fLvl) {
+    const alertTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
+     _val('showFormValAlert', [field, alertTags[field], fLvl]);
 }
-function ifPreviousErrClearIt(field, fLvl) {
-    if (!$('#'+field+'_errs.'+fLvl+'-active-errs')) { return; }
-    _val('clrContribFieldErr', [field, fLvl]);
+function ifPreviousAlertClearIt(field, fLvl) {
+    if (!$('#'+field+'_alert.'+fLvl+'-active-alert')) { return; }
+    _val('clrContribFieldAlert', [field, fLvl]);
 }
 /* ====================== OPTIONS BUILDERS ================================== */
 /** Returns and array of options for the passed field type. */

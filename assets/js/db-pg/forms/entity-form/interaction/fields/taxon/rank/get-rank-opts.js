@@ -32,7 +32,7 @@ function resetOptMemory() {
 }
 /* ------------------- GET ALL OPTS FOR RELATED TAXA ------------------------ */
 export function getAllRankAndSelectedOpts(selId, selTaxon = null) {
-    d.taxon = selTaxon || _state('getRcrd', ['taxon', selId]);      /*dbug-log*///console.log("repopulateCombosWithRelatedTaxa. taxon = %O, opts = %O, selected = %O", d.taxon, d.opts, d.selected);
+    d.taxon = selTaxon ? selTaxon : _state('getRcrd', ['taxon', selId]);/*dbug-log*///console.log("getAllRankAndSelectedOpts. taxon = %O, opts = %O, selected = %O", d.taxon, d.opts, d.selected);
     if (!d.taxon) { return; } //issue alerted to developer and editor
     d.group = d.taxon.group.name;
     d.subGroup = d.taxon.group.subGroup.name;
@@ -87,6 +87,7 @@ function addEmptyChildRankOptAry(rank) {
 }
 /* ------------------------- SIBLING TAXA ----------------------------------- */
 function getSiblingOpts(taxon) {
+    if (taxon.isRoot) { return Promise.resolve(); }
     const rank = taxon.rank.displayName;
     return _cmbx('getTaxonOpts', [rank, null, d.group, d.subGroup])
         .then(o => {                                                /*dbug-log*///console.log('getSiblingOpts = %O. taxon = %O ', o, taxon);
@@ -96,8 +97,9 @@ function getSiblingOpts(taxon) {
 }
 /* ----------------------- ANCESTOR RANKS ----------------------------------- */
 function getAncestorOpts(pId) {
-    const pTaxon = _state('getRcrd', ['taxon', pId]);               /*dbug-log*///console.log('getAncestorOpts. parent = [%s]', pTaxon);
-    if (pTaxon.isRoot) { return Promise.resolve();}
+    if (!pId) { return Promise.resolve();} //Group-Root Taxon
+    const pTaxon = _state('getRcrd', ['taxon', pId]);               /*dbug-log*///console.log('getAncestorOpts. parent [%s] = %O', pId, pTaxon);
+    if (pTaxon.isRoot) { return Promise.resolve();} //Group-Root Taxon
     d.selected[pTaxon.rank.displayName] = pTaxon.id;
     return buildAncestorOpts(pTaxon);
 }

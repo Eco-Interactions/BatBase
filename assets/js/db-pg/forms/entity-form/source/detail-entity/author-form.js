@@ -27,7 +27,7 @@ export function initAuthOrEdForm(authCnt, value, authType) {        /*perm-log*/
     const pId = '#'+authType+'-sel'+authCnt;
     const fLvl = getSubFormLvl('sub2');
     if ($('#'+fLvl+'-form').length !== 0) {
-        return _val('openSubFormErr', [authType, pId, fLvl]);
+        return _val('openSubFormAlert', [authType, pId, fLvl]);
     }
     const val = value === 'create' ? '' : value;
     const singular = _u('lcfirst', [authType.slice(0, -1)]);
@@ -77,8 +77,8 @@ function selectAuthor(cnt, authId, field, fLvl) {                   /*dbug-log*/
  */
 export function onAuthAndEdSelection(selCnt, authType, val) {
     let cnt = $('#'+authType+'-sel-cntnr').data('cnt');
-    if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     const fLvl = getSubFormLvl('sub');
+    if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }
     if (val === 'create') { return initAuthOrEdForm(selCnt, val, authType); }
     if (lastAuthComboEmpty(cnt, authType)) { return; }

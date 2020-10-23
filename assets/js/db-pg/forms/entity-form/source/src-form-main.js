@@ -12,7 +12,7 @@
  */
 import { _modal, _u } from '../../../db-main.js';
 import { _state, _elems, submitForm } from '../../forms-main.js';
-import * as entityForm from './detail-entity/detail-entity-main.js';
+import * as entityForm from './detail-entity/src-detail-entity-form-main.js';
 import * as typeFields from './pub-and-cit-type-fields.js';
 /* ------------------- FORM INIT -------------------------------------------- */
 /** Inits comboboxes for the source forms. */
@@ -53,7 +53,6 @@ function getSrcRcrd(pubId) {
 /* ----------------- PUBLICATION|CITATION FINISH BUILD ---------------------- */
 /** Note: Only citation & publication forms use this. */
 export function finishEditFormBuild(entity) {                       /*dbug-log*///console.log('---finishEditFormBuild')
-    finishSourceForm(entity, 'top');
     $('.all-fields-cntnr').hide();
     initFormCombos(entity, 'top');
     finishSrcFieldLoad(entity, 'top');

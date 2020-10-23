@@ -192,12 +192,12 @@ function checkRequiredFields(e) {                                               
 }
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {
-    const reqElems = _state('getFormProp', [fLvl, 'reqElems']);                 //console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
+    const reqElems = _state('getFormProp', [fLvl, 'reqElems']);     /*dbug-log*///console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
 function isRequiredFieldFilled(fLvl, elem) {
-    if ($('.'+fLvl+'-active-errs').length) { return false; }                    //console.log('       --checking [%s] = %O, value ? ', elem.id, elem, getElemValue(elem));
+    if ($('.'+fLvl+'-active-alert').length) { return false; }                    //console.log('       --checking [%s] = %O, value ? ', elem.id, elem, getElemValue(elem));
     return getElemValue(elem);
 
     function getElemValue(elem) {

@@ -15,7 +15,7 @@ export function initPublisherForm(value) {                          /*perm-log*/
     const fLvl = getSubFormLvl('sub2');
     const prntLvl = getNextFormLevel('parent', fLvl);
     if ($('#'+fLvl+'-form').length !== 0) {
-        return _val('openSubFormErr', ['Publisher', null, fLvl]);
+        return _val('openSubFormAlert', ['Publisher', null, fLvl]);
     }
     return sForm.initEntitySubForm('publisher', fLvl, {'DisplayName': val}, '#Publisher-sel')
     .then(appendPublFormAndFinishBuild);
