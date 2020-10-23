@@ -27,7 +27,7 @@ import { _u } from '../../../../db-main.js';
 import { _state, _elems, _cmbx, _form } from '../../../forms-main.js';
 
 export function buildFieldInput(field, entity, fLvl) {              /*dbug-log*///console.log('buildFieldInput. [%s] = %O, lvl [%s]', field.name, field, fLvl);
-    return Promise.resolve(getFieldInput())
+    return Promise.resolve(getFieldInput(field, entity, fLvl))
         .then(input => finishFieldBuild(input, field, entity, fLvl))
         .then(input => handleFieldValidation(input, field, fLvl));
 }

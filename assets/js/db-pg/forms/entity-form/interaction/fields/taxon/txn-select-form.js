@@ -25,19 +25,10 @@ import { _state, _elems, _cmbx } from '../../../../forms-main.js';
 import * as iForm from '../../int-form-main.js';
 
 export function initTaxonSelectForm(role, groupId) {                /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
-    if (ifSubFormAlreadyInUse(role)) { return iForm.throwAndCatchSubFormAlert(role, 'sub'); }
     $('#'+role+'-sel').data('loading', true);
     return buildTaxonSelectForm(role, groupId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));
-}
-/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-function ifSubFormAlreadyInUse(role) {
-    return iForm.ifFormAlreadyOpenAtLevel('sub') || ifOppositeRoleFormLoading(role);
-}
-function ifOppositeRoleFormLoading(role) {
-    const oppRole = role === 'Subject' ? 'Object' : 'Subject';
-    return $('#'+oppRole+'-sel').data('loading');
 }
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
 function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('-------------build[%s]Taxon[%s]SelectForm', role, groupId);
@@ -64,6 +55,7 @@ export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*/
     selectInitTaxonOrFocusFirstCombo(role);
     _u('replaceSelOpts', ['#'+role+'-sel', []]);
     $('#'+role+'-sel').data('loading', false);
+    return Promise.resolve();
 }
 /* ----------------- SELECT UNSPECIFIED - ROOT TAXON  ----------------------- */
 function addSelectRootTaxonBttn() {

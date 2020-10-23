@@ -27,19 +27,36 @@ function addRoleFocusListener(role) {
 }
 /* ----------------- ROLE-TAXON SELECT-FORM INIT ---------------------------- */
 export function initSubjectSelect() {
+    if (ifSubFormAlreadyInUse('Subject')) { return openSubFormAlert('Subject'); }
     txnSelect.initTaxonSelectForm('Subject', 1);
 }
-/** Note: The selected group's rank combos are built @onGroupSelection. */
+/**
+ * Notes:
+ * - subForm check has to happen here because catching issues later is difficult.
+ * - The selected group's rank combos are built @onGroupSelection.
+ */
 export function initObjectSelect() {
+    if (ifSubFormAlreadyInUse('Object')) { return openSubFormAlert('Object'); }
     const groupInitId = getObjectGroupId();
     txnSelect.initTaxonSelectForm('Object', groupInitId)
     .then(() => groupFields.onGroupSelection(groupInitId))
-    .then(() => txnSelect.selectPrevTaxonAndResetRoleField('Object'));
+    .then(() => txnSelect.selectPrevTaxonAndResetRoleField('Object'))
 }
 function getObjectGroupId() {
     const prevSelectedId = $('#Object-sel').data('selTaxon');
     if (!prevSelectedId) { return 2; } //default: Plants (2)
     return _state('getRcrd', ['taxon', prevSelectedId]).group.id;
+}
+/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
+function ifSubFormAlreadyInUse(role) {
+    return iForm.ifFormAlreadyOpenAtLevel('sub') || ifOppositeRoleFormLoading(role);
+}
+function ifOppositeRoleFormLoading(role) {
+    const oppRole = role === 'Subject' ? 'Object' : 'Subject';
+    return $('#'+oppRole+'-sel').data('loading');
+}
+function openSubFormAlert(role) {
+    iForm.handleOpenSubFormAlert(role, 'sub');
 }
 /* ------------------ SELECT ROLE-TAXON ------------------------------------- */
 export function selectRoleTaxon() {

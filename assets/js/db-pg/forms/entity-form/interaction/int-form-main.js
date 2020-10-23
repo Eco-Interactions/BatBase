@@ -70,22 +70,22 @@ export function resetInteractionForm() {                            /*dbug-log*/
     return build.resetInteractionForm();
 }
 export function createSubEntity(entity, fLvl, val) {
-    if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormAlert(entity, fLvl); }
+    if (ifFormAlreadyOpenAtLevel(fLvl)) { return handleOpenSubFormAlert(entity, fLvl); }
     _form('createEntity', [entity, val]);
 }
 /* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
 export function ifFormAlreadyOpenAtLevel(fLvl) {
     return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
 }
-export function throwAndCatchSubFormAlert(entity, fLvl) {
-    openSubFormAlert(entity, fLvl)
-    .catch(() => {});
+export function handleOpenSubFormAlert(entity, fLvl) {
+    return openSubFormAlert(entity, fLvl)
+    // .catch(() => {});
 }
 function openSubFormAlert(ent, fLvl) {
     const entity = ent === 'citation' ? 'citationTitle' : ent;
     const ucEntity = _u('ucfirst', [entity]);
     _val('openSubFormAlert', [ucEntity, null, fLvl]);
-    return Promise.reject();
+    // return Promise.reject();
 }
 /** ====================== FORM-FIELD HELPERS =============================== */
 export function initTypeField() {
