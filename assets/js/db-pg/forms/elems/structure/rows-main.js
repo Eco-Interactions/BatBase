@@ -6,10 +6,10 @@
  *     buildFormRows
  *     getFormFieldRows
  */
-import { _u } from '../../../../db-main.js';
-import { _elems } from '../../../forms-main.js';
-import getFieldConfgs from './field-confg.js';
-import buildFormField from './form-field.js';
+import { _u } from '../../../db-main.js';
+import { _elems } from '../../forms-main.js';
+import getFieldConfgs from '../fields/field-confg.js';
+import buildFormField from '../fields/form-field.js';
 
 export function buildFormRow() {
     return buildFormField(...arguments);

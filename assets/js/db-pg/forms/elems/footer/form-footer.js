@@ -7,8 +7,8 @@
  *     SHOW ALL FIELDS CHECKBOX
  *     SUBMIT AND CANCEL BUTTONS
  */
-import { _u } from '../../../../db-main.js';
-import { _confg, _elems, _state, exitFormLevel, submitForm } from '../../../forms-main.js';
+import { _u } from '../../../db-main.js';
+import { _confg, _elems, _state, exitFormLevel, submitForm } from '../../forms-main.js';
 
 let fS;
 /**

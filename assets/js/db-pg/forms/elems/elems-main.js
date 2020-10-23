@@ -34,12 +34,11 @@
 import { executeMethod, _table, _u } from '../../db-main.js';
 import { _form, _state, getNextFormLevel, clearFormMemory } from '../forms-main.js';
 import * as panel from './detail-panel/detail-panel.js';
-import * as cmbx from './form-elems/input/combobox-input.js';
-import * as base from './form-elems/form-container.js';
-import * as fields from './form-elems/input/input-builder.js';
-import * as rows from './form-elems/rows/rows-main.js';
-import buildFormFooter from './form-elems/footer/form-footer.js';
+import * as fields from './fields/form-fields-main.js';
+import * as base from './structure/form-structure-main.js';
+import buildFormFooter from './footer/form-footer.js';
 
+import * as cmbx from './fields/input/combobox-input.js';
 /* -------------------- EXECUTE MODULE COMMANDS ----------------------------- */
 export function _cmbx(funcName, params = []) {
     return executeMethod(funcName, cmbx, 'cmbx', 'elems-main', params);
@@ -49,7 +48,7 @@ export function _panel(funcName, params = []) {
 }
 /* ------------------- FACADE ----------------------------------------------- */
 export function buildAndAppendForm(fields, id) {
-    return base.buildAndAppendRootForm(fields, id);
+    return base.buildAndAppendForm(fields, id);
 }
 export function getExitButton() {
     return base.getExitButton();
@@ -58,10 +57,10 @@ export function initSubForm() {
     return base.initSubForm(...arguments);
 }
 export function buildFormRows() {
-    return rows.buildFormRows(...arguments);
+    return base.buildFormRows(...arguments);
 }
 export function getFormFieldRows() {
-    return rows.getFormFieldRows(...arguments);
+    return base.getFormFieldRows(...arguments);
 }
 export function buildFieldInput() {
     return fields.buildFieldInput(...arguments);

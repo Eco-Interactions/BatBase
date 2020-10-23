@@ -3,7 +3,7 @@
  * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
  *               .required Ary of required fields
  */
-import { _confg, _state } from '../../../forms-main.js';
+import { _confg, _state } from '../../forms-main.js';
 
 export default function getFieldConfgs(entity, fLvl) {
     const confg = getFormConfgData(entity, fLvl);                               //console.log('[%s] get[%s]FieldConfg = %O', fLvl, entity, confg);
