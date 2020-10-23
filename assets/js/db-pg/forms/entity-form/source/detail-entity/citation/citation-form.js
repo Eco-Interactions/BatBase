@@ -80,12 +80,11 @@ function finishCitFormUiLoad() {
 }
 /* ----------------------- AUTO-GENERATE CITATION --------------------------- */
 /** Note: to prevent multiple rebuilds, a timeout is used. */
-export function handleCitText(formLvl) {                            /*dbug-log*///console.log('   --handleCitText. timeout? ', !!timeout);
+export function handleCitText(fLvl) {                               /*dbug-log*///console.log('   --handleCitText [%s] timeout? [%s]', fLvl, !!timeout);
     if (timeout) { return; }
-    timeout = window.setTimeout(buildCitTextAndUpdateField.bind(null, formLvl), 750);
+    timeout = window.setTimeout(buildCitTextAndUpdateField.bind(null, fLvl), 750);
 }
-function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*///console.log('           /--buildCitTextAndUpdateField')
-    // const fLvl = formLvl || getSubFormLvl('sub');
+function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*///console.log('           /--buildCitTextAndUpdateField [%s]', fLvl);console.trace();
     const reqFieldsFilled = _elems('ifAllRequiredFieldsFilled', [fLvl]);
     cite.buildCitTextAndUpdateField(reqFieldsFilled, fLvl)
     .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(reqFieldsFilled, fLvl))

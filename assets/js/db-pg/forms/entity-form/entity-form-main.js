@@ -91,8 +91,8 @@ export function selectParentTaxon(id) {
 export function finishSrcFieldLoad() {
     src.finishSrcFieldLoad(...arguments);
 }
-export function getPubOrCitFields() {
-    return src.getPubOrCitFields(...arguments);
+export function getPubOrCitEditFields() {
+    return src.getPubOrCitEditFields(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */

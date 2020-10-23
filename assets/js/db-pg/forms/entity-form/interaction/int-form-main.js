@@ -12,7 +12,7 @@
  *         SUBJECT|OBJECT
  *     MODULE INTERNAL-USAGE
  *         CREATE SUB-ENTITY
- *             SUB-FORM ALREADY OPEN ERROR
+ *             IF OPEN SUB-FORM ISSUE
  *         FORM-FIELD HELPERS
  *             PUBLICATION
  *             LOCATION
@@ -70,21 +70,21 @@ export function resetInteractionForm() {                            /*dbug-log*/
     return build.resetInteractionForm();
 }
 export function createSubEntity(entity, fLvl, val) {
-    if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormErr(entity, fLvl); }
+    if (ifFormAlreadyOpenAtLevel(fLvl)) { return throwAndCatchSubFormAlert(entity, fLvl); }
     _form('createEntity', [entity, val]);
 }
-/* ----------------- SUB-FORM ALREADY OPEN ERROR ---------------------------- */
+/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
 export function ifFormAlreadyOpenAtLevel(fLvl) {
     return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
 }
-export function throwAndCatchSubFormErr(entity, fLvl) {
-    openSubFormErr(entity, fLvl)
+export function throwAndCatchSubFormAlert(entity, fLvl) {
+    openSubFormAlert(entity, fLvl)
     .catch(() => {});
 }
-function openSubFormErr(ent, fLvl) {
+function openSubFormAlert(ent, fLvl) {
     const entity = ent === 'citation' ? 'citationTitle' : ent;
     const ucEntity = _u('ucfirst', [entity]);
-    _val('openSubFormErr', [ucEntity, null, fLvl]);
+    _val('openSubFormAlert', [ucEntity, null, fLvl]);
     return Promise.reject();
 }
 /** ====================== FORM-FIELD HELPERS =============================== */

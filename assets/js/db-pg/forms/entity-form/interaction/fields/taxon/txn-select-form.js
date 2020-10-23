@@ -13,7 +13,7 @@
  *     selectPrevTaxonAndResetRoleField
  *
  * TOC
- *     IF OPEN SUB-FORM ERROR
+ *     IF OPEN SUB-FORM ISSUE
  *     BUILD FORM-FIELDS
  *     SELECT UNSPECIFIED - ROOT TAXON
  *     CUSTOMIZE ELEMS FOR TAXON SELECT-FORM
@@ -25,13 +25,13 @@ import { _state, _elems, _cmbx } from '../../../../forms-main.js';
 import * as iForm from '../../int-form-main.js';
 
 export function initTaxonSelectForm(role, groupId) {                /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
-    if (ifSubFormAlreadyInUse(role)) { return iForm.throwAndCatchSubFormErr(role, 'sub'); }
+    if (ifSubFormAlreadyInUse(role)) { return iForm.throwAndCatchSubFormAlert(role, 'sub'); }
     $('#'+role+'-sel').data('loading', true);
     return buildTaxonSelectForm(role, groupId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));
 }
-/* ----------------- IF OPEN SUB-FORM ERROR --------------------------------- */
+/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
 function ifSubFormAlreadyInUse(role) {
     return iForm.ifFormAlreadyOpenAtLevel('sub') || ifOppositeRoleFormLoading(role);
 }

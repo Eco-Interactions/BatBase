@@ -5,6 +5,7 @@
  *     AUTHOR
  *
  */
+import { _cmbx } from '../../../forms-main.js';
 import * as author from './author-form.js';
 import * as publisher from './publisher-form.js';
 import * as citation from './citation/citation-form.js';

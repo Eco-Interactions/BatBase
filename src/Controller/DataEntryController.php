@@ -499,7 +499,7 @@ class DataEntryController extends AbstractController
     private function logErr($line, $msg, $trace)
     {
         $this->logger->error("\n\n### Error @ [$line] = $msg\n$trace\n");
-        if ($this->getParameter('env') === 'prod') { return; };
+        if ($_ENV['APP_ENV'] === 'prod') { return; };
         print("\n\n### Error @ [$line] = $msg\n$trace\n");
     }
     private function ifNotDuplicateEntityError($e)

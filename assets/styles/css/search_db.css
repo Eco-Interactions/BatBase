@@ -360,29 +360,29 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-top: .5em
 }
 /** ------------ Error Styles -------------- */
-[id$="_errs"] {
+[id$="_alert"] {
     display: flex;
     justify-content: center;
     text-align: center;
     width: 100%;
     color: red;
 }
-[id$="_errs"] span {
+[id$="_alert"] span {
     margin-top: .3em;
     justify-content: center;
 }
-[class$="active-errs"] {
+[class$="active-alert"] {
     padding: .3em;
     margin-bottom: .3em;
 }
-[id$="_errs"]>p {
+[id$="_alert"]>p {
     padding-top: .4em;
     width: initial !important;
 }
-#data_errs .exit-bttn {
+#data_alert .exit-bttn {
     width: 3em;
 }
-.err-exit {
+.alert-exit {
     color: darkred;
     height: 1.75em;
     width: 1.7em;

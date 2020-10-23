@@ -57,13 +57,17 @@ export function getExitButton() {
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
     const formWin = _u('buildElem', ['div', { id: 'form-main', class: action }]);
-    $(formWin).append([getFormHelpElems('top'), getHeader(), getForm(fields)]);
+    $(formWin).append([getFormHelpElems('top'), getHeader(), getValMsgCntnr('top'), getForm(fields)]);
     return formWin;
 }
 /* ------------------------------ HEADER ------------------------------------ */
 function getHeader() {
     const title = (action == 'create' ? 'New ' : 'Editing ') + _u('ucfirst', [entity]);
     return _u('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
+}
+/** Container for custom form-validation messages. */
+function getValMsgCntnr(fLvl) {
+    return _u('buildElem', ['div', { id: fLvl+'_alert' }]);
 }
 /* ----------------------------- FORM --------------------------------------- */
 function getForm(fields) {
@@ -78,6 +82,7 @@ function getForm(fields) {
 function buildFormElem() {
     const form = document.createElement('form');
     $(form).attr({'action': '', 'method': 'POST', 'name': 'top'});
+    $(form).submit(e => e.preventDefault());
     form.className = 'flex-row';
     form.id = 'top-form';
     return form;
@@ -112,15 +117,17 @@ export function initSubForm(fLvl, fClasses, fVals, sId) {
     entity = _state('getFormProp', [fLvl, 'entity']);
     setFormScopeParams('create', entity, fLvl);
     return _elems('buildFormRows', [entity, fVals, fLvl])
-        .then(rows => buildFormContainer(rows, fClasses))
+        .then(rows => buildSubFormContainer(rows, fClasses))
         .then(subForm => finishSubFormInit(subForm, sId));
 }
-function buildFormContainer(rows, fClasses, sId) {
+function buildSubFormContainer(rows, fClasses, sId) {
     const subFormContainer = buildSubFormCntnr(fClasses);
     const helpBttn = getFormHelpElems();
     const hdr = buildSubFormHdr();
+    const valMsg = getValMsgCntnr(fLvl);
     const footer = _elems('getFormFooter', [entity, fLvl, 'create']);
-    $(subFormContainer).append([helpBttn, hdr, rows, footer]);
+    $(subFormContainer).append([helpBttn, hdr, valMsg, rows, footer]);
+    $(subFormContainer).submit(e => e.preventDefault());
     return subFormContainer;
 }
 function buildSubFormCntnr(fClasses) {

@@ -4,13 +4,13 @@
 import { _u } from '../../../../db-main.js';
 /**
  * Each element is built, nested, and returned as a completed row.
- * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
+ * rowDiv>(alertDiv, fieldDiv>(label, input, [pin]))
  */
-export default function buildFormField(field, input, fLvl, rowClss, info) {              //console.log('building form row for [%s], req? [%s]', field, isReq);
+export default function buildFormField(field, input, fLvl, rowClss, info) {/*dbug-log*///console.log('building form row for [%s], req? [%s]', field, isReq);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
-    const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]);
+    const alertDiv = _u('buildElem', ['div', { id: field+'_alert'}]);
     const fieldCntnr = buildField(input, field, fLvl, info);
-    $(rowDiv).append([errorDiv, fieldCntnr]);
+    $(rowDiv).append([alertDiv, fieldCntnr]);
     return rowDiv;
 }
 function buildRowContainer(field, input, fLvl, rowClss) {
@@ -19,7 +19,7 @@ function buildRowContainer(field, input, fLvl, rowClss) {
     /** Returns the style classes for the row. */
     function getRowClasses() {
         const rowClass = input.className.includes('xlrg-field') ?
-            'full-row' : (fLvl + '-row') + (rowClss ? (' '+rowClss) : '');      //console.log("rowClass = ", rowClass)
+            'full-row' : (fLvl + '-row') + (rowClss ? (' '+rowClss) : '');
         return rowClass;
     }
 }
@@ -30,15 +30,20 @@ function buildField(input, field, fLvl, info) {
     $(cntnr).append([label, input, pin]);
     return cntnr;
 }
-/**
- * Note: The formLvl class is used for the form-specific tutorials.
+/** Note: The formLvl class is used for the form-specific tutorials.
  */
 function buildFieldContainer(fLvl, info) {
     const attr = { class: 'field-row flex-row', title: getInfoTxt(info)};
     const cntnr = _u('buildElem', ['div', attr]);
-    if (info) { $(cntnr).addClass(fLvl+'-intro')
-        .attr({'data-intro': getInfoTxt(info, 'intro'), 'data-intro-group': fLvl+'-intro'}); }
+    if (info) { addTutorialDataAttr(cntnr, fLvl, info); }
     return cntnr;
+}
+function addTutorialDataAttr(cntnr, fLvl, info) {
+    $(cntnr).addClass(fLvl+'-intro')
+        .attr({
+            'data-intro': getInfoTxt(info, 'intro'),
+            'data-intro-group': fLvl+'-intro'
+        });
 }
 function getInfoTxt(info, key = 'tooltip') {
     return typeof info === 'string' ? info : info[key];

@@ -17,10 +17,10 @@
  *                 TAXON PARENT SELECT FORM
  *                     RANK COMBO ELEMS
  *                     FINISH SELECT FORM BUILD
- *                     ERROR HANDLING
+ *                     DATA VALIDATION
  *         ROW BUILDERS
  *         FINISH EDIT FORM BUILD
- *         ERROR HANDLING
+ *         DATA VALIDATION
  */
 import { _u } from '../../../db-main.js';
 import { _state, _elems, _cmbx, _form, _val, formatAndSubmitData, submitForm } from '../../forms-main.js';
@@ -30,7 +30,7 @@ let taxonData;
 export function initFormCombos(entity, fLvl) {} //No combos in this form.
 
 /** ********************** CREATE FORM ************************************** */
-export function initCreateForm(rank, value) {                                    console.log('           /--initTaxon[%s]Form [%s]', rank, value);
+export function initCreateForm(rank, value) {                       /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, value);
     const val = value === 'create' ? '' : value;
     const ucRank = _u('ucfirst', [rank]);
     return showNewTaxonForm(val, ucRank);
@@ -56,28 +56,28 @@ function showNewTaxonForm(val, rank) {
     }
 }
 function updateTaxonSubmitBttn(rank) {
-    $('#sub2-submit').off('click').click(checkTaxonymErrsAndSubmit.bind(null, rank));
+    $('#sub2-submit').off('click').click(validateAndSubmit.bind(null, rank));
 }
-function checkTaxonymErrsAndSubmit(rank) {
-    if (ifEmptyNameField()) { return fieldErr(rank, 'needsName'); }
-    if (ifSpeciesErr(rank)) { return fieldErr(rank, 'needsGenusName'); }
+function validateAndSubmit(rank) {
+    if (ifEmptyNameField()) { return valAlert(rank, 'needsName'); }
+    if (ifSpeciesValIssue(rank)) { return valAlert(rank, 'needsGenusName'); }
     submitForm('#sub2-form',  'sub2', 'taxon');
 }
 function ifEmptyNameField() {
     return !$('#DisplayName_row input').val();
 }
-function ifSpeciesErr(rank) {
+function ifSpeciesValIssue(rank) {
     return rank === 'Species' && !hasCorrectBinomialNomenclature();
 
     function hasCorrectBinomialNomenclature() {
         const species = $('#DisplayName_row input')[0].value;
-        const genus = _cmbx('getSelTxt', ['#Genus-sel']);                     //console.log('Genus = %s, Species = %s', genus, species);
+        const genus = _cmbx('getSelTxt', ['#Genus-sel']);           /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
         const speciesParts = species.split(' ');
         return genus === speciesParts[0];
     }
 }
-function fieldErr(rank, tag) {
-    _val('reportFormFieldErr', [rank, tag, 'sub2'])
+function valAlert(rank, tag) {
+    _val('showFormValAlert', [rank, tag, 'sub2'])
 }
 /** ********************** EDIT FORM **************************************** */
 /**
@@ -107,7 +107,7 @@ function buildTaxonEditFields(taxon) {
     return prntElems.concat(txnElems);
 }
 /** ----------------- NAME FIELD AND Rank COMBOBOX ------------------------- */
-function getEditTaxonFields(taxon) {                                            //console.log("getEditTaxonFields for [%s]", taxon.displayName);
+function getEditTaxonFields(taxon) {                                /*dbug-log*///console.log("getEditTaxonFields for [%s]", taxon.displayName);
     const input = buildNameInput(taxon.name);
     const rankSel = buildRankSel(taxon);
     return [ buildTaxonEditFormRow('Taxon', [rankSel, input], 'top')];
@@ -138,7 +138,7 @@ function getTaxonRankOpts() {
  * <div>Taxon Parent: [parent name]</> <button>Change Parent</>
  * Button calls @showParentTaxonSelectForm.
  */
-function getPrntTaxonElems(taxon) {                                             //console.log("getPrntTaxonElems for %O", taxon);
+function getPrntTaxonElems(taxon) {                                 /*dbug-log*///console.log("getPrntTaxonElems for %O", taxon);
     const prnt = taxonData.rcrds[taxon.parent];
     const elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt)];
     return [ buildTaxonEditFormRow('Parent', elems, 'top')];
@@ -177,8 +177,8 @@ function showParentTaxonSelectForm() {
     .then(finishSelectPrntFormBuild);
 }
 /** ------------------- RANK COMBO ELEMS ------------------------------------ */
-function buildParentTaxonEditElems(prntId) {
-    const prnt = taxonData.rcrds[prntId];
+function buildParentTaxonEditElems(pId) {
+    const prnt = taxonData.rcrds[pId];
     const hdr = [ buildEditParentHdr()];
     const bttns = [ _elems('getFormFooter', ['taxon', 'sub', 'edit'])];
     return getParentEditFields(prnt)
@@ -194,7 +194,7 @@ function getParentEditFields(prnt) {
     return _elems('buildFormRows', ['object', {}, 'sub', null])
         .then(modifyAndReturnPrntRows);
 
-    function modifyAndReturnPrntRows(rows) {                                    //console.log('modifyAndReturnPrntRows = %O', rows);
+    function modifyAndReturnPrntRows(rows) {                        /*dbug-log*///console.log('modifyAndReturnPrntRows = %O', rows);
         $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
         const groupSelRow = getGroupRankRow(prnt, rows);
         return [groupSelRow, rows].filter(r=>r);
@@ -229,7 +229,7 @@ function appendPrntFormElems(elems) {
  * Initializes the edit-parent form's comboboxes and selects the current parent.
  * Hides the species row. Adds styles and modifies event listeners.
  */
-function finishSelectPrntFormBuild() {                                          //console.log("fP = %O", fP);
+function finishSelectPrntFormBuild() {
     initSelectParentCombos();
     selectParentTaxon($('#txn-prnt').data('txn'));
     finishParentSelectFormUi();
@@ -262,16 +262,16 @@ function hideGroupAndSpeciesCombo() {
 function enableChangeParentSubmitBttn() {
     _elems('toggleSubmitBttn', ['#sub-submit', true]);
 }
-export function selectParentTaxon(prntId) {
-    const prntTxn = taxonData.rcrds[prntId];                                    //console.log('selectParentTaxon = ', prntTxn);
-    ifSubGroupSelect(prntTxn);
-    if (prntTxn.isRoot) { return; }
-    const prntRank = prntTxn.rank.displayName;
-    _cmbx('setSelVal', ['#'+prntRank+'-sel', prntId]);
+export function selectParentTaxon(pId) {
+    const pTaxon = taxonData.rcrds[pId];                            /*dbug-log*///console.log('selectParentTaxon[%s] = %O', pId, pTaxon);
+    ifSubGroupSelect(pTaxon);
+    if (pTaxon.isRoot) { return; }
+    const pRank = pTaxon.rank.displayName;
+    _cmbx('setSelVal', ['#'+pRank+'-sel', pId]);
 }
-function ifSubGroupSelect(parentTaxon) {
+function ifSubGroupSelect(pTaxon) {
     if (!$('#Sub-Group_row').length) { return; }
-    _cmbx('setSelVal', ['#Sub-Group-sel', parentTaxon.group.subGroup.id, 'silent']);
+    _cmbx('setSelVal', ['#Sub-Group-sel', pTaxon.group.subGroup.id, 'silent']);
 }
 function finishParentSelectFormUi() {
     alignGroupRankText();
@@ -296,11 +296,11 @@ function updateSubmitBttns() {
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectNewTaxonParent() {
-    const prnt = _form('getSelectedTaxon') || _state('getTaxonProp', ['groupTaxon']);//console.log("selectNewTaxonParent called. prnt = %O", prnt);
-    if (ifParentSelectErrs(getRankVal(prnt.rank.displayName))) { return; }
+    const prnt = _form('getSelectedTaxon') || _state('getTaxonProp', ['groupTaxon']);/*dbug-log*///console.log("selectNewTaxonParent called. prnt = %O", prnt);
+    if (ifInvalidParentRank(getRankVal(prnt.rank.displayName))) { return; }
     exitPrntEdit(prnt);
 }
-function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
+function cancelPrntEdit() {
     const prnt = taxonData.rcrds[$('#txn-prnt').data('txn')];
     exitPrntEdit(prnt);
 }
@@ -308,46 +308,46 @@ function exitPrntEdit(prnt) {
     resetAfterEditParentClose(prnt);
 }
 function resetAfterEditParentClose(prnt) {
-    clearRankErrs('#Parent_errs', 'sub');
+    clearRankAlerts('#Parent_alert', 'sub');
     $('#sub-form').remove();
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     setTaxonPrntNameElem(prnt);
     _elems('toggleSubmitBttn', ['#top-submit', true]);
 }
-/** ------------------------ ERROR HANDLING --------------------------------- */
+/** ------------------------ DATA VALIDATION --------------------------------- */
 /**
  * Ensures that the parent taxon has a higher taxon-rank and that a species
  * taxon being edited has a genus parent selected.
  */
-function ifParentSelectErrs(prntRank) {
-    const hasErrs = checkEachPossibleParentErr(prntRank);
-    if (!hasErrs) { clearRankErrs('#Parent_errs', 'sub'); }
-    return hasErrs;
+function ifInvalidParentRank(pRank) {
+    const issues = handleParentRankIssues(pRank);
+    if (!issues) { clearRankAlerts('#Parent_alert', 'sub'); }
+    return issues;
 }
-function checkEachPossibleParentErr(prntRank) {
-    const txnRank = $('#txn-rank').val();                                       //console.log("ifParentSelectErrs. taxon = %s. parent = %s", txnRank, prntRank);
-    const errs = [
-        { 'needsHigherRankPrnt': txnRank <= prntRank },
-        { 'needsGenusPrnt': txnRank == 8 && prntRank != 7 }
+function handleParentRankIssues(pRank) {
+    const txnRank = $('#txn-rank').val();                           /*dbug-log*///console.log("handleParentRankIssues. txnRank = %s. pRank = %s", txnRank, pRank);
+    const issues = [
+        { 'needsHigherRankPrnt': txnRank <= pRank },
+        { 'needsGenusPrnt': txnRank == 8 && pRank != 7 }
     ];
-    return !errs.every(checkForErr);                                            //console.log('hasErrs? ', hasErrs)
+    return !issues.every(handleIfValIssue);
 
-    function checkForErr(errObj) {
-        for (let err in errObj) {
-            return errObj[err] ? sendTxnErrRprt(err, 'Parent', 'sub') : true;
+    function handleIfValIssue(issues) {
+        for (let tag in issues) {
+            return issues[tag] ? shwTxnValAlert(tag, 'Parent', 'sub') : true;
         }
     }
 }
 /** ======================= ROW BUILDERS ==================================== */
 /**
  * Each element is built, nested, and returned as a completed row.
- * rowDiv>(errorDiv, fieldDiv>inputElems)
+ * rowDiv>(alertDiv, fieldDiv>inputElems)
  */
 function buildTaxonEditFormRow(field, inputElems, fLvl) {
     const rowDiv = buildFormRow(field, fLvl);
-    const errorDiv = _u('buildElem', ['div', { id: field+'_errs'}]);
+    const alertDiv = _u('buildElem', ['div', { id: field+'_alert'}]);
     const fieldCntnr = buildFieldCntnr(inputElems);
-    $(rowDiv).append([errorDiv, fieldCntnr]);
+    $(rowDiv).append([alertDiv, fieldCntnr]);
     return rowDiv;
 }
 function buildFormRow(field, fLvl) {
@@ -370,29 +370,29 @@ function submitTaxonEdit() {
         displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
         rank:       $('#Taxon_row select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
-    };                                                                          //console.log("taxon vals = %O", vals);
+    };                                                              /*dbug-log*///console.log("taxon vals = %O", vals);
     formatAndSubmitData('taxon', 'top', vals);
 }
 function initTaxonEditRankCombo() {
-    const options = { create: false, onChange: checkForTaxonRankErrs, placeholder: null };
+    const options = { create: false, onChange: validateTaxonRank, placeholder: null };
     $('#txn-rank').selectize(options);
     _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank'), 'silent']);
 }
-/** ======================= ERROR HANDLING ================================== */
+/** ======================= DATA VALIDATION ================================== */
 /**
  * Ensures that the new taxon-rank is higher than its children, and that a
  * species taxon being edited has a genus parent selected.
  */
-function checkForTaxonRankErrs(txnRank) {
-    const prntRank = $('#txn-prnt').data('rank');                                 //console.log("checkForTaxonRankErrs. taxon = %s. parent = %s", txnRank, prntRank);
-    const hasErrs = {
+function validateTaxonRank(txnRank) {
+    const pRank = $('#txn-prnt').data('rank');                   /*dbug-log*///console.log("validateTaxonRank. taxon = %s. parent = %s", txnRank, pRank);
+    const valIssues = {
         'isGenusPrnt': isGenusPrnt(),
         'needsHigherRank': rankIsLowerThanKidRanks(txnRank)
     };
-    for (let err in hasErrs) {
-        if (hasErrs[err]) { return sendTxnErrRprt(err, 'Taxon', 'top'); }
+    for (let alertTag in valIssues) {
+        if (valIssues[alertTag]) { return shwTxnValAlert(alertTag, 'Taxon', 'top'); }
     }
-    clearPreviousErr('clrNeedsHigherRank', txnRank);
+    clearActiveAlert('clrNeedsHigherRank', txnRank);
 }
 /** Returns true if the taxon's original rank is Genus and it has children. */
 function isGenusPrnt() {
@@ -418,17 +418,17 @@ function getHighestChildRank(taxonId) {
         if (child.rank.ord < high) { high = child.rank.ord; }
     }
 }
-function clearPreviousErr(errTag, txnRank) {
-    if ($('.top-active-errs').length) {
-        _val(errTag, [null, null, null, txnRank]);
+function clearActiveAlert(alertTag, txnRank) {
+    if ($('.top-active-alert').length) {
+        _val(alertTag, [null, null, null, txnRank]);
     }
 }
-function sendTxnErrRprt(errTag, field, fLvl) {
-    _val('reportFormFieldErr', [field, errTag, fLvl]);
+function shwTxnValAlert(alertTag, field, fLvl) {
+    _val('showFormValAlert', [field, alertTag, fLvl]);
     _elems('toggleSubmitBttn', ['#top-submit', false]);
     return false;
 }
-function clearRankErrs(elemId, fLvl) {                                           //console.log('clearRankErrs.')
-    if (!$('.top-active-errs').length) { return; }
-    _val('clearErrElemAndEnableSubmit', [$(elemId)[0], fLvl]);
+function clearRankAlerts(elemId, fLvl) {
+    if (!$('.top-active-alert').length) { return; }
+    _val('clearAlert', [$(elemId)[0], fLvl]);
 }
