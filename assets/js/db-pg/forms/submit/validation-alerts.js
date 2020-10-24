@@ -45,7 +45,6 @@ let fS;
 export function formSubmitError(jqXHR, textStatus) {                /*perm-log*/console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
     const fLvl = _state('getStateProp', ['submit']).fLvl;
     const tag = getFormAlertTag(jqXHR.responseText);
-    _elems('toggleWaitOverlay', [false]);
     showFormValAlert(fLvl, tag, fLvl);
 }
 function getFormAlertTag(errTxt) {                                    /*dbug-log*///console.log("errTxt = %O", errTxt)
@@ -81,7 +80,7 @@ function buildResetDataButton() {
     return confirm;
 }
 function reloadAndRedownloadData() {
-    _elems('exitFormPopup', [null, 'skipTableReset']);
+    _elems('exitRootForm', [null, 'skipTableReset']);
     _db('resetStoredData', [true]);
 }
 /* ===================== FORM-INIT ALERT ==================================== */
@@ -319,8 +318,7 @@ function clearAlertElem(elem, fLvl) {
     $(elem).fadeTo(0, 1);
 }
 function enableSubmitIfFormReady(fLvl, enableSubmit) {
-    const subLvl = getNextFormLevel('child', fLvl);
-    if (!$('#'+fLvl+'-form').length || $('#'+subLvl+'-form').length) { return; }
+    if (!$('#'+fLvl+'-form').length || !_elems('hasOpenSubForm', [fLvl])) { return; }
     if (!enableSubmit) { return; }
     _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }

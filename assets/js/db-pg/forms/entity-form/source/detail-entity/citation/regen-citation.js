@@ -32,7 +32,7 @@ function getCitationFieldText($elem, fLvl, reqFieldsFilled) {
     return Promise.resolve(getCitationText());
 
     function getCitationText() {
-        return ifNoChildFormOpen(fLvl) && reqFieldsFilled ?
+        return _elems('ifNoOpenSubFormAndAllRequiredFieldsFilled', [fLvl]) ?
             buildCitationText(fLvl) :
            ($elem.val() === dfault ? false : dfault);
     }
