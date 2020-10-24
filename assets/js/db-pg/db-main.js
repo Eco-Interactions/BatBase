@@ -1,21 +1,15 @@
 /**
  * The Database Search page entry point. The data table is built to display the
  * eco-interaction records organized by a selected "focus": taxa (grouped further
- * by view: bat, plant, arthropod), locations, or sources (grouped by either
+ * by view: bat, plant, etc), locations, or sources (grouped by either
  * authors, publications, or publishers). The data map displays interactions
  * geographically. Filtered interactions can be viewed in either form.
  *
- * CODE SECTIONS:
- *     TABLE STATE OBJ
+ * TOC
+ *     EXECUTOR
+ *         LOCAL DATA
+ *         ERROR HANDLING
  *     PAGE INIT
- *     TABLE "STATE"
- *         STATE MANAGMENT
- *     TABLE (RE)BUILD
- *     LOCATION SEARCH
- *         LOCATION TABLE
- *         LOCATION MAP
- *     SOURCE SEARCH
- *     TAXON SEARCH
  */
 import * as db from './local-data/local-data-main.js';
 import * as forms from './forms/forms-main.js';
@@ -33,7 +27,7 @@ import * as modal from '../misc/intro-modals.js';
 if (window.location.pathname.includes('search')) {
     initDbPage();
 }
-/** ================== EXECUTE MODULE METHODS =============================== */
+/** ========================= EXECUTOR ====================================== */
 export function executeMethod(funcName, mod, modName, caller, params = []) {
     if (!Array.isArray(params)) { params = [params]; }  //Catches events typically.
     try {
@@ -91,7 +85,6 @@ export function reportErr() {
     return alert.reportErr(...arguments);
 }
 
-/** ==================== TABLE STATE OBJ ==================================== */
 /** ==================== PAGE INIT ========================================== */
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () {

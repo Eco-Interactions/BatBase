@@ -40,8 +40,8 @@
  *        TAXON
  *        LOCATION
  */
-import { _u } from '../../../../db-main.js';
-import { _state, _val, getSubFormLvl } from '../../../forms-main.js';
+import { _u } from '../../../../../db-main.js';
+import { _state, _val, getSubFormLvl } from '../../../../forms-main.js';
 
 /* ====================== COMBOBOX HELPERS ================================== */
 /* -------------------------- INIT ------------------------------------------ */

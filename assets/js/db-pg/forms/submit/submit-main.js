@@ -41,8 +41,12 @@ function submitFormData(data, fLvl, entity) {                                   
     const url = getEntityAjaxUrl(_state('getFormProp', [fLvl, 'action']));
     addEntityDataToFormData(data, coreEntity, fLvl);
     storeParamsData(entity, coreEntity, fLvl);
-    _elems('toggleWaitOverlay', [true]);
+    toggleWaitOverlay(true);
     _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);
+}
+function formSubmitError() {
+    toggleWaitOverlay(false);
+    val.formSubmitError(...arguments);
 }
 function getEntityAjaxUrl(action) {
     const path = $('body').data('base-url');
@@ -116,7 +120,7 @@ function handleFormComplete(data) {
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
     const onClose = _state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
     if (onClose) { onClose(data);
-    } else { _elems('exitFormPopup'); }
+    } else { _elems('exitRootForm'); }
 }
 /* ---------- After Sub-Entity Created ------------ */
 /**
@@ -136,4 +140,14 @@ function addAndSelectEntity(data, formParent) {
         'value': data.coreEntity.id, 'text': data.coreEntity.displayName
     });
     selApi.addItem(data.coreEntity.id);
+}
+/* ------------------- WAIT OVERLAY ----------------------------------------- */
+ function toggleWaitOverlay(waiting) {
+    if (waiting) { appendWaitingOverlay();
+    } else { $('#c-overlay').remove(); }
+}
+function appendWaitingOverlay() {
+    const attr = { class: 'overlay waiting', id: 'c-overlay'}
+    $('#b-overlay').append(_u('buildElem', ['div', attr]));
+    $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
 }

@@ -16,8 +16,8 @@
  *         APPEND AND STYLE
  *     SUB FORM
  */
-import { _modal, _u } from '../../../db-main.js';
-import { _cmbx, _confg, _elems, _panel, _state } from '../../forms-main.js';
+import { _modal, _u } from '../../db-main.js';
+import { _cmbx, _confg, _elems, _panel, _state } from '../forms-main.js';
 
 let action, entity, fLvl;
 
@@ -51,7 +51,7 @@ function getExitButtonRow() {
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'exit-bttn', 'type': 'button', 'value': 'X' }
     const bttn = _u('buildElem', ['input', attr]);
-    $(bttn).click(_elems.bind(null, 'exitFormPopup'));
+    $(bttn).click(_elems.bind(null, 'exitRootForm'));
     return bttn;
 }
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */

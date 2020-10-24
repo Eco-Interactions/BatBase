@@ -85,7 +85,6 @@ export function handleCitText(fLvl) {                               /*dbug-log*/
     timeout = window.setTimeout(buildCitTextAndUpdateField.bind(null, fLvl), 750);
 }
 function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*///console.log('           /--buildCitTextAndUpdateField [%s]', fLvl);console.trace();
-    const reqFieldsFilled = _elems('ifAllRequiredFieldsFilled', [fLvl]);
     cite.buildCitTextAndUpdateField(reqFieldsFilled, fLvl)
     .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(reqFieldsFilled, fLvl))
     .then(() => {timeout = null;});

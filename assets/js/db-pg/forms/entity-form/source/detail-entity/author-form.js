@@ -42,9 +42,7 @@ export function initAuthOrEdForm(authCnt, value, authType) {        /*perm-log*/
         sForm.addConfirmationBeforeSubmit(singular, fLvl);
     }
     function handleSubmitBttns() {
-        const prntLvl = getNextFormLevel('parent', fLvl);
-        _elems('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
-        _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+        _elems('ifParentFormValidEnableSubmit', [fLvl]);
         $('#'+fLvl+'-cancel').click(toggleOtherAuthorTypeSelect.bind(null, authType, true));
     }
 }
