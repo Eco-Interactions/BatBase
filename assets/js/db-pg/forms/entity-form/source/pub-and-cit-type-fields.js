@@ -68,7 +68,7 @@ function setSourceType(entity, fLvl, tName) {
 }
 function getSourceTypeFromCombo(entity) {
     const typeElemId = '#'+_u('ucfirst', [entity])+'Type-sel';
-    return _cmbx('getSelTxt', [typeElemId]);
+    return _u('getSelTxt', [typeElemId]);
 }
 /* ================= UPDATE SOURCE-TYPE FIELDS ============================== */
 export function updateFieldsForSourceType (entity, fLvl) {

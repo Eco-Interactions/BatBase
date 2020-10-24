@@ -123,7 +123,7 @@ function getPrevSelId(role) {
         $('#'+role+'-sel').data('selTaxon') : null;
 }
 function focusFirstRankCombobox(lcRole) {
-    _cmbx('focusFirstCombobox', ['#'+lcRole+'_Rows']);
+    _u('focusFirstCombobox', ['#'+lcRole+'_Rows']);
 }
 function appendTxnFormAndInitCombos(role, form) {
     const lcRole = _u('lcfirst', [role]);

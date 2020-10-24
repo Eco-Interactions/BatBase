@@ -116,12 +116,12 @@ export function addRoleTaxonFocusListeners() {
     return fields.addRoleTaxonFocusListeners(...arguments);
 }
 export function enableRoleTaxonFieldCombos() {
-    _cmbx('enableCombobox', ['#Subject-sel']);
-    _cmbx('enableCombobox', ['#Object-sel']);
+    _u('enableCombobox', ['#Subject-sel']);
+    _u('enableCombobox', ['#Object-sel']);
 }
 function enableTaxonRanks(enable = true) {
     $.each($('#sub-form select'), (i, sel) => {
-        _cmbx('enableCombobox', ['#'+sel.id, enable])
+        _u('enableCombobox', ['#'+sel.id, enable])
     });
 }
 /* ========================== HELPERS ======================================= */

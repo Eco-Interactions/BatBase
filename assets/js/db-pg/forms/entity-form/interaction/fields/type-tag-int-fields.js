@@ -54,7 +54,7 @@ function loadIntTypeOptions() {
     const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];/*dbug-log*///console.log('types = %O', types)
     _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
     .then(loadComboOptionsForType)
-    .then(() => _cmbx('enableCombobox', ['#InteractionType-sel', true]))
+    .then(() => _u('enableCombobox', ['#InteractionType-sel', true]))
 }
 function loadComboOptionsForType(opts) {                            /*dbug-log*///console.log('opts = %O', opts)
     const prevType = _cmbx('getSelVal', [`#InteractionType-sel`])
@@ -78,7 +78,7 @@ function clearTypeRelatedTags() {                                   /*dbug-log*/
 function fillAndEnableTags(id) {
     const tagOpts = buildTagOpts(_state('getRcrd', ['interactionType', id]));
     _cmbx('updateComboboxOptions', ['#InteractionTags-sel', tagOpts]);
-    _cmbx('enableCombobox', ['#InteractionTags-sel', true]);
+    _u('enableCombobox', ['#InteractionTags-sel', true]);
     selectTagInitVal();
 }
 /**

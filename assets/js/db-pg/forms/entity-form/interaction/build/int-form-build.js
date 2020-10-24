@@ -23,7 +23,7 @@ export function initCreateForm(entity) {                            /*perm-log*/
     if (_state('getFormState')) { return; } //Form is already opened.
     return _state('initFormState', ['create', 'interaction'])
     .then(getInteractionFormFields)
-    .then(fields => _elems('buildAndAppendForm', [fields]))
+    .then(fields => _elems('buildAndAppendRootForm', [fields]))
     .then(finishInteractionFormBuild)
     .then(addConfirmationBeforeSubmit)
     .then(() => _state('setOnFormCloseHandler', ['top', iForm.resetInteractionForm]));
@@ -64,15 +64,15 @@ function openReferenceGuideInNewTab() {
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
     iForm.initFormCombos('interaction', 'top');
-    _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
+    _u('enableCombobox', ['#CitationTitle-sel', false]);
     iForm.addRoleTaxonFocusListeners();
-    _cmbx('enableCombobox', ['#InteractionType-sel', false]);
-    _cmbx('enableCombobox', ['#InteractionTags-sel', false]);
+    _u('enableCombobox', ['#InteractionType-sel', false]);
+    _u('enableCombobox', ['#InteractionTags-sel', false]);
     focusPubFieldIfNewRecord();
 }
 function focusPubFieldIfNewRecord() {
     const action = _state('getFormProp', ['top', 'action']);
-    _cmbx('focusCombobox', ['#Publication-sel', action === 'create']);
+    _u('focusCombobox', ['#Publication-sel', action === 'create']);
 }
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */
 function addConfirmationBeforeSubmit() {

@@ -121,7 +121,7 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
         if ($('#Authors-sel-cntnr')[0].children.length > 1) {
             $('#Authors-sel-cntnr')[0].lastChild.remove();
         }
-        _cmbx('enableComboboxes', [$('#Authors-sel-cntnr select'), false]);
+        _u('enableComboboxes', [$('#Authors-sel-cntnr select'), false]);
     }
     function disableTitleField() {
         $('#Title_row input').prop('disabled', true);

@@ -26,7 +26,7 @@ import * as elemUtil from './util/form-elems-util-main.js';
 import * as cmbx from './rows/fields/input/combobox-input.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
 export function _cmbx(funcName, params = []) {
-    return executeMethod(funcName, _cmbx, 'cmbx', 'elems-main', params);
+    return executeMethod(funcName, cmbx, 'cmbx', 'elems-main', params);
 }
 export function _panel(funcName, params = []) {
     return executeMethod(funcName, panel, 'panel', 'elems-main', params);

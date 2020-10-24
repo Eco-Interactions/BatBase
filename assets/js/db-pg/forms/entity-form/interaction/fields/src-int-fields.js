@@ -37,14 +37,14 @@ function hasCitation(val) {
 }
 export function onPubClear() {
     _cmbx('clearCombobox', ['#CitationTitle-sel']);
-    _cmbx('enableCombobox', ['#CitationTitle-sel', false]);
+    _u('enableCombobox', ['#CitationTitle-sel', false]);
     _panel('clearDetailPanel', ['pub']);
 }
 /* ======================== CITATION ======================================== */
 /* ---------------------- FILL COMBOBOX ------------------------------------- */
 /** Fills the citation combobox with all citations for the selected publication. */
 export function fillCitationCombo(pubId) {
-    _cmbx('enableCombobox', ['#CitationTitle-sel']);
+    _u('enableCombobox', ['#CitationTitle-sel']);
     _cmbx('updateComboboxOptions', ['#CitationTitle-sel', getPubCitationOpts(pubId)]);
 }
 /** Returns an array of option objects with citations for this publication.  */
@@ -64,6 +64,6 @@ export function onCitSelection(val) {                               /*perm-log*/
     if (val === 'create') { return iForm.createSubEntity('citation', 'sub'); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['cit']); }
     _panel('updateSrcDetails', ['cit']);
-    _cmbx('enableCombobox', ['#Publication-sel']);
+    _u('enableCombobox', ['#Publication-sel']);
     iForm.focusPinAndEnableSubmitIfFormValid('CitationTitle')
 }

@@ -47,8 +47,33 @@ function getBaseConfgObj(field, onChange) {
         // Search Page Comboboxes with Create Options
         'Int-lists': { name: 'Interaction List', id: '#selIntList', change: onChange },
         'Saved Filter Set': {name: field, id: '#selSavedFilters', change: onChange },
+        // Data-entry form combos
+        'Authors': { name: 'Authors', id: '#Authors-sel1' },
+        'Editors': { name: 'Editors', id: '#Editors-sel1' },
+        'InteractionTags': { name: 'Interaction Tags', options: { delimiter: ",", maxItems: null }},
     };
     return confgs[field];
+}
+/**
+ * Inits the combobox, using 'selectize', according to the passed config.
+ * Note: The 'selectize' library turns select dropdowns into input comboboxes
+ * that allow users to search by typing and, when configured, add new options
+ * not in the list by triggering a sub-form for that entity.
+ */
+export function initComboboxN(confg) {                               /*dbug-log*/console.log("initCombobox = %O", confg);
+    const options = {
+        create: confg.add ? confg.add : false,
+        onChange: confg.change,
+        placeholder: 'Select ' + confg.name
+    };
+    if (confg.options) { addAdditionalOptions(); }
+    $(confg.id).selectize(options);
+    /** All non-standard options are added to this 'options' prop. */
+    function addAdditionalOptions() {
+        for (let opt in confg.options) {
+            options[opt] = confg.options[opt];
+        }
+    }
 }
 /**
  * Inits the combobox, using 'selectize', according to the passed config.
@@ -77,12 +102,17 @@ function getPlaceholer(id, name, add, empty) {
     const placeholder = 'Select ' + name
     return optCnt || add ? placeholder : '- None -';
 }
+/* ---------------------- GET COMBO DATA ------------------------------------ */
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const selId = getBaseConfgObj(field).id;                                    //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false;
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
     return $selApi.getValue();
 }
+export function getSelTxt(id) {                                                 //console.log('getSelTxt. id = ', id);
+    return $(id)[0].innerText;
+}
+/* ---------------------- SET COMBO DATA ------------------------------------ */
 export function setSelVal(field, val, silent) {                                 //console.log('setSelVal [%s] (silent ? %s) = [%O]', field, silent, val);
     const selId = getBaseConfgObj(field).id;
     const $selApi = $(selId).length ? $(selId)[0].selectize : false;
@@ -115,13 +145,30 @@ export function updatePlaceholderText(selId, newTxt, optCnt) {                  
     $selApi.settings.placeholder = getPlaceholer(selId, newTxt, false, emptySel);
     $selApi.updatePlaceholder();
 }
-// export function enableComboboxes($pElems, enable) {   console.log('############ enableComboboxes used')
-//     $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
-// }
-// function enableCombobox(enable, selId) {
-//     if (enable === false) { return $(selId)[0].selectize.disable(); }
-//     $(selId)[0].selectize.enable();
-// }
+
+/* ----------------- (EN/DIS)ABLE COMBOBOXES -------------------------------- */
+export function enableCombobox(selId, enable = true) {                          //*console.log('enableCombobox [%s] ? ', selId, enable);
+    if (enable === false) { return $(selId)[0].selectize.disable(); }
+    $(selId)[0].selectize.enable();
+}
+export function enableComboboxes($pElems, enable) {
+    $pElems.each((i, elem) => { enableCombobox('#'+elem.id, enable)});
+}
+export function enableFirstCombobox(cntnrId, enable = true) {
+    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
+    const firstElem = $('#'+ selElems[0].id)[0].selectize;
+    return enable ? firstElem.enable() : firstElem.disable();
+}
+/* ------------------------- FOCUS COMBOBOX --------------------------------- */
+export function focusCombobox(selId, focus = true) {
+    if (!focus) { return $(selId)[0].selectize.blur(); }
+    $(selId)[0].selectize.focus();
+}
+export function focusFirstCombobox(cntnrId, focus) {
+    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
+    focusCombobox('#'+ selElems[0].id, focus);
+}
+/* -------------------- REPLACE OPTIONS ------------------------------------- */
 export function replaceSelOpts(selId, opts, changeHndlr, name) {                //console.log('replaceSelOpts. args = %O', arguments)
     const $selApi = $(selId)[0].length ? $(selId)[0].selectize : false;
     if (!$selApi) { return _pg.alertIssue('comboboxNotFound', {id: selId}); }
@@ -141,6 +188,7 @@ function clearCombobox($selApi) {
     $selApi.clear('silent');
     $selApi.clearOptions();
 }
+/* -------------------- TRIGGER CHANGE -------------------------------------- */
 export function triggerComboChangeReturnPromise(field, val) {                   //console.log('triggerComboChange [%s] = [%s]', field, val);
     const confg = getBaseConfgObj(field);
     const $selApi = $(confg.id)[0].selectize;

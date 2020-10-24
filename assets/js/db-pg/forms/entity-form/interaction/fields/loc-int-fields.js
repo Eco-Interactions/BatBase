@@ -41,7 +41,7 @@ function showCountryDataOnMap(val) {
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 export function enableCountryRegionField() {
-    _cmbx('enableCombobox', ['#Country-Region-sel']);
+    _u('enableCombobox', ['#Country-Region-sel']);
     $('#loc-note').fadeTo(400, 1);
 }
 /* ========================== LOCATION ====================================== */
@@ -74,7 +74,7 @@ export function selectLoc(id) {
     $('#sub-form').remove();
     _cmbx('setSelVal', ['#Location-sel', id]);
     enableCountryRegionField();
-    _cmbx('enableCombobox', ['#Location-sel']);
+    _u('enableCombobox', ['#Location-sel']);
 }
 /**
  * When a location is selected, its country/region is selected in the top-form
@@ -120,5 +120,5 @@ function showInteractionFormMap() {                                 /*dbug-log*/
     const pElem = $('#Location_row')[0].parentNode;
     _form('addMapToLocForm', ['int', $(pElem)]);
     if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
-    _cmbx('focusCombobox', ['#Country-Region-sel', true]);
+    _u('focusCombobox', ['#Country-Region-sel', true]);
 }

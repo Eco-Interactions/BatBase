@@ -116,7 +116,7 @@ function buildNewAuthorSelect(cnt, val, prntLvl, authType) {        /*dbug-log*/
 
     function appendNewAuthSelect(sel) {
         $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
-        _cmbx('initSingle', [getAuthSelConfg(authType, cnt), prntLvl]);
+        _u('initComboboxN', [getAuthSelConfg(authType, cnt), prntLvl]);
     }
 }
 function getAuthSelConfg(authType, cnt) {
