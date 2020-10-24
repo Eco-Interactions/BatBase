@@ -140,7 +140,7 @@ function buildSubFormHdr() {
 }
 function finishSubFormInit(subForm, sId) {
     _state('setFormProp', [fLvl, 'pSelId', sId]);
-    _cmbx('enableCombobox', [sId, false]);
+    _u('enableCombobox', [sId, false]);
     return subForm;
 }
 /* ============================== SHARED ==================================== */

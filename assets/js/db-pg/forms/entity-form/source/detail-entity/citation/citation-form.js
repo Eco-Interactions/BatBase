@@ -49,7 +49,7 @@ function addSourceDataToMemory(data) {
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
-    _cmbx('enableCombobox', ['#Publication-sel']);
+    _u('enableCombobox', ['#Publication-sel']);
     _form('fillCitationCombo', [$('#Publication-sel').val()]);
 }
 function addPubRcrdsToMemory(pubRcrds) {
@@ -74,7 +74,7 @@ function appendCitFormAndFinishBuild(form) {                        /*dbug-log*/
         .then(() => finishCitFormUiLoad());
 }
 function finishCitFormUiLoad() {
-    _cmbx('enableCombobox', ['#Publication-sel', false]);
+    _u('enableCombobox', ['#Publication-sel', false]);
     $('#Abstract_row textarea').focus();
     _elems('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
 }
@@ -115,6 +115,6 @@ function ifFieldShouldBeSkipped (el, label, input) {
 }
 /* ---------------- CITATION EDIT ------------------------------------------- */
 export function finishCitationEditForm() {
-    types.handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['#CitationType-sel']), 'top');
+    types.handleSpecialCaseTypeUpdates(_u('getSelTxt', ['#CitationType-sel']), 'top');
     handleCitText('top');
 }

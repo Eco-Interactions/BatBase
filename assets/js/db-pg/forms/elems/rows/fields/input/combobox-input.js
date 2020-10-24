@@ -19,7 +19,6 @@
  *     getSelTxt
  *     getSrcOpts
  *     getTaxonOpts
- *     initSingle
  *     initFormCombos
  *     resetFormCombobox
  *     setSelVal
@@ -46,27 +45,6 @@ import { _state, _val, getSubFormLvl } from '../../../../forms-main.js';
 /* ====================== COMBOBOX HELPERS ================================== */
 /* -------------------------- INIT ------------------------------------------ */
 /**
- * Inits the combobox, using 'selectize', according to the passed config.
- * Note: The 'selectize' library turns select dropdowns into input comboboxes
- * that allow users to search by typing and, when configured, add new options
- * not in the list by triggering a sub-form for that entity.
- */
-export function initSingle(confg, fLvl) {                                       //console.log("initSingle. CONFG = %O. fLvl = ", confg, fLvl)
-    const options = {
-        create: confg.add,
-        onChange: confg.change,
-        placeholder: 'Select ' + confg.name
-    };
-    if (confg.options) { addAdditionalOptions(); }
-    $(confg.id).selectize(options);
-    /** All non-standard options are added to this 'options' prop. */
-    function addAdditionalOptions() {
-        for (let opt in confg.options) {
-            options[opt] = confg.options[opt];
-        }
-    }
-}
-/**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
@@ -79,7 +57,7 @@ export function initFormCombos(entity, fLvl, comboEvents) {                     
         const confg = getFieldConfg(comboEvents, fieldName);
         confg.id = confg.id || '#'+fieldName+'-sel';
         // $(confg.id).off('change');
-        initSingle(confg, fLvl);
+        _u('initComboboxN', [confg]);
     }
 }
 function getFieldConfg(comboEvents, fieldName) {
@@ -97,40 +75,15 @@ function getBaseFieldConfg(fieldName) {
     };
     return confgs[fieldName] || { name: confgName };
 }
-/* ----------------- (EN/DIS)ABLE COMBOBOXES -------------------------------- */
-export function enableCombobox(selId, enable = true) {                          //*console.log('enableCombobox [%s] ? ', selId, enable);
-    if (enable === false) { return $(selId)[0].selectize.disable(); }
-    $(selId)[0].selectize.enable();
-}
-export function enableComboboxes($pElems, enable) {
-    $pElems.each((i, elem) => { enableCombobox('#'+elem.id, enable)});
-}
-export function enableFirstCombobox(cntnrId, enable = true) {
-    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
-    const firstElem = $('#'+ selElems[0].id)[0].selectize;
-    return enable ? firstElem.enable() : firstElem.disable();
-}
-/* ------------------------- FOCUS COMBOBOX --------------------------------- */
-export function focusCombobox(selId, focus) {
-    if (!focus) { return $(selId)[0].selectize.blur(); }
-    $(selId)[0].selectize.focus();
-}
-export function focusFirstCombobox(cntnrId, focus) {
-    const selElems = $(cntnrId+' .selectized').toArray();                       //console.log("[%s] first elem = %O", cntnrId, selElems[0]);
-    focusCombobox('#'+ selElems[0].id, focus);
-}
 export function clearCombobox(selId) {                                          //console.log("clearCombobox [%s]", selId);
     const selApi = $(selId)[0].selectize;
     selApi.clear('silent');
     selApi.updatePlaceholder();
-    selApi.removeOption('');
+    selApi.removeOption('');  //Removes the "Creating [entity]..." placeholder.
 }
 /* --------------------- GETTERS & (RE)SETTERS ------------------------------ */
 export function getSelVal(id) {                                                 //console.log('getSelVal [%s]', id);
     return $(id)[0].selectize.getValue();
-}
-export function getSelTxt(id) {                                                 //console.log('getSelTxt. id = ', id);
-    return $(id)[0].innerText;
 }
 export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
     const $selApi = $(id)[0].selectize;
@@ -147,12 +100,9 @@ export function setSelVal(id, val, silent) {                                    
 export function resetFormCombobox(fLvl, focus) {
     const selId = _state('getFormParentId', [fLvl]);
     if (!selId) { return; }
-    const combobox = $(selId)[0].selectize;
-    combobox.clear('silent');
-    combobox.enable();
-    combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.
-    if (focus) { combobox.focus();
-    } else if (focus === false) { combobox.blur(); }
+    clearCombobox(selId);
+    _u('enableCombobox', [selId]);
+    _u('focusCombobox', [selId, focus]);
 }
 /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
 export function updateComboboxOptions(selId, opts, focus) {
@@ -161,15 +111,23 @@ export function updateComboboxOptions(selId, opts, focus) {
     selApi.clearOptions();
     selApi.addOption(opts);
     selApi.refreshOptions(false);
-    if (focus === true) {  }
+    if (focus === true) { _u('focusCombobox', [selId, focus]); }
 }
 /* ====================== COMBOBOX BUILDERS ================================= */
+export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*/console.log('buildComboInput [%s], args = %O', type, arguments);
+    const map = {
+        multiSelect: buildMultiSelect,
+        select: buildSelect,
+        tags: buildTagField,
+    };
+    return map[type](entity, field, fLvl);
+}
 /* ---------------------- TAGS COMBOBOX ------------------------------------- */
 /**
  * Creates and returns a select dropdown that will be initialized with 'selectize'
  * to allow multiple selections. A data property is added for use form submission.
  */
-export function buildTagField(entity, field, fLvl) {
+function buildTagField(entity, field, fLvl) {
     const attr = { id: field + '-sel', class: 'med-field'};
     const tagSel = _u('buildSelectElem', [[], attr]);
     $(tagSel).data('inputType', 'tags');
@@ -183,11 +141,11 @@ export function buildTagField(entity, field, fLvl) {
  * the select's fieldName to the subForm config's 'selElem' array to later
  * init the 'selectize' combobox.
  */
-export function buildSelect(entity, field, fLvl, cnt) {                         //console.log("buildSelect [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);
+function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*///console.log("buildSelect [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);
     return getSelectOpts(field)
         .then(finishSelectBuild);
 
-    function finishSelectBuild(opts) {                                          //console.log('[%s] opts = %O', field, opts);
+    function finishSelectBuild(opts) {                              /*dbug-log*///console.log('[%s] opts = %O', field, opts);
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
         const attr = { id: fieldId , class: 'med-field'};
         _state('addComboToFormState', [fLvl, field]);
@@ -200,7 +158,7 @@ export function buildSelect(entity, field, fLvl, cnt) {                         
  * be reaplced inline upon selection. Either with an existing Author's name,
  * or the Author create form when the user enters a new Author's name.
  */
-export function buildMultiSelect(entity, field, fLvl) {                           //console.log("entity = %s. field = ", entity, field);
+function buildMultiSelect(entity, field, fLvl) {                    /*dbug-log*///console.log("buildMultiSelect [%s][%s]", entity, field);
     const cntnr = _u('buildElem', ['div', { id: field+'-sel-cntnr'}]);
     return buildMultiSelectElem(entity, field, fLvl, 1)
         .then(returnFinishedMultiSelectFields);
@@ -211,6 +169,7 @@ export function buildMultiSelect(entity, field, fLvl) {                         
         return cntnr;
     }
 }
+/* --- used externally */
 export function buildMultiSelectElem(entity, field, fLvl, cnt) {
     return buildSelect(entity, field, fLvl, cnt)
         .then(returnFinishedMultiSelectField);
@@ -232,8 +191,8 @@ function getCntLabel(cnt) {
     const map = {1: '1st: ', 2:'2nd: ', 3:'3rd: '};
     return cnt in map ? map[cnt] : cnt+'th: ';
 }
-function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
-    const valueObj = _state('getFormFieldData', [fLvl, field]).val;             //console.log('fieldObj = %O', fieldObj);
+function storeMultiSelectValue(fLvl, cnt, field, e) {               /*dbug-log*///console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
+    const valueObj = _state('getFormFieldData', [fLvl, field]).val; /*dbug-log*///console.log('fieldObj = %O', fieldObj);
     valueObj[cnt] = e.target.value || null;
     _state('setFormFieldData', [fLvl, field, valueObj, 'multiSelect']);
     checkForBlanksInOrder(valueObj, field, fLvl);
@@ -242,7 +201,7 @@ function storeMultiSelectValue(fLvl, cnt, field, e) {                           
  * Author/editor fields must have all fields filled continuously. There can
  * be no blanks in the selected order. If found, an alert is shown to the user.
  */
-function checkForBlanksInOrder(vals, field, fLvl) {                             //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
+function checkForBlanksInOrder(vals, field, fLvl) {                 /*dbug-log*///console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
     let blank = checkForBlanks(vals);
     if (blank === 'found') { return alertBlank(field, fLvl); }
     ifPreviousAlertClearIt(field, fLvl);
@@ -269,7 +228,7 @@ function ifPreviousAlertClearIt(field, fLvl) {
 }
 /* ====================== OPTIONS BUILDERS ================================== */
 /** Returns and array of options for the passed field type. */
-function getSelectOpts(field) {                                                 //console.log("getSelectOpts. for [%s]", field);
+function getSelectOpts(field) {                                     /*dbug-log*///console.log("getSelectOpts. for [%s]", field);
     const optMap = {
         'Authors': [ getSrcOpts, 'authSrcs'],
         'CitationType': [ getCitTypeOpts, 'citTypeNames'],
@@ -323,7 +282,7 @@ export function getRcrdOpts(ids, rcrds) {
 //     return _u('getOptsFromStoredData', [entity+"Tags"]);
 // }
 /** Returns an array of source-type (prop) options objects. */
-export function getSrcOpts(prop, field, rcrds) {
+function getSrcOpts(prop, field, rcrds) {
     return _u('getData', [prop]).then(buildSrcOpts);
 
     function buildSrcOpts(ids) {

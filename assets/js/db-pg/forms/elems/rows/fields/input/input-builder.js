@@ -4,7 +4,6 @@
  *
  * Export
  *     buildFieldInput
- *     buildTagField
  *     buildLongTextArea
  *     ifAllRequiredFieldsFilled
  *
@@ -77,10 +76,7 @@ export function buildLongTextArea(entity, field, fLvl) {
 }
 /* ------------------------------- SELECT ----------------------------------- */
 function buildCombobox(fieldType, entity, field, fLvl) {
-    const map = {
-        tags: 'buildTagField', select: 'buildSelect', multiSelect: 'buildMultiSelect'
-    };
-    return _cmbx(map[fieldType], [entity, field, fLvl]);
+    return _cmbx('buildComboInput', [fieldType, entity, field, fLvl]);
 }
 /* =================== FINISH INPUT BUILD =================================== */
 function finishFieldBuild(input, field, entity, fLvl) {

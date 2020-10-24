@@ -33,7 +33,7 @@ function buildLocForm(val) {
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
-        _cmbx('enableCombobox', ['#Country-Region-sel', false]);
+        _u('enableCombobox', ['#Country-Region-sel', false]);
         _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_row input').focus();

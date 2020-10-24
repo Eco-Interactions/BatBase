@@ -1,34 +1,6 @@
 /**
  * Helpful utility methods used throughout the database search page.
  *
- * Exports:                     Imported by:
- *     (IDB Storage Methods)
- *         getData
- *         setData
- *   addEnterKeypressClick
- *   alphaOptionObjs
- *   buildElem
- *   buildSelectElem
- *   buildSimpleOpts
- *   buildOptsObj
- *   generateCitationText
- *   getDataFromStorage
- *   getDetachedRcrd
- *   getOptsFromStoredData
- *   getSelVal
- *   initCombobox
- *   initComboboxes
- *   init_db
- *   lcfirst
- *   logInDevEnv
- *   replaceSelOpts
- *   sendAjaxQuery
- *   setSelVal
- *   stripString
- *   snapshot
- *   triggerComboChangeReturnPromise
- *   ucfirst
- *
  * TOC:
  *     GENERATE CITATION TEXT
  *     UTIL FACADE
@@ -65,9 +37,30 @@ export function logAjaxData() {
 export function initCombobox() {
     return cmbx.initCombobox(...arguments);
 }
+export function initComboboxN() {
+    return cmbx.initComboboxN(...arguments);
+}
 export function initComboboxes(fields) {
     return cmbx.initComboboxes(fields);
 }
+/* ----------------- (EN|DIS)ABLE ------------------------------------------- */
+export function enableCombobox() {
+    return cmbx.enableCombobox(...arguments);
+}
+export function enableComboboxes() {
+    return cmbx.enableComboboxes(...arguments);
+}
+export function enableFirstCombobox() {
+    return cmbx.enableFirstCombobox(...arguments);
+}
+/* ------------------------- FOCUS COMBOBOX --------------------------------- */
+export function focusCombobox() {
+    return cmbx.focusCombobox(...arguments);
+}
+export function focusFirstCombobox() {
+    return cmbx.focusFirstCombobox(...arguments);
+}
+/* ---------------------- GET|SET COMBO DATA -------------------------------- */
 export function getSelVal(field) {
     return cmbx.getSelVal(field);
 }

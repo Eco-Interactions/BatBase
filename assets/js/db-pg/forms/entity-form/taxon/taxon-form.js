@@ -71,7 +71,7 @@ function ifSpeciesValIssue(rank) {
 
     function hasCorrectBinomialNomenclature() {
         const species = $('#DisplayName_row input')[0].value;
-        const genus = _cmbx('getSelTxt', ['#Genus-sel']);           /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
+        const genus = _u('getSelTxt', ['#Genus-sel']);           /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
         const speciesParts = species.split(' ');
         return genus === speciesParts[0];
     }

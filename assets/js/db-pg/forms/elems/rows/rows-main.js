@@ -11,7 +11,7 @@ import { _u } from '../../../db-main.js';
 import { _elems } from '../../forms-main.js';
 import * as fields from './fields/form-fields-main.js';
 import buildFormRow from './form-row.js';
-import getRowConfg from './form-row.js';
+import getRowConfg from './row-confg.js';
 
 /* ============================== FIELDS ==================================== */
 export function buildFieldInput() {

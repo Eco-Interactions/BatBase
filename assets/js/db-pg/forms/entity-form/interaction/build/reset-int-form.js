@@ -104,7 +104,7 @@ function handePersistedField(field, data) {
 }
 function fillPubDetails(pub) {
     if (pub) { _panel('updateSrcDetails', ['pub']);
-    } else { _cmbx('enableCombobox', ['#CitationTitle-sel', false]); }
+    } else { _u('enableCombobox', ['#CitationTitle-sel', false]); }
 }
 function setFieldInitVal(field, data) {
     $(`#${field}-sel`).data('init-val', data);
