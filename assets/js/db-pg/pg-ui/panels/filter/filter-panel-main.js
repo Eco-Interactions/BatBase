@@ -22,12 +22,6 @@ export function resetFilterPanelOnFocusChange(focus) {
 export function isFilterSetActive() {
     return fSets.isFilterSetActive();
 }
-export function newFilterSet(val) {
-    return fSets.newFilterSet(val);
-}
-export function selFilterSet(val) {
-    fSets.selFilterSet(val);
-}
 export function onTableReloadCompleteApplyFilters(filters, id) {
     fSets.onTableReloadCompleteApplyFilters(filters, id);
 }
@@ -175,8 +169,8 @@ function clearMultiCombo(i, el) {
     $('#'+selId)[0].selectize.clear('silent');
 }
 function resetStoredFiltersUi() {
-    if (!$('#selSavedFilters')[0].selectize) { return; }
-    $('#selSavedFilters')[0].selectize.clear('silent');
+    if (!$('#sel-FilterSet')[0].selectize) { return; }
+    $('#sel-FilterSet')[0].selectize.clear('silent');
     $('#stored-filters input, #stored-filters textarea').val('');
 }
 /* ======================== TABLE DATA-STATUS =============================== */

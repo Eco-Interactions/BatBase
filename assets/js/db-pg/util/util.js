@@ -37,11 +37,11 @@ export function logAjaxData() {
 export function initCombobox() {
     return cmbx.initCombobox(...arguments);
 }
-export function initComboboxN() {
-    return cmbx.initComboboxN(...arguments);
+export function resetCombobox() {
+    return cmbx.resetCombobox(...arguments);
 }
-export function initComboboxes(fields) {
-    return cmbx.initComboboxes(fields);
+export function destroySelectizeInstance() {
+    return cmbx.destroySelectizeInstance(...arguments);
 }
 /* ----------------- (EN|DIS)ABLE ------------------------------------------- */
 export function enableCombobox() {
@@ -63,6 +63,9 @@ export function focusFirstCombobox() {
 /* ---------------------- GET|SET COMBO DATA -------------------------------- */
 export function getSelVal(field) {
     return cmbx.getSelVal(field);
+}
+export function getSelTxt(field) {
+    return cmbx.getSelTxt(field);
 }
 export function setSelVal() {
     return cmbx.setSelVal(...arguments);
@@ -98,14 +101,14 @@ export function buildSelectElem() {
 export function buildSimpleOpts() {
     return elems.buildSimpleOpts(...arguments);
 }
-export function alphaOptionObjs() {
-    return elems.alphaOptionObjs(...arguments);
-}
 export function getOptsFromStoredData(prop) {
     return elems.getOptsFromStoredData(prop);
 }
 export function buildOptsObj() {
     return elems.buildOptsObj(...arguments);
+}
+export function alphabetizeOpts() {
+    return elems.alphabetizeOpts(...arguments);
 }
 export function addEnterKeypressClick() {
     return elems.addEnterKeypressClick(...arguments);

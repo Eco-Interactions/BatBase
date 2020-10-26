@@ -36,16 +36,16 @@ function hasCitation(val) {
     return pub ? pub.children.length : null; //If no pub found, the issue was alerted to developer and editor
 }
 export function onPubClear() {
-    _cmbx('clearCombobox', ['#CitationTitle-sel']);
-    _u('enableCombobox', ['#CitationTitle-sel', false]);
+    _u('resetCombobox', ['CitationTitle']);
+    _u('enableCombobox', ['CitationTitle', false]);
     _panel('clearDetailPanel', ['pub']);
 }
 /* ======================== CITATION ======================================== */
 /* ---------------------- FILL COMBOBOX ------------------------------------- */
 /** Fills the citation combobox with all citations for the selected publication. */
 export function fillCitationCombo(pubId) {
-    _u('enableCombobox', ['#CitationTitle-sel']);
-    _cmbx('updateComboboxOptions', ['#CitationTitle-sel', getPubCitationOpts(pubId)]);
+    _u('enableCombobox', ['CitationTitle']);
+    _u('replaceSelOpts', ['CitationTitle', getPubCitationOpts(pubId)]);
 }
 /** Returns an array of option objects with citations for this publication.  */
 function getPubCitationOpts(pubId) {
@@ -64,6 +64,6 @@ export function onCitSelection(val) {                               /*perm-log*/
     if (val === 'create') { return iForm.createSubEntity('citation', 'sub'); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['cit']); }
     _panel('updateSrcDetails', ['cit']);
-    _u('enableCombobox', ['#Publication-sel']);
+    _u('enableCombobox', ['Publication']);
     iForm.focusPinAndEnableSubmitIfFormValid('CitationTitle')
 }

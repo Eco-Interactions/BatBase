@@ -50,7 +50,7 @@ export function getCurrentFormFieldVals(fLvl) {
     const vals = {};
     for (let field in fieldData) {
         vals[field] = fieldData[field].val;
-    }
+    }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fieldsData = %O returnedVals = %O', fieldData, vals);
     return vals;
 }
 /* ------------------ FILL FORM-FIELD DATA ---------------------------------- */

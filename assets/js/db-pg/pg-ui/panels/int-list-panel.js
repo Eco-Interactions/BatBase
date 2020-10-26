@@ -4,7 +4,7 @@
  * Exports:
  *     addListPanelEvents
  *     newIntList
- *     selIntList
+ *     sel-InteractionList
  *     toggleListPanelOrientation
  *     enableListResetBttn
  *
@@ -85,8 +85,8 @@ export function toggleListPanelOrientation(style) {
 }
 /* --- Vertical Stacking --- */
 function stackIntListPanel() {
-    $(`#list-sel-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
-    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #list-sel-cntnr,
+    $(`#sel-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
+    $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #sel-list-cntnr,
         #load-list, #list-count`).addClass('vert');
     stackListElems();
 }
@@ -95,9 +95,9 @@ function stackListElems() {
 }
 /* --- Horizontal Spreading --- */
 function spreadIntListPanel() {
-    $(`#list-sel-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
+    $(`#sel-list-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
     $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list,
-        #list-sel-cntnr, #list-count`).removeClass('vert');
+        #sel-list-cntnr, #list-count`).removeClass('vert');
     $('#list-details').append($('#list-count').detach());
 }
 function filtersApplied() {
@@ -231,8 +231,8 @@ function updateRelatedListUi() {
 }
 function syncFilterUi(focus) {
     _ui('updateFilterStatusMsg');
-    if ($('#selSavedFilters')[0].selectize) {
-        $('#selSavedFilters')[0].selectize.clear('silent')
+    if ($('#sel-FilterSet')[0].selectize) {
+        $('#sel-FilterSet')[0].selectize.clear('silent')
     }
 }
 function updateListLoadButton(text, clickFunc) {
@@ -257,7 +257,7 @@ function onListSubmitComplete(action, results) {
     .then(updateUiAfterListSubmit.bind(null, list));
 }
 function updateUiAfterListSubmit(list) {
-    $('#selIntList')[0].selectize.addItem(list.id)
+    $('#sel-InteractionList')[0].selectize.addItem(list.id)
     showSavedMsg();
     toggleInstructions();
     if (app.submitting === 'rmv') { loadListInTable(); }
@@ -267,7 +267,7 @@ function updateUiAfterListSubmit(list) {
 function onListDeleteComplete(results) {                            /*temp-log*///console.log('listDeleteComplete results = %O', results)
     pM.updateUserNamedList(results.list, 'delete')
     .then(updateListComboboxOptions)
-    .then(() => $('#selIntList')[0].selectize.open());
+    .then(() => $('#sel-InteractionList')[0].selectize.open());
 }
 function showSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 1);
@@ -279,9 +279,9 @@ function hideSavedMsg() {
 /* =============================== UI ======================================= */
 function initListCombobox() {
     if ($('#list-details>span').text() !== 'List Details') { return; }
-    _u('initCombobox', ['Int-lists', selIntList, {add: newIntList}]);
+    _u('initCombobox', [{ name: 'Interaction List', onChange: selIntList, create: newIntList}]);
     updateListComboboxOptions().then(() => {
-        window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
+        window.setTimeout(() => $('#sel-InteractionList')[0].selectize.focus(), 500);
         disableInputs();
     });
 }
@@ -371,7 +371,7 @@ function enableInputs(creating) {
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
 function disableInputs() {
-    $(`#list-details input, #list-details textarea, #list-details span, #list-sel-cntnr button,
+    $(`#list-details input, #list-details textarea, #list-details span, #sel-list-cntnr button,
         #mod-list-pnl button, #mod-list-pnl > span:first-child, #load-list+div,
         #mod-mode, #mod-radios input, #mod-radios label`)
             .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
@@ -403,7 +403,7 @@ function updateListComboboxOptions() {
     return Promise.resolve(_u('getOptsFromStoredData', ['dataListNames']).then(
         opts => {
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
-            _u('replaceSelOpts', ['#selIntList', opts]);
+            _u('replaceSelOpts', ['InteractionList', opts]);
     }));
 }
 function resetPrevListUiState() {

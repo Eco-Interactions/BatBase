@@ -14,11 +14,11 @@
 import { _u } from '../../../../../db-main.js';
 import { _state, _elems, getNextFormLevel, getValidatedFormData } from '../../../../forms-main.js';
 
-export function buildCitTextAndUpdateField(reqFieldsFilled, fLvl) {
+export function buildCitTextAndUpdateField(fLvl) {
     const $elem = $('#CitationText_row textarea');
     if (!$elem.val()) { initializeCitField($elem); }
 
-    return getCitationFieldText($elem, fLvl, reqFieldsFilled)
+    return getCitationFieldText($elem, fLvl)
         .then(citText => updateCitField(citText, $elem))
 }
 function initializeCitField($elem) {
@@ -26,7 +26,7 @@ function initializeCitField($elem) {
 }
 /* ------------------------ GET CITATION TEXT ------------------------------- */
 /** Returns the citation field text or false if there are no updates. */
-function getCitationFieldText($elem, fLvl, reqFieldsFilled) {
+function getCitationFieldText($elem, fLvl) {
     const dfault = 'The citation will display here once all required fields '+
         'are filled.';
     return Promise.resolve(getCitationText());
@@ -56,7 +56,7 @@ function getDataForCitation(fData, fLvl) {                          /*dbug-log*/
 }
 function buildCitData(fData) {
     return {
-        citationType: { displayName: $('#CitationType-sel')[0].innerText },
+        citationType: { displayName: _u('getSelTxt', ['CitationType']) },
         title: fData.title ? fData.title : fData.chapterTitle,
         publicationPages: fData.pages,
         publicationIssue: fData.issue,

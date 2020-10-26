@@ -12,7 +12,7 @@
  *     UPDATE UI FOR CITATION-TYPE
  */
 import { _u } from '../../../../../db-main.js';
-import {  _state, _elems, _cmbx, getSubFormLvl } from '../../../../forms-main.js';
+import {  _state, _elems, getSubFormLvl } from '../../../../forms-main.js';
 import * as sForm from '../../src-form-main.js';
 
 let rmvdAuthField = {};
@@ -26,7 +26,7 @@ function setCitType(citTypes) {
     const rcrds = _state('getFormProp', ['sub', 'rcrds']);
     const pubType = rcrds.pub.publicationType.displayName;
     const defaultType = getDefaultCitType(pubType, rcrds);
-    _cmbx('setSelVal', ['#CitationType-sel', citTypes[defaultType], 'silent']);
+    _u('setSelVal', ['CitationType', citTypes[defaultType], 'silent']);
     return loadCitTypeFields(citTypes[defaultType], defaultType);
 }
 function getDefaultCitType(pubType, rcrds) {
@@ -118,10 +118,10 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
         disableAuthorField();
     }
     function disableAuthorField() {
-        if ($('#Authors-sel-cntnr')[0].children.length > 1) {
-            $('#Authors-sel-cntnr')[0].lastChild.remove();
+        if ($('#sel-cntnr-Authors')[0].children.length > 1) {
+            $('#sel-cntnr-Authors')[0].lastChild.remove();
         }
-        _u('enableComboboxes', [$('#Authors-sel-cntnr select'), false]);
+        _u('enableComboboxes', [$('#sel-cntnr-Authors select'), false]);
     }
     function disableTitleField() {
         $('#Title_row input').prop('disabled', true);

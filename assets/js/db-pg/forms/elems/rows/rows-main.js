@@ -26,7 +26,7 @@ export function ifAllRequiredFieldsFilled() {
 }
 /*---------------------- FILL FORM-DATA --------------------------------------*/
 export function getCurrentFormFieldVals(fLvl) {
-    fields.getCurrentFormFieldVals(fLvl);
+    return fields.getCurrentFormFieldVals(fLvl);
 }
 export function fillComplexFormFields(fLvl) {
     return fields.fillComplexFormFields(fLvl);
@@ -57,7 +57,7 @@ export function buildFormRows(entity, fVals, fLvl, params) {        /*dbug-log*/
  * Returns rows for the entity form fields. If the form is a source-type,
  * the type-entity form config is used.
  */
-export function getFormFieldRows(entity, fVals, fLvl) {
+export function getFormFieldRows(entity, fVals, fLvl) {             /*dbug-log*///console.log('getFormFieldRows [%s][%s] = %O', entity, fLvl, fVals);
     const fObj = getRowConfg(_u('lcfirst', [entity]), fLvl);        /*dbug-log*///console.log('getFormFieldRows [%s] = %O', entity, fObj);
     return buildRows(fObj, entity, fVals, fLvl);
 }

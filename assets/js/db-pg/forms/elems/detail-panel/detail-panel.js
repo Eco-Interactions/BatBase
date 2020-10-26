@@ -253,10 +253,10 @@ export function updateSrcDetails(entity) {                                      
     addDataToIntDetailPanel('src', data);
 
     function buildSourceData() {
-        const pubSrc = srcRcrds[$('#Publication-sel').val()];
+        const pubSrc = srcRcrds[$('#sel-Publication').val()];
         const pub = _state('getRcrd', ['publication', pubSrc.publication]);
         const pubType = getSrcType(pub, 'publication');
-        const citId = $('#CitationTitle-sel').val();
+        const citId = $('#sel-CitationTitle').val();
         const citSrc = citId ? srcRcrds[citId] : false;
         const cit = !citSrc ? false :  _state('getRcrd', ['citation', citSrc.citation]);
         const citType = cit ? getSrcType(cit, 'citation') : false;              //console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit);

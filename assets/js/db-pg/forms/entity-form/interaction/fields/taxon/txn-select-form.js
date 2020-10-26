@@ -21,11 +21,11 @@
  *     RESET SELECT-FORM TO INIT STATE
  */
 import { _u } from '../../../../../db-main.js';
-import { _state, _elems, _cmbx } from '../../../../forms-main.js';
+import { _state, _elems } from '../../../../forms-main.js';
 import * as iForm from '../../int-form-main.js';
 
 export function initTaxonSelectForm(role, groupId) {                /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
-    $('#'+role+'-sel').data('loading', true);
+    $('#sel-'+role).data('loading', true);
     return buildTaxonSelectForm(role, groupId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));
@@ -35,11 +35,11 @@ function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*/
     addNewFormState(role);
     return _state('initTaxonState', [role, groupId])
         .then(data => _elems('initSubForm', ['sub', 'sml-sub-form',
-            {Group: groupId, 'Sub-Group': data.groupTaxon.id}, '#'+role+'-sel']));
+            {Group: groupId, 'Sub-Group': data.groupTaxon.id}, '#sel-'+role]));
 }
 function addNewFormState(role) {
     const lcRole = _u('lcfirst', [role]);
-    _state('addEntityFormState', [lcRole, 'sub', '#'+role+'-sel', 'create']);
+    _state('addEntityFormState', [lcRole, 'sub', '#sel-'+role, 'create']);
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -53,8 +53,8 @@ function finishTaxonSelectBuild(role) {
 }
 export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*///console.log('selectPrevTaxonAndResetRoleField [%s]', role)
     selectInitTaxonOrFocusFirstCombo(role);
-    _u('replaceSelOpts', ['#'+role+'-sel', []]);
-    $('#'+role+'-sel').data('loading', false);
+    _u('replaceSelOpts', [role, []]);
+    $('#sel-'+role).data('loading', false);
     return Promise.resolve();
 }
 /* ----------------- SELECT UNSPECIFIED - ROOT TAXON  ----------------------- */
@@ -95,14 +95,14 @@ function getTaxonExitButton(role) {
 /** Exits sub form and restores any previous taxon selection. */
 function exitTaxonSelectForm(role) {
     _elems('exitSubForm', ['sub', false, iForm.enableRoleTaxonFieldCombos]);
-    const prevTaxonId = $('#'+role+'-sel').data('selTaxon');
+    const prevTaxonId = $('#sel-'+role).data('selTaxon');
     if (!prevTaxonId) { return; }
     resetTaxonCombobox(role, prevTaxonId);
 }
 function resetTaxonCombobox(role, prevTaxonId) {
     const opt = { value: prevTaxonId, text: getTaxonym(prevTaxonId) };
-    _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
-    _cmbx('setSelVal', ['#'+role+'-sel', prevTaxonId]);
+    _u('replaceSelOpts', [role, opt]);
+    _u('setSelVal', [role, prevTaxonId]);
 }
 function getTaxonym(id) {
     return _state('getRcrd', ['taxon', id]).displayName;
@@ -119,8 +119,8 @@ function selectInitTaxonOrFocusFirstCombo(role) {
     } else { focusFirstRankCombobox(_u('lcfirst', [role])); }
 }
 function getPrevSelId(role) {
-    return $('#'+role+'-sel').val() || $('#'+role+'-sel').data('reset') ?
-        $('#'+role+'-sel').data('selTaxon') : null;
+    return $('#sel-'+role).val() || $('#sel-'+role).data('reset') ?
+        $('#sel-'+role).data('selTaxon') : null;
 }
 function focusFirstRankCombobox(lcRole) {
     _u('focusFirstCombobox', ['#'+lcRole+'_Rows']);
@@ -138,7 +138,7 @@ function appendTxnFormAndInitCombos(role, form) {
 function resetTaxonSelectForm(role) {
     const group = _state('getTaxonProp', ['groupName']);
     const reset =  group == 'Bat' ? initSubjectSelect : initObjectSelect;
-    $('#'+role+'-sel').data('reset', true);
+    $('#sel-'+role).data('reset', true);
     $('#sub-form').remove();
     reset();
 }
@@ -151,18 +151,18 @@ function resetPrevTaxonSelection(id, role) {
 function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
     if (ifTaxonInDifferentGroup(taxon.group)) { return selectTaxonGroup(taxon); }
-    _cmbx('setSelVal', ['#'+taxon.rank.displayName+'-sel', taxon.id]);
+    _u('setSelVal', [taxon.rank.displayName, taxon.id]);
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
     _state('setTaxonProp', ['prevSel', {val: taxon.id, text: taxon.displayName }]);
 }
 function ifTaxonInDifferentGroup(group) {
-    return group.displayName !== 'Bat' && $('#Group-sel').val() != group.id;
+    return group.displayName !== 'Bat' && $('#sel-Group').val() != group.id;
 }
 function selectTaxonGroup(taxon) {
-    _cmbx('setSelVal', ['#Group-sel', taxon.group.id]);
+    _u('setSelVal', ['Group', taxon.group.id]);
 }
 function deleteResetFlag(role) {
-    $('#'+role+'-sel').removeData('reset');
+    $('#sel-'+role).removeData('reset');
 }

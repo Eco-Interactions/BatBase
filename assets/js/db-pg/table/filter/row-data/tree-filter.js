@@ -26,7 +26,7 @@ function buildTxtSearchLbl(entity) {
     return _u('buildElem', ['label', { class: classes }]);
 }
 function buildTxtSearchInput(entity) {
-    const attr = { type: 'text', name: 'sel'+entity,
+    const attr = { type: 'text', name: 'name-'+entity,
         placeholder: entity+' Name (Press Enter to Filter)' };
     const input = _u('buildElem', ['input', attr]);
     addInputClass(entity, input);
@@ -48,7 +48,7 @@ function onTextFilterChange(entity, e) {
     fM.onFilterChangeUpdateRowData();
 }
 export function getTreeFilterVal(entity) {                         /*debug-log*///console.log('getTreeFilterVal entity = ', entity);
-    return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
+    return $('input[name="name-'+entity+'"]').val().trim().toLowerCase();
 }
 function updateTreeFilterState(text) {
     const val = !text ? false : '"'+text+'"';

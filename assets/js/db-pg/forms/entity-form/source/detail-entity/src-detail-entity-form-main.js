@@ -63,25 +63,25 @@ function getEntityComboEvents(entity) {
     return  {
         'citation': {
             'CitationType': {
-                change: loadCitTypeFields },
+                onChange: loadCitTypeFields },
             'Authors': {
-                add: initAuthOrEdForm.bind(null, 1, 'Authors'),
-                change: onAuthAndEdSelection.bind(null, 1, 'Authors')
+                create: initAuthOrEdForm.bind(null, 1, 'Authors'),
+                onChange: onAuthAndEdSelection.bind(null, 1, 'Authors')
             },
         },
         'publication': {
             'PublicationType': {
-                change: loadPubTypeFields },
+                onChange: loadPubTypeFields },
             'Publisher': {
-                add: initPublisherForm,
-                change: onPublSelection },
+                create: initPublisherForm,
+                onChange: onPublSelection },
             'Authors': {
-                add: initAuthOrEdForm.bind(null, 1, 'Authors'),
-                change: onAuthAndEdSelection.bind(null, 1, 'Authors')
+                create: initAuthOrEdForm.bind(null, 1, 'Authors'),
+                onChange: onAuthAndEdSelection.bind(null, 1, 'Authors')
             },
             'Editors': {
-                add: initAuthOrEdForm.bind(null, 1, 'Editors'),
-                change: onAuthAndEdSelection.bind(null, 1, 'Editors')
+                create: initAuthOrEdForm.bind(null, 1, 'Editors'),
+                onChange: onAuthAndEdSelection.bind(null, 1, 'Editors')
             }
         }
     }[entity];

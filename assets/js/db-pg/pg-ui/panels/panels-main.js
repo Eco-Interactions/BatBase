@@ -1,15 +1,15 @@
 /**
  * Strutural code and helpers for the search-options panels
  *
- * Exports:           Imported by:
- *     addPanelEvents       db-ui
- *     closeOpenPanels      db-ui
- *     parseUserNamed       filter-panel, save-ints
- *     submitUpdates        filter-panel, save-ints
- *     togglePanel          filter-panel, save-ints, review-panel
- *     updateSubmitEvent    filter-panel, save-ints
+ * Export
+ *     addPanelEvents
+ *     closeOpenPanels
+ *     parseUserNamed
+ *     submitUpdates
+ *     togglePanel
+ *     updateSubmitEvent
  *
- * TOC:
+ * TOC
  *     FACADE
  *         EXTERNAL
  *         INTERNAL
@@ -84,7 +84,7 @@ export function addPanelEventsAndStyles(userRole) {
 }
 function setInfoButtonClickEvents() {
     $('#svd-list-hlp').click(_modal.bind(null, 'showInfoModal', ['saved-lists']));
-    $('#svd-fltr-hlp').click(_modal.bind(null, 'showInfoModal', ['selSavedFilters']));
+    $('#svd-fltr-hlp').click(_modal.bind(null, 'showInfoModal', ['sel-FilterSet']));
     $('#fltr-pnl-hlp').click(_modal.bind(null, 'showInfoModal', ['filter-panel']));
 }
 export function updateSubmitEvent(id, event) {

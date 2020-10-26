@@ -20,11 +20,11 @@ export function initLocViewOpts(view) {                             /*Perm-log*/
     } else { _u('getData', ['curView']).then(setLocView); }
 }
 function loadLocationViewOpts() {
-    if ($('#sel-view').data('focus') === 'locs') { return; }
+    if ($('#sel-View').data('focus') === 'locs') { return; }
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
-    _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onLocViewChange')]);
-    $('#sel-view').data('focus', 'locs');
+    _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onLocViewChange')]);
+    $('#sel-View').data('focus', 'locs');
 }
 function setLocView(view) {
     _u('setSelVal', ['View', view, 'silent']);
@@ -39,12 +39,12 @@ export function initSrcViewOpts(view) {                             /*Perm-log*/
     setSrcView(view);
 }
 function loadSourceViewOpts() {
-    if ($('#sel-view').data('focus') === 'srcs') { return ; }
+    if ($('#sel-View').data('focus') === 'srcs') { return ; }
     const opts = [{ value: "auths", text: "Authors" },
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
-    _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onSrcViewChange')]);
-    $('#sel-view').data('focus', 'srcs');
+    _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onSrcViewChange')]);
+    $('#sel-View').data('focus', 'srcs');
 }
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView(view) {
@@ -58,19 +58,19 @@ export function initTxnViewOpts(view, reset) {
     setTaxonView(view);
 }
 function loadTxnViewOpts(groups, reset) {
-    if ($('#sel-view').data('focus') === 'taxa' && !reset) { return; }
+    if ($('#sel-View').data('focus') === 'taxa' && !reset) { return; }
     buildAndLoadTxnOpts(groups);
 }
 function buildAndLoadTxnOpts(groups) {
     const opts = getViewOpts(groups);
-    _u('replaceSelOpts', ['#sel-view', opts, _table.bind(null, 'onTxnViewChange')]);
-    $('#sel-view').data('focus', 'taxa');
+    _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
+    $('#sel-View').data('focus', 'taxa');
 }
 function getViewOpts(groups) {
     const taxa = _table('tableState').get('rcrdsById');
     const optsAry = [];
     Object.keys(groups).forEach(buildGroupOpt);
-    return optsAry.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    return _u('alphabetizeOpts', [optsAry]);
 
     function buildGroupOpt(id) {
         if (!ifGroupHasInts(groups[id].taxa)) { return; }

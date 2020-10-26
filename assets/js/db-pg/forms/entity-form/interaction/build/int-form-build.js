@@ -15,7 +15,7 @@
  *         FORM COMBOBOXES
  */
 import { _modal, _u } from '../../../../db-main.js';
-import { _state, _elems, _cmbx, submitForm } from '../../../forms-main.js';
+import { _state, _elems, submitForm } from '../../../forms-main.js';
 import * as iForm from '../int-form-main.js';
 
 /* ======================= CREATE-FORM BUILD ================================ */
@@ -38,7 +38,7 @@ function getInteractionFormFields() {
  * required field elems to the form's config object.
  */
 export function finishInteractionFormBuild() {                      /*dbug-log*///console.log('           --finishIntFormBuild');
-    $('#Note-txt').change(iForm.focusPinAndEnableSubmitIfFormValid.bind(null, 'Note'));
+    $('#txt-Note').change(iForm.focusPinAndEnableSubmitIfFormValid.bind(null, 'Note'));
     modifyFormDisplay();
     iForm.addLocationSelectionMethodsNote();
     finishComboboxInit();
@@ -64,15 +64,15 @@ function openReferenceGuideInNewTab() {
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
     iForm.initFormCombos('interaction', 'top');
-    _u('enableCombobox', ['#CitationTitle-sel', false]);
+    _u('enableCombobox', ['CitationTitle', false]);
     iForm.addRoleTaxonFocusListeners();
-    _u('enableCombobox', ['#InteractionType-sel', false]);
-    _u('enableCombobox', ['#InteractionTags-sel', false]);
+    _u('enableCombobox', ['InteractionType', false]);
+    _u('enableCombobox', ['InteractionTags', false]);
     focusPubFieldIfNewRecord();
 }
 function focusPubFieldIfNewRecord() {
     const action = _state('getFormProp', ['top', 'action']);
-    _u('focusCombobox', ['#Publication-sel', action === 'create']);
+    _u('focusCombobox', ['Publication', action === 'create']);
 }
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */
 function addConfirmationBeforeSubmit() {
@@ -91,9 +91,9 @@ function showSubmitModal() {
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }
 function buildConfirmationModalHtml() {
-    const subj = $('#Subject-sel')[0].innerText;
-    const obj = $('#Object-sel')[0].innerText;
-    const typeVerb = getIntTypeVerbForm(_cmbx('getSelVal', ['#InteractionType-sel']));
+    const subj = _u('getSelTxt', ['Subject']);
+    const obj = _u('getSelTxt', ['Object']);
+    const typeVerb = getIntTypeVerbForm(_u('getSelVal', ['InteractionType']));
     return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
 }
 function getIntTypeVerbForm(typeId) {

@@ -21,7 +21,7 @@ export function addRoleTaxonFocusListeners() {
     ['Subject', 'Object'].forEach(addRoleFocusListener);
 }
 function addRoleFocusListener(role) {
-    const elem = '#'+role+'-sel + div div.selectize-input';
+    const elem = `#sel-${role} + div div.selectize-input`;
     const showSelectForm = role === 'Object' ? initObjectSelect : initSubjectSelect;
     $('#form-main').on('focus', elem, showSelectForm);
 }
@@ -43,7 +43,7 @@ export function initObjectSelect() {
     .then(() => txnSelect.selectPrevTaxonAndResetRoleField('Object'))
 }
 function getObjectGroupId() {
-    const prevSelectedId = $('#Object-sel').data('selTaxon');
+    const prevSelectedId = $('#sel-Object').data('selTaxon');
     if (!prevSelectedId) { return 2; } //default: Plants (2)
     return _state('getRcrd', ['taxon', prevSelectedId]).group.id;
 }
@@ -53,7 +53,7 @@ function ifSubFormAlreadyInUse(role) {
 }
 function ifOppositeRoleFormLoading(role) {
     const oppRole = role === 'Subject' ? 'Object' : 'Subject';
-    return $('#'+oppRole+'-sel').data('loading');
+    return $('#sel-'+oppRole).data('loading');
 }
 function openSubFormAlert(role) {
     iForm.handleOpenSubFormAlert(role, 'sub');
@@ -85,12 +85,12 @@ export function initRankCombos() {
 }
 function getRankComboEvents() {
     return {
-        'Class': { change: onRankSelection, add: iForm.create('class') },
-        'Family': { change: onRankSelection, add: iForm.create('family') },
-        'Genus': { change: onRankSelection, add: iForm.create('genus') },
-        'Order': { change: onRankSelection, add: iForm.create('order') },
-        'Group': { change: onGroupSelection },
-        'Sub-Group': { change: onSubGroupSelection },
-        'Species': { change: onRankSelection, add: iForm.create('species') },
+        'Class': { onChange: onRankSelection, create: iForm.create('class') },
+        'Family': { onChange: onRankSelection, create: iForm.create('family') },
+        'Genus': { onChange: onRankSelection, create: iForm.create('genus') },
+        'Order': { onChange: onRankSelection, create: iForm.create('order') },
+        'Group': { onChange: onGroupSelection },
+        'Sub-Group': { onChange: onSubGroupSelection },
+        'Species': { onChange: onRankSelection, create: iForm.create('species') },
     };
 }

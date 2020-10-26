@@ -122,7 +122,7 @@ function requireJs() {
 export function showIntroAndLoadingMsg(resettingData) {
     ui.updateUiForDatabaseInit();
     ui.selectInitialSearchFocus('taxa', resettingData);
-    if (resettingData) { return $('#sel-view')[0].selectize.clear('silent'); }
+    if (resettingData) { return $('#sel-View')[0].selectize.clear('silent'); } //TODO: Why is this needed?
     tutorial.startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */

@@ -14,22 +14,22 @@
  *     FINISH EDIT-FORM
  */
 import { _u } from '../../../../db-main.js';
-import { _state, _elems, _cmbx, _panel } from '../../../forms-main.js';
+import { _state, _elems, _panel } from '../../../forms-main.js';
 import * as sForm from '../src-form-main.js';
 /* -------------------------- PUBLICATION CREATE ---------------------------- */
 export function initPubForm(value) {                                /*perm-log*/console.log('       /--initPubForm [%s]', value);
     const val = value === 'create' ? '' : value;
     initPubMemory();
-    _cmbx('clearCombobox', ['#CitationTitle-sel']);
+    _u('resetCombobox', ['CitationTitle']);
     _panel('clearFieldDetails', ['CitationTitle']);
     return buildAndAppendPubForm(val);
 }
 function initPubMemory() {
-    _state('addEntityFormState', ['publication', 'sub', '#Publication-sel', 'create']);
+    _state('addEntityFormState', ['publication', 'sub', '#sel-Publication', 'create']);
 }
 function buildAndAppendPubForm(val) {
     return _elems('initSubForm',
-        ['sub', 'med-sub-form', {'Title': val}, '#Publication-sel'])
+        ['sub', 'med-sub-form', {'Title': val}, '#sel-Publication'])
     .then(form => appendPubFormAndFinishBuild(form));
 }
 function appendPubFormAndFinishBuild(form) {
@@ -63,13 +63,13 @@ function setPubComboLabelWidth() {
     $('#Authors-lbl').css('min-width', '109px');
 }
 function ifThesisDissertationModifyLabel() {
-    const type = $('#PublicationType-sel')[0].innerText;
+    const type = _u('getSelTxt', ['PublicationType']);
     if (type !== 'Thesis/Dissertation') { return; }
     $('#Publisher-lbl').css({'flex': '0 0 157px'});
 }
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote() {
-    if ($('#PublicationType-sel')[0].innerText !== 'Book') { return; }
+    if (_u('getSelTxt', ['PublicationType']) !== 'Book') { return; }
     const note = _u('buildElem', ['div', { class: 'skipFormData' }]);
     $(note).html('<i>Note: there must be at least one author OR editor ' +
         'selected for book publications.</i>')

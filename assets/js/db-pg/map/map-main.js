@@ -523,7 +523,7 @@ function showNearbyLocationsAndUpdateForm(results) {                            
 function loadCountryAndSubLocs(cntryId) {
     app.volatile.prnt = cntryId;
     if (app.map._container.id === 'map') { return addParentLocDataToMap(cntryId, null, 'map'); }
-    $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
+    $('#sel-Country-Region')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
 export function addVolatileMapPin(val, type, cntryId) {                         //console.log('           --addVolatileMapPin')
@@ -594,7 +594,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
-        $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent');
+        $('#sel-Country')[0].selectize.addItem(loc.cntryId, 'silent');
         $('#location_Rows #DisplayName_row input[type="text"]').change(); //Required fields handle submit button enabling
         addParentLocDataToMap(loc.cntryId, zoomFlag === 'create');
     }

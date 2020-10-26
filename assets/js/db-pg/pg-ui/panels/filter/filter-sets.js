@@ -5,8 +5,8 @@
  *      onTableReloadCompleteApplyFilters
  *      isFilterSetActive
  *      initFilterSetsFeature
- *      selFilterSet
- *      newFilterSet
+ *      selectFilterSet
+ *      createNewFilterSet
  *      updateFilterSetSel
  *
  * TOC:
@@ -40,37 +40,34 @@ function setFilterSetEventListeners() {
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
 }
-function updateFilterSetSel(filterOpts) {                           /*dbug-log*///console.log('updateFilterSetSel. filterNames = %O', filterNames);
-    const opts = getSavedFilterOpts(filterOpts);
-    const optGroups = buildOptGroups(opts);                         /*dbug-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
-    if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
-    _u('initCombobox', ['Saved Filter Set', selFilterSet, getSpecialOpts()]);
-
-    function getSpecialOpts() {
-        return {
-            add: newFilterSet,
-            options: opts,
-            optgroups: optGroups,
-            optgroupField: 'group',
-            labelField: 'text',
-            searchField: ['text'],
-            sortField: [
-                { field: 'group',
-                  direction: 'asc'},
-                { field: 'text',
-                  direction: 'asc'},
-                { field: '$score'}],
-            render: {
-                optgroup_header: function(data, escape) {
-                    return '<div class="optgroup-header">' + escape(data.text) + '</div>';
-                }
-            }
-        };
-    }
+function updateFilterSetSel(opts) {                                 /*dbug-log*///console.log('updateFilterSetSel. opts = %O', opts);
+    addCreateOpt(opts);
+    _u('destroySelectizeInstance', ['SavedFilters']);
+    _u('initCombobox', [buildSavedFiltersComboConfg(opts)]);
 }
-function getSavedFilterOpts(opts) {
+function addCreateOpt(opts) {
     opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'});
-    return opts;
+}
+function buildSavedFiltersComboConfg(opts) {
+    return {
+        name: 'Filter Set',
+        create: createNewFilterSet,
+        onChange: selectFilterSet,
+        options: opts,
+        optgroups: buildOptGroups(opts),
+        optgroupField: 'group',
+        labelField: 'text',
+        searchField: ['text'],
+        sortField: [
+            { field: 'group', direction: 'asc'},
+            { field: 'text', direction: 'asc'},
+            { field: '$score'}],
+        render: {
+            optgroup_header: function(data, escape) {
+                return '<div class="optgroup-header">' + escape(data.text) + '</div>';
+            }
+        }
+    };
 }
 function buildOptGroups(opts) {
     let groups = Array.from(new Set(opts.map(opt => opt.group)));
@@ -78,7 +75,7 @@ function buildOptGroups(opts) {
     return groups;
 }
 /* ============================== CREATE ==================================== */
-export function newFilterSet(val) {                                 /*dbug-log*///console.log('newFilterSet. val = %s', val);
+export function createNewFilterSet(val) {                                 /*dbug-log*///console.log('createNewFilterSet. val = %s', val);
     enableFilterSetInputs('create');
     updateSubmitButton(createFilterSet);
     $('#filter-set-name + input').val(val).focus();
@@ -90,10 +87,10 @@ function createFilterSet() {
     _modal('exitModal');
 }
 /* ========================= SELECT/EDIT ==================================== */
-export function selFilterSet(val) {
+export function selectFilterSet(val) {
     if (val === 'new') { return; } // New list typed into combobox
     resetFilterUi();
-    if (val === 'create') { return newFilterSet(); }
+    if (val === 'create') { return createNewFilterSet(); }
     if (!val) { return;  }                                          /*dbug-log*///console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
     updateSubmitButton(editFilterSet);
@@ -256,7 +253,7 @@ function applyColumnFilters(filters) {                              /*dbug-log*/
 }
 function onAllFiltersApplied() {
     if (!app.fltr) { return; } //reapplying filters after form closed.
-    $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
+    $('#sel-FilterSet')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
 /* ====================== UTILITY =========================================== */
@@ -301,7 +298,7 @@ function onUpdateSuccessUpdateFilterUi(id) {
     _u('getOptsFromStoredData', ['savedFilterNames'])
     .then(updateFilterSetSel)
     .then(() => {
-        $('#selSavedFilters')[0].selectize.addItem(id);
+        $('#sel-FilterSet')[0].selectize.addItem(id);
         addSetToFilterStatus();
         showSavedMsg();
     });
@@ -327,7 +324,7 @@ function onFilterDeleteComplete(results) {                          /*dbug-log*/
 function onDeleteSuccessUpdateFilterUi() {
     resetFilterUi();
     _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
-    $('#selSavedFilters')[0].selectize.open();
+    $('#sel-FilterSet')[0].selectize.open();
 }
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);

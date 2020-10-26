@@ -1,35 +1,10 @@
 /**
  * Handles building and managing the form comboboxes.
  *
- * EXPORTS:
- *     buildMultiSelect
- *     buildMultiSelectElem
- *     buildSelect
- *     buildTagField
- *     clearCombobox
- *     enableCombobox
- *     enableComboboxes
- *     enableFirstCombobox
- *     focusCombobox
- *     focusFirstCombobox
- *     getLocationOpts
- *     getRcrdOpts
- *     getSelectStoredOpts
- *     getSelVal
- *     getSelTxt
- *     getSrcOpts
- *     getTaxonOpts
- *     initFormCombos
- *     resetFormCombobox
- *     setSelVal
- *     updateComboboxOptions
- *
  * TOC
  *    COMBOBOX HELPERS
  *        INIT
- *        (EN/DIS)ABLE COMBOBOXES
- *        FOCUS COMBOBOX
- *        GETTERS & (RE)SETTERS
+ *        RESET
  *    COMBOBOX BUILDERS
  *        TAGS COMBOBOX
  *        SINGLE SELECT/COMBOS
@@ -48,51 +23,33 @@ import { _state, _val, getSubFormLvl } from '../../../../forms-main.js';
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, comboEvents) {                     //console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
+export function initFormCombos(entity, fLvl, comboEvents) {         /*dbug-log*/console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
     const elems = _state('getFormProp', [fLvl, 'selElems']);
     elems.forEach(selectizeElem);
     _state('setFormProp', [fLvl, 'selElems', []]);
 
-    function selectizeElem(fieldName) {                                         //console.log("Initializing --%s-- select", field);
-        const confg = getFieldConfg(comboEvents, fieldName);
-        confg.id = confg.id || '#'+fieldName+'-sel';
-        // $(confg.id).off('change');
-        _u('initComboboxN', [confg]);
+    function selectizeElem(fieldName) {
+        const confg = getFieldConfg(comboEvents, fieldName);        /*dbug-log*/console.log("   Initializing [%s] confg = %O", fieldName, confg);
+        _u('initCombobox', [confg]);
     }
 }
 function getFieldConfg(comboEvents, fieldName) {
-    const baseConfg = getBaseFieldConfg(fieldName) ;                            //console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
+    const baseConfg = getBaseFieldConfg(fieldName) ;                /*dbug-log*///console.log('baseConfg = %O, eventConfg = %O', baseConfg, comboEvents);
     const eventConfg = comboEvents[fieldName] || {};
     return Object.assign(baseConfg, eventConfg);
 }
 function getBaseFieldConfg(fieldName) {
-    const confgName = fieldName.replace(/([A-Z])/g, ' $1');
-    const confgs = {
-        'Authors': { name: 'Authors', id: '#Authors-sel1' },
-        'Editors': { name: 'Editors', id: '#Editors-sel1' },
-        'InteractionTags': { name: 'Interaction Tags',
-            options: { delimiter: ",", maxItems: null }},
+    const confgMap = {
+        'Authors': { id: '#sel-Authors1', confgName: 'Authors1' },
+        'Editors': { id: '#sel-Editors1', confgName: 'Editors1' },
+        'InteractionTags': { delimiter: ",", maxItems: null },
     };
-    return confgs[fieldName] || { name: confgName };
+    const confg = confgMap[fieldName] ? confgMap[fieldName] : {};
+    confg.name = fieldName.replace(/([A-Z])/g, ' $1').trim(); //Adds a space between words in CamelCase string.
+    if (!confg.id) { confg.id = '#sel-'+fieldName; }
+    return confg;
 }
-export function clearCombobox(selId) {                                          //console.log("clearCombobox [%s]", selId);
-    const selApi = $(selId)[0].selectize;
-    selApi.clear('silent');
-    selApi.updatePlaceholder();
-    selApi.removeOption('');  //Removes the "Creating [entity]..." placeholder.
-}
-/* --------------------- GETTERS & (RE)SETTERS ------------------------------ */
-export function getSelVal(id) {                                                 //console.log('getSelVal [%s]', id);
-    return $(id)[0].selectize.getValue();
-}
-export function setSelVal(id, val, silent) {                                    //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
-    const $selApi = $(id)[0].selectize;
-    if ($(id)[0].multiple) {
-        $selApi.setValue(val, silent);
-    } else {
-        $selApi.addItem(val, silent);
-    }
-}
+/* -------------------------------- RESET ----------------------------------- */
 /**
  * Clears and enables the parent combobox for the exited form. Removes any
  * placeholder options and, optionally, brings it into focus.
@@ -100,21 +57,13 @@ export function setSelVal(id, val, silent) {                                    
 export function resetFormCombobox(fLvl, focus) {
     const selId = _state('getFormParentId', [fLvl]);
     if (!selId) { return; }
-    clearCombobox(selId);
-    _u('enableCombobox', [selId]);
-    _u('focusCombobox', [selId, focus]);
-}
-/** Clears previous options and adds the new ones. Optionally focuses the combobox. */
-export function updateComboboxOptions(selId, opts, focus) {
-    const selApi = $(selId)[0].selectize;
-    selApi.clear('silent');
-    selApi.clearOptions();
-    selApi.addOption(opts);
-    selApi.refreshOptions(false);
-    if (focus === true) { _u('focusCombobox', [selId, focus]); }
+    const field = selId.split('sel-')[1];
+    _u('resetCombobox', [field]);
+    _u('enableCombobox', [field]);
+    _u('focusCombobox', [field, focus]);
 }
 /* ====================== COMBOBOX BUILDERS ================================= */
-export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*/console.log('buildComboInput [%s], args = %O', type, arguments);
+export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*///console.log('buildComboInput [%s], args = %O', type, arguments);
     const map = {
         multiSelect: buildMultiSelect,
         select: buildSelect,
@@ -128,7 +77,7 @@ export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*/
  * to allow multiple selections. A data property is added for use form submission.
  */
 function buildTagField(entity, field, fLvl) {
-    const attr = { id: field + '-sel', class: 'med-field'};
+    const attr = { id: 'sel-'+field, class: 'med-field'};
     const tagSel = _u('buildSelectElem', [[], attr]);
     $(tagSel).data('inputType', 'tags');
     _state('addComboToFormState', [fLvl, field]);
@@ -146,7 +95,7 @@ function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*/
         .then(finishSelectBuild);
 
     function finishSelectBuild(opts) {                              /*dbug-log*///console.log('[%s] opts = %O', field, opts);
-        const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
+        const fieldId = 'sel-' + (cnt ? field + cnt : field);
         const attr = { id: fieldId , class: 'med-field'};
         _state('addComboToFormState', [fLvl, field]);
         return _u('buildSelectElem', [opts, attr]);
@@ -159,7 +108,7 @@ function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*/
  * or the Author create form when the user enters a new Author's name.
  */
 function buildMultiSelect(entity, field, fLvl) {                    /*dbug-log*///console.log("buildMultiSelect [%s][%s]", entity, field);
-    const cntnr = _u('buildElem', ['div', { id: field+'-sel-cntnr'}]);
+    const cntnr = _u('buildElem', ['div', { id: 'sel-cntnr-' + field, class: 'sel-cntnr' }]);
     return buildMultiSelectElem(entity, field, fLvl, 1)
         .then(returnFinishedMultiSelectFields);
 
@@ -332,7 +281,7 @@ export function getTaxonOpts(rank, field, r, g) {
 function getGroupOpts(prop, field) {
     const groups = _state('getTaxonProp', ['groups']);
     const opts = Object.keys(groups).map(getGroupOpt).filter(o => o);
-    return opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    return _u('alphabetizeOpts', [opts]);
 
     function getGroupOpt(name) {
         if (name === 'Bat') { return null; }
@@ -353,7 +302,7 @@ function getCntryRegOpts(prop, field) {
 export function getLocationOpts(prop, field) {
     const rcrds = _state('getEntityRcrds', ['location']);
     let opts = Object.keys(rcrds).map(buildLocOpt);
-    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    opts = _u('alphabetizeOpts', [opts]);
     opts.unshift({ value: 'create', text: 'Add a new Location...'});
     return opts;
 

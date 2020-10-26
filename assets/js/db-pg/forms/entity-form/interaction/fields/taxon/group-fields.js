@@ -68,7 +68,7 @@ export function onSubGroupSelection(val) {
     return buildAndAppendGroupRows(val);
 }
 function updateSubGroupState() {
-    const subGroup = $('#Sub-Group-sel')[0].innerText.split(' ')[1];/*temp-log*/console.log('onSubGroupSelection [%s]', subGroup);
+    const subGroup = _u('getSelTxt', ['Sub-Group']).split(' ')[1];  /*temp-log*/console.log('onSubGroupSelection [%s]', subGroup);
     const subGroupTaxon = _state('getRcrd', ['taxon', _state('getTaxonProp', ['subGroups'])[subGroup].id]);
     _state('setTaxonProp', ['subGroup', subGroup]);
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);

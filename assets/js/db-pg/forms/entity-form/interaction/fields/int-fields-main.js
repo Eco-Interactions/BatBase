@@ -15,14 +15,14 @@ import * as type from './type-tag-int-fields.js';
 
 export function getIntFormFieldComboEvents(argument) {
     return {
-        'CitationTitle': { change: src.onCitSelection, add: create('citation', 'sub') },
-        'Country-Region': { change: loc.onCntryRegSelection },
-        'InteractionType': { change: type.onTypeSelectionInitTagField },
-        'InteractionTags': { change: type.onTagSelection },
-        'Location': { change: loc.onLocSelection, add: create('location', 'sub')},
-        'Publication': { change: src.onPubSelection, add: create('publication', 'sub')},
-        'Subject': { change: txn.onTaxonRoleSelection.bind(null, 'Subject') },
-        'Object': { change: txn.onTaxonRoleSelection.bind(null, 'Object') },
+        'CitationTitle': { onChange: src.onCitSelection, create: create('citation', 'sub') },
+        'Country-Region': { onChange: loc.onCntryRegSelection },
+        'InteractionType': { onChange: type.onTypeSelectionInitTagField },
+        'InteractionTags': { onChange: type.onTagSelection },
+        'Location': { onChange: loc.onLocSelection, create: create('location', 'sub')},
+        'Publication': { onChange: src.onPubSelection, create: create('publication', 'sub')},
+        'Subject': { onChange: txn.onTaxonRoleSelection.bind(null, 'Subject') },
+        'Object': { onChange: txn.onTaxonRoleSelection.bind(null, 'Object') },
     };
 }
 /* ------------------ SOURCE ------------------------------------------------ */

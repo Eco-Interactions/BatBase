@@ -25,7 +25,7 @@ const db_v = '.53'; //prod: .53
 export function initDb() {
     getData(db_v, true).then(resetDbIfNeeded);
 }
-function resetDbIfNeeded(noResetNeeded) {                                       console.log('Download DB? ', !noResetNeeded);
+function resetDbIfNeeded(noResetNeeded) {                            /*perm-log*/console.log('Download DB? ', !noResetNeeded);
     return noResetNeeded ? checkForServerUpdates() : downloadFullDb();
 }
 export function downloadFullDb(reset) {                                         //console.log('   --DOWNLOADING FULL DB');
@@ -91,14 +91,14 @@ function getStoredDataObj(keys, returnUndefined) {
     });
 }
 /* ----------------------- ERROR HANDLING ----------------------------------- */
-function handleMissingDataKey(key) {                                            console.log('       !!!!getData: key missing [%s]', key); console.trace();
+function handleMissingDataKey(key) {                                /*dbug-log*///console.log('       !!!!getData: key missing [%s]', key); console.trace();
     alertIssue('undefiendDataKey', {key: key});
 }
-function handleInvalidKeyType(key) {                                            console.log('       !!!!getData: Non-string key passed = [%O]', key); console.trace();
+function handleInvalidKeyType(key) {                                /*dbug-log*///console.log('       !!!!getData: Non-string key passed = [%O]', key); console.trace();
     alertIssue('invalidDataKeyType', {
         key: JSON.stringify(key), type: typeof key });
 }
-function handleExpectedDataNotFound(key) {                                      console.log('       !!!!getData: [%s] Not Found', key); console.trace();
+function handleExpectedDataNotFound(key) {                          /*dbug-log*///console.log('       !!!!getData: [%s] Not Found', key); console.trace();
     alertIssue('expectedDataNotFound', {key: key});
 }
 /** ----------------------- SETTERS ----------------------------------------- */

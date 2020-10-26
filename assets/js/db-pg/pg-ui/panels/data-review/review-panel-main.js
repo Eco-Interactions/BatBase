@@ -38,9 +38,9 @@ function toggleEditorColumn() {
 // }
 // function getComboConfg(field) {
 //     const confgs = {
-//         'Review-Editor': { name: 'Editor', id: 'rvw-editor-sel', change: Function.prototype },
-//         'Review-Status': { name: 'Status', id: 'rvw-state-sel', change: Function.prototype },
-//         'Review-Date-Range': { name: 'Date Range', id: 'rvw-date-start-sel', change: Function.prototype },
+//         'Review-Editor': { name: 'Editor', id: 'sel-rvw-editor', onChange: Function.prototype },
+//         'Review-Status': { name: 'Status', id: 'sel-rvw-state', onChange: Function.prototype },
+//         'Review-Date-Range': { name: 'Date Range', id: 'sel-rvw-date-start', onChange: Function.prototype },
 //     };
 //     return confgs[field];
 // }

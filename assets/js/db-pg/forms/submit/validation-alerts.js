@@ -35,7 +35,7 @@
  *         DEFAULT-HANDLER
  */
 import { _db, _u } from '../../db-main.js';
-import { _state, _elems, _cmbx, _form, getNextFormLevel } from '../forms-main.js';
+import { _state, _elems, _form, getNextFormLevel } from '../forms-main.js';
 let fS;
 /* ====================== FORM-SUBMIT ALERT ================================= */
 /**
@@ -85,19 +85,17 @@ function reloadAndRedownloadData() {
 }
 /* ===================== FORM-INIT ALERT ==================================== */
 /** A sub-form is already open. */
-export function openSubFormAlert(field, id, fLvl, skipClear) {        /*dbug-log*///console.log("       --open[%s]FormAlert [%s]", fLvl, id)
-    const selId = id || '#'+field+'-sel';
-    return formInitAlert(field, 'openSubForm', fLvl, selId, skipClear);
+export function openSubFormAlert(field, fLvl, skipClear) {          /*dbug-log*///console.log("       --open[%s]FormAlert [%s]", fLvl, field)
+    return formInitAlert(field, 'openSubForm', fLvl, skipClear);
 }
 /**
  * When an issue prevents a form init, an alert is shown to the editor and the
  * combobox that triggered the form is reset.
  */
-export function formInitAlert(field, tag, fLvl, id, skipClear) {    /*perm-log*/console.log("       --[%s]formInitAlert [%s][%s][%s]", fLvl, field, id, tag);
-    const selId = id || '#'+field+'-sel';
+export function formInitAlert(field, tag, fLvl, skipClear) {        /*perm-log*/console.log("       --[%s]formInitAlert [%s][%s]", fLvl, field, tag);
     showFormValAlert(field, tag, fLvl);
     if (skipClear) { return; }
-    window.setTimeout(function() {_cmbx('clearCombobox', [selId])}, 10);
+    window.setTimeout(function() {_u('resetCombobox', [field])}, 10);
 }
 /* =================== SHOW FORM-VALIDATION ALERT =========================== */
 /**
@@ -226,11 +224,11 @@ function handleIsGenusPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return "<span>Genus' with species children must remain at genus.</span>";
 }
 function clrIsGenusPrnt(elem, fLvl, e) {
-    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank')]);
+    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusNameAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    const genus = _u('getSelTxt', ['#Genus-sel']);
+    const genus = _u('getSelTxt', ['Genus']);
     $('#DisplayName_row input').change(clearAlert.bind(null, elem, fLvl));
     return `<span>Species must begin with the Genus name "${genus}".</span>`;
 }
@@ -240,7 +238,7 @@ function handleNeedsGenusParentAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return '<span>Please select a genus parent for the species taxon.</span>';
 }
 function clrNeedsGenusPrntAlert(elem, fLvl, e) {
-    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank')]);
+    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
 }
 /* -------------- PARENT MUST BE HIGHER RANK -------------------------------- */
 function handleNeedsHigherRankPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
@@ -253,8 +251,8 @@ function handleNeedsHigherRankAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 }
 /** Resets the taxon's rank. */
 export function clrNeedsHigherRank(elem, fLvl, e, taxonRank) {
-    const txnRank = taxonRank || $('#txn-rank').data('rank');
-    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank'), 'silent']);
+    const txnRank = taxonRank || $('#sel-Rank').data('rank');
+    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
     clearAlert($('#Taxon_alert')[0], fLvl);
     enableChngPrntBtttn();
 }

@@ -41,7 +41,7 @@ function showCountryDataOnMap(val) {
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 export function enableCountryRegionField() {
-    _u('enableCombobox', ['#Country-Region-sel']);
+    _u('enableCombobox', ['Country-Region']);
     $('#loc-note').fadeTo(400, 1);
 }
 /* ========================== LOCATION ====================================== */
@@ -53,13 +53,13 @@ export function enableCountryRegionField() {
  */
 export function fillLocCombo(loc) {
     const opts = loc ? getOptsForLoc(loc) : _cmbx('getLocationOpts');
-    _cmbx('updateComboboxOptions', ['#Location-sel', opts]);
+    _u('replaceSelOpts', ['Location', opts]);
 }
 /** Returns an array of options for the locations of the passed country/region. */
 function getOptsForLoc(loc) {
     let opts = getChildLocOpts(loc.children)
     opts.push({ value: loc.id, text: loc.displayName });
-    opts = opts.sort((a, b) => _u('alphaOptionObjs', [a, b]));
+    opts = _u('alphabetizeOpts', [opts]);
     opts.unshift({ value: 'create', text: 'Add a new Location...'});
     return opts;
 }
@@ -72,9 +72,9 @@ function getChildLocOpts(children) {
 /* ---------------------- SELECT LOCATION ----------------------------------- */
 export function selectLoc(id) {
     $('#sub-form').remove();
-    _cmbx('setSelVal', ['#Location-sel', id]);
+    _u('setSelVal', ['Location', id]);
     enableCountryRegionField();
-    _u('enableCombobox', ['#Location-sel']);
+    _u('enableCombobox', ['Location']);
 }
 /**
  * When a location is selected, its country/region is selected in the top-form
@@ -88,7 +88,7 @@ export function onLocSelection(val) {                               /*perm-log*/
     const locRcrd = _state('getRcrd', ['location', val]);
     if (!locRcrd) { return; } //error alerted to developer and editor
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
-    _cmbx('setSelVal', ['#Country-Region-sel', prntVal, 'silent']);
+    _u('setSelVal', ['Country-Region', prntVal, 'silent']);
     _panel('fillLocDataInDetailPanel', [locRcrd]);
     iForm.focusPinAndEnableSubmitIfFormValid('Location');
 }
@@ -119,6 +119,6 @@ function showInteractionFormMap() {                                 /*dbug-log*/
     if ($('#form-map').length) { return; }
     const pElem = $('#Location_row')[0].parentNode;
     _form('addMapToLocForm', ['int', $(pElem)]);
-    if (_cmbx('getSelVal', ['#Country-Region-sel'])) { return; }
-    _u('focusCombobox', ['#Country-Region-sel', true]);
+    if (_u('getSelVal', ['Country-Region'])) { return; }
+    _u('focusCombobox', ['Country-Region', true]);
 }
