@@ -47,12 +47,17 @@ export function reportErr(e) {
  *     TestIssue null (no browser alert)
  *     undefiendDataKey {key}
  */
-export function alertIssue(tag, errData = {}) {                                 _u('logInDevEnv', ['!!ALERT ISSUE [%s] = %O', tag, errData]);
+export function alertIssue(tag, errData = {}) {                                 logAlertInDev(tag, errData);
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
     if (tag == 'editorReport') { return submitEditorIssue(errData); }
     setSentryDebugContext(errData);
     handleUserAlert(tag);
     Sentry.captureException(new SentryError(tag, errData));
+}
+function logAlertInDev(tag, errData) {
+    try {
+        _u('logInDevEnv', ['!!ALERT ISSUE [%s] = %O', tag, errData]);
+    } catch (e) { /* When error occurs before module is fully loaded. */ }
 }
 function setSentryDebugContext(errData) {
     setBasicStateContext();

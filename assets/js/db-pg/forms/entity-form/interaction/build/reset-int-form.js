@@ -12,7 +12,7 @@
  *         HANDLE PERSISTED FIELDS
  *     RESET FORM UI
  */
-import { _state, _elems, _panel, _cmbx } from '../../../forms-main.js';
+import { _state, _elems, _panel } from '../../../forms-main.js';
 import * as iForm from '../int-form-main.js';
 
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
@@ -58,8 +58,8 @@ function getPinnedFieldVals() {
     return vals;
 
     function getFieldVal(fieldName) {
-        const suffx = fieldName === 'Note' ? '-txt' : '-sel';
-        vals[fieldName] = $('#'+fieldName+suffx).val();
+        const prefix = fieldName === 'Note' ? 'txt-' : 'sel-';
+        vals[fieldName] = $('#'+prefix+fieldName).val();
     }
     function addFalseValue(fieldName) {
         vals[fieldName] = false;
@@ -68,9 +68,9 @@ function getPinnedFieldVals() {
 /* ------------------------ CLEAR FIELD DATA -------------------------------- */
 function clearField(field, vals) {
     _state('setFormFieldData', ['top', field, null]);
-    if (field === 'Note') { return $('#Note-txt').val(""); }
+    if (field === 'Note') { return $('#txt-Note').val(""); }
     _panel('clearFieldDetails', [field]);
-    _cmbx('clearCombobox', ['#'+field+'-sel']);
+    _u('resetCombobox', [field]);
     handleClearedField(field, vals);
 }
 function handleClearedField(field, vals) {
@@ -85,8 +85,8 @@ function handleClearedField(field, vals) {
 }
 function clearTaxonField(field) {
     if (['Subject', 'Object'].indexOf(field) === -1) { return; }
-    _cmbx('updateComboboxOptions', ['#'+field+'-sel', []]);
-    $('#'+field+'-sel').data('selTaxon', false);
+    _u('replaceSelOpts', [field, []]);
+    $('#sel-'+field).data('selTaxon', false);
 }
 function syncWithCountryField(cntryId, field) {
     const cntry = cntryId ? _state('getRcrd', ['location', cntryId]) : null;
@@ -104,10 +104,10 @@ function handePersistedField(field, data) {
 }
 function fillPubDetails(pub) {
     if (pub) { _panel('updateSrcDetails', ['pub']);
-    } else { _u('enableCombobox', ['#CitationTitle-sel', false]); }
+    } else { _u('enableCombobox', ['CitationTitle', false]); }
 }
 function setFieldInitVal(field, data) {
-    $(`#${field}-sel`).data('init-val', data);
+    $('#sel-'+field).data('init-val', data);
 }
 /* ==================== RESET FORM UI ======================================= */
 function resetFormUi() {

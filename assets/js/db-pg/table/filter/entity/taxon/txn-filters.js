@@ -23,7 +23,7 @@ const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
     loadTxnRankComboboxes(tblState);
-    if ($('input[name="selTaxon"]').length) { return; } //elems already initialized
+    if ($('input[name="name-Taxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
     _ui('updateTaxonFilterViewMsg', [tblState.groupPluralName]);
     return loadAsyncFilters(tblState);
@@ -110,7 +110,7 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {                     //c
         ranks.forEach(function(rank) {                                        //console.log('----- building select box for rank = [%s]', rank);
             const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
             const span = _u('buildElem', ['span', { text: rank + ': ' }]);
-            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', 'sel' + rank, rank);
+            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', 'sel-' + rank, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
@@ -119,12 +119,14 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {                     //c
 }
 function initRankComboboxes(groupRanks) {
     const confg = {};
-    groupRanks.forEach(rank => {confg[rank] = applyTxnFilter});
-    _u('initComboboxes', [confg]);
+    groupRanks.forEach(initRankCombo);
+}
+function initRankCombo(rank) {
+    _u('initCombobox', [{ name: rank, onChange: applyTxnFilter }, true]);
 }
 function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {                  //console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
     ranks.forEach(rank => {
-        _u('replaceSelOpts', ['#sel'+rank, rankOptsObj[rank], null, rank]);
+        _u('replaceSelOpts', [rank, rankOptsObj[rank], null, rank]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
@@ -180,7 +182,7 @@ function getTaxonTreeRootRcrd(val, rcrds, that) {
     }
     function getParentTxn() {
         const selected = tState().get('selectedOpts');
-        const rank = that.$input[0].id.split('sel')[1];
+        const rank = that.$input[0].id.split('sel-')[1];
         const prntId = _u('getDetachedRcrd', [selected[rank], rcrds]).parent;
         return _u('getDetachedRcrd', [prntId, rcrds])
     }

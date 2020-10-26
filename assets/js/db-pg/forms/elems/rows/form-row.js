@@ -6,7 +6,7 @@ import { _u } from '../../../db-main.js';
  * Each element is built, nested, and returned as a completed row.
  * rowDiv>(alertDiv, fieldDiv>(label, input, [pin]))
  */
-export default function buildFormRow(field, input, fLvl, rowClss, info) {/*dbug-log*///console.log('building form row for [%s], req? [%s]', field, isReq);
+export default function buildFormRow(field, input, fLvl, rowClss, info) {/*dbug-log*///console.log('buildFormRow[%s][%s] row.[%s] info?[%s] input = %O', field, fLvl, rowClss, info, arguments);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
     const alertDiv = _u('buildElem', ['div', { id: field+'_alert'}]);
     const fieldCntnr = buildField(input, field, fLvl, info);

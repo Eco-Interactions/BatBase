@@ -23,17 +23,17 @@ export function initCreateForm(entity, val) {                                   
 }
 function buildLocForm(val) {
     const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
-        'Country': $('#Country-Region-sel').val()
+        'Country': $('#sel-Country-Region').val()
     };
-    _state('addEntityFormState', ['location', 'sub', '#Location-sel', 'create']);
+    _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create']);
     _state('setOnFormCloseHandler', ['sub', _form.bind(null, 'enableCountryRegionField')]);
-    return _elems('initSubForm', ['sub', 'med-sub-form', vals, '#Location-sel'])
+    return _elems('initSubForm', ['sub', 'med-sub-form', vals, '#sel-Location'])
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
-        _u('enableCombobox', ['#Country-Region-sel', false]);
+        _u('enableCombobox', ['Country-Region', false]);
         _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_row input').focus();
@@ -81,8 +81,8 @@ export function finishEditFormBuild(entity) {
     onLocFormLoadComplete();
 }
 function updateCountryChangeMethod() {
-    $('#Country-sel')[0].selectize.off('change');
-    $('#Country-sel')[0].selectize.on('change',
+    $('#sel-Country')[0].selectize.off('change');
+    $('#sel-Country')[0].selectize.on('change',
         focusParentAndShowChildLocs.bind(null, 'edit'));
 }
 function addGpsListenerToEditForm(id) {
@@ -96,7 +96,7 @@ function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
     if (!$('#Latitude_row input').val()) { return; }
-    _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['#Country-sel'])]);
+    _map('addVolatileMapPin', [id, 'edit', _u('getSelVal', ['#Country'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
 function afterMapLoads(onLoadFunc, id) {
@@ -110,7 +110,7 @@ function afterMapLoads(onLoadFunc, id) {
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 export function initFormCombos(entity, fLvl) {
     const events = {
-        'Country': { change: focusParentAndShowChildLocs.bind(null, 'create') }
+        'Country': { onChange: focusParentAndShowChildLocs.bind(null, 'create') }
     };
     _cmbx('initFormCombos', ['location', fLvl, events]);
 }
@@ -121,7 +121,7 @@ export function addMapToLocForm(type, $formElem = $('#location_Rows')) {
     initLocFormMap(type);
 }
 function initLocFormMap(type) {
-    const prntId = $('#Country-Region-sel').val() || $('#Country-sel').val();
+    const prntId = $('#sel-Country-Region').val() || $('#sel-Country').val();
     const locRcrds = _state('getEntityRcrds', ['location'])
     _map('initFormMap', [prntId, locRcrds, type]);
 }

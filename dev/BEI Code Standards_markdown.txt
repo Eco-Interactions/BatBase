@@ -1,0 +1,12 @@
+# BEI Code Standards
+
+## Elem Attributes
+    - ID for comboboxes: 'sel-'[FieldName]
+
+## Logs
+    /*perm-log*/
+    /*temp-log*/
+    /*dbug-log*/
+
+    TODO
+    REMOVE

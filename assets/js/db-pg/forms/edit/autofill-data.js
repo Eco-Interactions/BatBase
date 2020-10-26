@@ -14,7 +14,7 @@
  *     FILL FIELD-DATA
  */
 import { _u } from '../../db-main.js';
-import { _state, _elems, _confg, _cmbx, _form, _panel } from '../forms-main.js';
+import { _state, _elems, _confg, _form, _panel } from '../forms-main.js';
 
 export function fillFormWithEntityData(entity, id) {
     const cEntity =  _confg('getCoreEntity', [entity]);
@@ -64,21 +64,21 @@ function removeFieldsWithSpecialHandling(fieldTypes) {
  * Values will be set in fields in the change event for the taxon role combos.
  */
 function setTypeAndTagInitValuesAsDataFieldElems(rcrd) {
-    $('#InteractionType-sel').data('init-val', rcrd.interactionType.id);
-    $('#InteractionType-sel').data('init-val', rcrd.interactionType.id);
-    $('#InteractionTags-sel').data('init-val', rcrd.tags.map(t => t.id).join(', '));
+    $('#sel-InteractionType').data('init-val', rcrd.interactionType.id);
+    $('#sel-InteractionType').data('init-val', rcrd.interactionType.id);
+    $('#sel-InteractionTags').data('init-val', rcrd.tags.map(t => t.id).join(', '));
 }
-function addTaxon(fieldId, prop, rcrd) {
-    const selApi = $('#'+ fieldId + '-sel')[0].selectize;
+function addTaxon(field, prop, rcrd) {
+    const selApi = $('#sel-'+ field)[0].selectize;
     const taxon = _state('getRcrd', ['taxon', rcrd[prop]]);
     _state('setTaxonProp', ['groupName', taxon.group.displayName]);
     selApi.addOption({ value: taxon.id, text: taxon.displayName });
     selApi.addItem(taxon.id);
 }
-function addSource(fieldId, prop, rcrd) {
+function addSource(field, prop, rcrd) {
     const citSrc = _state('getRcrd', ['source', rcrd.source])
-    _cmbx('setSelVal', ['#Publication-sel', citSrc.parent]);
-    _cmbx('setSelVal', ['#CitationTitle-sel', rcrd.source]);
+    _u('setSelVal', ['Publication', citSrc.parent]);
+    _u('setSelVal', ['CitationTitle', rcrd.source]);
 }
 /* ------------------------- LOCATION --------------------------------------- */
 function fillLocData(entity, id, rcrd, dEntity) {
@@ -94,7 +94,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
         delete fields.Longitude;
         delete fields.Country;
         ['lat', 'long'].forEach(setCoordField);
-        _cmbx('setSelVal', ['#Country-sel', rcrd.country.id, 'silent']);
+        _u('setSelVal', ['Country', rcrd.country.id, 'silent']);
     }
     function setCoordField(prefix) {
         const value = rcrd[`${prefix}itude`];
@@ -154,7 +154,7 @@ function setTitleField(entity, srcRcrd) {
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) {
     if (!_elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }
-    _cmbx('setSelVal', ['#Publisher-sel', srcRcrd.parent]);
+    _u('setSelVal', ['Publisher', srcRcrd.parent]);
 }
 function setWebsiteField (srcRcrd) {
     $('#Website_row input').val(srcRcrd.linkUrl);
@@ -198,30 +198,30 @@ function ifFieldInForm(field) {
     return _elems('ifFieldIsDisplayed', [field, 'top']);
 }
 function addDataToField(field, fieldHndlr, rcrd) {                  /*dbug-log*///console.log("addDataToField [%s] [%O] rcrd = %O", field, fieldHndlr, rcrd);
-    const elemId = field.split(' ').join('');
-    const prop = _u('lcfirst', [elemId]);
-    fieldHndlr(elemId, prop, rcrd);
+    const fieldName = field.split(' ').join('');
+    const prop = _u('lcfirst', [fieldName]);
+    fieldHndlr(fieldName, prop, rcrd);
 }
 /** Adds multiSelect values to the form's val object. */
-function setMultiSelect(fieldId, prop, rcrd) {                      /*dbug-log*///console.log("setMultiSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-    if (!rcrd[prop] || !ifFieldInForm(fieldId)) { return; }
+function setMultiSelect(field, prop, rcrd) {                        /*dbug-log*///console.log("setMultiSelect [%s] [%s] rcrd = %O", field, prop, rcrd);
+    if (!rcrd[prop] || !ifFieldInForm(field)) { return; }
     const ucProp = _u('ucfirst', [prop]);
     _state('setFormFieldData', ['top', ucProp, rcrd[prop]]);
-    if (!$('#'+ucProp+'-sel-cntnr').length) { return; } //can this be the first line here?
+    if (!$('#sel-cntnr-'+ucProp).length) { return; } //can this be the first line here?
     _form('selectExistingAuthsOrEds', [ucProp, rcrd[prop], 'top']);
 }
-function setInput(fieldId, prop, rcrd) {                            /*dbug-log*///console.log("setInputField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+function setInput(field, prop, rcrd) {                              /*dbug-log*///console.log("setInputField [%s] [%s] rcrd = %O", field, prop, rcrd);
     const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);
-    $('#'+fieldId+'_row input').val(val).change();
+    $('#'+field+'_row input').val(val).change();
 }
-function setTextArea(fieldId, prop, rcrd) {
-    $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();
+function setTextArea(field, prop, rcrd) {
+    $('#'+field+'_row textarea').val(rcrd[prop]).change();
 }
-function setSelect(fieldId, prop, rcrd) {                           /*dbug-log*///console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+function setSelect(field, prop, rcrd) {                             /*dbug-log*///console.log("setSelect [%s] [%s] rcrd = %O", field, prop, rcrd);
     const id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
-    _cmbx('setSelVal', ['#'+fieldId+'-sel', id]);
+    _u('setSelVal', [field, id]);
 }
-function setTagField(fieldId, prop, rcrd) {                         /*dbug-log*///console.log("setTagField. rcrd = %O", rcrd)
+function setTagField(field, prop, rcrd) {                           /*dbug-log*///console.log("setTagField. rcrd = %O", rcrd)
     const tags = rcrd[prop] || rcrd.tags;
-    tags.forEach(tag => _cmbx('setSelVal', ['#'+fieldId+'-sel', tag.id]));
+    tags.forEach(tag => _u('setSelVal', [field, tag.id]));
 }

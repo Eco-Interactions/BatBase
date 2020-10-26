@@ -104,7 +104,7 @@ export function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
 }
 /*---------------------- FILL FORM-DATA --------------------------------------*/
 export function getCurrentFormFieldVals(fLvl) {
-    rows.getCurrentFormFieldVals(fLvl);
+    return rows.getCurrentFormFieldVals(fLvl);
 }
 export function fillComplexFormFields(fLvl) {
     return rows.fillComplexFormFields(fLvl);
@@ -121,4 +121,8 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
         const fVals = getCurrentFormFieldVals(fLvl);
         rows.toggleFormFields(entity, fLvl, fVals);
     }
+}/** Returns true if the next sub-rank form exists in the dom. */
+function ifOpenSubForm(fLvl) {
+    const childFormLvl = getNextFormLevel('child', fLvl);
+    return $('#'+childFormLvl+'-form').length > 0;
 }

@@ -21,7 +21,7 @@ export function loadSrcFilters(type) {                              /*Perm-log*/
 }
 function clearPanelCombos(type) {
     if (type !== 'pubs') { return Promise.resolve(); }
-    return Promise.resolve($('#selPubType')[0].selectize.clear('silent'));
+    return Promise.resolve($('#sel-PublicationType')[0].selectize.clear('silent'));
 }
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
@@ -37,14 +37,14 @@ function loadPubSearchElems(pubTypeOpts) {
     const pubTypeElem = buildPubTypeSelect(pubTypeOpts);
     const searchTreeElem = fM.getTreeTextFilterElem('Publication');
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
-    _u('initCombobox', ['Publication Type', applyPubFilter]);
-    $('#selPubType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
+    _u('initCombobox', [{ name: 'Publication Type', onChange: applyPubFilter }, true]);
+    $('#sel-PublicationType')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
 }
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _u('buildElem', ['label', {class: "sel-cntnr flex-row"}]);
     const span = _u('buildElem', ['span', { text: 'Type:' }]);
-    const sel = fM.newSel(addAllOpt(opts), '', 'selPubType', 'Publication Type');
+    const sel = fM.newSel(addAllOpt(opts), '', 'sel-PublicationType', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';
     $(sel).css('width', '177px');
     $(lbl).css('width', lblW).append([span, sel]);
@@ -65,7 +65,7 @@ function loadPublSearchHtml() {
  */
 export function applyPubFilter(typeId) {
     if (!typeId) { return; }
-    const type = $(`#selPubType option[value="${typeId}"]`).text();
+    const type = $(`#sel-PublicationType option[value="${typeId}"]`).text();
     const filter = type === '- All -' ? false : buildPubFilterObj(typeId);
     fM.setFilterState('combo', filter, 'direct');
     fM.onFilterChangeUpdateRowData();

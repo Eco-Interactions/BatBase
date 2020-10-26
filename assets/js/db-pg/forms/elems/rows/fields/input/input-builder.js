@@ -71,7 +71,7 @@ function buildTextArea(entity, field, fLvl) {
     return _u('buildElem', ['textarea', {class: getFieldClass(fLvl) }]);
 }
 export function buildLongTextArea(entity, field, fLvl) {
-    const attr = { class: getFieldClass(fLvl, 'long'), id:field+'-txt' };
+    const attr = { class: getFieldClass(fLvl, 'long'), id:'txt-'+field };
     return _u('buildElem', ['textarea', attr]);
 }
 /* ------------------------------- SELECT ----------------------------------- */
@@ -89,7 +89,7 @@ function finishFieldBuild(input, field, entity, fLvl) {
 /* ------------------------ CHANGE HANDLER ---------------------------------- */
 function addFieldOnChangeHandler(entity, input, field, fLvl) {
     ifCitationFormAutoGenerateCitationOnChange(entity, input, fLvl);
-    if (input.id.includes('-sel-cntnr')) { return; } //change event added during combo build
+    if (input.id.includes('sel-cntnr')) { return; } //change event added during combo build
     $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));
 }
 function ifCitationFormAutoGenerateCitationOnChange(entity, input, fLvl) {
@@ -145,9 +145,9 @@ function isRequiredFieldFilled(fLvl, elem) {
 function isCntnrFilled(elem) {                                      /*dbug-log*///console.log('isCntnrFilled? elem = %O', elem);
     return isAFieldSelected('Authors') || isAFieldSelected('Editors');
 }
-function isAFieldSelected(entity) {                                 /*dbug-log*///console.log('[%s] field = %O', entity, $('#'+entity+'-sel-cntnr')[0]);
-    if (!$('#'+entity+'-sel-cntnr').length) { return false; } //When no editor select is loaded.
-    const fields = $('#'+entity+'-sel-cntnr')[0].firstChild.children;/*dbug-log*/c//console.log('fields = %O', fields);
+function isAFieldSelected(entity) {                                 /*dbug-log*///console.log('[%s] field = %O', entity, $('#sel-cntnr-'+entity)[0]);
+    if (!$('#sel-cntnr-'+entity).length) { return false; } //When no editor select is loaded.
+    const fields = $('#sel-cntnr-'+entity)[0].firstChild.children;/*dbug-log*///c//console.log('fields = %O', fields);
     let isSelected = false;
     $.each(fields, (i, field) => { if ($(field).val()) { isSelected = true; } });
     return isSelected;

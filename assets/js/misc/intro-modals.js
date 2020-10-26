@@ -50,7 +50,7 @@ function getInfoModalOpts(key) {
 function getHelpSteps(key) {
     const getSteps = {
         'filter-panel': 'getFilterPanelSteps',
-        'selSavedFilters': 'getSavedFilterSteps',
+        'sel-FilterSet': 'getSavedFilterSteps',
         'saved-lists': 'getSavedListSteps'
     };
     return _tutorial(getSteps[key]);

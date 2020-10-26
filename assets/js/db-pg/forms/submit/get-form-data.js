@@ -5,7 +5,7 @@
  *     getValidatedFormData
  */
 import { _u } from '../../db-main.js';
-import { _cmbx, _state, getSelectedVals } from '../forms-main.js';
+import { _state, getSelectedVals } from '../forms-main.js';
 
 let fS; //form state
 
@@ -61,7 +61,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
     }
     /** Adds an array of tag values. */
     function getTagVals(input, fieldName) {
-        return _cmbx('getSelVal', ['#'+_u('ucfirst', [fieldName])+'-sel']);
+        return _u('getSelVal', [_u('ucfirst', [fieldName])]);
     }
     function handleAdditionalEntityData(entity) {
         if (!submitting) { return Promise.resolve(); }
@@ -103,7 +103,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
     /** ---- Additional Citation data ------ */
     function getPublicationData() {
         formVals.publication = fS.editing ?
-            fS.forms[fLvl].rcrds.src.id : $('#Publication-sel').val();
+            fS.forms[fLvl].rcrds.src.id : $('#sel-Publication').val();
     }
     /** Adds 'displayName', which will be added to both the form data objects. */
     function addCitDisplayName() {
@@ -114,7 +114,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
      * to maintain unique display names for both the publication and its citation.
      */
     function ifFullWorkCited() {
-        const type = $('#CitationType-sel option:selected').text();
+        const type = $('#sel-CitationType option:selected').text();
         const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other',
             'Ph.D. Dissertation', 'Report' ];
         if (fulls.indexOf(type) === -1) { return; }
@@ -196,7 +196,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
         if (ifParentIsRootTaxon(rank, parentRank)) {
             return fS.forms.taxonData.groupTaxon.id;
         }
-        return $('#'+parentRank+'-sel').val() || getParentTaxon(parentRank);
+        return $('#sel-'+parentRank).val() || getParentTaxon(parentRank);
 
         function ifParentIsRootTaxon(rank, parentRank) {
             const subGroupRank = fS.forms.taxonData.groupTaxon.rank.displayName;
@@ -222,7 +222,7 @@ function getFormFieldElems(entity, fLvl) {
 //  */
 // function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
 //     if (fS.action === 'edit') { return; }
-//     const cntnr = $('#'+_u('ucfirst', [entity])+'s-sel1')[0];
+//     const cntnr = $('#sel-'+_u('ucfirst', [entity])+'s1')[0];
 //     const opts = cntnr.selectize.options;
 //     const dup = checkForDuplicate(opts, vals.displayName);
 //     if (!dup) { return; }

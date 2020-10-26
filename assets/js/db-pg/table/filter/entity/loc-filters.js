@@ -26,7 +26,7 @@ export function loadLocFilters(tblState) {                          /*Perm-log*/
 function updateLocSelOptions(tblState) {
     const opts = buildLocSelectOpts(tblState);
     Object.keys(opts).forEach(locType => {
-        _u('replaceSelOpts', ['#sel'+locType, opts[locType], null, locType]);
+        _u('replaceSelOpts', [locType, opts[locType], null, locType]);
     });
     setSelectedLocVals(tblState.selectedOpts);
 }
@@ -42,7 +42,7 @@ function loadLocComboboxes(tblState) {
     const opts = buildLocSelectOpts(tblState);
     const selElems = buildLocSelects(opts);
     $('#focus-filters').append(selElems);
-    _u('initComboboxes', [{'Region': applyLocFilter, 'Country': applyLocFilter}]);
+    initLocCombos();
     setSelectedLocVals(tblState.selectedOpts);
 }
 /** Builds arrays of options objects for the location comboboxes. */
@@ -118,7 +118,7 @@ function buildLocSelectOpts(tblState, data) {
     /** Alphabetizes the options. */
     function sortLocOpts() {
         for (let type in opts) {
-            opts[type] = opts[type].sort(alphaOptionObjs);
+            opts[type] = _u('alphabetizeOpts', [opts[type]]);
         }
     }
     function addAllOption() {
@@ -133,11 +133,10 @@ function buildLocSelectOpts(tblState, data) {
         const filterType = selTypes.length === 1 ? selTypes[0] : 'Country';
         updateLocComboFilter(filterType, tblState.selectedOpts[filterType]);
     }
-} /* End buildLocSelectOpts */
-function alphaOptionObjs(a, b) {
-    var x = a.text.toLowerCase();
-    var y = b.text.toLowerCase();
-    return x<y ? -1 : x>y ? 1 : 0;
+}
+function initLocCombos() {
+    _u('initCombobox', [{ name: 'Region',  onChange: applyLocFilter }, true]);
+    _u('initCombobox', [{ name: 'Country', onChange: applyLocFilter }, true]);
 }
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {
@@ -151,7 +150,7 @@ function buildLocSelects(locOptsObj) {
     function buildLocSel(selName, opts) {
         const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
         const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
-        const sel = fM.newSel(opts, 'opts-box', 'sel' + selName, selName);
+        const sel = fM.newSel(opts, 'opts-box', 'sel-' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;
@@ -220,14 +219,14 @@ function getSelectedLocVal(locType, selectedOpts) {
 }
 function getLocType(that, selectedOpts) {
     return that && that.hasOwnProperty('$input') ?
-        that.$input[0].id.split('sel')[1] : getSelectedLocType(selectedOpts)
+        that.$input[0].id.split('sel-')[1] : getSelectedLocType(selectedOpts)
 }
 function getSelectedLocType(selectedOpts) {
     const sels = Object.keys(selectedOpts);
     return !sels.length ? getLocTypeFromElems() : (sels.length == 1 ? 'Region' : 'Country');
 }
 function getLocTypeFromElems() {
-    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel'+type).val()) );
+    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel-'+type).val()) );
     return locType.length == 1 ? locType[0] : null;
 }
 function hasSelVal(val) {

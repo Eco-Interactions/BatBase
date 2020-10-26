@@ -41,7 +41,7 @@ function showNewTaxonForm(val, rank) {
     .then(() => _elems('toggleSubmitBttn', ['#sub2-submit', true]));
 
     function buildTaxonForm() {
-        const pId = '#'+rank+'-sel'
+        const pId = '#sel-'+rank;
         const vals = {'DisplayName': val};
         _state('addEntityFormState', ['taxon', 'sub2', pId, 'create']);
         return _elems('initSubForm', ['sub2', 'sml-sub-form', vals, pId])
@@ -71,7 +71,7 @@ function ifSpeciesValIssue(rank) {
 
     function hasCorrectBinomialNomenclature() {
         const species = $('#DisplayName_row input')[0].value;
-        const genus = _u('getSelTxt', ['#Genus-sel']);           /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
+        const genus = _u('getSelTxt', ['Genus']);                   /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
         const speciesParts = species.split(' ');
         return genus === speciesParts[0];
     }
@@ -120,7 +120,7 @@ function buildNameInput(name) {
 /** ------- RANK COMBOBOX --------------- */
 function buildRankSel(taxon) {
     const opts = getTaxonRankOpts();
-    const sel = _u('buildSelectElem', [opts, { id: 'txn-rank' }]);
+    const sel = _u('buildSelectElem', [opts, { id: 'sel-Rank' }]);
     $(sel).data({ 'txn': taxon.id, 'rank': getRankVal(taxon.rank.displayName) });
     return sel;
 }
@@ -239,12 +239,12 @@ function initSelectParentCombos() {
 }
 function getSelectParentComboEvents() {
     return {
-        'Class': { change: onParentRankSelection, add: initCreateForm.bind(null, 'class') },
-        'Family': { change: onParentRankSelection, add: initCreateForm.bind(null, 'family') },
-        'Genus': { change: onParentRankSelection, add: initCreateForm.bind(null, 'genus') },
-        'Sub-Group': { change: handleOnSubGroupSelection },
-        'Order': { change: onParentRankSelection, add: initCreateForm.bind(null, 'order') },
-        'Species': { change: onParentRankSelection, add: initCreateForm.bind(null, 'species') },
+        'Class': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'class') },
+        'Family': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'family') },
+        'Genus': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'genus') },
+        'Sub-Group': { onChange: handleOnSubGroupSelection },
+        'Order': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'order') },
+        'Species': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'species') },
     }
 }
 function onParentRankSelection(val) {
@@ -267,11 +267,11 @@ export function selectParentTaxon(pId) {
     ifSubGroupSelect(pTaxon);
     if (pTaxon.isRoot) { return; }
     const pRank = pTaxon.rank.displayName;
-    _cmbx('setSelVal', ['#'+pRank+'-sel', pId]);
+    _u('setSelVal', [pRank, pId]);
 }
 function ifSubGroupSelect(pTaxon) {
     if (!$('#Sub-Group_row').length) { return; }
-    _cmbx('setSelVal', ['#Sub-Group-sel', pTaxon.group.subGroup.id, 'silent']);
+    _u('setSelVal', ['Sub-Group', pTaxon.group.subGroup.id, 'silent']);
 }
 function finishParentSelectFormUi() {
     alignGroupRankText();
@@ -325,7 +325,7 @@ function ifInvalidParentRank(pRank) {
     return issues;
 }
 function handleParentRankIssues(pRank) {
-    const txnRank = $('#txn-rank').val();                           /*dbug-log*///console.log("handleParentRankIssues. txnRank = %s. pRank = %s", txnRank, pRank);
+    const txnRank = $('#sel-Rank').val();                           /*dbug-log*///console.log("handleParentRankIssues. txnRank = %s. pRank = %s", txnRank, pRank);
     const issues = [
         { 'needsHigherRankPrnt': txnRank <= pRank },
         { 'needsGenusPrnt': txnRank == 8 && pRank != 7 }
@@ -374,9 +374,8 @@ function submitTaxonEdit() {
     formatAndSubmitData('taxon', 'top', vals);
 }
 function initTaxonEditRankCombo() {
-    const options = { create: false, onChange: validateTaxonRank, placeholder: null };
-    $('#txn-rank').selectize(options);
-    _cmbx('setSelVal', ['#txn-rank', $('#txn-rank').data('rank'), 'silent']);
+    _u('initCombobox', [{ name: 'Rank', onChange: validateTaxonRank }]);
+    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
 }
 /** ======================= DATA VALIDATION ================================== */
 /**
@@ -396,8 +395,8 @@ function validateTaxonRank(txnRank) {
 }
 /** Returns true if the taxon's original rank is Genus and it has children. */
 function isGenusPrnt() {
-    const orgTxnRank = $('#txn-rank').data('rank');
-    const txnId = $('#txn-rank').data('txn');
+    const orgTxnRank = $('#sel-Rank').data('rank');
+    const txnId = $('#sel-Rank').data('txn');
     return orgTxnRank == 6 && getHighestChildRank(txnId) < 8;
 }
 /**
@@ -405,7 +404,7 @@ function isGenusPrnt() {
  * the taxon-being-edited's children.
  */
 function rankIsLowerThanKidRanks(txnRank) {
-    const highRank = getHighestChildRank($('#txn-rank').data('txn'));
+    const highRank = getHighestChildRank($('#sel-Rank').data('txn'));
     return txnRank >= highRank;
 }
 function getHighestChildRank(taxonId) {

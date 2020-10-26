@@ -31,13 +31,17 @@ function buildSubGroupOpts(subGroups) {
 function buildSubGroupCombo(opts) {
     const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
     const span = _u('buildElem', ['span', { text: '' }]);
-    const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'selSub-Group');
+    const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-Sub-Group');
     $(lbl).append([span, sel]);
     return lbl;
 }
 function finishSubGroupComboInit(filterElem) {
-    $('#focus-filters').append(filterElem);
-    _u('initCombobox', ['Sub-Group', filterTableBySubGroup, {maxItems: null}]);
+    const confg = {
+        name: 'Sub-Group',
+        maxItems: null,
+        onChange: filterTableBySubGroup,
+    };
+    $('#focus-filters').append(filterEl);
 }
 /* ----------------------- APPLY FILTER ------------------------------------- */
 function filterTableBySubGroup(vals) {                                          //console.log('filterTableBySubGroups = %O', vals);
@@ -48,7 +52,7 @@ function filterTableBySubGroup(vals) {                                          
 function filterBySubGroups() {
     timeout = null;
     const groupNames = _u('getSelVal', ['Sub-Group']);
-    const totalGroups = $('#selSub-Group')[0].selectize.currentResults.total;   //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total);
+    const totalGroups = $('#sel-Sub-Group')[0].selectize.currentResults.total;   //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total);
     ifAllGroupsSelectedClearFilterCombo(groupNames.length, totalGroups);
     updateSubGroupFilterState(groupNames, totalGroups);
     fM.onFilterChangeUpdateRowData();
@@ -56,7 +60,7 @@ function filterBySubGroups() {
 
     function ifAllGroupsSelectedClearFilterCombo(selectedGroupCnt, totalGroups) {
         if (selectedGroupCnt !== totalGroups) { return; }
-        $('#selSub-Group')[0].selectize.clear();
+        $('#sel-Sub-Group')[0].selectize.clear();
     }
 }
 function updateSubGroupFilterState(gNames, totalGroups) {

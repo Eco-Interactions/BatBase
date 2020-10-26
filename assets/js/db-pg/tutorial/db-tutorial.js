@@ -57,21 +57,21 @@ function getIntroOptions() {
 function setTableState() {
     $('#show-tips').off("click");
     $('#db-view').css("height", "444px");
-    $('#search-focus')[0].selectize.disable();
-    $('#sel-view')[0].selectize.disable();
+    $('#sel-Focus')[0].selectize.disable();
+    $('#sel-View')[0].selectize.disable();
     setDbLoadDependentState();
 }
 function setDbLoadDependentState() {
-    if (!$('#search-focus').val()) {
+    if (!$('#sel-Focus').val()) {
         return window.setTimeout(setDbLoadDependentState, 200);
     }
-    $('#search-focus')[0].selectize.addItem('taxa');
-    $('#sel-view')[0].selectize.addItem('3');
+    $('#sel-Focus')[0].selectize.addItem('taxa');
+    $('#sel-View')[0].selectize.addItem('3');
 }
 /* ----------------- STEP SET UP -------------------------------------------- */
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
-    if (!$('#sel-view').val() && intro._currentStep > 2) { return waitForDbLoad('tbl'); }
+    if (!$('#sel-View').val() && intro._currentStep > 2) { return waitForDbLoad('tbl'); }
     if (intro._currentStep >= 14) { return showAlertIfGeoJsonNotAvailable(stepConfg); }
     if (stepConfg.setUpFunc) { stepConfg.setUpFunc(); }
 }
@@ -103,14 +103,14 @@ function loadIntsOnMap() {                                                      
     if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
 }
 function loadLocView(view) {
-    if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
-        $('#search-focus')[0].selectize.addItem('locs');
+    if ($('#sel-Focus')[0].selectize.getValue() !== 'locs') {
+        $('#sel-Focus')[0].selectize.addItem('locs');
     }
     window.setTimeout(setLocView(view), 400);
 }
 function setLocView(view) {
-    if ($('#sel-view')[0].selectize.getValue() !== view) {
-        $('#sel-view')[0].selectize.addItem(view);
+    if ($('#sel-View')[0].selectize.getValue() !== view) {
+        $('#sel-View')[0].selectize.addItem(view);
     }
 }
 function addBttnEvents() {
@@ -162,13 +162,13 @@ function toggleListPanelInTutorial(close) {
 /* ==================== TEAR DOWN =========================================== */
 function resetTableState() {
     resetUi();
-    if (!$('#sel-view').val()) { return; }
+    if (!$('#sel-View').val()) { return; }
     updateUiIfAllTableDataAvailable();
 }
 function updateUiIfAllTableDataAvailable() {
     _db('getData', ['interaction', true]).then(interactions => {
         if (!interactions) {return;}
-        $('#search-focus')[0].selectize.enable();
+        $('#sel-Focus')[0].selectize.enable();
         _table('resetDataTable', [focus]);
     });
 }
@@ -177,8 +177,8 @@ function resetUi() {                                                            
     intro = null;
     $('#db-view').css("height", "888px");
     $('#show-tips').click(_ui.bind(null, 'showTips'));
-    $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    $('#sel-view')[0].selectize.enable();
+    $('#sel-Focus')[0].selectize.addItem(focus, 'silent');
+    $('#sel-View')[0].selectize.enable();
 }
 /* =================== TUTORIAL STEP CONFIG ================================= */
 function getSteps() {
@@ -471,7 +471,7 @@ export function getSavedListSteps() {
             position: 'top'
         },
         {
-            element: '#list-sel-cntnr',
+            element: '#sel-list-cntnr',
             intro: `<h3><center>Select a list to manage or enter a new name to create.</center></h3><br>
                 New users have preloaded examples to help demonstrate this feature.`,
             position: 'right',

@@ -34,12 +34,12 @@ let app = {};
 /* ========================== INIT ========================================== */
 export function initDateFilterUi() {
     $('#shw-chngd').change(toggleDateFilter.bind(null, null, null, null));
-    _u('initCombobox', ['Date Filter', onSelDateFilterTypeChange]);
-    $('#selDateFilterType')[0].selectize.disable();
+    _u('initCombobox', [{ name: 'Date Filter Type', onChange: onDateTypeChange }]);
+    _u('enableCombobox', ['DateFilterType', false]);
     applyDateFilterStyles(false); //inits disabled ui
 }
 /** Change event for the time-filter-type combobox. */
-function onSelDateFilterTypeChange(val) {
+function onDateTypeChange(val) {
     if (!app.date) { app.date = { time: null, active: false }; }
     app.date.type = val;
     if (ifDateFilterActive()) {
@@ -108,7 +108,7 @@ function getCalOnReadyMethod() {
  * and that date is set as the default for the calendar.
  */
 function addDefaultTimeIfTesting(calOpts) {
-    const date = $('#selDateFilterType').data('default');
+    const date = $('#sel-DateFilterType').data('default');
     if (!date) { return; }
     calOpts.defaultDate = date;
 }
@@ -116,13 +116,13 @@ function addDefaultTimeIfTesting(calOpts) {
 function applyDateFilterStyles(filtering) {
     const opac = filtering ? 1 : .6;
     $('#filter-cal, #filter-cal+.form-control').attr({'disabled': !filtering});
-    $('.selDateFilterType-sel, #filter-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
+    $('.sel-DateFilterType-sel, #filter-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
     _ui('setTreeToggleData', [false]);
     if (filtering) {
-        $('#selDateFilterType')[0].selectize.enable();
+        $('#sel-DateFilterType')[0].selectize.enable();
     } else {
-        $('#selDateFilterType')[0].selectize.disable()
+        $('#sel-DateFilterType')[0].selectize.disable()
     }
 }
 function ifDateFilterActive(state) {
@@ -133,7 +133,7 @@ function updateDateFilterState(dateTime, filtering) {
     app.date = {
         active: filtering,
         time:   dateTime || app.date.time,
-        type:   _u('getSelVal', ['Date Filter'])
+        type:   _u('getSelVal', ['Date Filter Type'])
     };
     fM.setFilterState('date', app.date, 'direct');
 }
@@ -151,7 +151,7 @@ function filterTableByDate(date) {                                              
 }
 function filterToChangesToday() {
     const today = new Date().today();
-    $('#selDateFilterType')[0].selectize.addItem('updated');
+    $('#sel-DateFilterType')[0].selectize.addItem('updated');
     app.date.type = 'updated';
     app.cal.setDate(today, false, 'Y-m-d');
     filterByTime(null, today);
@@ -166,7 +166,7 @@ function reapplyPreviousDateFilter(dateTime) {
 }
 function openCalendar() {
     app.cal.open();
-    if ($('#selDateFilterType').data('default')) { return; }
+    if ($('#sel-DateFilterType').data('default')) { return; }
     app.cal.setDate(new Date().today(), false, 'Y-m-d');
 }
 /* ------------- SHOW TODAY'S UPDATES AFTER CREATE FORM CLOSE --------------- */

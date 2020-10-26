@@ -5,8 +5,8 @@
  */
 import { _confg, _state } from '../../forms-main.js';
 
-export default function getRowConfg(entity, fLvl) {
-    const confg = getFormConfgData(entity, fLvl);                   /*dbug-log*///console.log('[%s] get[%s]FieldConfg = %O', fLvl, entity, confg);
+export default function getRowConfg(entity, fLvl) {                 /*dbug-log*///console.log('getRowConfg [%s][%s]', entity, fLvl)
+    const confg = getFormConfgData(entity, fLvl);                   /*dbug-log*///console.log('[%s] get[%s]FieldConfg = %O', fLvl, entity, confg)
     return {
         fields: getIncludedFields(confg),
         info: confg.form.info || {},

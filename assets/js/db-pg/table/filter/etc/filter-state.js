@@ -134,7 +134,7 @@ function getPageActiveFilters () {
  * There are two groups of filters, ones that require the table to rebuild, and
  * the other can be applied to the row data directly.
  */
-function getFilterDisplayNames(dFilters, rFilters) {                            //console.log('getFilterDisplayNames. detail = %O, rebuild = %O', dFilters, rFilters);
+function getFilterDisplayNames(dFilters, rFilters) {                /*dbug-log*///console.log('getFilterDisplayNames. detail = %O, rebuild = %O', dFilters, rFilters);
     const names = [];
     getActivePanelFilterDisplayNames(dFilters, 'direct');
     getActivePanelFilterDisplayNames(rFilters, 'rebuild');

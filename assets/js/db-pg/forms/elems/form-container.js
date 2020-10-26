@@ -17,7 +17,7 @@
  *     SUB FORM
  */
 import { _modal, _u } from '../../db-main.js';
-import { _cmbx, _confg, _elems, _panel, _state } from '../forms-main.js';
+import { _confg, _elems, _panel, _state } from '../forms-main.js';
 
 let action, entity, fLvl;
 
@@ -120,7 +120,7 @@ export function initSubForm(fLvl, fClasses, fVals, sId) {
         .then(rows => buildSubFormContainer(rows, fClasses))
         .then(subForm => finishSubFormInit(subForm, sId));
 }
-function buildSubFormContainer(rows, fClasses, sId) {
+function buildSubFormContainer(rows, fClasses) {
     const subFormContainer = buildSubFormCntnr(fClasses);
     const helpBttn = getFormHelpElems();
     const hdr = buildSubFormHdr();
@@ -140,7 +140,7 @@ function buildSubFormHdr() {
 }
 function finishSubFormInit(subForm, sId) {
     _state('setFormProp', [fLvl, 'pSelId', sId]);
-    _u('enableCombobox', [sId, false]);
+    _u('enableCombobox', [sId.split('sel-').pop(), false]);
     return subForm;
 }
 /* ============================== SHARED ==================================== */

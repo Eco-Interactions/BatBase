@@ -16,7 +16,7 @@
  *         INPUTS
  */
 import { _u } from '../../../db-main.js';
-import { _state, _elems, _cmbx, getSubFormLvl } from '../../forms-main.js';
+import { _state, _elems, getSubFormLvl } from '../../forms-main.js';
 import * as sForm from './src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
 export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*///console.log('           /--loadSrcTypeFields [%s][%s]', entity, type);
@@ -67,8 +67,7 @@ function setSourceType(entity, fLvl, tName) {
     _state('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
-    const typeElemId = '#'+_u('ucfirst', [entity])+'Type-sel';
-    return _u('getSelTxt', [typeElemId]);
+    return _u('getSelTxt', [_u('ucfirst', [entity])+'Type']);
 }
 /* ================= UPDATE SOURCE-TYPE FIELDS ============================== */
 export function updateFieldsForSourceType (entity, fLvl) {
@@ -81,15 +80,14 @@ export function updateFieldsForSourceType (entity, fLvl) {
  * the selected type.
  */
 function updateFieldLabelsForType(entity, fLvl) {
-    const typeElemId = '#'+_u('ucfirst', [entity])+'Type-sel';
-    const type = $(typeElemId)[0].innerText;
+    const type = _u('getSelTxt', [_u('ucfirst', [entity]+ 'Type')]);
     const trans = getLabelTrans();
     const fId = '#'+fLvl+'-form';
 
     for (let field in trans) {                                      /*dbug-log*///console.log('updating field [%s] to [%s]', field, trans[field]);
         const $lbl = $(fId+' label:contains('+field+')');
         $lbl.text(trans[field]);
-        if ($(fId+' [id^='+field+'-sel]').length) {
+        if ($(fId+' [id^=sel-'+field).length) {
             updateComboText($lbl[0], field, trans[field]);
         }
     }
@@ -107,8 +105,8 @@ function updateFieldLabelsForType(entity, fLvl) {
     }
     function updateComboText(lblElem, fieldTxt, newTxt) {
         return lblElem.nextSibling.id.includes('-cntnr') ?
-            updateAllComboPlaceholders($('#'+fieldTxt+'-sel-cntnr')[0]) :
-            _u('updatePlaceholderText', [`#${fieldTxt}-sel`, newTxt]);
+            updateAllComboPlaceholders($('#sel-cntnr-'+fieldTxt)[0]) :
+            _u('updatePlaceholderText', [ '#sel-'+fieldTxt, newTxt]);
 
         function updateAllComboPlaceholders(cntnrElem) {
             for (let $i = 0; $i < cntnrElem.children.length; $i++) {

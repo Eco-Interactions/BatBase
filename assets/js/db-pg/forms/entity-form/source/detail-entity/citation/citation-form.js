@@ -15,7 +15,7 @@
  *     CITATION EDIT
  */
 import { _u } from '../../../../../db-main.js';
-import { _form, _state, _elems, _cmbx } from '../../../../forms-main.js';
+import { _form, _state, _elems } from '../../../../forms-main.js';
 import * as sForm from '../../src-form-main.js';
 import * as types from './cit-type-fields.js';
 import * as cite from './regen-citation.js';
@@ -36,7 +36,7 @@ export function initCitForm(v) {                                    /*perm-log*/
 }
 function initCitFormMemory(data) {
     addSourceDataToMemory(data);
-    _state('addEntityFormState', ['citation', 'sub', '#CitationTitle-sel', 'create']);
+    _state('addEntityFormState', ['citation', 'sub', '#sel-CitationTitle', 'create']);
     _state('setOnFormCloseHandler', ['sub', enablePubField]);
     addPubRcrdsToMemory(data.publication);
     return Promise.resolve();
@@ -49,11 +49,11 @@ function addSourceDataToMemory(data) {
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
-    _u('enableCombobox', ['#Publication-sel']);
-    _form('fillCitationCombo', [$('#Publication-sel').val()]);
+    _u('enableCombobox', ['Publication']);
+    _form('fillCitationCombo', [$('#sel-Publication').val()]);
 }
 function addPubRcrdsToMemory(pubRcrds) {
-    const pubSrc = _state('getRcrd', ['source', $('#Publication-sel').val()]);
+    const pubSrc = _state('getRcrd', ['source', $('#sel-Publication').val()]);
     const pub = pubRcrds[pubSrc.publication];
     _state('setFormProp', ['sub', 'rcrds', { pub: pub, src: pubSrc}]);
 }
@@ -63,7 +63,7 @@ function buildAndAppendCitForm(val) {
 }
 function initCitSubForm(val) {
     return _elems('initSubForm',
-        ['sub', 'med-sub-form', {'Title': val}, '#CitationTitle-sel']);
+        ['sub', 'med-sub-form', {'Title': val}, '#sel-CitationTitle']);
 }
 function appendCitFormAndFinishBuild(form) {                        /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
     $('#CitationText_row textarea').attr('disabled', true);
@@ -74,7 +74,7 @@ function appendCitFormAndFinishBuild(form) {                        /*dbug-log*/
         .then(() => finishCitFormUiLoad());
 }
 function finishCitFormUiLoad() {
-    _u('enableCombobox', ['#Publication-sel', false]);
+    _u('enableCombobox', ['Publication', false]);
     $('#Abstract_row textarea').focus();
     _elems('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
 }
@@ -85,8 +85,8 @@ export function handleCitText(fLvl) {                               /*dbug-log*/
     timeout = window.setTimeout(buildCitTextAndUpdateField.bind(null, fLvl), 750);
 }
 function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*///console.log('           /--buildCitTextAndUpdateField [%s]', fLvl);console.trace();
-    cite.buildCitTextAndUpdateField(reqFieldsFilled, fLvl)
-    .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(reqFieldsFilled, fLvl))
+    cite.buildCitTextAndUpdateField(fLvl)
+    .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl))
     .then(() => {timeout = null;});
 }
 /* ---------------- HIGHTLIGHT EMPTY CITATION-FIELDS ------------------------ */
@@ -94,8 +94,8 @@ function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*/
  * Highlights field continer if citation field is empty once all required fields
  * are filled. Removes hightlights when filled.
  */
-function ifReqFieldsFilledHighlightEmptyAndPrompt(reqFieldsFilled, fLvl) {
-    if (!reqFieldsFilled) { return; }
+function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl) {
+    if (!_elems('ifAllRequiredFieldsFilled', [fLvl])) { return; }
     const empty = $('#citation_Rows div.field-row').filter(hightlightIfEmpty);
     if (!empty.length && $('.warn-msg').length) { return $('.warn-msg').remove(); }
     if ($('.warn-msg').length) { return; }
@@ -115,6 +115,6 @@ function ifFieldShouldBeSkipped (el, label, input) {
 }
 /* ---------------- CITATION EDIT ------------------------------------------- */
 export function finishCitationEditForm() {
-    types.handleSpecialCaseTypeUpdates(_u('getSelTxt', ['#CitationType-sel']), 'top');
+    types.handleSpecialCaseTypeUpdates(_u('getSelTxt', ['CitationType']), 'top');
     handleCitText('top');
 }

@@ -1,32 +1,15 @@
 /**
  * Handles UI related to the database search page.
  *
- * Exports:
- *     addDomEventListeners
- *     collapseTree
- *     expandTreeByOne
- *     fadeTable
- *     init
- *     initLocViewOpts
- *     initSrcViewOpts
- *     initTxnViewOpts
- *     loadLocFilterPanelElems
- *     loadSrcFilterPanelElems
- *     loadTxnFilterPanelElems
- *     setTreeToggleData
- *     selectInitialSearchFocus
- *     updateUiForDatabaseInit
- *     showTips
- *     updateFilterStatusMsg
- *     updateUiForTableView
- *     updateUiForMapView
- *
  * TOC
- *     FACADE
  *     PANELS
  *         FILTERS
- *         DATA LISTS
- *     TABLE ROW TOGGLE
+ *         DATA-LISTS
+ *     TABLE-ROW TOGGLE
+ *     DATABASE-PAGE INIT
+ *     DATABASE ENTITY FOCUS/VIEW UI
+ *         VIEW OPTS
+ *     SWITCH BETWEEN MAP AND TABLE UI
  *     UTILITY
  *
  */
@@ -69,7 +52,7 @@ export function isFilterSetActive() {
 export function enableListResetBttn() {
     return pM.enableListResetBttn();
 }
-/* -------------------- TABLE ROW TOGGLE ------------------------------------ */
+/* ====================== TABLE-ROW TOGGLE =================================== */
 export function setTreeToggleData(state) {
     rowToggle.setTreeToggleData(state);
 }
@@ -93,7 +76,7 @@ function setRowToggleEvents() {
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(toggleTreeRows.bind(null, false, true));
 }
-/* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
+/* ====================== DATABASE-PAGE INIT ================================ */
 /** Shows a loading popup message for the inital data-download wait. */
 export function init() {
     const userRole = $('body').data("user-role");
@@ -101,7 +84,12 @@ export function init() {
     setRowToggleEvents();
     pM.addPanelEventsAndStyles(userRole);
     bttns.initFeatureButtons(userRole);
-    _u('initComboboxes', [{'Focus': buildTable, 'View': Function.prototype}]);
+    initDatabaseFocusAndViewCombos();
+}
+function initDatabaseFocusAndViewCombos() {  console.log('initDatabaseFocusAndViewCombos')
+    _u('initCombobox', [{ name: 'Focus', onChange: buildTable }, true]);
+    _u('initCombobox', [{ name: 'View',  onChange: Function.prototype }, true]);
+    // _u('initComboboxes', [{'Focus': buildTable, 'View': Function.prototype}]);
 }
 function buildTable() {
     _table('buildTable')
@@ -114,9 +102,9 @@ export function onDataDownloadCompleteEnableUiFeatures() {
 }
 /* =========== DATABASE ENTITY FOCUS/VIEW UI ================================ */
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-export function selectInitialSearchFocus(f) {                                   //console.log('--------------selectInitialSearchFocus [%s]', f);
+export function selectInitialSearchFocus(f) {                       /*dbug-log*///console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
-    _u('replaceSelOpts', ['#search-focus', getFocusOpts()]);
+    _u('replaceSelOpts', ['Focus', getFocusOpts()]);
     _u('setSelVal', ['Focus', focus, 'silent']);
 }
 function getFocusOpts() {
@@ -172,7 +160,7 @@ function updateBttnToShowRcrdsOnMap() {
 function showRcrdsOnMap() {
     _map('showTableRecordsOnMap');
 }
-function returnRcrdsToTable() {                                                 console.log('       +--returnRcrdsToTable');
+function returnRcrdsToTable() {                                     /*dbug-log*///console.log('       +--returnRcrdsToTable');
     updateUiForTableView();
     if (_u('getSelVal', ['View']) === 'map') { _u('setSelVal', ['View', 'tree']); }
 }
@@ -186,7 +174,7 @@ export function fadeTable() {
 export function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 }
-export function showPopupMsg(msg) {                                             //console.log("showPopupMsg. msg = ", msg)
+export function showPopupMsg(msg) {                                 /*dbug-log*///console.log("showPopupMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
     $('#db-popup').text(popUpMsg);
     $('#db-popup').addClass('loading'); //used in testing

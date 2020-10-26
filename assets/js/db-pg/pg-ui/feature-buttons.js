@@ -54,7 +54,7 @@ export function authDependentInit(userRole) {
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
     $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #data-help,
-        #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter,
+        #sel-FilterSet, .fltr-desc, #apply-filter, #save-filter, #delete-filter,
         #stored-filters input, #stored-filters textarea`)
         .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
         .prop('title', 'Please register to use these features.');
@@ -101,7 +101,7 @@ function showDataInitLoadingStatus() {
 }
 function toggleSearchOptions(toggleKey) {
     handleButtons(toggleKey);
-    $('#search-focus')[0].selectize[toggleKey]();
+    _u('enableCombobox', ['Focus', toggleKey]);
 }
 function handleButtons(toggleKey) {
     const opac = toggleKey === 'enable' ? 1 : .5;

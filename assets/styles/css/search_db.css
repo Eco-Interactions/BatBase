@@ -356,7 +356,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     justify-content: space-between;
     margin-top: .3em;
 }
-[id$="-sel-cntnr"]>div {
+[id^="sel-cntnr-"]>div {
     margin-top: .5em
 }
 /** ------------ Error Styles -------------- */
@@ -397,7 +397,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin: 0;
     font-size: .95em;
 }
-#Note-txt {
+#txt-Note {
     border-color: #b8b8b8;
 }
 .bttn-cntnr {
@@ -412,7 +412,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #Authors-lbl, #Editors-lbl {
     padding-top: .7em;
 }
-#Authors-sel-cntnr, #Editors-sel-cntnr {
+#sel-Authors-cntnr, #sel-Editors-cntnr {
     width: 329px;
 }
 /**--- Taxon Edit-Form ---*/
@@ -431,7 +431,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .group-row {
     justify-content: flex-start !important;
 }
-select[id$="txn-rank"] + div {
+#sel-Rank + div {
     width: 150px;
 }
 /*------------- Loc Map Styles ----------------*/

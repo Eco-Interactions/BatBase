@@ -79,13 +79,12 @@ export function ifFormAlreadyOpenAtLevel(fLvl) {
 }
 export function handleOpenSubFormAlert(entity, fLvl) {
     return openSubFormAlert(entity, fLvl)
-    // .catch(() => {});
+//REMOVE?    // .catch(() => {});
 }
 function openSubFormAlert(ent, fLvl) {
     const entity = ent === 'citation' ? 'citationTitle' : ent;
-    const ucEntity = _u('ucfirst', [entity]);
-    _val('openSubFormAlert', [ucEntity, null, fLvl]);
-    // return Promise.reject();
+    _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
+//REMOVE?    // return Promise.reject();
 }
 /** ====================== FORM-FIELD HELPERS =============================== */
 export function initTypeField() {
@@ -116,8 +115,8 @@ export function addRoleTaxonFocusListeners() {
     return fields.addRoleTaxonFocusListeners(...arguments);
 }
 export function enableRoleTaxonFieldCombos() {
-    _u('enableCombobox', ['#Subject-sel']);
-    _u('enableCombobox', ['#Object-sel']);
+    _u('enableCombobox', ['Subject']);
+    _u('enableCombobox', ['Object']);
 }
 function enableTaxonRanks(enable = true) {
     $.each($('#sub-form select'), (i, sel) => {

@@ -18,7 +18,7 @@
  *     FILL RANK COMBOS WITH RELATED TAXA
  */
 import { _u } from '../../../../../../db-main.js';
-import { _elems, _cmbx, _state, _val, getSubFormLvl } from '../../../../../forms-main.js';
+import { _elems, _state, _val, getSubFormLvl } from '../../../../../forms-main.js';
 import * as iForm from '../../../int-form-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
 
@@ -32,17 +32,17 @@ export function onRankSelection(val, input) {                       /*dbug-log*/
 }
  /* ----------------------- VALIDATE AND CREATE ----------------------------- */
 function openTaxonCreateForm(selElem, fLvl) {
-    const rank = selElem.id.split('-sel')[0];
-    if (rank === 'Species' && !$('#Genus-sel').val()) {
+    const rank = selElem.id.split('sel-')[1];
+    if (rank === 'Species' && !$('#sel-Genus').val()) {
         return _val('formInitAlert', [rank, 'noGenus', fLvl]);
-    } else if (rank === 'Genus' && !$('#Family-sel').val()) {
+    } else if (rank === 'Genus' && !$('#sel-Family').val()) {
         return _val('formInitAlert', [rank, 'noFamily', fLvl]);
     }
     selElem.selectize.createItem('create');
 }
  /* ----------------------- RESET CHILD-RANK COMBOS ------------------------- */
 function syncTaxonCombos(elem) {
-    resetChildRankCombos(iForm.getSelectedTaxon(elem.id.split('-sel')[0]));
+    resetChildRankCombos(iForm.getSelectedTaxon(elem.id.split('sel-')[1]));
 }
 function resetChildRankCombos(selTxn) {
     getOptsForSelectedChildren(selTxn)
@@ -82,19 +82,11 @@ function repopulateRankCombos(optsObj, selected) {                  /*dbug-log*/
  * its direct ancestors.
  */
 function repopulateRankCombo(opts, rank, selected) {                /*dbug-log*///console.log("repopulateRankCombo [%s] = %O", rank, opts);
-    updateComboOpts(rank, opts);
+    _u('replaceSelOpts', [rank, opts]);
     if (!rank in selected) { return; }
     if (selected[rank] == 'none') { return resetPlaceholer(rank); }
-    _cmbx('setSelVal', ['#'+rank+'-sel', selected[rank], 'silent']);
-}
-/**
- * Change event is fired when options are replaced, so the event is removed and
- * restored after the options are updated.
- */
-function updateComboOpts(rank, opts) {
-    _u('replaceSelOpts', ['#'+rank+'-sel', opts, () => {}]);
-    $('#'+rank+'-sel')[0].selectize.on('change', onRankSelection);
+    _u('setSelVal', [rank, selected[rank], 'silent']);
 }
 function resetPlaceholer(rank) {
-    _u('updatePlaceholderText', ['#'+rank+'-sel', null, 0]);
+    _u('updatePlaceholderText', [ rank, null, 0]);
 }

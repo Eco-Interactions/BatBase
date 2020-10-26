@@ -10,7 +10,7 @@
  *     SELECT TAXON IN ROLE COMBOBOX
  *     GET TAXON SELECTED IN ROLE COMBOBOX
  */
-import { _state, _cmbx, getSubFormLvl } from '../../../../forms-main.js';
+import { _state, getSubFormLvl } from '../../../../forms-main.js';
 import * as iForm from '../../int-form-main.js';
 /* ------------------- SELECT TAXON IN ROLE COMBOBOX ------------------------ */
 /**
@@ -20,7 +20,7 @@ import * as iForm from '../../int-form-main.js';
 export function onTaxonRoleSelection(role, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s] = ", role, val);
     if (val === "" || isNaN(parseInt(val))) { return; }
     $('#'+getSubFormLvl('sub')+'-form').remove();
-    $('#'+role+'-sel').data('selTaxon', val);
+    $('#sel-'+role).data('selTaxon', val);
     iForm.enableRoleTaxonFieldCombos();
     if (role === 'Object') { iForm.initTypeField(_state('getTaxonProp', ['groupName'])); }
     iForm.focusPinAndEnableSubmitIfFormValid(role);
@@ -31,8 +31,8 @@ export function selectRoleTaxon(e, groupTaxon) {
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
-    _cmbx('updateComboboxOptions', ['#'+role+'-sel', opt]);
-    _cmbx('setSelVal', ['#'+role+'-sel', opt.value]);
+    _u('replaceSelOpts', [role, opt]);
+    _u('setSelVal', [role, opt.value]);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(groupTaxon) {
@@ -62,9 +62,9 @@ function isSelectedTaxon(resetRank, elem) {
 }
 function isRankChildOfResetRank(resetRank, elem) {
     const allRanks = Object.keys(_state('getTaxonProp', ['ranks']));
-    const rank = elem.id.split('-sel')[0];                          /*dbug-log*///console.log('is [%s] sub-rank to [%s]', rank, resetRank, allRanks.indexOf(rank) < allRanks.indexOf(resetRank));
+    const rank = elem.id.split('sel-')[1];                          /*dbug-log*///console.log('is [%s] sub-rank to [%s]', rank, resetRank, allRanks.indexOf(rank) < allRanks.indexOf(resetRank));
     return allRanks.indexOf(rank) > allRanks.indexOf(resetRank);
 }
 function ifIsRankComboElem(elem) {
-    return elem.id.includes('-sel') && !elem.id.includes('Group');
+    return elem.id.includes('sel') && !elem.id.includes('Group');
  }

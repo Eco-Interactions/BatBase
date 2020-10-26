@@ -2,10 +2,10 @@
  * Html element methods.
  *
  * Exports:
+ *     alphabetizeOpts
  *     buildElem
  *     buildSelectElem
  *     buildSimpleOpts
- *     alphaOptionObjs
  *     getOptsFromStoredData
  *     buildOptsObj
  *     addEnterKeypressClick
@@ -84,11 +84,6 @@ export function buildSimpleOpts(optAry, placeholder) {                          
     }
     return opts;
 }
-export function alphaOptionObjs(a, b) {
-    var x = a.text.toLowerCase();
-    var y = b.text.toLowerCase();
-    return x<y ? -1 : x>y ? 1 : 0;
-}
 /** Builds options out of a stored entity-name object. */
 export function getOptsFromStoredData(prop) {                                   //bp
     return _db('getData', [prop, true]).then(data => {                               //console.log('       --getOptsFromStoredData. [%s].', prop);
@@ -109,6 +104,14 @@ export function buildOptsObj(entityObj, sortedKeys) {                           
               value: entityObj[name].value
             } : { value: entityObj[name], text: _u('ucfirst', [name]) }
     });
+}
+export function alphabetizeOpts(opts) {
+    return opts.sort(alphaOptionObjs)
+}
+function alphaOptionObjs(a, b) {
+    var x = a.text.toLowerCase();
+    var y = b.text.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
 }
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {
