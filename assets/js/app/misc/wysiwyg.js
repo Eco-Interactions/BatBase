@@ -5,15 +5,15 @@
  * Exports:
  *     initWysiwyg
  */
-import { sendAjaxQuery } from '../util/util-main.js';
+import { sendAjaxQuery } from '~util';
 
 export default function initWysiwyg(role) {
     requireStyles();
     if ($('.wysiwyg').length > 0) { addEditContentButton(role); }
 }
 function requireStyles () {
-    require('../../../libs/wysiwyg/trumbowyg.min.js');
-    require('../../../libs/wysiwyg/ui/trumbowyg.min.css');
+    require('libs/wysiwyg/trumbowyg.min.js');
+    require('libs/wysiwyg/ui/trumbowyg.min.css');
 }
 function addEditContentButton(userRole) {
     const button = $('<button/>', {
@@ -92,7 +92,7 @@ function getBlockContainerId(editId) {
  * any div with class 'wysiwyg', on the page.
  */
 function addEditPencils(userRole) {
-    const icoSrc = require('../../../images/icons/eif.pencil.svg').default;
+    const icoSrc = require('images/icons/eif.pencil.svg').default;
     var contentBlocks = $('.wysiwyg');
 
     for (var i = 0; i < contentBlocks.length; i++) {
@@ -130,7 +130,7 @@ function addEditPencils(userRole) {
                     id: containerElemId
                 }
             },
-            svgPath: require('../../../libs/wysiwyg/ui/icons.svg').default
+            svgPath: require('libs/wysiwyg/ui/icons.svg').default
         });
     }
 } /* End addEditPencils */

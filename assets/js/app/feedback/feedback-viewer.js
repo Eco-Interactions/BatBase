@@ -1,7 +1,7 @@
 /**
  * Handles loading and managind user-submitted feedback for the admin-view page.
  */
-import { sendAjaxQuery } from '../util/util-main.js';
+import * as _u from '~util';
 
 var $asgnUsrElem, $statusElem, $adminNotesElem, $viewerPopup;
 var minNotesChars = 1;

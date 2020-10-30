@@ -1,16 +1,15 @@
 /**
  * Loads site statistics relevant to the current page.
  *
- * Exports
+ * Export
  * 	initHeaderStats
  *
  *
  * TOC
  * 		INIT STAT HEADER
  * 		LOAD STAT HEADER
- *
  */
-import { sendAjaxQuery } from '../util/util-main.js';
+import { sendAjaxQuery } from '~util';
 
 /** @type {Object} Page URL (k) statdata-set key (v) */
 const pageStatKeys = {

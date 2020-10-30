@@ -3,6 +3,7 @@ const Encore = require('@symfony/webpack-encore');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 /* ======== ALL =========== */
 const autoProvidedVars = { L: 'leaflet', $: 'jquery', Sentry: '@sentry/browser' };
+const path = require('path');
 /** ======================== Configuration ================================== */
 Encore
 /* ======== DEV ======= */
@@ -64,26 +65,34 @@ Encore
         to: 'files/[name].[ext]'
     }])
     /** ------- Site Js/Style Entries ----------------- */
-    .addEntry('app', './assets/js/app/oi.js')
-    .addEntry('db', './assets/js/db-pg/db-main.js')
+    .addEntry('app', './assets/js/main.js')
+    .addEntry('db', './assets/js/page/database/db-main.js')
     .addEntry('feedback', './assets/js/app/feedback/feedback-viewer.js')
-    .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
-    .addEntry('show', './assets/js/show-pg/entity-show.js')
+    .addEntry('pdfs', './assets/js/page/view-pdfs.js')
+    .addEntry('show', './assets/js/page/show/entity-show.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
     // Optimizes code by breaking files into the smallest size needed to run the page (builds lots of files)
     .splitEntryChunks()
 ;
-const confg = Encore.getWebpackConfig();
+const config = Encore.getWebpackConfig();
+
+config.resolve.alias["db"] = path.resolve(__dirname, 'assets/js/page/database/');
+config.resolve.alias["~db"] = path.resolve(__dirname, 'assets/js/page/database/db-main.js');
+config.resolve.alias["~form"] = path.resolve(__dirname, 'assets/js/page/database/forms/forms-main.js');
+config.resolve.alias["images"] = path.resolve(__dirname, 'assets/images/');
+config.resolve.alias["styles"] = path.resolve(__dirname, 'assets/styles/');
+config.resolve.alias["libs"] = path.resolve(__dirname, 'assets/libs/');
+config.resolve.alias["~util"] = path.resolve(__dirname, 'assets/js/util/util-main.js');
 
 /* Force Webpack to display errors/warnings */
-// confg.stats.errors = true;
-// confg.stats.warnings = true;
+// config.stats.errors = true;
+// config.stats.warnings = true;
 
 // Change the source map generated in development mode so logs show the original code line numbers
 if (Encore.isProduction()) {
-    confg.devtool = 'source-map';
+    config.devtool = 'source-map';
 } else {
-    confg.devtool = 'eval-source-map';
+    config.devtool = 'eval-source-map';
 }
-module.exports = confg;
+module.exports = config;
