@@ -1,10 +1,10 @@
 /**
  * Handles displaying and submitting the user-feedback form.
  *
- * Exports:
- *     init
+ * Export
+ *     initFeedbackUi
  */
-import { sendAjaxQuery } from '../util/util-main.js';
+import { sendAjaxQuery } from '~util';
 
 var minTopicChars = 3;
 var minContentChars = 10;
@@ -17,7 +17,7 @@ var feedbackUrl = $body.data('base-url') + 'feedback/post';
 var thisUrl = $body.data('this-url');
 
 /** Creates the "Leave Feedback" menu option for all registered users. */
-export function init() {
+export default function initFeedbackUi() {
     if (feedbackUrl == "false") { return; }
     const fdbkElem = '<li id="feedback-menu"><a href="#">Leave Feedback</a></li>';
     $('#oimenu>.last>ul').prepend(fdbkElem);
