@@ -38,7 +38,7 @@ export function buildFormDataAndSubmit(entity, fLvl, formVals) {
 /* ------------------------- SUBMIT FORM ------------------------------------ */
 function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
     const coreEntity = _confg('getCoreFormEntity', [entity]);
-    const url = getEntityAjaxUrl(_state('getFormProp', [fLvl, 'action']));
+    const url = 'crud/entity/' + _state('getFormProp', [fLvl, 'action']);
     addEntityDataToFormData(data, coreEntity, fLvl);
     storeParamsData(entity, coreEntity, fLvl);
     toggleWaitOverlay(true);
@@ -47,10 +47,6 @@ function submitFormData(data, fLvl, entity) {                                   
 function formSubmitError() {
     toggleWaitOverlay(false);
     val.formSubmitError(...arguments);
-}
-function getEntityAjaxUrl(action) {
-    const path = $('body').data('base-url');
-    return path + 'crud/entity/' + action;
 }
 function addEntityDataToFormData(data, coreEntity, fLvl) {
     data.coreEntity = coreEntity;

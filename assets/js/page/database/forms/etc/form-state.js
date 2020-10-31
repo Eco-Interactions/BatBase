@@ -12,7 +12,6 @@
  *     SETTERS
  */
 import { _db, _u } from '~db';
-import { alertIssue } from '../forms-main.js';
 
 let formState = {}; //formState
 
@@ -185,7 +184,7 @@ export function getRcrd(entity, id) {
     if (!formState.records || !formState.records[entity]) { return; }
     const rcrd = formState.records[entity][id] ?
         _u('snapshot', [formState.records[entity][id]]) :
-        alertIssue('noRcrdFound', {id: id, entity: entity });
+        _u('alertIssue', ['noRcrdFound', {id: id, entity: entity }]);
     return rcrd ? rcrd : false;
 }
 /* ---------------------------- Setters ------------------------------------- */

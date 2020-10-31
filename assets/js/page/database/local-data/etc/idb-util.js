@@ -12,7 +12,7 @@
  *     GETTERS
  *     SETTERS
  */
-import { alertIssue } from '~db';
+import { _u } from '~db';
 import { initStoredData, syncLocalDbWithServer } from '../local-data-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
@@ -92,14 +92,14 @@ function getStoredDataObj(keys, returnUndefined) {
 }
 /* ----------------------- ERROR HANDLING ----------------------------------- */
 function handleMissingDataKey(key) {                                /*dbug-log*///console.log('       !!!!getData: key missing [%s]', key); console.trace();
-    alertIssue('undefiendDataKey', {key: key});
+    _u('alertIssue', ['undefiendDataKey', {key: key}]);
 }
 function handleInvalidKeyType(key) {                                /*dbug-log*///console.log('       !!!!getData: Non-string key passed = [%O]', key); console.trace();
-    alertIssue('invalidDataKeyType', {
-        key: JSON.stringify(key), type: typeof key });
+    _u('alertIssue', ['invalidDataKeyType', {
+        key: JSON.stringify(key), type: typeof key }]);
 }
 function handleExpectedDataNotFound(key) {                          /*dbug-log*///console.log('       !!!!getData: [%s] Not Found', key); console.trace();
-    alertIssue('expectedDataNotFound', {key: key});
+    _u('alertIssue', ['expectedDataNotFound', {key: key}]);
 }
 /** ----------------------- SETTERS ----------------------------------------- */
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);

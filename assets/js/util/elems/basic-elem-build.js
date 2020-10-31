@@ -8,7 +8,7 @@
  * @return {Node} The HTML element.
  */
 /* ------------------------ GET ELEM FULL ----------------------------------- */
-export function buildElem(tag, attrs) {                             /*dbug-log*///console.log("buildElem [%s] attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
+export function getElem(tag, attrs) {                               /*dbug-log*///console.log("getElem [%s] attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
     const elem = document.createElement(tag);
     if (attrs) { addAttributes(elem, attrs); }
     return elem;

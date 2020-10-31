@@ -66,7 +66,7 @@ function addButtons() {
                             fn: function() {                                    console.log("Saving WYSIWYG. trumbowyg = %O", trumbowyg);
                                 var blkId = trumbowyg.o.plugins.save.id;
                                 var data = { content: $('#' + blkId ).trumbowyg('html')};    //console.log("blkId = ", blkId)
-                                var url = "admin/contentblock/" + blkId + "/update";
+                                var url = 'admin/contentblock/' + blkId + '/update';
                                 sendAjaxQuery(data, url, wysiwygSubmitSuccess);
                             }
                         };

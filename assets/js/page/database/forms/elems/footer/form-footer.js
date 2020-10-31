@@ -27,6 +27,21 @@ function buildFooterElems(entity, level, action) {
     const bttns = buildSubmitAndCancelBttns(level, action, entity);
     return [shwFields, spacer, bttns];
 }
+// function getFooterConfg() {
+//     return {
+//         formName: _u('ucfirst', [entity]),
+//         onSubmit: getSubmitEvent(entity, level),
+//         onCancel: getCancelFunc(entity, level)
+//     }
+// }
+// function getSubmitEvent(entity, level) {
+//     return submitForm.bind(null, '#'+level+'-form', level, entity);
+// }
+// function getCancelFunc(entity, level) {
+//     const onExit = fS ? fS.onFormClose : Function.prototype;
+//     return level === 'top' ? _elems.bind(null, 'exitRootForm') :
+//         exitFormLevel.bind(null, level, true, onExit);
+// }
 /* ------------------ SHOW ALL FIELDS CHECKBOX ------------------------------ */
 /**
  * Returns the html of a checkbox labeled 'Show all fields' that toggles the

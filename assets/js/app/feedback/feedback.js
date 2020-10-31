@@ -3,108 +3,133 @@
  *
  * Export
  *     initFeedbackUi
+ *
+ * TOC
+ *     MENU ITEM
+ *     POPUP
+ *         SHOW
+ *         HEADER
+ *         FIELD ROWS
+ *             RELOCATE ALERT
+ *             TOPIC FIELD
+ *             FEEDBACK-TEXTAREA
+ *         FEEDBACK FOOTER
+ *             TOGGLE SUBMIT
+ *             SUBMIT FEEDBACK
+ *             SENTRY ALERT
+ *         CLOSE POPUP
  */
-import { sendAjaxQuery } from '~util';
-
-var minTopicChars = 3;
-var minContentChars = 10;
-var maxTopicChars = 50;
-var maxContentChars = 500;
-var submitDisabled = true;
-var $body = $('body');
-var $masthead = $('#hdrmenu');
-var feedbackUrl = $body.data('base-url') + 'feedback/post';
-var thisUrl = $body.data('this-url');
-
+import { alertIssue, getElem, getFieldRow, getFormFooter, sendAjaxQuery } from '~util';
+/* ======================= MWNU ITEM ======================================== */
 /** Creates the "Leave Feedback" menu option for all registered users. */
 export default function initFeedbackUi() {
-    if (feedbackUrl == "false") { return; }
+    if ($('body').data('base-url') == "false") { return; }
     const fdbkElem = '<li id="feedback-menu"><a href="#">Leave Feedback</a></li>';
     $('#oimenu>.last>ul').prepend(fdbkElem);
     $('#feedback-menu').on('click', showFeedbackPopup);
+    require('styles/modules/user-feedback.styl');
 }
+/* ======================= POPUP ============================================ */
 function showFeedbackPopup() {
-    createFeedbackPopUp();
-    addPopupEvents();
-    submitDisabled && hasValidData() && enableSubmit();
-    $('#b-overlay').fadeIn("slow");
+    buildFeedbackPopup();
+    initCharCountAlerts();
+    $('#b-overlay').fadeIn('slow');
 }
-function hasValidData() {
-    return $('.feedback-popup input').val().length >= minTopicChars &&
-        $('.feedback-popup>textarea').val().length >= minContentChars;
+/* ------------------------- SHOW ------------------------------------------- */
+function buildFeedbackPopup() {
+    const elems = [
+        getFeedbackHeader(),
+        getTopicField(),
+        getContentField(),
+        getFeedbackFooter()];
+    $('#b-overlay-popup').addClass('feedback-popup').append(elems);
 }
+function initCharCountAlerts() {
+    $('.feedback-popup textarea, .feedback-popup input').trigger('keyup');
+}
+/* ------------------------- HEADER ----------------------------------------- */
+function getFeedbackHeader() {
+    const thanks = 'Thank you for contributing to Bat Eco-Interactions!';
+    return `<center><h3>${thanks}</h3></center>`;
+}
+/* _________________________ FIELD ROWS _____________________________________ */
+function getFieldConfg(name, input, min, max) {
+    return {
+        name: name,
+        input: input,
+        flow: 'col',
+        val: {
+            charLimits: {
+                min: min,
+                max: max,
+                onValid: toggleFeedbackSubmitButton,
+                onInvalid: toggleFeedbackSubmitButton.bind(null, false)
+            }
+        }
+    };
+}
+function getFeedbackFieldRow(confg) {
+    const row = getFieldRow(confg);
+    moveAlertsToRightOfLabel(row, confg);
+    return row;
+}
+/* -------------------- RELOCATE ALERT -------------------------------------- */
+function moveAlertsToRightOfLabel(row, confg) {
+    const alertEl = row.removeChild(row.firstChild);
+    $(getFieldLabel(row)).addClass('flex-row field-elems').append(alertEl);
+}
+function getFieldLabel(row) {
+    return row.firstChild.firstChild;
+}
+/* ------------------------- TOPIC FIELD ------------------------------------ */
+function getTopicField() {
+    const confg = getFieldConfg('Topic', getTopicInput(), 5, 50);
+    return getFeedbackFieldRow(confg);
+}
+function getTopicInput() {
+    const attrs = { type: 'text',  placeholder: 'Breif summary of your feedback' };
+    return getElem('input', attrs);
+}
+/* ----------------------- FEEDBACK-TEXTAREA -------------------------------- */
+function getContentField() {
+    const confg = getFieldConfg('Feedback', getContentTextarea(), 10, 500);
+    return getFeedbackFieldRow(confg);
+}
+function getContentTextarea() {
+    const attrs = { placeholder: 'Have an idea? Find a bug? Love a feature? Let us know!' };
+    return getElem('textarea', attrs);
+}
+/* ====================== FEEDBACK FOOTER =================================== */
+function getFeedbackFooter() {
+    const confg = {
+        formName: 'Feedback',
+        onSubmit: postFeedback,
+        submitText: 'Submit Feedback',
+        onCancel: closePopup
+    };
+    return getFormFooter(confg);
+}
+/* ----------------------------- TOGGLE SUBMIT ------------------------------ */
+function toggleFeedbackSubmitButton(enable = true) {
+    enable = enable && $('.feedback-popup .alert-active').length === 0;/*dbug-log*///console.log('toggleFeedbackSubmitButton enable?[%s]', enable);
+    const opac = enable ? 1 : .35;
+    $('#Feedback-submit').fadeTo( 'fast', opac).attr({'disabled': !enable});
+}
+/* ---------------------------- SUBMIT FEEDBACK ----------------------------- */
 function postFeedback() {
-    var data = {
-            routeStr: thisUrl,
-            topicStr: $('.feedback-popup input').val(),
-            contentStr: $('.feedback-popup>textarea').val()
-        };
-    closePopup() && sendAjaxQuery(data, feedbackUrl, feedbackSubmitted);
+    const data = {
+        route: $('body').data('this-url'),
+        topic: $('#Topic_row input').val(),
+        feedback: $('#Feedback_row textarea').val()
+    };
+    closePopup() && sendAjaxQuery(data, 'feedback/post');
+    alertIssue('feedback', data);
 }
+/* =========================== CLOSE POPUP ================================== */
 function closePopup() {
-    $('#b-overlay').fadeOut("slow", () => {
+    $('#b-overlay').fadeOut('slow', () => {
         $('#b-overlay-popup').empty();
         $('#b-overlay-popup').removeClass('feedback-popup');
-        removePopupEvents();
     });
     return true;
-}
-function feedbackSubmitted(data, textStatus, jqXHR) {                           console.log("feedbackSubmitted - data = %O", data);
-    $('.feedback-popup>textarea').val('');
-    $('.feedback-popup input').val('');
-    setTopicsChars(0);
-    setContentChars(0);
-}
-function setTopicsChars(charCnt) {
-    $('#topic-chars').text(getCharStr(charCnt, minTopicChars, maxTopicChars))
-}
-function setContentChars(charCnt) {
-    $('#content-chars').text(getCharStr(charCnt, minContentChars, maxContentChars))
-}
-function getCharStr(curCnt, min, max) {
-    if (curCnt < min) {
-        submitDisabled || disableSubmit();
-        return curCnt + ' characters (' + min + ' minimum.)';
-    } else if (curCnt < max) {
-        submitDisabled && hasValidData() && enableSubmit();
-        return curCnt + ' characters (' + max + ' max.)';
-    } else {
-
-    }
-}
-function enableSubmit() {
-    console.log("enableSubmit called");
-    $('.feedback-popup').on('click', "button[name='post-feedback']", postFeedback);
-    $(".feedback-popup>button[name='post-feedback']").fadeTo( 'fast', 1);
-    submitDisabled = false;
-}
-function disableSubmit() {
-    console.log("disableSubmit called");
-    $(".feedback-popup>button[name='post-feedback']").fadeTo( 'fast' , .35);
-    $('.feedback-popup').off('click', "button[name='post-feedback']", postFeedback);
-    submitDisabled = true;
-}
-function removePopupEvents() {
-    $('.feedback-popup').off('click');
-    $('.feedback-popup').off('keyup');
-}
-function addPopupEvents() {
-    $('.feedback-popup').on('click', "button[name='cancel-feedback']", closePopup);
-    $('.feedback-popup').on('keyup', 'input', function(){ setTopicsChars($(this).val().length); });
-    $('.feedback-popup').on('keyup','textarea' ,function(){ setContentChars($(this).val().length); });
-}
-function createFeedbackPopUp() {
-    var helpTxt = 'Leave us feedback about your experience ' +
-        'of using the Bat Eco-Interactions database!'
-    var popup = $('#b-overlay-popup');
-    popup.addClass('feedback-popup');
-    popup.append($('<p></p>').text(helpTxt));
-    popup.append($('<label>Topic <input type="text" name="topic" placeholder="Topic of your feedback"></label>'));
-    popup.append($('<p id="topic-chars"></p>').css({ 'font-size': '.8em' }));
-    popup.append($('<textarea placeholder="Type your feedback here..."></textarea>'));
-    popup.append($('<p id="content-chars"></p>').css({ 'font-size': '.8em' }));
-    popup.append($('<button name="post-feedback">Submit Feedback</button>'));
-    popup.append($('<button name="cancel-feedback">Cancel</button>'));
-    setTopicsChars(0);
-    setContentChars(0);
 }

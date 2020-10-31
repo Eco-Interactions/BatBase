@@ -339,10 +339,6 @@ button[name="show-hide-col"] {
     left: 24%;
     font-size: .75em !important;
 }
-[id$="_row"] {
-    padding: .2em .75em .3em  .75em;
-    width: 100%;
-}
 #sub-hdr, #sub2-hdr {
     font-size: 1.1em;
 }
@@ -351,10 +347,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 .all-fields-cntnr {
     padding-top: 1em;
-}
-.field-row {
-    justify-content: space-between;
-    margin-top: .3em;
 }
 [id^="sel-cntnr-"]>div {
     margin-top: .5em
@@ -371,6 +363,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-top: .3em;
     justify-content: center;
 }
+/* Used to style the active-alert. ".alert-active" used to flag form invalid */
 [class$="active-alert"] {
     padding: .3em;
     margin-bottom: .3em;

@@ -50,9 +50,9 @@ class FeedbackController extends AbstractController
         $request = $this->requestStack->getCurrentRequest();
         $requestContent = $request->getContent();
         $postedData = json_decode($requestContent);
-        $routeStr = $postedData->routeStr;
-        $topicStr = $postedData->topicStr;
-        $contentStr = $postedData->contentStr;
+        $routeStr = $postedData->route;
+        $topicStr = $postedData->topic;
+        $contentStr = $postedData->feedback;
 
         $feedbackEntry = new Feedback();
         $feedbackEntry->setTopic($topicStr);

@@ -14,7 +14,7 @@
  *         REFERENCE-GUIDE BUTTON
  *         FORM COMBOBOXES
  */
-import { _app, _u } from '~db';
+import { _util, _u } from '~db';
 import { _state, _elems, submitForm } from '~form';
 import * as iForm from '../int-form-main.js';
 
@@ -86,7 +86,7 @@ function showSubmitModal() {
         submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
         bttn: 'SUBMIT INTERACTION'
     };
-    _app('showSaveModal', [ modalConfg ]);
+    _util('showSaveModal', [ modalConfg ]);
     $('#top-submit').css({'opacity': .5, cursor: 'not-allowed'})
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }

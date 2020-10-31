@@ -15,7 +15,7 @@
  *         DATA SYNC
  *         TEMP DATA
  */
-import { _app, alertIssue, showIntroAndLoadingMsg } from '~db';
+import { _util, showIntroAndLoadingMsg } from '~db';
 import * as idb from './etc/idb-util.js';
 import * as sync from './sync/db-sync-main.js';
 import * as temp from './etc/temp-data.js';
@@ -47,10 +47,10 @@ export function resetLocalDb() {
         html: '<center>Click "Reset" to redownload all data.</center>',
         selector: '#data-help', dir: 'left', submit: resetDb, bttn: 'Reset'
     }
-    _app('showSaveModal', [confg]);
+    _util('showSaveModal', [confg]);
 
     function resetDb() {
-        _app('exitModal');
+        _util('exitModal');
         idb.downloadFullDb(true);
     }
 }
@@ -63,7 +63,7 @@ export function fetchServerData(url, options = {}, n = 9) {         /*dbug-log*/
     });
 };
 function alertFetchIssue(url, responseText) {
-    alertIssue('fetchIssue', { url: url, response: responseText });
+    _util('alertIssue', ['fetchIssue', { url: url, response: responseText }]);
     return Promise.reject();
 }
 export function getAllStoredData() {
