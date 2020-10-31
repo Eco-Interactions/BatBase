@@ -1,12 +1,5 @@
 {% extends "layout.html.twig" %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('build/feedback.css') }}" />
-{% endblock stylesheets %}
-
-{# Javascript after detail block. #}
-
 {% block datatable %}feedback_tbl{% endblock datatable %}
 
 {% block headline %}
@@ -44,8 +37,7 @@
                     <td>
                         <a  href="{{app.request.getSchemeAndHttpHost() ~ app.request.baseUrl ~ feedback.route}}"
                             class="feedback-link"
-                            data-ajaxload="{{ path('app_feedback_load', { 'id': feedback.id }) }}"
-                            data-ajaxupdate="{{ path('app_feedback_update', { 'id': feedback.id }) }}">
+                            data-id="{{feedback.id}}">
                             {{ route }}
                         </a>
                     </td>

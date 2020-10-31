@@ -12,8 +12,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Feedback controller.
- *
- * @Route("/feedback")
  */
 class FeedbackController extends AbstractController
 {
@@ -27,7 +25,7 @@ class FeedbackController extends AbstractController
     /**
      * Lists all Feedback entities.
      *
-     * @Route("/", name="app_feedback", methods={"GET"})
+     * @Route("/feedback", name="app_feedback", methods={"GET"})
      */
     public function indexAction()
     {
@@ -43,30 +41,30 @@ class FeedbackController extends AbstractController
     /**
      * Ajax action to create a new Feedback entity.
      *
-     * @Route("/post", name="app_feedback_post", methods={"POST"})
+     * @Route("/feedback/post", name="app_feedback_post", methods={"POST"})
      */
     public function postAction()
     {
         $request = $this->requestStack->getCurrentRequest();
         $requestContent = $request->getContent();
-        $postedData = json_decode($requestContent);
-        $routeStr = $postedData->route;
-        $topicStr = $postedData->topic;
-        $contentStr = $postedData->feedback;
+        $feedbackData = json_decode($requestContent);
+        $route = $feedbackData->route;
+        $topic = $feedbackData->topic;
+        $content = $feedbackData->feedback;
 
-        $feedbackEntry = new Feedback();
-        $feedbackEntry->setTopic($topicStr);
-        $feedbackEntry->setContent($contentStr);
-        $feedbackEntry->setRoute($routeStr);
-        $feedbackEntry->setStatus(3);
+        $entity = new Feedback();
+        $entity->setTopic($topic);
+        $entity->setContent($content);
+        $entity->setRoute($route);
+        $entity->setStatus(3);  //Index for:['Closed', 'Follow-Up', 'Read', 'Unread']
 
         $em = $this->getDoctrine()->getManager();
-        $em->persist($feedbackEntry);
+        $em->persist($entity);
         $em->flush();
 
         $response = new JsonResponse();
         $response->setData(array(
-            'fullDataObj' => $postedData,
+            'feedback' => $feedbackData,
         ));
 
         return $response;
@@ -75,7 +73,7 @@ class FeedbackController extends AbstractController
     /**
      * Ajax action to retrieve all data for a Feedback entity.
      *
-     * @Route("/update/{id}", name="app_feedback_update", methods={"POST"})
+     * @Route("/feedback/update/{id}", name="app_feedback_update", methods={"POST"})
      */
     public function updateAction($id)
     {
@@ -88,10 +86,10 @@ class FeedbackController extends AbstractController
         }
 
         $requestContent = $request->getContent();
-        $postedData = json_decode($requestContent);
-        $asgnUserId = $postedData->asgnUserId;
-        $adminNotes = $postedData->adminNotes;
-        $status = $postedData->status;
+        $feedbackData = json_decode($requestContent);
+        $asgnUserId = $feedbackData->asgnUserId;
+        $adminNotes = $feedbackData->adminNotes;
+        $status = $feedbackData->status;
 
         $asgnUser = $em->getRepository('App:User')->find($asgnUserId);
 
@@ -104,7 +102,7 @@ class FeedbackController extends AbstractController
 
         $response = new JsonResponse();
         $response->setData(array(
-            'fullDataObj' => $postedData,
+            'feedback' => $feedbackData,
         ));
 
         return $response;
@@ -113,7 +111,7 @@ class FeedbackController extends AbstractController
     /**
      * Ajax action to retrieve all data for a Feedback entity.
      *
-     * @Route("/load/{id}", name="app_feedback_load", methods={"POST"})
+     * @Route("/feedback/load/{id}", name="app_feedback_load", methods={"POST"})
      */
     public function loadAction($id)
     {
@@ -123,47 +121,38 @@ class FeedbackController extends AbstractController
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Feedback entity.');
         }
-        $fromUser = $entity->getCreatedBy();
-        $assignedUser = $entity->getAssignedUser();
-        $adminUsers = $em->getRepository('App:User')->findAdmins();
-        $users = array();
-        foreach ($adminUsers as $user) {
-            array_push($users, array('id' => $user->getId(), 'name' => $user->getUsername()));
-        }
 
         $response = new JsonResponse();
-        $response->setData(array(
-            'feedbackObj' => array(
+        $response->setData([
+            'feedback' => [
                     'id' => $entity->getId(),
-                    'from' => $this->_userDetails($fromUser),
+                    'from' => $this->getUserData($entity->getCreatedBy()),
                     'topic' => $entity->getTopic(),
                     'content' => $entity->getContent(),
                     'submitted' => $entity->getCreated(),
                     'status' => $entity->getStatus(),
                     'notes' => $entity->getAdminNotes(),
-                    'assigned' => $this->_userDetails($assignedUser),
-                    'users' => $users,
-                ),
-        ));
-
+                    'assigned' => $this->getUserData($entity->getAssignedUser()),
+                    'users' => $this->getAdminData($em),
+            ]
+        ]);
         return $response;
     }
-
-    private function _userDetails($user)
+    private function getUserData($user)
     {
-        if (is_null($user)) {
-            return array(
-                'id' => null,
-                'username' => null,
-                'email' => null,
-                );
+        return is_null($user) ? ['email' => null, 'name' => null, 'id' => null]
+            : [ 'email' => $user->getEmail(),
+                'name' => $user->getFirstName().' '.$user->getLastName(),
+                'id' => $user->getId()];
+    }
+    private function getAdminData($em)
+    {
+        $adminUsers = $em->getRepository('App:User')->findAdmins();
+        $users = [];
+        foreach ($adminUsers as $user) {
+            array_push($users, $this->getUserData($user));
         }
-
-        return array(
-            'id' => $user->getId(),
-            'username' => $user->getUsername(),
-            'email' => $user->getEmail(),
-            );
+        return $users;
     }
 
     /**

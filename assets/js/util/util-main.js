@@ -11,7 +11,14 @@ import * as elems from './elems/elems-main.js';
 import * as uAjax from './ajax-util.js';
 import * as alert from './alert-issue.js';
 import * as modal from './intro-modals.js';
+import extendPrototypes from './extend.js';
 
+extendPrototypes();
+
+export function logInDevEnv() {
+    if ($('body').data('env') === 'prod') { return; }
+    console.log(...arguments);
+}
 /* ==================== APP ALERTS ========================================== */
 export function initSentry() {
     return alert.initSentry(...arguments);
@@ -39,12 +46,26 @@ export function sendAjaxQuery() {
 export function logAjaxData() {
     return uAjax.logAjaxData(...arguments);
 }
-/* =========================== ELEMS ======================================== */
-export function getFieldRow() {
-    return elems.getFieldRow(...arguments);
-}
+/* ======================== HTML ELEMS ====================================== */
 export function getElem() {
     return elems.getElem(...arguments);
+}
+export function getSelect() {
+    return elems.getSelect(...arguments);
+}
+/* -------------------- SELECT OPTIONS -------------------------------------- */
+export function getOptsFromStoredData() {
+    return elems.getOptsFromStoredData(...arguments);
+}
+export function buildOptsObj() {
+    return elems.buildOptsObj(...arguments);
+}
+export function alphabetizeOpts() {
+    return elems.alphabetizeOpts(...arguments);
+}
+/* ===================== FIELDS & ROWS ====================================== */
+export function getFieldRow() {
+    return elems.getFieldRow(...arguments);
 }
 export function getFormFooter() {
     return elems.getFormFooter(...arguments);

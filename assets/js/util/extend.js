@@ -16,6 +16,28 @@ function extendDate() {
             ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+
             ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
     }
+    /** Ex: PDT|PST */
+    Date.prototype.getTimezoneAlphaString = function () {
+        return /.*\s(.+)/.exec(this.toLocaleDateString('en-us', { timeZoneName:'short' }))[1];
+    }
+    /** H:i(pm|am) PT */
+    Date.prototype.getStandardTimeString = function () {
+        let hours = this.getHours();
+        let minutes = this.getMinutes();
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        return `${hours}:${minutes}${ampm} ${this.getTimezoneAlphaString()}`;
+    }
+    /** m/d/Y */
+    Date.prototype.getMonthDayYearString = function () {
+        return `${this.getMonth()+1} /${this.getDate()}/${this.getFullYear()}`;
+    }
+    /** m/d/Y at H:i(pm|am) PT */
+    Date.prototype.getDateTimeSentence = function () {
+        return `${this.getMonthDayYearString()} at ${this.getStandardTimeString()}`;
+    }
 }
 function extendJquery() {
     addOnEnterEvent();

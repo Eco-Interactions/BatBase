@@ -16,11 +16,7 @@
  */
 import { _db, _util } from '~db';
 import * as cmbx from './combos.js';
-import * as elems from './elems-util.js';
 import * as cite from './generate-citation.js';
-import extendPrototypes from './extend.js';
-
-extendPrototypes();
 /** ================ GENERATE CITATION TEXT ================================= */
 export function generateCitationText() {
     return cite.generateCitationText(...arguments);
@@ -100,37 +96,17 @@ export function setData(k, v) {
     return _db('setData', [k, v]);
 }
 /* -------------- HTML ELEMENT HELPERS  ------------------------------------- */
-export function buildElem() {
-    return _util('buildElem', [...arguments]);
-}
-export function buildSelectElem() {
-    return elems.buildSelectElem(...arguments);
-}
-export function buildSimpleOpts() {
-    return elems.buildSimpleOpts(...arguments);
-}
-export function getOptsFromStoredData(prop) {
-    return elems.getOptsFromStoredData(prop);
-}
-export function buildOptsObj() {
-    return elems.buildOptsObj(...arguments);
-}
-export function alphabetizeOpts() {
-    return elems.alphabetizeOpts(...arguments);
-}
-export function addEnterKeypressClick() {
-    return elems.addEnterKeypressClick(...arguments);
+export function addEnterKeypressClick(elem) {
+    $(elem).keypress(function(e){ //Enter
+        if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
+    });
 }
 /* -------------------- LOGS ------------------------------------------------ */
-export function logInDevEnv() {
-    if ($('body').data('env') === 'prod') { return; }
-    console.log(...arguments);
-}
 /* ================== MISC UTIL METHODS ============================================================================= */
 /* ------------------ DATA -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
-    if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    logInDevEnv("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+    if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    _util('logInDevEnv', ["#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds]);
     alertIssue('noRcrdFound', {id: rcrdKey, entity: entity });
     return false;
 }
