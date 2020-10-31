@@ -35,3 +35,22 @@ function addAttrProps(elem, attrs) {
     });
     $(elem).attr(attrsToAdd);
 }
+/**
+ * Builds a select drop down with the options, attributes and change method
+ * passed. Sets the selected option as the passed 'selected' or the default 'all'.
+ */
+export function getSelect(options, attrs, onChange, selected = false) {     /*dbug-log*/console.log('getSelect opts %O attr %O onChange %O selected ?[%s]', options, attrs, onChange, selected);
+    const $selectElem = $(getElem('select', attrs));
+    $selectElem.change(onChange);
+    options.forEach(appendOption);
+    setSelectedVal($selectElem, selected);
+    return $selectElem[0];
+
+    function appendOption(opt) {
+        $selectElem.append(opt);
+    }
+}
+function setSelectedVal($selectElem, selected) {
+    selected = selected === false ? 'all' : selected;
+    $selectElem.val(selected);
+}

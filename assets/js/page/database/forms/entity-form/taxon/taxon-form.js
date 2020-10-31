@@ -120,7 +120,7 @@ function buildNameInput(name) {
 /** ------- RANK COMBOBOX --------------- */
 function buildRankSel(taxon) {
     const opts = getTaxonRankOpts();
-    const sel = _u('buildSelectElem', [opts, { id: 'sel-Rank' }]);
+    const sel = _u('getSelect', [opts, { id: 'sel-Rank' }]);
     $(sel).data({ 'txn': taxon.id, 'rank': getRankVal(taxon.rank.displayName) });
     return sel;
 }

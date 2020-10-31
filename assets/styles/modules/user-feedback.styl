@@ -7,6 +7,7 @@
  *         USER-FEEDBACK FIELDS
  *     VIEW-PAGE
  */
+ @import '../util/*'
  /* ============================ POPUP ====================================== */
 #b-overlay-popup.feedback-popup
     background-color: #bbecef
@@ -25,7 +26,7 @@
     color: grey
     justify-content: flex-end
 /* ----------------------- USER-FEEDBACK FIELDS ----------------------------- */
-#Topic_row input
+#topic_row input
     margin-bottom: .5em
     width: 100%
     line-height: 2em
@@ -34,76 +35,25 @@
     width: 100%
     height: 10em
     padding: .4em
- /* ========================= VIEW PAGE ===================================== */
-#feedback-container
-    position: absolute
-    top: 0
-    left:50%
-    height: 500px
-    width: 1500px
-    margin-left:-750px
-    z-index: 5001
-
+/* ========================== VIEW PAGE ===================================== */
 #feedback-context-frame
     position: absolute
     border: none
     width: 100%
     height: 100%
 
-#feedback-viewer-popup
-    background-color: #a2dadd
-    box-shadow: 5px 5px 7px rgba(0,0,0,0.6)
+#feedback-popup
+    background-color: $lightest-green
+    box-shadow: .4em .4em .5em rgba(0,0,0,0.6)
     padding: 2em
     position: absolute
-    top: 20px
-    right: 20px
+    top: 2em
+    right: 5em
     z-index: 5001
+    width: 36em
 
-#feedback-viewer-popup>p
-    width: 23em
-    margin: .1em 0 .1em 0
-
-#feedback-viewer-popup>label
-    font-weight: bold
-    margin-right: 1em
-    margin-top: 1em
-
-#feedback-viewer-popup input
-    width: 23em
-    margin-bottom: .5em
-
-#feedback-viewer-popup>textarea
+#feedback-popup textarea
     display: block
-    width: 26.7em
+    width: 100%
     height: 6em
     margin: 0 0 .5em 0
-
-#feedback-viewer-popup>button
-    border: 1px solid #1b3b1b
-    background: #245A37
-    color: #a2dadd
-    font-weight: bold
-    border-radius: 5px
-    box-shadow: 2px 2px 3px rgba(0,0,0,0.6)
-    padding: .5em
-    margin: .5em 1em 0 0
-
-#feedback-viewer-popup>button:hover
-    background: #2D7853
-    box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
-
-span.lbl
-    font-weight: bold
-
-#feedback-viewer-popup .top-mrg
-    margin-top: .5em
-
-#feedback-viewer-popup .btm-mrg
-    margin-bottom: .5em
-
-#scrollbar-measure
-    width: 100px
-    height: 100px
-    overflow: scroll
-    position: absolute
-    top: -9999px

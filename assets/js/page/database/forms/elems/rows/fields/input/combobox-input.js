@@ -14,7 +14,7 @@
  *        TAXON
  *        LOCATION
  */
-import { _u } from '~db';
+import { _u, _util } from '~db';
 import { _state, _val, getSubFormLvl } from '~form';
 
 /* ====================== COMBOBOX HELPERS ================================== */
@@ -78,7 +78,7 @@ export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*/
  */
 function buildTagField(entity, field, fLvl) {
     const attr = { id: 'sel-'+field, class: 'med-field'};
-    const tagSel = _u('buildSelectElem', [[], attr]);
+    const tagSel = _u('getSelect', [[], attr]);
     $(tagSel).data('inputType', 'tags');
     _state('addComboToFormState', [fLvl, field]);
     return tagSel;
@@ -98,7 +98,7 @@ function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*/
         const fieldId = 'sel-' + (cnt ? field + cnt : field);
         const attr = { id: fieldId , class: 'med-field'};
         _state('addComboToFormState', [fLvl, field]);
-        return _u('buildSelectElem', [opts, attr]);
+        return _u('getSelect', [opts, attr]);
     }
 }
 /* ---------------------- MULTI-SELECT/COMBOS ------------------------------- */
@@ -209,10 +209,10 @@ function getSelectOpts(field) {                                     /*dbug-log*/
     return Promise.resolve(getOpts(fieldKey, field));
 }
 function getStoredOpts(prop, field) {
-    return _u('getOptsFromStoredData', [prop]);
+    return _util('getOptsFromStoredData', [prop]);
 }
 export function getSelectStoredOpts(prop, field, include) {
-    return _u('getOptsFromStoredData', [prop])
+    return _util('getOptsFromStoredData', [prop])
         .then(opts => opts.filter(o => include.indexOf(o.text) !== -1));
 }
 /** Builds options out of the passed ids and their entity records. */
@@ -228,7 +228,7 @@ export function getRcrdOpts(ids, rcrds) {
 // NOTE: DON'T DELETE. USEFUL ONCE TAGS ARE USED FOR MORE THAN JUST INTERACTIONS.
 // /** Returns an array of options objects for tags of the passed entity. */
 // function getTagOpts(entity) {
-//     return _u('getOptsFromStoredData', [entity+"Tags"]);
+//     return _util('getOptsFromStoredData', [entity+"Tags"]);
 // }
 /** Returns an array of source-type (prop) options objects. */
 function getSrcOpts(prop, field, rcrds) {
@@ -253,7 +253,7 @@ function getCitTypeOpts(prop, field) {
     return _u('getData', [prop]).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
-        return _u('buildOptsObj', [types, getCitTypeNames().sort()]);
+        return _util('buildOptsObj', [types, getCitTypeNames().sort()]);
     }
     function getCitTypeNames() {
         const opts = {
@@ -270,7 +270,7 @@ function getCitTypeOpts(prop, field) {
 export function getTaxonOpts(rank, field, r, g) {
     const group = r ? r : _state('getTaxonProp', ['groupName']);
     const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);  /*dbug-log*///console.log('getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
-    return _u('getOptsFromStoredData', [group+subGroup+rank+'Names'])
+    return _util('getOptsFromStoredData', [group+subGroup+rank+'Names'])
         .then(buildTaxonOpts);
 
         function buildTaxonOpts(opts) {
@@ -290,12 +290,12 @@ function getGroupOpts(prop, field) {
 }
 function getSubGroupOpts(prop, field) {
     const group = _state('getTaxonProp', ['groupName']);
-    return _u('getOptsFromStoredData', [group+'SubGroupNames']);
+    return _util('getOptsFromStoredData', [group+'SubGroupNames']);
 }
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */
 function getCntryRegOpts(prop, field) {
-    const proms = ['countryNames', 'regionNames'].map(k => _u('getOptsFromStoredData', [k]));
+    const proms = ['countryNames', 'regionNames'].map(k => _util('getOptsFromStoredData', [k]));
     return Promise.all(proms).then(data => data[0].concat(data[1]));
 }
 /** Returns an array of option objects with all unique locations.  */

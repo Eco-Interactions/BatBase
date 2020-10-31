@@ -10,7 +10,7 @@
  *      UI
  *      FILTER
  */
-import { _ui, _u } from '~db';
+import { _ui, _u, util } from '~db';
 import * as fM from '../filter-main.js';
 /* ========================= UI ============================================ */
 export function loadSrcFilters(type) {                              /*Perm-log*/console.log("       --Loading source [%s] filters.", type);
@@ -30,7 +30,7 @@ function loadAuthSearchHtml() {
     return Promise.resolve();
 }
 function loadPubSearchHtml() {
-    return _u('getOptsFromStoredData', ['pubTypeNames'])
+    return _util('getOptsFromStoredData', ['pubTypeNames'])
         .then(loadPubSearchElems);
 }
 function loadPubSearchElems(pubTypeOpts) {

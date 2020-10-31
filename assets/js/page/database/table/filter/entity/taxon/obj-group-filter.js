@@ -8,13 +8,13 @@
  * 		INIT COMBOBOX
  * 		APPLY FILTER
  */
-import { _ui, _u } from '~db';
+import { _ui, _u, _util } from '~db';
 import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectGroupCombobox() {
-    return _u('getOptsFromStoredData', ['groupNames'])
+    return _util('getOptsFromStoredData', ['groupNames'])
     .then(buildObjectGroupCombo)
     .then(finishGroupComboInit);
 }

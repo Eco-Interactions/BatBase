@@ -49,7 +49,7 @@ function getSubmitBttn(confg) {
     function getSubmitText() {
         if (confg.submitText) { return confg.submitText; }
         const text = { create: 'Create', edit: 'Update' };;
-        return text[action] + ' ' + ucfirst(confg.formName);
+        return text[confg.action] + ' ' + ucfirst(confg.formName);
     }
 }
 /* -------------------------- CANCEL BUTTON --------------------------------- */

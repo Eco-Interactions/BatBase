@@ -55,9 +55,9 @@ function getFeedbackHeader() {
 /* _________________________ FIELD ROWS _____________________________________ */
 function getFieldConfg(name, input, min, max) {
     return {
-        name: name,
-        input: input,
         flow: 'col',
+        input: input,
+        name: name,
         val: {
             charLimits: {
                 min: min,
@@ -83,7 +83,7 @@ function getFieldLabel(row) {
 }
 /* ------------------------- TOPIC FIELD ------------------------------------ */
 function getTopicField() {
-    const confg = getFieldConfg('Topic', getTopicInput(), 5, 50);
+    const confg = getFieldConfg('topic', getTopicInput(), 5, 50);
     return getFeedbackFieldRow(confg);
 }
 function getTopicInput() {
@@ -92,7 +92,7 @@ function getTopicInput() {
 }
 /* ----------------------- FEEDBACK-TEXTAREA -------------------------------- */
 function getContentField() {
-    const confg = getFieldConfg('Feedback', getContentTextarea(), 10, 500);
+    const confg = getFieldConfg('feedback', getContentTextarea(), 10, 500);
     return getFeedbackFieldRow(confg);
 }
 function getContentTextarea() {
@@ -119,8 +119,8 @@ function toggleFeedbackSubmitButton(enable = true) {
 function postFeedback() {
     const data = {
         route: $('body').data('this-url'),
-        topic: $('#Topic_row input').val(),
-        feedback: $('#Feedback_row textarea').val()
+        topic: $('#topic_row input').val(),
+        feedback: $('#feedback_row textarea').val()
     };
     closePopup() && sendAjaxQuery(data, 'feedback/post');
     alertIssue('feedback', data);

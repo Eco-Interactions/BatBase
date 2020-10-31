@@ -9,13 +9,13 @@
  *     ADD UPDATED SERVER DATA TO LOCAL DB
  *     ON SYNC COMPLETE
  */
-import { _u, initSearchStateAndTable } from '~db';
+import { _u, _util, initSearchStateAndTable } from '~db';
 import * as db from '../../local-data-main.js';
 import { reportDataSyncFailures } from '../db-sync-main.js';
 import { downloadAndStoreUpdatedData } from './sync-updated-data.js';
 import { validateAndUpdateUserData } from './user-data-sync.js';
 
-export function syncLocalDbWithServer(lclUpdtdAt) {                 /*perm-log*/_u('logInDevEnv', ["   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt]);
+export function syncLocalDbWithServer(lclUpdtdAt) {                 /*perm-log*/_utiil('logInDevEnv', ["   /--syncLocalDbWithServer. lclUpdtdAt = %O", lclUpdtdAt]);
     db.fetchServerData('data-state').then(checkAgainstLocalDataState);
     db.getData('user').then(validateAndUpdateUserData);
 /* ------------------- CHECK FOR ENTITY UPDATES ----------------------------- */

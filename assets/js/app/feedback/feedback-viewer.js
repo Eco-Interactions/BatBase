@@ -1,202 +1,206 @@
 /**
  * Handles loading and managind user-submitted feedback for the admin-view page.
+ *
+ * TOC
+ * 	  SHOW CONTEXT PAGE
+ *    POPUP
+ *    	SUBMITTED FEEDBACK
+ *    		SUBMITTED BY
+ *    		TOPIC
+ *    		FEEDBACK TEXT
+ *      ADMIN RESPONSE-FIELDS
+ *      	FEEDBACK ASSIGNED TO
+ *      	FEEDBACK STATUS
+ *      	ADMIN NOTES
+ *      POPUP FOOTER
+ *      BUILD AND APPEND POPUP
+ *   HANDLE SUBMIT
+ *   	TOGGLE SUBMIT
+ *   	SUBMIT UPDATE
+ *   CLOSE POPUP
  */
-import * as _u from '~util';
+import { getElem, getSelect, getFieldRow, getFormFooter, sendAjaxQuery, ucfirst } from '~util';
 
-var $asgnUsrElem, $statusElem, $adminNotesElem, $viewerPopup;
-var minNotesChars = 1;
-var maxNotesChars = 500;
-var orgnlFeedback = {};
-var submitDisabled = true;
-var noteHasChanges = false;
-var statusHasChanges = false;
-var asgnUserHasChanges = false;
-
-requireCss();
-
-function requireCss() {
-	require('../../../styles/css/feedback-viewer.css');
-}
+let submitEnabled = false;
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
-
+/* ========================= SHOW CONTEXT PAGE ============================== */
+/** Shows the page the feedback was submitted from. */
 function showContextPage(e) {
 	e.preventDefault()
-	var $iframe = $('<iframe id="feedback-context-frame"></iframe>');
-	var contextUrl =  $(this).attr('href');
-
-	sendAjaxQuery(null, $(this).data('ajaxload'), feedbackEntryRecieved);
-	$( 'body' ).empty();
-	$('html').css({ 'overflow-y': 'hidden' });
-	$( 'body' ).append($iframe);
-	$('#feedback-context-frame').attr('src', contextUrl);
+	sendAjaxQuery(null, 'feedback/load/'+$(this).data('id'), feedbackEntryRecieved);
+	clearBodyAndBuildIframe($(this).attr('href'));
 	return false;
 }
-
-function createPopUp(feedback) {
-	orgnlFeedback = extractEditable(feedback);		console.log("orgnlFeedback= ", orgnlFeedback);
-	$viewerPopup = $('<div id="feedback-viewer-popup"></div>');
-	var container = $('<div id="feedback-container"></div>');
-	var fromTxt = feedback.from.username + formatDate(feedback.submitted.date);
-	$asgnUsrElem = createUserSelect(feedback.users, feedback.assigned.id);
-	$statusElem = createStatusSelect(feedback.status);
-	$adminNotesElem = $('<textarea id="admn-notes" placeholder="Add notes about this feedback here..."></textarea>').text(feedback.notes);
-
-	$viewerPopup.append($('<p></p>').text(fromTxt).prepend($('<span class="lbl">Feedback from: </span>')));
-	$viewerPopup.append($('<p class="top-mrg"></p>').text(feedback.topic).prepend($('<span class="lbl">Topic: </span>')));
-	$viewerPopup.append($('<p class="top-mrg btm-mrg"></p>').text(feedback.content).prepend($('<span class="lbl">Description: </span>')));
-	$viewerPopup.append($('<hr>'));
-	$viewerPopup.append($asgnUsrElem);
-	$viewerPopup.append($statusElem);
-	$viewerPopup.append($('<p class="top-mrg"><span class="lbl">Admin Notes:</span></p>'));
-	$viewerPopup.append($adminNotesElem);
-	$viewerPopup.append($('<button name="post-feedback">Update Feedback Entry</button>'));
-	$viewerPopup.append($('<button name="cancel-feedback">Cancel</button>'));
-	$viewerPopup.hide();
-	container.prepend($viewerPopup);
-	$('body').prepend(container);
-	addPopupEvents();
-	$viewerPopup.css({ right: sbarOffest($viewerPopup.css('right')) });
-	$("#feedback-viewer-popup>button[name='post-feedback']").fadeTo( 'fast' , .35);
-	$viewerPopup.fadeIn("fast");
+function clearBodyAndBuildIframe(pageUrl) {
+	const $iframe = $('<iframe id="feedback-context-frame"></iframe>');
+	$('body').empty();
+	$('html').css({ 'overflow-y': 'hidden' });
+	$('body').append($iframe);  console.log('href = ', pageUrl)
+	$('#feedback-context-frame').attr('src',pageUrl);
 }
-
-function extractEditable(feedback) {
-	var userId = feedback.assigned.id;
+function feedbackEntryRecieved(data, textStatus, jqXHR) {
+	createFeedbackResponsePopup(data.feedback);
+}
+/* ============================= POPUP ====================================== */
+function createFeedbackResponsePopup(feedback) {
+	const data = getEditableFeedbackData(feedback);					/*dbug-log*/console.log("createFeedbackResponsePopup feedback = %O, editableData = %O", feedback, data);
+	const elems = [
+		...getSubmittedFeedbackElems(feedback, data), '<hr>',
+		...getAdminResponseFields(feedback, data),
+		getFeedbackResponseFooter()
+	];
+	buildAndShowResponsePopup(elems);
+}
+function getEditableFeedbackData(feedback) {
+	const userId = feedback.assigned.id;
 	return {
 		status: parseInt(feedback.status),
-		asgnUser: parseInt(userId === null ? 0 : userId),
+		assignedUser: parseInt(userId === null ? 0 : userId),
 		notes: feedback.notes
 	}
 }
-
-function onDataChange() {
-	console.log("onDataChange called.");
-	if (submitDisabled && hasChangedData()) {
-		enableSubmit();
-	} else if (!submitDisabled && !hasChangedData()) {
-		disableSubmit();
+/* ----------------------- SUBMITTED FEEDBACK ------------------------------- */
+function getSubmittedFeedbackElems(feedback, data) {
+	return [
+		getSubmittedBy (feedback),
+		getTopic(feedback),
+		getFeedbackText(feedback)
+	];
+}
+function getDisplayElems(name, dText, label = null) {
+	const displayText = getElem('span', { text: dText });
+	return getFieldRow(getDisplayFieldConfg(name, label, displayText));
+}
+function getDisplayFieldConfg(name, label, input) {
+    return {
+        flow: 'row',
+        input: input,
+        label: label ? label : ucfirst(name)+':',
+        name: name,
+    };
+}
+/* __________________________ SUBMITTED-BY __________________________________ */
+function getSubmittedBy(feedback) {
+	const userAndDate = feedback.from.name + ' - ' + formatDate(feedback.submitted.date);
+	return getDisplayElems('submitted', userAndDate, 'Submitted by:');
+}
+function formatDate(dateStr) {
+	const date = new Date(dateStr);
+	return date.getDateTimeSentence();
+}
+/* ____________________________ TOPIC _______________________________________ */
+function getTopic(feedback) {
+	return getDisplayElems('topic', feedback.topic);
+}
+/* _________________________ FEEDBACK TEXT __________________________________ */
+function getFeedbackText(feedback) {
+	return getDisplayElems('feedback', feedback.content);
+}
+/* -------------------- ADMIN RESPONSE-FIELDS ------------------------------- */
+function getAdminResponseFields(feedback, data) {
+	return [
+		getAssignedUserField(feedback.users, data.assignedUser),
+		getFeedbackStatuElem(feedback.status),
+		getAdminNotesElem(feedback.notes)
+	];
+}
+/* ____________________ FEEDBACK ASSIGNED TO ________________________________ */
+function getAssignedUserField(users, assignedId) {
+	const select = getSelect(
+		getUserOpts(users), {id: 'sel-assignedUser'}, onDataChange, assignedId);
+	$(select).data('original', assignedId);
+	return getFieldRow(getDisplayFieldConfg('fAssigned', 'Assigned to:', select));
+}
+function getUserOpts(users) {
+	const opts = [new Option('- None - ', 0)];
+	users.forEach(user => opts.push(new Option(user.name, user.id)));
+	return opts;
+}
+/* ________________________ FEEDBACK STATUS _________________________________ */
+function getFeedbackStatuElem(curStatus) {
+	const select = getSelect(
+		getStatusOpts(), {id: 'sel-feedbackStatus'}, onDataChange, curStatus);
+	$(select).data('original', curStatus);
+	return getFieldRow(getDisplayFieldConfg('fStatus', 'Status:', select));
+}
+function getStatusOpts() {
+	const statuses = ['Closed', 'Follow-Up', 'Read', 'Unread'];
+	return statuses.map((status, idx) => new Option(status, idx));
+}
+/* _________________________ ADMIN NOTES ____________________________________ */
+function getAdminNotesElem(notes) {
+	const input = buildAdminNotesTextarea(notes);
+	$(input).data('original', notes).keyup(onDataChange);
+	return getFieldRow(getDisplayFieldConfg('fNotes', 'Notes:', input));
+}
+function buildAdminNotesTextarea(notes) {
+	const attr = {
+		id: 'feedback-notes',
+		placeholder: 'Add notes about this feedback here...',
+		text: notes
+	};
+	return getElem('textarea', attr);
+}
+/* ------------------------ POPUP FOOTER ------------------------------------ */
+function getFeedbackResponseFooter() {
+    const confg = {
+    	action: 'edit',
+        formName: 'Feedback',
+        onSubmit: updateFeedback,
+        onCancel: closePopup
+    };
+    return getFormFooter(confg);
+}
+/* -------------------- BUILD AND APPEND POPUP ------------------------------ */
+function buildAndShowResponsePopup(elems) {
+	const popup = getFeedbackResponsePopup();
+	$('body').prepend(popup);
+	$(popup).append(elems).fadeIn("fast");
+}
+function getFeedbackResponsePopup() {
+	const $popup = $(getElem('div', {id: 'feedback-popup'}));
+	$popup.css({
+		display: 'none'
+	});
+	return $popup;
+}
+/* ========================= HANDLE SUBMIT ================================== */
+function onDataChange() {											/*dbug-log*/console.log("onDataChange called.");
+	if (!submitEnabled && hasChangedData()) {
+		toggleFeedbackSubmitButton();
+	} else if (submitEnabled && !hasChangedData()) {
+		toggleFeedbackSubmitButton(false);
 	}
 }
-
-function hasChangedData() {
-	console.log("hasChangedData called. will return -> ", (noteHasChanges || statusHasChanges || asgnUserHasChanges));
-	return noteHasChanges || statusHasChanges || asgnUserHasChanges;
+function hasChangedData() {											/*dbug-log*/console.log("hasChangedData called. will return -> ", (noteHasChanges || statusHasChanges || assignedUserHasChanges));
+	const fields = ['#sel-feedbackStatus', '#sel-assignedUser', '#feedback-notes'];
+	return fields.find(fieldHasChanges);
 }
-
-function onNoteChange() {
-	noteHasChanges = $adminNotesElem.val() === orgnlFeedback.notes ? false : true;
-	console.log("noteChanges called and ==", noteHasChanges);
-	onDataChange();
+function fieldHasChanges(field) {
+	return $(field).val() !== $(field).data('original');
 }
-
-function onStatusChange() {
-	statusHasChanges = parseInt($('select[name=status] option:selected').val()) !== orgnlFeedback.status;
-	onDataChange();
+/* ----------------------------- TOGGLE SUBMIT ------------------------------ */
+function toggleFeedbackSubmitButton(enable = true) {				/*dbug-log*/console.log('toggleFeedbackSubmitButton enable?[%s]', enable);
+    const opac = enable ? 1 : .35;
+    submitEnabled = enable;
+    $('#Feedback-submit').fadeTo( 'fast', opac).attr({'disabled': !enable});
 }
-
-function onAsgnUserChange() {
-	asgnUserHasChanges = parseInt($('select[name=asgnuser] option:selected').val()) !== orgnlFeedback.asgnUser;
-	onDataChange();
-}
-
-function enableSubmit() {
-	console.log("enableSubmit called");
-	$('#feedback-viewer-popup').on('click', 'button[name="post-feedback"]', updateFeedback);
-	$("#feedback-viewer-popup>button[name='post-feedback']").fadeTo( 'fast', 1);
-	submitDisabled = false;
-}
-
-function disableSubmit() {
-	console.log("disableSubmit called");
-	$("#feedback-viewer-popup>button[name='post-feedback']").fadeTo( 'fast' , .35);
-	$('#feedback-viewer-popup').off('click', 'button[name="post-feedback"]', updateFeedback);
-	submitDisabled = true;
-}
-
+/* ---------------------------- SUBMIT UPDATE ------------------------------- */
 function updateFeedback() {
-	const url = $(this).data('ajaxupdate');
-	var userId = $('select[name=asgnuser] option:selected').val();
-	var data = {
-			asgnUserId: userId === 0 ? null : userId,
-    		adminNotes: $adminNotesElem.val(),
-    		status: $('select[name=status] option:selected').val()
-    	};																		console.log('$adminNotesElem = ', $adminNotesElem);
+	const url = 'feedback/update/'+$(this).data('id');
+	const userId = $('#assignedUser').val();
+	const data = {
+		assignedUserId: userId === 0 ? null : userId,
+		adminNotes: $adminNotesElem.val(),
+		status: $('#feedback-status').val()
+	};
     sendAjaxQuery(data, url, feedbackUpdateSucess);
 }
-function feedbackUpdateSucess(data, textStatus, jqXHR) {						console.log('feedbackUpdateSucess data = ', data);
+function feedbackUpdateSucess(data, textStatus, jqXHR) {			/*dbug-log*/console.log('feedbackUpdateSucess data = ', data);
 	closePopup();
 }
-
-function addPopupEvents() {
-	$viewerPopup.on('click', 'button[name="cancel-feedback"]', closePopup);
-	$viewerPopup.on('keyup', 'textarea', onNoteChange);
-	$viewerPopup.on('change', 'select[name=status]', onStatusChange);
-	$viewerPopup.on('change', 'select[name=asgnuser]', onAsgnUserChange);
-}
-
+/* =========================== CLOSE POPUP ================================== */
 function closePopup() {
-	$viewerPopup.fadeOut("slow", function () { document.location.reload(true); });
-	return true;
-}
-
-function sbarOffest(pxValStr) {
-	return (parseInt(numPart(pxValStr)) + Math.floor(sbarWidth() / 2)) + 'px';
-}
-
-/* strip px, em, etc off of css values */
-function numPart(str) {
-	return str.replace(/[^-\d\.]/g, '');
-}
-
-function createUserSelect(users, selected) {
-	var selectElemStr = '<label>Assigned to: <select name="asgnuser"><option value="0"';
-	selectElemStr += (selected === null ? ' selected>' : '>') + 'none</option>';
-	users.forEach(function (user) {
-		var optionStr = '<option value="' + user.id + '"';
-		optionStr += (selected === user.id ? ' selected>' : '>');
-		optionStr += user.name + '</option>';
-		selectElemStr += optionStr;
-	});
-	selectElemStr += '</select></label>';
-	return $(selectElemStr);
-}
-
-function createStatusSelect(curStatus) {
-	var statusAry = ['Closed', 'Follow-Up', 'Read', 'Unread'];
-	var selectElemStr = '<label>Status: <select name="status">';
-	statusAry.forEach(function (statusStr, idx) {
-		var optionStr = '<option value="' + idx + '"';
-		optionStr += (curStatus === statusStr ? ' selected>' : '>');
-		optionStr += statusStr + '</option>';
-		selectElemStr += optionStr;
-	});
-	selectElemStr += '</select></label>';
-	return $(selectElemStr);
-}
-
-function feedbackEntryRecieved(data, textStatus, jqXHR) {
-	createPopUp(data.feedbackObj);
-}
-
-function formatDate(dateStr) {
-	var date = new Date(dateStr);
-	var hours = date.getHours();
-	var minutes = date.getMinutes();
-	var ampm = hours >= 12 ? 'pm' : 'am';
-	hours = hours % 12;
-	hours = hours ? hours : 12; // the hour '0' should be '12'
-	minutes = minutes < 10 ? '0'+minutes : minutes;
-	var strTime = hours + ':' + minutes + ' ' + ampm;
-	return ' on ' + date.getMonth()+1 + "/" + date.getDate() + "/" + date.getFullYear() + " at " + strTime;
-}
-
-function sbarWidth() {
-	var scrollbarWidth;
-	var scrollDiv = document.createElement("div");
-	scrollDiv.id = "scrollbar-measure";
-	document.body.appendChild(scrollDiv);
-	scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-	document.body.removeChild(scrollDiv);
-	return parseInt(scrollbarWidth);
+	$('#feedback-popup').fadeOut('slow', () => document.location.reload(true));
 }
