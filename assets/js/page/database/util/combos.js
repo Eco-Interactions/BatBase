@@ -10,7 +10,7 @@
  *     replaceSelOpts
  *     triggerComboChangeReturnPromise
  */
-import * as _pg from '~db';
+import { _util } from '~db';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
 /**
@@ -160,7 +160,7 @@ export function destroySelectizeInstance(field) {
 }
 /* ======================= HELPERS ========================================== */
 function getSelApi(field) {
-    if (!confgs[field]) { return _pg.alertIssue('comboboxNotFound', {field: field}); }
+    if (!confgs[field]) { return _util('alertIssue', ['comboboxNotFound', {field: field}]); }
     return $(confgs[field].id)[0].selectize;
 }
 function isMultiSelCombo(field) {

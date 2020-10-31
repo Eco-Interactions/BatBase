@@ -44,7 +44,7 @@ function getDataCell (data) {
 }
 /* ------------------------- HTML BUILDERS ---------------------------------- */
 function getDataSect (cnt, section, rows) {                         /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
-    const hdr = util.buildElem('h3', { text: section.name });
+    const hdr = util.getElem('h3', { text: section.name });
     const id = 'data-sect-'+cnt;
     const classes = 'data-sect' + (section.classes ? ' ' + section.classes : '');
     return getDivWithContent(id, classes, [hdr, ...rows]);
@@ -56,7 +56,7 @@ function getRowGroupSect (dir, colCells) {                          /*dbug-log*/
     const classes = `group-${dir} flex-${dir}`;
     return getDivWithContent('', classes, colCells);
 }
-function buildDataCell (field, fieldHTML, label, c = '') {                 /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
+function buildDataCell (field, fieldHTML, label, c = '') {          /*dbug-log*///console.log('           buildDataCell [%s] = [%O]', label, fieldHTML);
     const lbl = getFieldLabel(field, label);
     const data = getDivWithContent(field+'-data', '', fieldHTML);
     const classes = 'flex-row cell-data ' + c;
@@ -64,11 +64,11 @@ function buildDataCell (field, fieldHTML, label, c = '') {                 /*dbu
 }
 /** Note: If label is set to FALSE in confg, no label is built. */
 function getFieldLabel(field, label) {
-    return label === false ? false : util.getLabel(field+':');
+    return label === false ? false : util.getElem('label', { text: field+':'});
 }
 /* ------------ base ------------------- */
 function getDivWithContent (id, classes, content) {                 /*dbug-log*///console.log('               getDivWithContent [%s] = [%O]', classes, content);
-    const div = util.buildElem('div', { class: classes, id: id });
+    const div = util.getElem('div', { class: classes, id: id });
     const html = !!content ? content : '[ NONE ]';
     $(div).append(html);
     return div;

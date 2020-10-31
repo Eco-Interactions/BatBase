@@ -2,27 +2,23 @@
  * @module app/util/elem
  * Html element methods.
  *
- * Export
- *     buildElem
- *     getDiv
- *
  * TOC
  *    GET ELEMS
- *    GET ELEM FULL
+ *        FIELD ROW
+ *        FORM FOOTER
  */
 import * as basic from './basic-elem-build.js';
-import * as row from './field-row.js';
+import * as row from './basic-field-row.js';
+import * as footer from './basic-form-footer.js';
 /* ===================== GET ELEMS ========================================== */
-export function buildElem() {
-    return basic.buildElem(...arguments);
-}
-export function getDiv(attrs) {
-    return basic.buildElem('div', attrs);
-}
-export function getLabel(text, attrs = {}) {
-    return basic.buildElem('label', Object.assign(attrs, { text: text }));
+export function getElem() {
+    return basic.getElem(...arguments);
 }
 /* ------------------------ FIELD ROW --------------------------------------- */
-export default function buildFieldRow() {
-    return row.buildFieldRow(...arguments);
+export function getFieldRow() {
+    return row.getFieldRow(...arguments);
+}
+/* ---------------------- FORM FOOTER --------------------------------------- */
+export function getFormFooter() {
+    return footer.getFormFooter(...arguments);
 }

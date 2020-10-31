@@ -40,6 +40,7 @@ export function reportErr(e) {
  *     invalidDataKeyType {key, type}
  *     dataSyncFailure {fails} (no browser alert)
  *     facadeErr {module, caller, called, error(toString), errMsg}
+ *     feedback { route, topic, feedback } (no browser alert)
  *     editorReport {summary, steps, etc, screenshots} (no browser alert)
  *     expectedDataNotFound {key}
  *     fetchIssue {url, responseText}
@@ -112,7 +113,7 @@ class SentryError extends Error {
  *     undefiendDataKey: showGeneralAlert
  */
 function handleUserAlert(tag) {
-    const silent = ['dataSyncFailure', 'noRcrdFound', 'TestIssue', 'editorReport'];
+    const silent = ['dataSyncFailure', '', 'noRcrdFound', 'TestIssue', 'editorReport'];
     if (silent.indexOf(tag) !== -1) { return; }
     const map = {
         'alertNoRcrdFound': noRcrdFoundInForms

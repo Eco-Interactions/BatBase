@@ -4,7 +4,7 @@
  * Export
  *     fillTreeWithInteractions
  */
-import { alertIssue, _u } from '~db';
+import { _u } from '~db';
 import { getTreeRcrds } from '../build-main.js';
 
 /** Replaces all interaction ids with records for every node in the tree.  */
@@ -99,6 +99,6 @@ function getTreeRcrd(id, entityData, entity, prop) {  //console.log('getTreeRcrd
     if (entityData[entity] === undefined) { return {}; }
     const rcrd = entityData[entity][id];
     if (!rcrd && prop === 'object') { return {}; }
-    if (!rcrd) { alertIssue('noRcrdFound', {id: id, entity: entity }); }
+    if (!rcrd) { _u('alertIssue', ['noRcrdFound', {id: id, entity: entity }]); }
     return rcrd ? rcrd : '_err_';
 }

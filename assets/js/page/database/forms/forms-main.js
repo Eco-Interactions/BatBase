@@ -10,7 +10,7 @@
  *         VALIDATION & SUBMIT
  *     BUNDLE HELPERS
  */
-import { _app, _map, _ui, executeMethod } from '~db';
+import { _util, _map, _ui, executeMethod } from '~db';
 import * as confg from './confg/confg-main.js';
 import * as form from './entity-form/entity-form-main.js';
 import * as state from './etc/form-state.js';
@@ -25,7 +25,7 @@ function getParams(params) {
 /** ======================== EXTERNAL FACADE ================================ */
 export function alertIssue() {
     if (!state.getFormState()) { return; } //form closed
-    return _app('alertIssue', [...arguments]);
+    return _util('alertIssue', [...arguments]);
 }
 /** ===================== BUNDLE FACADE ===================================== */
 export function _confg(funcName, params = []) {

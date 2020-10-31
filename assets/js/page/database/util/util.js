@@ -1,8 +1,9 @@
 /**
  * Helpful utility methods used throughout the database search page.
  *
- * TOC:
+ * TOC
  *     GENERATE CITATION TEXT
+ *     CORE-UTIL FACADE
  *     UTIL FACADE
  *         SELECTIZE COMBOBOXES
  *         IDB STORAGE METHODS
@@ -13,7 +14,7 @@
  *         STRING HELPERS
  *         OBJECT HELPERS
  */
-import { alertIssue as _alertIssue, _db, _app } from '~db';
+import { _db, _util } from '~db';
 import * as cmbx from './combos.js';
 import * as elems from './elems-util.js';
 import * as cite from './generate-citation.js';
@@ -24,12 +25,20 @@ extendPrototypes();
 export function generateCitationText() {
     return cite.generateCitationText(...arguments);
 }
-/** ==================== CORE APP FACADE ==================================== */
+/** =================== CORE-UTIL FACADE ==================================== */
 export function sendAjaxQuery() {
-    return _app('sendAjaxQuery', [...arguments]);
+    return _util('sendAjaxQuery', [...arguments]);
 }
 export function logAjaxData() {
-    return _app('logAjaxData', [...arguments]);
+    return _util('logAjaxData', [...arguments]);
+}
+/** Handles issues without javascript error/exception objects. */
+export function alertIssue() {
+    return _util('alertIssue', [...arguments]);
+}
+/** Sends Error object to Sentry, issue tracker. */
+export function reportErr() {
+    return _util('reportErr', [...arguments]);
 }
 /** ==================== UTIL FACADE ======================================== */
 /* ---------------------- SELECTIZE COMBOBOXES ------------------------------ */
@@ -92,7 +101,7 @@ export function setData(k, v) {
 }
 /* -------------- HTML ELEMENT HELPERS  ------------------------------------- */
 export function buildElem() {
-    return _app('buildElem', [...arguments]);
+    return _util('buildElem', [...arguments]);
 }
 export function buildSelectElem() {
     return elems.buildSelectElem(...arguments);
@@ -122,7 +131,7 @@ export function logInDevEnv() {
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
     if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    logInDevEnv("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
-    _alertIssue('noRcrdFound', {id: rcrdKey, entity: entity });
+    alertIssue('noRcrdFound', {id: rcrdKey, entity: entity });
     return false;
 }
 /* ------------ STRING HELPERS ---------------------------------------------- */

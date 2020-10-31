@@ -15,7 +15,7 @@
  *         RETRY QUEUE
  *         REPORT FAILURES
  */
-import { _u, alertIssue } from '~db';
+import { _u } from '~db';
 import * as db from '../../local-data-main.js';
 
 let failed = { data: [], retryQueue: {}};
@@ -74,7 +74,7 @@ export function reportDataSyncFailures(obj) {
     const data = obj || {};
     addFailedUpdatesToObj(data);
     if (!data.fails) { return data; }                               /*perm-log*/console.log('           !!Reporting failures = %O', data.fails)
-    alertIssue('dataSyncFailure', { fails: getFailureReport(data.fails) });
+    _u('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
     return data
 }
 function getFailureReport (failures) {

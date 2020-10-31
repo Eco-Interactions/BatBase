@@ -30,8 +30,7 @@ const loadHeaderData = {
 export default function initHeaderStats(pgPath) {
 	const pg = pgPath || 'home';
 	if (!ifPgHasStatistics(pg)) { return }
-    const envUrl = $('body').data("base-url");
-	sendAjaxQuery({tag: pageStatKeys[pg]}, envUrl + 'stats/', loadPageHeaderStatistics);
+	sendAjaxQuery({tag: pageStatKeys[pg]}, 'stats/', loadPageHeaderStatistics);
 
 	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  				//console.log('loadPageHeaderStatistics. args = %O', arguments);
 		loadHeaderData[pageStatKeys[pg]](data);

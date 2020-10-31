@@ -13,14 +13,14 @@
  *            SENTRY
  *        CLOSE REPORT POPUP
  */
-import { alertIssue, resetLocalDb, _app, _u } from '~db';
+import { _db, _util, _u } from '~db';
 
 /* ===================== HELP MODAL ========================================= */
 export default function showEditorHelpModal() {
     const confg = {
         html: getHelpHtml(), selector: '#data-help', dir: 'left', onLoad: setBttnEvents
     }
-    _app('showSaveModal', [confg]);
+    _util('showSaveModal', [confg]);
 }
 function getHelpHtml() {
     return `<center><h3>Experiencing issues?</h3></center><br><br>
@@ -31,11 +31,11 @@ function getModalBttn(text) {
 }
 function setBttnEvents() {
     const map = {
-        'Reset Local Data': resetLocalDb.bind(null, true),
+        'Reset Local Data': _db.bind(null, 'resetStoredData', [true]),
         'Report A Bug': showBugReportPopup
     }
     $('.intro-bttn').each((i, elem) => {
-        $(elem).click(() => { _app('exitModal', [map[elem.innerText]]); }
+        $(elem).click(() => { _util('exitModal', [map[elem.innerText]]); }
     )});
 }
 /* ===================== BUG REPORT POPUP =================================== */
@@ -150,7 +150,7 @@ function submitNewSentryIssue(fileNames) {
         etc: $('.bug-rprt-input')[2].value,
         screenshots: JSON.stringify(fileNames.map(f => buildScreenshotUrl(f)))
     };
-    alertIssue('editorReport', data);
+    _util('alertIssue', ['editorReport', data]);
     updateBugReportUiAfterSubmit();
 }
 function buildScreenshotUrl(fileName) {

@@ -69,7 +69,7 @@ Encore
     .addEntry('db', './assets/js/page/database/db-main.js')
     .addEntry('feedback', './assets/js/app/feedback/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/page/view-pdfs.js')
-    .addEntry('show', './assets/js/page/show/entity-show.js')
+    .addEntry('entity', './assets/js/page/entity/entity-show.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
     // Optimizes code by breaking files into the smallest size needed to run the page (builds lots of files)

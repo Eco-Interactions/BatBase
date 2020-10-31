@@ -40,14 +40,14 @@ export function logAjaxData() {
     return uAjax.logAjaxData(...arguments);
 }
 /* =========================== ELEMS ======================================== */
-export function getDiv() {
-    return elems.getDiv(...arguments);
+export function getFieldRow() {
+    return elems.getFieldRow(...arguments);
 }
-export function buildElem() {
-    return elems.buildElem(...arguments);
+export function getElem() {
+    return elems.getElem(...arguments);
 }
-export function getLabel() {
-    return elems.getLabel(...arguments);
+export function getFormFooter() {
+    return elems.getFormFooter(...arguments);
 }
 /* ========================= STRINGS ======================================== */
 export function ucfirst(str) {
