@@ -1,5 +1,6 @@
 /**
- * Handles loading and managind user-submitted feedback for the admin-view page.
+ * Loads the page the feedback was submitted from. Shows a popup with the submitted
+ * feedback data and the admin fields to manage the feedback.
  *
  * TOC
  * 	  SHOW CONTEXT PAGE
@@ -20,7 +21,6 @@
  *   CLOSE POPUP
  */
 import { getElem, getSelect, getFieldRow, getFormFooter, sendAjaxQuery, ucfirst } from '~util';
-
 let submitEnabled = false;
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
@@ -44,7 +44,7 @@ function feedbackEntryRecieved(data, textStatus, jqXHR) {
 }
 /* ============================= POPUP ====================================== */
 function createFeedbackResponsePopup(feedback) {
-	const data = getEditableFeedbackData(feedback);					/*dbug-log*/console.log("createFeedbackResponsePopup feedback = %O, editableData = %O", feedback, data);
+	const data = getEditableFeedbackData(feedback);					/*dbug-log*///console.log("createFeedbackResponsePopup feedback = %O, editableData = %O", feedback, data);
 	const elems = [
 		...getSubmittedFeedbackElems(feedback, data), '<hr>',
 		...getAdminResponseFields(feedback, data),
@@ -60,19 +60,13 @@ function getEditableFeedbackData(feedback) {
 		notes: feedback.notes
 	}
 }
-/* ----------------------- SUBMITTED FEEDBACK ------------------------------- */
-function getSubmittedFeedbackElems(feedback, data) {
-	return [
-		getSubmittedBy (feedback),
-		getTopic(feedback),
-		getFeedbackText(feedback)
-	];
+/* ------------------------ FIELD HELPERS ----------------------------------- */
+function getMultiFieldRow(fields) {
+	const row = getElem('div', { class: 'flex-row' });
+	$(row).append(fields);
+	return row;
 }
-function getDisplayElems(name, dText, label = null) {
-	const displayText = getElem('span', { text: dText });
-	return getFieldRow(getDisplayFieldConfg(name, label, displayText));
-}
-function getDisplayFieldConfg(name, label, input) {
+function getFeedbackFieldConfg(name, label, input) {
     return {
         flow: 'row',
         input: input,
@@ -80,10 +74,25 @@ function getDisplayFieldConfg(name, label, input) {
         name: name,
     };
 }
+/* ----------------------- SUBMITTED FEEDBACK ------------------------------- */
+function getSubmittedFeedbackElems(feedback, data) {
+	return [
+		getSubmittedBy(feedback),
+		getTopic(feedback),
+		getFeedbackText(feedback)
+	];
+}
+function getDisplayElems(name, dText, label = null) {
+	const displayText = getElem('span', { text: dText });
+	return getFieldRow(getFeedbackFieldConfg(name, label, displayText));
+}
 /* __________________________ SUBMITTED-BY __________________________________ */
 function getSubmittedBy(feedback) {
-	const userAndDate = feedback.from.name + ' - ' + formatDate(feedback.submitted.date);
-	return getDisplayElems('submitted', userAndDate, 'Submitted by:');
+	const fields = [
+		getDisplayElems('fUser', feedback.from.name, 'User:'),
+		getDisplayElems('fDate', formatDate(feedback.submitted.date), 'Date:'),
+	];
+	return getMultiFieldRow(fields)
 }
 function formatDate(dateStr) {
 	const date = new Date(dateStr);
@@ -100,17 +109,23 @@ function getFeedbackText(feedback) {
 /* -------------------- ADMIN RESPONSE-FIELDS ------------------------------- */
 function getAdminResponseFields(feedback, data) {
 	return [
-		getAssignedUserField(feedback.users, data.assignedUser),
-		getFeedbackStatuElem(feedback.status),
+		getTopAdminResponseRow(feedback, data),
 		getAdminNotesElem(feedback.notes)
 	];
+}
+function getTopAdminResponseRow(feedback, data) {
+	const fields = [
+		getAssignedUserField(feedback.users, data.assignedUser),
+		getFeedbackStatuElem(feedback.status)
+	];
+	return getMultiFieldRow(fields)
 }
 /* ____________________ FEEDBACK ASSIGNED TO ________________________________ */
 function getAssignedUserField(users, assignedId) {
 	const select = getSelect(
 		getUserOpts(users), {id: 'sel-assignedUser'}, onDataChange, assignedId);
 	$(select).data('original', assignedId);
-	return getFieldRow(getDisplayFieldConfg('fAssigned', 'Assigned to:', select));
+	return getFieldRow(getFeedbackFieldConfg('fAssigned', 'Assigned to:', select));
 }
 function getUserOpts(users) {
 	const opts = [new Option('- None - ', 0)];
@@ -122,7 +137,7 @@ function getFeedbackStatuElem(curStatus) {
 	const select = getSelect(
 		getStatusOpts(), {id: 'sel-feedbackStatus'}, onDataChange, curStatus);
 	$(select).data('original', curStatus);
-	return getFieldRow(getDisplayFieldConfg('fStatus', 'Status:', select));
+	return getFieldRow(getFeedbackFieldConfg('fStatus', 'Status:', select));
 }
 function getStatusOpts() {
 	const statuses = ['Closed', 'Follow-Up', 'Read', 'Unread'];
@@ -132,7 +147,7 @@ function getStatusOpts() {
 function getAdminNotesElem(notes) {
 	const input = buildAdminNotesTextarea(notes);
 	$(input).data('original', notes).keyup(onDataChange);
-	return getFieldRow(getDisplayFieldConfg('fNotes', 'Notes:', input));
+	return getFieldRow(getFeedbackFieldConfg('fNotes', 'Notes:', input));
 }
 function buildAdminNotesTextarea(notes) {
 	const attr = {
@@ -166,14 +181,14 @@ function getFeedbackResponsePopup() {
 	return $popup;
 }
 /* ========================= HANDLE SUBMIT ================================== */
-function onDataChange() {											/*dbug-log*/console.log("onDataChange called.");
+function onDataChange() {											/*dbug-log*///console.log("onDataChange called.");
 	if (!submitEnabled && hasChangedData()) {
 		toggleFeedbackSubmitButton();
 	} else if (submitEnabled && !hasChangedData()) {
 		toggleFeedbackSubmitButton(false);
 	}
 }
-function hasChangedData() {											/*dbug-log*/console.log("hasChangedData called. will return -> ", (noteHasChanges || statusHasChanges || assignedUserHasChanges));
+function hasChangedData() {											/*dbug-log*///console.log("hasChangedData called. will return -> ", (noteHasChanges || statusHasChanges || assignedUserHasChanges));
 	const fields = ['#sel-feedbackStatus', '#sel-assignedUser', '#feedback-notes'];
 	return fields.find(fieldHasChanges);
 }
@@ -181,7 +196,7 @@ function fieldHasChanges(field) {
 	return $(field).val() !== $(field).data('original');
 }
 /* ----------------------------- TOGGLE SUBMIT ------------------------------ */
-function toggleFeedbackSubmitButton(enable = true) {				/*dbug-log*/console.log('toggleFeedbackSubmitButton enable?[%s]', enable);
+function toggleFeedbackSubmitButton(enable = true) {				/*dbug-log*///console.log('toggleFeedbackSubmitButton enable?[%s]', enable);
     const opac = enable ? 1 : .35;
     submitEnabled = enable;
     $('#Feedback-submit').fadeTo( 'fast', opac).attr({'disabled': !enable});
@@ -197,7 +212,7 @@ function updateFeedback() {
 	};
     sendAjaxQuery(data, url, feedbackUpdateSucess);
 }
-function feedbackUpdateSucess(data, textStatus, jqXHR) {			/*dbug-log*/console.log('feedbackUpdateSucess data = ', data);
+function feedbackUpdateSucess(data, textStatus, jqXHR) {			/*dbug-log*///console.log('feedbackUpdateSucess data = ', data);
 	closePopup();
 }
 /* =========================== CLOSE POPUP ================================== */
