@@ -22,31 +22,32 @@
         </thead>
         <tbody>
             {% for feedback in entities %}
-                {% set user = feedback.createdBy %}
-                {% set route = 'Home' %}
-                {% if feedback.route != '/' %}
-                    {% set routeParts = feedback.route|split('/') %}
-                    {% set route = routeParts|join(' ') %}
+                {% set trans = { 0: 'Closed', 1: 'Follow-up', 2: 'Read', 3: 'Unread' } %}
+                {% set status = attribute(trans, feedback.status) %}
+                {% if status != 'Closed' %}
+                    {% set user = feedback.createdBy %}
+                    {% set route = 'Home' %}
+                    {% if feedback.route != '/' %}
+                        {% set routeParts = feedback.route|split('/') %}
+                        {% set route = routeParts|join(' ') %}
+                    {% endif %}
+                    <tr>
+                        <td>{{ feedback.created|date("F jS \\a\\t g:ia") }}</td>
+                        <td><a href="mailto:{{ user.email }}?subject=website%20feedback">{{ user }}</a></td>
+                        <td>
+                            <a  href="{{app.request.getSchemeAndHttpHost() ~ app.request.baseUrl ~ feedback.route}}"
+                                class="feedback-link"
+                                data-id="{{feedback.id}}">
+                                {{ route }}
+                            </a>
+                        </td>
+                        <td>{{ feedback.topic }}</td>
+                        <td>{{ feedback.content }}</td>
+                        <td>{{ feedback.adminNotes }}</td>
+                        <td>{{ feedback.assignedUser }}</td>
+                        <td>{{ status }}</td>
+                    </tr>
                 {% endif %}
-                {% set trans = {
-                    0: 'Closed', 1: 'Follow-up', 2: 'Read', 3: 'Unread' }
-                %}
-                <tr>
-                    <td>{{ feedback.created|date("F jS \\a\\t g:ia") }}</td>
-                    <td><a href="mailto:{{ user.email }}?subject=website%20feedback">{{ user }}</a></td>
-                    <td>
-                        <a  href="{{app.request.getSchemeAndHttpHost() ~ app.request.baseUrl ~ feedback.route}}"
-                            class="feedback-link"
-                            data-id="{{feedback.id}}">
-                            {{ route }}
-                        </a>
-                    </td>
-                    <td>{{ feedback.topic }}</td>
-                    <td>{{ feedback.content }}</td>
-                    <td>{{ feedback.adminNotes }}</td>
-                    <td>{{ feedback.assignedUser }}</td>
-                    <td>{{ attribute(trans, feedback.status) }}</td>
-                </tr>
             {% endfor %}
         </tbody>
     </table>

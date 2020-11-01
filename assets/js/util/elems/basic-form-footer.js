@@ -15,6 +15,7 @@ import { getElem, ucfirst } from '~util';
 /**
  * @param  {Object}   confg
  * @param  {String}   confg.formName
+ * @param  {String}   confg.action
  * @param  {Function} confg.onSubmit
  * @param  {Function} confg.onCancel
  * @param  {String}   [confg.submitText]
