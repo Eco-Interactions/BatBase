@@ -57,7 +57,7 @@ function getFieldClass(fLvl, fieldKey) {
 /* ------------------------------- INPUT ------------------------------------ */
 function buildInput(entity, field, fLvl, type = 'text') {
     const attr = { type: type, class: getFieldClass(fLvl) };
-    const input = _u('buildElem', ['input', attr]);
+    const input = _u('getElem', ['input', attr]);
     return input;
 }
 function buildNumberInput(entity, field, fLvl) {
@@ -68,11 +68,11 @@ function buildUrlInput(entity, field, fLvl) {
 }
 /* ----------------------------- TEXTAREA ----------------------------------- */
 function buildTextArea(entity, field, fLvl) {
-    return _u('buildElem', ['textarea', {class: getFieldClass(fLvl) }]);
+    return _u('getElem', ['textarea', {class: getFieldClass(fLvl) }]);
 }
 export function buildLongTextArea(entity, field, fLvl) {
     const attr = { class: getFieldClass(fLvl, 'long'), id:'txt-'+field };
-    return _u('buildElem', ['textarea', attr]);
+    return _u('getElem', ['textarea', attr]);
 }
 /* ------------------------------- SELECT ----------------------------------- */
 function buildCombobox(fieldType, entity, field, fLvl) {
@@ -87,7 +87,7 @@ function finishFieldBuild(input, field, entity, fLvl) {
     return input;
 }
 /* ------------------------ CHANGE HANDLER ---------------------------------- */
-function addFieldOnChangeHandler(entity, input, field, fLvl) {
+function addFieldOnChangeHandler(entity, input, field, fLvl) {      /*dbug-log*///console.log('addFieldOnChangeHandler [%s][%s][%s] = %O', fLvl, entity, field, input);
     ifCitationFormAutoGenerateCitationOnChange(entity, input, fLvl);
     if (input.id.includes('sel-cntnr')) { return; } //change event added during combo build
     $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));

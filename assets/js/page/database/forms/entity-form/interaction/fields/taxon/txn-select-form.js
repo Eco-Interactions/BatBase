@@ -64,7 +64,7 @@ function addSelectRootTaxonBttn() {
 }
 function buildSelectUnspecifedBttn() {
     const gTaxon = _state('getTaxonProp', ['groupTaxon']);
-    const bttn = _u('buildElem', ['input', getUnspecifiedBttnAttrs()]);
+    const bttn = _u('getElem', ['input', getUnspecifiedBttnAttrs()]);
     $(bttn).click(iForm.selectRoleTaxon.bind(null, null, gTaxon));
     return bttn;
 }
@@ -100,7 +100,7 @@ function exitTaxonSelectForm(role) {
     resetTaxonCombobox(role, prevTaxonId);
 }
 function resetTaxonCombobox(role, prevTaxonId) {
-    const opt = { value: prevTaxonId, text: getTaxonym(prevTaxonId) };
+    const opt = new Option(getTaxonym(prevTaxonId), prevTaxonId);
     _u('replaceSelOpts', [role, opt]);
     _u('setSelVal', [role, prevTaxonId]);
 }
@@ -116,7 +116,7 @@ function getTaxonym(id) {
 function selectInitTaxonOrFocusFirstCombo(role) {
     const selId = getPrevSelId(role);
     if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { focusFirstRankCombobox(_u('lcfirst', [role])); }
+    } else { _u('focusCombobox', ['Species']); }
 }
 function getPrevSelId(role) {
     return $('#sel-'+role).val() || $('#sel-'+role).data('reset') ?
@@ -137,7 +137,7 @@ function appendTxnFormAndInitCombos(role, form) {
  */
 function resetTaxonSelectForm(role) {
     const group = _state('getTaxonProp', ['groupName']);
-    const reset =  group == 'Bat' ? initSubjectSelect : initObjectSelect;
+    const reset =  group == 'Bat' ? iForm.initSubjectSelect : iForm.initObjectSelect;
     $('#sel-'+role).data('reset', true);
     $('#sub-form').remove();
     reset();

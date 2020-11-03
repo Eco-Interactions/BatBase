@@ -22,7 +22,8 @@ export function initCreateForm(entity, val) {                                   
     .then(onCreateFormLoadComplete);
 }
 function buildLocForm(val) {
-    const vals = { 'DisplayName': val === 'create' ? '' : val, //clears form trigger value
+    const vals = {
+        'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#sel-Country-Region').val()
     };
     _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create']);
@@ -116,7 +117,7 @@ export function initFormCombos(entity, fLvl) {
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
 export function addMapToLocForm(type, $formElem = $('#location_Rows')) {
-    const mapContainer = _u('buildElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
+    const mapContainer = _u('getElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
     $formElem.after(mapContainer);
     initLocFormMap(type);
 }

@@ -164,7 +164,7 @@ function getCiteVolumeIssueAndPages() {
                 pgs ? (pgs) : (null);
 }
 
-/** ======================== HELPERS ======================================== */
+/** ======================= FORMAT PUBLISHER ================================ */
 /** Formats publisher data and returns the Name, City, Country. */
 function buildPublString(pubSrc) {
     const publ = getPublisher(pubSrc);
@@ -180,6 +180,7 @@ function buildPublString(pubSrc) {
         return d.rcrds.publisher[publSrc.publisher];
     }
 }
+/* =================== FORMAT AUTHOR|EDITOR ================================= */
 /**
  * Returns a string with all author names formatted with the first author
  * [Last, Initials.], all following authors as [Initials. Last], and each
@@ -187,40 +188,50 @@ function buildPublString(pubSrc) {
  * with '&'. If the names are of editors, they are returned [Initials. Last].
  * If >= 4 authors, returns first author [Last, Initials.] + ', et al';
  */
-function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*///console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
-    if (Object.keys(auths).length > 3) { return getFirstEtAl(auths[1]); }
+function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*/console.log('getFormattedAuthorNames. auths = %O, eds [%s]', _u('snapshot', [auths]), eds);
+    if (Object.keys(auths).length > 3) { return getFirstAuthorEtAl(auths[1], eds); }
     let athrs = '';
     for (let ord in auths) {
-        let name = getFormattedName(ord, auths[ord]);
-        if (!name) { continue; }
-        athrs += (ord == 1 ? name : (ord == Object.keys(auths).length ?
-            ' & '+ name : ', '+ name));
+        if (auths[ord] === 'create') { continue; }
+        let name = getFormattedName(ord, auths[ord], eds);
+        if (!name) {
+            _u('alertIssue', ['citeAuth', {auths: _u('snapshot', auths), eds: eds}]);
+            continue; //Temp until bug is fixed
+        }
+        athrs += getAuthorName(name, ord, Object.keys(auths).length);
     }
     return _u('stripString', [athrs]);
+}
+/* ------------------- FIRST AUTHOR ET ALL ---------------------------------- */
+function getFirstAuthorEtAl(authId, eds) {
+    const name = getFormattedName(1, authId, eds);
+    return name +', et al';
+}
+/* ----------------------- FORMAT NAME -------------------------------------- */
+function getFormattedName(i, srcId, eds) {                          /*dbug-log*///console.log('getFormattedName cnt[%s] id[%s]', i, srcId);
+    const src = d.rcrds.source[srcId];
+    const athrId = src[_u('lcfirst', [src.sourceType.displayName])];
+    const athr = d.rcrds.author[athrId];
+    return getCitAuthName(i, athr, eds);
+}
+/**
+ * Returns the last name and initials of the passed author. The first
+ * author is formatted [Last, Initials.] and all others [Initials. Last].
+ * If editors (eds), [Initials. Last].
+ */
+function getCitAuthName(cnt, a, eds) {                              /*dbug-log*///console.log('getCitAuthName. cnt[%s], auth = %O, eds?[%s] ', cnt, a, eds);
+    const last = a.lastName;
+    const initials = ['firstName', 'middleName'].map(getInitial).filter(i=>i).join(' ');
+    return cnt > 1 || eds ? initials +' '+ last : last+', '+initials;
 
-    function getFirstEtAl(authId) {
-        const name = getFormattedName(1, authId);
-        return name +', et al';
-    }
-    function getFormattedName(i, srcId) {                           /*dbug-log*///console.log('getFormattedName cnt =%s, id = %s', i, srcId);
-        if (srcId === 'create') { return false; }
-        const src = d.rcrds.source[srcId];
-        const athrId = src[_u('lcfirst', [src.sourceType.displayName])];
-        const athr = d.rcrds.author[athrId];
-        return getCitAuthName(i, athr, eds);
-    }
-    /**
-     * Returns the last name and initials of the passed author. The first
-     * author is formatted [Last, Initials.] and all others [Initials. Last].
-     * If editors (eds), [Initials. Last].
-     */
-    function getCitAuthName(cnt, a, eds) {                          /*dbug-log*///console.log('getCitAuthName. cnt = [%s], auth = %O, eds = ', cnt, a, eds);
-        const last = a.lastName;
-        const initials = ["firstName", "middleName"].map(name =>
-            a[name] ? a[name].charAt(0)+'.' : null).filter(i=>i).join(' '); //removes null values and joins
-        return cnt > 1 || eds ? initials +' '+ last : last+', '+initials;
+    function getInitial(name) {
+        return a[name] ? a[name].charAt(0)+'.' : null;
     }
 }
+function getAuthorName(name, ord, authCnt) {
+    return ord == 1 ? name : (ord !== authCnt ? ', '+ name : ' & '+ name);
+}
+/** ======================== HELPERS ======================================== */
 /** Handles adding the punctuation for the data in the citation. */
 function addPunc(data) {
     return /[.!?,;:]$/.test(data) ? data : data+'.';

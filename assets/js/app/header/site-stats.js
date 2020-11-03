@@ -4,7 +4,6 @@
  * Export
  * 	initHeaderStats
  *
- *
  * TOC
  * 		INIT STAT HEADER
  * 		LOAD STAT HEADER

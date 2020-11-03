@@ -14,7 +14,7 @@
  *         REFERENCE-GUIDE BUTTON
  *         FORM COMBOBOXES
  */
-import { _util, _u } from '~db';
+import { _u } from '~db';
 import { _state, _elems, submitForm } from '~form';
 import * as iForm from '../int-form-main.js';
 
@@ -54,7 +54,7 @@ function modifyFormDisplay() {
 /* ----------------------- REFERENCE-GUIDE BUTTON --------------------------- */
 function addReferenceGuideButton() {
     const attr = { class: 'ag-fresh', type: 'button', value: 'Reference Guide' };
-    const bttn = _u('buildElem', ['input', attr]);
+    const bttn = _u('getElem', ['input', attr]);
     $(bttn).click(openReferenceGuideInNewTab);
     $('#top-help').prepend(bttn);
 }
@@ -86,7 +86,7 @@ function showSubmitModal() {
         submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
         bttn: 'SUBMIT INTERACTION'
     };
-    _util('showSaveModal', [ modalConfg ]);
+    _u('showSaveModal', [ modalConfg ]);
     $('#top-submit').css({'opacity': .5, cursor: 'not-allowed'})
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }

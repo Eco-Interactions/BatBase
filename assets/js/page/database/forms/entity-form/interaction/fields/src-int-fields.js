@@ -50,10 +50,7 @@ export function fillCitationCombo(pubId) {
 /** Returns an array of option objects with citations for this publication.  */
 function getPubCitationOpts(pubId) {
     const pubRcrd = _state('getRcrd', ['source', pubId]);
-    if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
-    const opts = _cmbx('getRcrdOpts', [pubRcrd.children, _state('getEntityRcrds', ['source'])]);
-    opts.unshift({ value: 'create', text: 'Add a new Citation...'});
-    return opts;
+    return _cmbx('buildSrcOpts', ['citation', pubRcrd.children]);
 }
 /* ---------------------- SELECT CITATION ----------------------------------- */
 /**

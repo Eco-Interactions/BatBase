@@ -71,11 +71,9 @@ function buildTaxonSelectOpts(tblState) {                                       
     }
     function buildTaxonOptions(taxonNames, data) {
         if (!taxonNames.length) { return []; }
-        const opts = taxonNames.map(name => {
-            return { value: data[name],
-                     text: name}});
+        const opts = taxonNames.map(name => new Option(name, data[name]));
         if (optionIsSelected(opts[0].value)) {
-            opts.unshift({value: 'all', text: '- All -'});
+            opts.unshift(new Option('- All -', 'all'));
         }
         return opts;
     }
@@ -86,9 +84,7 @@ function buildTaxonSelectOpts(tblState) {                                       
     function fillInRankOpts(rank) {                                               //console.log("fillInEmptyAncestorRanks. rank = ", rank);
         if (rank in tblState.selectedOpts) {
             const taxon = _u('getDetachedRcrd', [tblState.selectedOpts[rank], tblState.rcrdsById]);
-            optsObj[rank] = [
-                {value: 'all', text: '- All -'},
-                {value: taxon.id, text: taxon.name}];
+            optsObj[rank] = [ new Option('- All -', 'all'), new Option(taxon.id, taxon.name)];
         } else { optsObj[rank] = []; }
     }
 } /* End buildTaxonSelectOpts */
@@ -108,8 +104,8 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {                     //c
     function buildTaxonSelects(opts, ranks) {
         const elems = [];
         ranks.forEach(function(rank) {                                        //console.log('----- building select box for rank = [%s]', rank);
-            const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
-            const span = _u('buildElem', ['span', { text: rank + ': ' }]);
+            const lbl = _u('getElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
+            const span = _u('getElem', ['span', { text: rank + ': ' }]);
             const sel = fM.newSel(opts[rank], 'opts-box taxonSel', 'sel-' + rank, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);

@@ -3,14 +3,14 @@
  *
  * TOC
  *     EXTERNAL FACADE
- *     BUNDLE FACADE
+ *     MODULE FACADE
  *         FORM STATE / MEMORY
  *         ENTITY FORMS
  *         FORM UI
  *         VALIDATION & SUBMIT
- *     BUNDLE HELPERS
+ *     MODULE HELPERS
  */
-import { _util, _map, _ui, executeMethod } from '~db';
+import { _map, _u, _util, _ui, executeMethod } from '~db';
 import * as confg from './confg/confg-main.js';
 import * as form from './entity-form/entity-form-main.js';
 import * as state from './etc/form-state.js';
@@ -18,22 +18,20 @@ import * as submit from './submit/submit-main.js';
 import * as elems from './elems/elems-main.js';
 import editEntity from './edit/edit-forms-main.js';
 
-/* Handles captures of event objects and returns wrapped in array. */
-function getParams(params) {
-    return Array.isArray(params) ? params : [params];
-}
-/** ======================== EXTERNAL FACADE ================================ */
 export function alertIssue() {
     if (!state.getFormState()) { return; } //form closed
-    return _util('alertIssue', [...arguments]);
+    return _u('alertIssue', [...arguments]);
 }
-/** ===================== BUNDLE FACADE ===================================== */
+/** ===================== MODULE-EXECUTOR =================================== */
+function moduleMethod(funcName, mod, modName, params) {
+    return executeMethod(funcName, mod, modName, 'forms-main', params);
+}
 export function _confg(funcName, params = []) {
-    return executeMethod(funcName, confg, 'confg', 'forms-main', params);
+    return moduleMethod(funcName, confg, 'confg', params);
 }
 /** ------------------- FORM STATE / MEMORY --------------------------------- */
 export function _state(funcName, params = []) {
-    return executeMethod(funcName, state, 'state', 'forms-main', params);
+    return moduleMethod(funcName, state, 'state', params);
 }
 export function clearFormMemory() {
     _map('clearMemory');
@@ -41,7 +39,7 @@ export function clearFormMemory() {
 }
 /* ----------------- ENTITY FORMS ------------------------------------------- */
 export function _form(funcName, params = []) {                                  //console.log('entity func = %O', arguments);//entity form interface
-    return executeMethod(funcName, form, 'form', 'forms-main', getParams(params));
+    return moduleMethod(funcName, form, 'form', getParams(params));
 }
 export function create(entity, name) {
     return form.createEntity(entity, name);
@@ -93,6 +91,10 @@ export function formatAndSubmitData(entity, fLvl, formVals) {
     return submit.buildFormDataAndSubmit(entity, fLvl, formVals);
 }
 /* ======================= MODULE HELPERS =================================== */
+/* Handles captures of event objects and returns wrapped in array. */
+function getParams(params) {
+    return Array.isArray(params) ? params : [params];
+}
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
     const fLvls = state.getStateProp('formLevels');

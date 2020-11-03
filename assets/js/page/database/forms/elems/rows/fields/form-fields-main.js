@@ -35,7 +35,7 @@ export function toggleFormFields(entity, fLvl, fVals) {
         const complex = ['citation', 'publication', 'location'];
         if (complex.indexOf(entity) === -1) { return; }
         if (entity !== 'location') { _form('finishSrcFieldLoad', [entity, fVals, fLvl]); }
-        setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
+        _elems('setCoreRowStyles', ['#'+entity+'_Rows', '.'+fLvl+'-row']);
     }
 }
 function updateFormMemoryOnFieldToggle(isChecked, fLvl) {

@@ -21,8 +21,7 @@ export function initLocViewOpts(view) {                             /*Perm-log*/
 }
 function loadLocationViewOpts() {
     if ($('#sel-View').data('focus') === 'locs') { return; }
-    const opts = [{ value: 'map', text: 'Map Data' },
-                { value: 'tree', text: 'Table Data' }];
+    const opts = [new Option('Map Data', 'map'), new Option('Table Data', 'tree')];
     _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onLocViewChange')]);
     $('#sel-View').data('focus', 'locs');
 }
@@ -40,11 +39,16 @@ export function initSrcViewOpts(view) {                             /*Perm-log*/
 }
 function loadSourceViewOpts() {
     if ($('#sel-View').data('focus') === 'srcs') { return ; }
-    const opts = [{ value: "auths", text: "Authors" },
-                  { value: "pubs", text: "Publications" },
-                  { value: "publ", text: "Publishers" }];
+    const opts = getSrcViewopts();
     _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onSrcViewChange')]);
     $('#sel-View').data('focus', 'srcs');
+}
+function getSrcViewopts() {
+    return [
+        new Option('Authors', 'auths'),
+        new Option('Publications', 'pubs'),
+        new Option('Publishers', 'publ')
+    ];
 }
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView(view) {
@@ -74,7 +78,7 @@ function getViewOpts(groups) {
 
     function buildGroupOpt(id) {
         if (!ifGroupHasInts(groups[id].taxa)) { return; }
-        optsAry.push({ value: id, text: groups[id].pluralName });
+        optsAry.push(new Option(groups[id].pluralName, id));
     }
     function ifGroupHasInts(rootTaxa) {
         return Object.values(rootTaxa).find(t => ifTxnHasInts(t.id));

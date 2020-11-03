@@ -3,40 +3,38 @@
  *
  * TOC
  *     GENERATE CITATION TEXT
- *     CORE-UTIL FACADE
  *     UTIL FACADE
+ *         SELECT OPTIONS
  *         SELECTIZE COMBOBOXES
  *         IDB STORAGE METHODS
  *         HTML ELEMENT HELPERS
  *         AJAX
  *     MISC
  *         DATA
- *         STRING HELPERS
- *         OBJECT HELPERS
+ *     CORE-UTIL FACADE
  */
-import { _db, _util } from '~db';
+import { _db, _util, executeMethod } from '~db';
 import * as cmbx from './combos.js';
 import * as cite from './generate-citation.js';
+/* -------------------- SUB-EXECUTOR ---------------------------------------- */
+export function _dbCmbx(funcName, params = []) {                                  console.log('args = %O', arguments);
+    return executeMethod(funcName, cmbx, 'db-cmbx', 'elems-main', params);
+}
 /** ================ GENERATE CITATION TEXT ================================= */
 export function generateCitationText() {
     return cite.generateCitationText(...arguments);
 }
-/** =================== CORE-UTIL FACADE ==================================== */
-export function sendAjaxQuery() {
-    return _util('sendAjaxQuery', [...arguments]);
-}
-export function logAjaxData() {
-    return _util('logAjaxData', [...arguments]);
-}
-/** Handles issues without javascript error/exception objects. */
-export function alertIssue() {
-    return _util('alertIssue', [...arguments]);
-}
-/** Sends Error object to Sentry, issue tracker. */
-export function reportErr() {
-    return _util('reportErr', [...arguments]);
-}
 /** ==================== UTIL FACADE ======================================== */
+/* -------------------- SELECT OPTIONS -------------------------------------- */
+export function getOptsFromStoredData() {
+    return cmbx.getOptsFromStoredData(...arguments);
+}
+export function getOptions() {
+    return cmbx.getOptions(...arguments);
+}
+export function alphabetizeOpts() {
+    return cmbx.alphabetizeOpts(...arguments);
+}
 /* ---------------------- SELECTIZE COMBOBOXES ------------------------------ */
 export function initCombobox() {
     return cmbx.initCombobox(...arguments);
@@ -80,6 +78,9 @@ export function updatePlaceholderText() {
 export function replaceSelOpts() {
     return cmbx.replaceSelOpts(...arguments);
 }
+export function removeOpt() {
+    return cmbx.removeOpt(...arguments);
+}
 export function triggerComboChangeReturnPromise() {
     return cmbx.triggerComboChangeReturnPromise(...arguments);
 }
@@ -95,35 +96,10 @@ export function getData(props, returnUndefined) {  //breakpoint  //bp
 export function setData(k, v) {
     return _db('setData', [k, v]);
 }
-/* -------------- HTML ELEMENT HELPERS  ------------------------------------- */
-export function addEnterKeypressClick(elem) {
-    $(elem).keypress(function(e){ //Enter
-        if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
-    });
-}
-/* -------------------- LOGS ------------------------------------------------ */
-/* ================== MISC UTIL METHODS ============================================================================= */
 /* ------------------ DATA -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
-export function getDetachedRcrd(rcrdKey, rcrds, entity) {                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
-    if (rcrds[rcrdKey]) { return snapshot(rcrds[rcrdKey]); }                    _util('logInDevEnv', ["#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds]);
+export function getDetachedRcrd(rcrdKey, rcrds, entity) {           /*dbug-log*///console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
+    if (rcrds[rcrdKey]) { return _util('snapshot', [rcrds[rcrdKey]]); }/*perm-log*/_util('logInDevEnv', ["#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds]);
     alertIssue('noRcrdFound', {id: rcrdKey, entity: entity });
     return false;
-}
-/* ------------ STRING HELPERS ---------------------------------------------- */
-export function ucfirst(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-export function lcfirst(str) {
-    const f = str.charAt(0).toLowerCase();
-    return f + str.substr(1);
-}
-/** Removes white space at beginning and end, and any ending period. */
-export function stripString(text) {
-    const str = text.trim();
-    return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
-}
-/* ------------ OBJECT HELPERS ---------------------------------------------- */
-export function snapshot(obj) {
-    return JSON.parse(JSON.stringify(obj));
 }

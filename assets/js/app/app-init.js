@@ -22,13 +22,14 @@ import initHeaderStats from './header/site-stats.js';
 import initDataTable from './misc/ei-data-tables.js';
 import initFeedbackUi from './feedback/feedback.js';
 import initWysiwyg from './misc/wysiwyg.js';
-import { initSentry } from '~util';
+import { initUtil, initSentry } from '~util';
 
 export function initSiteCore() {
     initSentryIssueTracking();
     requireStyles();
     setGlobalJquery();                                                          //console.log('window width [%s]', window.outerWidth);
     initUi();
+    initUtil();
 }
 /* ==================== STYLES & GLOBAL JQUERY ============================== */
 function requireStyles() {

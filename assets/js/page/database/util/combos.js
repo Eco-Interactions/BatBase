@@ -9,8 +9,11 @@
  *     updatePlaceholderText
  *     replaceSelOpts
  *     triggerComboChangeReturnPromise
+ *
+ * TOC
+ *
  */
-import { _util } from '~db';
+import { _db, _u } from '~db';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
 /**
@@ -114,7 +117,7 @@ export function enableComboboxes($pElems, enable) {
     $pElems.each((i, elem) => { enableCombobox('#'+elem.id.split('sel-')[1], enable)});
 }
 export function enableFirstCombobox(field, enable = true) {
-    const selElems = $(`#sel-cntnr-#${field} .selectized`).toArray();/*dbug-log*///console.log("[%s] first elem = %O", cntnrId, selElems[0]);
+    const selElems = $(`#sel-cntnr-${field} .selectized`).toArray();/*dbug-log*///console.log("[%s] first elem = %O", field, selElems);
     const firstElem = $('#'+ selElems[0].id)[0].selectize;
     return enable ? firstElem.enable() : firstElem.disable();
 }
@@ -127,6 +130,75 @@ export function focusFirstCombobox(cntnrId, focus) {
     const selElems = $(cntnrId+' .selectized').toArray();           /*dbug-log*///console.log("focusFirstCombobox of [%s] = %O", cntnrId, selElems[0]);
     focusCombobox(selElems[0].id.split('sel-')[1], focus);
 }
+/* -------------------- TRIGGER CHANGE -------------------------------------- */
+export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*///console.log('triggerComboChange [%s] = [%s]', field, val);
+    const selApi = getSelApi(field);
+    const onChange = confgs[field].onChange;
+    setComboVal(selApi, field, val, 'silent');
+    return onChange(val);
+}
+/* ----------------------- DESTROY ------------------------------------------ */
+export function destroySelectizeInstance(field) {
+    if (!confgs[field]) { return; }
+    $('#sel-'+confgs[name].id)[0].selectize.destroy();
+}
+
+/** ==================== GET OPTIONS ======================================== */
+/** --------------------- STORED DATA --------------------------------------- */
+/** Builds options out of a stored entity-name object. */
+export function getOptsFromStoredData(prop) {
+    return _db('getData', [prop, true]).then(data => {              /*dbug-log*///console.log('getOptsFromStoredData [%s] = %O', prop, data);
+        if (!data) { console.log('NO STORED DATA for [%s]', prop);return []; }
+        return getOptions(data, Object.keys(data).sort());
+    });
+}
+/** --------------------- BUILD OPTIONS ------------------------------------- */
+/**
+ * Builds options out of the entity-name  object. Name (k) ID (v). If an option
+ * group is passed, an additional 'group' key is added that will serve as a category
+ * for the options in the group.
+ */
+export function getOptions(entityObj, sortedKeys) {                 /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
+    return Object.values(entityObj)[0].group ?
+        getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);
+}
+function getEntityOpt(name, id) {                                   /*dbug-log*///console.log('getEntityOpt [%s][%s]', name, id);
+    return new Option(_u('ucfirst', [name]), id);
+}
+/** _____________________ GROUP OPTIONS _____________________________________ */
+function getOptGroups(entityObj, sortedKeys) {
+    const gSorted = sortEntityDataByGroup(entityObj, sortedKeys);
+    return Object.keys(gSorted).map(getOptGroup);
+
+    function getOptGroup(gName) {                                   /*dbug-log*///console.log('getOptGroup [%s] %O', gName, gSorted[gName]);
+        const $group = $(`<optgroup label="${gName}" />`);
+        $group.append(...gSorted[gName]);
+        return $group[0];
+    }
+}
+function sortEntityDataByGroup(data, keys) {
+    const sorted = {};
+    keys.forEach(k => sortEntity(k, data[k]));
+    return sorted;
+
+    function sortEntity(name, oData) {
+        if (!sorted[oData.group]) { sorted[oData.group] = []; }
+        sorted[oData.group].push(getEntityOpt(name, oData.value));
+    }
+}
+/** _____________________ SIMPLE GROUPS _____________________________________ */
+function getSimpleOpts(entityObj, sortedKeys) {
+    return sortedKeys.map(name => getEntityOpt(name, entityObj[name]));
+}
+/** ==================== OPTIONS UTIL ======================================= */
+export function alphabetizeOpts(opts) {
+    return opts.sort(alphaOptionObjs)
+}
+function alphaOptionObjs(a, b) {
+    const x = a.text.toLowerCase();
+    const y = b.text.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
+}
 /* -------------------- REPLACE OPTIONS ------------------------------------- */
 /**
  * Note: Change event is fired when options are replaced, so the event is removed
@@ -134,7 +206,6 @@ export function focusFirstCombobox(cntnrId, focus) {
  */
 export function replaceSelOpts(field, opts, changeHndlr, name) {    /*dbug-log*///console.log('replaceSelOpts [%s] opts = %O, args = %O', field, opts,  arguments)
     const selApi = getSelApi(field);
-    // if (!opts) { return clearCombobox(selApi); }
     clearCombobox(selApi);
     selApi.addOption(opts);
     selApi.refreshOptions(false); //Don't trigger options-dropdown
@@ -146,22 +217,15 @@ function replaceOnChangeEvent(selApi, onChange = false) {           /*dbug-log*/
     selApi.off('change');
     selApi.on('change', onChange);
 }
-/* -------------------- TRIGGER CHANGE -------------------------------------- */
-export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*///console.log('triggerComboChange [%s] = [%s]', field, val);
+export function removeOpt(field, val) {
     const selApi = getSelApi(field);
-    const onChange = confgs[field].onChange;  console.log('selApi = %O', selApi)
-    setComboVal(selApi, field, val, 'silent');
-    return onChange(val);
-}
-/* ----------------------- DESTROY ------------------------------------------ */
-export function destroySelectizeInstance(field) {
-    if (!confgs[field]) { return; }
-    $('#sel-'+confgs[name].id)[0].selectize.destroy();
+    selApi.removeOption(val, 'silent');
 }
 /* ======================= HELPERS ========================================== */
-function getSelApi(field) {
-    if (!confgs[field]) { return _util('alertIssue', ['comboboxNotFound', {field: field}]); }
-    return $(confgs[field].id)[0].selectize;
+function getSelApi(field) {                                         /*dbug-log*/console.log('getSelApi [%s] = %O', field, confgs);
+    if (!confgs[field]) { return _u('alertIssue', ['comboboxNotFound', {field: field}]); }
+    //If the combo was removed
+    return $(confgs[field].id).length ? $(confgs[field].id)[0].selectize : false;
 }
 function isMultiSelCombo(field) {
     return !!$(confgs[field].id)[0].multiple;
@@ -170,9 +234,8 @@ function clearCombobox(selApi) {
     replaceOnChangeEvent(selApi);
     selApi.clear('silent');
     selApi.clearOptions();
-//REMOVE?    selApi.off('change');
 }
-function toggleChangeHandler(field, selApi, remove = false) {
+function toggleChangeHandler(field, selApi, remove = false) {       /*dbug-log*///console.log('toggleChangeHandler [%s]remove?[%s] %O', field, remove, selApi);
     if (remove) { return selApi.off('change'); }
     selApi.on('change', confgs[field].onChange);
 }

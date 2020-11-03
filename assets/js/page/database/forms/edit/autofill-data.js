@@ -72,7 +72,7 @@ function addTaxon(field, prop, rcrd) {
     const selApi = $('#sel-'+ field)[0].selectize;
     const taxon = _state('getRcrd', ['taxon', rcrd[prop]]);
     _state('setTaxonProp', ['groupName', taxon.group.displayName]);
-    selApi.addOption({ value: taxon.id, text: taxon.displayName });
+    selApi.addOption(new Option(taxon.displayName, taxon.id));
     selApi.addItem(taxon.id);
 }
 function addSource(field, prop, rcrd) {

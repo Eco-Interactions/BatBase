@@ -61,6 +61,12 @@ export function getSelectedTaxon() {
 export function onSubGroupSelection() {
     return fields.onSubGroupSelection(...arguments);
 }
+export function initSubjectSelect() {
+    return fields.initSubjectSelect(...arguments);
+}
+export function initObjectSelect() {
+    return fields.initObjectSelect(...arguments);
+}
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 /* ==================== CREATE SUB-ENTITY =================================== */
 export function create(entity, fLvl) {

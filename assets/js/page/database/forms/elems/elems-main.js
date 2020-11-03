@@ -15,7 +15,7 @@
  *         FILL FORM-DATA
  *         TOGGLE FORM-FIELDS
  */
-import { executeMethod } from '~db';
+import { _u, executeMethod } from '~db';
 import { _state, getNextFormLevel } from '../forms-main.js';
 import * as panel from './detail-panel/detail-panel.js';
 import * as base from './form-container.js';
@@ -26,7 +26,10 @@ import * as elemUtil from './util/form-elems-util-main.js';
 import * as cmbx from './rows/fields/input/combobox-input.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
 export function _cmbx(funcName, params = []) {
-    return executeMethod(funcName, cmbx, 'cmbx', 'elems-main', params);
+    if (cmbx[funcName]) {
+        return executeMethod(funcName, cmbx, 'db-cmbx', 'elems-main', params);
+    }
+    _u('_dbCmbx', [funcName, [...params]]);
 }
 export function _panel(funcName, params = []) {
     return executeMethod(funcName, panel, 'panel', 'elems-main', params);

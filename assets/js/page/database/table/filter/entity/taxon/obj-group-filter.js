@@ -1,26 +1,26 @@
 /**
  * The table can be filtered by Object Group when in Taxon->Bat view.
  *
- * Exports
+ * Export
  * 		initObjectGroupCombobox
  *
  * TOC
  * 		INIT COMBOBOX
  * 		APPLY FILTER
  */
-import { _ui, _u, _util } from '~db';
+import { _ui, _u } from '~db';
 import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectGroupCombobox() {
-    return _util('getOptsFromStoredData', ['groupNames'])
+    return _u('getOptsFromStoredData', ['groupNames'])
     .then(buildObjectGroupCombo)
     .then(finishGroupComboInit);
 }
 function buildObjectGroupCombo(groups) {
-    const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
-    const span = _u('buildElem', ['span', { text: 'Groups: ' }]);
+    const lbl = _u('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
+    const span = _u('getElem', ['span', { text: 'Groups: ' }]);
     const opts = groups.filter(r => r.text !== 'Bat');  						//console.log('groups = %O', groups)
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-ObjectGroups');
     $(lbl).append([span, sel]);

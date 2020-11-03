@@ -16,8 +16,8 @@
  *         APPEND AND STYLE
  *     SUB FORM
  */
-import { _util, _u } from '~db';
-import { _confg, _elems, _panel, _state } from '../forms-main.js';
+import { _u } from '~db';
+import { _confg, _elems, _panel, _state } from '~form';
 
 let action, entity, fLvl;
 
@@ -37,37 +37,37 @@ function buildForm(id, fields) {
     return [getExitButtonRow(), getMainFormAndDetailPanelHtml(id, fields)];
 }
 function getMainFormAndDetailPanelHtml(id, fields) {
-    const cntnr = _u('buildElem', ['div', { class: 'flex-row' }]);
+    const cntnr = _u('getElem', ['div', { class: 'flex-row' }]);
     const detailPanelHtml = _panel('getDetailPanelElems', [entity, id, action]);
     $(cntnr).append([buildMainForm(fields), detailPanelHtml]);
     return cntnr;
 }
 /* ----------------------- TOP CORNER EXIT BUTTON --------------------------- */
 function getExitButtonRow() {
-    const  row = _u('buildElem', ['div', { class: 'exit-row' }]);
+    const  row = _u('getElem', ['div', { class: 'exit-row' }]);
     $(row).append(getExitButton());
     return row;
 }
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'exit-bttn', 'type': 'button', 'value': 'X' }
-    const bttn = _u('buildElem', ['input', attr]);
+    const bttn = _u('getElem', ['input', attr]);
     $(bttn).click(_elems.bind(null, 'exitRootForm'));
     return bttn;
 }
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
-    const formWin = _u('buildElem', ['div', { id: 'form-main', class: action }]);
+    const formWin = _u('getElem', ['div', { id: 'form-main', class: action }]);
     $(formWin).append([getFormHelpElems('top'), getHeader(), getValMsgCntnr('top'), getForm(fields)]);
     return formWin;
 }
 /* ------------------------------ HEADER ------------------------------------ */
 function getHeader() {
     const title = (action == 'create' ? 'New ' : 'Editing ') + _u('ucfirst', [entity]);
-    return _u('buildElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
+    return _u('getElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }
 /** Container for custom form-validation messages. */
 function getValMsgCntnr(fLvl) {
-    return _u('buildElem', ['div', { id: fLvl+'_alert' }]);
+    return _u('getElem', ['div', { id: fLvl+'_alert' }]);
 }
 /* ----------------------------- FORM --------------------------------------- */
 function getForm(fields) {
@@ -89,7 +89,7 @@ function buildFormElem() {
 }
 function buildEntityFieldContainer(fields) {
     const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
-    const div = _u('buildElem', ['div', attr]);
+    const div = _u('getElem', ['div', attr]);
     $(div).append(fields);
     return div;
 }
@@ -132,11 +132,11 @@ function buildSubFormContainer(rows, fClasses) {
 }
 function buildSubFormCntnr(fClasses) {
     const attr = {id: fLvl+'-form', class: fClasses };
-    return _u('buildElem', ['form', attr]);
+    return _u('getElem', ['form', attr]);
 }
 function buildSubFormHdr() {
     const attr = { text: 'New '+_u('ucfirst', [entity]), id: fLvl+'-hdr' };
-    return _u('buildElem', ['p', attr]);
+    return _u('getElem', ['p', attr]);
 }
 function finishSubFormInit(subForm, sId) {
     _state('setFormProp', [fLvl, 'pSelId', sId]);
@@ -151,7 +151,7 @@ function setFormScopeParams(a, e, l) {
 }
 /* ----------------------- HELP ELEMS --------------------------------------- */
 function getFormHelpElems() {
-    const cntnr = _u('buildElem', ['div', { id: fLvl+'-help', class: 'flex-row'}]);
+    const cntnr = _u('getElem', ['div', { id: fLvl+'-help', class: 'flex-row'}]);
     $(cntnr).append(getFormWalkthroughBttn());
     return cntnr;
 }
@@ -160,7 +160,7 @@ function getFormWalkthroughBttn() {
     if (!formInfoStepCount) { return; }
     const titleInfo = "Hover your mouse over any field and it's help popup will show, if it has one.";
     const bttn = buildWalkthroughButton(titleInfo);
-    $(bttn).click(_util.bind(null, 'showTutorialModal', [fLvl]));
+    $(bttn).click(_u.bind(null, 'showTutorialModal', [fLvl]));
     setIntroWalkthroughAttrs(bttn, titleInfo, ++formInfoStepCount);
     return bttn;
 }
@@ -172,7 +172,7 @@ function buildWalkthroughButton(titleInfo) {
         type: 'button',
         value: 'Walkthrough',
     };
-    return _u('buildElem', ['input', attr]);
+    return _u('getElem', ['input', attr]);
 }
 function getFormInfoStepCount() {
     const formInfoConfg = _confg('getFormConfg', [entity]).info;

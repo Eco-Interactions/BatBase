@@ -17,19 +17,19 @@ let fS; //form state
 export function getValidatedFormData(entity, fLvl, submitting = false) {
     fS = _state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
     const elems = getFormFieldElems(entity, fLvl);
-    const formVals = {};
+    const fVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }
-    if (formVals.displayName) { formVals.displayName = _u('ucfirst', [formVals.displayName]) }
+    if (fVals.displayName) { fVals.displayName = _u('ucfirst', [fVals.displayName]) }
     return handleAdditionalEntityData(entity)
-        .then(() => formVals);
+        .then(() => fVals);
 
-    /** Get's the value from the form elem and set it into formVals. */
+    /** Get's the value from the form elem and set it into fVals. */
     function getInputData(elem) {
         if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
         if (elem.className.includes('cntnr-row')) { return getMultiFieldRowData(elem); }
         const fieldName = getInputFieldNameFromCntnr(elem.children[1]);
         const input = elem.children[1].children[1];                             //console.log("           --get[%s]InputData = %O", fieldName, input);
-        formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
+        fVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, fVals[fieldName]);
 
         /**
          * Returns the input value from specialized parsing methods or trims the
@@ -79,35 +79,28 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
         return Promise.all(dataHndlrs[entity].map(func => Promise.resolve(func())));
     }
     /** ---- Additional Author data ------ */
-    /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */
+    /** Concatonates all Author name fields and adds it as 'fullName' in fVals. */
     function getAuthFullName() {
-        const nameFields = ['firstName', 'middleName', 'lastName', 'suffix'];
-        const fullName = [];
-        nameFields.forEach(function(field) {
-            if (formVals[field]) { fullName.push(formVals[field]) };
-        });
-        formVals.fullName = fullName.join(" ");
+        const names = ['firstName', 'middleName', 'lastName', 'suffix'];
+        fVals.fullName = names.map(f => fVals[f]).filter(n=>n).join(' ')
     }
     /** Concats author Last, First Middle Suffix as the author display name.*/
     function getAuthDisplayName() {
-        let displayName = formVals.lastName + ',';
-        ["firstName", "middleName", "suffix"].forEach(name => {
-            if (formVals[name]) { addToDisplayName(formVals[name]); };
-        });
-        formVals.displayName = displayName;
+        const names = ['firstName','middleName','suffix'].map(getName).filter(n=>n).join(' ');
+        fVals.displayName = fVals.lastName + (!!names ? ', '+names : '');
 
-        function addToDisplayName(namePiece) {
-            displayName += ' '+namePiece;
-         }
-    } /* End getAuthDisplayName */
+        function getName(field) {
+            return fVals[field];
+        }
+    }
     /** ---- Additional Citation data ------ */
     function getPublicationData() {
-        formVals.publication = fS.editing ?
+        fVals.publication = fS.editing ?
             fS.forms[fLvl].rcrds.src.id : $('#sel-Publication').val();
     }
     /** Adds 'displayName', which will be added to both the form data objects. */
     function addCitDisplayName() {
-        formVals.displayName = formVals.title ? formVals.title : formVals.chapterTitle;
+        fVals.displayName = fVals.title ? fVals.title : fVals.chapterTitle;
     }
     /**
      * Appends '(citation)' to citations that are attributed to entire books
@@ -119,22 +112,22 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
             'Ph.D. Dissertation', 'Report' ];
         if (fulls.indexOf(type) === -1) { return; }
         const pubTitle = fS.forms[fLvl].rcrds.src.displayName;
-        if (formVals.displayName.includes('(citation)')) { return; }
-        if (pubTitle != formVals.displayName) { return; }
-        formVals.displayName += '(citation)';
+        if (fVals.displayName.includes('(citation)')) { return; }
+        if (pubTitle != fVals.displayName) { return; }
+        fVals.displayName += '(citation)';
     }
     /** ---- Additional Location data ------ */
     /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
     function addElevUnits() {
-        if (formVals.elevation) { formVals.elevUnitAbbrv = 'm'; }
+        if (fVals.elevation) { fVals.elevUnitAbbrv = 'm'; }
     }
     /** Pads each to the 13 scale set by the db. This eliminates false change flags. */
     function padLatLong() {
-        if (formVals.latitude) {
-            formVals.latitude = parseFloat(formVals.latitude).toFixed(14);
+        if (fVals.latitude) {
+            fVals.latitude = parseFloat(fVals.latitude).toFixed(14);
         }
-        if (formVals.longitude) {
-            formVals.longitude = parseFloat(formVals.longitude).toFixed(14);
+        if (fVals.longitude) {
+            fVals.longitude = parseFloat(fVals.longitude).toFixed(14);
         }
     }
     /**
@@ -143,8 +136,8 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
      */
     function getLocType() {
         return _u('getData', ['locTypeNames']).then(locTypes => {
-            const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
-            formVals.locationType = locTypes[type];
+            const type = fVals.longitude || fVals.latitude ? 'Point' : 'Area';
+            fVals.locationType = locTypes[type];
         });
     }
     /**
@@ -153,9 +146,9 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
      * if not, the 'Unspecfied' location is added.
      */
     function handleUnspecifiedLocs(entity) {
-        if (formVals.location) { return; }
-        if (formVals.country) { return getUnspecifiedLocId(); }
-        formVals.location = formVals.country;
+        if (fVals.location) { return; }
+        if (fVals.country) { return getUnspecifiedLocId(); }
+        fVals.location = fVals.country;
     }
     /** Returns the id of the Unspecified region. */
     function getUnspecifiedLocId() {
@@ -168,22 +161,22 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
      * distinguished by an isEditor flag.
      */
     function addContributorData() {
-        if (!formVals.contributor) { formVals.contributor = {}; }
-        if (formVals.editors) { addContribs(formVals.editors, true); }
-        if (formVals.authors) { addContribs(formVals.authors, false); }
+        if (!fVals.contributor) { fVals.contributor = {}; }
+        if (fVals.editors) { addContribs(fVals.editors, true); }
+        if (fVals.authors) { addContribs(fVals.authors, false); }
 
-        function addContribs(vals, isEd) {                                      //console.log('addContributorData. editors ? [%s] formVals = %O', isEd, vals)
+        function addContribs(vals, isEd) {                                      //console.log('addContributorData. editors ? [%s] fVals = %O', isEd, vals)
             for (let ord in vals) {
                 let id = vals[ord];
-                formVals.contributor[id] = { isEditor: isEd, ord: ord };
+                fVals.contributor[id] = { isEditor: isEd, ord: ord };
             }
         }
     } /* End addContributorData */
     /** ---- Additional Taxon data ------ */
     function getTaxonRankData() {
         const formTaxonRank = fS.forms.taxonData.formTaxonRank;
-        formVals.parentTaxon = getParentTaxon(formTaxonRank);
-        formVals.rank = formTaxonRank;
+        fVals.parentTaxon = getParentTaxon(formTaxonRank);
+        fVals.rank = formTaxonRank;
     }
     /** -------------------- Additional Taxon Data -----------------------*/
     /**
@@ -210,10 +203,10 @@ function getFormFieldElems(entity, fLvl) {
     if ($(id+'_'+fLvl).length) { id = id + '_' + fLvl; }
     return $(id)[0].children;
 }
-// function checkForErrors(entity, formVals, fLvl) {
+// function checkForErrors(entity, fVals, fLvl) {
 //     const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
 //     if (!errs[entity]) { return; }
-//     errs[entity](entity, formVals, fLvl);
+//     errs[entity](entity, fVals, fLvl);
 // }
 // /**
 //  * Checks to ensure the new author's name doesn't already exist in the database.

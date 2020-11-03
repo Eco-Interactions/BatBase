@@ -52,22 +52,9 @@ export function enableCountryRegionField() {
  * repopulated with all locations.
  */
 export function fillLocCombo(loc) {
-    const opts = loc ? getOptsForLoc(loc) : _cmbx('getLocationOpts');
+    const subSet = loc ? loc.children : false;
+    const opts = _cmbx('getRcrdOpts', ['location', subSet]);
     _u('replaceSelOpts', ['Location', opts]);
-}
-/** Returns an array of options for the locations of the passed country/region. */
-function getOptsForLoc(loc) {
-    let opts = getChildLocOpts(loc.children)
-    opts.push({ value: loc.id, text: loc.displayName });
-    opts = _u('alphabetizeOpts', [opts]);
-    opts.unshift({ value: 'create', text: 'Add a new Location...'});
-    return opts;
-}
-function getChildLocOpts(children) {
-    return children.map(id => {
-        const loc = _state('getRcrd', ['location', id]);  //error alerted to developer and editor
-        return loc ? { value: id, text: loc.displayName } : null
-    }).filter(l => l);
 }
 /* ---------------------- SELECT LOCATION ----------------------------------- */
 export function selectLoc(id) {
@@ -98,7 +85,7 @@ function removeLocMap() {
 /* =================== WAYS TO SELECT LOCATION NOTE ========================= */
 /** Adds a message above the location fields in interaction forms. */
 export function addLocationSelectionMethodsNote() {
-    const cntnr = _u('buildElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
+    const cntnr = _u('getElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
     const mapInfo = getMapInfoText();
     $(cntnr).append(mapInfo);
     $('#Country-Region_row')[0].parentNode.before(cntnr);
@@ -110,7 +97,7 @@ function getMapInfoText() {
 }
 function getInfoLinkTextToOpenMap(argument) {
     const attr = {class:'map-link', text: 'click here to use the map interface.'};
-    const span = _u('buildElem', ['span', attr]);
+    const span = _u('getElem', ['span', attr]);
     $(span).click(showInteractionFormMap);
     return span;
 }

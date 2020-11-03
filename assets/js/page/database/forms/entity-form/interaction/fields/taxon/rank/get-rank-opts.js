@@ -77,7 +77,7 @@ function addRelatedChild(id) {                                      /*dbug-log*/
 }
 function addOptToRankAry(childTxn, rank) {
     if (!d.opts[rank]) { d.opts[rank] = []; }                       /*dbug-log*///console.log("setting rank = ", d.taxon.rank)
-    d.opts[rank].push({ value: childTxn.id, text: childTxn.name });
+    d.opts[rank].push(new Option(childTxn.name, childTxn.id));
 }
 function handleEmptyChildRanks(childRanks) {
     childRanks.forEach(r => d.opts[r] ? null : addEmptyChildRankOptAry(r));
@@ -89,7 +89,7 @@ function addEmptyChildRankOptAry(rank) {
 function getSiblingOpts(taxon) {
     if (taxon.isRoot) { return Promise.resolve(); }
     const rank = taxon.rank.displayName;
-    return _cmbx('getTaxonOpts', [rank, null, d.group, d.subGroup])
+    return _cmbx('getTaxonOpts', [null, rank, d.group, d.subGroup])
         .then(o => {                                                /*dbug-log*///console.log('getSiblingOpts = %O. taxon = %O ', o, taxon);
             d.opts[taxon.rank.displayName] = o;
             d.selected[taxon.rank.displayName] = taxon.id;
@@ -105,7 +105,7 @@ function getAncestorOpts(pId) {
 }
 function buildAncestorOpts(pTaxon) {
     const rank = pTaxon.rank.displayName;
-    return _cmbx('getTaxonOpts', [rank, null, d.group, d.subGroup])
+    return _cmbx('getTaxonOpts', [null, rank, d.group, d.subGroup])
         .then(o => {                                                /*dbug-log*///console.log("--getAncestorOpts - setting rank = ", pTaxon.rank)
             d.opts[pTaxon.rank.displayName] = o;
             return getAncestorOpts(pTaxon.parent);
@@ -129,14 +129,14 @@ function buildOptsForEmptyRanks() {
         });
     }
     function buildAncestorOpts(rank) {
-        proms.push(_cmbx('getTaxonOpts', [rank, null, d.group, d.subGroup])
+        proms.push(_cmbx('getTaxonOpts', [null, rank, d.group, d.subGroup])
             .then(o => d.opts[rank] = o ));
     }
 }
 /* ------------------------ CREATE OPTION ----------------------------------- */
 function addCreateOpts() {
     for (let rank in d.opts) {                                      /*dbug-log*///console.log("rank = %s, name = ", rank, ranks[rank-1]);
-        d.opts[rank].unshift({ value: 'create', text: 'Add a new '+rank+'...'});
+        d.opts[rank].unshift(new Option(`Add a new ${rank}...`, 'create'));
     }
     return Promise.resolve();
 }

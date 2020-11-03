@@ -70,7 +70,7 @@ function ifThesisDissertationModifyLabel() {
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote() {
     if (_u('getSelTxt', ['PublicationType']) !== 'Book') { return; }
-    const note = _u('buildElem', ['div', { class: 'skipFormData' }]);
+    const note = _u('getElem', ['div', { class: 'skipFormData' }]);
     $(note).html('<i>Note: there must be at least one author OR editor ' +
         'selected for book publications.</i>')
     $(note).css({'margin': 'auto'});

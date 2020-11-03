@@ -2,13 +2,13 @@
  * Handles all notifications and reporting related to issues that occur throughout
  * the database search page. Submits new events to our bugb tracker, Sentry.
  *
- * EXPORTS:
+ * Export
  *     alertIssue
  *     initSentry
  *     getErrMsgForUserRole
  *     showAlert
  *
- * TOC:
+ * TOC
  *     INIT SENTRY
  *     CREATE SENTRY EVENT
  *     ALERT USER
@@ -47,6 +47,9 @@ export function reportErr(e) {
  *     noRcrdFound {id, entity} (no browser alert)
  *     TestIssue null (no browser alert)
  *     undefiendDataKey {key}
+ *
+ * TEMP ISSUE TAGS FOR BUG TRACKING
+ *     citeAuth { auths, hasEds }
  */
 export function alertIssue(tag, errData = {}) {                                 logAlertInDev(tag, errData);
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
@@ -111,12 +114,16 @@ class SentryError extends Error {
  *     invalidDataKeyType: showGeneralAlert
  *     noRcrdFound: (handled at relevant points through the code)
  *     undefiendDataKey: showGeneralAlert
+ *
+ * TEMP ISSUE TAGS FOR BUG TRACKING
+ *     citeAuth: showGeneralFormAlert
  */
 function handleUserAlert(tag) {
     const silent = ['dataSyncFailure', '', 'noRcrdFound', 'TestIssue', 'editorReport'];
     if (silent.indexOf(tag) !== -1) { return; }
     const map = {
-        'alertNoRcrdFound': noRcrdFoundInForms
+        alertNoRcrdFound: noRcrdFoundInForms,
+        citeAuth: showGeneralFormAlert
     };
     if (tag in map) { map[tag]();
     } else { showGeneralAlert(); }
@@ -126,6 +133,9 @@ function noRcrdFoundInForms() {
 }
 function showGeneralAlert() {
     alert(`If you are using an adblocker, please disable.\n\n An error ocurred somewhere on the page. If error persists, try reloading the page or ${getErrMsgForUserRole()}`);
+}
+function showGeneralFormAlert() {
+    alert(`If you are using an adblocker, please disable.\n\n An error ocurred somewhere on the form.\n\n Please do not submit new data. Try refreshing the page or ${getErrMsgForUserRole()}`);
 }
 function getErrMsgForUserRole() {
     const userRole = $('body').data('user-role');

@@ -52,7 +52,7 @@ export function initTypeField(objectGroup) {                        /*perm-log*/
 /* ---------------------- LOAD OPTIONS -------------------------------------- */
 function loadIntTypeOptions() {
     const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];/*dbug-log*///console.log('types = %O', types)
-    _cmbx('getSelectStoredOpts', ['intTypeNames', null, types])
+    _cmbx('getSelectStoredOpts', ['intTypeNames', types])
     .then(loadComboOptionsForType)
     .then(() => _u('enableCombobox', ['InteractionType', true]))
 }
@@ -71,7 +71,7 @@ export function onTypeSelectionInitTagField(val) {
 }
 /* -------------------------- CLEAR TYPE-TAGS ------------------------------- */
 function clearTypeRelatedTags() {                                   /*dbug-log*///console.log('clearTypeRelatedTags')
-    const opts = [{ text: 'Secondary', value: app.secondaryTagId }];
+    const opts = [ new Option('Secondary', app.secondaryTagId) ];
     _u('replaceSelOpts', ['InteractionTags', opts]);
     app.defaultTag = null;
 }
