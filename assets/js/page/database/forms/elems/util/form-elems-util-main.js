@@ -13,7 +13,8 @@
  *     SUBMIT BUTTOM
  *     SUBMIT-SUCCESS MSG
  */
-import { _elems, _form, _state } from '../../forms-main.js';
+import { _u } from '~db';
+import { _elems, _form, _state } from '~form';
 import * as exit from './exit-form.js';
 /* ---------------------------- EXIT FORM ----------------------------------- */
 /**
@@ -50,15 +51,15 @@ function disableSubmitBttn(bttnId) {
 /* ------------------- SUBMIT-SUCCESS MSG ----------------------------------- */
 /** Shows a form-submit success message at the top of the interaction form. */
 export function showSuccessMsg(msg, color = 'green') {
-    const cntnr = _u('buildElem', ['div', { id: 'success' }]);
+    const cntnr = _u('getElem', ['div', { id: 'success' }]);
     cntnr.append(getSuccessMsgHtml(msg));
     $(cntnr).css('border-color', (color));
     $('#top-hdr').after(cntnr);
     $(cntnr).fadeTo('400', .8);
 }
 function getSuccessMsgHtml(msg) {
-    const div = _u('buildElem', ['div', { class: 'flex-row' }]);
-    const p = _u('buildElem', ['p', { text: msg }]);
+    const div = _u('getElem', ['div', { class: 'flex-row' }]);
+    const p = _u('getElem', ['p', { text: msg }]);
     const bttn = getSuccessMsgExitBttn();
     div.append(p, bttn);
     return div;
@@ -66,7 +67,7 @@ function getSuccessMsgHtml(msg) {
 function getSuccessMsgExitBttn() {
     const attr = { 'id': 'sucess-exit', 'class': 'exit-bttn',
         'type': 'button', 'value': 'X' }
-    const bttn = _u('buildElem', ['input', attr]);
+    const bttn = _u('getElem', ['input', attr]);
     $(bttn).click(exitSuccessMsg);
     return bttn;
 }

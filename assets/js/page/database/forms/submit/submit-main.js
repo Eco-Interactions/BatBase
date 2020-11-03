@@ -70,7 +70,7 @@ function onSuccess(data, textStatus, jqXHR) {                                   
 }
 function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
     if (!_state('getStateProp', ['submit'])) { return; } //form closed.
-    _elems('toggleWaitOverlay', [false]);
+    toggleWaitOverlay(false);
     if (data.fails) { return val.errUpdatingData('dataSyncFailures'); }
     if (noDataChanges()) { return showNoChangesMessage(); }
     addDataToStoredRcrds(data.core, data.detail)
@@ -144,6 +144,6 @@ function addAndSelectEntity(data, formParent) {
 }
 function appendWaitingOverlay() {
     const attr = { class: 'overlay waiting', id: 'c-overlay'}
-    $('#b-overlay').append(_u('buildElem', ['div', attr]));
+    $('#b-overlay').append(_u('getElem', ['div', attr]));
     $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
 }

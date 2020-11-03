@@ -17,7 +17,7 @@ export function addLocCountLegend(map) {
     legend.addTo(map);
 }
 function addLocCountHtml() {
-    return _u('buildElem', ['div', { id: 'cnt-legend', class: 'info legend flex-col'}]);
+    return _u('getElem', ['div', { id: 'cnt-legend', class: 'info legend flex-col'}]);
 }
 export function addCountToLegend(ttlLocs, noGpsDataCnt, prnt) {
     const noGpsDataHtml = noGpsDataCnt === 0 ? null :

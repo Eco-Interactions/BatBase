@@ -23,7 +23,7 @@
  *             Reset & Enable/Disable UI
  *             Table Methods
  */
-import { _db, _table, _u, _ui, _util } from '~db';
+import { _db, _table, _u, _ui } from '~db';
 import * as pM from './panels-main.js';
 
 const tState = _table.bind(null, 'tableState');
@@ -112,7 +112,6 @@ export function newIntList(val) {                                   /*dbug-log*/
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
     delete app.rowSelMode;
-    return { value: "new", text: val ? val : "Creating New Interaction List" };
 }
 function updateUiForListCreate() {
     enableInputs('create');
@@ -408,7 +407,7 @@ function updateDetailHdr(type) {
     $('#list-details>span').html(type + ' List Details');
 }
 function updateListComboboxOptions() {
-    return Promise.resolve(_util('getOptsFromStoredData', ['dataListNames']).then(
+    return Promise.resolve(_u('getOptsFromStoredData', ['dataListNames']).then(
         opts => {
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
             _u('replaceSelOpts', ['InteractionList', opts]);

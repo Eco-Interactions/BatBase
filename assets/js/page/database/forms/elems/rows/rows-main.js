@@ -48,7 +48,7 @@ export function buildFormRows(entity, fVals, fLvl, params) {        /*dbug-log*/
         let id = entity+'_Rows';
         if ($('#'+id).length) { id = id+'_'+fLvl;  }
         const attr = { id: id, class: 'flex-row flex-wrap'};
-        const rowCntnr = _u('buildElem', ['div', attr]);
+        const rowCntnr = _u('getElem', ['div', attr]);
         $(rowCntnr).append(rows);
         return rowCntnr;
     }
@@ -68,7 +68,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                 /*dbug-log*/
     }));
 
     function buildMultiFieldRow(fields) {                           /*dbug-log*///console.log('buildMultiFieldRow = %O', fields);
-        const cntnr = _u('buildElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
+        const cntnr = _u('getElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
         const rows = fields.map(buildSingleFieldRow);
         return Promise.all(rows).then(appendRows).then(() => cntnr);
 

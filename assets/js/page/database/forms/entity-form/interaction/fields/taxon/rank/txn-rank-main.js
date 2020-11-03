@@ -8,6 +8,7 @@
  * are reset with children of the next selected ancestor, or the root taxon. If
  * the 'create' option is selected, the taxon create-form is opened for the rank if
  * all required ancestor-rank taxa are selected in the form or shows an alert.
+ * @since  Refactored 102020
  *
  * Export
  *     onRankSelection

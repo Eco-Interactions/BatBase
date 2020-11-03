@@ -38,7 +38,7 @@ export function selectRoleTaxon(e, groupTaxon) {
 function getSelectedTaxonOption(groupTaxon) {
     const taxon = groupTaxon || getSelectedTaxon();                 /*dbug-log*///console.log("selected Taxon = %O", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
-    return { value: taxon.id, text:taxon.displayName };
+    return new Option(taxon.id, taxon.displayName);
 }
 /* --------------- GET TAXON SELECTED IN ROLE COMBOBOX ---------------------- */
 /** Finds the most specific rank with a selection and returns that taxon record. */

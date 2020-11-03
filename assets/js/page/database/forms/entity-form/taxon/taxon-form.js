@@ -115,7 +115,7 @@ function getEditTaxonFields(taxon) {                                /*dbug-log*/
 /** ----------- NAME INPUT --------------- */
 function buildNameInput(name) {
     const attr = { id: 'txn-name', type: 'text', value: name };
-    return _u('buildElem', ['input', attr]);
+    return _u('getElem', ['input', attr]);
 }
 /** ------- RANK COMBOBOX --------------- */
 function buildRankSel(taxon) {
@@ -130,7 +130,7 @@ function getRankVal(rank) {
 /** Returns an array of options for the ranks in the taxon's group. */
 function getTaxonRankOpts() {
     return taxonData.groupRanks.reverse().map(rank => {
-        return { value: taxonData.ranks[rank].ord, text: rank };
+        return new Option(rank, taxonData.ranks[rank].ord);
     });
 }
 /** ----------------- PARENT TAXON ELEMS ------------------------------------ */
@@ -145,7 +145,7 @@ function getPrntTaxonElems(taxon) {                                 /*dbug-log*/
 }
 /** ----------- PARENT TAXON NAME --------------- */
 function buildNameElem(prnt) {
-    const div = _u('buildElem', ['div', { id: 'txn-prnt' }]);
+    const div = _u('getElem', ['div', { id: 'txn-prnt' }]);
     setTaxonPrntNameElem(prnt, div);
     $(div).css({'padding-top': '4px'});
     return div;
@@ -160,7 +160,7 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
 function buildEditPrntBttn(prnt) {
     const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt',
         class: 'ag-fresh' };
-    const bttn = _u('buildElem', ['input', attr]);
+    const bttn = _u('getElem', ['input', attr]);
     $(bttn).click(showParentTaxonSelectForm);
     return bttn;
 }
@@ -186,7 +186,7 @@ function buildParentTaxonEditElems(pId) {
 }
 function buildEditParentHdr() {
     const attr = { text: 'Select New Taxon Parent', id:'sub-hdr' };
-    return _u('buildElem', ['h3', attr]);
+    return _u('getElem', ['h3', attr]);
 }
 function getParentEditFields(prnt) {
     const group = _u('lcfirst', [prnt.group.displayName]);
@@ -209,18 +209,18 @@ function getGroupRankRow(taxon, rows) {
 }
 function buildTaxonParentRow(displayName) {
     const groupRank = displayName.split(' ')[0];
-    const lbl = _u('buildElem', ['label', { text: groupRank }]);
+    const lbl = _u('getElem', ['label', { text: groupRank }]);
     const groupParent = buildGroupNameSpan(displayName.split(' ')[1]);
     return buildTaxonEditFormRow(groupRank, [lbl, groupParent], 'sub');
 }
 function buildGroupNameSpan(name) {
-    const span = _u('buildElem', ['span', { text: name }]);
+    const span = _u('getElem', ['span', { text: name }]);
     $(span).css({ 'padding-top': '.55em' });
     return span;
 }
 function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };
-    const cntnr = _u('buildElem', ['div', attr]);
+    const cntnr = _u('getElem', ['div', attr]);
     $(cntnr).append(elems);
     $('#Parent_row').after(cntnr);
 }
@@ -345,17 +345,17 @@ function handleParentRankIssues(pRank) {
  */
 function buildTaxonEditFormRow(field, inputElems, fLvl) {
     const rowDiv = buildFormRow(field, fLvl);
-    const alertDiv = _u('buildElem', ['div', { id: field+'_alert'}]);
+    const alertDiv = _u('getElem', ['div', { id: field+'_alert'}]);
     const fieldCntnr = buildFieldCntnr(inputElems);
     $(rowDiv).append([alertDiv, fieldCntnr]);
     return rowDiv;
 }
 function buildFormRow(field, fLvl) {
     const attr = { class: fLvl + '-row', id: field + '_row'};
-    return _u('buildElem', ['div', attr]);
+    return _u('getElem', ['div', attr]);
 }
 function buildFieldCntnr(fields) {
-    const cntnr =  _u('buildElem', ['div', { class: 'field-row flex-row'}]);
+    const cntnr =  _u('getElem', ['div', { class: 'field-row flex-row'}]);
     $(cntnr).append(fields);
     return cntnr;
 }

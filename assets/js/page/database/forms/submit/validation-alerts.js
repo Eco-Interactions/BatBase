@@ -61,7 +61,7 @@ function isDuplicateAuthor(errTxt) {
 }
 /* ===================== DATA-STORAGE ALERT ================================= */
 export function errUpdatingData(errTag) {                           /*perm-log*/console.log('           !!!errUpdatingData [%s]', errTag);
-    const cntnr = _u('buildElem', ['div', { class: 'flex-col', id:'data_alert' }]);
+    const cntnr = _u('getElem', ['div', { class: 'flex-col', id:'data_alert' }]);
     $(cntnr).append([buildAlertMsg(), buildResetDataButton()]);
     $('#top-hdr').after(cntnr);
     $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
@@ -72,9 +72,9 @@ function buildAlertMsg() {
         <br>All stored data will be redownloaded.</span>`;
 }
 function buildResetDataButton() {
-    const confirm = _u('buildElem', ['span', { class: 'flex-row',
+    const confirm = _u('getElem', ['span', { class: 'flex-row',
             'text': `Please click "OK" to continue.` }]);
-    const bttn = _u('buildElem', ['input', { type: 'button', value: 'OK', class: 'exit-bttn' }]);
+    const bttn = _u('getElem', ['input', { type: 'button', value: 'OK', class: 'exit-bttn' }]);
     $(bttn).click(reloadAndRedownloadData);
     $(confirm).append(bttn);
     return confirm;

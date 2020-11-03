@@ -10,7 +10,7 @@
  *         ENTITY FIELDS
  *         SUBMIT CONFIRMATION-MODAL
  */
-import { _util, _u } from '~db';
+import { _u } from '~db';
 import { _state, _elems, submitForm } from '~form';
 import * as entityForm from './detail-entity/src-detail-entity-form-main.js';
 import * as typeFields from './pub-and-cit-type-fields.js';
@@ -94,7 +94,7 @@ function showSubmitModal(entity, fLvl) {
     const linkHtml = buildConfirmationModalHtml(fLvl);
     const submit = submitForm.bind(null, `#${fLvl}-form`, fLvl, entity);
     if (!linkHtml) { return submit(); }
-    _util('showSaveModal', [ buildModalConfg(fLvl, linkHtml, submit) ]);
+    _u('showSaveModal', [ buildModalConfg(fLvl, linkHtml, submit) ]);
     $(`#${fLvl}-submit`).css({'opacity': .5, cursor: 'not-allowed'})
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }

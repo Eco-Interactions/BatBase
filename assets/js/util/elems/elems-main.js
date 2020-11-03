@@ -10,6 +10,7 @@
 import * as basic from './basic-elem-build.js';
 import * as row from './basic-field-row.js';
 import * as footer from './basic-form-footer.js';
+
 /* ------------------------ FIELD ROW --------------------------------------- */
 export function getFieldRow() {
     return row.getFieldRow(...arguments);
@@ -24,13 +25,4 @@ export function getElem() {
 }
 export function getSelect() {
     return basic.getSelect(...arguments);
-}
-export function getOptsFromStoredData() {
-    return opts.getOptsFromStoredData(...arguments);
-}
-export function buildOptsObj() {
-    return opts.buildOptsObj(...arguments);
-}
-export function alphabetizeOpts() {
-    return opts.alphabetizeOpts(...arguments);
 }

@@ -11,7 +11,7 @@
  *   showLocOnMap
  *   buildLocMap
  */
-import { _db, _table, _u, _ui} from '~db';
+import { _db, _table, _u, _ui } from '~db';
 import * as MM from './map-markers.js';
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
@@ -156,7 +156,7 @@ function addTipsLegend() {
 }
 function addViewTips(map) {
     const attr = { id: 'tips-legend', class: 'info legend flex-col'};
-    const div = _u('buildElem', ['div', attr]);
+    const div = _u('getElem', ['div', attr]);
     div.innerHTML = getDefaultTipTxt();
     $(div).click(toggleTips)
     return div;
@@ -233,7 +233,7 @@ function addMarkerLegend() {
     legend.addTo(app.map);
 }
 function addMarkerLegendHtml(map) {
-    const div = _u('buildElem', ['div', { class: 'info legend flex-col'}]);
+    const div = _u('getElem', ['div', { class: 'info legend flex-col'}]);
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
@@ -256,7 +256,7 @@ function addIntCountLegend() {
 }
 function addIntCntLegendHtml(map) {
     const attr = { id: 'int-legend', class: 'info legend flex-col'};
-    const div = _u('buildElem', ['div', attr]);
+    const div = _u('getElem', ['div', attr]);
     return div;
 }
 function fillIntCntLegend(shown, notShown) {
@@ -585,6 +585,7 @@ function buildLocData(latLng, results, cntrys) {                                
 }
 function getCountryId(cntrys, address) {
     if (address.state === 'French Guiana') { return 210; }
+    if (!address.country_code) { return null; }
     return cntrys[address.country_code.toUpperCase()];
 }
 /** Note: MarkerType triggers the marker's popup build method.  */
@@ -596,7 +597,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#sel-Country')[0].selectize.addItem(loc.cntryId, 'silent');
         $('#location_Rows #DisplayName_row input[type="text"]').change(); //Required fields handle submit button enabling
-        addParentLocDataToMap(loc.cntryId, zoomFlag === 'create');
+        addParentLocDataToMap(loc.cntryId); //, zoomFlag === 'create'
     }
     addPinToMap(latLng, marker, zoomFlag);
 }

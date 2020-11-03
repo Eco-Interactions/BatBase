@@ -19,18 +19,19 @@ export function initSubGroupFilter(tblState) {
         .then(buildSubGroupCombo)
         .then(finishSubGroupComboInit);
 }
+/** @todo Move opts builders to app-util and replace this. */
 function getSubGroupOpts(tblState) {
     return _u('getData', [tblState.groupName+'SubGroupNames'])
         .then(buildSubGroupOpts);
 }
 function buildSubGroupOpts(subGroups) {
     return Object.keys(subGroups).map(group => {
-        return { value: group.split(' ')[1], text: group };
+        return new Option(group, group.split(' ')[1]);
     });
 }
 function buildSubGroupCombo(opts) {
-    const lbl = _u('buildElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
-    const span = _u('buildElem', ['span', { text: '' }]);
+    const lbl = _u('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
+    const span = _u('getElem', ['span', { text: '' }]);
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-Sub-Group');
     $(lbl).append([span, sel]);
     return lbl;

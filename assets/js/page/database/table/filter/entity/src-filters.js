@@ -10,7 +10,7 @@
  *      UI
  *      FILTER
  */
-import { _ui, _u, util } from '~db';
+import { _ui, _u } from '~db';
 import * as fM from '../filter-main.js';
 /* ========================= UI ============================================ */
 export function loadSrcFilters(type) {                              /*Perm-log*/console.log("       --Loading source [%s] filters.", type);
@@ -30,7 +30,7 @@ function loadAuthSearchHtml() {
     return Promise.resolve();
 }
 function loadPubSearchHtml() {
-    return _util('getOptsFromStoredData', ['pubTypeNames'])
+    return _u('getOptsFromStoredData', ['pubTypeNames'])
         .then(loadPubSearchElems);
 }
 function loadPubSearchElems(pubTypeOpts) {
@@ -42,8 +42,8 @@ function loadPubSearchElems(pubTypeOpts) {
 }
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-    const lbl = _u('buildElem', ['label', {class: "sel-cntnr flex-row"}]);
-    const span = _u('buildElem', ['span', { text: 'Type:' }]);
+    const lbl = _u('getElem', ['label', {class: "sel-cntnr flex-row"}]);
+    const span = _u('getElem', ['span', { text: 'Type:' }]);
     const sel = fM.newSel(addAllOpt(opts), '', 'sel-PublicationType', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';
     $(sel).css('width', '177px');

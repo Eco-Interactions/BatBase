@@ -79,6 +79,9 @@ export function rebuildTxnTable() {
     return build.rebuildTxnTable(...arguments);
 }
 /* ======================== FILTER ========================================== */
+export function initDefaultFilters() {
+    filter.initDefaultFilters();
+}
 export function getTreeTextFilterElem() {
     return filter.getTreeTextFilterElem(...arguments);
 }

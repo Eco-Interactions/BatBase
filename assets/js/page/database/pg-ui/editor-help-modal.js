@@ -13,14 +13,14 @@
  *            SENTRY
  *        CLOSE REPORT POPUP
  */
-import { _db, _util, _u } from '~db';
+import { _db, _u } from '~db';
 
 /* ===================== HELP MODAL ========================================= */
 export default function showEditorHelpModal() {
     const confg = {
         html: getHelpHtml(), selector: '#data-help', dir: 'left', onLoad: setBttnEvents
     }
-    _util('showSaveModal', [confg]);
+    _u('showSaveModal', [confg]);
 }
 function getHelpHtml() {
     return `<center><h3>Experiencing issues?</h3></center><br><br>
@@ -35,7 +35,7 @@ function setBttnEvents() {
         'Report A Bug': showBugReportPopup
     }
     $('.intro-bttn').each((i, elem) => {
-        $(elem).click(() => { _util('exitModal', [map[elem.innerText]]); }
+        $(elem).click(() => { _u('exitModal', [map[elem.innerText]]); }
     )});
 }
 /* ===================== BUG REPORT POPUP =================================== */
@@ -70,25 +70,25 @@ function getReportPrompts() {
 }
 function buildRprtPrompt(text, inputType, isRequired) {
     const lbl = buildFieldContainer(isRequired);
-    const span = _u('buildElem', ['span', { text: text, class: 'bug-span' }]);
+    const span = _u('getElem', ['span', { text: text, class: 'bug-span' }]);
     const input = buildFieldInput(inputType);
     $(lbl).append([span, input]);
     return lbl;
 }
 function buildFieldInput (type) {
-    if (!type) { return _u('buildElem', ['textarea', { class: 'bug-rprt-input' }])}
-    const input =  _u('buildElem', ['input', { class: 'bug-rprt-input', type: type }]);
+    if (!type) { return _u('getElem', ['textarea', { class: 'bug-rprt-input' }])}
+    const input =  _u('getElem', ['input', { class: 'bug-rprt-input', type: type }]);
     if (type === 'file') { $(input).attr('multiple', 'multiple'); }
     return input;
 }
 function buildFieldContainer(isRequired) {
     const classes = 'bug-prompt' + (isRequired ? ' required' : '');
-    return _u('buildElem', ['label', { class: classes }]);
+    return _u('getElem', ['label', { class: classes }]);
 }
 /* ------ BUTTONS ----------------- */
 function getReportBttns() {
-    const cntnr = _u('buildElem', ['div', { class: 'flex-row' }]);
-    const spacer = _u('buildElem', ['div', { class: 'flex-grow' }]);
+    const cntnr = _u('getElem', ['div', { class: 'flex-row' }]);
+    const spacer = _u('getElem', ['div', { class: 'flex-grow' }]);
     const sub = buildFormButton('Submit', submitBugRprt);
     const cncl = buildFormButton('Cancel', closeBugReportPopup);
     $(cntnr).append([spacer, sub, cncl]);
@@ -97,7 +97,7 @@ function getReportBttns() {
 /** Returns a (submit or cancel) button */
 function buildFormButton(action, onClick) {
     const attr = { id: 'rprt-'+action, class: 'ag-fresh', type: 'button', value: action}
-    const bttn = _u('buildElem', ['input', attr]);
+    const bttn = _u('getElem', ['input', attr]);
     $(bttn).click(onClick);
     return bttn;
 }
@@ -150,7 +150,7 @@ function submitNewSentryIssue(fileNames) {
         etc: $('.bug-rprt-input')[2].value,
         screenshots: JSON.stringify(fileNames.map(f => buildScreenshotUrl(f)))
     };
-    _util('alertIssue', ['editorReport', data]);
+    _u('alertIssue', ['editorReport', data]);
     updateBugReportUiAfterSubmit();
 }
 function buildScreenshotUrl(fileName) {
@@ -167,7 +167,7 @@ function showReportStatus(msg, color) {
     $('.bugs-popup h3').after(buildReportStatus(msg, color));
 }
 function buildReportStatus(text, color) {
-    const msg = _u('buildElem', ['div', { class: 'rprt-status', text: text }]);
+    const msg = _u('getElem', ['div', { class: 'rprt-status', text: text }]);
     $(msg).css({'color': color, 'margin-top': '1em'});
     return msg;
 }

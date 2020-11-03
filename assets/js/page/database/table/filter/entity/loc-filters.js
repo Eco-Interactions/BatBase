@@ -71,7 +71,7 @@ function buildLocSelectOpts(tblState, data) {
         if (processedOpts[type].indexOf(name) !== -1) { return; }
         const id = rowData.id;
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
-        opts[type].push({ value: id, text: name.split('[')[0] });
+        opts[type].push(new Option(name.split('[')[0], id));
         processedOpts[type].push(name);
     }
     function isOpenRow(id) {
@@ -109,7 +109,7 @@ function buildLocSelectOpts(tblState, data) {
         if (!val) { return }
         addToSelectedObj(val, optProp);
         tblState.openRows.push(val);
-        opts[optProp].push({ value: val, text: txt });
+        opts[optProp].push(new Option(txt, val));
     }
     function addToSelectedObj(id, type) {
         const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s]', type);
@@ -148,8 +148,8 @@ function buildLocSelects(locOptsObj) {
     return selElems;
 
     function buildLocSel(selName, opts) {
-        const lbl = _u('buildElem', ['label', { class: "sel-cntnr flex-row" }]);
-        const span = _u('buildElem', ['span', { text: selName + ': ', class: "opts-span" }]);
+        const lbl = _u('getElem', ['label', { class: "sel-cntnr flex-row" }]);
+        const span = _u('getElem', ['span', { text: selName + ': ', class: "opts-span" }]);
         const sel = fM.newSel(opts, 'opts-box', 'sel-' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');

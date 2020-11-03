@@ -15,33 +15,35 @@ import * as map from './map/map-main.js';
 import * as table from './table/table-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 
-import * as u from './util/util.js';
+import * as u from './util/db-util.js';
 
 import * as ui from './pg-ui/ui-main.js';
-import * as util from '~util';
-/*NOTE: Not sure why this page is getting loaded on external pages. It could be something tangled with webpack.*/
+import * as appUtil from '~util';
+/*
+ * NOTE: Not sure why this code is getting loaded on external pages, or why this
+ * is ran before the core site-init begins. Probably something tangled with webpack.
+ */
 if (window.location.pathname.includes('search')) {
-    initDbPage();
+    window.setTimeout(initDbPage, 500);
 }
 /** ===================== MODULE-EXECUTOR =================================== */
-export function executeMethod(funcName, mod, modName, caller, params = []) {
-    if (!Array.isArray(params)) { params = [params]; }  //Catches events typically.
-    try {
-        return mod[funcName](...params);
-    } catch(e) {
-        util.alertIssue('facadeErr', {module: modName, caller: caller, called: funcName, error: e.toString(), errMsg: e.message});
-        if ($('body').data('env') === 'prod') { return; }
-        console.error('[%s][%s] module: [%s] call failed.  params = %O, err = %O', caller, modName, funcName, params, e);
-    }
+export function executeMethod() {
+    return appUtil.executeMethod(...arguments);
 }
 function moduleMethod(funcName, mod, modName, params) {
-    return executeMethod(funcName, mod, modName, 'db-main', params);
+    return appUtil.executeMethod(funcName, mod, modName, 'db-main', params);
 }
 export function _util(funcName, params = []) {
-    return moduleMethod(funcName, util, 'util', params);
+    return moduleMethod(funcName, appUtil, 'app-util', params);
 }
+/** Calls the util methods from either the db-util or the app-util. */
 export function _u(funcName, params = []) {
-    return moduleMethod(funcName, u, 'db-util', params);
+    const modName = u[funcName] ? 'db-util' : 'app-util';
+    const mod = modName === 'db-util' ? u : appUtil;
+    return moduleMethod(funcName, mod, modName, params);
+}
+export function _dbCmbx(funcName, params = []) {
+    return moduleMethod(funcName, u._dbCmbx, 'db-cmbx', params);
 }
 export function _ui(funcName, params = []) {
     return moduleMethod(funcName, ui, 'ui', params);
