@@ -26,17 +26,22 @@ const loadHeaderData = {
 	'project': loadAboutProjectHeaderStats
 }
 /* ------------------------ INIT STAT HEADER -------------------------------- */
-export default function initHeaderStats(pgPath) {
-	const pg = pgPath || 'home';
-	if (!ifPgHasStatistics(pg)) { return }
+export default function initHeaderStats() {
+	if (!ifPgHasStatistics()) { return }
 	sendAjaxQuery({tag: pageStatKeys[pg]}, 'stats/', loadPageHeaderStatistics);
 
 	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  				//console.log('loadPageHeaderStatistics. args = %O', arguments);
 		loadHeaderData[pageStatKeys[pg]](data);
 	}
 }
-function ifPgHasStatistics(pg) {
+function ifPgHasStatistics() {
+	const pg = getPageName(window.location.pathname.split('/'));
 	return Object.keys(pageStatKeys).indexOf(pg) !== -1;
+}
+function getPageName(path) {
+    let pg = path.pop();
+    pg = !pg ? 'home' : (path.pop() === 'register' ? 'register' : pg)
+    initHeaderStats(pg);
 }
 /* ------------------------ LOAD STAT HEADER -------------------------------- */
 function updateHeaderStats(counts) {

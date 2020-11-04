@@ -16,18 +16,17 @@
  *    BROWSER SPECIFIC
  */
 import initTosPopup from './misc/tos.js';
-import initSiteNav from './header/nav.js';
-import initSlider from './header/img-slider.js';
-import initHeaderStats from './header/site-stats.js';
+import initHeaderAndNav from './header/header-main.js';
 import initDataTable from './misc/ei-data-tables.js';
-import initFeedbackUi from './feedback/feedback.js';
+import initFeedbackUi from '../page/feedback/feedback.js';
 import initWysiwyg from './misc/wysiwyg.js';
-import { initUtil, initSentry } from '~util';
+import { ExtraErrorData } from '@sentry/integrations';
+import { initUtil } from '~util';
 
 export function initSiteCore() {
     initSentryIssueTracking();
     requireStyles();
-    setGlobalJquery();                                                          //console.log('window width [%s]', window.outerWidth);
+    setGlobalJquery();
     initUi();
     initUtil();
 }
@@ -46,6 +45,21 @@ function initSentryIssueTracking() {
     if ($('body').data('env') !== 'prod') { return; }
     initSentry();
 }
+
+/* --------------------- INIT SENTRY ---------------------------------------- */
+function initSentry () {
+    Sentry.init({
+        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
+        integrations: [new ExtraErrorData()],
+        blacklistUrls: ['copy.batbase.org', 'dev.batbase.org']
+    });
+    configureSentryUserData($('body').data('user-name'), $('body').data('user-role'));
+}
+function configureSentryUserData (userName, userRole) {
+    Sentry.configureScope(scope => {
+        scope.setUser({ username: userName, role: userRole });
+    })
+}
 /* ========================== UI INIT ======================================= */
 function initUi() {
     initHeaderAndNav();
@@ -55,63 +69,27 @@ function initUi() {
     $('#b-overlay').hide(); // Hides loading overlay on mobile
     $('.popup').show();
 }
-/* -------------------- HEADER AND MAIN NAV --------------------------------- */
-function initHeaderAndNav() {
-    handleBrowserSpecificLoad();
-    initNav();
-    initImageSlider();
-    initStickyHeader(); //Must load after image slider and the nav menus
-    $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
-}
-function initNav() {
-    initSiteNav();
-}
-function initImageSlider() {
-    initSlider();
-}
-/* Header sticks when image header scrolls off screen. */
-function initStickyHeader() {
-    const hdrHeight = $('#img-slider').outerHeight() ||
-     $('#slider-overlay').outerHeight() || $('#slider-logo').outerHeight();
-    $(window).scroll(handleStickyNav.bind(null, hdrHeight));
-    $(window).scroll();
-};
-function handleStickyNav(hdrHeight) {
-    if ($(window).scrollTop() > hdrHeight) {
-        $('#sticky-hdr').addClass("top-sticky");
-    } else {
-        $('#sticky-hdr').removeClass("top-sticky");
-    }
-}/* -------------------------- TOS ------------------------------------------ */
+/* -------------------------- TOS ------------------------------------------ */
 function initTos() {
     initTosPopup();
 }
 /* ------------------- AUTH-DEPENDENT INIT ---------------------------------- */
 function authDependentInit() {
-    const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
+    const userRole = $('body').data("user-role");
     if (userRole === 'visitor') { return; }
     initFeedbackUi();
     if (userRole === 'admin' && window.outerWidth > 550 || userRole === 'super') {
         initEditContentUi();
     }
     function initEditContentUi() {
-        // const wysiwyg = require('./misc/wysiwyg.js').default;
         initWysiwyg(userRole);
     }
 }
 /* ========================== PAGE SPECIFIC ================================= */
 function handlePageSpecificUiInit() {
-    loadSiteStatisticsHeader();
     initPageTable();
     clearFieldForPdfSubmissions();
     showOverlayOnMobile();
-}
-/* ----------------------- SITE STATISTICS HEADER --------------------------- */
-function loadSiteStatisticsHeader() {
-    const path = window.location.pathname.split('/');
-    let pg = path.pop();
-    if (path.pop() === 'register') { pg = 'register'; }
-    initHeaderStats(pg);
 }
 /* ----------------------- DATATABLES --------------------------------------- */
 /**
@@ -122,7 +100,6 @@ function initPageTable() {
     const tableName = $('#pg-container').data("dt");
     if (tableName === false) { return; }
     initDataTable(tableName);
-    // require('../misc/ei-data-tables.js').init(tableName);
 }
 /* ------------------- SUBMIT PDF ------------------------------------------- */
 /** Not quite sure how to show a success message and reload form, will loop back when there's more time. */
@@ -152,7 +129,7 @@ function getMobileMsg() {
     return getMobileMsgHtml(map[pg])
 
     /** Note: search page code doesn't load on mobile devices. */
-    function isSearchPgOnApple(pg) {                                            //console.log('pg = %s, apple? ', pg, ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1)
+    function isSearchPgOnApple(pg) {                                /*dbug-log*///console.log('pg = %s, apple? ', pg, ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1)
         if (pg == 'search' &&
             ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1) {
             showBrowserWarningPopup();
@@ -179,56 +156,4 @@ function showMobilePopupMsg(mblMsg) {
     $(overlay).append(popup);
     $('#detail-block').prepend(overlay);
     $('#b-overlay-popup').fadeIn(500);
-}
-/* ======================= BROWSER SPECIFIC ================================= */
-function handleBrowserSpecificLoad() {
-    const brwsr = getBrowserName();
-    $('body').data('browser', brwsr);
-    if (brwsr == 'Chrome') { return; }
-    addMsgAboutChromeOptimization();
-}
-function getBrowserName() {
-    return isOpera() || isIEedge() || isIphone() || isChrome() || isSafari();
-
-    function isOpera() {
-        return typeof window.opr !== "undefined" ? 'Opera' : false;
-    }
-    function isIEedge() {
-        return window.navigator.userAgent.indexOf("Edge") > -1 ? 'IE' : false;
-    }
-    function isChrome() {
-        const isChromium = window.chrome;
-        const vendorName = window.navigator.vendor;
-        const isIOSChrome = window.navigator.userAgent.match("CriOS");
-        return isIOSChrome ? 'Chrome' :
-                (isChromium !== null && typeof isChromium !== "undefined" &&
-                vendorName === "Google Inc.") ? 'Chrome' : false;
-    }
-    function isSafari() {
-        return window.safari ? 'Safari' : false;
-    }
-    function isIphone() {
-        return /CriOS|iPad|iPhone|iPod/.test(navigator.platform) ? 'iPhone' : false;
-    }
-}
-function addMsgAboutChromeOptimization() {
-    const msg = buildMsgHtml();
-    const logo = $('#slider-logo').detach();
-    $(logo).addClass('overlay');
-    $('#slider-overlay').css('padding', '2em');
-    $('#slider-overlay').prepend([msg, logo]);
-    window.setTimeout(() => {
-        $('#sticky-hdr').css({
-            'top': $('#slider-overlay').outerHeight(),
-            'position': 'absolute'
-        });
-    }, 750);
-}
-function buildMsgHtml() {
-    const div = document.createElement("div");
-    div.id = 'chrome-opt-msg';
-    div.innerHTML = `<b>This site is developed and tested with chrome.</b> If
-        you encounter issues with other browsers, please log in and leave
-        feedback to let us know.`;
-    return div;
 }
