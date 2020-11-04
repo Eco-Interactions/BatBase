@@ -4,6 +4,7 @@
  * Export
  *     getValidatedFormData
  */
+import { _db } from '~util';
 import { _u } from '~db';
 import { _state, getSelectedVals } from '../forms-main.js';
 
@@ -135,7 +136,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
      * "Point": if there is lat/long data. "Area" otherwise.
      */
     function getLocType() {
-        return _u('getData', ['locTypeNames']).then(locTypes => {
+        return _db('getData', ['locTypeNames']).then(locTypes => {
             const type = fVals.longitude || fVals.latitude ? 'Point' : 'Area';
             fVals.locationType = locTypes[type];
         });
@@ -152,7 +153,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
     }
     /** Returns the id of the Unspecified region. */
     function getUnspecifiedLocId() {
-        return _u('getData', ['topRegionNames'])
+        return _db('getData', ['topRegionNames'])
             .then(regions => regions['Unspecified']);
     }
     /** ---- Additional Publication data ------ */

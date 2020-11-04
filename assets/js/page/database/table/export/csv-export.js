@@ -13,6 +13,7 @@
  *     RESET
  *     HELPERS
  */
+import { _db } from '~util';
 import { _table, _u, _ui } from '~db';
 let tblState;
 
@@ -35,7 +36,7 @@ function exportTableDataThenResetTable() {
  *     Location - Elevation, Elevation Max, Latitude, and Longitude
  */
 function fillTableWithExportOnlyData() {
-    return _u('getData', [['interaction', 'taxon']])
+    return _db('getData', [['interaction', 'taxon']])
     .then(fillInteractionsWithExportData);
 }
 function fillInteractionsWithExportData(rcrds) {

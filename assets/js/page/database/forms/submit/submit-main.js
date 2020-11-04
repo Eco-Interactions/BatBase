@@ -13,7 +13,8 @@
  *             TOP-FORM
  *             SUB-ENTITY
  */
-import { executeMethod, _db, _u } from '~db';
+import { _db } from '~util';
+import { executeMethod, _u } from '~db';
 import { _state, _elems, _confg, clearFormMemory } from '../forms-main.js';
 import * as val from './validation-alerts.js';
 import formatDataForServer from './format-data.js';
@@ -103,7 +104,7 @@ function showNoChangesMessage() {
 }
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s])', entity, detailEntity);
-    return _u('getData', [entity]).then(addDataToMemory);
+    return _db('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
         _state('addEntityRecords', [entity, data]);

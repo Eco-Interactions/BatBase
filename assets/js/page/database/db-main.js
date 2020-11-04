@@ -9,7 +9,7 @@
  *     MODULE-EXECUTOR
  *     PAGE INIT
  */
-import * as db from './local-data/local-data-main.js';
+import * as appUtil from '~util';
 import * as forms from './forms/forms-main.js';
 import * as map from './map/map-main.js';
 import * as table from './table/table-main.js';
@@ -17,8 +17,7 @@ import * as tutorial from './tutorial/db-tutorial.js';
 
 import * as u from './util/db-util.js';
 
-import * as ui from './pg-ui/ui-main.js';
-import * as appUtil from '~util';
+import * as ui from './ui/ui-main.js';
 /*
  * NOTE: Not sure why this code is getting loaded on external pages, or why this
  * is ran before the core site-init begins. Probably something tangled with webpack.
@@ -63,16 +62,13 @@ export function _map(funcName, params = []) {
 export function _table(funcName, params = []) {
     return moduleMethod(funcName, table, 'table', params);
 }
-export function _db(funcName, params = []) {                        /*dbug-log*///console.log('_ui args = %O', arguments);
-    return db[funcName](...params);
-}
 /** ==================== PAGE INIT ========================================== */
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () {
     if ($(window).width() < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js
     requireScriptsAndStyles();
     ui.init();
-    db.initDb();
+    appUtil._db('initDb');
     //The idb-util.initDb will call @initSearchStateAndTable once local database is ready.
 }
 function requireScriptsAndStyles() {

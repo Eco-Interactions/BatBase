@@ -13,6 +13,7 @@
  *         TAXON
  *     FILL FIELD-DATA
  */
+import { _db } from '~util';
 import { _u } from '~db';
 import { _state, _elems, _confg, _form, _panel } from '../forms-main.js';
 
@@ -107,7 +108,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
         storeLocGeoJson(geoId);
     }
     function storeLocGeoJson(id) {
-        return _u('getData', ['geoJson'])
+        return _db('getData', ['geoJson'])
             .then(data => _state('setFormProp', ['top', 'geoJson', data[id]]));
     }
 }

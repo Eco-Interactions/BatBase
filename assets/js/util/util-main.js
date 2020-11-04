@@ -11,11 +11,13 @@
  *     STRINGS
  *     MISC
  */
+import * as db from './local-data/local-data-main.js';
 import * as elems from './elems/elems-main.js';
-import * as uAjax from './ajax-util.js';
-import * as alert from './alert-issue.js';
-import * as modal from './intro-modals.js';
-import extendPrototypes from './extend.js';
+import * as uAjax from './misc/ajax-util.js';
+import * as alert from './misc/alert-issue.js';
+import * as modal from './misc/intro-modals.js';
+import * as cite from './misc/generate-citation.js';
+import extendPrototypes from './misc/extend.js';
 
 export function initUtil() {
     extendPrototypes();
@@ -34,28 +36,20 @@ export function executeMethod(funcName, mod, modName, caller, params = []) {
 function moduleMethod(funcName, mod, modName, params) {
     return executeMethod(funcName, mod, modName, 'app-main', params);
 }
+export function _alert(funcName, params = []) {
+    return moduleMethod(funcName, elems, 'app-elems', params);
+}
+export function _db(funcName, params = []) {
+    return moduleMethod(funcName, db, 'app-db', params);
+}
 export function _elems(funcName, params = []) {
     return moduleMethod(funcName, elems, 'app-elems', params);
 }
-/* ==================== APP ALERTS ========================================== */
-export function initSentry() {
-    return alert.initSentry(...arguments);
+export function _modal(funcName, params = []) {
+    return moduleMethod(funcName, db, 'app-db', params);
 }
-export function reportErr() {
-    return alert.reportErr(...arguments);
-}
-export function alertIssue() {
-    return alert.alertIssue(...arguments);
-}
-/* ==================== APP MODALS ========================================== */
-export function showInfoModal() {
-    return modal.showInfoModal(...arguments);
-}
-export function showSaveModal() {
-    return modal.showInfoModal(...arguments);
-}
-export function showTutorialModal() {
-    return modal.showTutorialModal(...arguments);
+export function generateCitationText(params) {                      /*dbug-log*///console.log('generateCitationText. params = %O', params);
+    return moduleMethod('generateCitationText', cite, 'gen-cite', params);
 }
 /* =========================== AJAX ========================================= */
 export function sendAjaxQuery() {

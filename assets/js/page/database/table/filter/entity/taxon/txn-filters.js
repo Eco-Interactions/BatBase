@@ -14,6 +14,7 @@
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
+import { _db } from '~util';
 import { _table, _ui, _u } from '~db';
 import * as fM from '../../filter-main.js';
 import { initObjectGroupCombobox } from './obj-group-filter.js';
@@ -213,7 +214,7 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
  */
 export function updateTaxonComboboxes(rd) {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
     const rowData = _u('snapshot', [rd]);
-    _u('getData', ['rankNames']).then(ranks => {
+    _db('getData', ['rankNames']).then(ranks => {
         const taxaByRank = seperateTaxonTreeByRank(ranks, rowData);
         tState().set({'taxaByRank': taxaByRank});                                 //console.log("taxaByRank = %O", taxaByRank)
         loadTxnFilters(tState().get());

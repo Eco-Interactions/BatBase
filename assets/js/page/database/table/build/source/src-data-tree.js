@@ -10,6 +10,7 @@
  *     PUBLISHER TREE
  *     AUTHOR TREE
  */
+import { _db } from '~util';
 import { _u } from '~db';
 import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../build-main.js';
 
@@ -34,7 +35,7 @@ function buildSrcTypeTree(type) {
 }
 function getSrcTreeData(type) {
     const typeKey = getSrcRcrdKey(type);
-    return [ _u('getData', [['publication', 'author']]), _u('getData', [typeKey])];
+    return [ _db('getData', [['publication', 'author']]), _db('getData', [typeKey])];
 }
 function getSrcRcrdKey(type) {
     const keys = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };

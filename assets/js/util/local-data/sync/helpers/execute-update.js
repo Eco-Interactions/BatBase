@@ -15,8 +15,7 @@
  *         RETRY QUEUE
  *         REPORT FAILURES
  */
-import { _u } from '~db';
-import * as db from '../../local-data-main.js';
+import { _alert, _db, snapshot } from '~util';
 
 let failed = { data: [], retryQueue: {}};
 
@@ -57,7 +56,7 @@ function addToRetryQueue(updateFunc, prop, params, edits) {         /*dbug-log*/
     };
 }
 /** Retries any updates that failed in the first pass. */
-export function retryFailedUpdates() {                              /*perm-log*/console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, _u('snapshot', [failed]));
+export function retryFailedUpdates() {                              /*perm-log*/console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, snapshot(failed));
     if (!Object.keys(failed.retryQueue).length) { return Promise.resolve(); }
     failed.final = true;
     Object.keys(failed.retryQueue).forEach(retryEntityUpdates);
@@ -74,7 +73,7 @@ export function reportDataSyncFailures(obj) {
     const data = obj || {};
     addFailedUpdatesToObj(data);
     if (!data.fails) { return data; }                               /*perm-log*/console.log('           !!Reporting failures = %O', data.fails)
-    _u('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
+    _alert('alertIssue', ['dataSyncFailure', { fails: getFailureReport(data.fails) }]);
     return data
 }
 function getFailureReport (failures) {

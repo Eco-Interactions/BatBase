@@ -10,6 +10,7 @@
  *     SERVER-DATA UPDATE
  *     LOCAL-DATA UPDATE
  */
+import { generateCitationText } from '~util';
 import { _forms, _u } from '~db';
 import * as db from '../../local-data-main.js';
 import { updateLocalEntityData, hasEdits } from '../db-sync-main.js';
@@ -72,7 +73,7 @@ function updateCitations(citIds, rcrds) {                           /*dbug-log*/
                 source: srcRcrds
             }
         };
-        const citText = _u('generateCitationText', [params]);       /*dbug-log*///console.log('citText = %O', citText)
+        const citText = generateCitationText(params);       /*dbug-log*///console.log('citText = %O', citText)
         return updateCitationData(citSrc, citText);
     }
 }

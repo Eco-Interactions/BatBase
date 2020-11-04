@@ -23,7 +23,8 @@
  *             Reset & Enable/Disable UI
  *             Table Methods
  */
-import { _db, _table, _u, _ui } from '~db';
+import { _db } from '~util';
+import { _table, _u, _ui } from '~db';
 import * as pM from './panels-main.js';
 
 const tState = _table.bind(null, 'tableState');
@@ -146,7 +147,7 @@ function editDataList() {
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
-    _u('getData', ['dataLists']).then(lists => {
+    _db('getData', ['dataLists']).then(lists => {
         const list = addActiveListToMemory(lists[id]);              /*dbug-log*///console.log('activeList = %O', list);
         fillListDataFields(
             list.displayName, list.description, list.details.length);

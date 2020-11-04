@@ -12,7 +12,7 @@
  *     SET
  *         RESET
  */
-import { _db } from '~db';
+import { _db } from '~util';
 /**
  * Stores table state params needed throughout the page.
  *

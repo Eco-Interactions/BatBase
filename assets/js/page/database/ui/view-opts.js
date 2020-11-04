@@ -7,6 +7,7 @@
  *     initSrcViewOpts
  *     initTxnViewOpts
  */
+import { _db } from '~util';
 import { _table, _u } from '~db';
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
@@ -17,7 +18,7 @@ import { _table, _u } from '~db';
 export function initLocViewOpts(view) {                             /*Perm-log*/console.log("       --Init Location UI. view ? [%s]", view);
     loadLocationViewOpts();
     if (view) { setLocView(view);
-    } else { _u('getData', ['curView']).then(setLocView); }
+    } else { _db('getData', ['curView']).then(setLocView); }
 }
 function loadLocationViewOpts() {
     if ($('#sel-View').data('focus') === 'locs') { return; }

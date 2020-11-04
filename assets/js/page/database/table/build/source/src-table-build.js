@@ -6,13 +6,33 @@
  *     onSrcViewChange
  *
  * TOC
- *     SOURCE VIEW
  *     SOURCE TABLE
+ *     SOURCE VIEW
  */
+import { _db } from '~util';
 import { _filter, _table, _u, _ui } from '~db';
 import * as build from '../build-main.js';
 
 const tState = _table.bind(null, 'tableState');
+/** ================= SOURCE TABLE ========================================== */
+/**
+ * Get all data needed for the Source-focused table from data storage and send
+ * to @initSrcViewOpts to begin the data-table build.
+ */
+export function buildSrcTable(v) {                                  /*Perm-log*/console.log("       --Building Source Table. view ? [%s]", v);
+    if (v) { return getSrcDataAndBuildTable(v); }
+    return _db('getData', ['curView', true]).then(storedView => {
+        const view = typeof storedView == 'string' ? storedView : 'pubs';
+        return getSrcDataAndBuildTable(view);
+    });
+}
+function getSrcDataAndBuildTable(view) {
+    return _db('getData', ['source']).then(srcs => {
+        tState().set({rcrdsById: srcs});
+        _ui('initSrcViewOpts', [view]);
+        return startSrcTableBuildChain(view);
+    });
+}
 /** ================== SOURCE VIEW ========================================== */
 /** Event fired when the source view select box has been changed. */
 export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --onSrcViewChange. view ? [%s]', val);
@@ -40,23 +60,4 @@ function getAndStoreSrcView(val) {
     _u('setData', ['curView', viewVal]);
     tState().set({curView: viewVal});
     return viewVal;
-}
-/** ================= SOURCE TABLE ========================================== */
-/**
- * Get all data needed for the Source-focused table from data storage and send
- * to @initSrcViewOpts to begin the data-table build.
- */
-export function buildSrcTable(v) {                                  /*Perm-log*/console.log("       --Building Source Table. view ? [%s]", v);
-    if (v) { return getSrcDataAndBuildTable(v); }
-    return _u('getData', ['curView', true]).then(storedView => {
-        const view = typeof storedView == 'string' ? storedView : 'pubs';
-        return getSrcDataAndBuildTable(view);
-    });
-}
-function getSrcDataAndBuildTable(view) {
-    return _u('getData', ['source']).then(srcs => {
-        tState().set({rcrdsById: srcs});
-        _ui('initSrcViewOpts', [view]);
-        return startSrcTableBuildChain(view);
-    });
 }

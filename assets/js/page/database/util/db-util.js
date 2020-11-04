@@ -2,7 +2,6 @@
  * Helpful utility methods used throughout the database search page.
  *
  * TOC
- *     GENERATE CITATION TEXT
  *     UTIL FACADE
  *         SELECT OPTIONS
  *         SELECTIZE COMBOBOXES
@@ -13,16 +12,12 @@
  *         DATA
  *     CORE-UTIL FACADE
  */
-import { _db, _util, executeMethod } from '~db';
+import { _db } from '~util';
+import { _util, executeMethod } from '~db';
 import * as cmbx from './combos.js';
-import * as cite from './generate-citation.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
 export function _dbCmbx(funcName, params = []) {                                  console.log('args = %O', arguments);
     return executeMethod(funcName, cmbx, 'db-cmbx', 'elems-main', params);
-}
-/** ================ GENERATE CITATION TEXT ================================= */
-export function generateCitationText() {
-    return cite.generateCitationText(...arguments);
 }
 /** ==================== UTIL FACADE ======================================== */
 /* -------------------- SELECT OPTIONS -------------------------------------- */

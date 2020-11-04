@@ -20,7 +20,8 @@
  *     TUTORIAL STEP CONFIG
  *         HELP MODAL STEPS
  */
-import { _db, _table, _ui } from '~db';
+import { _db } from '~util';
+import { _table, _ui } from '~db';
 
 let intro, focus, isMapDataAvailable = false;
 

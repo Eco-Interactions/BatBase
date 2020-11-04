@@ -19,7 +19,7 @@
  *             SENTRY ALERT
  *         CLOSE POPUP
  */
-import { alertIssue, getElem, getFieldRow, getFormFooter, sendAjaxQuery } from '~util';
+import { _alert, getElem, getFieldRow, getFormFooter, sendAjaxQuery } from '~util';
 /* ======================= MWNU ITEM ======================================== */
 /** Creates the "Leave Feedback" menu option for all registered users. */
 export default function initFeedbackUi() {
@@ -123,7 +123,7 @@ function postFeedback() {
         feedback: $('#feedback_row textarea').val()
     };
     closePopup() && sendAjaxQuery(data, 'feedback/post');
-    alertIssue('feedback', data);
+    _alert('alertIssue', ['feedback', data]);
 }
 /* =========================== CLOSE POPUP ================================== */
 function closePopup() {

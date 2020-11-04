@@ -13,7 +13,7 @@
  * TOC
  *
  */
-import { _db, _u } from '~db';
+import { __alert, _db, ucfirst } from '~util';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
 /**
@@ -163,7 +163,7 @@ export function getOptions(entityObj, sortedKeys) {                 /*dbug-log*/
         getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);
 }
 function getEntityOpt(name, id) {                                   /*dbug-log*///console.log('getEntityOpt [%s][%s]', name, id);
-    return new Option(_u('ucfirst', [name]), id);
+    return new Option(ucfirst(name), id);
 }
 /** _____________________ GROUP OPTIONS _____________________________________ */
 function getOptGroups(entityObj, sortedKeys) {
@@ -223,7 +223,7 @@ export function removeOpt(field, val) {
 }
 /* ======================= HELPERS ========================================== */
 function getSelApi(field) {                                         /*dbug-log*/console.log('getSelApi [%s] = %O', field, confgs);
-    if (!confgs[field]) { return _u('alertIssue', ['comboboxNotFound', {field: field}]); }
+    if (!confgs[field]) { return _alert('alertIssue', ['comboboxNotFound', {field: field}]); }
     //If the combo was removed
     return $(confgs[field].id).length ? $(confgs[field].id)[0].selectize : false;
 }

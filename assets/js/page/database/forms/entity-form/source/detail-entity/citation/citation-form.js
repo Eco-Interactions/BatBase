@@ -14,6 +14,7 @@
  *     HIGHTLIGHT EMPTY CITATION-FIELDS
  *     CITATION EDIT
  */
+import { _db } from '~util';
 import { _u } from '~db';
 import { _form, _state, _elems } from '~form';
 import * as sForm from '../../src-form-main.js';
@@ -30,7 +31,7 @@ export function loadCitTypeFields() {
 export function initCitForm(v) {                                    /*perm-log*/console.log("       /--initCitForm [%s]", v);
     const val = v === 'create' ? '' : v;
     timeout = null;
-    return _u('getData', [['author', 'publication']])
+    return _db('getData', [['author', 'publication']])
     .then(data => initCitFormMemory(data))
     .then(() => buildAndAppendCitForm(val));
 }

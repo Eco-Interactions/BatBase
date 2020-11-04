@@ -22,7 +22,7 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { _forms, _map, _table } from '~db';
+import { _forms, _map, _table, _u } from '~db';
 import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';

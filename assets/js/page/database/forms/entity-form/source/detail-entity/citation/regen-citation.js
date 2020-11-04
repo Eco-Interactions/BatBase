@@ -10,7 +10,7 @@
  *     GET ALL DATA FOR CITATION
  *     UPDATE FIELD
  */
-
+import { generateCitationText } from '~util';
 import { _u } from '~db';
 import { _state, _elems, getNextFormLevel, getValidatedFormData } from '~form';
 

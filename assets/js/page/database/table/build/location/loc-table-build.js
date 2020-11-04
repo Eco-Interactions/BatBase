@@ -7,40 +7,18 @@
  *     rebuildLocTable
  *
  * TOC
- *     LOCATION VIEW
  *     LOCATION TABLE
+ *     LOCATION VIEW
  */
+import { _db } from '~util';
 import { _map, _table, _u, _ui } from '~db';
 import * as build from '../build-main.js';
 
 const tState = _table.bind(null, 'tableState');
-/** ================ LOCATION VIEW ========================================== */
-export function onLocViewChange(val) {
-    if (!val) { return; }
-    updateLocView(val);
-}
-/**
- * Event fired when the source view select box has been changed.
- */
-function updateLocView(v) {
-    const val = v || _u('getSelVal', ['View']);                     /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
-    resetLocUi(val);
-    _table('resetTableState');
-    _ui('setTreeToggleData', [false]);
-    return showLocInteractionData(val);
-}
-function resetLocUi(view) {
-    _ui('fadeTable');
-    if (view === 'tree') { _ui('updateUiForTableView'); }
-}
-function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
-    _u('setData', ['curView', view]);
-    return view === 'tree' ? rebuildLocTable() : _map('buildLocMap');
-}
 /** =============== LOCATION TABLE ========================================== */
 export function buildLocTable(v) {                                  /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
-    return _u('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
+    return _db('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
 
     function beginLocationLoad(data) {
         addLocDataToTableParams(data);
@@ -90,4 +68,27 @@ export function showLocInDataTable(loc) {                          /*Perm-log*/c
     rebuildLocTable([loc.id])
     .then(() => _ui('updateFilterStatusMsg'))
     .then(() => _ui('enableClearFiltersButton'));
+}
+/** ================ LOCATION VIEW ========================================== */
+export function onLocViewChange(val) {
+    if (!val) { return; }
+    updateLocView(val);
+}
+/**
+ * Event fired when the source view select box has been changed.
+ */
+function updateLocView(v) {
+    const val = v || _u('getSelVal', ['View']);                     /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
+    resetLocUi(val);
+    _table('resetTableState');
+    _ui('setTreeToggleData', [false]);
+    return showLocInteractionData(val);
+}
+function resetLocUi(view) {
+    _ui('fadeTable');
+    if (view === 'tree') { _ui('updateUiForTableView'); }
+}
+function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
+    _u('setData', ['curView', view]);
+    return view === 'tree' ? rebuildLocTable() : _map('buildLocMap');
 }

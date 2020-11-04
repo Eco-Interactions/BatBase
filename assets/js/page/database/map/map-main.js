@@ -11,7 +11,8 @@
  *   showLocOnMap
  *   buildLocMap
  */
-import { _db, _table, _u, _ui } from '~db';
+import { _db } from '~util';
+import { _table, _u, _ui } from '~db';
 import * as MM from './map-markers.js';
 import * as _elems from './map-elems.js';
 import buildMapDataObj from './map-data.js';
@@ -751,6 +752,6 @@ export function showTableRecordsOnMap() {                                       
 
     function getLocRcrds() {
         return Promise.resolve(tblState.curFocus !== 'locs' ?
-            _u('getData', ['location']) : tblState.rcrdsById);
+            _db('getData', ['location']) : tblState.rcrdsById);
     }
 }

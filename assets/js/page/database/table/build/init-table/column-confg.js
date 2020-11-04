@@ -7,6 +7,7 @@
  * TOC
  *     ROW STYLING
  */
+import { _db } from '~util';
 import { _forms, _map, _u } from '~db';
 import { getCellStyleClass, getRowStyleClass } from './init-table-main.js';
 import unqVals from 'db/table/filter/aggrid/ag-grid-unique-filter.js';
@@ -22,7 +23,7 @@ let tblState;
  */
 export function getColumnConfg(mainCol, state) {
     tblState = state;
-    return _u('getData', ['tagNames', true])
+    return _db('getData', ['tagNames', true])
         .then(tags => buildColDefs(mainCol, tags));
 }
 function buildColDefs(mainCol, tags) {

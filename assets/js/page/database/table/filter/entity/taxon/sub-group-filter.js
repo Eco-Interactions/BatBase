@@ -9,6 +9,7 @@
  *     INIT COMBOBOX
  *     APPLY FILTER
  */
+import { _db } from '~util';
 import { _ui, _u } from '~db';
 import * as fM from '../../filter-main.js';
 
@@ -21,7 +22,7 @@ export function initSubGroupFilter(tblState) {
 }
 /** @todo Move opts builders to app-util and replace this. */
 function getSubGroupOpts(tblState) {
-    return _u('getData', [tblState.groupName+'SubGroupNames'])
+    return _db('getData', [tblState.groupName+'SubGroupNames'])
         .then(buildSubGroupOpts);
 }
 function buildSubGroupOpts(subGroups) {

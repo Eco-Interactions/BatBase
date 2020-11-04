@@ -11,6 +11,7 @@
  *     LOAD TYPE-FIELDS
  *     UPDATE UI FOR CITATION-TYPE
  */
+import { _db } from '~util';
 import { _u } from '~db';
 import {  _state, _elems, getSubFormLvl } from '~form';
 import * as sForm from '../../src-form-main.js';
@@ -19,7 +20,7 @@ let rmvdAuthField = {};
 /* ----------------------- SELECT DEFAULT-TYPE ------------------------------ */
 export function selectDefaultCitType() {
     rmvdAuthField = {};
-    return _u('getData', ['citTypeNames'])
+    return _db('getData', ['citTypeNames'])
         .then(types => setCitType(types));
 }
 function setCitType(citTypes) {

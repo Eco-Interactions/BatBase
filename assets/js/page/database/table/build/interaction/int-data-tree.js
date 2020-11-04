@@ -4,14 +4,14 @@
  * Export
  *     fillTreeWithInteractions
  */
-import { _u } from '~db';
+import { _alert, _db } from '~util';
 import { getTreeRcrds } from '../build-main.js';
 
 /** Replaces all interaction ids with records for every node in the tree.  */
 export async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
     const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source'];
-    const data = await _u('getData', [entities, true]);
+    const data = await _db('getData', [entities, true]);
     fillInts[focus](dataTree, data);
     return dataTree;
 }
@@ -99,6 +99,6 @@ function getTreeRcrd(id, entityData, entity, prop) {  //console.log('getTreeRcrd
     if (entityData[entity] === undefined) { return {}; }
     const rcrd = entityData[entity][id];
     if (!rcrd && prop === 'object') { return {}; }
-    if (!rcrd) { _u('alertIssue', ['noRcrdFound', {id: id, entity: entity }]); }
+    if (!rcrd) { _alert('alertIssue', ['noRcrdFound', {id: id, entity: entity }]); }
     return rcrd ? rcrd : '_err_';
 }

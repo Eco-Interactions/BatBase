@@ -7,7 +7,7 @@
  *        LOAD AND STYLE POPUP
  *        UPDATE LAST VIEWED BY
  */
-import { exitModal, showSaveModal, sendAjaxQuery } from '~util';
+import { _modal, sendAjaxQuery } from '~util';
 
 if (window.location.pathname.includes('pdfs')) {
     addPdfEvents();
@@ -26,7 +26,7 @@ function handleDeletePdf() {
         bttn: 'Confirm',
         submit: deletePdf.bind(null, id)
     }
-    showSaveModal(confg);
+    _modal('showSaveModal', [confg]);
 }
 function deletePdf(id) {
     sendAjaxQuery(null, 'pub/'+id+'/delete', () => location.reload());

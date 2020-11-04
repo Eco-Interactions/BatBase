@@ -10,6 +10,7 @@
  *         VALIDATION & SUBMIT
  *     MODULE HELPERS
  */
+import { _alert } from '~util';
 import { _map, _u, _util, _ui, executeMethod } from '~db';
 import * as confg from './confg/confg-main.js';
 import * as form from './entity-form/entity-form-main.js';
@@ -20,7 +21,7 @@ import editEntity from './edit/edit-forms-main.js';
 
 export function alertIssue() {
     if (!state.getFormState()) { return; } //form closed
-    return _u('alertIssue', [...arguments]);
+    return _alert('alertIssue', [...arguments]);
 }
 /** ===================== MODULE-EXECUTOR =================================== */
 function moduleMethod(funcName, mod, modName, params) {

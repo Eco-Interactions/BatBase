@@ -16,6 +16,7 @@
  *         APPEND AND STYLE
  *     SUB FORM
  */
+import { _modal } from '~util';
 import { _u } from '~db';
 import { _confg, _elems, _panel, _state } from '~form';
 
@@ -160,7 +161,7 @@ function getFormWalkthroughBttn() {
     if (!formInfoStepCount) { return; }
     const titleInfo = "Hover your mouse over any field and it's help popup will show, if it has one.";
     const bttn = buildWalkthroughButton(titleInfo);
-    $(bttn).click(_u.bind(null, 'showTutorialModal', [fLvl]));
+    $(bttn).click(_modal.bind(null, 'showTutorialModal', [fLvl]));
     setIntroWalkthroughAttrs(bttn, titleInfo, ++formInfoStepCount);
     return bttn;
 }

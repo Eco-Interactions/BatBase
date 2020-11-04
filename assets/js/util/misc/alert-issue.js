@@ -4,7 +4,6 @@
  *
  * Export
  *     alertIssue
- *     initSentry
  *     getErrMsgForUserRole
  *     showAlert
  *
@@ -14,22 +13,7 @@
  *     ALERT USER
  */
 import { _table, _u } from '~db';
-import { ExtraErrorData } from '@sentry/integrations';
 
-/* --------------------- INIT SENTRY ---------------------------------------- */
-export function initSentry () {
-    Sentry.init({
-        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
-        integrations: [new ExtraErrorData()],
-        blacklistUrls: ['copy.batbase.org', 'dev.batbase.org']
-    });
-    configureSentryUserData($('body').data('user-name'), $('body').data('user-role'));
-}
-function configureSentryUserData (userName, userRole) {
-    Sentry.configureScope(scope => {
-        scope.setUser({ username: userName, role: userRole });
-    })
-}
 /* =================== CREATE SENTRY EVENT ================================== */
 /** Sends Error object to Sentry, issue tracker. */
 export function reportErr(e) {
