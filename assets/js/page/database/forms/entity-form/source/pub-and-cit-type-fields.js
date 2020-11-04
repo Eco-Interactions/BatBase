@@ -15,7 +15,7 @@
  *         LABELS
  *         INPUTS
  */
-import { _u } from '~db';
+import { _cmbx, _u } from '~util';
 import { _state, _elems, getSubFormLvl } from '~form';
 import * as sForm from './src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
@@ -67,7 +67,7 @@ function setSourceType(entity, fLvl, tName) {
     _state('setFormProp', [fLvl, 'entityType', type]);
 }
 function getSourceTypeFromCombo(entity) {
-    return _u('getSelTxt', [_u('ucfirst', [entity])+'Type']);
+    return _cmbx('getSelTxt', [_u('ucfirst', [entity])+'Type']);
 }
 /* ================= UPDATE SOURCE-TYPE FIELDS ============================== */
 export function updateFieldsForSourceType (entity, fLvl) {
@@ -80,7 +80,7 @@ export function updateFieldsForSourceType (entity, fLvl) {
  * the selected type.
  */
 function updateFieldLabelsForType(entity, fLvl) {
-    const type = _u('getSelTxt', [_u('ucfirst', [entity]+ 'Type')]);
+    const type = _cmbx('getSelTxt', [_u('ucfirst', [entity]+ 'Type')]);
     const trans = getLabelTrans();
     const fId = '#'+fLvl+'-form';
 
@@ -106,12 +106,12 @@ function updateFieldLabelsForType(entity, fLvl) {
     function updateComboText(lblElem, fieldTxt, newTxt) {
         return lblElem.nextSibling.id.includes('-cntnr') ?
             updateAllComboPlaceholders($('#sel-cntnr-'+fieldTxt)[0]) :
-            _u('updatePlaceholderText', [ '#sel-'+fieldTxt, newTxt]);
+            _cmbx('updatePlaceholderText', [ '#sel-'+fieldTxt, newTxt]);
 
         function updateAllComboPlaceholders(cntnrElem) {
             for (let $i = 0; $i < cntnrElem.children.length; $i++) {
                 if (cntnrElem.children[$i].tagName !== 'SELECT') {continue}
-                _u('updatePlaceholderText', ['#'+cntnrElem.children[$i].id, newTxt]);
+                _cmbx('updatePlaceholderText', ['#'+cntnrElem.children[$i].id, newTxt]);
             }
         }
     }

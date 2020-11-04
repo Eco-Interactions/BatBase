@@ -11,8 +11,9 @@
  *         FORM COMBOBOXES
  *         MAP METHODS
  */
-import { _map, _u } from '~db';
-import { _state, _elems, _cmbx, _form, _val, getSubFormLvl, submitForm } from '~form';
+import { _cmbx, _el, _u } from '~util';
+import { _map } from '~db';
+import { _state, _elems, _form, _val, getSubFormLvl, submitForm } from '~form';
 
 /** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
@@ -34,7 +35,7 @@ function buildLocForm(val) {
     function appendLocFormAndFinishBuild(form) {
         $('#Location_row')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
-        _u('enableCombobox', ['Country-Region', false]);
+        _cmbx('enableCombobox', ['Country-Region', false]);
         _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_row input').focus();
@@ -97,7 +98,7 @@ function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
     if (!$('#Latitude_row input').val()) { return; }
-    _map('addVolatileMapPin', [id, 'edit', _u('getSelVal', ['#Country'])]);
+    _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['#Country'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
 function afterMapLoads(onLoadFunc, id) {
@@ -113,11 +114,11 @@ export function initFormCombos(entity, fLvl) {
     const events = {
         'Country': { onChange: focusParentAndShowChildLocs.bind(null, 'create') }
     };
-    _cmbx('initFormCombos', ['location', fLvl, events]);
+    _elems('initFormCombos', ['location', fLvl, events]);
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
 export function addMapToLocForm(type, $formElem = $('#location_Rows')) {
-    const mapContainer = _u('getElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
+    const mapContainer = _el('getElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
     $formElem.after(mapContainer);
     initLocFormMap(type);
 }

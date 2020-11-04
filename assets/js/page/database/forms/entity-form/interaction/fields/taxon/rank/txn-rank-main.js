@@ -18,7 +18,7 @@
  *     RESET CHILD-RANK COMBOS
  *     FILL RANK COMBOS WITH RELATED TAXA
  */
-import { _u } from '~db';
+import { _cmbx } from '~util';
 import { _elems, _state, _val, getSubFormLvl } from '~form';
 import * as iForm from '../../../int-form-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
@@ -83,11 +83,11 @@ function repopulateRankCombos(optsObj, selected) {                  /*dbug-log*/
  * its direct ancestors.
  */
 function repopulateRankCombo(opts, rank, selected) {                /*dbug-log*///console.log("repopulateRankCombo [%s] = %O", rank, opts);
-    _u('replaceSelOpts', [rank, opts]);
+    _cmbx('replaceSelOpts', [rank, opts]);
     if (!rank in selected) { return; }
     if (selected[rank] == 'none') { return resetPlaceholer(rank); }
-    _u('setSelVal', [rank, selected[rank], 'silent']);
+    _cmbx('setSelVal', [rank, selected[rank], 'silent']);
 }
 function resetPlaceholer(rank) {
-    _u('updatePlaceholderText', [ rank, null, 0]);
+    _cmbx('updatePlaceholderText', [ rank, null, 0]);
 }

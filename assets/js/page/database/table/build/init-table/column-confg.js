@@ -7,8 +7,8 @@
  * TOC
  *     ROW STYLING
  */
-import { _db } from '~util';
-import { _forms, _map, _u } from '~db';
+import { _db, _u } from '~util';
+import { _forms, _map } from '~db';
 import { getCellStyleClass, getRowStyleClass } from './init-table-main.js';
 import unqVals from 'db/table/filter/aggrid/ag-grid-unique-filter.js';
 const mapIcon = require('images/icons/marker-icon.png').default;

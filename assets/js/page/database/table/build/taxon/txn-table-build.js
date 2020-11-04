@@ -11,7 +11,7 @@
  *     TAXON VIEW
  */
 import { _db } from '~util';
-import { _filter, _table, _u, _ui } from '~db';
+import { _filter, _table, _ui, getDetachedRcrd } from '~db';
 import * as build from '../build-main.js';
 
 const tState = _table.bind(null, 'tableState');
@@ -93,12 +93,12 @@ function buildTaxonTable(val) {
  */
 function storeGroupAndReturnRootTaxa(val) {
     const groupId = val || getSelValOrDefault(_u('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], groupId [%s]', val, groupId)
-    const group = _u('getDetachedRcrd', [groupId, tState().get('groups'), 'group']);/*dbug-log*///console.log("groupTaxon = %O", group);
+    const group = getDetachedRcrd(groupId, tState().get('groups'), 'group');/*dbug-log*///console.log("groupTaxon = %O", group);
     updateGroupTableState(groupId, group);
     return Object.values(group.taxa).map(getRootTaxonRcrd);
 }
 function getRootTaxonRcrd(root) {
-    return _u('getDetachedRcrd', [root.id, tState().get('rcrdsById'), 'taxon']);
+    return getDetachedRcrd(root.id, tState().get('rcrdsById'), 'taxon');
 }
 function updateGroupTableState(groupId, group) {
     _u('setData', ['curView', groupId]);

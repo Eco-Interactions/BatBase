@@ -11,26 +11,19 @@
  *         SUBMIT|EXIT BUTTON
  *         FORM-STATUS MESSAGES
  *     FIELDS
+ *         COMBOBOXES
  *         REQUIRED FIELDS
  *         FILL FORM-DATA
  *         TOGGLE FORM-FIELDS
  */
-import { _u, executeMethod } from '~db';
+import { executeMethod } from '~util';
 import { _state, getNextFormLevel } from '../forms-main.js';
-import * as panel from './detail-panel/detail-panel.js';
-import * as base from './form-container.js';
-import * as rows from './rows/rows-main.js';
 import buildFormFooter from './footer/form-footer.js';
+import * as base from './form-container.js';
 import * as elemUtil from './util/form-elems-util-main.js';
-
-import * as cmbx from './rows/fields/input/combobox-input.js';
+import * as panel from './detail-panel/detail-panel.js';
+import * as rows from './rows/rows-main.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
-export function _cmbx(funcName, params = []) {
-    if (cmbx[funcName]) {
-        return executeMethod(funcName, cmbx, 'db-cmbx', 'elems-main', params);
-    }
-    _u('_dbCmbx', [funcName, [...params]]);
-}
 export function _panel(funcName, params = []) {
     return executeMethod(funcName, panel, 'panel', 'elems-main', params);
 }
@@ -95,8 +88,18 @@ export function exitSuccessMsg() {
     elemUtil.exitSuccessMsg(...arguments);
 }
 /* ============================== FIELDS ==================================== */
-export function buildFieldInput() {
-    return rows.buildFieldInput(...arguments);
+export function getFieldInput() {
+    return rows.getFieldInput(...arguments);
+}
+/* -------------------------- COMBOBOXES ------------------------------------ */
+export function initFormCombos() {
+    return rows.initFormCombos(...arguments);
+}
+export function resetFormCombobox() {
+    return rows.resetFormCombobox(...arguments);
+}
+export function buildMultiSelectElem() {
+    return rows.buildMultiSelectElem(...arguments);
 }
 /* -------------------- REQUIRED FIELDS ------------------------------------- */
 export function ifAllRequiredFieldsFilled() {
@@ -106,11 +109,11 @@ export function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
     return rows.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl);
 }
 /*---------------------- FILL FORM-DATA --------------------------------------*/
-export function getCurrentFormFieldVals(fLvl) {
-    return rows.getCurrentFormFieldVals(fLvl);
+export function getCurrentFormFieldVals() {
+    return rows.getCurrentFormFieldVals(...arguments);
 }
-export function fillComplexFormFields(fLvl) {
-    return rows.fillComplexFormFields(fLvl);
+export function fillComplexFormFields() {
+    return rows.fillComplexFormFields(...arguments);
 }
 export function ifFieldIsDisplayed(field, fLvl) {
     return !!_state('getFormFieldData', [fLvl, field]);

@@ -5,7 +5,7 @@
  * Exports:
  *     initWysiwyg
  */
-import { sendAjaxQuery } from '~util';
+import { _u } from '~util';
 
 export default function initWysiwyg(role) {
     requireStyles();
@@ -67,7 +67,7 @@ function addButtons() {
                                 var blkId = trumbowyg.o.plugins.save.id;
                                 var data = { content: $('#' + blkId ).trumbowyg('html')};    //console.log("blkId = ", blkId)
                                 var url = 'admin/contentblock/' + blkId + '/update';
-                                sendAjaxQuery(data, url, wysiwygSubmitSuccess);
+                                _u('sendAjaxQuery', [data, url, wysiwygSubmitSuccess]);
                             }
                         };
                         trumbowyg.addBtnDef('save', btnDef);

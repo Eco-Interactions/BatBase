@@ -13,7 +13,8 @@
  *     UTILITY
  *
  */
-import { _map, _table, _u } from '~db';
+import { _cmbx } from '~util';
+import { _map, _table } from '~db';
 import * as pM from './panels/panels-main.js';
 import * as bttns from './feature-buttons.js';
 import * as rowToggle from './table-row-toggle.js';
@@ -81,9 +82,9 @@ export function init() {
     initDatabaseFocusAndViewCombos();
 }
 function initDatabaseFocusAndViewCombos() {  console.log('initDatabaseFocusAndViewCombos')
-    _u('initCombobox', [{ name: 'Focus', onChange: buildTable }, true]);
-    _u('initCombobox', [{ name: 'View',  onChange: Function.prototype }, true]);
-    // _u('initComboboxes', [{'Focus': buildTable, 'View': Function.prototype}]);
+    _cmbx('initCombobox', [{ name: 'Focus', onChange: buildTable }, true]);
+    _cmbx('initCombobox', [{ name: 'View',  onChange: Function.prototype }, true]);
+    // _cmbx('initComboboxes', [{'Focus': buildTable, 'View': Function.prototype}]);
 }
 function buildTable() {
     _table('buildTable')
@@ -98,8 +99,8 @@ export function onDataDownloadCompleteEnableUiFeatures() {
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 export function selectInitialSearchFocus(f) {                       /*dbug-log*///console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
-    _u('replaceSelOpts', ['Focus', getFocusOpts()]);
-    _u('setSelVal', ['Focus', focus, 'silent']);
+    _cmbx('replaceSelOpts', ['Focus', getFocusOpts()]);
+    _cmbx('setSelVal', ['Focus', focus, 'silent']);
 }
 function getFocusOpts() {
     return [
@@ -156,7 +157,7 @@ function showRcrdsOnMap() {
 }
 function returnRcrdsToTable() {                                     /*dbug-log*///console.log('       +--returnRcrdsToTable');
     updateUiForTableView();
-    if (_u('getSelVal', ['View']) === 'map') { _u('setSelVal', ['View', 'tree']); }
+    if (_cmbx('getSelVal', ['View']) === 'map') { _cmbx('setSelVal', ['View', 'tree']); }
 }
 /* ==================== UTILITY ============================================= */
 export function enableTableButtonsIfDataLoaded() {

@@ -8,12 +8,11 @@
  *     showAlert
  *
  * TOC
- *     INIT SENTRY
  *     CREATE SENTRY EVENT
  *     ALERT USER
  */
-import { _table, _u } from '~db';
-
+import { _u } from '~util';
+import { _table, } from '~db';
 /* =================== CREATE SENTRY EVENT ================================== */
 /** Sends Error object to Sentry, issue tracker. */
 export function reportErr(e) {

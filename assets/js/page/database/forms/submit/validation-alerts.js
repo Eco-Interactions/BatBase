@@ -34,9 +34,8 @@
  *     CLEAR ALERT
  *         DEFAULT-HANDLER
  */
-import { _db } from '~util';
-import { _u } from '~db';
-import { _state, _elems, _form, getNextFormLevel } from '../forms-main.js';
+import { _cmbx, _db, _el } from '~util';
+import { _state, _elems, _form, getNextFormLevel } from '~form';
 let fS;
 /* ====================== FORM-SUBMIT ALERT ================================= */
 /**
@@ -62,7 +61,7 @@ function isDuplicateAuthor(errTxt) {
 }
 /* ===================== DATA-STORAGE ALERT ================================= */
 export function errUpdatingData(errTag) {                           /*perm-log*/console.log('           !!!errUpdatingData [%s]', errTag);
-    const cntnr = _u('getElem', ['div', { class: 'flex-col', id:'data_alert' }]);
+    const cntnr = _el('getElem', ['div', { class: 'flex-col', id:'data_alert' }]);
     $(cntnr).append([buildAlertMsg(), buildResetDataButton()]);
     $('#top-hdr').after(cntnr);
     $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
@@ -73,9 +72,9 @@ function buildAlertMsg() {
         <br>All stored data will be redownloaded.</span>`;
 }
 function buildResetDataButton() {
-    const confirm = _u('getElem', ['span', { class: 'flex-row',
+    const confirm = _el('getElem', ['span', { class: 'flex-row',
             'text': `Please click "OK" to continue.` }]);
-    const bttn = _u('getElem', ['input', { type: 'button', value: 'OK', class: 'exit-bttn' }]);
+    const bttn = _el('getElem', ['input', { type: 'button', value: 'OK', class: 'exit-bttn' }]);
     $(bttn).click(reloadAndRedownloadData);
     $(confirm).append(bttn);
     return confirm;
@@ -96,7 +95,7 @@ export function openSubFormAlert(field, fLvl, skipClear) {          /*dbug-log*/
 export function formInitAlert(field, tag, fLvl, skipClear) {        /*perm-log*/console.log("       --[%s]formInitAlert [%s][%s]", fLvl, field, tag);
     showFormValAlert(field, tag, fLvl);
     if (skipClear) { return; }
-    window.setTimeout(function() {_u('resetCombobox', [field])}, 10);
+    window.setTimeout(function() {_cmbx('resetCombobox', [field])}, 10);
 }
 /* =================== SHOW FORM-VALIDATION ALERT =========================== */
 /**
@@ -225,11 +224,11 @@ function handleIsGenusPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return "<span>Genus' with species children must remain at genus.</span>";
 }
 function clrIsGenusPrnt(elem, fLvl, e) {
-    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
+    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusNameAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    const genus = _u('getSelTxt', ['Genus']);
+    const genus = _cmbx('getSelTxt', ['Genus']);
     $('#DisplayName_row input').change(clearAlert.bind(null, elem, fLvl));
     return `<span>Species must begin with the Genus name "${genus}".</span>`;
 }
@@ -239,7 +238,7 @@ function handleNeedsGenusParentAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return '<span>Please select a genus parent for the species taxon.</span>';
 }
 function clrNeedsGenusPrntAlert(elem, fLvl, e) {
-    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
+    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
 }
 /* -------------- PARENT MUST BE HIGHER RANK -------------------------------- */
 function handleNeedsHigherRankPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
@@ -253,7 +252,7 @@ function handleNeedsHigherRankAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 /** Resets the taxon's rank. */
 export function clrNeedsHigherRank(elem, fLvl, e, taxonRank) {
     const txnRank = taxonRank || $('#sel-Rank').data('rank');
-    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
+    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
     clearAlert($('#Taxon_alert')[0], fLvl);
     enableChngPrntBtttn();
 }

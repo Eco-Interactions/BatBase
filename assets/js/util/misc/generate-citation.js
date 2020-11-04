@@ -5,7 +5,7 @@
  * Export
  *     generateCitationText
  */
-import { _alert, stripString, snashot, lcfirst } from '~util';
+import { _alert, _u } from '~util';
 /**
  * All data needed to generate the citation.
  * {obj} cit            Citation detail-entity data
@@ -46,9 +46,9 @@ function getTypeCitationGenerator(type) {
  */
 function  buildArticleCite(type) {
     const athrs = getCitAuthors();
-    const year = stripString(d.citSrc.year);
-    const title = stripString(d.cit.title);
-    const pub = stripString(d.pubSrc.displayName);
+    const year = _u('stripString', [d.citSrc.year]);
+    const title = _u('stripString', [d.cit.title]);
+    const pub = _u('stripString', [d.pubSrc.displayName]);
     const vip = getCiteVolumeIssueAndPages();
     let fullText = [athrs, year, title].map(addPunc).join(' ')+' ';
     fullText += vip ? (pub+' '+vip) : pub;
@@ -96,7 +96,7 @@ function buildChapterCite(type) {
 function buildDissertThesisCite(type) {
     const athrs = getPubSrcAuthors();
     const year = d.pubSrc.year;
-    const title = stripString(d.cit.title);
+    const title = _u('stripString', [d.cit.title]);
     const degree = type === "Master's Thesis" ? 'M.S. Thesis' : type;
     const publ = buildPublString(d.pubSrc) || ifWarning('[NEEDS PUBLISHER DATA]');
     return [athrs, year, title, degree, publ].join('. ')+'.';
@@ -109,8 +109,8 @@ function buildDissertThesisCite(type) {
  */
 function buildOtherCite(type) {
     const athrs = getCitAuthors() || getPubSrcAuthors();
-    const year = d.citSrc.year ? stripString(d.citSrc.year) : d.pubSrc.year;
-    const title = stripString(d.cit.title);
+    const year = d.citSrc.year ? _u('stripString', [d.citSrc.year]) : d.pubSrc.year;
+    const title = _u('stripString', [d.cit.title]);
     const vip = getCiteVolumeIssueAndPages();
     const publ = buildPublString(d.pubSrc);
     return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
@@ -118,7 +118,7 @@ function buildOtherCite(type) {
     /** ---------- citation full text helpers ----------------------- */
 function getCitBookPages(argument) {
     if (!d.cit.publicationPages) { return false; }
-    return 'pp. ' + stripString(d.cit.publicationPage);
+    return 'pp. ' + _u('stripString', [d.cit.publicationPages]);
 }
 function getCitAuthors() {
     const auths = d.citSrc.authors;                               /*dbug-log*///console.log('auths = %O', auths);
@@ -142,8 +142,8 @@ function getPubEditors() {
  * they are added in parentheses here.].
  */
 function getCitTitlesAndEditors() {
-    const chap = d.type === 'Chapter' ? stripString(d.cit.title) : false;
-    const pub = stripString(d.pubSrc.displayName);
+    const chap = d.type === 'Chapter' ? _u('stripString', [d.cit.title]) : false;
+    const pub = _u('stripString', [d.pubSrc.displayName]);
     const titles = chap ? (chap + '. In: ' + pub) : pub;
     const eds = getPubEditors();
     return eds ? (titles + ' ' + eds) : titles;
@@ -188,19 +188,19 @@ function buildPublString(pubSrc) {
  * with '&'. If the names are of editors, they are returned [Initials. Last].
  * If >= 4 authors, returns first author [Last, Initials.] + ', et al';
  */
-function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*/console.log('getFormattedAuthorNames. auths = %O, eds [%s]', snapshot(auths), eds);
+function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*/console.log('getFormattedAuthorNames. auths = %O, eds [%s]', _u('snapshot', [auths]), eds);
     if (Object.keys(auths).length > 3) { return getFirstAuthorEtAl(auths[1], eds); }
     let athrs = '';
     for (let ord in auths) {
         if (auths[ord] === 'create') { continue; }
         let name = getFormattedName(ord, auths[ord], eds);
         if (!name) {
-            _alert('alertIssue', ['citeAuth', {auths: snapshot(auths), eds: eds}]);
+            _alert('alertIssue', ['citeAuth', {auths: _u('snapshot', auths), eds: eds}]);
             continue; //Temp until bug is fixed
         }
         athrs += getAuthorName(name, ord, Object.keys(auths).length);
     }
-    return stripString(athrs);
+    return _u('stripString', [athrs]);
 }
 /* ------------------- FIRST AUTHOR ET ALL ---------------------------------- */
 function getFirstAuthorEtAl(authId, eds) {
@@ -210,7 +210,7 @@ function getFirstAuthorEtAl(authId, eds) {
 /* ----------------------- FORMAT NAME -------------------------------------- */
 function getFormattedName(i, srcId, eds) {                          /*dbug-log*///console.log('getFormattedName cnt[%s] id[%s]', i, srcId);
     const src = d.rcrds.source[srcId];
-    const athrId = src[lcfirst(src.sourceType.displayName)];
+    const athrId = src[_u('lcfirst', [src.sourceType.displayName])];
     const athr = d.rcrds.author[athrId];
     return getCitAuthName(i, athr, eds);
 }

@@ -10,8 +10,9 @@
  *      UI
  *      FILTER
  */
+import { _cmbx, el, _u } from '~util';
+import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../filter-main.js';
-import { _table, _ui, _u } from '~db';
 
 const tState = _table.bind(null, 'tableState');
  /* ========================= UI ============================================ */
@@ -26,7 +27,7 @@ export function loadLocFilters(tblState) {                          /*Perm-log*/
 function updateLocSelOptions(tblState) {
     const opts = buildLocSelectOpts(tblState);
     Object.keys(opts).forEach(locType => {
-        _u('replaceSelOpts', [locType, opts[locType], null, locType]);
+        _cmbx('replaceSelOpts', [locType, opts[locType], null, locType]);
     });
     setSelectedLocVals(tblState.selectedOpts);
 }
@@ -118,7 +119,7 @@ function buildLocSelectOpts(tblState, data) {
     /** Alphabetizes the options. */
     function sortLocOpts() {
         for (let type in opts) {
-            opts[type] = _u('alphabetizeOpts', [opts[type]]);
+            opts[type] = _cmbx('alphabetizeOpts', [opts[type]]);
         }
     }
     function addAllOption() {
@@ -135,8 +136,8 @@ function buildLocSelectOpts(tblState, data) {
     }
 }
 function initLocCombos() {
-    _u('initCombobox', [{ name: 'Region',  onChange: applyLocFilter }, true]);
-    _u('initCombobox', [{ name: 'Country', onChange: applyLocFilter }, true]);
+    _cmbx('initCombobox', [{ name: 'Region',  onChange: applyLocFilter }, true]);
+    _cmbx('initCombobox', [{ name: 'Country', onChange: applyLocFilter }, true]);
 }
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {
@@ -148,8 +149,8 @@ function buildLocSelects(locOptsObj) {
     return selElems;
 
     function buildLocSel(selName, opts) {
-        const lbl = _u('getElem', ['label', { class: "sel-cntnr flex-row" }]);
-        const span = _u('getElem', ['span', { text: selName + ': ', class: "opts-span" }]);
+        const lbl = _el('getElem', ['label', { class: "sel-cntnr flex-row" }]);
+        const span = _el('getElem', ['span', { text: selName + ': ', class: "opts-span" }]);
         const sel = fM.newSel(opts, 'opts-box', 'sel-' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
@@ -158,7 +159,7 @@ function buildLocSelects(locOptsObj) {
 }
 function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
-        _u('setSelVal', [locType, selected[locType], 'silent']);
+        _cmbx('setSelVal', [locType, selected[locType], 'silent']);
     });
 }
 /* =========================== FILTER ======================================= */
@@ -209,7 +210,7 @@ function getSelectedVals(val, type) {                                           
     return selected;
 
     function selectRegion(val) {
-        const loc = _u('getDetachedRcrd', [val, locRcrds]);
+        const loc = getDetachedRcrd(val, locRcrds);
         selected['Region'] = loc.region.id;
     }
 }

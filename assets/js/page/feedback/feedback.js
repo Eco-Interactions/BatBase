@@ -19,7 +19,7 @@
  *             SENTRY ALERT
  *         CLOSE POPUP
  */
-import { _alert, getElem, getFieldRow, getFormFooter, sendAjaxQuery } from '~util';
+import { _alert, _el, _u } from '~util';
 /* ======================= MWNU ITEM ======================================== */
 /** Creates the "Leave Feedback" menu option for all registered users. */
 export default function initFeedbackUi() {
@@ -69,7 +69,7 @@ function getFieldConfg(name, input, min, max) {
     };
 }
 function getFeedbackFieldRow(confg) {
-    const row = getFieldRow(confg);
+    const row = _el('getFieldRow', [confg]);
     moveAlertsToRightOfLabel(row, confg);
     return row;
 }
@@ -88,7 +88,7 @@ function getTopicField() {
 }
 function getTopicInput() {
     const attrs = { type: 'text',  placeholder: 'Breif summary of your feedback' };
-    return getElem('input', attrs);
+    return _u('getElem', ['input', attrs]);
 }
 /* ----------------------- FEEDBACK-TEXTAREA -------------------------------- */
 function getContentField() {
@@ -97,7 +97,7 @@ function getContentField() {
 }
 function getContentTextarea() {
     const attrs = { placeholder: 'Have an idea? Find a bug? Love a feature? Let us know!' };
-    return getElem('textarea', attrs);
+    return _u('getElem', ['textarea', attrs]);
 }
 /* ====================== FEEDBACK FOOTER =================================== */
 function getFeedbackFooter() {
@@ -107,7 +107,7 @@ function getFeedbackFooter() {
         submitText: 'Submit Feedback',
         onCancel: closePopup
     };
-    return getFormFooter(confg);
+    return _el('getFormFooter', [confg]);
 }
 /* ----------------------------- TOGGLE SUBMIT ------------------------------ */
 function toggleFeedbackSubmitButton(enable = true) {
@@ -122,7 +122,7 @@ function postFeedback() {
         topic: $('#topic_row input').val(),
         feedback: $('#feedback_row textarea').val()
     };
-    closePopup() && sendAjaxQuery(data, 'feedback/post');
+    closePopup() && _u('endAjaxQuery', [data, 'feedback/post']);
     _alert('alertIssue', ['feedback', data]);
 }
 /* =========================== CLOSE POPUP ================================== */

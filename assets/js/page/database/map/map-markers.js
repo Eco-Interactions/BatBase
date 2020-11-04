@@ -1,7 +1,8 @@
 /*
  *
  */
-import { _forms, _table, _u } from '~db';
+import { _el } from '~util';
+import { _forms, _table } from '~db';
 import 'leaflet.markercluster';
 /* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
 let data;
@@ -465,7 +466,7 @@ function getSelectLocationBttn(loc, editing) {
 function buildSelectLocBttn(editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location';
     const attr = {type: 'button', class:'ag-fresh popup-bttn', value: text};
-    return _u('getElem', ['input', attr]);
+    return _el('getElem', ['input', attr]);
 }
 function addSelectLocClickEvent(bttn, editing, locId) {
     const onClick = editing ? Function.prototype : _forms.bind(null, 'selectIntLoc');
@@ -627,7 +628,7 @@ function loadLocInTable(loc) {
 }
 function buildLoadInTableBttn() {
     const attr = {type: 'button', class:'ag-fresh', value: 'Show Interactions In Data-Table'}
-    return _u('getElem', ['input', attr]);
+    return _el('getElem', ['input', attr]);
 }
 /* ============ Location Details Popup ================== */
 /* Used for Countries displayed in forms. */
@@ -639,7 +640,7 @@ function buldCntryDetailsHtml(loc) {
         ${loc.displayName}</b></div>`;
 }
 function getEditLocHtml(loc, editing) {
-    const div = _u('getElem', ['div', { class: 'flex-col' }]);
+    const div = _el('getElem', ['div', { class: 'flex-col' }]);
     const name = `<div style="font-size:1.1em; margin-bottom: .5em;"><b>
         The location being edited.</b></div>`;
     $(div).append(name);
@@ -647,7 +648,7 @@ function getEditLocHtml(loc, editing) {
 }
 /* Used for locations displayed in forms. */
 function getLocDetailsHtml(loc, editing, htmlFunc) {
-    const div = _u('getElem', ['div', { class: 'flex-col' }]);
+    const div = _el('getElem', ['div', { class: 'flex-col' }]);
     const html = htmlFunc ? htmlFunc(loc) : buildDetailsHtml(loc);
     const bttn = getSelectLocationBttn(loc, editing);
     $(div).append([html, bttn]);
@@ -685,8 +686,8 @@ function getNoGpsHdr(cnt) {
         </div><span>Hover over a location name to see the location data.</span><br>`;
 }
 function buildLocDetailHtml(loc, editing) {
-    const cntnr = _u('getElem', ['div', {class: 'info-tooltip'}]);
-    const locDetails = _u('getElem', ['div', {class: 'tip'}]);
+    const cntnr = _el('getElem', ['div', {class: 'info-tooltip'}]);
+    const locDetails = _el('getElem', ['div', {class: 'tip'}]);
     const bttn = getSelectLocationBttn(loc, editing);
     $(locDetails).append([buildLocDetails(loc), '<br>', bttn]);
     $(cntnr).append([loc.displayName, locDetails]);
@@ -703,7 +704,7 @@ function buildLocDetails(loc) {
 /* ============ New Location Popup ============== */
 /** Used when displaying a geocoded (new or edit) location on the form.  */
 function getGeocodedLocHtml(loc) {                                              //console.log('buildingGeocodedLocationPopup. loc = %O ', loc);
-    const cntnr = _u('getElem', ['div', {class: 'flex-col form-loc-popup'}]);
+    const cntnr = _el('getElem', ['div', {class: 'flex-col form-loc-popup'}]);
     const elems = getLocDataHtml(loc);
     const bttn = loc ? getFillCoordsBttn(loc.lat, loc.lng) : null;
     $(cntnr).append([...elems, bttn].filter(e=>e));
@@ -723,7 +724,7 @@ function getNameHtml(loc) {
 /** Click event added in location-form. */
 function getFillCoordsBttn(lat, lng) {
     const attr = {type: 'button', id: 'fill-coords', class:'ag-fresh', value: 'Autofill Coordinates'};
-    const bttn = _u('getElem', ['input', attr]);
+    const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(_forms.bind(null, 'autofillCoordinateFields', [lat, lng]));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;

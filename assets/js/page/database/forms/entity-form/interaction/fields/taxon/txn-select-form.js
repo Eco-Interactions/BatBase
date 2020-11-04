@@ -20,7 +20,7 @@
  *     SELECT CURRENT ROLE-TAXON OR FOCUS COMBO
  *     RESET SELECT-FORM TO INIT STATE
  */
-import { _u } from '~db';
+import { _cmbx, _u } from '~util';
 import { _state, _elems } from '~form';
 import * as iForm from '../../int-form-main.js';
 
@@ -53,7 +53,7 @@ function finishTaxonSelectBuild(role) {
 }
 export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*///console.log('selectPrevTaxonAndResetRoleField [%s]', role)
     selectInitTaxonOrFocusFirstCombo(role);
-    _u('replaceSelOpts', [role, []]);
+    _cmbx('replaceSelOpts', [role, []]);
     $('#sel-'+role).data('loading', false);
     return Promise.resolve();
 }
@@ -64,7 +64,7 @@ function addSelectRootTaxonBttn() {
 }
 function buildSelectUnspecifedBttn() {
     const gTaxon = _state('getTaxonProp', ['groupTaxon']);
-    const bttn = _u('getElem', ['input', getUnspecifiedBttnAttrs()]);
+    const bttn = _el('getElem', ['input', getUnspecifiedBttnAttrs()]);
     $(bttn).click(iForm.selectRoleTaxon.bind(null, null, gTaxon));
     return bttn;
 }
@@ -101,8 +101,8 @@ function exitTaxonSelectForm(role) {
 }
 function resetTaxonCombobox(role, prevTaxonId) {
     const opt = new Option(getTaxonym(prevTaxonId), prevTaxonId);
-    _u('replaceSelOpts', [role, opt]);
-    _u('setSelVal', [role, prevTaxonId]);
+    _cmbx('replaceSelOpts', [role, opt]);
+    _cmbx('setSelVal', [role, prevTaxonId]);
 }
 function getTaxonym(id) {
     return _state('getRcrd', ['taxon', id]).displayName;
@@ -116,14 +116,14 @@ function getTaxonym(id) {
 function selectInitTaxonOrFocusFirstCombo(role) {
     const selId = getPrevSelId(role);
     if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { _u('focusCombobox', ['Species']); }
+    } else { _cmbx('focusCombobox', ['Species']); }
 }
 function getPrevSelId(role) {
     return $('#sel-'+role).val() || $('#sel-'+role).data('reset') ?
         $('#sel-'+role).data('selTaxon') : null;
 }
 function focusFirstRankCombobox(lcRole) {
-    _u('focusFirstCombobox', ['#'+lcRole+'_Rows']);
+    _cmbx('focusFirstCombobox', ['#'+lcRole+'_Rows']);
 }
 function appendTxnFormAndInitCombos(role, form) {
     const lcRole = _u('lcfirst', [role]);
@@ -151,7 +151,7 @@ function resetPrevTaxonSelection(id, role) {
 function selectPrevTaxon(taxon, role) {
     addTaxonOptToTaxonMemory(taxon);
     if (ifTaxonInDifferentGroup(taxon.group)) { return selectTaxonGroup(taxon); }
-    _u('setSelVal', [taxon.rank.displayName, taxon.id]);
+    _cmbx('setSelVal', [taxon.rank.displayName, taxon.id]);
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
@@ -161,7 +161,7 @@ function ifTaxonInDifferentGroup(group) {
     return group.displayName !== 'Bat' && $('#sel-Group').val() != group.id;
 }
 function selectTaxonGroup(taxon) {
-    _u('setSelVal', ['Group', taxon.group.id]);
+    _cmbx('setSelVal', ['Group', taxon.group.id]);
 }
 function deleteResetFlag(role) {
     $('#sel-'+role).removeData('reset');

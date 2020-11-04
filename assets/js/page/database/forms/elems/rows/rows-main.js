@@ -7,18 +7,28 @@
  *     getFormFieldRows
  *     setCoreRowStyles
  */
-import { _u } from '~db';
+import { _el, _u } from '~util';
 import { _elems } from '~form';
 import * as fields from './fields/form-fields-main.js';
 import buildFormRow from './form-row.js';
 import getRowConfg from './row-confg.js';
 
 /* ============================== FIELDS ==================================== */
-export function buildFieldInput() {
-    return fields.buildFieldInput(...arguments);
+export function getFieldInput() {
+    return fields.getFieldInput(...arguments);
 }
 export function toggleFormFields() {
     return fields.toggleFormFields(...arguments);
+}
+/* -------------------------- COMBOBOXES ------------------------------------ */
+export function initFormCombos() {
+    return fields.initFormCombos(...arguments);
+}
+export function resetFormCombobox() {
+    return fields.resetFormCombobox(...arguments);
+}
+export function buildMultiSelectElem() {
+    return fields.buildMultiSelectElem(...arguments);
 }
 /* -------------------- REQUIRED FIELDS ------------------------------------- */
 export function ifAllRequiredFieldsFilled() {
@@ -48,7 +58,7 @@ export function buildFormRows(entity, fVals, fLvl, params) {        /*dbug-log*/
         let id = entity+'_Rows';
         if ($('#'+id).length) { id = id+'_'+fLvl;  }
         const attr = { id: id, class: 'flex-row flex-wrap'};
-        const rowCntnr = _u('getElem', ['div', attr]);
+        const rowCntnr = _el('getElem', ['div', attr]);
         $(rowCntnr).append(rows);
         return rowCntnr;
     }
@@ -68,7 +78,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                 /*dbug-log*/
     }));
 
     function buildMultiFieldRow(fields) {                           /*dbug-log*///console.log('buildMultiFieldRow = %O', fields);
-        const cntnr = _u('getElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
+        const cntnr = _el('getElem', ['div', { class: 'full-row flex-row cntnr-row' }]);
         const rows = fields.map(buildSingleFieldRow);
         return Promise.all(rows).then(appendRows).then(() => cntnr);
 
@@ -85,7 +95,7 @@ function buildRows(fieldObj, entity, fVals, fLvl) {                 /*dbug-log*/
  */
 function buildRowField(field, fieldsObj, entity, fVals, fLvl) {     /*dbug-log*///console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
     const fieldData = getFieldData();
-    return _elems('buildFieldInput', [fieldData, entity, fLvl])
+    return _elems('getFieldInput', [fieldData, entity, fLvl])
         .then(buildField);
 
     function getFieldData() {

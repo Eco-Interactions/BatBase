@@ -14,8 +14,8 @@
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
-import { _db } from '~util';
-import { _table, _ui, _u } from '~db';
+import { _cmbx, _el, _db, _u } from '~util';
+import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../../filter-main.js';
 import { initObjectGroupCombobox } from './obj-group-filter.js';
 import { initSubGroupFilter } from './sub-group-filter.js';
@@ -84,7 +84,7 @@ function buildTaxonSelectOpts(tblState) {                                       
     }
     function fillInRankOpts(rank) {                                               //console.log("fillInEmptyAncestorRanks. rank = ", rank);
         if (rank in tblState.selectedOpts) {
-            const taxon = _u('getDetachedRcrd', [tblState.selectedOpts[rank], tblState.rcrdsById]);
+            const taxon = getDetachedRcrd(tblState.selectedOpts[rank], tblState.rcrdsById);
             optsObj[rank] = [ new Option('- All -', 'all'), new Option(taxon.id, taxon.name)];
         } else { optsObj[rank] = []; }
     }
@@ -105,8 +105,8 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {                     //c
     function buildTaxonSelects(opts, ranks) {
         const elems = [];
         ranks.forEach(function(rank) {                                        //console.log('----- building select box for rank = [%s]', rank);
-            const lbl = _u('getElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
-            const span = _u('getElem', ['span', { text: rank + ': ' }]);
+            const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
+            const span = _el('getElem', ['span', { text: rank + ': ' }]);
             const sel = fM.newSel(opts[rank], 'opts-box taxonSel', 'sel-' + rank, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);
@@ -119,11 +119,11 @@ function initRankComboboxes(groupRanks) {
     groupRanks.forEach(initRankCombo);
 }
 function initRankCombo(rank) {
-    _u('initCombobox', [{ name: rank, onChange: applyTxnFilter }, true]);
+    _cmbx('initCombobox', [{ name: rank, onChange: applyTxnFilter }, true]);
 }
 function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {                  //console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
     ranks.forEach(rank => {
-        _u('replaceSelOpts', [rank, rankOptsObj[rank], null, rank]);
+        _cmbx('replaceSelOpts', [rank, rankOptsObj[rank], null, rank]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
@@ -131,7 +131,7 @@ function setSelectedTaxonVals(selected, tblState) {                             
     if (!selected || !Object.keys(selected).length) {return;}
     tblState.allgroupRanks.forEach(rank => {
         if (!selected[rank]) { return; }                                         //console.log("selecting [%s] = ", rank, selected[rank])
-        _u('setSelVal', [rank, selected[rank], 'silent']);
+        _cmbx('setSelVal', [rank, selected[rank], 'silent']);
     });
 }
 /* ====================== FILTER ============================================ */
@@ -172,7 +172,7 @@ function clearSelection(elem) {
  * When the tree-text filter is being applied, returns the most specific taxon selected.
  */
 function getTaxonTreeRootRcrd(val, rcrds, that) {
-    return isNaN(parseInt(val)) ? getSelTxn() : _u('getDetachedRcrd', [val, rcrds]);
+    return isNaN(parseInt(val)) ? getSelTxn() : getDetachedRcrd(val, rcrds);
 
     function getSelTxn() {
         return that.hasOwnProperty('$input') ? getParentTxn() : getSelectedTxn();
@@ -180,13 +180,13 @@ function getTaxonTreeRootRcrd(val, rcrds, that) {
     function getParentTxn() {
         const selected = tState().get('selectedOpts');
         const rank = that.$input[0].id.split('sel-')[1];
-        const prntId = _u('getDetachedRcrd', [selected[rank], rcrds]).parent;
-        return _u('getDetachedRcrd', [prntId, rcrds])
+        const prntId = getDetachedRcrd(selected[rank], rcrds).parent;
+        return getDetachedRcrd(prntId, rcrds);
     }
     function getSelectedTxn() {
         const selected = tState().get('selectedOpts');
-        const id = selected[getSelectedTaxonRank(selected)] || _u('getSelVal', ['View']);
-        return _u('getDetachedRcrd', [id, rcrds]);
+        const id = selected[getSelectedTaxonRank(selected)] || _cmbx('getSelVal', ['View']);
+        return getDetachedRcrd(id, rcrds);
     }
 }
 function getSelectedTaxonRank(selected) {
@@ -203,7 +203,7 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
     function selectAncestorTaxa(taxon) {
         if (taxon.isRoot) { return; }
         selected[taxon.rank.displayName] = taxon.id;
-        selectAncestorTaxa(_u('getDetachedRcrd', [taxon.parent, taxonRcrds]));
+        selectAncestorTaxa(getDetachedRcrd(taxon.parent, taxonRcrds));
     }
 }
 /* --------------- UPDATE COMBOBOXES AFTER FILTER CHANGE -------------------- */

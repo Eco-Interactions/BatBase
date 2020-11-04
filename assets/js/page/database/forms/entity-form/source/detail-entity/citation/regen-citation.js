@@ -10,8 +10,7 @@
  *     GET ALL DATA FOR CITATION
  *     UPDATE FIELD
  */
-import { generateCitationText } from '~util';
-import { _u } from '~db';
+import { _cmbx, generateCitationText } from '~util';
 import { _state, _elems, getNextFormLevel, getValidatedFormData } from '~form';
 
 export function buildCitTextAndUpdateField(fLvl) {
@@ -56,7 +55,7 @@ function getDataForCitation(fData, fLvl) {                          /*dbug-log*/
 }
 function buildCitData(fData) {
     return {
-        citationType: { displayName: _u('getSelTxt', ['CitationType']) },
+        citationType: { displayName: _cmbx('getSelTxt', ['CitationType']) },
         title: fData.title ? fData.title : fData.chapterTitle,
         publicationPages: fData.pages,
         publicationIssue: fData.issue,

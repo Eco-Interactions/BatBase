@@ -19,8 +19,8 @@
  *             SUBJECT|OBJECT
  *         HELPERS
  */
-import { _u } from '~db';
-import { _state, _elems, _cmbx, _form, _val } from '~form';
+import { _cmbx, _u } from '~util';
+import { _state, _elems, _form, _val } from '~form';
 import * as build from './build/int-build-main.js';
 import * as fields from './fields/int-fields-main.js';
 /** ======================= BUILD FORM ====================================== */
@@ -36,7 +36,7 @@ export function initFormCombos(entity) {
 }
 function initFormFieldCombos() {
     const events = fields.getIntFormFieldComboEvents();
-    _cmbx('initFormCombos', ['interaction', 'top', events]);
+    _elems('initFormCombos', ['interaction', 'top', events]);
 }
 /** ====================== FORM-FIELD HELPERS =============================== */
 /*------------------ CITATION ------------------------------------------------*/
@@ -85,12 +85,10 @@ export function ifFormAlreadyOpenAtLevel(fLvl) {
 }
 export function handleOpenSubFormAlert(entity, fLvl) {
     return openSubFormAlert(entity, fLvl)
-//REMOVE?    // .catch(() => {});
 }
 function openSubFormAlert(ent, fLvl) {
     const entity = ent === 'citation' ? 'citationTitle' : ent;
     _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
-//REMOVE?    // return Promise.reject();
 }
 /** ====================== FORM-FIELD HELPERS =============================== */
 export function initTypeField() {
@@ -121,12 +119,12 @@ export function addRoleTaxonFocusListeners() {
     return fields.addRoleTaxonFocusListeners(...arguments);
 }
 export function enableRoleTaxonFieldCombos() {
-    _u('enableCombobox', ['Subject']);
-    _u('enableCombobox', ['Object']);
+    _cmbx('enableCombobox', ['Subject']);
+    _cmbx('enableCombobox', ['Object']);
 }
 function enableTaxonRanks(enable = true) {
     $.each($('#sub-form select'), (i, sel) => {
-        _u('enableCombobox', ['#'+sel.id, enable])
+        _cmbx('enableCombobox', ['#'+sel.id, enable])
     });
 }
 /* ========================== HELPERS ======================================= */

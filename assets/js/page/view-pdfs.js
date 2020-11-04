@@ -7,7 +7,7 @@
  *        LOAD AND STYLE POPUP
  *        UPDATE LAST VIEWED BY
  */
-import { _modal, sendAjaxQuery } from '~util';
+import { _modal, _u } from '~util';
 
 if (window.location.pathname.includes('pdfs')) {
     addPdfEvents();
@@ -29,7 +29,7 @@ function handleDeletePdf() {
     _modal('showSaveModal', [confg]);
 }
 function deletePdf(id) {
-    sendAjaxQuery(null, 'pub/'+id+'/delete', () => location.reload());
+    _u('sendAjaxQuery', [null, 'pub/'+id+'/delete', () => location.reload()]);
 }
 /* ============================ OPEN ======================================== */
 /**

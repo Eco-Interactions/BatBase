@@ -11,8 +11,7 @@
  *     LOAD TYPE-FIELDS
  *     UPDATE UI FOR CITATION-TYPE
  */
-import { _db } from '~util';
-import { _u } from '~db';
+import { _db, _cmbx } from '~util';
 import {  _state, _elems, getSubFormLvl } from '~form';
 import * as sForm from '../../src-form-main.js';
 
@@ -27,7 +26,7 @@ function setCitType(citTypes) {
     const rcrds = _state('getFormProp', ['sub', 'rcrds']);
     const pubType = rcrds.pub.publicationType.displayName;
     const defaultType = getDefaultCitType(pubType, rcrds);
-    _u('setSelVal', ['CitationType', citTypes[defaultType], 'silent']);
+    _cmbx('setSelVal', ['CitationType', citTypes[defaultType], 'silent']);
     return loadCitTypeFields(citTypes[defaultType], defaultType);
 }
 function getDefaultCitType(pubType, rcrds) {
@@ -122,7 +121,7 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
         if ($('#sel-cntnr-Authors')[0].children.length > 1) {
             $('#sel-cntnr-Authors')[0].lastChild.remove();
         }
-        _u('enableComboboxes', [$('#sel-cntnr-Authors select'), false]);
+        _cmbx('enableComboboxes', [$('#sel-cntnr-Authors select'), false]);
     }
     function disableTitleField() {
         $('#Title_row input').prop('disabled', true);

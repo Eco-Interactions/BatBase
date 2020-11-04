@@ -13,9 +13,8 @@
  *         TAXON
  *     FILL FIELD-DATA
  */
-import { _db } from '~util';
-import { _u } from '~db';
-import { _state, _elems, _confg, _form, _panel } from '../forms-main.js';
+import { _cmbx, _db, _u  } from '~util';
+import { _state, _elems, _confg, _form, _panel } from '~form';
 
 export function fillFormWithEntityData(entity, id) {
     const cEntity =  _confg('getCoreEntity', [entity]);
@@ -78,8 +77,8 @@ function addTaxon(field, prop, rcrd) {
 }
 function addSource(field, prop, rcrd) {
     const citSrc = _state('getRcrd', ['source', rcrd.source])
-    _u('setSelVal', ['Publication', citSrc.parent]);
-    _u('setSelVal', ['CitationTitle', rcrd.source]);
+    _cmbx('setSelVal', ['Publication', citSrc.parent]);
+    _cmbx('setSelVal', ['CitationTitle', rcrd.source]);
 }
 /* ------------------------- LOCATION --------------------------------------- */
 function fillLocData(entity, id, rcrd, dEntity) {
@@ -95,7 +94,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
         delete fields.Longitude;
         delete fields.Country;
         ['lat', 'long'].forEach(setCoordField);
-        _u('setSelVal', ['Country', rcrd.country.id, 'silent']);
+        _cmbx('setSelVal', ['Country', rcrd.country.id, 'silent']);
     }
     function setCoordField(prefix) {
         const value = rcrd[`${prefix}itude`];
@@ -155,7 +154,7 @@ function setTitleField(entity, srcRcrd) {
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) {
     if (!_elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }
-    _u('setSelVal', ['Publisher', srcRcrd.parent]);
+    _cmbx('setSelVal', ['Publisher', srcRcrd.parent]);
 }
 function setWebsiteField (srcRcrd) {
     $('#Website_row input').val(srcRcrd.linkUrl);
@@ -220,9 +219,9 @@ function setTextArea(field, prop, rcrd) {
 }
 function setSelect(field, prop, rcrd) {                             /*dbug-log*///console.log("setSelect [%s] [%s] rcrd = %O", field, prop, rcrd);
     const id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
-    _u('setSelVal', [field, id]);
+    _cmbx('setSelVal', [field, id]);
 }
 function setTagField(field, prop, rcrd) {                           /*dbug-log*///console.log("setTagField. rcrd = %O", rcrd)
     const tags = rcrd[prop] || rcrd.tags;
-    tags.forEach(tag => _u('setSelVal', [field, tag.id]));
+    tags.forEach(tag => _cmbx('setSelVal', [field, tag.id]));
 }

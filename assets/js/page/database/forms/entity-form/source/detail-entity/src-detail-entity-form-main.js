@@ -5,7 +5,7 @@
  *     AUTHOR
  *
  */
-import { _cmbx } from '../../../forms-main.js';
+import { _elems } from '~form';
 import * as author from './author-form.js';
 import * as publisher from './publisher-form.js';
 import * as citation from './citation/citation-form.js';
@@ -57,7 +57,7 @@ export function finishPubOrCitEditForm(entity) {
 export function initFormCombos(entity, fLvl) {
     const events = getEntityComboEvents(entity);                    /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
     if (!events) { return; }
-    _cmbx('initFormCombos', [entity, fLvl, events]);
+    _elems('initFormCombos', [entity, fLvl, events]);
 }
 function getEntityComboEvents(entity) {
     return  {

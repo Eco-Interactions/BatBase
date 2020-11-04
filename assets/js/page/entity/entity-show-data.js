@@ -16,10 +16,9 @@
  *    ENTITY-SHOW CONFG
  *    FIELD-DATA HANDLERS
  */
- let util;
+import { _u } from '~util';
 /* =================== ENTITY-SHOW CONFIG =================================== */
-export default function getEntityDisplayData (entity, data, u) {    /*dbug-log*/console.log('get[%s]DisplayData = %O', entity, data);
-    util = u;
+export default function getEntityDisplayData (entity, data) {       /*dbug-log*///console.log('get[%s]DisplayData = %O', entity, data);
     return getEntityShowData(entity, data).map(c => c); //detach obj
 }
 function getEntityShowData(entity, data) {
@@ -217,7 +216,7 @@ function getContributorFieldData (contribs) {
     if (!contribs || !Object.keys(contribs).length) { return null; }
     let type;
     const names = Object.keys(contribs).map(storeTypeAndReturnName).join("<br>");
-    return { field: util.ucfirst(type)+'s', content: names, classes: 'max-cntnt' };
+    return { field: _u('ucfirst', [type])+'s', content: names, classes: 'max-cntnt' };
 
     function storeTypeAndReturnName (ord) {
         type = Object.keys(contribs[ord])[0];

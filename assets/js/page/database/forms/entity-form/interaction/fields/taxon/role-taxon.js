@@ -10,6 +10,7 @@
  *     SELECT TAXON IN ROLE COMBOBOX
  *     GET TAXON SELECTED IN ROLE COMBOBOX
  */
+import { _cmbx } from '~util';
 import { _state, getSubFormLvl } from '~form';
 import * as iForm from '../../int-form-main.js';
 /* ------------------- SELECT TAXON IN ROLE COMBOBOX ------------------------ */
@@ -31,8 +32,8 @@ export function selectRoleTaxon(e, groupTaxon) {
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
-    _u('replaceSelOpts', [role, opt]);
-    _u('setSelVal', [role, opt.value]);
+    _cmbx('replaceSelOpts', [role, opt]);
+    _cmbx('setSelVal', [role, opt.value]);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(groupTaxon) {

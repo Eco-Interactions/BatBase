@@ -9,8 +9,8 @@
  *     INIT COMBOBOX
  *     APPLY FILTER
  */
-import { _db } from '~util';
-import { _ui, _u } from '~db';
+import { _cmbx, _db } from '~util';
+import { _ui } from '~db';
 import * as fM from '../../filter-main.js';
 
 let timeout;
@@ -31,8 +31,8 @@ function buildSubGroupOpts(subGroups) {
     });
 }
 function buildSubGroupCombo(opts) {
-    const lbl = _u('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
-    const span = _u('getElem', ['span', { text: '' }]);
+    const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
+    const span = _el('getElem', ['span', { text: '' }]);
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-Sub-Group');
     $(lbl).append([span, sel]);
     return lbl;
@@ -53,7 +53,7 @@ function filterTableBySubGroup(vals) {                                          
 }
 function filterBySubGroups() {
     timeout = null;
-    const groupNames = _u('getSelVal', ['Sub-Group']);
+    const groupNames = _cmbx('getSelVal', ['Sub-Group']);
     const totalGroups = $('#sel-Sub-Group')[0].selectize.currentResults.total;   //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total);
     ifAllGroupsSelectedClearFilterCombo(groupNames.length, totalGroups);
     updateSubGroupFilterState(groupNames, totalGroups);

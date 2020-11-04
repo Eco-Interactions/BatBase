@@ -22,8 +22,8 @@
  *         FINISH EDIT FORM BUILD
  *         DATA VALIDATION
  */
-import { _u } from '~db';
-import { _state, _elems, _cmbx, _form, _val, formatAndSubmitData, submitForm } from '~form';
+import { _cmbx, _el, _u } from '~util';
+import { _state, _elems, _form, _val, formatAndSubmitData, submitForm } from '~form';
 
 let taxonData;
 
@@ -71,7 +71,7 @@ function ifSpeciesValIssue(rank) {
 
     function hasCorrectBinomialNomenclature() {
         const species = $('#DisplayName_row input')[0].value;
-        const genus = _u('getSelTxt', ['Genus']);                   /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
+        const genus = _cmbx('getSelTxt', ['Genus']);                   /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
         const speciesParts = species.split(' ');
         return genus === speciesParts[0];
     }
@@ -115,12 +115,12 @@ function getEditTaxonFields(taxon) {                                /*dbug-log*/
 /** ----------- NAME INPUT --------------- */
 function buildNameInput(name) {
     const attr = { id: 'txn-name', type: 'text', value: name };
-    return _u('getElem', ['input', attr]);
+    return _el('getElem', ['input', attr]);
 }
 /** ------- RANK COMBOBOX --------------- */
 function buildRankSel(taxon) {
     const opts = getTaxonRankOpts();
-    const sel = _u('getSelect', [opts, { id: 'sel-Rank' }]);
+    const sel = _elems('getSelect', [opts, { id: 'sel-Rank' }]);
     $(sel).data({ 'txn': taxon.id, 'rank': getRankVal(taxon.rank.displayName) });
     return sel;
 }
@@ -145,7 +145,7 @@ function getPrntTaxonElems(taxon) {                                 /*dbug-log*/
 }
 /** ----------- PARENT TAXON NAME --------------- */
 function buildNameElem(prnt) {
-    const div = _u('getElem', ['div', { id: 'txn-prnt' }]);
+    const div = _el('getElem', ['div', { id: 'txn-prnt' }]);
     setTaxonPrntNameElem(prnt, div);
     $(div).css({'padding-top': '4px'});
     return div;
@@ -160,7 +160,7 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
 function buildEditPrntBttn(prnt) {
     const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt',
         class: 'ag-fresh' };
-    const bttn = _u('getElem', ['input', attr]);
+    const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(showParentTaxonSelectForm);
     return bttn;
 }
@@ -186,7 +186,7 @@ function buildParentTaxonEditElems(pId) {
 }
 function buildEditParentHdr() {
     const attr = { text: 'Select New Taxon Parent', id:'sub-hdr' };
-    return _u('getElem', ['h3', attr]);
+    return _el('getElem', ['h3', attr]);
 }
 function getParentEditFields(prnt) {
     const group = _u('lcfirst', [prnt.group.displayName]);
@@ -209,18 +209,18 @@ function getGroupRankRow(taxon, rows) {
 }
 function buildTaxonParentRow(displayName) {
     const groupRank = displayName.split(' ')[0];
-    const lbl = _u('getElem', ['label', { text: groupRank }]);
+    const lbl = _el('getElem', ['label', { text: groupRank }]);
     const groupParent = buildGroupNameSpan(displayName.split(' ')[1]);
     return buildTaxonEditFormRow(groupRank, [lbl, groupParent], 'sub');
 }
 function buildGroupNameSpan(name) {
-    const span = _u('getElem', ['span', { text: name }]);
+    const span = _el('getElem', ['span', { text: name }]);
     $(span).css({ 'padding-top': '.55em' });
     return span;
 }
 function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };
-    const cntnr = _u('getElem', ['div', attr]);
+    const cntnr = _el('getElem', ['div', attr]);
     $(cntnr).append(elems);
     $('#Parent_row').after(cntnr);
 }
@@ -267,11 +267,11 @@ export function selectParentTaxon(pId) {
     ifSubGroupSelect(pTaxon);
     if (pTaxon.isRoot) { return; }
     const pRank = pTaxon.rank.displayName;
-    _u('setSelVal', [pRank, pId]);
+    _cmbx('setSelVal', [pRank, pId]);
 }
 function ifSubGroupSelect(pTaxon) {
     if (!$('#Sub-Group_row').length) { return; }
-    _u('setSelVal', ['Sub-Group', pTaxon.group.subGroup.id, 'silent']);
+    _cmbx('setSelVal', ['Sub-Group', pTaxon.group.subGroup.id, 'silent']);
 }
 function finishParentSelectFormUi() {
     alignGroupRankText();
@@ -375,7 +375,7 @@ function submitTaxonEdit() {
 }
 function initTaxonEditRankCombo() {
     _u('initCombobox', [{ name: 'Rank', onChange: validateTaxonRank }]);
-    _u('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
+    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
 }
 /** ======================= DATA VALIDATION ================================== */
 /**

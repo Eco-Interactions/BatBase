@@ -11,8 +11,7 @@
  *     GETTERS
  *     SETTERS
  */
-import { _alert, _db } from '~util';
-import { _u } from '~db';
+import { _alert, _db, _u } from '~util';
 
 let fState = {}; //formState
 

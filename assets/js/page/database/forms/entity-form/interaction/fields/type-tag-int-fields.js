@@ -16,7 +16,8 @@
  *     SHARED
  *         FIELD INIT-VAL
  */
-import { _cmbx, _confg, _state } from '../../../forms-main.js';
+import { _cmbx } from '~util';
+import { _confg, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 /**
  * defaultTag:      Required tag id for the selected interaction type.
@@ -54,12 +55,12 @@ function loadIntTypeOptions() {
     const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];/*dbug-log*///console.log('types = %O', types)
     _cmbx('getSelectStoredOpts', ['intTypeNames', types])
     .then(loadComboOptionsForType)
-    .then(() => _u('enableCombobox', ['InteractionType', true]))
+    .then(() => _cmbx('enableCombobox', ['InteractionType', true]))
 }
 function loadComboOptionsForType(opts) {                            /*dbug-log*///console.log('opts = %O', opts)
-    const prevType = _u('getSelVal', [`InteractionType`]);
-    _u('replaceSelOpts', ['InteractionType', opts]);
-    _u('focusCombobox', ['InteractionType']);
+    const prevType = _cmbx('getSelVal', [`InteractionType`]);
+    _cmbx('replaceSelOpts', ['InteractionType', opts]);
+    _cmbx('focusCombobox', ['InteractionType']);
     const initVal = getInitVal('InteractionType', prevType);
     selectInitValIfValidType(initVal, opts);
 }
@@ -72,14 +73,14 @@ export function onTypeSelectionInitTagField(val) {
 /* -------------------------- CLEAR TYPE-TAGS ------------------------------- */
 function clearTypeRelatedTags() {                                   /*dbug-log*///console.log('clearTypeRelatedTags')
     const opts = [ new Option('Secondary', app.secondaryTagId) ];
-    _u('replaceSelOpts', ['InteractionTags', opts]);
+    _cmbx('replaceSelOpts', ['InteractionTags', opts]);
     app.defaultTag = null;
 }
 /* ---------------------------- INIT FIELD ---------------------------------- */
 function fillAndEnableTags(id) {
     const tagOpts = buildTagOpts(_state('getRcrd', ['interactionType', id]));
-    _u('replaceSelOpts', ['InteractionTags', tagOpts]);
-    _u('enableCombobox', ['InteractionTags', true]);
+    _cmbx('replaceSelOpts', ['InteractionTags', tagOpts]);
+    _cmbx('enableCombobox', ['InteractionTags', true]);
     selectTagInitVal();
 }
 /**
@@ -89,7 +90,7 @@ function fillAndEnableTags(id) {
 function selectTagInitVal() {
     const initVal = getInitVal('InteractionTags');
     if (!initVal) { return; }
-    _u('setSelVal', ['InteractionTags', initVal]);
+    _cmbx('setSelVal', ['InteractionTags', initVal]);
 }
 function buildTagOpts(type) {
     filterTagsForObjectGroup(type, type.tags);
@@ -103,7 +104,7 @@ function handleRequiredTagForType(typeTags) {
     app.defaultTag = getDefaultTag(typeTags);
     $('#sel-InteractionTags').data('init-val', app.defaultTag);
     if (!app.defaultTag) { return; }
-    _u('setSelVal', ['InteractionTags', app.defaultTag]);
+    _cmbx('setSelVal', ['InteractionTags', app.defaultTag]);
 }
 function getDefaultTag(tags) {
     const tag = tags.find(t => t.required);
@@ -134,7 +135,7 @@ function getInitVal(field, prevVal) {
 function selectInitValIfValidType(initVal, typeOpts) {
     const validType = typeOpts.find(opt => opt.value == initVal);   /*dbug-log*///console.log('validType = ', validType)
     if (validType) {
-        _u('setSelVal', ['InteractionType', initVal]);
+        _cmbx('setSelVal', ['InteractionType', initVal]);
     } else {
         clearTypeRelatedTags();
     }

@@ -20,7 +20,7 @@
  *   	SUBMIT UPDATE
  *   CLOSE POPUP
  */
-import { getElem, getSelect, getFieldRow, getFormFooter, sendAjaxQuery, ucfirst } from '~util';
+import { _el, _u } from '~util';
 let submitEnabled = false;
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
@@ -28,7 +28,7 @@ $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
 /** Shows the page the feedback was submitted from. */
 function showContextPage(e) {
 	e.preventDefault()
-	sendAjaxQuery(null, 'feedback/load/'+$(this).data('id'), feedbackEntryRecieved);
+	_u('sendAjaxQuery', [null, 'feedback/load/'+$(this).data('id'), feedbackEntryRecieved]);
 	clearBodyAndBuildIframe($(this).attr('href'));
 	return false;
 }
@@ -62,7 +62,7 @@ function getEditableFeedbackData(feedback) {
 }
 /* ------------------------ FIELD HELPERS ----------------------------------- */
 function getMultiFieldRow(fields) {
-	const row = getElem('div', { class: 'flex-row' });
+	const row = _u('getElem', ['div', { class: 'flex-row' }]);
 	$(row).append(fields);
 	return row;
 }
@@ -70,7 +70,7 @@ function getFeedbackFieldConfg(name, label, input) {
     return {
         flow: 'row',
         input: input,
-        label: label ? label : ucfirst(name)+':',
+        label: label ? label : _u('ucfirst', [name])+':',
         name: name,
     };
 }
@@ -83,8 +83,8 @@ function getSubmittedFeedbackElems(feedback, data) {
 	];
 }
 function getDisplayElems(name, dText, label = null) {
-	const displayText = getElem('span', { text: dText });
-	return getFieldRow(getFeedbackFieldConfg(name, label, displayText));
+	const displayText = _el('getElem', ['span', { text: dText }]);
+	return _el('getFieldRow', [getFeedbackFieldConfg(name, label, displayText)]);
 }
 /* __________________________ SUBMITTED-BY __________________________________ */
 function getSubmittedBy(feedback) {
@@ -122,10 +122,10 @@ function getTopAdminResponseRow(feedback, data) {
 }
 /* ____________________ FEEDBACK ASSIGNED TO ________________________________ */
 function getAssignedUserField(users, assignedId) {
-	const select = getSelect(
-		getUserOpts(users), {id: 'sel-assignedUser'}, onDataChange, assignedId);
+	const select = _el('getSelect', [
+		getUserOpts(users), {id: 'sel-assignedUser'}, onDataChange, assignedId]);
 	$(select).data('original', assignedId);
-	return getFieldRow(getFeedbackFieldConfg('fAssigned', 'Assigned to:', select));
+	return _el('getFieldRow', [getFeedbackFieldConfg('fAssigned', 'Assigned to:', select)]);
 }
 function getUserOpts(users) {
 	const opts = [new Option('- None - ', 0)];
@@ -134,10 +134,10 @@ function getUserOpts(users) {
 }
 /* ________________________ FEEDBACK STATUS _________________________________ */
 function getFeedbackStatuElem(curStatus) {
-	const select = getSelect(
-		getStatusOpts(), {id: 'sel-feedbackStatus'}, onDataChange, curStatus);
+	const select = _el('getSelect', [
+		getStatusOpts(), {id: 'sel-feedbackStatus'}, onDataChange, curStatus]);
 	$(select).data('original', curStatus);
-	return getFieldRow(getFeedbackFieldConfg('fStatus', 'Status:', select));
+	return _el('getFieldRow', [getFeedbackFieldConfg('fStatus', 'Status:', select)]);
 }
 function getStatusOpts() {
 	const statuses = ['Closed', 'Follow-Up', 'Read', 'Unread'];
@@ -147,7 +147,7 @@ function getStatusOpts() {
 function getAdminNotesElem(notes) {
 	const input = buildAdminNotesTextarea(notes);
 	$(input).data('original', notes).keyup(onDataChange);
-	return getFieldRow(getFeedbackFieldConfg('fNotes', 'Notes:', input));
+	return _el('getFieldRow', [getFeedbackFieldConfg('fNotes', 'Notes:', input)]);
 }
 function buildAdminNotesTextarea(notes) {
 	const attr = {
@@ -155,7 +155,7 @@ function buildAdminNotesTextarea(notes) {
 		placeholder: 'Add notes about this feedback here...',
 		text: notes
 	};
-	return getElem('textarea', attr);
+	return _el('getElem', ['textarea', attr]);
 }
 /* ------------------------ POPUP FOOTER ------------------------------------ */
 function getFeedbackResponseFooter() {
@@ -165,7 +165,7 @@ function getFeedbackResponseFooter() {
         onSubmit: updateFeedback,
         onCancel: closePopup
     };
-    return getFormFooter(confg);
+    return _el('getFormFooter', [confg]);
 }
 /* -------------------- BUILD AND APPEND POPUP ------------------------------ */
 function buildAndShowResponsePopup(elems) {
@@ -174,7 +174,7 @@ function buildAndShowResponsePopup(elems) {
 	$(popup).append(elems).fadeIn("fast");
 }
 function getFeedbackResponsePopup() {
-	const $popup = $(getElem('div', {id: 'feedback-popup'}));
+	const $popup = $(_el('getElem', ['div', {id: 'feedback-popup'}]));
 	$popup.css({
 		display: 'none'
 	});
@@ -210,7 +210,7 @@ function updateFeedback() {
 		adminNotes: $adminNotesElem.val(),
 		status: $('#feedback-status').val()
 	};
-    sendAjaxQuery(data, url, feedbackUpdateSucess);
+    _u('sendAjaxQuery', [data, url, feedbackUpdateSucess]);
 }
 function feedbackUpdateSucess(data, textStatus, jqXHR) {			/*dbug-log*///console.log('feedbackUpdateSucess data = ', data);
 	closePopup();

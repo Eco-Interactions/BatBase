@@ -8,7 +8,7 @@
  * 		INIT STAT HEADER
  * 		LOAD STAT HEADER
  */
-import { sendAjaxQuery } from '~util';
+import { _u } from '~util';
 
 /** @type {Object} Page URL (k) statdata-set key (v) */
 const pageStatKeys = {
@@ -28,7 +28,7 @@ const loadHeaderData = {
 /* ------------------------ INIT STAT HEADER -------------------------------- */
 export default function initHeaderStats() {
 	if (!ifPgHasStatistics()) { return }
-	sendAjaxQuery({tag: pageStatKeys[pg]}, 'stats/', loadPageHeaderStatistics);
+	_u('sendAjaxQuery', [{tag: pageStatKeys[pg]}, 'stats/', loadPageHeaderStatistics]);
 
 	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  				//console.log('loadPageHeaderStatistics. args = %O', arguments);
 		loadHeaderData[pageStatKeys[pg]](data);

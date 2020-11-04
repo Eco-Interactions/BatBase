@@ -3,7 +3,7 @@
  *
  * Export default only.
  */
-import { _u } from '~db';
+import { _u } from '~util';
 import { _confg, _state } from '../forms-main.js';
 
 export default function formatDataForServer(entity, fLvl, formVals) {

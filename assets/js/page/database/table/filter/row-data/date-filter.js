@@ -23,7 +23,8 @@
  *          TAXON
  *          TREE-TEXT
  */
-import { _table, _ui, _u } from '~db';
+import { _cmbx } from '~util';
+import { _table, _ui } from '~db';
 import * as fM from '../filter-main.js';
 let tblState;
 /*
@@ -34,8 +35,8 @@ let app = {};
 /* ========================== INIT ========================================== */
 export function initDateFilterUi() {
     $('#shw-chngd').change(toggleDateFilter.bind(null, null, null, null));
-    _u('initCombobox', [{ name: 'Date Filter Type', onChange: onDateTypeChange }]);
-    _u('enableCombobox', ['DateFilterType', false]);
+    _cmbx('initCombobox', [{ name: 'Date Filter Type', onChange: onDateTypeChange }]);
+    _cmbx('enableCombobox', ['DateFilterType', false]);
     applyDateFilterStyles(false); //inits disabled ui
 }
 /** Change event for the time-filter-type combobox. */
@@ -133,7 +134,7 @@ function updateDateFilterState(dateTime, filtering) {
     app.date = {
         active: filtering,
         time:   dateTime || app.date.time,
-        type:   _u('getSelVal', ['Date Filter Type'])
+        type:   _cmbx('getSelVal', ['Date Filter Type'])
     };
     fM.setFilterState('date', app.date, 'direct');
 }
@@ -175,12 +176,12 @@ function openCalendar() {
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
 export function showTodaysUpdates(focus) {                                      //console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
-    _u('setSelVal', ['Focus', focus, 'silent']);
+    _cmbx('setSelVal', ['Focus', focus, 'silent']);
     _table('resetDataTable', [focus])
     .then(showUpdatesAfterTableLoad);
 }
 function showUpdatesAfterTableLoad() {
-    _u('setSelVal', ['Date Filter', 'updated']);
+    _cmbx('setSelVal', ['Date Filter', 'updated']);
     toggleDateFilter(true, 'today');
 }
 /* ------------------- APPLY FILTER ----------------------------------------- */

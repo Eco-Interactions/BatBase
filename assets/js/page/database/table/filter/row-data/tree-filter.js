@@ -10,25 +10,25 @@
  *      BUILS FILTER ELEM
  *      SYNC WITH ACTIVE FILTERS
  */
+import { _el } from '~util';
 import * as fM from '../filter-main.js';
-import { _u } from '~db';
 /* ====================== BUILD FILTER ELEM ================================= */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function getTreeTextFilterElem(entity) {
     const lbl = buildTxtSearchLbl(entity);
-    const span = _u('getElem', ['span', { text: 'Name:' }]);
+    const span = _el('getElem', ['span', { text: 'Name:' }]);
     const input = buildTxtSearchInput(entity);
     $(lbl).append([span, input]);
     return lbl;
 }
 function buildTxtSearchLbl(entity) {
     const classes = 'sel-cntnr flex-row' + (entity == 'Taxon' ? ' taxonLbl' : ' txtLbl');
-    return _u('getElem', ['label', { class: classes }]);
+    return _el('getElem', ['label', { class: classes }]);
 }
 function buildTxtSearchInput(entity) {
     const attr = { type: 'text', name: 'name-'+entity,
         placeholder: entity+' Name (Press Enter to Filter)' };
-    const input = _u('getElem', ['input', attr]);
+    const input = _el('getElem', ['input', attr]);
     addInputClass(entity, input);
     return addInputChangeEvent(entity, input);
 }

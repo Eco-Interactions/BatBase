@@ -15,7 +15,7 @@
  *         RETRY QUEUE
  *         REPORT FAILURES
  */
-import { _alert, _db, snapshot } from '~util';
+import { _alert, _db, _u } from '~util';
 
 let failed = { data: [], retryQueue: {}};
 
@@ -56,7 +56,7 @@ function addToRetryQueue(updateFunc, prop, params, edits) {         /*dbug-log*/
     };
 }
 /** Retries any updates that failed in the first pass. */
-export function retryFailedUpdates() {                              /*perm-log*/console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, snapshot(failed));
+export function retryFailedUpdates() {                              /*perm-log*/console.log('           --retrying[%s]FailedUpdates = %O', Object.keys(failed.retryQueue).length, _u('snapshot', [failed]));
     if (!Object.keys(failed.retryQueue).length) { return Promise.resolve(); }
     failed.final = true;
     Object.keys(failed.retryQueue).forEach(retryEntityUpdates);

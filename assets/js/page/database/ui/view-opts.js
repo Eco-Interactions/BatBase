@@ -7,8 +7,8 @@
  *     initSrcViewOpts
  *     initTxnViewOpts
  */
-import { _db } from '~util';
-import { _table, _u } from '~db';
+import { _cmbx, _db } from '~util';
+import { _table } from '~db';
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
  * Builds location view html and initializes table load. Either builds the table
@@ -23,11 +23,11 @@ export function initLocViewOpts(view) {                             /*Perm-log*/
 function loadLocationViewOpts() {
     if ($('#sel-View').data('focus') === 'locs') { return; }
     const opts = [new Option('Map Data', 'map'), new Option('Table Data', 'tree')];
-    _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onLocViewChange')]);
+    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onLocViewChange')]);
     $('#sel-View').data('focus', 'locs');
 }
 function setLocView(view) {
-    _u('setSelVal', ['View', view, 'silent']);
+    _cmbx('setSelVal', ['View', view, 'silent']);
 }
 /* ---------------------------- SOURCE VIEW ------------------------------------------------------------------------- */
 /**
@@ -41,7 +41,7 @@ export function initSrcViewOpts(view) {                             /*Perm-log*/
 function loadSourceViewOpts() {
     if ($('#sel-View').data('focus') === 'srcs') { return ; }
     const opts = getSrcViewopts();
-    _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onSrcViewChange')]);
+    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onSrcViewChange')]);
     $('#sel-View').data('focus', 'srcs');
 }
 function getSrcViewopts() {
@@ -54,7 +54,7 @@ function getSrcViewopts() {
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView(view) {
     _table('tableState').set({'curView': view});
-    if (!_u('setSelVal', ['View'])) { _u('setSelVal', ['View', view, 'silent']); }
+    if (!_cmbx('setSelVal', ['View'])) { _cmbx('setSelVal', ['View', view, 'silent']); }
 }
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
@@ -68,14 +68,14 @@ function loadTxnViewOpts(groups, reset) {
 }
 function buildAndLoadTxnOpts(groups) {
     const opts = getViewOpts(groups);
-    _u('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
+    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
     $('#sel-View').data('focus', 'taxa');
 }
 function getViewOpts(groups) {
     const taxa = _table('tableState').get('rcrdsById');
     const optsAry = [];
     Object.keys(groups).forEach(buildGroupOpt);
-    return _u('alphabetizeOpts', [optsAry]);
+    return _cmbx('alphabetizeOpts', [optsAry]);
 
     function buildGroupOpt(id) {
         if (!ifGroupHasInts(groups[id].taxa)) { return; }
@@ -92,8 +92,8 @@ function getViewOpts(groups) {
 }
 /** Restores stored group from previous session or sets the default 'Bats'. */
 function setTaxonView(view) {
-    if (!_u('getSelVal', ['View'])) {
+    if (!_cmbx('getSelVal', ['View'])) {
         const groupVal = view ? view : '1';
-        _u('setSelVal', ['View', groupVal, 'silent']);
+        _cmbx('setSelVal', ['View', groupVal, 'silent']);
     }
 }

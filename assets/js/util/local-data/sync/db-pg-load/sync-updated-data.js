@@ -10,7 +10,7 @@
  *     DATA DOWNLOAD
  *     SYNC LOCAL DATA
  */
-import { _u } from '~db';
+import { _u } from '~util';
 import * as db from '../../local-data-main.js';
 import { addCoreEntityData, addDetailEntityData, retryFailedUpdates } from '../db-sync-main.js';
 

@@ -11,7 +11,7 @@
  *     AUTHOR TREE
  */
 import { _db } from '~util';
-import { _u } from '~db';
+import { getDetachedRcrd } from '~db';
 import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../build-main.js';
 
 let srcRcrds;
@@ -74,7 +74,7 @@ function buildPubTree(pubSrcRcrds, data) {                                      
 function getPubData(rcrd, pubRcrds) {                                           //console.log("getPubData. rcrd = %O", rcrd);
     rcrd.children = getPubChildren(rcrd, pubRcrds);
     if (rcrd.publication) {
-        const pub = _u('getDetachedRcrd', [rcrd.publication, pubRcrds, 'publication']);
+        const pub = getDetachedRcrd(rcrd.publication, pubRcrds, 'publication');
         if (!pub) { return false; }
         rcrd.publication = pub;
     }
@@ -105,7 +105,7 @@ function buildPublTree(pubSrcRcrds, data) {                                 //co
 
     function getPublBranch(pub) {
         if (!pub.parent) { noPubl.push(pub); return; }
-        const publ = _u('getDetachedRcrd', [pub.parent, srcRcrds, 'source']);
+        const publ = getDetachedRcrd(pub.parent, srcRcrds, 'source');
         if (!publ) { return; }
         tree[publ.displayName] = getPublData(publ);
     }
@@ -139,7 +139,7 @@ function buildAuthTree(authSrcRcrds, data) {                                    
 
     function getAuthBranch(authSrc) {                                           //console.log("rcrd = %O", authSrc);
         if (!authSrc.contributions.length) { return; }
-        authSrc.author = _u('getDetachedRcrd', [authSrc.author, authRcrds, 'author']);
+        authSrc.author = getDetachedRcrd(authSrc.author, authRcrds, 'author');
         if (!authSrc.author) { return; }
         authSrc.children = getAuthChildren(authSrc.contributions);
         tree[authSrc.displayName] = authSrc;

@@ -13,9 +13,8 @@
  *             TOP-FORM
  *             SUB-ENTITY
  */
-import { _db } from '~util';
-import { executeMethod, _u } from '~db';
-import { _state, _elems, _confg, clearFormMemory } from '../forms-main.js';
+import { _db, _el, _u, executeMethod } from '~util';
+import { _state, _elems, _confg, clearFormMemory } from '~form';
 import * as val from './validation-alerts.js';
 import formatDataForServer from './format-data.js';
 import * as data from './get-form-data.js';
@@ -145,6 +144,6 @@ function addAndSelectEntity(data, formParent) {
 }
 function appendWaitingOverlay() {
     const attr = { class: 'overlay waiting', id: 'c-overlay'}
-    $('#b-overlay').append(_u('getElem', ['div', attr]));
+    $('#b-overlay').append(_el('getElem', ['div', attr]));
     $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
 }

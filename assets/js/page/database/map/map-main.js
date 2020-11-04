@@ -11,10 +11,10 @@
  *   showLocOnMap
  *   buildLocMap
  */
-import { _db } from '~util';
-import { _table, _u, _ui } from '~db';
+import { _db, _cmbx } from '~util';
+import { _table, _ui } from '~db';
 import * as MM from './map-markers.js';
-import * as _elems from './map-elems.js';
+import * as mapEl from './map-elems.js';
 import buildMapDataObj from './map-data.js';
 
 let app;
@@ -157,7 +157,7 @@ function addTipsLegend() {
 }
 function addViewTips(map) {
     const attr = { id: 'tips-legend', class: 'info legend flex-col'};
-    const div = _u('getElem', ['div', attr]);
+    const div = _elem('getElem', ['div', attr]);
     div.innerHTML = getDefaultTipTxt();
     $(div).click(toggleTips)
     return div;
@@ -234,7 +234,7 @@ function addMarkerLegend() {
     legend.addTo(app.map);
 }
 function addMarkerLegendHtml(map) {
-    const div = _u('getElem', ['div', { class: 'info legend flex-col'}]);
+    const div = _elem('getElem', ['div', { class: 'info legend flex-col'}]);
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
@@ -627,9 +627,9 @@ export function initFormMap(parent, rcrds, type) {                              
     downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);
 }
 function finishFormMap(parentId, type) {                                        //console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
-    _elems.addLocCountLegend(app.map);
+    mapEl.addLocCountLegend(app.map);
     if (type === 'int') {
-        _elems.addNewLocBttn(app.map);
+        mapEl.addNewLocBttn(app.map);
     }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);
@@ -685,7 +685,7 @@ function addChildLocsToMap(prnt, coords, type, locId) {
     const noGpsLocs = [];
     const locs = getChildLocData(prnt);
     addLocsWithGpsDataToMap();
-    _elems.addCountToLegend(locs.length, noGpsLocs.length, prnt);
+    mapEl.addCountToLegend(locs.length, noGpsLocs.length, prnt);
     if (noGpsLocs.length) { addLocsWithoutGpsDataToMap(noGpsLocs.length); }
 
     function addLocsWithGpsDataToMap() {
@@ -737,7 +737,7 @@ export function buildLocMap() {
 export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
     if ($('#shw-map').prop('loading')) { return; }
     _ui('updateUiForMapView');
-    _u('setSelVal', ['View', 'map', 'silent']);
+    _cmbx('setSelVal', ['View', 'map', 'silent']);
     showLoc(locId, zoom, _table('tableState').get('rcrdsById'));
     $('#tbl-filter-status').html('No Active Filters.');
 }

@@ -17,8 +17,8 @@
  *     WAYS TO SELECT LOCATION NOTE
  */
 
-import { _u } from '~db';
-import { _cmbx, _form, _panel, _state } from '~form';
+import { _cmbx, _el } from '~util';
+import { _form, _panel, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 
 /* ======================= COUNTRY/REGION =================================== */
@@ -41,7 +41,7 @@ function showCountryDataOnMap(val) {
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 export function enableCountryRegionField() {
-    _u('enableCombobox', ['Country-Region']);
+    _cmbx('enableCombobox', ['Country-Region']);
     $('#loc-note').fadeTo(400, 1);
 }
 /* ========================== LOCATION ====================================== */
@@ -54,14 +54,14 @@ export function enableCountryRegionField() {
 export function fillLocCombo(loc) {
     const subSet = loc ? loc.children : false;
     const opts = _cmbx('getRcrdOpts', ['location', subSet]);
-    _u('replaceSelOpts', ['Location', opts]);
+    _cmbx('replaceSelOpts', ['Location', opts]);
 }
 /* ---------------------- SELECT LOCATION ----------------------------------- */
 export function selectLoc(id) {
     $('#sub-form').remove();
-    _u('setSelVal', ['Location', id]);
+    _cmbx('setSelVal', ['Location', id]);
     enableCountryRegionField();
-    _u('enableCombobox', ['Location']);
+    _cmbx('enableCombobox', ['Location']);
 }
 /**
  * When a location is selected, its country/region is selected in the top-form
@@ -75,7 +75,7 @@ export function onLocSelection(val) {                               /*perm-log*/
     const locRcrd = _state('getRcrd', ['location', val]);
     if (!locRcrd) { return; } //error alerted to developer and editor
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
-    _u('setSelVal', ['Country-Region', prntVal, 'silent']);
+    _cmbx('setSelVal', ['Country-Region', prntVal, 'silent']);
     _panel('fillLocDataInDetailPanel', [locRcrd]);
     iForm.focusPinAndEnableSubmitIfFormValid('Location');
 }
@@ -85,7 +85,7 @@ function removeLocMap() {
 /* =================== WAYS TO SELECT LOCATION NOTE ========================= */
 /** Adds a message above the location fields in interaction forms. */
 export function addLocationSelectionMethodsNote() {
-    const cntnr = _u('getElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
+    const cntnr = _el('getElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
     const mapInfo = getMapInfoText();
     $(cntnr).append(mapInfo);
     $('#Country-Region_row')[0].parentNode.before(cntnr);
@@ -97,7 +97,7 @@ function getMapInfoText() {
 }
 function getInfoLinkTextToOpenMap(argument) {
     const attr = {class:'map-link', text: 'click here to use the map interface.'};
-    const span = _u('getElem', ['span', attr]);
+    const span = _el('getElem', ['span', attr]);
     $(span).click(showInteractionFormMap);
     return span;
 }
@@ -106,6 +106,6 @@ function showInteractionFormMap() {                                 /*dbug-log*/
     if ($('#form-map').length) { return; }
     const pElem = $('#Location_row')[0].parentNode;
     _form('addMapToLocForm', ['int', $(pElem)]);
-    if (_u('getSelVal', ['Country-Region'])) { return; }
-    _u('focusCombobox', ['Country-Region', true]);
+    if (_cmbx('getSelVal', ['Country-Region'])) { return; }
+    _cmbx('focusCombobox', ['Country-Region', true]);
 }

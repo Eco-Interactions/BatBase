@@ -13,7 +13,8 @@
  *             FILTER STATUS TEXT
  *     FILTER ROW DATA
  */
-import { _table, _ui, _u } from '~db';
+import {  _el } from '~util';
+import { _table, _ui } from '~db';
 import * as fDate from './row-data/date-filter.js';
 import * as fLoc from './entity/loc-filters.js';
 import * as fSrc from './entity/src-filters.js';
@@ -94,7 +95,7 @@ export function getActiveFilterVals() {
 }
 /* ------------------- UTIL ------------------------------------------------- */
 export function newSel(opts, c, i, field) {
-    const elem = _u('getSelect', [opts, { class: c, id: i }]);
+    const elem = _el('getSelect', [opts, { class: c, id: i }]);
     $(elem).data('field', field);
     return elem;
 }

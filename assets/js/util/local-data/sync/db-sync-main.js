@@ -8,7 +8,7 @@
  */
 import * as h from './helpers/sync-helpers-main.js';
 import * as entry from './data-entry/data-entry-sync.js';
-import * as pgLoad from './pg-load/pg-load-main.js';
+import * as pgLoad from './db-pg-load/db-pg-load-main.js';
 
 /* ========================= DATA-ENTRY SYNC ================================ */
 export function updateUserNamedList() {

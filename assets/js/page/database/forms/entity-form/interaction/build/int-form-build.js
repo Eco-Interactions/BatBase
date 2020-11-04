@@ -14,8 +14,7 @@
  *         REFERENCE-GUIDE BUTTON
  *         FORM COMBOBOXES
  */
-import { _modal } from '~util';
-import { _u } from '~db';
+import { _cmbx, _el, _modal } from '~util';
 import { _state, _elems, submitForm } from '~form';
 import * as iForm from '../int-form-main.js';
 
@@ -55,7 +54,7 @@ function modifyFormDisplay() {
 /* ----------------------- REFERENCE-GUIDE BUTTON --------------------------- */
 function addReferenceGuideButton() {
     const attr = { class: 'ag-fresh', type: 'button', value: 'Reference Guide' };
-    const bttn = _u('getElem', ['input', attr]);
+    const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(openReferenceGuideInNewTab);
     $('#top-help').prepend(bttn);
 }
@@ -65,15 +64,15 @@ function openReferenceGuideInNewTab() {
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
     iForm.initFormCombos('interaction', 'top');
-    _u('enableCombobox', ['CitationTitle', false]);
+    _cmbx('enableCombobox', ['CitationTitle', false]);
     iForm.addRoleTaxonFocusListeners();
-    _u('enableCombobox', ['InteractionType', false]);
-    _u('enableCombobox', ['InteractionTags', false]);
+    _cmbx('enableCombobox', ['InteractionType', false]);
+    _cmbx('enableCombobox', ['InteractionTags', false]);
     focusPubFieldIfNewRecord();
 }
 function focusPubFieldIfNewRecord() {
     const action = _state('getFormProp', ['top', 'action']);
-    _u('focusCombobox', ['Publication', action === 'create']);
+    _cmbx('focusCombobox', ['Publication', action === 'create']);
 }
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */
 function addConfirmationBeforeSubmit() {
@@ -92,9 +91,9 @@ function showSubmitModal() {
     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
 }
 function buildConfirmationModalHtml() {
-    const subj = _u('getSelTxt', ['Subject']);
-    const obj = _u('getSelTxt', ['Object']);
-    const typeVerb = getIntTypeVerbForm(_u('getSelVal', ['InteractionType']));
+    const subj = _cmbx('getSelTxt', ['Subject']);
+    const obj = _cmbx('getSelTxt', ['Object']);
+    const typeVerb = getIntTypeVerbForm(_cmbx('getSelVal', ['InteractionType']));
     return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
 }
 function getIntTypeVerbForm(typeId) {

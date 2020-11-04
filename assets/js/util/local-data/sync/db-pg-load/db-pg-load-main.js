@@ -9,7 +9,7 @@
  *     ADD UPDATED SERVER DATA TO LOCAL DB
  *     ON SYNC COMPLETE
  */
-import { _u, initSearchStateAndTable } from '~db';
+import { _u } from '~util';
 import * as db from '../../local-data-main.js';
 import { reportDataSyncFailures } from '../db-sync-main.js';
 import { downloadAndStoreUpdatedData } from './sync-updated-data.js';

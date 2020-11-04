@@ -23,12 +23,12 @@
  *         SOURCE DETAILS
  *     CLEAR PANELS
  */
-import { _u } from '~db';
+import { _el, _u } from '~util';
 import { _state } from '~form';
 
 /* ===================== INIT DETAIL PANEL ================================== */
 export function getDetailPanelElems(entity, id, action) {                       //console.log("getDetailPanelElems. action = %s, entity = %s", action, entity)
-    const cntnr = _u('getElem', ['div', { 'id': 'form-details' }]);
+    const cntnr = _el('getElem', ['div', { 'id': 'form-details' }]);
     $(cntnr).append(buildPanelHeader(entity));
     $(cntnr).append(getDetailElems(entity, action));
     $(cntnr).append(getEntityIdFooter(id));
@@ -36,11 +36,11 @@ export function getDetailPanelElems(entity, id, action) {                       
 }
 function buildPanelHeader(entity) {
     const txt = _u('ucfirst', [entity]) + ' Details';
-    return _u('getElem', ['h3', { 'text':  txt}]);
+    return _el('getElem', ['h3', { 'text':  txt}]);
 }
 function getEntityIdFooter(id) {
     const intIdStr = id ? 'Id:  ' + id : '';
-    return _u('getElem', ['p', { id: 'ent-id',  'text': intIdStr }]);
+    return _el('getElem', ['p', { id: 'ent-id',  'text': intIdStr }]);
 }
 function getDetailElems(entity, action) {
     const builder = action === 'edit' && entity !== 'interaction' ?
@@ -58,19 +58,19 @@ function initDetailDiv(ent) {
 }
 function getDetailContainer(ent) {
     const attr = { 'id': ent+'-det', 'class': 'det-div' };
-    return  _u('getElem', ['div', attr]);
+    return  _el('getElem', ['div', attr]);
 }
 function getDetailHeader(ent) {
     const entities = {'src': 'Source', 'loc': 'Location'};
-     return _u('getElem', ['h5', { 'text': entities[ent]+':' }]);
+     return _el('getElem', ['h5', { 'text': entities[ent]+':' }]);
 }
 function getInitDetailData() {
-    return _u('getElem', ['div', { 'text': 'None selected.' }]);
+    return _el('getElem', ['div', { 'text': 'None selected.' }]);
 }
 /** Returns the elems that will display the count of references to the entity. */
 function getSubEntityEditDetailElems(entity) {                                  //console.log("getSubEntityEditDetailElems for [%s]", entity);
-    const div = _u('getElem', ['div', { 'id': 'det-cnt-cntnr' }]);
-    $(div).append(_u('getElem', ['span']));
+    const div = _el('getElem', ['div', { 'id': 'det-cnt-cntnr' }]);
+    $(div).append(_el('getElem', ['span']));
     $(div).append(getCountElemForEachReferencedEntityType(entity));
     return div;
 }
@@ -91,17 +91,17 @@ function initCountDiv(ent) {
 }
 function getCntCntnr(ent) {
     const attr = { 'id': ent+'-det', 'class': 'cnt-div flex-row' };
-    return _u('getElem', ['div', attr]);
+    return _el('getElem', ['div', attr]);
 }
 function getInitCntElem() {
-    return _u('getElem', ['div', {'text': '0' }]);
+    return _el('getElem', ['div', {'text': '0' }]);
 }
 function getEntityNameElem(ent) {
     const entities = { 'cit': 'Citations', 'fam': 'Families', 'gen': 'Genera',
         'int': 'Interactions', 'loc': 'Locations', 'ord': 'Orders',
         'pub': 'Publications', 'spc': 'Species', 'txn': 'Taxa',
     };
-    return _u('getElem', ['span', {'text': entities[ent] }]);
+    return _el('getElem', ['span', {'text': entities[ent] }]);
 }
 /* ================== EDIT FORM RELATIONAL DETAILS ========================== */
 export function fillRelationalDataInPanel(entity, rcrd) {

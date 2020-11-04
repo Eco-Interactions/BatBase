@@ -7,7 +7,7 @@
  *
  */
 import { _table } from '~db';
-import { _cmbx, _state, clearFormMemory } from '~form';
+import { _elems, _state, clearFormMemory } from '~form';
 /* ------------------------ ROOT-FORM --------------------------------------- */
 /** Returns popup and overlay to their original/default state. */
 export function exitRootForm(e, skipReset) {                       /*perm-log*/console.log('           --exitRootForm')
@@ -49,6 +49,6 @@ function refocusAndShowUpdates(submitData) {                        /*dbug-log*/
 export function exitSubForm(fLvl, focus, onExit, data) {
     const exitFunc = onExit || _state('getFormProp', [fLvl, 'onFormClose']);
     $('#'+fLvl+'-form').remove();                                   /*perm-log*/console.log("               --exitSubForm fLvl = %s, onExit = %O", fLvl, exitFunc);
-    _cmbx('resetFormCombobox', [fLvl, !!focus]);
+    _elems('resetFormCombobox', [fLvl, !!focus]);
     if (exitFunc) { exitFunc(data); }
 }

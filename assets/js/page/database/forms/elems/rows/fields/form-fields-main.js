@@ -1,20 +1,40 @@
 /**
+ * Builds and manages the form fields.
+ *
+ * Export
+ *     getFieldInput
+ *     buildMultiSelectElem
+ *     fillComplexFormFields
+ *     getCurrentFormFieldVals
+ *     ifAllRequiredFieldsFilled
+ *     initFormCombos
+ *     resetFormCombobox
+ *     toggleFormFields
+ *
  * TOC
+ *     INIT FORM-FIELDS
  *     TOGGLE FORM-FIELDS
  *     GET FIELD-DATA
  *     FILL FORM-FIELD DATA
+ *     IF REQUIRED FIELDS FILLED
  */
-import { _u } from '~db';
+import { _u } from '~util';
 import { _elems, _form, _state } from '~form';
-import * as fields from './input/input-builder.js';
-
-export function buildFieldInput() {
-    return fields.buildFieldInput(...arguments);
+import * as fields from './input/input-main.js';
+/* ==================== INIT FORM-FIELDS ================================== */
+export function getFieldInput() {
+    return fields.getFieldInput(...arguments);
 }
-export function ifAllRequiredFieldsFilled() {
-    return fields.ifAllRequiredFieldsFilled(...arguments);
+export function buildMultiSelectElem() {
+    return fields.buildMultiSelectElem(...arguments);
 }
-/* -------------------- TOGGLE FORM-FIELDS ---------------------------------- */
+export function initFormCombos() {
+    combo.initFormCombos(...arguments);
+}
+export function resetFormCombobox() {
+    combo.resetFormCombobox(...arguments);
+}
+/* ==================== TOGGLE FORM-FIELDS ================================== */
 /**
  * Toggles between displaying all fields for the entity and only showing the
  * default (required and suggested) fields.
@@ -43,7 +63,7 @@ function updateFormMemoryOnFieldToggle(isChecked, fLvl) {
     _state('setFormProp', [fLvl, 'reqElems', []]);
 }
 
-/* ----------------------- GET FIELD-DATA ----------------------------------- */
+/* ======================= GET FIELD-DATA =================================== */
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) {
     const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
@@ -53,7 +73,7 @@ export function getCurrentFormFieldVals(fLvl) {
     }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fieldsData = %O returnedVals = %O', fieldData, vals);
     return vals;
 }
-/* ------------------ FILL FORM-FIELD DATA ---------------------------------- */
+/* ================== FILL FORM-FIELD DATA ================================== */
 /**
  * When either source-type fields are regenerated or the form fields are toggled
  * between all available fields and the default shown, the fields that can
@@ -74,4 +94,35 @@ export function fillComplexFormFields(fLvl) {
 }
 function getMultiSelectHandler() {
     return _form.bind(null, 'selectExistingAuthsOrEds');
+}
+/* ================== IF REQUIRED FIELDS FILLED ============================= */
+/** Returns true if all the required elements for the current form have a value. */
+export function ifAllRequiredFieldsFilled(fLvl) {
+    const reqElems = _state('getFormProp', [fLvl, 'reqElems']);     /*dbug-log*///console.log("   ->-> ifAllRequiredFieldsFilled... [%s] = %O", fLvl, reqElems)
+    return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
+}
+/** Note: checks the first input of multiSelect container elems.  */
+function isRequiredFieldFilled(fLvl, elem) {
+    if ($('.'+fLvl+'-active-alert').length) { return false; }       /*dbug-log*///console.log('       --checking [%s] = %O, value ? ', elem.id, elem, getElemValue(elem));
+    return getElemValue(elem);
+
+    function getElemValue(elem) {
+        return elem.value ? true :
+            elem.id.includes('-cntnr') ? isCntnrFilled(elem) : false;
+    }
+}
+/**
+ * Returns true if the first field of the author/editor container has a value.
+ * For book publications, either authors or editors are required. If there is
+ * no author value, the first editor value is returned instead.
+ */
+function isCntnrFilled(elem) {                                      /*dbug-log*///console.log('isCntnrFilled? elem = %O', elem);
+    return isAFieldSelected('Authors') || isAFieldSelected('Editors');
+}
+function isAFieldSelected(entity) {                                 /*dbug-log*///console.log('[%s] field = %O', entity, $('#sel-cntnr-'+entity)[0]);
+    if (!$('#sel-cntnr-'+entity).length) { return false; } //When no editor select is loaded.
+    const fields = $('#sel-cntnr-'+entity)[0].firstChild.children;/*dbug-log*///c//console.log('fields = %O', fields);
+    let isSelected = false;
+    $.each(fields, (i, field) => { if ($(field).val()) { isSelected = true; } });
+    return isSelected;
 }

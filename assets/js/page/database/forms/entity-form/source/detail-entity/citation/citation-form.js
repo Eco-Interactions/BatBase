@@ -14,8 +14,7 @@
  *     HIGHTLIGHT EMPTY CITATION-FIELDS
  *     CITATION EDIT
  */
-import { _db } from '~util';
-import { _u } from '~db';
+import { _db, _cmbx } from '~util';
 import { _form, _state, _elems } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as types from './cit-type-fields.js';
@@ -50,7 +49,7 @@ function addSourceDataToMemory(data) {
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
-    _u('enableCombobox', ['Publication']);
+    _cmbx('enableCombobox', ['Publication']);
     _form('fillCitationCombo', [$('#sel-Publication').val()]);
 }
 function addPubRcrdsToMemory(pubRcrds) {
@@ -75,7 +74,7 @@ function appendCitFormAndFinishBuild(form) {                        /*dbug-log*/
         .then(() => finishCitFormUiLoad());
 }
 function finishCitFormUiLoad() {
-    _u('enableCombobox', ['Publication', false]);
+    _cmbx('enableCombobox', ['Publication', false]);
     $('#Abstract_row textarea').focus();
     _elems('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
 }
@@ -116,6 +115,6 @@ function ifFieldShouldBeSkipped (el, label, input) {
 }
 /* ---------------- CITATION EDIT ------------------------------------------- */
 export function finishCitationEditForm() {
-    types.handleSpecialCaseTypeUpdates(_u('getSelTxt', ['CitationType']), 'top');
+    types.handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['CitationType']), 'top');
     handleCitText('top');
 }

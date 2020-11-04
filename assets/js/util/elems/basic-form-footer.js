@@ -11,7 +11,7 @@
  *         SUBMIT BUTTOM
  *         CANCEL BUTTON
  */
-import { getElem, ucfirst } from '~util';
+import { _u } from '~util';
 /**
  * @param  {Object}   confg
  * @param  {String}   confg.formName
@@ -31,7 +31,7 @@ export function getFormFooter(confg) {
 /* ======================== CONTAINER ======================================= */
 function getFooterCntnr(formName) {
     const attrs = { class: 'flex-row bttn-cntnr', id: formName+'_footer' };
-    return getElem('div', attrs);
+    return _u('getElem', ['div', attrs]);
 }
 /* ========================== BUTTONS ======================================= */
 function getSubmitAndCancelBttns(confg) {
@@ -39,7 +39,7 @@ function getSubmitAndCancelBttns(confg) {
 }
 function getActionButton(actn, formName, val) {
     const attr = { id: formName+'-'+actn, class: 'ag-fresh', type: 'button', value: val}
-    return getElem('input', attr);
+    return _u('getElem', ['input', attr]);
 }
 /* -------------------------- SUBMIT BUTTON --------------------------------- */
 function getSubmitBttn(confg) {
@@ -50,7 +50,7 @@ function getSubmitBttn(confg) {
     function getSubmitText() {
         if (confg.submitText) { return confg.submitText; }
         const text = { create: 'Create', edit: 'Update' };;
-        return text[confg.action] + ' ' + ucfirst(confg.formName);
+        return text[confg.action] + ' ' + _u('ucfirst', [confg.formName]);
     }
 }
 /* -------------------------- CANCEL BUTTON --------------------------------- */

@@ -12,8 +12,7 @@
  *     DETAIL-ENTITY DATA
  *     EXECUTE UPDATES
  */
-import { _u } from '~db';
-import * as db from '../../../local-data-main.js';
+import { _db, _u } from '~util';
 import { updateData } from '../execute-update.js';
 import * as a from './add-funcs.js';
 
@@ -21,7 +20,7 @@ import * as a from './add-funcs.js';
 /** Updates stored-data props related to a core-entity record with new data. */
 export function addCoreEntityData(entity, rcrd) {                   /*dbug-log*///console.log("       --Updating Core entity. %s. %O", entity, rcrd);
     updateCoreData(entity, rcrd);
-    updateCoreDataProps(entity, db.getMmryData(entity)[rcrd.id]);
+    updateCoreDataProps(entity, _db('getMmryData', [entity])[rcrd.id]);
 }
 /**
  * Updates the stored core-records array and the stored entityType array.

@@ -8,20 +8,21 @@
  * 		INIT COMBOBOX
  * 		APPLY FILTER
  */
-import { _ui, _u } from '~db';
+import { _cmbx, _el } from '~util';
+import { _ui } from '~db';
 import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectGroupCombobox() {
-    return _u('getOptsFromStoredData', ['groupNames'])
+    return _cmbx('getOptsFromStoredData', ['groupNames'])
     .then(buildObjectGroupCombo)
     .then(finishGroupComboInit);
 }
 function buildObjectGroupCombo(groups) {
-    const lbl = _u('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
-    const span = _u('getElem', ['span', { text: 'Groups: ' }]);
-    const opts = groups.filter(r => r.text !== 'Bat');  						//console.log('groups = %O', groups)
+    const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
+    const span = _el('getElem', ['span', { text: 'Groups: ' }]);
+    const opts = groups.filter(r => r.text !== 'Bat');  		    /*dbug-log*///console.log('groups = %O', groups)
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-ObjectGroups');
     $(lbl).append([span, sel]);
     return lbl;
@@ -33,21 +34,21 @@ function finishGroupComboInit(filterEl) {
         onChange: filterTableByObjectGroup,
     };
     $('#focus-filters').append(filterEl);
-    _u('initCombobox', [confg]);
+    _cmbx('initCombobox', [confg]);
 }
 /* ----------------------- APPLY FILTER ------------------------------------- */
 /**
  * When viewing by publication, interactions can be filtered by the publication type.
  * Handles synchronizing with the tree-text filter.
  */
-function filterTableByObjectGroup(groupIds) {                                   //console.log('filterTableByObjectGroup args = %O', arguments);
+function filterTableByObjectGroup(groupIds) {                       /*dbug-log*///console.log('filterTableByObjectGroup args = %O', arguments);
     if (!groupIds.length) { return; }
     _ui('fadeTable');
 	if (!timeout) { timeout = setTimeout(filterByObjGroups, 1000); }
 }
 function filterByObjGroups() {
 	timeout = null;
-    const groupIds = _u('getSelVal', ['Object Group']);
+    const groupIds = _cmbx('getSelVal', ['Object Group']);
     if (!groupIds.length) { return; }
     ifAllGroupsSelectedClearFilterCombo(groupIds.length);
     updateObjGroupFilterState(groupIds);
@@ -55,7 +56,7 @@ function filterByObjGroups() {
     _ui('showTable');
 
     function ifAllGroupsSelectedClearFilterCombo(selectedGroupCnt) {
-        const total = $('#sel-ObjectGroups')[0].selectize.currentResults.total;      //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total)
+        const total = $('#sel-ObjectGroups')[0].selectize.currentResults.total;/*dbug-log*///console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total)
         if (selectedGroupCnt !== total) { return; }
         $('#sel-ObjectGroups')[0].selectize.clear();
     }

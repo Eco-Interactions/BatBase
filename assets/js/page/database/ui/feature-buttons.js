@@ -22,7 +22,8 @@
  *   DATABASE INIT UI
  *   TOGGLE TABLE BUTTONS
  */
-import { _forms, _map, _table, _u } from '~db';
+import { _cmbx } from '~util';
+import { _forms, _map, _table } from '~db';
 import { enableClearFiltersButton, enableListResetBttn, showPopupMsg } from './ui-main.js';
 import showEditorHelpModal from './editor-help-modal.js';
 import showTips from './tips-popup.js';
@@ -101,7 +102,7 @@ function showDataInitLoadingStatus() {
 }
 function toggleSearchOptions(toggleKey) {
     handleButtons(toggleKey);
-    _u('enableCombobox', ['Focus', toggleKey]);
+    _cmbx('enableCombobox', ['Focus', toggleKey]);
 }
 function handleButtons(toggleKey) {
     const opac = toggleKey === 'enable' ? 1 : .5;

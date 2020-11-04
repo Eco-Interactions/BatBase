@@ -1,21 +1,21 @@
 /**
  * Builds a single form-row.
  */
-import { _u } from '~db';
+import { _el, _u } from '~util';
 /**
  * Each element is built, nested, and returned as a completed row.
  * rowDiv>(alertDiv, fieldDiv>(label, input, [pin]))
  */
 export default function buildFormRow(field, input, fLvl, rowClss, info) {/*dbug-log*///console.log('buildFormRow[%s][%s] class?[%s] info?[%s] input = %O', field, fLvl, rowClss, info, input);
     const rowDiv = buildRowContainer(field, input, fLvl, rowClss);
-    const alertDiv = _u('getElem', ['div', { id: field+'_alert'}]);
+    const alertDiv = _el('getElem', ['div', { id: field+'_alert'}]);
     const fieldCntnr = buildField(input, field, fLvl, info);
     $(rowDiv).append([alertDiv, fieldCntnr]);
     return rowDiv;
 }
 function buildRowContainer(field, input, fLvl, rowClss) {
     const attr = { class: getRowClasses(), id: field + '_row'}
-    return _u('getElem', ['div', attr]);
+    return _el('getElem', ['div', attr]);
     /** Returns the style classes for the row. */
     function getRowClasses() {
         const rowClass = input.className.includes('xlrg-field') ?
@@ -34,7 +34,7 @@ function buildField(input, field, fLvl, info) {
  */
 function buildFieldContainer(fLvl, info) {
     const attr = { class: 'field-row flex-row', title: getInfoTxt(info)};
-    const cntnr = _u('getElem', ['div', attr]);
+    const cntnr = _el('getElem', ['div', attr]);
     if (info) { addTutorialDataAttr(cntnr, fLvl, info); }
     return cntnr;
 }
@@ -50,7 +50,7 @@ function getInfoTxt(info, key = 'tooltip') {
 }
 function buildFieldLabel(input, field) {
     const attr = { id: field+'-lbl', class: getLabelClass(), text: getFieldName()};
-    return _u('getElem', ['label', attr]);
+    return _el('getElem', ['label', attr]);
 
     function getLabelClass() {
         return $(input).data('fLvl') ? 'required' : '';
@@ -67,7 +67,7 @@ function getPinElem(field) {
 }
 function buildPinElem(field) {
     const attr = {type: 'checkbox', id: field+'_pin', class: 'top-pin'};
-    const pin = _u('getElem', ['input', attr]);
+    const pin = _el('getElem', ['input', attr]);
     _u('addEnterKeypressClick', [pin]);
     return pin;
 }

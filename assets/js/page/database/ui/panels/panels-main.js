@@ -19,7 +19,7 @@
  *     SUBMIT/SUCCESS METHODS
  *     MISC
  */
-import { _alert, _db, sendAjaxQuery } from '~util';
+import { _alert, _db, _u } from '~util';
 import * as fM from './filter-panel-main.js';
 import * as iM from './int-list-panel.js';
 import { initReviewPanel } from './data-review/review-panel-main.js';
@@ -147,5 +147,5 @@ function getOpenPanels() {
 }
 /* ================ SUBMIT AND SUCCESS METHODS ============================== */
 export function submitUpdates(data, action, successFunc) {
-    sendAjaxQuery(data, 'lists/' + action, successFunc);
+    _u('sendAjaxQuery', [data, 'lists/' + action, successFunc]);
 }

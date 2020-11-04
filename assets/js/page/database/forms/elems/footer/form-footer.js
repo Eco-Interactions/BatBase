@@ -7,7 +7,7 @@
  *     SHOW ALL FIELDS CHECKBOX
  *     SUBMIT AND CANCEL BUTTONS
  */
-import { _u } from '~db';
+import { _el, _u } from '~util';
 import { _confg, _elems, _state, exitFormLevel, submitForm } from '~form';
 
 let fS;
@@ -17,7 +17,7 @@ let fS;
  */
 export default function buildFormFooter(entity, level, action) {
     fS = _state('getFormState').forms[level];
-    const cntnr = _u('getElem', ['div', { class: "flex-row bttn-cntnr" }]);
+    const cntnr = _el('getElem', ['div', { class: "flex-row bttn-cntnr" }]);
     $(cntnr).append(...buildFooterElems(entity, level, action));
     return cntnr;
 }
@@ -51,7 +51,7 @@ function buildFooterElems(entity, level, action) {
  */
 function buildAddFieldsCheckbox(entity, level) {
     if (!ifEntityHasOptionalFields(entity)) { return null; }
-    const cntnr = _u('getElem', ['div', {class: 'all-fields-cntnr'}]);
+    const cntnr = _el('getElem', ['div', {class: 'all-fields-cntnr'}]);
     $(cntnr).append([getCheckbox(level, entity), getLabel(level)]);
     return cntnr;
 }
@@ -67,7 +67,7 @@ function getCheckbox(level, entity) {
 }
 function buildChkbxInput(level) {
     const attr = { id: level+'-all-fields', type: 'checkbox', value: 'Show all fields' };
-    const input = _u('getElem', ['input', attr]);
+    const input = _el('getElem', ['input', attr]);
     if (fS.expanded) { input.checked = true; }
     return input;
 }
@@ -77,7 +77,7 @@ function setToggleEvent(level, entity, chkbx) {
 }
 function getLabel(level) {
     const attr = { for: level+'-all-fields', text: 'Show all fields.' };
-    return _u('getElem', ['label', attr]);
+    return _el('getElem', ['label', attr]);
 }
 /* ------------------ SUBMIT AND CANCEL BUTTONS ----------------------------- */
 
@@ -123,5 +123,5 @@ function getCancelFunc(entity, level) {
 /** Returns a (submit or cancel) button for the form level. */
 function buildFormButton(actn, lvl, val) {
     const attr = { id: lvl+'-'+actn, class: 'ag-fresh', type: 'button', value: val}
-    return _u('getElem', ['input', attr]);
+    return _el('getElem', ['input', attr]);
 }

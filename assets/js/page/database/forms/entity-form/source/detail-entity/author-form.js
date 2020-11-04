@@ -15,8 +15,8 @@
  *         ON AUTHOR|EDITOR SELECTION
  *         BUILD NEXT COMBO
  */
-import { _u } from '~db';
-import { _elems, _cmbx, _val, getSubFormLvl, getNextFormLevel } from '~form';
+import { _cmbx, _u } from '~util';
+import { _elems, _val, getSubFormLvl, getNextFormLevel } from '~form';
 import * as sForm from '../src-form-main.js';
 /* ------------------------ AUTHOR CREATE ----------------------------------- */
 /**
@@ -46,7 +46,7 @@ export function initAuthOrEdForm(authCnt, value, authType) {        /*perm-log*/
         $('#'+fLvl+'-cancel').click(toggleOtherAuthorTypeSelect.bind(null, authType, true));
     }
     function clearComboOnFormClose() {
-        _u('resetCombobox', [authType+authCnt]);
+        _cmbx('resetCombobox', [authType+authCnt]);
     }
 }
 /* ======================= SELECT AUTHORS|EDITORS =========================== */
@@ -65,7 +65,7 @@ function ifFieldNotShownOrNoValToSelect(field, authObj) {
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {                   /*dbug-log*///console.log('selectAuthor. args = %O', arguments)
     if (!$('#sel-'+field+cnt).length) { return Promise.resolve(); } //field hidden for certain citation types
-    _u('setSelVal', [field+cnt, authId, 'silent']);
+    _cmbx('setSelVal', [field+cnt, authId, 'silent']);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
 /* ----------------------- ON AUTHOR|EDITOR SELECTION ----------------------- */
@@ -109,7 +109,7 @@ function lastAuthComboEmpty(cnt, authType) {
 function toggleOtherAuthorTypeSelect(type, enable) {
     const entity = type === 'Authors' ? 'Editors' : 'Authors';
     if (!$('#sel-cntnr-'+entity).length) { return; }
-    _u('enableFirstCombobox', [entity, enable]);
+    _cmbx('enableFirstCombobox', [entity, enable]);
 }
 /* ------------------ BUILD NEXT COMBO -------------------------------------- */
 /** Builds a new, empty author combobox */
@@ -119,7 +119,7 @@ function buildNewAuthorSelect(cnt, val, prntLvl, authType) {        /*dbug-log*/
 
     function appendNewAuthSelect(sel) {
         $('#sel-cntnr-'+authType).append(sel).data('cnt', cnt);
-        _u('initCombobox', [getAuthSelConfg(authType, cnt)]);
+        _cmbx('initCombobox', [getAuthSelConfg(authType, cnt)]);
     }
 }
 function getAuthSelConfg(authType, cnt) {

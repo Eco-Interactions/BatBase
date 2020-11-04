@@ -16,8 +16,7 @@
  *         APPEND AND STYLE
  *     SUB FORM
  */
-import { _modal } from '~util';
-import { _u } from '~db';
+import { _cmbx, _modal, _u } from '~util';
 import { _confg, _elems, _panel, _state } from '~form';
 
 let action, entity, fLvl;
@@ -38,37 +37,37 @@ function buildForm(id, fields) {
     return [getExitButtonRow(), getMainFormAndDetailPanelHtml(id, fields)];
 }
 function getMainFormAndDetailPanelHtml(id, fields) {
-    const cntnr = _u('getElem', ['div', { class: 'flex-row' }]);
+    const cntnr = _el('getElem', ['div', { class: 'flex-row' }]);
     const detailPanelHtml = _panel('getDetailPanelElems', [entity, id, action]);
     $(cntnr).append([buildMainForm(fields), detailPanelHtml]);
     return cntnr;
 }
 /* ----------------------- TOP CORNER EXIT BUTTON --------------------------- */
 function getExitButtonRow() {
-    const  row = _u('getElem', ['div', { class: 'exit-row' }]);
+    const  row = _el('getElem', ['div', { class: 'exit-row' }]);
     $(row).append(getExitButton());
     return row;
 }
 export function getExitButton() {
     const attr = { 'id': 'exit-form', 'class': 'exit-bttn', 'type': 'button', 'value': 'X' }
-    const bttn = _u('getElem', ['input', attr]);
+    const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(_elems.bind(null, 'exitRootForm'));
     return bttn;
 }
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
-    const formWin = _u('getElem', ['div', { id: 'form-main', class: action }]);
+    const formWin = _el('getElem', ['div', { id: 'form-main', class: action }]);
     $(formWin).append([getFormHelpElems('top'), getHeader(), getValMsgCntnr('top'), getForm(fields)]);
     return formWin;
 }
 /* ------------------------------ HEADER ------------------------------------ */
 function getHeader() {
     const title = (action == 'create' ? 'New ' : 'Editing ') + _u('ucfirst', [entity]);
-    return _u('getElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
+    return _el('getElem', ['h1', { 'id': 'top-hdr', 'text': title }]);
 }
 /** Container for custom form-validation messages. */
 function getValMsgCntnr(fLvl) {
-    return _u('getElem', ['div', { id: fLvl+'_alert' }]);
+    return _el('getElem', ['div', { id: fLvl+'_alert' }]);
 }
 /* ----------------------------- FORM --------------------------------------- */
 function getForm(fields) {
@@ -90,7 +89,7 @@ function buildFormElem() {
 }
 function buildEntityFieldContainer(fields) {
     const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
-    const div = _u('getElem', ['div', attr]);
+    const div = _el('getElem', ['div', attr]);
     $(div).append(fields);
     return div;
 }
@@ -133,15 +132,15 @@ function buildSubFormContainer(rows, fClasses) {
 }
 function buildSubFormCntnr(fClasses) {
     const attr = {id: fLvl+'-form', class: fClasses };
-    return _u('getElem', ['form', attr]);
+    return _el('getElem', ['form', attr]);
 }
 function buildSubFormHdr() {
     const attr = { text: 'New '+_u('ucfirst', [entity]), id: fLvl+'-hdr' };
-    return _u('getElem', ['p', attr]);
+    return _el('getElem', ['p', attr]);
 }
 function finishSubFormInit(subForm, sId) {
     _state('setFormProp', [fLvl, 'pSelId', sId]);
-    _u('enableCombobox', [sId.split('sel-').pop(), false]);
+    _cmbx('enableCombobox', [sId.split('sel-').pop(), false]);
     return subForm;
 }
 /* ============================== SHARED ==================================== */
@@ -152,7 +151,7 @@ function setFormScopeParams(a, e, l) {
 }
 /* ----------------------- HELP ELEMS --------------------------------------- */
 function getFormHelpElems() {
-    const cntnr = _u('getElem', ['div', { id: fLvl+'-help', class: 'flex-row'}]);
+    const cntnr = _el('getElem', ['div', { id: fLvl+'-help', class: 'flex-row'}]);
     $(cntnr).append(getFormWalkthroughBttn());
     return cntnr;
 }
@@ -173,7 +172,7 @@ function buildWalkthroughButton(titleInfo) {
         type: 'button',
         value: 'Walkthrough',
     };
-    return _u('getElem', ['input', attr]);
+    return _el('getElem', ['input', attr]);
 }
 function getFormInfoStepCount() {
     const formInfoConfg = _confg('getFormConfg', [entity]).info;

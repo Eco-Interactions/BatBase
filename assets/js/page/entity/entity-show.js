@@ -6,7 +6,7 @@
  *         HTML BUILDERS
  *     CSV DOWNLOAD
  */
-import * as util from '~util';
+import { _el } from '~util';
 import getEntityDisplayConfg from './entity-show-data.js';
 
 initShowPage();
@@ -23,7 +23,7 @@ function getEntity (url) {
 }
 /* ==================== CORE SHOW PAGE BUILDER ============================== */
 function buildEntityShowPage (entity, data) {                       /*dbug-log*/console.log('   *//init[%s]ShowPage = %O', entity, data);
-    const confg = getEntityDisplayConfg(entity, data, util);
+    const confg = getEntityDisplayConfg(entity, data);
     const sections = confg.map(buildDataSection);
     $('#show-loading-msg').remove();
     $('#entity-show').append(sections.filter(s => s));
@@ -44,7 +44,7 @@ function getDataCell (data) {
 }
 /* ------------------------- HTML BUILDERS ---------------------------------- */
 function getDataSect (cnt, section, rows) {                         /*dbug-log*///console.log('getDataSect [%s] = [%O]', title, rows);
-    const hdr = util.getElem('h3', { text: section.name });
+    const hdr = _el('getElem', ['h3', { text: section.name }]);
     const id = 'data-sect-'+cnt;
     const classes = 'data-sect' + (section.classes ? ' ' + section.classes : '');
     return getDivWithContent(id, classes, [hdr, ...rows]);
@@ -64,11 +64,11 @@ function buildDataCell (field, fieldHTML, label, c = '') {          /*dbug-log*/
 }
 /** Note: If label is set to FALSE in confg, no label is built. */
 function getFieldLabel(field, label) {
-    return label === false ? false : util.getElem('label', { text: field+':'});
+    return label === false ? false : _el('getElem', ['label', { text: field+':'}]);
 }
 /* ------------ base ------------------- */
 function getDivWithContent (id, classes, content) {                 /*dbug-log*///console.log('               getDivWithContent [%s] = [%O]', classes, content);
-    const div = util.getElem('div', { class: classes, id: id });
+    const div = _el('getElem', ['div', { class: classes, id: id }]);
     const html = !!content ? content : '[ NONE ]';
     $(div).append(html);
     return div;

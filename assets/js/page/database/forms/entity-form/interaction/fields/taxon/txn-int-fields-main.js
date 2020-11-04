@@ -9,7 +9,7 @@
  *     RANK FIELDS
  *     SELECT ROLE-TAXON
  */
-import {  _cmbx, _state } from '~form';
+import {  _elems, _state } from '~form';
 import * as iForm from '../../int-form-main.js';
 import * as txnSelect from './txn-select-form.js';
 import * as rankFields from './rank/txn-rank-main.js';
@@ -81,7 +81,7 @@ export function onRankSelection() {
 }
 export function initRankCombos() {
     const events = getRankComboEvents();
-    _cmbx('initFormCombos', ['taxon', 'sub', events]);
+    _elems('initFormCombos', ['taxon', 'sub', events]);
 }
 function getRankComboEvents() {
     return {

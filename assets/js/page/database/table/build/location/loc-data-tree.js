@@ -4,7 +4,7 @@
  * Export
  *     buildLocTree
  */
-import { _u } from '~db';
+import { getDetachedRcrd } from '~db';
 import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../build-main.js';
 
 let locRcrds;
@@ -22,7 +22,7 @@ function buildLocDataTree(topLocs) {
     return sortDataTree(tree);
 
     function buildLocBrach(id) {
-        const topLoc = _u('getDetachedRcrd', [id, locRcrds]);
+        const topLoc = getDetachedRcrd(id, locRcrds);
         tree[topLoc.displayName] = fillLocChildren(topLoc);
     }
 }

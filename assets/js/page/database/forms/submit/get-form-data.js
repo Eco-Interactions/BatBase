@@ -4,9 +4,8 @@
  * Export
  *     getValidatedFormData
  */
-import { _db } from '~util';
-import { _u } from '~db';
-import { _state, getSelectedVals } from '../forms-main.js';
+import { _cmbx, _db, _u } from '~util';
+import { _state, getSelectedVals } from '~form';
 
 let fS; //form state
 
@@ -62,7 +61,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
     }
     /** Adds an array of tag values. */
     function getTagVals(input, fieldName) {
-        return _u('getSelVal', [_u('ucfirst', [fieldName])]);
+        return _cmbx('getSelVal', [_u('ucfirst', [fieldName])]);
     }
     function handleAdditionalEntityData(entity) {
         if (!submitting) { return Promise.resolve(); }

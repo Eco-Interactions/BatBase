@@ -1,14 +1,7 @@
 /**
- * Selectized combobox methods.
+ * Handles building Options objects for comboboxes throughout the site.
  *
  * Export
- *     initCombobox
- *     initComboboxes
- *     getSelVal
- *     setSelVal
- *     updatePlaceholderText
- *     replaceSelOpts
- *     triggerComboChangeReturnPromise
  *
  * TOC
  *
@@ -16,6 +9,7 @@
 import { __alert, _db, ucfirst } from '~util';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
+
 /**
  * Inits the combobox, using 'selectize', according to the passed config.
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
@@ -141,63 +135,6 @@ export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*/
 export function destroySelectizeInstance(field) {
     if (!confgs[field]) { return; }
     $('#sel-'+confgs[name].id)[0].selectize.destroy();
-}
-
-/** ==================== GET OPTIONS ======================================== */
-/** --------------------- STORED DATA --------------------------------------- */
-/** Builds options out of a stored entity-name object. */
-export function getOptsFromStoredData(prop) {
-    return _db('getData', [prop, true]).then(data => {              /*dbug-log*///console.log('getOptsFromStoredData [%s] = %O', prop, data);
-        if (!data) { console.log('NO STORED DATA for [%s]', prop);return []; }
-        return getOptions(data, Object.keys(data).sort());
-    });
-}
-/** --------------------- BUILD OPTIONS ------------------------------------- */
-/**
- * Builds options out of the entity-name  object. Name (k) ID (v). If an option
- * group is passed, an additional 'group' key is added that will serve as a category
- * for the options in the group.
- */
-export function getOptions(entityObj, sortedKeys) {                 /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
-    return Object.values(entityObj)[0].group ?
-        getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);
-}
-function getEntityOpt(name, id) {                                   /*dbug-log*///console.log('getEntityOpt [%s][%s]', name, id);
-    return new Option(ucfirst(name), id);
-}
-/** _____________________ GROUP OPTIONS _____________________________________ */
-function getOptGroups(entityObj, sortedKeys) {
-    const gSorted = sortEntityDataByGroup(entityObj, sortedKeys);
-    return Object.keys(gSorted).map(getOptGroup);
-
-    function getOptGroup(gName) {                                   /*dbug-log*///console.log('getOptGroup [%s] %O', gName, gSorted[gName]);
-        const $group = $(`<optgroup label="${gName}" />`);
-        $group.append(...gSorted[gName]);
-        return $group[0];
-    }
-}
-function sortEntityDataByGroup(data, keys) {
-    const sorted = {};
-    keys.forEach(k => sortEntity(k, data[k]));
-    return sorted;
-
-    function sortEntity(name, oData) {
-        if (!sorted[oData.group]) { sorted[oData.group] = []; }
-        sorted[oData.group].push(getEntityOpt(name, oData.value));
-    }
-}
-/** _____________________ SIMPLE GROUPS _____________________________________ */
-function getSimpleOpts(entityObj, sortedKeys) {
-    return sortedKeys.map(name => getEntityOpt(name, entityObj[name]));
-}
-/** ==================== OPTIONS UTIL ======================================= */
-export function alphabetizeOpts(opts) {
-    return opts.sort(alphaOptionObjs)
-}
-function alphaOptionObjs(a, b) {
-    const x = a.text.toLowerCase();
-    const y = b.text.toLowerCase();
-    return x<y ? -1 : x>y ? 1 : 0;
 }
 /* -------------------- REPLACE OPTIONS ------------------------------------- */
 /**

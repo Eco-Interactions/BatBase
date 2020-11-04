@@ -9,7 +9,7 @@
  *     SOURCE TABLE
  *     SOURCE VIEW
  */
-import { _db } from '~util';
+import { _cmbx, _db } from '~util';
 import { _filter, _table, _u, _ui } from '~db';
 import * as build from '../build-main.js';
 
@@ -19,7 +19,7 @@ const tState = _table.bind(null, 'tableState');
  * Get all data needed for the Source-focused table from data storage and send
  * to @initSrcViewOpts to begin the data-table build.
  */
-export function buildSrcTable(v) {                                  /*Perm-log*/console.log("       --Building Source Table. view ? [%s]", v);
+export function buildSrcTable(v) {                                  /*perm-log*/console.log("       --Building Source Table. view ? [%s]", v);
     if (v) { return getSrcDataAndBuildTable(v); }
     return _db('getData', ['curView', true]).then(storedView => {
         const view = typeof storedView == 'string' ? storedView : 'pubs';
@@ -35,12 +35,12 @@ function getSrcDataAndBuildTable(view) {
 }
 /** ================== SOURCE VIEW ========================================== */
 /** Event fired when the source view select box has been changed. */
-export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --onSrcViewChange. view ? [%s]', val);
+export function onSrcViewChange(val) {                              /*perm-log*/console.log('       --onSrcViewChange. view ? [%s]', val);
     if (!val) { return; }
     $('#focus-filters').empty();
     return rebuildSrcTable(val);
 }
-function rebuildSrcTable(val) {                                     /*Perm-log*/console.log('       --rebuildSrcTable. view ? [%s]', val)
+function rebuildSrcTable(val) {                                     /*perm-log*/console.log('       --rebuildSrcTable. view ? [%s]', val)
     _ui('fadeTable');
     _table('resetTableState');
     _ui('setTreeToggleData', [false]);
@@ -56,8 +56,8 @@ function startSrcTableBuildChain(val) {
         .then(() => _table('loadSrcFilters', [view]));
 }
 function getAndStoreSrcView(val) {
-    const viewVal = val || _u('getSelVal', ['View']);                           //console.log("getAndStoreSrcView. viewVal = ", viewVal)
-    _u('setData', ['curView', viewVal]);
+    const viewVal = val || _cmbx('getSelVal', ['View']);            /*dbug-log*///console.log("getAndStoreSrcView [%s]", viewVal)
+    _db('setData', ['curView', viewVal]);
     tState().set({curView: viewVal});
     return viewVal;
 }

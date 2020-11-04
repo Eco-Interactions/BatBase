@@ -23,8 +23,8 @@
  *             Reset & Enable/Disable UI
  *             Table Methods
  */
-import { _db } from '~util';
-import { _table, _u, _ui } from '~db';
+import { _cmbx, _db, _u } from '~util';
+import { _table, _ui } from '~db';
 import * as pM from './panels-main.js';
 
 const tState = _table.bind(null, 'tableState');
@@ -143,7 +143,7 @@ function editDataList() {
     if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
-    data.id = _u('getSelVal', ['Int-lists']);
+    data.id = _cmbx('getSelVal', ['Int-lists']);
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
@@ -287,7 +287,7 @@ function hideSavedMsg() {
 /* =============================== UI ======================================= */
 function initListCombobox() {
     if ($('#list-details>span').text() !== 'List Details') { return; }
-    _u('initCombobox', [{ name: 'Interaction List', onChange: selIntList, create: newIntList}]);
+    _cmbx('initCombobox', [{ name: 'Interaction List', onChange: selIntList, create: newIntList}]);
     updateListComboboxOptions().then(() => {
         window.setTimeout(() => $('#sel-InteractionList')[0].selectize.focus(), 500);
         disableInputs();
@@ -408,10 +408,10 @@ function updateDetailHdr(type) {
     $('#list-details>span').html(type + ' List Details');
 }
 function updateListComboboxOptions() {
-    return Promise.resolve(_u('getOptsFromStoredData', ['dataListNames']).then(
+    return Promise.resolve(_cmbx('getOptsFromStoredData', ['dataListNames']).then(
         opts => {
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
-            _u('replaceSelOpts', ['InteractionList', opts]);
+            _cmbx('replaceSelOpts', ['InteractionList', opts]);
     }));
 }
 function resetPrevListUiState() {

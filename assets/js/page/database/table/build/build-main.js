@@ -17,7 +17,9 @@
  *     TABLE REBUILD
  *     UTILITY
  */
-import { _u, _ui } from '~db';
+
+import { _cmbx } from '~util';
+import { _ui, getDetachedRcrd } from '~db';
 import { getFilterState, resetTableState, resetTableParams, tableState } from '../table-main.js';
 import * as init from './init-table/init-table-main.js';
 import * as loc from './location/loc-table-main.js';
@@ -166,5 +168,5 @@ function alphaEntityNames(a, b) {                                               
     return x<y ? -1 : x>y ? 1 : 0;
 }
 export function getTreeRcrds(idAry, rcrds, entity) {                                   //console.log('getTreeRcrds. args = %O', arguments);
-    return idAry.map(id => _u('getDetachedRcrd', [id, rcrds, entity])).filter(r => r);
+    return idAry.map(id => getDetachedRcrd(id, rcrds, entity)).filter(r => r);
 }

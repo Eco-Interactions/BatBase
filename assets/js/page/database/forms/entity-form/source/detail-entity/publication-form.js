@@ -13,14 +13,14 @@
  *     PUBLICATION-TYPE FIELDS
  *     FINISH EDIT-FORM
  */
-import { _u } from '~db';
+import { _cmbx, _el } from '~util';
 import { _state, _elems, _panel } from '~form';
 import * as sForm from '../src-form-main.js';
 /* -------------------------- PUBLICATION CREATE ---------------------------- */
 export function initPubForm(value) {                                /*perm-log*/console.log('       /--initPubForm [%s]', value);
     const val = value === 'create' ? '' : value;
     initPubMemory();
-    _u('resetCombobox', ['CitationTitle']);
+    _cmbx('resetCombobox', ['CitationTitle']);
     _panel('clearFieldDetails', ['CitationTitle']);
     return buildAndAppendPubForm(val);
 }
@@ -63,14 +63,14 @@ function setPubComboLabelWidth() {
     $('#Authors-lbl').css('min-width', '109px');
 }
 function ifThesisDissertationModifyLabel() {
-    const type = _u('getSelTxt', ['PublicationType']);
+    const type = _cmbx('getSelTxt', ['PublicationType']);
     if (type !== 'Thesis/Dissertation') { return; }
     $('#Publisher-lbl').css({'flex': '0 0 157px'});
 }
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote() {
-    if (_u('getSelTxt', ['PublicationType']) !== 'Book') { return; }
-    const note = _u('getElem', ['div', { class: 'skipFormData' }]);
+    if (_cmbx('getSelTxt', ['PublicationType']) !== 'Book') { return; }
+    const note = _el('getElem', ['div', { class: 'skipFormData' }]);
     $(note).html('<i>Note: there must be at least one author OR editor ' +
         'selected for book publications.</i>')
     $(note).css({'margin': 'auto'});
