@@ -100,25 +100,26 @@ function buildCombobox(fieldType, entity, field, fLvl) {
 /* ------------------ HTML VALIDATION --------------------------------------- */
 /* ---------- COORDINATES ---------- */
 function setLatitudePattern(input, fLvl) {
-    return handleCoordPattern(input, fLvl, 'lat');
+    const regex = '^-?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)';
+    return handleCoordPattern(input, fLvl, 'lat', regex);
 }
 function setLongitudePattern(input, fLvl) {
-    return handleCoordPattern(input, fLvl, 'long');
+    const regex = '^-?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)';
+    return handleCoordPattern(input, fLvl, 'long', regex);
 }
-function handleCoordPattern(input, fLvl, prefix) {
-    const coordRegex = '-?\\d{1,2}(\\.?\\d*)';
+function handleCoordPattern(input, fLvl, prefix, regex) {
     const msg = `Please enter a valid ${prefix}itude.`;
-    return addAttrAndValidation(input, { pattern: coordRegex }, msg, fLvl);
+    return addAttrAndValidation(input, { pattern: regex }, msg, fLvl);
 }
 /* ---------- URL ---------- */
 function setHttpPatternAndPlaceholder(input, fLvl) {
     const msg = 'Please enter a valid URL. Ex: https://...';
-    const attrs = { pattern: '\\b(https?:\/\/\\S+\.\S*\\b\/?)', placeholder: 'http(s)://...' };
+    const attrs = { pattern: '^(https?:\/\/\\S+\.\S*\\b\/?)', placeholder: 'http(s)://...' };
     return addAttrAndValidation(input, attrs, msg, fLvl);
 }
 function setDoiPattern(input, fLvl) {
     const msg = 'Please enter the full DOI URL. Ex: https://doi.org/10.1111/j.1439';
-    const attrs = { pattern: 'https?:\/\/doi.org/\\S+', placeholder: 'https://doi.org/...' };
+    const attrs = { pattern: '^https?:\/\/doi.org/\\S+', placeholder: 'https://doi.org/...' };
     return addAttrAndValidation(input, attrs, msg, fLvl);
 }
 /* ---------- PAGE ---------- */
