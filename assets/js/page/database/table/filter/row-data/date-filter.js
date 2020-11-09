@@ -134,7 +134,7 @@ function updateDateFilterState(dateTime, filtering) {
     app.date = {
         active: filtering,
         time:   dateTime || app.date.time,
-        type:   _cmbx('getSelVal', ['Date Filter Type'])
+        type:   _cmbx('getSelVal', ['DateFilterType'])
     };
     fM.setFilterState('date', app.date, 'direct');
 }

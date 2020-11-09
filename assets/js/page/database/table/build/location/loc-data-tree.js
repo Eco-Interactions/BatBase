@@ -5,7 +5,7 @@
  *     buildLocTree
  */
 import { getDetachedRcrd } from '~db';
-import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../build-main.js';
+import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../table-build-main.js';
 
 let locRcrds;
 /**

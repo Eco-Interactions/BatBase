@@ -6,7 +6,7 @@
  *     exitSubForm
  *
  */
-import { _table } from '~db';
+import { _filter, _table } from '~db';
 import { _elems, _state, clearFormMemory } from '~form';
 /* ------------------------ ROOT-FORM --------------------------------------- */
 /** Returns popup and overlay to their original/default state. */
@@ -35,7 +35,7 @@ function refocusTableIfFormWasSubmitted() {
 }
 function refocusAndShowUpdates(submitData) {                        /*dbug-log*///console.log('refocusAndShowUpdates.')
     if (_state('getFormProp', ['top', 'action']) === 'create') {
-        _table('showTodaysUpdates', ['srcs']);
+        _filter('showTodaysUpdates', ['srcs']);
     } else {
         _table('reloadTableWithCurrentFilters');
     }

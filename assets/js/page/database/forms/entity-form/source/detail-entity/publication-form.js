@@ -56,11 +56,16 @@ export function loadPubTypeFields(typeId) {                         /*dbug-log*/
         ifThesisDissertationModifyLabel();
     }
 }
+/* Fixes and aligns label and row styles. */
 function setPubComboLabelWidth() {
+    if ($('#PublicationType_row.top-row').length) { return setPublicationTypeLabel(); }
     const rowW = $('#PublicationType_row').width() - 14;
     $('#PublicationType_row, #Publisher_row, #Editors_row').css('max-width', rowW);
     $('#PublicationType-lbl, #Publisher-lbl, #Editors-lbl').css('min-width', '125px');
     $('#Authors-lbl').css('min-width', '109px');
+}
+function setPublicationTypeLabel() {
+    $('#PublicationType-lbl').css('min-width', '125px');
 }
 function ifThesisDissertationModifyLabel() {
     const type = _cmbx('getSelTxt', ['PublicationType']);

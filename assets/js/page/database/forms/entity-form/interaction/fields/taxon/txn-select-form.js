@@ -20,7 +20,7 @@
  *     SELECT CURRENT ROLE-TAXON OR FOCUS COMBO
  *     RESET SELECT-FORM TO INIT STATE
  */
-import { _cmbx, _u } from '~util';
+import { _cmbx, _el, _u } from '~util';
 import { _state, _elems } from '~form';
 import * as iForm from '../../int-form-main.js';
 

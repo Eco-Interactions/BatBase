@@ -11,7 +11,7 @@
  *         CONTAINER
  *         LABEL
  */
-import { _u } from '~util';
+import { _el, _u } from '~util';
 /**
  * Builds a field-row: rowDiv->(alertDiv, fieldDiv->(label, input))
  *
@@ -33,7 +33,7 @@ import { _u } from '~util';
  */
 export function getFieldRow(field) {                                /*dbug-log*///console.log('getFieldRow = %O', field);
     const rowDiv = buildRowContainer(field);
-    const alertDiv = _u('getElem', ['div', { id: field.name+'_alert'}]);
+    const alertDiv = _el('getElem', ['div', { id: field.name+'_alert'}]);
     const fieldElems = getFieldElems(field);
     $(rowDiv).append([alertDiv, fieldElems]);
     return rowDiv;
@@ -41,7 +41,7 @@ export function getFieldRow(field) {                                /*dbug-log*/
 /* --------------------- ROW CONTAINER -------------------------------------- */
 function buildRowContainer(field) {
     const attr = { class: getRowClasses(), id: field.name + '_row'}
-    return _u('getElem', ['div', attr]);
+    return _el('getElem', ['div', attr]);
     /** Returns the style classes for the row. */
     function getRowClasses() {
         const rowClass = field.input.className.includes('xlrg-field') ?
@@ -67,7 +67,7 @@ function getFieldElems(field) {
  */
 function buildFieldContainer(group, info, dir = 'row') {
     const attr = { class: 'field-elems flex-'+dir, title: getInfoTxt(info)};
-    const cntnr = _u('getElem', ['div', attr]);
+    const cntnr = _el('getElem', ['div', attr]);
     if (info) { addTutorialDataAttr(cntnr, group, info); }
     return cntnr;
 }
@@ -85,7 +85,7 @@ function getInfoTxt(info, key = 'tooltip') {
 function buildFieldLabel(field) {
     if (field.label === false) { return; }
     const attr = { id: field.name+'_lbl', class: getLabelClass(), text: getFieldName()};
-    return _u('getElem', ['label', attr]);
+    return _el('getElem', ['label', attr]);
 
     function getLabelClass() {
         return field.required ? 'required' : '';

@@ -19,7 +19,8 @@
  *          PANEL FILTERS
  *          TABLE FILTERS
  */
-import { _table, _u, _ui } from '../../../db-main.js';
+import { _u } from '~util';
+import { _table, _ui } from '~db';
 
 let fS;
 
@@ -113,16 +114,8 @@ export function getFilterStateForSentryErrorReport() {
  * If a saved filter set is applied filters are read from the set. Otherwise, the
  * active filters in the panel and table are checked and returned.
  */
-export function getActiveFilterVals() {
-    const set = _ui('isFilterSetActive');
-    return set ? getSavedFilterStatus(set) : getPageActiveFilters();
-}
-/* ------------------- FILTER SET STATUS ------------------------------------ */
-function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
-    const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = getFilterDisplayNames(set.direct, set.rebuild);
-    if (fS.filters.direct.list) { pnlFltrs.unshift('List'); }
-    return pnlFltrs.concat(tblFltrs);
+export function getActiveFilterVals(activeFilterSet = false) {
+    return getPageActiveFilters();
 }
 /* ------------------- PAGE FILTERS ----------------------------------------- */
 function getPageActiveFilters () {

@@ -14,7 +14,6 @@
 import * as db from './local-data/local-data-main.js';
 import * as cmbx from './elems/combobox/combobox-main.js';
 import * as elems from './elems/elems-main.js';
-import * as uAjax from './misc/ajax-util.js';
 import * as alert from './misc/alert-issue.js';
 import * as modal from './misc/intro-modals.js';
 import * as misc from './misc/misc-util-main.js';
@@ -50,7 +49,7 @@ export function _el(funcName, params = []) {
     return moduleMethod(funcName, elems, 'app-elems', params);
 }
 export function _modal(funcName, params = []) {
-    return moduleMethod(funcName, db, 'app-db', params);
+    return moduleMethod(funcName, modal, 'app-modal', params);
 }
 export function _u(funcName, params = []) {
     return moduleMethod(funcName, misc, 'app-util', params);

@@ -18,9 +18,8 @@
  *     UTILITY
  */
 
-import { _cmbx } from '~util';
-import { _ui, getDetachedRcrd } from '~db';
-import { getFilterState, resetTableState, resetTableParams, tableState } from '../table-main.js';
+import { _cmbx, _db, _u } from '~util';
+import { _filter, _table, _ui, getDetachedRcrd } from '~db';
 import * as init from './init-table/init-table-main.js';
 import * as loc from './location/loc-table-main.js';
 import * as src from './source/src-table-main.js';
@@ -94,24 +93,25 @@ export function initTable(tblName, rowData, tState) {
 }
 /* ==================== TABLE REBUILD ======================================= */
 export function reloadTableWithCurrentFilters() {
-    const filters = getFilterState();
+    const filters = _filter('getFilterState');
     buildTable(filters.focus, filters.view)
-    .then(() => _ui('onTableReloadCompleteApplyFilters', [filters]));
+    .then(() => _filter('onTableReloadCompleteApplyFilters', [filters]));
 }
 /**
  * Table-rebuild entry point after local database updates, filter clears, and
  * after edit-form close.
  */
 export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
-    resetTableState();
+    _table('resetTableState');
     return buildTable(focus)
         .then(() => _ui('updateUiForTableView'));
 }
 export function buildTable(f, view = false) {
     if (f === '') { return Promise.resolve(); } //Combobox cleared by user
-    const focus = f ? f : _u('getSelVal', ['Focus']);                 /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view);
-    resetTableState();
-    return updateFocusAndBuildTable(focus, view, tableState().get('curFocus'));
+    const focus = f ? f : _cmbx('getSelVal', ['Focus']);                 /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view);
+    const prevFocus = _table('tableState').get('curFocus');
+    _table('resetTableState');
+    return updateFocusAndBuildTable(focus, view, prevFocus);
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, view, curFocus) {                      //console.log("updateFocusAndBuildTable called. focus = [%s], view = [%s", focus, view)
@@ -120,10 +120,10 @@ function updateFocusAndBuildTable(focus, view, curFocus) {                      
         .then(() => buildDataTable(focus, view));
 }
 function onFocusChanged(focus, view) {
-    _u('setData', ['curFocus', focus]);
-    _u('setData', ['curView', view]);
+    _db('setData', ['curFocus', focus]);
+    _db('setData', ['curView', view]);
     resetFilterPanel(focus);
-    return resetTableParams(focus);
+    return _table('resetTableParams', [focus]);
 }
 function resetFilterPanel(focus) {
     _ui('updateFilterPanelHeader', [focus]);

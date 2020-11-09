@@ -19,13 +19,13 @@
 import { _cmbx, _db, _el } from '~util';
 import { _state, _val, getSubFormLvl } from '~form';
 /* ====================== COMBOBOX BUILDERS ================================= */
-export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*///console.log('buildComboInput [%s], args = %O', type, arguments);
+export function buildComboInput(field, entity, fLvl) {              /*dbug-log*///console.log('buildComboInput [%s] = %O', field.type, field);
     const map = {
         multiSelect: buildMultiSelect,
         select: buildSelect,
         tags: buildTagField,
     };
-    return map[type](entity, field, fLvl);
+    return map[field.type](entity, field, fLvl);
 }
 /* ---------------------- TAGS COMBOBOX ------------------------------------- */
 /**
@@ -33,10 +33,10 @@ export function buildComboInput(type, entity, field, fLvl) {        /*dbug-log*/
  * to allow multiple selections. A data property is added for use form submission.
  */
 function buildTagField(entity, field, fLvl) {
-    const attr = { id: 'sel-'+field, class: 'med-field'};
+    const attr = { id: 'sel-'+field.name, class: field.class };
     const tagSel = _el('getSelect', [[], attr]);
     $(tagSel).data('inputType', 'tags');
-    _state('addComboToFormState', [fLvl, field]);
+    _state('addComboToFormState', [fLvl, field.name]);
     return tagSel;
 }
 /* --------------------- SINGLE SELECT/COMBOS ------------------------------- */
@@ -47,13 +47,13 @@ function buildTagField(entity, field, fLvl) {
  * init the 'selectize' combobox.
  */
 function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*///console.log("buildSelect [%s] field [%s], fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);
-    return _cmbx('getFieldOptions', [field])
+    return _cmbx('getFieldOptions', [field.name])
         .then(finishSelectBuild);
 
     function finishSelectBuild(opts) {                              /*dbug-log*///console.log('finishSelectBuild [%s] opts %O', field, opts);
-        const fieldId = 'sel-' + (cnt ? field + cnt : field);
-        const attr = { id: fieldId , class: 'med-field'};
-        _state('addComboToFormState', [fLvl, field]);
+        const fieldId = 'sel-' + (cnt ? field.name + cnt : field.name);
+        const attr = { id: fieldId, class: field.class};
+        _state('addComboToFormState', [fLvl, field.name]);
         return _el('getSelect', [opts, attr]);
     }
 }
@@ -64,7 +64,7 @@ function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*/
  * or the Author create form when the user enters a new Author's name.
  */
 function buildMultiSelect(entity, field, fLvl) {                    /*dbug-log*///console.log("buildMultiSelect [%s][%s]", entity, field);
-    const cntnr = _el('getElem', ['div', { id: 'sel-cntnr-' + field, class: 'sel-cntnr' }]);
+    const cntnr = _el('getElem', ['div', { id: 'sel-cntnr-' + field.name, class: 'sel-cntnr' }]);
     return buildMultiSelectElem(entity, field, fLvl, 1)
         .then(returnFinishedMultiSelectFields);
 
@@ -81,7 +81,7 @@ export function buildMultiSelectElem(entity, field, fLvl, cnt) {
     function returnFinishedMultiSelectField(input) {
         const wrapper = _el('getElem', ['div', {class: 'flex-row'}]);
         const lbl = buildMultiSelectLbl(cnt)
-        $(input).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
+        $(input).change(storeMultiSelectValue.bind(null, fLvl, cnt, field.name));
         $(wrapper).append([lbl, input]);
         return wrapper;
     }
@@ -137,7 +137,7 @@ function ifPreviousAlertClearIt(field, fLvl) {
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, comboEvents) {         /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
-    const elems = _state('getFormProp', [fLvl, 'selElems']);
+    const elems = _state('getFormProp', [fLvl, 'selElems']);        /*dbug-log*///console.log('elems = %O', elems)
     elems.forEach(selectizeElem);
     _state('setFormProp', [fLvl, 'selElems', []]);
 

@@ -1,28 +1,29 @@
 /**
  * Builds, filters, and manages the data table, built using ag-grid.
  *
- * Exports:
- *     buildLocTable
- *
  * TOC
+ *     FILTER
  *     STATE
  *     EXPORT
  *     BUILD
  *         LOCATION
  *         SOURCE
  *         TAXON
- *     FILTER
- *         DATE FILTER
- *         DYNAMIC FILTERS
- *         FILTER ROW-DATA
- *         FILTER STATE
  */
+import { executeMethod } from '~util';
 import { _ui } from '~db';
-import * as build from './build/build-main.js';
+import * as build from './build/table-build-main.js';
 import * as csv from './export/csv-export.js';
 import * as filter from './filter/filter-main.js';
 import * as state from './etc/table-state.js';
 
+function moduleMethod(funcName, mod, modName, params) {
+    return executeMethod(funcName, mod, modName, 'tbl-main', params);
+}
+/* ======================== FILTER ========================================== */
+export function _filter(funcName, params = []) {
+    return moduleMethod(funcName, filter, 'filter', params);
+}
 /* ========================= STATE ========================================== */
 export function tableState() {
     return state.tableState();
@@ -77,69 +78,4 @@ export function onTxnViewChange() {
 }
 export function rebuildTxnTable() {
     return build.rebuildTxnTable(...arguments);
-}
-/* ======================== FILTER ========================================== */
-export function initDefaultFilters() {
-    filter.initDefaultFilters();
-}
-export function getTreeTextFilterElem() {
-    return filter.getTreeTextFilterElem(...arguments);
-}
-/* ------------------ DATE FILTER ------------------------------------------- */
-export function clearDateFilter() {
-    filter.clearDateFilter();
-}
-export function toggleDateFilter() {
-    filter.toggleDateFilter(...arguments);
-}
-export function showTodaysUpdates() {
-    filter.showTodaysUpdates(...arguments);
-}
-/* -------------------- DYNAMIC FILTERS ------------------------------------- */
-export function loadLocFilters() {
-    return filter.loadLocFilters(...arguments);
-}
-export function applyLocFilter() {
-    return filter.applyLocFilter(...arguments);
-}
-export function loadSrcFilters() {
-    return filter.loadSrcFilters(...arguments);
-}
-export function applyPubFilter() {
-    return filter.applyPubFilter(...arguments);
-}
-export function loadTxnFilters() {
-    return filter.loadTxnFilters(...arguments);
-}
-export function applyTxnFilter() {
-    return filter.applyTxnFilter(...arguments);
-}
-/* -------------------- FILTER ROW-DATA ------------------------------------- */
-export function getRowDataForCurrentFilters() {
-    return filter.getRowDataForCurrentFilters(...arguments)
-}
-export function onFilterChangeUpdateRowData() {
-    filter.onFilterChangeUpdateRowData(...arguments);
-}
-/* ----------------------- FILTER STATE ------------------------------------- */
-export function setFilterState() {
-    filter.setFilterState(...arguments);
-}
-export function resetFilterState() {
-    filter.resetFilterState();
-}
-export function getFilterStateKey() {
-    return filter.getFilterStateKey(...arguments);
-}
-export function getFilterState() {
-    return filter.getFilterState();
-}
-export function isFilterActive() {
-    return filter.isFilterActive();
-}
-export function getActiveFilterVals() {
-    return filter.getActiveFilterVals();
-}
-export function getFilterStateForSentryErrorReport() {
-    return filter.getFilterStateForSentryErrorReport();
 }

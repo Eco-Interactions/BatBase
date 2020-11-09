@@ -67,7 +67,7 @@ Encore
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/main.js')
     .addEntry('db', './assets/js/page/database/db-main.js')
-    .addEntry('feedback', './assets/js/app/feedback/feedback-viewer.js')
+    .addEntry('feedback', './assets/js/page/feedback/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/page/view-pdfs.js')
     .addEntry('entity', './assets/js/page/entity/entity-show.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.

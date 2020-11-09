@@ -65,10 +65,7 @@ export function getPubOrCitEditFields() {
 }
 /** --------------------------- FORM UI ------------------------------------- */
 export function _elems(funcName, params = []) {
-    return executeMethod(funcName, elems, 'elems', 'forms-main', getParams(params));
-}
-export function _cmbx(funcName, params = []) {
-    return elems._cmbx(funcName, params);
+    return moduleMethod(funcName, elems, 'form-elems', params);
 }
 export function _panel(funcName, params = []) {
     return elems._panel(funcName, params);

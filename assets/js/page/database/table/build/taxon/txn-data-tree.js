@@ -5,7 +5,7 @@
  *     buildTxnTree
  */
 import { _u } from '~db';
-import { fillTreeWithInteractions, getTreeRcrds } from '../build-main.js';
+import { fillTreeWithInteractions, getTreeRcrds } from '../table-build-main.js';
 
 let tState, tblState;
 /**

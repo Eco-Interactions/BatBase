@@ -18,7 +18,7 @@ import * as iForm from '../../int-form-main.js';
  * When complete, the select form is removed and the most specific taxon is displayed
  * in the interaction-form <role> combobox.
  */
-export function onTaxonRoleSelection(role, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s] = ", role, val);
+export function onTaxonRoleSelection(role, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", role, val);
     if (val === "" || isNaN(parseInt(val))) { return; }
     $('#'+getSubFormLvl('sub')+'-form').remove();
     $('#sel-'+role).data('selTaxon', val);
@@ -39,7 +39,7 @@ export function selectRoleTaxon(e, groupTaxon) {
 function getSelectedTaxonOption(groupTaxon) {
     const taxon = groupTaxon || getSelectedTaxon();                 /*dbug-log*///console.log("selected Taxon = %O", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
-    return new Option(taxon.id, taxon.displayName);
+    return new Option(taxon.displayName, taxon.id);
 }
 /* --------------- GET TAXON SELECTED IN ROLE COMBOBOX ---------------------- */
 /** Finds the most specific rank with a selection and returns that taxon record. */

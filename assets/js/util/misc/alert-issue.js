@@ -32,7 +32,6 @@ export function reportErr(e) {
  *     undefiendDataKey {key}
  *
  * TEMP ISSUE TAGS FOR BUG TRACKING
- *     citeAuth { auths, hasEds }
  */
 export function alertIssue(tag, errData = {}) {                                 logAlertInDev(tag, errData);
     if ($('body').data('env') !== 'prod') { return; }                           console.log("       !!!alertIssue [%s] = %O", tag, errData);
@@ -99,7 +98,6 @@ class SentryError extends Error {
  *     undefiendDataKey: showGeneralAlert
  *
  * TEMP ISSUE TAGS FOR BUG TRACKING
- *     citeAuth: showGeneralFormAlert
  */
 function handleUserAlert(tag) {
     const silent = ['dataSyncFailure', '', 'noRcrdFound', 'TestIssue', 'editorReport'];

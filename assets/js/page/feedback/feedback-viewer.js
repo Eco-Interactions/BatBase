@@ -62,7 +62,7 @@ function getEditableFeedbackData(feedback) {
 }
 /* ------------------------ FIELD HELPERS ----------------------------------- */
 function getMultiFieldRow(fields) {
-	const row = _u('getElem', ['div', { class: 'flex-row' }]);
+	const row = _el('getElem', ['div', { class: 'flex-row' }]);
 	$(row).append(fields);
 	return row;
 }

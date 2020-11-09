@@ -120,7 +120,7 @@ function buildNameInput(name) {
 /** ------- RANK COMBOBOX --------------- */
 function buildRankSel(taxon) {
     const opts = getTaxonRankOpts();
-    const sel = _elems('getSelect', [opts, { id: 'sel-Rank' }]);
+    const sel = _el('getSelect', [opts, { id: 'sel-Rank' }]);
     $(sel).data({ 'txn': taxon.id, 'rank': getRankVal(taxon.rank.displayName) });
     return sel;
 }
@@ -195,16 +195,20 @@ function getParentEditFields(prnt) {
         .then(modifyAndReturnPrntRows);
 
     function modifyAndReturnPrntRows(rows) {                        /*dbug-log*///console.log('modifyAndReturnPrntRows = %O', rows);
-        $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Group row
+        removeTaxonGroupRow(rows);
         const groupSelRow = getGroupRankRow(prnt, rows);
         return [groupSelRow, rows].filter(r=>r);
     }
+}
+function removeTaxonGroupRow(rows, field = 'Group') {
+    $(rows)[0].removeChild($(rows)[0].childNodes[0]);
+    _state('removeSelFromStateMemory', ['sub', field]);
 }
 /** ------- GROUP DISPLAY NAME ------ */
 function getGroupRankRow(taxon, rows) {
     const subGroups = Object.keys(taxonData.subGroups);
     if (subGroups.length > 1) { return; }
-    $(rows)[0].removeChild($(rows)[0].childNodes[0]); //removes Sub-Group row
+    removeTaxonGroupRow(rows, 'Sub-Group');
     return buildTaxonParentRow(taxonData.subGroups[subGroups[0]].displayName);
 }
 function buildTaxonParentRow(displayName) {
@@ -235,7 +239,7 @@ function finishSelectPrntFormBuild() {
     finishParentSelectFormUi();
 }
 function initSelectParentCombos() {
-    _cmbx('initFormCombos', [null, 'sub', getSelectParentComboEvents()]);
+    _elems('initFormCombos', [null, 'sub', getSelectParentComboEvents()]);
 }
 function getSelectParentComboEvents() {
     return {
@@ -345,17 +349,17 @@ function handleParentRankIssues(pRank) {
  */
 function buildTaxonEditFormRow(field, inputElems, fLvl) {
     const rowDiv = buildFormRow(field, fLvl);
-    const alertDiv = _u('getElem', ['div', { id: field+'_alert'}]);
+    const alertDiv = _el('getElem', ['div', { id: field+'_alert'}]);
     const fieldCntnr = buildFieldCntnr(inputElems);
     $(rowDiv).append([alertDiv, fieldCntnr]);
     return rowDiv;
 }
 function buildFormRow(field, fLvl) {
     const attr = { class: fLvl + '-row', id: field + '_row'};
-    return _u('getElem', ['div', attr]);
+    return _el('getElem', ['div', attr]);
 }
 function buildFieldCntnr(fields) {
-    const cntnr =  _u('getElem', ['div', { class: 'field-row flex-row'}]);
+    const cntnr =  _el('getElem', ['div', { class: 'field-row flex-row'}]);
     $(cntnr).append(fields);
     return cntnr;
 }
@@ -374,7 +378,7 @@ function submitTaxonEdit() {
     formatAndSubmitData('taxon', 'top', vals);
 }
 function initTaxonEditRankCombo() {
-    _u('initCombobox', [{ name: 'Rank', onChange: validateTaxonRank }]);
+    _cmbx('initCombobox', [{ name: 'Rank', onChange: validateTaxonRank }]);
     _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
 }
 /** ======================= DATA VALIDATION ================================== */

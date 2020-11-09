@@ -4,7 +4,7 @@
  * Export
  *     buildLocRowData
  */
-import { buildIntRowData, getIntRowData } from '../build-main.js';
+import { buildIntRowData, getIntRowData } from '../table-build-main.js';
 
 export function buildTxnRowData(tree, tblState) {
     const finalRowData = [];

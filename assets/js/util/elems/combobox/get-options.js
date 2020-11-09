@@ -17,6 +17,7 @@
  *    HELPERS
  */
 import { _db, _u } from '~util';
+import { _state, getSubFormLvl } from '~form';
 /* =========================== GET OPTIONS ================================== */
 /**
  * Builds options out of the entity-name  object. Name (k) ID (v). If an option
@@ -28,7 +29,7 @@ function getOptions(entityObj, sortedKeys) {                        /*dbug-log*/
         getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);
 }
 function getEntityOpt(name, id) {                                   /*dbug-log*///console.log('getEntityOpt [%s][%s]', name, id);
-    return new Option(ucfirst(name), id);
+    return new Option(_u('ucfirst', [name]), id);
 }
 /** --------------------- GROUP OPTIONS ------------------------------------- */
 function getOptGroups(entityObj, sortedKeys) {
@@ -199,7 +200,7 @@ function getSubGroupOpts(field, prop) {
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */
 function getCntryRegOpts(field, prop) {
-    const proms = ['Country', 'Region'].map(getFieldOpts);
+    const proms = ['Country', 'Region'].map(getFieldOptions);
     return Promise.all(proms).then(data => data[0].concat(data[1]));
 }
 /** ==================== HELPERS ============================================ */

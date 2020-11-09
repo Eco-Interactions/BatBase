@@ -12,6 +12,7 @@
  *         HANDLE PERSISTED FIELDS
  *     RESET FORM UI
  */
+import { _cmbx } from '~util';
 import { _state, _elems, _panel } from '~form';
 import * as iForm from '../int-form-main.js';
 
@@ -70,7 +71,7 @@ function clearField(field, vals) {
     _state('setFormFieldData', ['top', field, null]);
     if (field === 'Note') { return $('#txt-Note').val(""); }
     _panel('clearFieldDetails', [field]);
-    _u('resetCombobox', [field]);
+    _cmbx('resetCombobox', [field]);
     handleClearedField(field, vals);
 }
 function handleClearedField(field, vals) {
@@ -85,7 +86,7 @@ function handleClearedField(field, vals) {
 }
 function clearTaxonField(field) {
     if (['Subject', 'Object'].indexOf(field) === -1) { return; }
-    _u('replaceSelOpts', [field, []]);
+    _cmbx('replaceSelOpts', [field, []]);
     $('#sel-'+field).data('selTaxon', false);
 }
 function syncWithCountryField(cntryId, field) {
@@ -104,7 +105,7 @@ function handePersistedField(field, data) {
 }
 function fillPubDetails(pub) {
     if (pub) { _panel('updateSrcDetails', ['pub']);
-    } else { _u('enableCombobox', ['CitationTitle', false]); }
+    } else { _cmbx('enableCombobox', ['CitationTitle', false]); }
 }
 function setFieldInitVal(field, data) {
     $('#sel-'+field).data('init-val', data);

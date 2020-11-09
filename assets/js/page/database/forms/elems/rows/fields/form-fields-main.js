@@ -29,10 +29,10 @@ export function buildMultiSelectElem() {
     return fields.buildMultiSelectElem(...arguments);
 }
 export function initFormCombos() {
-    combo.initFormCombos(...arguments);
+    fields.initFormCombos(...arguments);
 }
 export function resetFormCombobox() {
-    combo.resetFormCombobox(...arguments);
+    fields.resetFormCombobox(...arguments);
 }
 /* ==================== TOGGLE FORM-FIELDS ================================== */
 /**
@@ -40,7 +40,7 @@ export function resetFormCombobox() {
  * default (required and suggested) fields.
  */
 export function toggleFormFields(entity, fLvl, fVals) {
-    updateFormMemoryOnFieldToggle(this.checked, fLvl);
+    updateFormMemoryOnFieldToggle(fLvl);
     $('#'+entity+'_Rows').empty();
     _elems('getFormFieldRows', [entity, fVals, fLvl])
     .then(appendAndFinishRebuild);
@@ -58,7 +58,8 @@ export function toggleFormFields(entity, fLvl, fVals) {
         _elems('setCoreRowStyles', ['#'+entity+'_Rows', '.'+fLvl+'-row']);
     }
 }
-function updateFormMemoryOnFieldToggle(isChecked, fLvl) {
+function updateFormMemoryOnFieldToggle(fLvl) {
+    const isChecked = $(`#${fLvl}-all-fields`)[0].checked;
     _state('setFormProp', [fLvl, 'expanded', isChecked]);
     _state('setFormProp', [fLvl, 'reqElems', []]);
 }

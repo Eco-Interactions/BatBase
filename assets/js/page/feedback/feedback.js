@@ -88,7 +88,7 @@ function getTopicField() {
 }
 function getTopicInput() {
     const attrs = { type: 'text',  placeholder: 'Breif summary of your feedback' };
-    return _u('getElem', ['input', attrs]);
+    return _el('getElem', ['input', attrs]);
 }
 /* ----------------------- FEEDBACK-TEXTAREA -------------------------------- */
 function getContentField() {
@@ -97,7 +97,7 @@ function getContentField() {
 }
 function getContentTextarea() {
     const attrs = { placeholder: 'Have an idea? Find a bug? Love a feature? Let us know!' };
-    return _u('getElem', ['textarea', attrs]);
+    return _el('getElem', ['textarea', attrs]);
 }
 /* ====================== FEEDBACK FOOTER =================================== */
 function getFeedbackFooter() {
@@ -122,7 +122,7 @@ function postFeedback() {
         topic: $('#topic_row input').val(),
         feedback: $('#feedback_row textarea').val()
     };
-    closePopup() && _u('endAjaxQuery', [data, 'feedback/post']);
+    closePopup() && _u('sendAjaxQuery', [data, 'feedback/post']);
     _alert('alertIssue', ['feedback', data]);
 }
 /* =========================== CLOSE POPUP ================================== */

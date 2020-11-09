@@ -12,6 +12,7 @@
  *     IF NO SUB-GROUPS REMOVE COMBO
  *     SELECT SUB-GROUP
  */
+import { _cmbx } from '~util';
 import { _state, _elems } from '~form';
 import * as iForm from '../../int-form-main.js';
 /**
@@ -54,12 +55,13 @@ function bindGroupRootTaxonToSelectUnspecfiedBttn() {
 /* ------------------- IF NO SUB-GROUPS REMOVE COMBO ------------------------ */
 function ifNoSubGroupsRemoveCombo(rows = false) {
     const subGroups = Object.keys(_state('getTaxonProp', ['subGroups'])); /*dbug-log*///console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
-    if (subGroups.length > 1) { return; }                           /*dbug-log*///console.log('     --removing sub-group combo');
+    if (subGroups.length > 1) { return; }
     if (!rows) { // Taxon edit-form parent select-form
         $('#Sub-Group_row').remove();
     } else { // Object taxon select-form
         rows.splice(0, 1);
     }
+    _state('removeSelFromStateMemory', ['sub', 'Sub-Group']);
 }
 /* ------------------ SELECT SUB-GROUP -------------------------------------- */
 export function onSubGroupSelection(val) {
@@ -68,7 +70,7 @@ export function onSubGroupSelection(val) {
     return buildAndAppendGroupRows(val);
 }
 function updateSubGroupState() {
-    const subGroup = _u('getSelTxt', ['Sub-Group']).split(' ')[1];  /*temp-log*/console.log('onSubGroupSelection [%s]', subGroup);
+    const subGroup = _cmbx('getSelTxt', ['Sub-Group']).split(' ')[1];/*temp-log*/console.log('onSubGroupSelection [%s]', subGroup);
     const subGroupTaxon = _state('getRcrd', ['taxon', _state('getTaxonProp', ['subGroups'])[subGroup].id]);
     _state('setTaxonProp', ['subGroup', subGroup]);
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);

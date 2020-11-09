@@ -10,7 +10,7 @@
  *     GET ALL DATA FOR CITATION
  *     UPDATE FIELD
  */
-import { _cmbx, generateCitationText } from '~util';
+import { _cmbx, _u } from '~util';
 import { _state, _elems, getNextFormLevel, getValidatedFormData } from '~form';
 
 export function buildCitTextAndUpdateField(fLvl) {

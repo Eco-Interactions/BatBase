@@ -114,7 +114,7 @@ function toggleOtherAuthorTypeSelect(type, enable) {
 /* ------------------ BUILD NEXT COMBO -------------------------------------- */
 /** Builds a new, empty author combobox */
 function buildNewAuthorSelect(cnt, val, prntLvl, authType) {        /*dbug-log*///console.log('buildNewAuthorSelect[%s][%s]', authType, cnt)
-    return _cmbx('buildMultiSelectElem', [null, authType, prntLvl, cnt])
+    return _elems('buildMultiSelectElem', [null, authType, prntLvl, cnt])
         .then(appendNewAuthSelect);
 
     function appendNewAuthSelect(sel) {

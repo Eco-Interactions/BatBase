@@ -21,8 +21,14 @@ export function getFieldInput(field, entity, fLvl) {
         .then(input => val.handleFieldValidation(input, field, fLvl));
 }
 function getInput(field, entity, fLvl) {
+    field.class = getFieldClass(fLvl)
     return isComboField(field) ?
         buildCombobox(...arguments) : basic.buildFieldInput(...arguments);
+}
+function getFieldClass(fLvl) {
+    return {
+        top: 'lrg-field', sub: 'med-field', sub2: 'med-field'
+    }[fLvl];
 }
 /* ----------------------------- COMBOBOX ----------------------------------- */
 function isComboField(field) {
@@ -30,10 +36,11 @@ function isComboField(field) {
     return comboTypes.indexOf(field.type) !== -1;
 }
 function buildCombobox(field, entity, fLvl) {
-    return combo.buildComboInput(field.type, entity, field.name, fLvl);
+    return combo.buildComboInput(field, entity, fLvl);
 }
-export function buildMultiSelectElem() {
-    combo.buildMultiSelectElem(...arguments);
+export function buildMultiSelectElem(entity, fieldName, fLvl, cnt) {
+    const field = { class: getFieldClass(fLvl), name: fieldName };
+    return combo.buildMultiSelectElem(entity, field, fLvl, cnt);
 }
 /* ====================== COMBO UTIL ========================================= */
 export function initFormCombos() {

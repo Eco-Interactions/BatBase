@@ -11,7 +11,7 @@
  */
 import { _cmbx, _db } from '~util';
 import { _filter, _table, _u, _ui } from '~db';
-import * as build from '../build-main.js';
+import * as build from '../table-build-main.js';
 
 const tState = _table.bind(null, 'tableState');
 /** ================= SOURCE TABLE ========================================== */
@@ -51,9 +51,9 @@ function startSrcTableBuildChain(val) {
     const tS = tState().get();
     return build.buildSrcTree(view, tS.rcrdsById)
         .then(tree => build.buildSrcRowData(tree, tS))
-        .then(rowData => _table('getRowDataForCurrentFilters', [rowData]))
+        .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Source Tree', rowData, tS))
-        .then(() => _table('loadSrcFilters', [view]));
+        .then(() => _filter('loadSrcFilters', [view]));
 }
 function getAndStoreSrcView(val) {
     const viewVal = val || _cmbx('getSelVal', ['View']);            /*dbug-log*///console.log("getAndStoreSrcView [%s]", viewVal)

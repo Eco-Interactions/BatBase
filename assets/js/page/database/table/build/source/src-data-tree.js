@@ -12,7 +12,7 @@
  */
 import { _db } from '~util';
 import { getDetachedRcrd } from '~db';
-import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../build-main.js';
+import { fillTreeWithInteractions, getTreeRcrds, sortDataTree } from '../table-build-main.js';
 
 let srcRcrds;
 /*---------------------- TREE-BUILD CORE -------------------------------------*/

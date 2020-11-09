@@ -10,9 +10,9 @@
  *     TAXON TABLE
  *     TAXON VIEW
  */
-import { _db } from '~util';
+import { _db, _cmbx, _u } from '~util';
 import { _filter, _table, _ui, getDetachedRcrd } from '~db';
-import * as build from '../build-main.js';
+import * as build from '../table-build-main.js';
 
 const tState = _table.bind(null, 'tableState');
 /** =================== TAXON TABLE ========================================= */
@@ -23,7 +23,7 @@ const tState = _table.bind(null, 'tableState');
 export function buildTxnTable(v) {
     if (v) { return getTxnDataAndBuildTable(v); }
     return _db('getData', ['curView', true]).then(storedView => {
-        const view = storedView || getSelValOrDefault(_u('getSelVal', ['View']));/*Perm-log*/console.log("       --Building [%s] Taxon Table", view);
+        const view = storedView || getSelValOrDefault(_cmbx('getSelVal', ['View']));/*Perm-log*/console.log("       --Building [%s] Taxon Table", view);
         return getTxnDataAndBuildTable(view);
     });
 }
@@ -92,7 +92,7 @@ function buildTaxonTable(val) {
  * the taxon's record.
  */
 function storeGroupAndReturnRootTaxa(val) {
-    const groupId = val || getSelValOrDefault(_u('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], groupId [%s]', val, groupId)
+    const groupId = val || getSelValOrDefault(_cmbx('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], groupId [%s]', val, groupId)
     const group = getDetachedRcrd(groupId, tState().get('groups'), 'group');/*dbug-log*///console.log("groupTaxon = %O", group);
     updateGroupTableState(groupId, group);
     return Object.values(group.taxa).map(getRootTaxonRcrd);
@@ -101,7 +101,7 @@ function getRootTaxonRcrd(root) {
     return getDetachedRcrd(root.id, tState().get('rcrdsById'), 'taxon');
 }
 function updateGroupTableState(groupId, group) {
-    _u('setData', ['curView', groupId]);
+    _db('setData', ['curView', groupId]);
     tState().set({
         curView: groupId,
         groupName: group.displayName,

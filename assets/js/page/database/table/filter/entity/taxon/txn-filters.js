@@ -85,7 +85,7 @@ function buildTaxonSelectOpts(tblState) {                                       
     function fillInRankOpts(rank) {                                               //console.log("fillInEmptyAncestorRanks. rank = ", rank);
         if (rank in tblState.selectedOpts) {
             const taxon = getDetachedRcrd(tblState.selectedOpts[rank], tblState.rcrdsById);
-            optsObj[rank] = [ new Option('- All -', 'all'), new Option(taxon.id, taxon.name)];
+            optsObj[rank] = [ new Option('- All -', 'all'), new Option(taxon.name, taxon.id)];
         } else { optsObj[rank] = []; }
     }
 } /* End buildTaxonSelectOpts */
@@ -107,7 +107,7 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {                     //c
         ranks.forEach(function(rank) {                                        //console.log('----- building select box for rank = [%s]', rank);
             const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
             const span = _el('getElem', ['span', { text: rank + ': ' }]);
-            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', 'sel-' + rank, rank);
+            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', `sel-filter-${rank}`, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
@@ -119,11 +119,12 @@ function initRankComboboxes(groupRanks) {
     groupRanks.forEach(initRankCombo);
 }
 function initRankCombo(rank) {
-    _cmbx('initCombobox', [{ name: rank, onChange: applyTxnFilter }, true]);
+    const confg = { id: `#sel-filter-${rank}`, name: rank + ' Filter', onChange: applyTxnFilter }
+    _cmbx('initCombobox', [confg, true]);
 }
 function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {                  //console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
     ranks.forEach(rank => {
-        _cmbx('replaceSelOpts', [rank, rankOptsObj[rank], null, rank]);
+        _cmbx('replaceSelOpts', [rank+'Filter', rankOptsObj[rank], null, rank]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
@@ -131,7 +132,7 @@ function setSelectedTaxonVals(selected, tblState) {                             
     if (!selected || !Object.keys(selected).length) {return;}
     tblState.allgroupRanks.forEach(rank => {
         if (!selected[rank]) { return; }                                         //console.log("selecting [%s] = ", rank, selected[rank])
-        _cmbx('setSelVal', [rank, selected[rank], 'silent']);
+        _cmbx('setSelVal', [rank+'Filter', selected[rank], 'silent']);
     });
 }
 /* ====================== FILTER ============================================ */

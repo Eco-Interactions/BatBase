@@ -8,6 +8,7 @@
  *    MISC
  */
 import * as cite from './generate-citation.js';
+import * as uAjax from './ajax-util.js';
 
 /* =========================== CITATION ===================================== */
 export function generateCitationText(params) {

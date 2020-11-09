@@ -1,7 +1,8 @@
 /**
- * On page load, all server-data updated since the last local-data update is downloaded.
+ * On database page load, all server-data updated since the last local-data update
+ * is downloaded.
  *
- * Exports
+ * Export
  *     syncLocalDbWithServer
  *
  * TOC
@@ -10,6 +11,7 @@
  *     ON SYNC COMPLETE
  */
 import { _u } from '~util';
+import { initSearchStateAndTable } from '~db';
 import * as db from '../../local-data-main.js';
 import { reportDataSyncFailures } from '../db-sync-main.js';
 import { downloadAndStoreUpdatedData } from './sync-updated-data.js';

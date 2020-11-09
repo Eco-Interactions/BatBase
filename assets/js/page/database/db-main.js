@@ -9,14 +9,11 @@
  *     MODULE-EXECUTOR
  *     PAGE INIT
  */
-import * as appUtil from '~util';
+import { _db, _u, executeMethod } from '~util';
 import * as forms from './forms/forms-main.js';
 import * as map from './map/map-main.js';
 import * as table from './table/table-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
-
-import * as u from './util/db-util.js';
-
 import * as ui from './ui/ui-main.js';
 /*
  * NOTE: Not sure why this code is getting loaded on external pages, or why this
@@ -26,32 +23,11 @@ if (window.location.pathname.includes('search')) {
     window.setTimeout(initDbPage, 500);
 }
 /** ===================== MODULE-EXECUTOR =================================== */
-export function executeMethod() {
-    return appUtil.executeMethod(...arguments);
-}
 function moduleMethod(funcName, mod, modName, params) {
-    return appUtil.executeMethod(funcName, mod, modName, 'db-main', params);
-}
-export function _util(funcName, params = []) {
-    return moduleMethod(funcName, appUtil, 'app-util', params);
-}
-/** Calls the util methods from either the db-util or the app-util. */
-export function _u(funcName, params = []) {
-    const modName = u[funcName] ? 'db-util' : 'app-util';
-    const mod = modName === 'db-util' ? u : appUtil;
-    return moduleMethod(funcName, mod, modName, params);
-}
-export function _dbCmbx(funcName, params = []) {
-    return moduleMethod(funcName, u._dbCmbx, 'db-cmbx', params);
-}
-export function _ui(funcName, params = []) {
-    return moduleMethod(funcName, ui, 'ui', params);
-}
-export function _tutorial(funcName, params = []) {
-    return moduleMethod(funcName, tutorial, 'tutorial', params);
+    return executeMethod(funcName, mod, modName, 'db-main', params);
 }
 export function _filter(funcName, params = []) {
-    return moduleMethod(funcName, table, 'filter', params);
+    return table._filter(funcName, [...params]);
 }
 export function _forms(funcName, params = []) {
     return moduleMethod(funcName, forms, 'forms', params);
@@ -62,13 +38,19 @@ export function _map(funcName, params = []) {
 export function _table(funcName, params = []) {
     return moduleMethod(funcName, table, 'table', params);
 }
+export function _tutorial(funcName, params = []) {
+    return moduleMethod(funcName, tutorial, 'tutorial', params);
+}
+export function _ui(funcName, params = []) {
+    return moduleMethod(funcName, ui, 'ui', params);
+}
 /** ==================== PAGE INIT ========================================== */
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () {
     if ($(window).width() < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js
     requireScriptsAndStyles();
     ui.init();
-    appUtil._db('initDb');
+    _db('initDb');
     //The idb-util.initDb will call @initSearchStateAndTable once local database is ready.
 }
 function requireScriptsAndStyles() {
@@ -112,4 +94,11 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
 function setTableInitState(focus, isAllDataAvailable) {
     ui.resetFilterPanelOnFocusChange(focus);
     table.resetTableParams(focus, isAllDataAvailable);
+}
+/** ==================== HELPERS ============================================ */
+/**  Returns a copy of the record detached from the original. */
+export function getDetachedRcrd(rcrdKey, rcrds, entity) {           /*dbug-log*///console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
+    if (rcrds[rcrdKey]) { return _u('snapshot', [rcrds[rcrdKey]]); }/*perm-log*/_u('logInDevEnv', ["#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds]);
+    _alert('alertIssue', ['noRcrdFound', {id: rcrdKey, entity: entity }]);
+    return false;
 }

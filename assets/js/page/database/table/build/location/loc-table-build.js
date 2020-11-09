@@ -11,8 +11,8 @@
  *     LOCATION VIEW
  */
 import { _db, _cmbx } from '~util';
-import { _map, _table, _ui } from '~db';
-import * as build from '../build-main.js';
+import { _filter, _map, _table, _ui } from '~db';
+import * as build from '../table-build-main.js';
 
 const tState = _table.bind(null, 'tableState');
 /** =============== LOCATION TABLE ========================================== */
@@ -56,9 +56,9 @@ function startLocTableBuildChain(topLocs) {
     const tS = tState().get();
     return build.buildLocTree(topLocs, tS.rcrdsById)
         .then(tree => build.buildLocRowData(tree, tS))
-        .then(rowData => _table('getRowDataForCurrentFilters', [rowData]))
+        .then(rowData => _filter('getRowDataForCurrentFilters', [rowData]))
         .then(rowData => build.initTable('Location Tree', rowData, tS))
-        .then(() => _table('loadLocFilters', [tS]));
+        .then(() => _filter('loadLocFilters', [tS]));
 }
 
 /** Reloads the data-table with the location selected from the map view. */

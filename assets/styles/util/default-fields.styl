@@ -1,12 +1,26 @@
+/* =========================== FIELDS ======================================= */
+/* CONTAINER FOR COMBOBOX GROUPS */
+.sel-cntnr           /* .flex-row also on elems */
+    flex: 0 0 auto
+    width: 18em
+    justify-content: space-between
 
+/* CONTAINER FOR FIELD-ELEMS */
+.field-elems
+    margin-top: .3em
+/* =========================== FORMS ======================================== */
 /* CONTAINER FOR FIELD ROWS */
 [id$="_row"]
     padding: .2em .75em .3em  .75em
     width: 100%
 
-/* CONTAINER FOR FIELD-ELEMS */
-.field-elems
-    margin-top: .3em
+/* FORM FIELD-ROWS */
+[id$="_row"] .sel-cntnr
+    flex-grow: 1
+
+/* FORM FIELD-ROWS */
+[id$="_row"] .field-row
+    justify-content: space-between
 
 /* LABEL IN FIELD-ELEMS */
 [id$="_lbl"]

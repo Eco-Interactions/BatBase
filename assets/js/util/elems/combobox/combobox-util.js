@@ -6,7 +6,7 @@
  * TOC
  *
  */
-import { __alert, _db, ucfirst } from '~util';
+import { _alert } from '~util';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
 
@@ -18,7 +18,7 @@ const confgs = {};
  * {obj} confg - required: name, onChange. All other props are selectize params.
  */
 export function initCombobox(confg, onBlur = false) {
-    const options = buildComboboxOptions(confg, onBlur);            /*dbug-log*/console.log("initCombobox. confg = %O finalConfg = %O", confg, options);
+    const options = buildComboboxOptions(confg, onBlur);            /*dbug-log*///console.log("initCombobox. confg = %O finalConfg = %O", confg, options);
     $(options.id).selectize(options);
     addToComboConfgMemory(confg, options);
 }
@@ -43,6 +43,7 @@ function addToComboConfgMemory(confg, options) {
  */
 function getPlaceholer(id, name, add, optCnt) {
     optCnt = optCnt ? optCnt : $(id + ' > option').length;
+    name = name.split(' Filter')[0];
     const placeholder = 'Select ' + name
     return optCnt || add ? placeholder : '- None -';
 }
@@ -72,9 +73,9 @@ function setComboVal(selApi, field, val, silent) {                  /*dbug-log*/
     if (isMultiSelCombo(field)) {
         selApi.setValue(val, silent)
     } else if (Array.isArray(val)) {
-        val.forEach(v => selApi.addItem(v, 'silent'))
+        val.forEach(v => selApi.addItem(v, silent))
     } else {
-        selApi.addItem(val, 'silent');
+        selApi.addItem(val, silent);
     }
 }
 function saveFieldValDataIfFieldTypeMustRemainedFilled(field, val) {
@@ -159,7 +160,8 @@ export function removeOpt(field, val) {
     selApi.removeOption(val, 'silent');
 }
 /* ======================= HELPERS ========================================== */
-function getSelApi(field) {                                         /*dbug-log*/console.log('getSelApi [%s] = %O', field, confgs);
+function getSelApi(field) {
+    field = field.split(' ').join('');                              /*dbug-log*///console.log('getSelApi [%s] = %O', field, confgs);
     if (!confgs[field]) { return _alert('alertIssue', ['comboboxNotFound', {field: field}]); }
     //If the combo was removed
     return $(confgs[field].id).length ? $(confgs[field].id)[0].selectize : false;

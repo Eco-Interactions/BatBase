@@ -4,7 +4,7 @@
  * Export
  *     buildSrcRowData
  */
-import { getIntRowData } from '../build-main.js';
+import { getIntRowData } from '../table-build-main.js';
 
 export function buildSrcRowData(tree, tblState) {
     let rowColorIdx = 0;

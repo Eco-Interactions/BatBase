@@ -193,11 +193,7 @@ function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*/
     let athrs = '';
     for (let ord in auths) {
         if (auths[ord] === 'create') { continue; }
-        let name = getFormattedName(ord, auths[ord], eds);
-        if (!name) {
-            _alert('alertIssue', ['citeAuth', {auths: _u('snapshot', auths), eds: eds}]);
-            continue; //Temp until bug is fixed
-        }
+        const name = getFormattedName(ord, auths[ord], eds);
         athrs += getAuthorName(name, ord, Object.keys(auths).length);
     }
     return _u('stripString', [athrs]);
@@ -229,7 +225,7 @@ function getCitAuthName(cnt, a, eds) {                              /*dbug-log*/
     }
 }
 function getAuthorName(name, ord, authCnt) {
-    return ord == 1 ? name : (ord !== authCnt ? ', '+ name : ' & '+ name);
+    return ord == 1 ? name : (ord != authCnt ? ', '+ name : ' & '+ name);
 }
 /** ======================== HELPERS ======================================== */
 /** Handles adding the punctuation for the data in the citation. */

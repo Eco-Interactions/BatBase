@@ -23,13 +23,13 @@ function buildObjectGroupCombo(groups) {
     const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
     const span = _el('getElem', ['span', { text: 'Groups: ' }]);
     const opts = groups.filter(r => r.text !== 'Bat');  		    /*dbug-log*///console.log('groups = %O', groups)
-    const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-ObjectGroups');
+    const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-ObjectGroupsFilter');
     $(lbl).append([span, sel]);
     return lbl;
 }
 function finishGroupComboInit(filterEl) {
     const confg = {
-        name: 'Object Groups',
+        name: 'Object Groups Filter',
         maxItems: null,
         onChange: filterTableByObjectGroup,
     };
@@ -48,7 +48,7 @@ function filterTableByObjectGroup(groupIds) {                       /*dbug-log*/
 }
 function filterByObjGroups() {
 	timeout = null;
-    const groupIds = _cmbx('getSelVal', ['Object Group']);
+    const groupIds = _cmbx('getSelVal', ['ObjectGroupsFilter']);
     if (!groupIds.length) { return; }
     ifAllGroupsSelectedClearFilterCombo(groupIds.length);
     updateObjGroupFilterState(groupIds);
@@ -56,9 +56,9 @@ function filterByObjGroups() {
     _ui('showTable');
 
     function ifAllGroupsSelectedClearFilterCombo(selectedGroupCnt) {
-        const total = $('#sel-ObjectGroups')[0].selectize.currentResults.total;/*dbug-log*///console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total)
+        const total = $('#sel-ObjectGroupsFilter')[0].selectize.currentResults.total;/*dbug-log*///console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total)
         if (selectedGroupCnt !== total) { return; }
-        $('#sel-ObjectGroups')[0].selectize.clear();
+        $('#sel-ObjectGroupsFilter')[0].selectize.clear();
     }
 }
 function updateObjGroupFilterState(groupIds) {

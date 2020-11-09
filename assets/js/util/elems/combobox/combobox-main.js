@@ -35,6 +35,9 @@ export function getTaxonOpts() {
 export function alphabetizeOpts() {
     return opts.alphabetizeOpts(...arguments);
 }
+export function getSelectStoredOpts() {
+    return opts.getSelectStoredOpts(...arguments);
+}
 /* ===================== UTILITY ============================================ */
 export function initCombobox() {
     return util.initCombobox(...arguments);

@@ -96,7 +96,7 @@ export function getActiveFilterVals() {
 /* ------------------- UTIL ------------------------------------------------- */
 export function newSel(opts, c, i, field) {
     const elem = _el('getSelect', [opts, { class: c, id: i }]);
-    $(elem).data('field', field);
+    if (field) { $(elem).data('field', field+' Filter'); }
     return elem;
 }
 /* ====================== FILTER ROW DATA =================================== */

@@ -11,7 +11,7 @@
  *   showLocOnMap
  *   buildLocMap
  */
-import { _db, _cmbx } from '~util';
+import { _cmbx, _db, _el } from '~util';
 import { _table, _ui } from '~db';
 import * as MM from './map-markers.js';
 import * as mapEl from './map-elems.js';
@@ -157,7 +157,7 @@ function addTipsLegend() {
 }
 function addViewTips(map) {
     const attr = { id: 'tips-legend', class: 'info legend flex-col'};
-    const div = _elem('getElem', ['div', attr]);
+    const div = _el('getElem', ['div', attr]);
     div.innerHTML = getDefaultTipTxt();
     $(div).click(toggleTips)
     return div;
@@ -234,7 +234,7 @@ function addMarkerLegend() {
     legend.addTo(app.map);
 }
 function addMarkerLegendHtml(map) {
-    const div = _elem('getElem', ['div', { class: 'info legend flex-col'}]);
+    const div = _el('getElem', ['div', { class: 'info legend flex-col'}]);
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
@@ -257,7 +257,7 @@ function addIntCountLegend() {
 }
 function addIntCntLegendHtml(map) {
     const attr = { id: 'int-legend', class: 'info legend flex-col'};
-    const div = _u('getElem', ['div', attr]);
+    const div = _el('getElem', ['div', attr]);
     return div;
 }
 function fillIntCntLegend(shown, notShown) {

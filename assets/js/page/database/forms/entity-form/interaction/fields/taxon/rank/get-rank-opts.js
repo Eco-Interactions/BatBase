@@ -37,12 +37,12 @@ export function getAllRankAndSelectedOpts(selId, selTaxon = null) {
     d.group = d.taxon.group.name;
     d.subGroup = d.taxon.group.subGroup.name;
     return buildRankTaxonOpts()
-    .then(getDecoupledOptsAndClearMmry)
+        .then(clearMemoryAndReturnOpts)
 }
-function getDecoupledOptsAndClearMmry() {
-    const data = JSON.parse(JSON.stringify({ opts: d.opts, selected: d.selected }));
-    resetOptMemory();
-    return data;
+function clearMemoryAndReturnOpts() {
+    window.setTimeout(() => resetOptMemory(), 500);
+    // const data = JSON.parse(JSON.stringify({ opts: d.opts, selected: d.selected }));
+    return d;
 }
 function buildRankTaxonOpts() {
     buildChildRankOpts(d.taxon.rank.displayName, d.taxon.children);
@@ -57,7 +57,7 @@ function buildUpdatedTaxonOpts() {
 export function getChildRankOpts(pRank, children) {
     buildChildRankOpts(pRank, children);
     addCreateOpts();
-    return getDecoupledOptsAndClearMmry();
+    return clearMemoryAndReturnOpts();
 }
 function buildChildRankOpts(pRank, children) {
     const childRanks = getChildRanks(pRank);

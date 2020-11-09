@@ -16,7 +16,7 @@
  *         APPEND AND STYLE
  *     SUB FORM
  */
-import { _cmbx, _modal, _u } from '~util';
+import { _cmbx, _el, _modal, _u } from '~util';
 import { _confg, _elems, _panel, _state } from '~form';
 
 let action, entity, fLvl;

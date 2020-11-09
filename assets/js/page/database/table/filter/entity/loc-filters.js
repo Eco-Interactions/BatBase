@@ -10,7 +10,7 @@
  *      UI
  *      FILTER
  */
-import { _cmbx, el, _u } from '~util';
+import { _cmbx, _el, _u } from '~util';
 import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../filter-main.js';
 
@@ -27,7 +27,7 @@ export function loadLocFilters(tblState) {                          /*Perm-log*/
 function updateLocSelOptions(tblState) {
     const opts = buildLocSelectOpts(tblState);
     Object.keys(opts).forEach(locType => {
-        _cmbx('replaceSelOpts', [locType, opts[locType], null, locType]);
+        _cmbx('replaceSelOpts', [locType+'Filter', opts[locType], null, locType]);
     });
     setSelectedLocVals(tblState.selectedOpts);
 }
@@ -104,7 +104,7 @@ function buildLocSelectOpts(tblState, data) {
         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
     /** build the new opts and adds their loc ids to the selected-options obj. */
-    function buildOpt(loc, type, optProp) {                                    //console.log('building opt for [%s]. loc = %O', type, loc);
+    function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
         const val = loc && loc[type] ?  loc[type].id : false;
         const txt = loc && loc[type] ?  loc[type].displayName : false;
         if (!val) { return }
@@ -124,7 +124,7 @@ function buildLocSelectOpts(tblState, data) {
     }
     function addAllOption() {
         Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
-            opts[type].unshift({value: 'all', text: '- All -'});
+            opts[type].unshift(new Option('- All -', 'all'));
         });
     }
     function updateFilterMemory() {
@@ -136,30 +136,30 @@ function buildLocSelectOpts(tblState, data) {
     }
 }
 function initLocCombos() {
-    _cmbx('initCombobox', [{ name: 'Region',  onChange: applyLocFilter }, true]);
-    _cmbx('initCombobox', [{ name: 'Country', onChange: applyLocFilter }, true]);
+    _cmbx('initCombobox', [{ name: 'Region Filter',  onChange: applyLocFilter }, true]);
+    _cmbx('initCombobox', [{ name: 'Country Filter', onChange: applyLocFilter }, true]);
 }
 /** Builds the location select elements */
-function buildLocSelects(locOptsObj) {
+function buildLocSelects(locOpts) {
     const selElems = [];
-    for (let locSelName in locOptsObj) {
-        let elem = buildLocSel(_u('ucfirst', [locSelName]), locOptsObj[locSelName]);
+    for (let locType in locOpts) {
+        let elem = buildLocSel(_u('ucfirst', [locType]), locOpts[locType]);
         selElems.push(elem);
     }
     return selElems;
 
-    function buildLocSel(selName, opts) {
-        const lbl = _el('getElem', ['label', { class: "sel-cntnr flex-row" }]);
-        const span = _el('getElem', ['span', { text: selName + ': ', class: "opts-span" }]);
-        const sel = fM.newSel(opts, 'opts-box', 'sel-' + selName, selName);
-        $(lbl).addClass('locLbl').append([span, sel]);
+    function buildLocSel(locType, opts) {
+        const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row' }]);
+        const span = _el('getElem', ['span', { text: locType + ': ', class: "opts-span" }]);
+        const sel = fM.newSel(opts, 'opts-box', `sel-${locType}Filter`, locType);
+        $(lbl).append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;
     }
 }
 function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
-        _cmbx('setSelVal', [locType, selected[locType], 'silent']);
+        _cmbx('setSelVal', [locType+'Filter', selected[locType], 'silent']);
     });
 }
 /* =========================== FILTER ======================================= */
@@ -186,7 +186,7 @@ export function applyLocFilter(val) {
             [selectedOpts['Region']];
     }
 }
-function updateLocFilterMemory(loc, locType) {                                  console.log('updateLocFilterMemory. [%s] loc = %O', locType, loc);
+function updateLocFilterMemory(loc, locType) {                                  //console.log('updateLocFilterMemory. [%s] loc = %O', locType, loc);
     if (loc.length > 1) { return resetLocComboMemory(); }
     const selVal = parseInt(loc[0]);
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
@@ -220,14 +220,14 @@ function getSelectedLocVal(locType, selectedOpts) {
 }
 function getLocType(that, selectedOpts) {
     return that && that.hasOwnProperty('$input') ?
-        that.$input[0].id.split('sel-')[1] : getSelectedLocType(selectedOpts)
+        that.$input[0].id.split('sel-')[1].split('Filter')[0] : getSelectedLocType(selectedOpts);
 }
 function getSelectedLocType(selectedOpts) {
     const sels = Object.keys(selectedOpts);
     return !sels.length ? getLocTypeFromElems() : (sels.length == 1 ? 'Region' : 'Country');
 }
 function getLocTypeFromElems() {
-    const locType = ['Country', 'Region'].filter(type => hasSelVal($('#sel-'+type).val()) );
+    const locType = ['Country', 'Region'].filter(l => hasSelVal($(`#sel-${l}Filter`).val()) );
     return locType.length == 1 ? locType[0] : null;
 }
 function hasSelVal(val) {
