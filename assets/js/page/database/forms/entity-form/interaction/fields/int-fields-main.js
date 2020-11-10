@@ -10,7 +10,7 @@
 import { create } from '../int-form-main.js';
 import * as src from './src-int-fields.js';
 import * as loc from './loc-int-fields.js';
-import * as txn from './taxon/txn-int-fields-main.js';
+import * as txn from './txn-int-fields-main.js';
 import * as type from './type-tag-int-fields.js';
 
 export function getIntFormFieldComboEvents(argument) {
@@ -58,32 +58,11 @@ export function addLocationSelectionMethodsNote() {
     return loc.addLocationSelectionMethodsNote(...arguments);
 }
 /* -------------------- TAXON ROLES ----------------------------------------- */
-export function initObjectSelect() {
-    return txn.initObjectSelect(...arguments);
-}
-export function initSubjectSelect() {
-    return txn.initSubjectSelect(...arguments);
-}
-export function getSelectedTaxon() {
-    return txn.getSelectedTaxon(...arguments);
-}
 export function selectRoleTaxon() {
     return txn.selectRoleTaxon(...arguments);
 }
 export function onTaxonRoleSelection() {
     return txn.onTaxonRoleSelection(...arguments);
-}
-export function onGroupSelection() {
-    return txn.onGroupSelection(...arguments);
-}
-export function onSubGroupSelection() {
-    return txn.onSubGroupSelection(...arguments);
-}
-export function onRankSelection() {
-    return txn.onRankSelection.bind(this)(...arguments);
-}
-export function initRankCombos() {
-    return txn.initRankCombos(...arguments);
 }
 export function addRoleTaxonFocusListeners() {
     return txn.addRoleTaxonFocusListeners(...arguments);

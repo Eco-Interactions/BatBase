@@ -14,7 +14,7 @@
  *         SELECT CITATION
  */
 import { _cmbx } from '~util';
-import { _panel, _state } from '~form';
+import { _form, _panel, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 
 /* ======================= PUBLICATION ====================================== */
@@ -24,11 +24,11 @@ import * as iForm from '../int-form-main.js';
  * the citation form is automatically opened.
  */
 export function onPubSelection(val) {                               /*perm-log*/console.log('       +--onPubSelection[%s]', val);
-    if (val === 'create') { return iForm.createSubEntity('publication', 'sub'); }
+    if (val === 'create') { return _form('createSubEntity', ['publication', 'sub']); }
     if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }
     fillCitationCombo(val);
     _panel('updateSrcDetails', ['pub']);
-    if (!hasCitation(val)) { return iForm.createSubEntity('citation', 'sub'); }
+    if (!hasCitation(val)) { return _form('createSubEntity', ['citation', 'sub']); }
     iForm.focusPinAndEnableSubmitIfFormValid('Publication');
 }
 function hasCitation(val) {
@@ -58,7 +58,7 @@ function getPubCitationOpts(pubId) {
  * and the publication combobox is reenabled.
  */
 export function onCitSelection(val) {                               /*perm-log*/console.log('       +--onCitSelection [%s]', val);
-    if (val === 'create') { return iForm.createSubEntity('citation', 'sub'); }
+    if (val === 'create') { return _form('createSubEntity', ['citation', 'sub']); }
     if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['cit']); }
     _panel('updateSrcDetails', ['cit']);
     _cmbx('enableCombobox', ['Publication']);

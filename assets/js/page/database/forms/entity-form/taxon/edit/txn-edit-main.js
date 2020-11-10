@@ -1,85 +1,23 @@
 /**
- * Taxon form code.
- *
- * Export
- *     finishEditFormBuild
- *     getTaxonEditFields
- *     initCreateForm
- *     initFormCombos
- *     selectParentTaxon
+ * Taxon edit-form.
  *
  * TOC
- *     CREATE FORM
- *     EDIT FORM
- *         FIELDS
- *             NAME FIELD AND RANK COMBOBOX
- *             PARENT TAXON ELEMS
- *                 TAXON PARENT SELECT FORM
- *                     RANK COMBO ELEMS
- *                     FINISH SELECT FORM BUILD
- *                     DATA VALIDATION
- *         ROW BUILDERS
- *         FINISH EDIT FORM BUILD
+ *     FIELDS
+ *     NAME FIELD AND RANK COMBOBOX
+ *     PARENT TAXON ELEMS
+ *         TAXON PARENT SELECT FORM
+ *         RANK COMBO ELEMS
+ *         FINISH SELECT FORM BUILD
  *         DATA VALIDATION
+ *     ROW BUILDERS
+ *     FINISH EDIT FORM BUILD
+ *     DATA VALIDATION
  */
 import { _cmbx, _el, _u } from '~util';
-import { _state, _elems, _form, _val, formatAndSubmitData, submitForm } from '~form';
+import { _state, _elems, _form, _val, formatAndSubmitData } from '~form';
+import * as tForm from '../txn-form-main.js';
 
 let taxonData;
-
-export function initFormCombos(entity, fLvl) {} //No combos in this form.
-
-/** ********************** CREATE FORM ************************************** */
-export function initCreateForm(rank, value) {                       /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, value);
-    const val = value === 'create' ? '' : value;
-    const ucRank = _u('ucfirst', [rank]);
-    return showNewTaxonForm(val, ucRank);
-}
-function showNewTaxonForm(val, rank) {
-    _state('setTaxonProp', ['formTaxonRank', rank]);  //used for data validation/submit
-    return buildTaxonForm()
-    .then(() => _elems('toggleSubmitBttn', ['#sub2-submit', true]));
-
-    function buildTaxonForm() {
-        const pId = '#sel-'+rank;
-        const vals = {'DisplayName': val};
-        _state('addEntityFormState', ['taxon', 'sub2', pId, 'create']);
-        return _elems('initSubForm', ['sub2', 'sml-sub-form', vals, pId])
-            .then(appendTxnFormAndFinishBuild);
-    }
-    function appendTxnFormAndFinishBuild(form) {
-        $('#'+rank+'_row').append(form);
-        _elems('toggleSubmitBttn', ['#sub2-submit'])
-        $('#sub2-hdr')[0].innerText += ' '+ rank;
-        $('#DisplayName_row input').focus();
-        updateTaxonSubmitBttn(rank);
-    }
-}
-function updateTaxonSubmitBttn(rank) {
-    $('#sub2-submit').off('click').click(validateAndSubmit.bind(null, rank));
-}
-function validateAndSubmit(rank) {
-    if (ifEmptyNameField()) { return valAlert(rank, 'needsName'); }
-    if (ifSpeciesValIssue(rank)) { return valAlert(rank, 'needsGenusName'); }
-    submitForm('#sub2-form',  'sub2', 'taxon');
-}
-function ifEmptyNameField() {
-    return !$('#DisplayName_row input').val();
-}
-function ifSpeciesValIssue(rank) {
-    return rank === 'Species' && !hasCorrectBinomialNomenclature();
-
-    function hasCorrectBinomialNomenclature() {
-        const species = $('#DisplayName_row input')[0].value;
-        const genus = _cmbx('getSelTxt', ['Genus']);                   /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
-        const speciesParts = species.split(' ');
-        return genus === speciesParts[0];
-    }
-}
-function valAlert(rank, tag) {
-    _val('showFormValAlert', [rank, tag, 'sub2'])
-}
-/** ********************** EDIT FORM **************************************** */
 /**
  * Returns the elements of the edit-taxon form.
  * <div>Parent Taxon: [Rank][Display-name]</> <bttnInput>"Edit Parent"</>
@@ -234,25 +172,9 @@ function appendPrntFormElems(elems) {
  * Hides the species row. Adds styles and modifies event listeners.
  */
 function finishSelectPrntFormBuild() {
-    initSelectParentCombos();
+    tForm.initSelectFormCombos();
     selectParentTaxon($('#txn-prnt').data('txn'));
     finishParentSelectFormUi();
-}
-function initSelectParentCombos() {
-    _elems('initFormCombos', [null, 'sub', getSelectParentComboEvents()]);
-}
-function getSelectParentComboEvents() {
-    return {
-        'Class': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'class') },
-        'Family': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'family') },
-        'Genus': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'genus') },
-        'Sub-Group': { onChange: handleOnSubGroupSelection },
-        'Order': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'order') },
-        'Species': { onChange: onParentRankSelection, create: initCreateForm.bind(null, 'species') },
-    }
-}
-function onParentRankSelection(val) {
-    _form('onRankSelection', [val, this.$input[0]]);
 }
 function handleOnSubGroupSelection(val) {
     _form('onSubGroupSelection', [val])
@@ -300,7 +222,8 @@ function updateSubmitBttns() {
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectNewTaxonParent() {
-    const prnt = _form('getSelectedTaxon') || _state('getTaxonProp', ['groupTaxon']);/*dbug-log*///console.log("selectNewTaxonParent called. prnt = %O", prnt);
+    const selected = _form('getSelectedTaxon');
+    const prnt = selected ? selected : _state('getTaxonProp', ['groupTaxon']);/*dbug-log*/console.log("selectNewTaxonParent called. prnt = %O", prnt);
     if (ifInvalidParentRank(getRankVal(prnt.rank.displayName))) { return; }
     exitPrntEdit(prnt);
 }

@@ -4,19 +4,24 @@
  * Note - required form methods: initCreateForm, initFormCombos
  *
  * TOC
- *     CREATE ENTITY
- *     EDIT FORMS
- *     INTERACTION
- *     LOCATION
- *     TAXON
- *     SOURCE TYPES
- *         AUTHOR
- *         CITATION
+ *     INIT FORM
+ *         IF OPEN SUB-FORM ISSUE
+ *         FORM COMBOS
+ *         EDIT FORMS
+ *     ENTITY FACADE
+ *         INTERACTION
+ *         LOCATION
+ *         TAXON
+ *         SOURCE TYPES
+ *             AUTHOR
+ *             CITATION
  */
+import { _u } from '~util';
+import { _val } from '~form';
 import * as int from './interaction/int-form-main.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/src-form-main.js';
-import * as txn from './taxon/taxon-form.js';
+import * as txn from './taxon/txn-form-main.js';
 
 const forms = {
     'interaction': int, 'object': int, 'subject': int,
@@ -24,9 +29,26 @@ const forms = {
     'author': src, 'citation': src, 'editor': src, 'publication': src, 'publisher': src,
     'taxon': txn,'species': txn, 'genus': txn, 'family': txn, 'order': txn, 'class': txn
 };
-export function createEntity(entity) {
+/* =================== INIT FORM ============================================ */
+export function createEntity(entity, val) {
     return forms[entity].initCreateForm(...arguments);
 }
+export function createSubEntity(entity, fLvl, val) {
+    if (ifFormAlreadyOpenAtLevel(fLvl)) { return handleOpenSubFormAlert(entity, fLvl); }
+    createEntity(entity, val);
+}
+/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
+export function ifFormAlreadyOpenAtLevel(fLvl) {
+    return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
+}
+export function handleOpenSubFormAlert(entity, fLvl) {
+    return openSubFormAlert(entity, fLvl)
+}
+function openSubFormAlert(ent, fLvl) {
+    const entity = ent === 'citation' ? 'citationTitle' : ent;
+    _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
+}
+/* ------------------------- FORM COMBOS ------------------------------------ */
 export function initFormCombos(entity, fLvl) {                      /*dbug-log*///console.log('initFormCombos [%s][%s]', fLvl, entity)
     forms[entity].initFormCombos(...arguments);
 }
@@ -45,6 +67,7 @@ export function finishEditFormInit(entity, id) {
     if (!cmplxFnshrs[entity]) { return Promise.resolve(); }
     return Promise.resolve(cmplxFnshrs[entity](id));
 }
+/* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationCombo() {
     int.fillCitationCombo(...arguments);
@@ -55,11 +78,11 @@ export function selectIntLoc(id) {
 export function enableCountryRegionField() {
     int.enableCountryRegionField();
 }
-export function onRankSelection() {
-    int.onRankSelection(...arguments);
+export function selectRoleTaxon() {
+    return int.selectRoleTaxon(...arguments);
 }
-export function onSubGroupSelection() {
-    return int.onSubGroupSelection(...arguments);
+export function enableRoleTaxonFieldCombos() {
+    return int.enableRoleTaxonFieldCombos(...arguments);
 }
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocationEditForm() {
@@ -79,13 +102,19 @@ export function createTaxon(rank, val) {
     return txn.initCreateForm(rank, val);
 }
 export function getSelectedTaxon() {
-    return int.getSelectedTaxon();
+    return txn.getSelectedTaxon();
 }
 export function getTaxonEditFields(entity, id) {
     return txn.getTaxonEditFields(id);
 }
+export function initRoleTaxonSelect() {
+    return txn.initRoleTaxonSelect(...arguments);
+}
 export function selectParentTaxon(id) {
     return txn.selectParentTaxon(id);
+}
+export function onSubGroupSelection() {
+    return txn.onSubGroupSelection(...arguments);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {

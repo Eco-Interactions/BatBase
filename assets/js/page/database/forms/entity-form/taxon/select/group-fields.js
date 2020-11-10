@@ -4,7 +4,6 @@
  * Export
  *     onSubGroupSelection
  *     onGroupSelection
- *     ifNoSubGroupsRemoveCombo
  *
  * TOC
  *     CLEAR PREVIOUS GROUP COMBOS
@@ -13,8 +12,8 @@
  *     SELECT SUB-GROUP
  */
 import { _cmbx } from '~util';
-import { _state, _elems } from '~form';
-import * as iForm from '../../int-form-main.js';
+import { _form, _state, _elems } from '~form';
+import * as selectForm from './txn-select-main.js';;
 /**
  * Removes any previous group comboboxes. Shows a combobox for each rank present
  * in the selected Taxon group filled with the taxa at that rank and sub-group
@@ -39,22 +38,22 @@ function buildAndAppendGroupRows(rootId) {
     return _elems('getFormFieldRows', ['object', {'Sub-Group': rootId}, 'sub'])
     .then(appendGroupRowsAndFinishBuild);
 }
-function appendGroupRowsAndFinishBuild(rows) {
+function appendGroupRowsAndFinishBuild(rows) {                      /*dbug-log*///console.log('appendGroupRowsAndFinishBuild = %O', rows);
     ifNoSubGroupsRemoveCombo(rows);
     $('#object_Rows').append(rows);
     _state('setFormFieldData', ['sub', 'Group', null, 'select']);
-    iForm.initFormCombos('taxon', 'sub');
+    selectForm.initSelectFormCombos();
     _elems('toggleSubmitBttn', ['#sub-submit', false]);
     bindGroupRootTaxonToSelectUnspecfiedBttn();
 }
 function bindGroupRootTaxonToSelectUnspecfiedBttn() {
     const gTaxon = _state('getTaxonProp', ['groupTaxon']);
     $('#select-group').off('click');
-    $('#select-group').click(iForm.selectRoleTaxon.bind(null, null, gTaxon));
+    $('#select-group').click(_form.bind(null, 'selectRoleTaxon', [null, gTaxon]));
 }
 /* ------------------- IF NO SUB-GROUPS REMOVE COMBO ------------------------ */
 function ifNoSubGroupsRemoveCombo(rows = false) {
-    const subGroups = Object.keys(_state('getTaxonProp', ['subGroups'])); /*dbug-log*///console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
+    const subGroups = Object.keys(_state('getTaxonProp', ['subGroups']));/*dbug-log*///console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
     if (subGroups.length > 1) { return; }
     if (!rows) { // Taxon edit-form parent select-form
         $('#Sub-Group_row').remove();

@@ -20,12 +20,11 @@
  */
 import { _cmbx } from '~util';
 import { _elems, _state, _val, getSubFormLvl } from '~form';
-import * as iForm from '../../../int-form-main.js';
+import { getSelectedTaxon } from '../txn-select-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
 
-export function onRankSelection(val, input) {                       /*dbug-log*///console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
+export function onRankSelection(val, elem) {                       /*dbug-log*///console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
     const fLvl = getSubFormLvl('sub');
-    const elem = input || this.$input[0];
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
     repopulateCombosWithRelatedTaxa(val);
@@ -43,7 +42,7 @@ function openTaxonCreateForm(selElem, fLvl) {
 }
  /* ----------------------- RESET CHILD-RANK COMBOS ------------------------- */
 function syncTaxonCombos(elem) {
-    resetChildRankCombos(iForm.getSelectedTaxon(elem.id.split('sel-')[1]));
+    resetChildRankCombos(getSelectedTaxon(elem.id.split('sel-')[1]));
 }
 function resetChildRankCombos(selTxn) {
     getOptsForSelectedChildren(selTxn)

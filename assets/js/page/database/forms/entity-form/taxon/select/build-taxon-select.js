@@ -21,12 +21,12 @@
  *     RESET SELECT-FORM TO INIT STATE
  */
 import { _cmbx, _el, _u } from '~util';
-import { _state, _elems } from '~form';
-import * as iForm from '../../int-form-main.js';
+import { _form, _elems, _state } from '~form';
+import * as selectForm from './txn-select-main.js';
 
-export function initTaxonSelectForm(role, groupId) {                /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
+export function initTaxonSelectForm(role, gId) {                    /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
     $('#sel-'+role).data('loading', true);
-    return buildTaxonSelectForm(role, groupId)
+    return buildTaxonSelectForm(role, gId)
         .then(form => appendTxnFormAndInitCombos(role, form))
         .then(() => finishTaxonSelectBuild(role));
 }
@@ -63,10 +63,13 @@ function addSelectRootTaxonBttn() {
     $('#sub-form .bttn-cntnr').prepend(bttn);
 }
 function buildSelectUnspecifedBttn() {
-    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
     const bttn = _el('getElem', ['input', getUnspecifiedBttnAttrs()]);
-    $(bttn).click(iForm.selectRoleTaxon.bind(null, null, gTaxon));
+    $(bttn).click(selectGroupTaxon);
     return bttn;
+}
+function selectGroupTaxon() {
+    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
+    _form('selectRoleTaxon', [null, gTaxon]);
 }
 function getUnspecifiedBttnAttrs() {
     return {
@@ -83,7 +86,7 @@ function customizeElemsForTaxonSelectForm(role) {
     $('#sub-hdr').append(getTaxonExitButton(role));
     $('#sub-submit')[0].value = "Select Taxon";
     $('#sub-cancel')[0].value = "Reset";
-    $('#sub-submit').unbind("click").click(iForm.selectRoleTaxon);
+    $('#sub-submit').unbind("click").click(_form.bind(null, 'selectRoleTaxon'));
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role));
 }
 function getTaxonExitButton(role) {
@@ -94,7 +97,7 @@ function getTaxonExitButton(role) {
 }
 /** Exits sub form and restores any previous taxon selection. */
 function exitTaxonSelectForm(role) {
-    _elems('exitSubForm', ['sub', false, iForm.enableRoleTaxonFieldCombos]);
+    _elems('exitSubForm', ['sub', false, _form.bind(null, 'enableRoleTaxonFieldCombos')]);
     const prevTaxonId = $('#sel-'+role).data('selTaxon');
     if (!prevTaxonId) { return; }
     resetTaxonCombobox(role, prevTaxonId);
@@ -128,7 +131,7 @@ function focusFirstRankCombobox(lcRole) {
 function appendTxnFormAndInitCombos(role, form) {
     const lcRole = _u('lcfirst', [role]);
     $('#'+role+'_row').append(form);
-    iForm.initFormCombos('taxon', 'sub');
+    selectForm.initSelectFormCombos();
 }
 /* -------------- RESET SELECT-FORM TO INIT STATE --------------------------- */
 /**
@@ -136,11 +139,9 @@ function appendTxnFormAndInitCombos(role, form) {
  * to the default taxon-group for the role.
  */
 function resetTaxonSelectForm(role) {
-    const group = _state('getTaxonProp', ['groupName']);
-    const reset =  group == 'Bat' ? iForm.initSubjectSelect : iForm.initObjectSelect;
     $('#sel-'+role).data('reset', true);
     $('#sub-form').remove();
-    reset();
+    initTaxonSelectForm(role);
 }
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(id, role) {

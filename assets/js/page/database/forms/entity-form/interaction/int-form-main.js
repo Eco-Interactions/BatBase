@@ -9,7 +9,6 @@
  *     FORM-FIELD HELPERS
  *         CITATION
  *         LOCATION
- *         SUBJECT|OBJECT
  *     MODULE INTERNAL-USAGE
  *         CREATE SUB-ENTITY
  *             IF OPEN SUB-FORM ISSUE
@@ -32,9 +31,6 @@ export function finishEditFormBuild(entity) {
 }
 /** ------------------ FORM COMBOBOXES -------------------------------------- */
 export function initFormCombos(entity) {
-    return entity === 'interaction' ? initFormFieldCombos() : fields.initRankCombos();
-}
-function initFormFieldCombos() {
     const events = fields.getIntFormFieldComboEvents();
     _elems('initFormCombos', ['interaction', 'top', events]);
 }
@@ -51,44 +47,13 @@ export function selectLoc() {
 export function enableCountryRegionField() {
     return fields.enableCountryRegionField(...arguments);
 }
-/* -------------- SUBJECT|OBJECT -------------------------------------------- */
-export function onRankSelection() {
-    fields.onRankSelection.bind(this)(...arguments);
-}
-export function getSelectedTaxon() {
-    return fields.getSelectedTaxon(...arguments);
-}
-export function onSubGroupSelection() {
-    return fields.onSubGroupSelection(...arguments);
-}
-export function initSubjectSelect() {
-    return fields.initSubjectSelect(...arguments);
-}
-export function initObjectSelect() {
-    return fields.initObjectSelect(...arguments);
-}
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 /* ==================== CREATE SUB-ENTITY =================================== */
 export function create(entity, fLvl) {
-    return createSubEntity.bind(null, entity, fLvl);
+    return _form.bind(null, 'createSubEntity', [entity, fLvl]);
 }
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
     return build.resetInteractionForm();
-}
-export function createSubEntity(entity, fLvl, val) {
-    if (ifFormAlreadyOpenAtLevel(fLvl)) { return handleOpenSubFormAlert(entity, fLvl); }
-    _form('createEntity', [entity, val]);
-}
-/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-export function ifFormAlreadyOpenAtLevel(fLvl) {
-    return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
-}
-export function handleOpenSubFormAlert(entity, fLvl) {
-    return openSubFormAlert(entity, fLvl)
-}
-function openSubFormAlert(ent, fLvl) {
-    const entity = ent === 'citation' ? 'citationTitle' : ent;
-    _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
 }
 /** ====================== FORM-FIELD HELPERS =============================== */
 export function initTypeField() {
@@ -108,9 +73,6 @@ export function addLocationSelectionMethodsNote() {
 /* --------------------- SUBJECT|OBJECT ------------------------------------- */
 export function selectRoleTaxon() {
     return fields.selectRoleTaxon(...arguments);
-}
-export function onGroupSelection() {
-    return fields.onGroupSelection(...arguments);
 }
 export function onTaxonRoleSelection() {
     return fields.onTaxonRoleSelection(...arguments);
