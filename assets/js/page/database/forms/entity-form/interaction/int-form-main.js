@@ -50,7 +50,10 @@ export function enableCountryRegionField() {
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 /* ==================== CREATE SUB-ENTITY =================================== */
 export function create(entity, fLvl) {
-    return _form.bind(null, 'createSubEntity', [entity, fLvl]);
+    return createEntity.bind(null, entity, fLvl);
+}
+function createEntity(entity, fLvl, val) {
+    return _form('createSubEntity', [entity, fLvl, val]);
 }
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
     return build.resetInteractionForm();

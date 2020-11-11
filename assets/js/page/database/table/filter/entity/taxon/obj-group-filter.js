@@ -20,7 +20,7 @@ export function initObjectGroupCombobox() {
     .then(finishGroupComboInit);
 }
 function buildObjectGroupCombo(groups) {
-    const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
+    const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row fWidthLbl' }]);
     const span = _el('getElem', ['span', { text: 'Groups: ' }]);
     const opts = groups.filter(r => r.text !== 'Bat');  		    /*dbug-log*///console.log('groups = %O', groups)
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-ObjectGroupsFilter');

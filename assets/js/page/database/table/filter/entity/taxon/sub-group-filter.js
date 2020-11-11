@@ -27,11 +27,11 @@ function getSubGroupOpts(tblState) {
 }
 function buildSubGroupOpts(subGroups) {
     return Object.keys(subGroups).map(group => {
-        return new Option(group, group.split(' ')[1]);
+        return { text: group, value: group.split(' ')[1]};
     });
 }
 function buildSubGroupCombo(opts) {
-    const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row fWidthLbl' }]);
+    const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row fWidthLbl' }]);
     const span = _el('getElem', ['span', { text: '' }]);
     const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-Sub-GroupFilter');
     $(lbl).append([span, sel]);

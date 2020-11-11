@@ -188,7 +188,7 @@ function buildPublString(pubSrc) {
  * with '&'. If the names are of editors, they are returned [Initials. Last].
  * If >= 4 authors, returns first author [Last, Initials.] + ', et al';
  */
-function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*/console.log('getFormattedAuthorNames. auths = %O, eds [%s]', _u('snapshot', [auths]), eds);
+function getFormattedAuthorNames(auths, eds) {                      /*dbug-log*///console.log('getFormattedAuthorNames. auths = %O, eds [%s]', _u('snapshot', [auths]), eds);
     if (Object.keys(auths).length > 3) { return getFirstAuthorEtAl(auths[1], eds); }
     let athrs = '';
     for (let ord in auths) {

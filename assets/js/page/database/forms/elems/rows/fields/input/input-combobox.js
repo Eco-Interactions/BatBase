@@ -64,7 +64,8 @@ function buildSelect(entity, field, fLvl, cnt) {                    /*dbug-log*/
  * or the Author create form when the user enters a new Author's name.
  */
 function buildMultiSelect(entity, field, fLvl) {                    /*dbug-log*///console.log("buildMultiSelect [%s][%s]", entity, field);
-    const cntnr = _el('getElem', ['div', { id: 'sel-cntnr-' + field.name, class: 'sel-cntnr' }]);
+    const attr = { id: 'sel-cntnr-' + field.name, class: 'field-cntnr' };
+    const cntnr = _el('getElem', ['div', attr]);
     return buildMultiSelectElem(entity, field, fLvl, 1)
         .then(returnFinishedMultiSelectFields);
 

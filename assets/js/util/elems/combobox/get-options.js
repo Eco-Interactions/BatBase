@@ -25,11 +25,12 @@ import { _state, getSubFormLvl } from '~form';
  * for the options in the group.
  */
 function getOptions(entityObj, sortedKeys) {                        /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
+    if (!Object.keys(entityObj).length) { return []; }
     return Object.values(entityObj)[0].group ?
         getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);
 }
 function getEntityOpt(name, id) {                                   /*dbug-log*///console.log('getEntityOpt [%s][%s]', name, id);
-    return new Option(_u('ucfirst', [name]), id);
+    return { text: _u('ucfirst', [name]), value: id};
 }
 /** --------------------- GROUP OPTIONS ------------------------------------- */
 function getOptGroups(entityObj, sortedKeys) {
@@ -114,14 +115,14 @@ export function getFieldOptions(field) {                            /*dbug-log*/
 export function getRcrdOpts(entity, ids = false, rcrds = false) {   /*dbug-log*///console.log('getRcrdOpts [%s] ids %O, rcrds %O', entity, ids, rcrds);
     rcrds = rcrds ? rcrds : _state('getEntityRcrds', [_u('lcfirst', [entity])]);
     ids = ids ? ids : Object.keys(rcrds);
-    const opts = [ new Option(`Add a new ${_u('ucfirst', [entity])}...`, 'create') ];
+    const opts = [ { text: `Add a new ${_u('ucfirst', [entity])}...`, value: 'create'} ];
     opts.push(...alphabetizeOpts(buildEntityOptions(ids, rcrds)));
     return opts;
 }
 function buildEntityOptions(ids, rcrds) {
     return ids.map(id => {
         const text = getEntityDisplayName(rcrds[id]);
-        return new Option(text, id);
+        return { text: text, value: id };
     });
 }
 function getEntityDisplayName(entity) {
@@ -151,7 +152,7 @@ function getSrcOpts(field, prop, rcrds) {
     }
 }
 export function buildSrcOpts(srcType, ids, rcrds) {                 /*dbug-log*///console.log('buildSrcTypeOpts[%s] ids? %O, rcrds? %O', srcType, ids, rcrds);
-    const opts = [ new Option(`Add a new ${_u('ucfirst', [srcType])}...`, 'create') ];
+    const opts = [ { text: `Add a new ${_u('ucfirst', [srcType])}...`, value: 'create'} ];
     if (!ids.length) { return opts; }
     opts.push(...getRcrdOpts('source', ids, rcrds));
     return opts;
@@ -179,7 +180,7 @@ function getCitTypeOpts(field, prop) {
 export function getTaxonOpts(field, rank, r, g) {
     const group = r ? r : _state('getTaxonProp', ['groupName']);
     const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);  /*dbug-log*///console.log('getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
-    const opts = [ new Option(`Add a new ${rank}...`, 'create') ];
+    const opts = [ { text: `Add a new ${rank}...`, value: 'create'} ];
     return getStoredOpts(null, group+subGroup+rank+'Names')
         .then(o => {
             opts.push(...alphabetizeOpts(o));
@@ -190,7 +191,7 @@ export function getTaxonOpts(field, rank, r, g) {
 function getGroupOpts(field, prop) {
     const groups = _state('getTaxonProp', ['groups']);
     delete groups.Bat;
-    const opts = Object.keys(groups).map(g => new Option(g, groups[g]));
+    const opts = Object.keys(groups).map(g => { return { text: g, value: groups[g] }});
     return alphabetizeOpts(opts);
 }
 function getSubGroupOpts(field, prop) {

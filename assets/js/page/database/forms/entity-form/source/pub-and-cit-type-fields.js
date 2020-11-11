@@ -103,15 +103,16 @@ function updateFieldLabelsForType(entity, fLvl) {
         };
         return trans[entity][type];
     }
-    function updateComboText(lblElem, fieldTxt, newTxt) {
+    function updateComboText(lblElem, field, newTxt) {
         return lblElem.nextSibling.id.includes('-cntnr') ?
-            updateAllComboPlaceholders($('#sel-cntnr-'+fieldTxt)[0]) :
-            _cmbx('updatePlaceholderText', [ '#sel-'+fieldTxt, newTxt]);
+            updateAllComboPlaceholders($('#sel-cntnr-'+field)[0].children) :
+            _cmbx('updatePlaceholderText', [field, newTxt]);
 
-        function updateAllComboPlaceholders(cntnrElem) {
-            for (let $i = 0; $i < cntnrElem.children.length; $i++) {
-                if (cntnrElem.children[$i].tagName !== 'SELECT') {continue}
-                _cmbx('updatePlaceholderText', ['#'+cntnrElem.children[$i].id, newTxt]);
+        function updateAllComboPlaceholders(elems) {
+            for (let $i = 0; $i < elems.length; $i++) {
+                if (elems[$i].tagName !== 'SELECT') {continue}
+                const field = elems[$i].id.split('sel-')[1];
+                _cmbx('updatePlaceholderText', [field, newTxt]);
             }
         }
     }

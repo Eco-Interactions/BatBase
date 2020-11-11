@@ -19,7 +19,7 @@ Feature: Search page features and database table controls
         And the database has loaded
         And I exit the tutorial
         And the database table is in "Taxon" view
-        And I group interactions by "Bats"
+        And I view interactions by "Bats"
 ## --------------- EXPAND AND COLLAPSE ROWS IN DATABASE TABLE --------------- ##
     @javascript
     Scenario:  I should be able to expand the data tree completely
@@ -81,7 +81,7 @@ Feature: Search page features and database table controls
 ## --------- DISPLAY INTERACTIONS IN TABLE ON MAP --------------------------- ##
     @javascript
     Scenario:  I should be able to show interactions with gps data on the map
-      Given the database table is in "Source" view
+      Given the database table is grouped by "Sources"
       When I select "Journal" from the "Pub Type" dropdown
       And i see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
@@ -92,13 +92,13 @@ Feature: Search page features and database table controls
 
     @javascript
     Scenario:  I should be able to view interactions on the map
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         When I select the Location view "Map Data"
         Then I should see the map with markers
 
     @javascript
     Scenario:  I should be able to show interactions in the table from a map marker
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         And I select the Location view "Map Data"
         When I click on a map marker
         And I press the "Show Interactions In Data-Table" button
@@ -106,7 +106,7 @@ Feature: Search page features and database table controls
 
     @javascript
     Scenario:  I should be able to view a specific location on the map
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         When I expand "Central America" in the data tree
         And I expand "Panama" in the data tree
         And I click on the map pin for "Summit Experimental Gardens"

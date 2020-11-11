@@ -19,7 +19,7 @@ import * as submit from './submit/submit-main.js';
 import * as elems from './elems/elems-main.js';
 import editEntity from './edit/edit-forms-main.js';
 
-export function alertIssue() {
+export function alertFormIssue() {
     if (!state.getFormState()) { return; } //form closed
     return _alert('alertIssue', [...arguments]);
 }

@@ -103,7 +103,7 @@ function exitTaxonSelectForm(role) {
     resetTaxonCombobox(role, prevTaxonId);
 }
 function resetTaxonCombobox(role, prevTaxonId) {
-    const opt = new Option(getTaxonym(prevTaxonId), prevTaxonId);
+    const opt = { text: getTaxonym(prevTaxonId), value: prevTaxonId};
     _cmbx('replaceSelOpts', [role, opt]);
     _cmbx('setSelVal', [role, prevTaxonId]);
 }

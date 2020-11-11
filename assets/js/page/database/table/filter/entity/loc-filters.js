@@ -72,7 +72,7 @@ function buildLocSelectOpts(tblState, data) {
         if (processedOpts[type].indexOf(name) !== -1) { return; }
         const id = rowData.id;
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
-        opts[type].push(new Option(name.split('[')[0], id));
+        opts[type].push({ text: name.split('[')[0], value: id});
         processedOpts[type].push(name);
     }
     function isOpenRow(id) {
@@ -110,7 +110,7 @@ function buildLocSelectOpts(tblState, data) {
         if (!val) { return }
         addToSelectedObj(val, optProp);
         tblState.openRows.push(val);
-        opts[optProp].push(new Option(txt, val));
+        opts[optProp].push({ text: txt, value: val});
     }
     function addToSelectedObj(id, type) {
         const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s]', type);
@@ -124,7 +124,7 @@ function buildLocSelectOpts(tblState, data) {
     }
     function addAllOption() {
         Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
-            opts[type].unshift(new Option('- All -', 'all'));
+            opts[type].unshift({ text: '- All -', value: 'all'});
         });
     }
     function updateFilterMemory() {
@@ -149,7 +149,7 @@ function buildLocSelects(locOpts) {
     return selElems;
 
     function buildLocSel(locType, opts) {
-        const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row' }]);
+        const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row' }]);
         const span = _el('getElem', ['span', { text: locType + ': ', class: "opts-span" }]);
         const sel = fM.newSel(opts, 'opts-box', `sel-${locType}Filter`, locType);
         $(lbl).append([span, sel]);

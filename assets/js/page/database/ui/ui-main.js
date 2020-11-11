@@ -104,9 +104,9 @@ export function selectInitialSearchFocus(f) {                       /*dbug-log*/
 }
 function getFocusOpts() {
     return [
-        new Option('Location', 'locs'),
-        new Option('Source', 'srcs'),
-        new Option('Taxon', 'taxa')
+        { text: 'Location', value: 'locs'},
+        { text: 'Source', value: 'srcs'},
+        { text: 'Taxon', value: 'taxa'}
     ];
 }
 /* --------------- VIEW OPTS --------------- */

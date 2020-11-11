@@ -16,8 +16,7 @@ export function addRoleTaxonFocusListeners() {
     ['Subject', 'Object'].forEach(addRoleFocusListener);
 }
 function addRoleFocusListener(role) {
-    const elem = `#sel-${role} + div div.selectize-input`;
-    $('#form-main').on('focus', elem, initRoleTaxonSelect.bind(null, role));
+    $(`#sel-${role}`)[0].selectize.on('focus', initRoleTaxonSelect.bind(null, role));
 }
 /* ----------------- ROLE-TAXON SELECT-FORM INIT ---------------------------- */
 function initRoleTaxonSelect(role) {
@@ -49,5 +48,5 @@ export function selectRoleTaxon(e, groupTaxon) {
 function getSelectedTaxonOption(groupTaxon) {
     const taxon = groupTaxon || _form('getSelectedTaxon');          /*dbug-log*///console.log("selected Taxon = %O", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
-    return new Option(taxon.displayName, taxon.id);
+    return { text: taxon.displayName, value: taxon.id};
 }

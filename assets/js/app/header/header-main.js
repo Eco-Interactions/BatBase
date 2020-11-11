@@ -19,6 +19,7 @@ export default function initHeaderAndNav() {
     initSiteNav();
     initSlider();
     initStickyHeader(); //Must load after image slider and the nav menus
+    initHeaderStats();
     $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
 }
 /* Header sticks when image header scrolls off screen. */

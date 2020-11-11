@@ -14,6 +14,6 @@ export function validateAndUpdateUserData(dbUser) {
 }
 function replaceUserData(userName, data) {                          /*dbug-log*///console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));
-    db.deriveUserData(data);
+    db.storeUserData(data);
     db.setDataInMemory('user', userName);
 }

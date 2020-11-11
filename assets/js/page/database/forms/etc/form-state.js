@@ -184,7 +184,7 @@ export function getRcrd(entity, id) {
     if (!fState.records || !fState.records[entity]) { return; }
     const rcrd = fState.records[entity][id] ?
         _u('snapshot', [fState.records[entity][id]]) :
-        _alert('alertIssue', ['noRcrdFound', {id: id, entity: entity }]);
+        _alert('alertFormIssue', ['noRcrdFound', {id: id, entity: entity }]);
     return rcrd ? rcrd : false;
 }
 /* ---------------------------- Setters ------------------------------------- */

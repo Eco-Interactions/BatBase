@@ -43,7 +43,7 @@ function loadPubSearchElems(pubTypeOpts) {
 }
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-    const lbl = _el('getElem', ['label', {class: "sel-cntnr flex-row"}]);
+    const lbl = _el('getElem', ['label', {class: "field-cntnr flex-row"}]);
     const span = _el('getElem', ['span', { text: 'Type:' }]);
     const sel = fM.newSel(addAllOpt(opts), '', 'sel-PublicationTypeFilter', 'Publication Type');
     const lblW = $(window).width() > 1500 ? '222px' : '230px';

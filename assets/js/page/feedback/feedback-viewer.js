@@ -128,8 +128,8 @@ function getAssignedUserField(users, assignedId) {
 	return _el('getFieldRow', [getFeedbackFieldConfg('fAssigned', 'Assigned to:', select)]);
 }
 function getUserOpts(users) {
-	const opts = [new Option('- None - ', 0)];
-	users.forEach(user => opts.push(new Option(user.name, user.id)));
+	const opts = [{ text: '- None - ', value: 0 }];
+	users.forEach(user => opts.push({ text: user.name, value: user.id }));
 	return opts;
 }
 /* ________________________ FEEDBACK STATUS _________________________________ */
@@ -141,7 +141,7 @@ function getFeedbackStatuElem(curStatus) {
 }
 function getStatusOpts() {
 	const statuses = ['Closed', 'Follow-Up', 'Read', 'Unread'];
-	return statuses.map((status, idx) => new Option(status, idx));
+	return statuses.map((status, idx) => { return { text: status, value: idx }});
 }
 /* _________________________ ADMIN NOTES ____________________________________ */
 function getAdminNotesElem(notes) {

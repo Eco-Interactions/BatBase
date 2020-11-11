@@ -50,6 +50,15 @@ class FeatureContext extends RawMinkContext implements Context
      * context constructor through behat.yml.
      */
     public function __construct(){}
+/** __________________________ SELECTORS ______________________________________ */
+    private function getComboId($label)
+    {
+        return '#sel-'.str_replace(' ','',$label);
+    }
+    private function getNameFilter($entity)
+    {
+        return 'input[name="name-'.$entity.'"]';
+    }
 /** __________________________ ALIASES ______________________________________ */
     private function execute($statement)
     {
@@ -59,10 +68,15 @@ class FeatureContext extends RawMinkContext implements Context
     {
         return $this->getUserSession()->evaluateScript($statement);
     }
+    private function wait($statement, $time = 5000)
+    {
+        return $this->getSession()->wait($time, $statement);
+    }
     private function log($msg)
     {
         fwrite(STDOUT, $msg);
     }
+
 /** ____________________________ EVENTS _____________________________________ */
     /**
      * @BeforeSuite
@@ -167,43 +181,68 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given the database table is in :entity view
+     * @Given the database table is grouped by :entity
      */
-    public function theDatabaseTableIsInFocus($entity)
+    public function theDatabaseTableIsGroupedBy($entity)
     {
-        $vals = ['Taxon' => 'taxa', 'Location' => 'locs', 'Source' => 'srcs'];
-        $newElems = ['Taxon' => '#selSpecies', 'Location' => '#selRegion', 'Source' => '#selPubType'];
-        $this->changeTableSort('#search-focus', $vals[$entity], $newElems[$entity]);
+        $vals = [
+            'Locations' => 'locs',
+            'Sources' => 'srcs',
+            'Taxa' => 'taxa',
+        ];
+        $newElems = [
+            'Locations' => $this->getComboId('Region Filter'),
+            'Sources' => $this->getComboId('Publication Type Filter'),
+            'Taxa' => $this->getComboId('Object Groups Filter'),
+        ];
+        $this->changeTableSort($this->getComboId('Focus'), $vals[$entity], $newElems[$entity]);
     }
+
+    /**
+     * @Given I view interactions by :type
+     */
+    public function iViewInteractionsBy($type)
+    {
+        $vals = [
+            'Bats' => 1,
+            'Arthropoda' => 3,
+            'Authors' => 'auths',
+            'Plants' => 2,
+            'Publications' => 'pubs',
+            'Publishers' => 'publ'
+        ];
+        $newElems = [  //Add views with sub-groups
+            'Bats' => $this->getComboId('Object Groups Filter'),
+            'Arthropoda' => $this->getComboId('Order Filter'),
+            'Authors' => $this->getNameFilter('Author'),
+            'Plants' => $this->getComboId('Species Filter'),
+            'Publications' => $this->getComboId('Publication Type Filter'),
+            'Publishers' => $this->getNameFilter('Publisher')
+        ];
+        $this->changeTableSort($this->getComboId('View'), $vals[$type], $newElems[$type]);
+    }
+
     /**
      * @Given I display locations in :loc View
      */
     public function iDisplayLocationsInView($loc)
     {
-        $vals = ['Map' => 'map', 'Table' => 'tbl'];
-        $newElems = ['Map' => '#map', 'Table' => '#search-tbl'];
-        $this->changeTableSort('#sel-view', $vals[$loc], $newElems[$loc]);
+        $vals = [
+            'Map' => 'map',
+            'Table' => 'tbl'
+        ];
+        $newElems = [
+            'Map' => '#map',
+            'Table' => '#search-tbl'
+        ];
+        $this->changeTableSort($this->getComboId('View'), $vals[$loc], $newElems[$loc]);
     }
-
-    /**
-     * @Given I group interactions by :type
-     */
-    public function iGroupInteractionsBy($type)
-    {
-        $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 1,
-            'Arthropoda' => 3, 'Plants' => 2, 'Publishers' => 'publ'];
-        $newElems = ['Authors' => 'input[name="selAuthor"]', 'Publications' => '#selPubType',
-            'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
-            'Publishers' => 'input[name="selPublisher"]'];
-        $this->changeTableSort('#sel-view', $vals[$type], $newElems[$type]);
-    }
-
     /**
      * @When I select the Location view :view
      */
     public function iSelectTheLocationView($view)
     {
-        $this->changeTableSort('#sel-view', 'map', '#map');
+        $this->changeTableSort($this->getComboId('View'), 'map', '#map');
     }
 
 
@@ -261,48 +300,67 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @When I select :text from the :label dropdown
-     * Search page elems.
-     */
-    public function iSelectFromTheDropdown($text, $label)
-    {                                                                           //$this->log("\niSelectFromTheDropdown\n");
-        $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1,
-            'Book' => 2, 'Article' => 3, 'Map Data' => 'map', 'Test Filter Set' => 1,
-            'Test Interaction List' => 1, 'Panama' => 12 ];
-        $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
-        $selId = '#sel'.str_replace(' ','',$label);
-        $this->spin(function() use ($selId, $val)
-        {
-            $elem = $this->getUserSession()->getPage()->find('css', $selId);
-            if (!$elem) { return false; }
-            $this->getUserSession()->
-                executeScript("$('$selId')[0].selectize.addItem('$val');");
-            return true;
-        }, "Couldn't select [$val] from the [$selId] elem.");
-    }
-
-    /**
      * @When I type :text in the :type text box and press enter
      */
     public function iTypeInTheTextBoxAndPressEnter($text, $type)
     {
-        $input = $this->getUserSession()->getPage()->find('css', 'input[name="sel'.$type.'"]');
+        $fId = $this->getNameFilter($type);
+        $input = $this->getUserSession()->getPage()->find('css', $fId);
         $input->setValue($text);
         $input->keypress('13');
     }
 
+/* ====================== SELECTIZE COMBOBOXES ============================== */
     /**
-     * @When I enter :text in the :label dropdown
+     * @When I add :text to the :label dropdown
+     * Note: Selectize create method.
      */
-    public function iEnterInTheDropdown($text, $label)
+    public function iAddToTheDropdown($text, $label)
     {
-        $selId = '#sel'.str_replace(' ','',$label);
-        try {
+        $selId = $this->getComboId($label);
+
+        $this->spin(function() use ($selId, $text){
             $this->execute("$('$selId')[0].selectize.createItem('$text');");
-        } catch (Exception $e) {
-            $this->iPutABreakpoint("Couldn't find dropdown [$selId]");
-        }
+            return true;
+        }, "Couldn't find dropdown [$selId]");
     }
+    /**
+     * @When I select :text from the :prop dropdown
+     * Note: Selectize select method.
+     */
+    public function iSelectFromTheDropdown($text, $prop)
+    {
+        $this->selectValueInCombobox($this->getComboId($prop), $text);
+    }
+/* ------------------------- DYNAMIC ---------------------------------------- */
+    /**
+     * @When I add :text to the :prop dynamic dropdown
+     */
+    public function iAddToTheDynamicDropdown($text, $prop)
+    {
+        $this->iSelectFromTheDynamicDropdown($text, $prop, true);
+    }
+
+    /**
+     * @When I select :text from the :prop dynamic dropdown
+     * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
+     */
+    public function iSelectFromTheDynamicDropdown($text, $prop, $new = false)
+    {
+        $count = $this->getCurrentFieldCount($prop);
+        $cnt = $new || $count == 1 ? $count : --$count;
+        $selId = $this->getComboId($prop).$cnt;
+        $this->selectValueInCombobox($selId, $text, $new);
+        $this->blurNextDynamicDropdown($selId, $count);
+        if ($new) { $this->waitForTheFormToOpen('sub2'); }
+    }
+
+    private function blurNextDynamicDropdown($prevId, $count)
+    {
+        $selId = substr($prevId, 0, -1).$count;
+        $this->execute("$('$selId')[0].selectize.blur();");
+    }
+/* ====================== MAP =============================================== */
 
     /**
      * @When I click on the map pin for :text
@@ -719,12 +777,11 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheDropdown($text, $label)
     {
-        $selId = '#sel'.str_replace(' ','',$label);
-        $this->spin(function() use ($text, $selId) {
-            $selector = $selId.' option:selected';
+        $selector = $this->getComboId($label) . ' option:selected';
+        $this->spin(function() use ($text, $selector) {
             $selected = $this->evaluate("$('$selector').text();");
             return $text == $selected;
-        }, "Did not find [$text] in the [$selId] field.");
+        }, "Did not find [$text] in the [$label] field.");
     }
     /**
      * @Then I should see the map with markers
@@ -768,53 +825,12 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given I enter :text in the :prop form dropdown
-     */
-    public function iEnterInTheFormDropdown($text, $prop)
-    {
-        $selId = '#'.str_replace(' ','',$prop).'-sel';
-        try {
-            $this->execute("$('$selId')[0].selectize.createItem('$text');");
-        } catch (Exception $e) {
-            $this->iPutABreakpoint("Couldn't find dropdown [".$selId."]");
-        }
-    }
-
-    /**
-     * @When I change the :prop form dropdown to :text
-     */
-    public function iChangeTheFormDropdownTo($prop, $text)
-    {
-        $map = [ "taxon rank" => "#txn-rank" ];
-        $selId = array_key_exists($prop, $map) ? $map[$prop] :
-            '#'.str_replace(' ','',$prop).'-sel';
-        $this->selectValueInCombobox($selId, $text);
-    }
-
-    /**
-     * @When I change the :prop dynamic dropdown field to :text
-     */
-    public function iChangeTheDynamicDropdownFieldTo($prop, $text)
-    {
-        $this->iSelectFromTheDynamicDropdown($text, $prop, false);
-    }
-
-    /**
-     * @When I add :text to the :prop dynamic dropdown
-     */
-    public function iAddToTheDynamicDropdown($text, $prop)
-    {
-        $this->iSelectFromTheDynamicDropdown($text, $prop, true);
-    }
-
-
-    /**
      * @Given I focus on the :role taxon field
      * @Given I focus on the :role combobox
      */
     public function iFocusOnTheTaxonField($role)
     {
-        $selId = '#'.$role.'-sel';
+        $selId = $this->getComboId($role);
 
         $this->spin(function() use ($selId) {
             $this->execute("$('$selId')[0].selectize.focus();");
@@ -838,9 +854,12 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iFillTheNewInteractionFormWithTheTestValues()
     {
-        $srcLocData = [ 'Publication' => 'Test Book with Editors',
+        $srcLocData = [
+            'Publication' => 'Test Book with Editors',
             'Citation Title' => 'Test Title for Chapter',
-            'Country-Region' => 'Costa Rica', 'Location' => 'Test Location With GPS'];
+            'Country-Region' => 'Costa Rica',
+            'Location' => 'Test Location With GPS'
+        ];
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'SGenus', 'Species' => 'OGenus Species'];
         $this->fillTaxaFields($taxaData);
@@ -892,33 +911,6 @@ class FeatureContext extends RawMinkContext implements Context
         $this->addValueToFormInput($selector, $text);
     }
 
-    /**
-     * @When I select :text from the :prop form dropdown
-     */
-    public function iSelectFromTheFormDropdown($text, $prop)
-    {
-        $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->selectValueInCombobox($selId, $text);
-    }
-
-    /**
-     * @When I select :text from the :prop dynamic dropdown
-     * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
-     */
-    public function iSelectFromTheDynamicDropdown($text, $prop, $new = true)
-    {
-        $count = $this->getCurrentFieldCount($prop);
-        $cnt = $new ? $count : --$count;
-        $selId = '#'.str_replace(' ','',$prop).'-sel'.$cnt;
-        $this->selectValueInCombobox($selId, $text);
-        $this->blurNextDynamicDropdown($selId, $count);
-    }
-
-    private function blurNextDynamicDropdown($prevId, $count)
-    {
-        $selId = substr($prevId, 0, -1).$count;
-        $this->execute("$('$selId')[0].selectize.blur();");
-    }
 
     /**
      * @When I uncheck the date-updated filter
@@ -937,7 +929,7 @@ class FeatureContext extends RawMinkContext implements Context
         $initialCount = $this->evaluate("$('#tbl-cnt').text().match(/\d+/)[0];");
         $this->setDateFilterDefault($date);
         $this->toggleTheDateFilter(true);
-        $this->iSelectFromTheDropdown($type, 'Date Filter Type');
+        $this->selectComboValue($this->getComboId('Date Filter Type'), $type);
         $this->clickOnPageElement('#filter-col1');
         $this->spin(function() use ($initialCount) {
             $postCount = $this->evaluate("$('#tbl-cnt').text().match(/\d+/)[0];");
@@ -946,31 +938,20 @@ class FeatureContext extends RawMinkContext implements Context
         $this->setDateFilterDefault($date, 'remove');
     }
 
-    /**
-     * @When I enter :text in the :prop dynamic dropdown
-     */
-    public function iEnterInTheDynamicDropdown($text, $prop)
-    {
-        $count = $this->getCurrentFieldCount($prop);
-        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
-
-        $this->spin(function() use ($selId, $text) {
-            $this->execute("$('$selId')[0].selectize.createItem('$text');");
-            return $this->getUserSession()->getPage()->find('css', '#sub2-hdr');
-        }, "New $prop form malfunctioning.");
-    }
 
     /**
      * @When I add the :text interaction tag
      */
     public function iAddTheInteractionTag($text)
     {                                                                           //$this->log("\niAddTheInteractionTag\n");
-        $val = $this->getValueToSelect('#InteractionTags-sel', $text);
-        $this->spin(function() use ($val, $text) {
+        $selId = $this->getComboId('Interaction Tags');
+
+        $this->spin(function() use ($selId, $text) {
+            $val = $this->getValueToSelect($selId, $text);
             $this->execute(
-                "$('#InteractionTags-sel')[0].selectize.addItem('$val');");
-            return $this->textContainedInField($text, '#InteractionTags-sel');
-        }, "[$text] tag wasn't added as expected.");
+                "$('$selId')[0].selectize.addItem('$val');");
+            return $this->textContainedInField($text, $selId);
+        }, "[$text] tag wasformn't added as expected.");
     }
 
     /**
@@ -978,11 +959,13 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iRemoveTheInteractionTag($text)
     {
-        $val = $this->getValueToSelect('#InteractionTags-sel', $text);
-        $this->spin(function() use ($val, $text) {
+        $selId = $this->getComboId('Interaction Tags');
+
+        $this->spin(function() use ($selId, $text) {
+            $val = $this->getValueToSelect($selId, $text);
             $this->execute(
-                "$('#InteractionTags-sel')[0].selectize.removeItem('$val');");
-            return $this->textContainedInField($text, '#InteractionTags-sel', false);
+                "$('$selId')[0].selectize.removeItem('$val');");
+            return $this->textContainedInField($text, $selId, false);
         }, "[$text] tag wasn't removed as expected.");
     }
 
@@ -1020,7 +1003,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeTheInteractionTag($text)
     {
-        $this->textContainedInField($text, '#InteractionTags-sel');
+        $selId = $this->getComboId('Interaction Tags');
+        $this->textContainedInField($text, $selId);
     }
 
     /**
@@ -1028,7 +1012,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldNotSeeTheInteractionTag($text)
     {
-        $this->textContainedInField($text, '#InteractionTags-sel', false);
+        $selId = $this->getComboId('Interaction Tags');
+        $this->textContainedInField($text, $selId, false);
     }
 
     /**
@@ -1036,8 +1021,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheDynamicDropdown($text, $prop)
     {
+        $selId = $this->getComboId($prop);
         $count = $this->getCurrentFieldCount($prop);
-        $selId = '#'.str_replace(' ','',$prop).'-sel#';
 
         $this->spin(function() use ($text, $count, $selId) {
             while ($count > 0) {
@@ -1074,16 +1059,16 @@ class FeatureContext extends RawMinkContext implements Context
         $this->assertFieldValueIs($text, $selector);
     }
 
-    /**
-     * @Then I should see :text in the :prop form dropdown
-     */
-    public function iShouldSeeInTheFormDropdown($text, $prop)
-    {
-        $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $selector = $selId.' option:selected';
-        $this->getUserSession()->wait(10000, "$('$selector').text() == '$text';");
-        $this->assertFieldValueIs($text, $selector);
-    }
+    // /**
+    //  * @Then I should see :text in the :prop form dropdown
+    //  */
+    // public function iShouldSeeInTheFormDropdown($text, $prop)
+    // {
+    //     $selId = '#'.str_replace(' ','',$prop).'-sel';
+    //     $selector = $selId.' option:selected';
+    //     $this->getUserSession()->wait(10000, "$('$selector').text() == '$text';");
+    //     $this->assertFieldValueIs($text, $selector);
+    // }
     /**
      * @Then I (should) see :text in the form header
      */
@@ -1113,8 +1098,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theSelectFieldShouldBeEmpty($prop)
     {
-        $selector = '#'.str_replace(' ','',$prop).'-sel';
-        $val = $this->evaluate("$('$selector')[0].selectize.getValue();");
+        $selId = $this->getComboId($prop);
+        $val = $this->evaluate("$('$selId')[0].selectize.getValue();");
         if (is_array($val)) {
             foreach ($val as $value) { if ($value) { $val = false; } }
             if ($val !== false) { $val = ''; }
@@ -1128,8 +1113,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeTheTableDisplayedInView($entity)
     {
         $map = [ 'Location' => 'locs', 'Taxon' => 'taxa', 'Source' => 'srcs' ];
-        $view = $this->getUserSession()->
-            evaluateScript("$('#search-focus')[0].selectize.getValue();");
+        $focusId = $this->getComboId('Focus');
+        $view = $this->evaluate("$('$focusId')[0].selectize.getValue();");
         $this->handleEqualAssert($view, $map[$entity], true,
             "DB in [$view] view. Expected [$map[$entity]]");
     }
@@ -1179,14 +1164,25 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @When I wait for the :level form to close
+     * @When I wait for the :type form to close
      */
-    public function iWaitForTheFormToClose($level)
+    public function iWaitForTheFormToClose($type)
     {
-        $this->spin(function() use ($level) {
-            $form = $this->getUserSession()->getPage()->find('css', "#$level-form");    //$this->log("\niWaitForTheFormToClose ? ". (!!$form === true ? 'true' : 'false'));
+        $this->spin(function() use ($type) {
+            $form = $this->getUserSession()->getPage()->find('css', "#$type-form");    //$this->log("\niWaitForTheFormToClose ? ". (!!$form === true ? 'true' : 'false'));
             return !$form;
-        }, "Form [$level] did not close.");
+        }, "Form [$type] did not close.");
+    }
+
+    /**
+     * @When I wait for the :type form to open
+     */
+    private function waitForTheFormToOpen($type)
+    {
+        $this->spin(function() use ($type) {
+            $form = $this->getUserSession()->getPage()->find('css', "#$type-form");    //$this->log("\niWaitForTheFormToClose ? ". (!!$form === true ? 'true' : 'false'));
+            return !!$form;
+        }, "Form [$type] did not open.");
     }
 
     /**
@@ -1279,14 +1275,21 @@ class FeatureContext extends RawMinkContext implements Context
             return $input->getValue() == $text;
         }, "Could not set [$text] in [$selector]");
     }
-    private function selectValueInCombobox($selId, $text)
-    {                                                                           //$this->log("\n            selectValueInCombobox - [$text] in [$selId]\n");
-        $val = $this->getValueToSelect($selId, $text);
-
-        $this->spin(function() use ($selId, $text, $val) {
-            $this->execute("$('$selId')[0].selectize.addItem('$val');");
-            return $this->getFieldData($selId) == $text;
+    private function selectValueInCombobox($selId, $text, $new = false)
+    {
+        $this->spin(function() use ($selId, $text, $new) {
+            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);        //$this->log("\n            selectValueInCombobox - [$text]->[$val] in [$selId]\n");
+            $this->selectComboValue($selId, $val);
+            return $new || $this->getFieldData($selId) == $text;
         }, "Could not select [$text] in [$selId]");
+    }
+    private function selectComboValue($selId, $val)
+    {
+        if ($this->evaluate("$('$selId')[0].multiple")) {
+            $this->execute("$('$selId')[0].selectize.setValue('$val');");
+        } else {
+            $this->execute("$('$selId')[0].selectize.addItem('$val');");
+        }
     }
     /**
      * There doesn't seem to be a way to set the date on the flatpickr calendar
@@ -1358,7 +1361,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function getCurrentFieldCount($prop)
     {
-        $selCntnrId = '#'.str_replace(' ','',$prop).'-sel-cntnr';
+        $selCntnrId = '#sel-cntnr-'.str_replace(' ','',$prop);
         return $this->evaluate("$('$selCntnrId').data('cnt');");
     }
     private function getFieldData($fieldId)
@@ -1366,7 +1369,7 @@ class FeatureContext extends RawMinkContext implements Context
         $val = $this->getFieldInnerText($fieldId);
         if ($val === null || $val === "") {
             $val = $this->getFieldValue($fieldId);
-        }                                           //$this->log("\n".$fieldId." - ".$val."\n");
+        }                                           //$this->log("\n field [$fieldId] val [$val]\n");
         return $val;
     }
     private function getFieldInnerText($fieldId)
@@ -1414,9 +1417,9 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $opts = $this->getComboboxOptions($selId);
         foreach ($opts as $key => $optAry) {
-            if ($optAry['text'] === $text) { return $optAry['value']; }
+            if ($optAry['text'] !== $text) { continue; }
+            return $optAry['value'];
         }
-        $this->iPutABreakpoint("Couldn't find the option for [$text] in [$selId]");
     }
     private function getComboboxOptions($selId)
     {
@@ -1433,19 +1436,16 @@ class FeatureContext extends RawMinkContext implements Context
      * Updates a select elem and checks the page updated by finding a 'new' elem.
      */
     private function changeTableSort($elemId, $newVal, $newElemSel)
-    {                                                                           //$this->log("\nchangeTableSort\n");
+    {                                                                           //$this->log("\nchangeTableSort. [$elemId] new = [$newElemSel]\n");
         $this->spin(function() use ($elemId, $newVal, $newElemSel){
-            $this->getUserSession()->
-                executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
+            $this->wait("$('$elemId').length");
+            $this->execute("$('$elemId')[0].selectize.addItem('$newVal');");
 
-            // $this->spin(function()
-            // {
-            //     return $this->evaluate("$('$newElemSel').length;");
-            // }, 'Inner-loop spin. Press Enter to continue.');
+            $this->wait("$('$newElemSel').length");
             return $this->evaluate("$('$newElemSel').length;");
-
         }, "UI did not update as expected. Did not find [$newElemSel].");
     }
+
     private function clickRowEditPencil($row)
     {
         $this->spin(function() use ($row){
@@ -1696,9 +1696,12 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iSubmitTheNewInteractionFormWithTheFixtureEntities($count = 1)
     {                                                                           $this->log("\n        Filling form with fixture data\n");
-        $srcLocData = [ 'Publication' => 'Revista de Biologia Tropical',
+        $srcLocData = [
+            'Publication' => 'Revista de Biologia Tropical',
             'Citation Title' => 'Two cases of bat pollination in Central America',
-            'Country-Region' => 'Central America', 'Location' => 'Panama'];
+            'Country-Region' => 'Central America',
+            'Location' => 'Panama'
+        ];
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Sphingidae'];
         $this->fillTaxaFields($taxaData);
@@ -1718,27 +1721,27 @@ class FeatureContext extends RawMinkContext implements Context
     private function fillSrcAndLocFields($data)
     {                                                                           $this->log("\n        Filling Source and Location fields.\n");
         foreach ($data as $field => $value) {
-            $this->iSelectFromTheFormDropdown($value, $field);
+            $this->iSelectFromTheDropdown($value, $field);
         }
     }
     private function fillTaxaFields($data)
     {                                                                           $this->log("\n        Filling Taxa fields.\n");
         $ranks = array_keys($data);
         $this->iFocusOnTheTaxonField('Subject');
-        $this->iSelectFromTheFormDropdown($data[$ranks[0]], $ranks[0]);
+        $this->iSelectFromTheDropdown($data[$ranks[0]], $ranks[0]);
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheFormDropdown('Arthropod', 'Group');
-        $this->iSelectFromTheFormDropdown($data[$ranks[1]], $ranks[1]);
+        $this->iSelectFromTheDropdown('Arthropod', 'Group');
+        $this->iSelectFromTheDropdown($data[$ranks[1]], $ranks[1]);
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
     }
     private function fillMiscIntFields($data)
     {                                                                           $this->log("\n        Filling remaining fields.\n");
         $fields = array_keys($data);
-        $this->iSelectFromTheFormDropdown($data[0], 'Interaction Type');
-        $this->iSelectFromTheFormDropdown($data[1], 'Interaction Tags');
+        $this->iSelectFromTheDropdown($data[0], 'Interaction Type');
+        $this->iSelectFromTheDropdown($data[1], 'Interaction Tags');
         $this->iTypeInTheField($data[2], 'Note', 'textarea');
     }
 
@@ -1761,7 +1764,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheRow('Santa Ana-Forest');
         $this->iChangeTheFieldTo('Display Name', 'input', 'Santa Ana-Desert');
-        $this->iChangeTheFormDropdownTo('Habitat Type', 'Desert');
+        $this->iSelectFromTheDropdown('Desert', 'Habitat Type');
         $this->curUser->getPage()->pressButton('Update Location');
         $this->iWaitForTheFormToClose('top');
     }
@@ -1770,7 +1773,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Santa Ana-Desert');
-        $this->iChangeTheFormDropdownTo('Location', 'Costa Rica');
+        $this->iSelectFromTheDropdown('Costa Rica', 'Location');
         $this->curUser->getPage()->pressButton('Update Interaction');
         $this->iWaitForTheFormToClose('top');
         $this->theDatabaseTableIsInFocus('Location');
@@ -1799,8 +1802,8 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheFormDropdown('Arthropod', 'Group');
-        $this->iSelectFromTheFormDropdown('Sphingidaey', 'Family');
+        $this->iSelectFromTheDropdown('Arthropod', 'Group');
+        $this->iSelectFromTheDropdown('Sphingidaey', 'Family');
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
         $this->curUser->getPage()->pressButton('Update Interaction');

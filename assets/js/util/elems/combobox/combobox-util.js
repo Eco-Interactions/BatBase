@@ -6,7 +6,7 @@
  * TOC
  *
  */
-import { _alert } from '~util';
+import { _alert, _u } from '~util';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
 
@@ -79,8 +79,8 @@ function setComboVal(selApi, field, val, silent) {                  /*dbug-log*/
     }
 }
 function saveFieldValDataIfFieldTypeMustRemainedFilled(field, val) {
-    if (!confgs[field].onBlur) { return; }
-    saveSelVal($(confgs[field].id), val);
+    if (!confgs[getFieldConfgKey(field)].onBlur) { return; }
+    saveSelVal($(confgs[getFieldConfgKey(field)].id), val);
 }
 /**
  * For comboboxes on the database page that must remain filled for the UI to stay synced.
@@ -109,7 +109,7 @@ export function enableCombobox(field, enable = true) {              /*dbug-log*/
     selApi.enable();
 }
 export function enableComboboxes($pElems, enable) {
-    $pElems.each((i, elem) => { enableCombobox('#'+elem.id.split('sel-')[1], enable)});
+    $pElems.each((i, elem) => { enableCombobox(elem.id.split('sel-')[1], enable)});
 }
 export function enableFirstCombobox(field, enable = true) {
     const selElems = $(`#sel-cntnr-${field} .selectized`).toArray();/*dbug-log*///console.log("[%s] first elem = %O", field, selElems);
@@ -128,14 +128,14 @@ export function focusFirstCombobox(cntnrId, focus) {
 /* -------------------- TRIGGER CHANGE -------------------------------------- */
 export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*///console.log('triggerComboChange [%s] = [%s]', field, val);
     const selApi = getSelApi(field);
-    const onChange = confgs[field].onChange;
+    const onChange = confgs[getFieldConfgKey(field)].onChange;
     setComboVal(selApi, field, val, 'silent');
     return onChange(val);
 }
 /* ----------------------- DESTROY ------------------------------------------ */
 export function destroySelectizeInstance(field) {
-    if (!confgs[field]) { return; }
-    $('#sel-'+confgs[name].id)[0].selectize.destroy();
+    if (!confgs[getFieldConfgKey(field)]) { return; }
+    $(confgs[getFieldConfgKey(field)].id)[0].selectize.destroy();
 }
 /* -------------------- REPLACE OPTIONS ------------------------------------- */
 /**
@@ -147,9 +147,9 @@ export function replaceSelOpts(field, opts, changeHndlr, name) {    /*dbug-log*/
     clearCombobox(selApi);
     selApi.addOption(opts);
     selApi.refreshOptions(false); //Don't trigger options-dropdown
-    const onChange = changeHndlr ? changeHndlr : confgs[field].onChange;
+    const onChange = changeHndlr ? changeHndlr : confgs[getFieldConfgKey(field)].onChange;
     replaceOnChangeEvent(selApi, onChange);
-    updatePlaceholder(selApi, field, confgs[field].name, opts.length);
+    updatePlaceholder(selApi, field, confgs[getFieldConfgKey(field)].name, opts.length);
 }
 function replaceOnChangeEvent(selApi, onChange = false) {           /*dbug-log*///console.log('replaceOnChangeEvent selApi = %O, onChange = %O', selApi, onChange);
     selApi.off('change');
@@ -160,14 +160,17 @@ export function removeOpt(field, val) {
     selApi.removeOption(val, 'silent');
 }
 /* ======================= HELPERS ========================================== */
+function getFieldConfgKey(field) {
+    return field.split(' ').join('');
+}
 function getSelApi(field) {
-    field = field.split(' ').join('');                              /*dbug-log*///console.log('getSelApi [%s] = %O', field, confgs);
+    field = getFieldConfgKey(field);                              /*dbug-log*///console.log('getSelApi [%s] = %O', field, _u('snapshot', [confgs]));
     if (!confgs[field]) { return _alert('alertIssue', ['comboboxNotFound', {field: field}]); }
     //If the combo was removed
     return $(confgs[field].id).length ? $(confgs[field].id)[0].selectize : false;
 }
 function isMultiSelCombo(field) {
-    return !!$(confgs[field].id)[0].multiple;
+    return !!$(confgs[getFieldConfgKey(field)].id)[0].multiple;
 }
 function clearCombobox(selApi) {
     replaceOnChangeEvent(selApi);
@@ -176,5 +179,5 @@ function clearCombobox(selApi) {
 }
 function toggleChangeHandler(field, selApi, remove = false) {       /*dbug-log*///console.log('toggleChangeHandler [%s]remove?[%s] %O', field, remove, selApi);
     if (remove) { return selApi.off('change'); }
-    selApi.on('change', confgs[field].onChange);
+    selApi.on('change', confgs[getFieldConfgKey(field)].onChange);
 }

@@ -68,7 +68,7 @@ function getRankVal(rank) {
 /** Returns an array of options for the ranks in the taxon's group. */
 function getTaxonRankOpts() {
     return taxonData.groupRanks.reverse().map(rank => {
-        return new Option(rank, taxonData.ranks[rank].ord);
+        return { text: rank, value: taxonData.ranks[rank].ord};
     });
 }
 /** ----------------- PARENT TAXON ELEMS ------------------------------------ */
@@ -223,7 +223,7 @@ function updateSubmitBttns() {
 }
 function selectNewTaxonParent() {
     const selected = _form('getSelectedTaxon');
-    const prnt = selected ? selected : _state('getTaxonProp', ['groupTaxon']);/*dbug-log*/console.log("selectNewTaxonParent called. prnt = %O", prnt);
+    const prnt = selected ? selected : _state('getTaxonProp', ['groupTaxon']);/*dbug-log*///console.log("selectNewTaxonParent called. prnt = %O", prnt);
     if (ifInvalidParentRank(getRankVal(prnt.rank.displayName))) { return; }
     exitPrntEdit(prnt);
 }

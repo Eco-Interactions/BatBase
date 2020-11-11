@@ -15,9 +15,11 @@
  *     initLocalDatabase
  *
  * TOC
- *     INIT BASE TABLE
- *     DOWNLOAD REMAINING TABLE DATA
- *     DOWNLOAD REMAINING DATA
+ *     INIT FULL DATABASE
+ *         INIT BASE TABLE
+ *         DOWNLOAD REMAINING TABLE DATA
+ *         DOWNLOAD REMAINING DATA
+ *     STORE NEW USER-DATA
  */
 import { initSearchStateAndTable, _ui } from '~db';
 import * as db from '../local-data-main.js';
@@ -26,7 +28,7 @@ import { modifyLocDataForLocalDb } from './entity/init-loc-data.js';
 import { modifySrcDataForLocalDb } from './entity/init-src-data.js';
 import { modifyIntDataForLocalDb } from './entity/init-int-data.js';
 import { modifyUsrDataForLocalDb } from './entity/init-usr-data.js';
-
+/* ====================== INIT FULL DATABASE ================================ */
 export function initLocalDatabase(reset) {                          /*Perm-log*/console.log("   *--initLocalDatabase");
     return db.fetchServerData('data-state')
         .then(data => db.setDataInMemory('lclDataUpdtdAt', data.state))
@@ -82,4 +84,8 @@ function storeServerData(data) {                                    /*dbug-log*/
     return ents.reduce((p, entity) => {                             /*dbug-log*///console.log("     entity = %s, data = %O", entity, data[entity]);
         return p.then(p => db.setDataInMemory(entity, db.parseData(data[entity])));
     }, Promise.resolve());
+}
+/* ===================== STORE NEW USER-DATA ================================ */
+export function storeUserData(data) {
+    modifyUsrDataForLocalDb(data)
 }

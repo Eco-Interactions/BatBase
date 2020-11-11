@@ -22,7 +22,7 @@ function getEntity (url) {
     return url.split('/').splice(-2, 1)[0];
 }
 /* ==================== CORE SHOW PAGE BUILDER ============================== */
-function buildEntityShowPage (entity, data) {                       /*dbug-log*/console.log('   *//init[%s]ShowPage = %O', entity, data);
+function buildEntityShowPage (entity, data) {                       /*dbug-log*///console.log('   *//init[%s]ShowPage = %O', entity, data);
     const confg = getEntityDisplayConfg(entity, data);
     const sections = confg.map(buildDataSection);
     $('#show-loading-msg').remove();

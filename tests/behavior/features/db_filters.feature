@@ -23,7 +23,7 @@ Feature: Filtering the data displayed in the database table
     ## -------------------------- Date Filter ---------------------------------##
     @javascript
     Scenario:  I should be able to filter the data by date published.
-      Given the database table is in "Location" view
+      Given the database table is grouped by "Locations"
       And I break "Open console"
       And I toggle "open" the filter panel
       And I set the date "cited" filter to "Januray 1, 1990"
@@ -34,7 +34,7 @@ Feature: Filtering the data displayed in the database table
       # TODO: Edit fixture update at time so this filter has something to show
     # @javascript
     # Scenario:  I should be able to filter by the date the data was updated/added.
-    #   Given the database table is in "Location" view
+    #   Given the database table grouped by "Locations"
     #   And I toggle "open" the filter panel
     #   And I break "What time would be good to set the UPDATED at filter too? How many interactions then?"
     #   When I "check" the time "updated" filter
@@ -46,7 +46,7 @@ Feature: Filtering the data displayed in the database table
     ## -------------------------- Location -----------------------------------##
     @javascript
     Scenario:  I should be able to filter the data tree to a specific country.
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         And I toggle "open" the filter panel
         And I see "Location and Date Filters"
         When I select "Costa Rica" from the "Country" dropdown
@@ -58,7 +58,7 @@ Feature: Filtering the data displayed in the database table
     ## -------------------------- Source -------------------------------------##
     @javascript
     Scenario:  I should be able to filter the data tree to a specific publication type.
-      Given the database table is in "Source" view
+      Given the database table is grouped by "Sources"
       And I toggle "open" the filter panel
       And I see "Source and Date Filters"
       When I select "Journal" from the "Pub Type" dropdown
@@ -69,8 +69,8 @@ Feature: Filtering the data displayed in the database table
 
     @javascript
     Scenario:  I should be able to filter the data tree to a specific author.
-      Given the database table is in "Source" view
-      And I group interactions by "Authors"
+      Given the database table is grouped by "Sources"
+      And I view interactions by "Authors"
       And I toggle "open" the filter panel
       When I type "Cockle" in the "Author" text box and press enter
       And I should see "1" rows in the table data tree
@@ -79,8 +79,8 @@ Feature: Filtering the data displayed in the database table
 
     @javascript
     Scenario:  I should be able to filter the data tree to a specific publisher.
-      Given the database table is in "Source" view
-      And I group interactions by "Publishers"
+      Given the database table is grouped by "Sources"
+      And I view interactions by "Publishers"
       And I toggle "open" the filter panel
       When I type "University of Paris VI" in the "Publisher" text box and press enter
       And I should see "1" rows in the table data tree
@@ -90,8 +90,8 @@ Feature: Filtering the data displayed in the database table
     ## -------------------------- Taxon --------------------------------------##
     @javascript
     Scenario:  I should be able to filter the data tree to a specific taxon.
-      Given the database table is in "Taxon" view
-      And I group interactions by "Bats"
+      Given the database table is grouped by "Taxa"
+      And I view interactions by "Bats"
       And I toggle "open" the filter panel
       And I see "Taxon and Date Filters"
       When I select "Artibeus lituratus" from the "Species" dropdown
@@ -104,26 +104,26 @@ Feature: Filtering the data displayed in the database table
 
     @javascript
     Scenario:  I should be able to filter the data tree to specific object groups.
-      Given the database table is in "Taxon" view
-      And I group interactions by "Bats"
+      Given the database table is grouped by "Taxa"
+      And I view interactions by "Bats"
       And I toggle "open" the filter panel
       # When I select "Artibeus lituratus" from the "Species" dropdown
 
     @javascript
     Scenario:  I should be able to filter the data tree to taxon sub-groups.
-      Given the database table is in "Taxon" view
-      And I group interactions by "Bats"
+      Given the database table is grouped by "Taxa"
+      And I view interactions by "Bats"
       And I toggle "open" the filter panel
       # When I select "Artibeus lituratus" from the "Species" dropdown
 
 ## --------------- FILTER-SET CREATE --------------- ##
     @javascript
     Scenario:  I should be able to CREATE a set of filters.
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         And I toggle "open" the filter panel
         And I select "Costa Rica" from the "Country" dropdown
         And I set the date "cited" filter to "January 1, 1977"
-        When I enter "Test Filter Set" in the "Saved Filters" dropdown
+        When I add "Test Filter Set" to the "Saved Filters" dropdown
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
         And I press the "Save" button
         And I should see "Date Published, Country." in the save modal
@@ -134,7 +134,7 @@ Feature: Filtering the data displayed in the database table
 ## --------------- FILTER-SET EDIT --------------- ##
     @javascript
     Scenario:  I should be able to APPLY and EDIT a set of filters.
-        Given the database table is in "Source" view
+        Given the database table is grouped by "Sources"
         And I toggle "open" the filter panel
         When I select "Test Filter Set" from the "Saved Filters" dropdown
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
@@ -153,7 +153,7 @@ Feature: Filtering the data displayed in the database table
  ##The first "Given" step is only needed because sometimes the tutorial isn't fully closed and this was easier than adding another wait
     @javascript
     Scenario:  I should be able to DELETE a set of filters.
-        Given the database table is in "Source" view
+        Given the database table is grouped by "Sources"
         And I toggle "open" the filter panel
         When I select "Test Filter Set" from the "Saved Filters" dropdown
         And I should see "Test Filter Set" in the "Saved Filters" dropdown

@@ -27,21 +27,22 @@ const loadHeaderData = {
 }
 /* ------------------------ INIT STAT HEADER -------------------------------- */
 export default function initHeaderStats() {
-	if (!ifPgHasStatistics()) { return }
-	_u('sendAjaxQuery', [{tag: pageStatKeys[pg]}, 'stats/', loadPageHeaderStatistics]);
+	const statTag = getStatTagForPage();
+	if (!statTag) { return }
+	_u('sendAjaxQuery', [{tag: statTag}, 'stats/', loadPageHeaderStatistics]);
 
-	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  				//console.log('loadPageHeaderStatistics. args = %O', arguments);
-		loadHeaderData[pageStatKeys[pg]](data);
+	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  	/*dbug-log*///console.log('loadPageHeaderStatistics. args = %O', arguments);
+		loadHeaderData[statTag](data);
 	}
 }
-function ifPgHasStatistics() {
-	const pg = getPageName(window.location.pathname.split('/'));
-	return Object.keys(pageStatKeys).indexOf(pg) !== -1;
+function getStatTagForPage() {
+	const pg = getPageName(window.location.pathname.split('/'));    /*dbug-log*///console.log('getStatTagForPage [%s] ?[%s]', pg, pageStatKeys[pg]);
+	return pageStatKeys[pg];
 }
 function getPageName(path) {
     let pg = path.pop();
     pg = !pg ? 'home' : (path.pop() === 'register' ? 'register' : pg)
-    initHeaderStats(pg);
+    return pg;
 }
 /* ------------------------ LOAD STAT HEADER -------------------------------- */
 function updateHeaderStats(counts) {

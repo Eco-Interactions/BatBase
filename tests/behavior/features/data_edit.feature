@@ -33,12 +33,12 @@ Feature: Edit data in the database
   ## -------------------------- Interaction ----------------------------------##
     @javascript
     Scenario:  I should be able to change an interaction's location
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         And I expand "Central America" in the data tree
         And I expand "Panama" in the data tree
         And I click on the edit pencil for the first interaction of "Summit Experimental Gardens"
         And I see "Editing Interaction"
-        When I change the "Location" form dropdown to "Panama"
+        When I select "Panama" from the "Location" dropdown
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
         And I uncheck the date-updated filter
@@ -49,8 +49,8 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to change an interaction's subject taxon
-        Given the database table is in "Taxon" view
-        And I group interactions by "Bats"
+        Given the database table is grouped by "Taxa"
+        And I view interactions by "Bats"
         And I expand "Family Phyllostomidae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Phyllostomidae Interactions"
         And I see "Editing Interaction"
@@ -69,8 +69,8 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to change an interaction's object taxon
-        Given the database table is in "Taxon" view
-        And I group interactions by "Plants"
+        Given the database table is grouped by "Taxa"
+        And I view interactions by "Plants"
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
@@ -89,12 +89,12 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to change an interaction's type, tags, and notes
-        Given the database table is in "Taxon" view
-        And I group interactions by "Plants"
+        Given the database table is grouped by "Taxa"
+        And I view interactions by "Plants"
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
-        When I change the "Interaction Type" form dropdown to "Consumption"
+        When I select "Consumption" from the "Interaction Type" dropdown
         And I remove the "Flower" interaction tag
         And I add the "Seed" interaction tag
         And I change the "Note" field "textarea" to "New Test Note Description"
@@ -110,8 +110,8 @@ Feature: Edit data in the database
 
     # @javascript
     # Scenario:  I should be able to change an interaction's citation  #TODO
-    #   Given the database table is in "Source" view
-    #   And I group interactions by "Publications"
+    #   Given the database table is grouped by "Sources"
+    #   And I view interactions by "Publications"
     #   And I break
     #   And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
     #   And I click on the edit pencil for the first interaction of "Feeding habits"
@@ -129,14 +129,14 @@ Feature: Edit data in the database
   # -------------------------- Location -------------------------------------##
     @javascript
     Scenario:  I should be able to edit the data of an existing location
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         And I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
         And I click on the edit pencil for the "Santa Ana-Forest" row
         And I see "Editing Location"
         When I change the "Display Name" field "input" to "Santa Ana-Captivity"
         And I change the "Description" field "textarea" to "Description..."
-        And I change the "Habitat Type" form dropdown to "Captivity"
+        And I select "Captivity" from the "Habitat Type" dropdown
         And I change the "Elevation" field "input" to "1000"
         And I change the "Elevation Max" field "input" to "2000"
         And I change the "Latitude" field "input" to "9.7489"
@@ -158,11 +158,11 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to change the parent of an existing location
-        Given the database table is in "Location" view
+        Given the database table is grouped by "Locations"
         And I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
         And I click on the edit pencil for the "Santa Ana-Forest" row
-        When I change the "Country" form dropdown to "Panama"
+        When I select "Panama" from the "Country" dropdown
         And I press the "Update Location" button
         And I wait for the "top" form to close
         And I expand "Central America" in the data tree
@@ -172,16 +172,16 @@ Feature: Edit data in the database
   ## -------------------------- Source ---------------------------------------##
     @javascript
     Scenario:  I should be able to edit the data of an existing publication
-        Given the database table is in "Source" view
+        Given the database table is grouped by "Sources"
         And I click on the edit pencil for the "Journal of Mammalogy" row
         And I see "Editing Publication"
         When I change the "Title" field "input" to "Book of Mammalogy"
-        And I change the "Publication Type" form dropdown to "Book"
+        And I select "Book" from the "Publication Type" dropdown
         And I change the "Description" field "textarea" to "Description..."
         And I change the "Year" field "input" to "1993"
         And I change the "Website" field "input" to "https://www.link.com"
         And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
-        And I change the "Publisher" form dropdown to "University of Paris VI"
+        And I select "University of Paris VI" from the "Publisher" dropdown
         And I add "Cockle, Anya" to the "Authors" dynamic dropdown
         And I press the "Update Publication" button
         And I press submit in the confirmation popup
@@ -198,8 +198,8 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to edit the data of an existing author
-        Given the database table is in "Source" view
-        And I group interactions by "Authors"
+        Given the database table is grouped by "Sources"
+        And I view interactions by "Authors"
         And I click on the edit pencil for the "Cockle, Anya" row
         And I see "Editing Author"
         When I change the "First Name" field "input" to "Joy"
@@ -219,8 +219,8 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to edit the data of an existing publisher
-        Given the database table is in "Source" view
-        And I group interactions by "Publishers"
+        Given the database table is grouped by "Sources"
+        And I view interactions by "Publishers"
         And I click on the edit pencil for the "University of Paris VI" row
         And I see "Editing Publisher"
         When I change the "Display Name" field "input" to "University of Paris V"
@@ -240,17 +240,17 @@ Feature: Edit data in the database
     #todo - test proper removal of citation from authors in tree
     @javascript
     Scenario:  I should be able to edit the data of an existing citation [CHAPTER->BOOK]
-        Given the database table is in "Source" view
-        And I group interactions by "Authors"
+        Given the database table is grouped by "Sources"
+        And I view interactions by "Authors"
         And I expand "Gardner, Alfred L" in the data tree
         When I click on the edit pencil for the "Feeding habits" row
         And I see "Editing Citation"
-        And I change the "Citation Type" form dropdown to "Book"
+        And I select "Book" from the "Citation Type" dropdown
         And I change the "Abstract" field "textarea" to "Test Abstract"
         And I change the "Edition" field "input" to "4"
         And I change the "Website" field "input" to "https://www.link.com"
         And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
-        And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
+        And I select "Cockle, Anya" from the "Authors" dynamic dropdown
         And I add "Baker, Herbert G" to the "Authors" dynamic dropdown
         And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I press the "Update Citation" button
@@ -272,13 +272,13 @@ Feature: Edit data in the database
 
     @javascript
     Scenario:  I should be able to change an interaction's publication
-        Given the database table is in "Source" view
-        And I group interactions by "Publications"
+        Given the database table is grouped by "Sources"
+        And I view interactions by "Publications"
         And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
         And I click on the edit pencil for the first interaction of "Feeding habits"
         And I see "Editing Interaction"
-        When I change the "Publication" form dropdown to "Journal of Mammalogy"
-        And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
+        When I select "Journal of Mammalogy" from the "Publication" dropdown
+        And I select "Observations on the life histories of Panama bats" from the "Citation Title" dropdown
         And I press the "Update Interaction" button
         # And I press submit in the confirmation popup
         And I wait for the "top" form to close
@@ -291,20 +291,20 @@ Feature: Edit data in the database
   ## -------------------------- Taxon ----------------------------------------##
     @javascript
     Scenario:  I should be able to edit the name and rank of an existing taxon
-        Given the database table is in "Taxon" view
-        And I group interactions by "Arthropoda"
+        Given the database table is grouped by "Taxa"
+        And I view interactions by "Arthropoda"
         And I click on the edit pencil for the "Order Lepidoptera" row
         And I see "Editing Taxon"
         When I change the "taxon name" field "input" to "Leopardil"
-        When I change the "taxon rank" form dropdown to "Class"
+        When I select "Class" from the "Rank" dropdown
         And I press the "Update Taxon" button
         And I wait for the "top" form to close
         Then I should see "Class Leopardil" in the tree
 
     @javascript
     Scenario:  I should be able to edit the parent taxon of an existing taxon
-        Given the database table is in "Taxon" view
-        And I group interactions by "Bats"
+        Given the database table is grouped by "Taxa"
+        And I view interactions by "Bats"
         And I expand "Family Phyllostomidae" in the data tree
         And I expand "Genus Rhinophylla" in the data tree
         And I click on the edit pencil for the "Rhinophylla pumilio" row

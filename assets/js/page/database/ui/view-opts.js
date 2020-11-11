@@ -22,7 +22,7 @@ export function initLocViewOpts(view) {                             /*Perm-log*/
 }
 function loadLocationViewOpts() {
     if ($('#sel-View').data('focus') === 'locs') { return; }
-    const opts = [new Option('Map Data', 'map'), new Option('Table Data', 'tree')];
+    const opts = [{ text: 'Map Data', value: 'map'}, { text: 'Table Data', value: 'tree'}];
     _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onLocViewChange')]);
     $('#sel-View').data('focus', 'locs');
 }
@@ -46,9 +46,9 @@ function loadSourceViewOpts() {
 }
 function getSrcViewopts() {
     return [
-        new Option('Authors', 'auths'),
-        new Option('Publications', 'pubs'),
-        new Option('Publishers', 'publ')
+        { text: 'Authors', value: 'auths'},
+        { text: 'Publications', value: 'pubs'},
+        { text: 'Publishers', value: 'publ'}
     ];
 }
 /** Restores stored realm from previous session or sets the default 'Publications'. */
@@ -79,7 +79,7 @@ function getViewOpts(groups) {
 
     function buildGroupOpt(id) {
         if (!ifGroupHasInts(groups[id].taxa)) { return; }
-        optsAry.push(new Option(groups[id].pluralName, id));
+        optsAry.push({ text: groups[id].pluralName, value: id});
     }
     function ifGroupHasInts(rootTaxa) {
         return Object.values(rootTaxa).find(t => ifTxnHasInts(t.id));

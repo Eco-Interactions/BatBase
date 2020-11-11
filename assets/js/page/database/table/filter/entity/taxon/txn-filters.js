@@ -22,7 +22,7 @@ import { initSubGroupFilter } from './sub-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
-export function loadTxnFilters(tblState) {                          /*Perm-log*/console.log("       --Loading taxon filters.");
+export function loadTxnFilters(tblState) {                          /*perm-log*/console.log("       --Loading taxon filters.");
     loadTxnRankComboboxes(tblState);
     if ($('input[name="name-Taxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
@@ -55,7 +55,7 @@ function loadTxnRankComboboxes(tblState) {
  * If there is no data after filtering at a rank, a 'none' option obj is built
  * and will be selected.
  */
-function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts ranks = %O", tblState.taxaByRank);
+function buildTaxonSelectOpts(tblState) {                           /*dbug-log*///console.log("buildTaxonSelectOpts ranks = %O", tblState.taxaByRank);
     const optsObj = {};
     const taxaByRank = tblState.taxaByRank;
     tblState.allgroupRanks.forEach(buildRankOptions);
@@ -67,14 +67,14 @@ function buildTaxonSelectOpts(tblState) {                                       
     }
     /** Child ranks can have multiple taxa.  */
     function getTaxaOptsAtRank(rcrds, rank) {
-        const taxonNames = Object.keys(taxaByRank[rank]).sort();                  //console.log("taxonNames = %O", taxonNames);
+        const taxonNames = Object.keys(taxaByRank[rank]).sort();    /*dbug-log*///console.log("taxonNames = %O", taxonNames);
         optsObj[rank] = buildTaxonOptions(taxonNames, taxaByRank[rank]);
     }
     function buildTaxonOptions(taxonNames, data) {
         if (!taxonNames.length) { return []; }
-        const opts = taxonNames.map(name => new Option(name, data[name]));
+        const opts = taxonNames.map(name => { return { text: name, value: data[name]}});
         if (optionIsSelected(opts[0].value)) {
-            opts.unshift(new Option('- All -', 'all'));
+            opts.unshift({ text: '- All -', value: 'all'});
         }
         return opts;
     }
@@ -82,13 +82,15 @@ function buildTaxonSelectOpts(tblState) {                                       
         if (Object.keys(tblState.selectedOpts).length > 2) { return; }
         return Object.keys(tblState.selectedOpts).some(k => id == tblState.selectedOpts[k]);
     }
-    function fillInRankOpts(rank) {                                               //console.log("fillInEmptyAncestorRanks. rank = ", rank);
+    function fillInRankOpts(rank) {                                 /*dbug-log*///console.log("fillInRankOpts [%s], rank);
         if (rank in tblState.selectedOpts) {
             const taxon = getDetachedRcrd(tblState.selectedOpts[rank], tblState.rcrdsById);
-            optsObj[rank] = [ new Option('- All -', 'all'), new Option(taxon.name, taxon.id)];
+            optsObj[rank] = [
+                { text: '- All -', value: 'all' },
+                { text: taxon.name, value: taxon.id }];
         } else { optsObj[rank] = []; }
     }
-} /* End buildTaxonSelectOpts */
+}
 function updateTxnRankComboboxes(rankOptsObj, ranks, tblState) {
     if ($('#focus-filters label').length) {
         updateTaxonSelOptions(rankOptsObj, ranks, tblState);
@@ -96,7 +98,7 @@ function updateTxnRankComboboxes(rankOptsObj, ranks, tblState) {
         loadRankSelects(rankOptsObj, ranks, tblState);
     }
 }
-function loadRankSelects(rankOptsObj, ranks, tblState) {                     //console.log("loadRankSelectElems. rankObj = %O", rankOptsObj)
+function loadRankSelects(rankOptsObj, ranks, tblState) {            /*dbug-log*///console.log("loadRankSelects for %O", rankOptsObj)
     const elems = buildTaxonSelects(rankOptsObj, ranks);
     $('#focus-filters').append(elems);
     initRankComboboxes(tblState.allgroupRanks);
@@ -104,10 +106,10 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {                     //c
 
     function buildTaxonSelects(opts, ranks) {
         const elems = [];
-        ranks.forEach(function(rank) {                                        //console.log('----- building select box for rank = [%s]', rank);
-            const lbl = _el('getElem', ['label', { class: 'sel-cntnr flex-row taxonLbl' }]);
+        ranks.forEach(rank => {
+            const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row taxonLbl' }]);
             const span = _el('getElem', ['span', { text: rank + ': ' }]);
-            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', `sel-filter-${rank}`, rank);
+            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', `sel-${rank}Filter`, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
@@ -119,19 +121,19 @@ function initRankComboboxes(groupRanks) {
     groupRanks.forEach(initRankCombo);
 }
 function initRankCombo(rank) {
-    const confg = { id: `#sel-filter-${rank}`, name: rank + ' Filter', onChange: applyTxnFilter }
+    const confg = { id: `#sel-${rank}Filter`, name: rank + ' Filter', onChange: applyTxnFilter }
     _cmbx('initCombobox', [confg, true]);
 }
-function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {                  //console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
+function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {      /*dbug-log*///console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
     ranks.forEach(rank => {
         _cmbx('replaceSelOpts', [rank+'Filter', rankOptsObj[rank], null, rank]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
-function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
+function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*///console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
     tblState.allgroupRanks.forEach(rank => {
-        if (!selected[rank]) { return; }                                         //console.log("selecting [%s] = ", rank, selected[rank])
+        if (!selected[rank]) { return; }                            /*dbug-log*///console.log("selecting [%s] = ", rank, selected[rank])
         _cmbx('setSelVal', [rank+'Filter', selected[rank], 'silent']);
     });
 }
@@ -142,7 +144,7 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
 export function applyTxnFilter(val) {
-    if (!val) { return; }                                                       //console.log('       +-applyTxnFilter.')
+    if (!val) { return; }                                           /*temp-log*/console.log('       +-applyTxnFilter.')
     const tblState = tState().get(['rcrdsById', 'flags']);
     if (!tblState.flags.allDataAvailable) { return clearSelection($(this)[0]); }
     const rcrd = getTaxonTreeRootRcrd(val, tblState.rcrdsById, this);
@@ -213,11 +215,11 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
  * updated based on the rows displayed in the grid so that the combobox options
  * show only taxa in the filtered tree.
  */
-export function updateTaxonComboboxes(rd) {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
+export function updateTaxonComboboxes(rd) {                         /*dbug-log*///console.log('updateTaxonComboboxes. tblState = %O', tblState)
     const rowData = _u('snapshot', [rd]);
     _db('getData', ['rankNames']).then(ranks => {
         const taxaByRank = seperateTaxonTreeByRank(ranks, rowData);
-        tState().set({'taxaByRank': taxaByRank});                                 //console.log("taxaByRank = %O", taxaByRank)
+        tState().set({'taxaByRank': taxaByRank});                   /*dbug-log*///console.log("taxaByRank = %O", taxaByRank)
         loadTxnFilters(tState().get());
     });
 }
@@ -227,7 +229,7 @@ function seperateTaxonTreeByRank(ranks, rowData) {
     rowData.forEach(data => separate(data));
     return sortObjByRank();
 
-    function separate(row) {                                                    //console.log('taxon = %O', taxon)
+    function separate(row) {                                        /*dbug-log*///console.log('taxon = %O', taxon)
         if (!separated[row.taxonRank]) { separated[row.taxonRank] = {}; }
         separated[row.taxonRank][row.name] = row.id;
 

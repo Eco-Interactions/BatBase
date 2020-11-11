@@ -87,7 +87,7 @@ function getEntityComboEvents(entity) {
     }[entity];
 }
 /* ************************* ENTITY FORMS *********************************** */
-export function initCreateForm(entity, name) {                      /*dbug-log*///console.log('entity [%s], name [%s]', entity, name)
+export function initCreateForm(entity, name) {                      /*dbug-log*///console.log('initCreateForm [%s] name [%s]', entity, name)
     const funcs = {
         'author': initAuthOrEdForm.bind(null, 1, 'Authors'),
         'citation': initCitForm,

@@ -77,7 +77,7 @@ function addRelatedChild(id) {                                      /*dbug-log*/
 }
 function addOptToRankAry(childTxn, rank) {
     if (!d.opts[rank]) { d.opts[rank] = []; }                       /*dbug-log*///console.log("setting rank = ", d.taxon.rank)
-    d.opts[rank].push(new Option(childTxn.name, childTxn.id));
+    d.opts[rank].push({ text: childTxn.name, value: childTxn.id });
 }
 function handleEmptyChildRanks(childRanks) {
     childRanks.forEach(r => d.opts[r] ? null : addEmptyChildRankOptAry(r));
@@ -136,7 +136,7 @@ function buildOptsForEmptyRanks() {
 /* ------------------------ CREATE OPTION ----------------------------------- */
 function addCreateOpts() {
     for (let rank in d.opts) {                                      /*dbug-log*///console.log("rank = %s, name = ", rank, ranks[rank-1]);
-        d.opts[rank].unshift(new Option(`Add a new ${rank}...`, 'create'));
+        d.opts[rank].unshift({ text: `Add a new ${rank}...`, value: 'create'});
     }
     return Promise.resolve();
 }

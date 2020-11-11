@@ -55,10 +55,11 @@ export function authDependentInit(userRole) {
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
     $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, #data-help,
-        #sel-FilterSet, .fltr-desc, #apply-filter, #save-filter, #delete-filter,
+        .fltr-desc, #apply-filter, #save-filter, #delete-filter,
         #stored-filters input, #stored-filters textarea`)
         .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
         .prop('title', 'Please register to use these features.');
+    window.setTimeout(() => _cmbx('enableCombobox', ['FilterSet', false]), 1000); //Needs time to finish initializing first.
     return false;
 }
 function initUserFeatures() {                                                   //console.log('enableUserFeatures')

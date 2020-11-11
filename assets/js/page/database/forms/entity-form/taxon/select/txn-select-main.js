@@ -13,7 +13,7 @@
  *     RANKS
  *     SELECTED
  */
-import { _elems, _form, _state } from '~form';
+import { _elems, _form, _state, _val } from '~form';
 import * as build from './build-taxon-select.js';
 import * as rank from './rank/txn-rank-main.js';
 import * as group from './group-fields.js';
@@ -33,12 +33,12 @@ function getSelectComboEvents() {
         'Species': { onChange: onRankSelection, create: create.bind(null, 'species') },
     };
 }
-function create(rank) {
-    return _form('createSubEntity', [rank, 'sub2']);
+function create(rank, val) {
+    return _form('createSubEntity', [rank, 'sub2', val]);
 }
 /* ======================= INIT =========================================== */
 export function initRoleTaxonSelect(role, gId) {
-    if (ifSubFormAlreadyInUse(role)) { return openSubFormAlert(role); }
+    if (ifSubFormAlreadyInUse(role)) { return _val('openSubFormAlert', [role, 'sub']); }
     const groupId = gId ? gId : getGroupId(role);
     if (role === 'Subject') { return build.initTaxonSelectForm('Subject', groupId); }
     build.initTaxonSelectForm('Object', groupId)

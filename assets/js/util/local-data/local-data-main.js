@@ -18,10 +18,9 @@
 import { _alert, _modal } from '~util';
 import { showIntroAndLoadingMsg } from '~db';
 import * as idb from './etc/idb-util.js';
+import * as init from './init/db-init-main.js';
 import * as sync from './sync/db-sync-main.js';
 import * as temp from './etc/temp-data.js';
-import { initLocalDatabase } from './init/db-init-main.js';
-
 /* ========================== FACADE ======================================== */
 export function initDb(argument) {
     idb.initDb();
@@ -91,10 +90,10 @@ export function syncLocalDbWithServer(lclDataUpdatedAt) {
  */
 export function initStoredData(reset) {
     showIntroAndLoadingMsg(reset);
-    return initLocalDatabase(reset);
+    return init.initLocalDatabase(reset);
 }
-export function deriveUserData() {
-    return init.deriveUserData(...arguments);
+export function storeUserData() {
+    return init.storeUserData(...arguments);
 }
 /** ----------------------- TEMP DATA --------------------------------------- */
 export function getMmryData() {

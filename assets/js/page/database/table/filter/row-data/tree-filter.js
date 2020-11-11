@@ -22,7 +22,7 @@ export function getTreeTextFilterElem(entity) {
     return lbl;
 }
 function buildTxtSearchLbl(entity) {
-    const classes = 'sel-cntnr flex-row' + (entity == 'Taxon' ? ' taxonLbl' : ' txtLbl');
+    const classes = 'field-cntnr flex-row' + (entity == 'Taxon' ? ' taxonLbl' : ' txtLbl');
     return _el('getElem', ['label', { class: classes }]);
 }
 function buildTxtSearchInput(entity) {

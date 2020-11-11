@@ -72,7 +72,7 @@ export function onTypeSelectionInitTagField(val) {
 }
 /* -------------------------- CLEAR TYPE-TAGS ------------------------------- */
 function clearTypeRelatedTags() {                                   /*dbug-log*///console.log('clearTypeRelatedTags')
-    const opts = [ new Option('Secondary', app.secondaryTagId) ];
+    const opts = [ { text: 'Secondary', value: app.secondaryTagId} ];
     _cmbx('replaceSelOpts', ['InteractionTags', opts]);
     app.defaultTag = null;
 }
