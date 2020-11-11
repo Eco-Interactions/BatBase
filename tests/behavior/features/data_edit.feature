@@ -56,8 +56,8 @@ Feature: Edit data in the database
         And I see "Editing Interaction"
         And I focus on the "Subject" taxon field
         And I see "Select Subject Taxon"
-        When I select "Artibeus lituratus" from the "Species" form dropdown
-        And I should see "Artibeus" in the "Genus" form dropdown
+        When I select "Artibeus lituratus" from the "Species" dropdown
+        And I should see "Artibeus" in the "Genus" dropdown
         And I press the "Select Taxon" button
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
@@ -76,8 +76,8 @@ Feature: Edit data in the database
         And I see "Editing Interaction"
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        When I select "Philodendron sphalerum" from the "Species" form dropdown
-        And I should see "Philodendron" in the "Genus" form dropdown
+        When I select "Philodendron sphalerum" from the "Species" dropdown
+        And I should see "Philodendron" in the "Genus" dropdown
         And I press the "Select Taxon" button
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
@@ -103,7 +103,7 @@ Feature: Edit data in the database
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
-        Then I should see "Consumption" in the "Interaction Type" form dropdown
+        Then I should see "Consumption" in the "Interaction Type" dropdown
         Then I should see the "Seed" interaction tag
         Then I should not see the "Flower" interaction tag
         Then I should see "New Test Note Description" in the "Note" field "textarea"
@@ -116,8 +116,8 @@ Feature: Edit data in the database
     #   And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
     #   And I click on the edit pencil for the first interaction of "Feeding habits"
     #   And I see "Editing Interaction"
-    #   When I change the "Publication" form dropdown to "Book of Mammalogy"
-    #   And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
+    #   When I change the "Publication" dropdown to "Book of Mammalogy"
+    #   And I change the "Citation Title" dropdown to "Observations on the life histories of Panama bats"
     #   And I press the "Update Interaction" button
     #     And I wait for the "top" form to close
     #   And I uncheck the date-updated filter
@@ -150,7 +150,7 @@ Feature: Edit data in the database
         And I see "Editing Location"
         Then I should see "Santa Ana-Captivity" in the "Display Name" field "input"
         And I should see "Description..." in the "Description" field "textarea"
-        Then I should see "Captivity" in the "Habitat Type" form dropdown
+        Then I should see "Captivity" in the "Habitat Type" dropdown
         Then I should see "1000" in the "Elevation" field "input"
         Then I should see "2000" in the "Elevation Max" field "input"
         Then I should see "9.7489" in the "Latitude" field "input"
@@ -182,18 +182,18 @@ Feature: Edit data in the database
         And I change the "Website" field "input" to "https://www.link.com"
         And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
         And I select "University of Paris VI" from the "Publisher" dropdown
-        And I add "Cockle, Anya" to the "Authors" dynamic dropdown
+        And I select "Cockle, Anya" from the "Authors" dynamic dropdown
         And I press the "Update Publication" button
         And I press submit in the confirmation popup
         And I wait for the "top" form to close
-        And I select "Book" from the "Pub Type" dropdown
+        And I select "Book" from the "Publication Type Filter" dropdown
         And I click on the edit pencil for the "Book of Mammalogy" row
         And I see "Editing Publication"
         Then I should see "Book of Mammalogy" in the "Title" field "input"
         Then I should see "Description..." in the "Description" field "textarea"
-        Then I should see "Book" in the "Publication Type" form dropdown
+        Then I should see "Book" in the "Publication Type" dropdown
         Then I should see "https://www.link.com" in the "Website" field "input"
-        Then I should see "University of Paris VI" in the "Publisher" form dropdown
+        Then I should see "University of Paris VI" in the "Publisher" dropdown
         Then I should see "Cockle, Anya" in the "Authors" dynamic dropdown
 
     @javascript
@@ -250,9 +250,9 @@ Feature: Edit data in the database
         And I change the "Edition" field "input" to "4"
         And I change the "Website" field "input" to "https://www.link.com"
         And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
+        And I change "Baker, Herbert G" in the "Authors" dynamic dropdown
         And I select "Cockle, Anya" from the "Authors" dynamic dropdown
-        And I add "Baker, Herbert G" to the "Authors" dynamic dropdown
-        And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
+        And I see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I press the "Update Citation" button
         And I press submit in the confirmation popup
         And I wait for the "top" form to close
@@ -260,10 +260,10 @@ Feature: Edit data in the database
         And I expand "Baker, Herbert G" in the data tree
         And I click on the edit pencil for the "Feeding habits" row
         And I see "Editing Citation"
-        Then I should see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
+        Then I should see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I should see "Test Abstract" in the "Abstract" field "textarea"
         And I should see "Feeding habits" in the "Title" field "input"
-        And I should see "Book" in the "Citation Type" form dropdown
+        And I should see "Book" in the "Citation Type" dropdown
         And I should see "4" in the "Edition" field "input"
         And I should see "https://www.link.com" in the "Website" field "input"
         And I should see "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
@@ -311,7 +311,7 @@ Feature: Edit data in the database
         And I see "Editing Taxon"
         When I press "Change Parent"
         And I see "Select New Taxon Parent"
-        When I select "Artibeus" from the "Genus" form dropdown
+        When I select "Artibeus" from the "Genus" dropdown
         And I press the "Select" button
         And I press the "Update Taxon" button
         And I wait for the "top" form to close

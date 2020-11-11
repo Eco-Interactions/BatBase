@@ -82,7 +82,7 @@ Feature: Search page features and database table controls
     @javascript
     Scenario:  I should be able to show interactions with gps data on the map
       Given the database table is grouped by "Sources"
-      When I select "Journal" from the "Pub Type" dropdown
+      When I select "Journal" from the "Publication Type Filter" dropdown
       And i see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
       And I press the "Map Interactions" button

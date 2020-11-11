@@ -63,7 +63,7 @@ export function rmvContrib(prop, rcrd, entity, edits) {             /*dbug-log*/
 export function rmvFromNameProp(prop, rcrd, entity, edits) {
     const taxonName = getTaxonName(edits, rcrd);
     const nameProp = getNameProp(edits, rcrd);
-    const nameObj = db.getMmryData(nameProp);
+    const nameObj = db.getMmryData(nameProp);                       /*dbug-log*///console.log('rmvFromNameProp [%s] from [%O] rcrd = %O, edits = %O', taxonName, nameObj, rcrd, edits);
     delete nameObj[taxonName];
     db.setDataInMemory(nameProp, nameObj);
 }
@@ -72,11 +72,11 @@ function getTaxonName(edits, rcrd) {
 }
 function getNameProp(edits, rcrd) {
     const subGroup = getSubGroup(edits.subGroup, rcrd);
-    const rank = getRank(edits.rank, rcrd);
+    const rank = getRank(edits.rank, rcrd);                         /*dbug-log*///console.log('getNameProp [%s][%s][%s]Names', rcrd.group.displayName, subGroup, rank);
     return rcrd.group.displayName + subGroup + rank + 'Names';
 }
 function getSubGroup(subGroupEdits, rcrd) {
-    return !subGroupEdits ? rcrd.group.subGroup : subGroupEdits.old;
+    return !subGroupEdits ? rcrd.group.subGroup.name : subGroupEdits.old;
 }
 function getRank(rankEdits, rcrd) {
     return !rankEdits ? rcrd.rank.displayName :

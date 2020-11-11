@@ -334,31 +334,41 @@ class FeatureContext extends RawMinkContext implements Context
     }
 /* ------------------------- DYNAMIC ---------------------------------------- */
     /**
+     * @When I change :text in the :prop dynamic dropdown
+     */
+    public function iChangeInTheDynamicDropdown($text, $prop)
+    {
+        $count = $this->getCurrentFieldCount($prop);
+        $this->iSelectFromTheDynamicDropdown($text, $prop, --$count);
+    }
+
+    /**
      * @When I add :text to the :prop dynamic dropdown
      */
     public function iAddToTheDynamicDropdown($text, $prop)
     {
-        $this->iSelectFromTheDynamicDropdown($text, $prop, true);
+        $newFormLvl = $this->getOpenFormPrefix() === 'sub' ? 'sub2' : 'sub';
+        $count = $this->getCurrentFieldCount($prop);
+        $this->iSelectFromTheDynamicDropdown($text, $prop, $count, 'new');
+        $this->waitForTheFormToOpen($newFormLvl);
     }
 
     /**
      * @When I select :text from the :prop dynamic dropdown
      * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
      */
-    public function iSelectFromTheDynamicDropdown($text, $prop, $new = false)
+    public function iSelectFromTheDynamicDropdown($text, $prop, $count = null, $new = false)
     {
-        $count = $this->getCurrentFieldCount($prop);
-        $cnt = $new || $count == 1 ? $count : --$count;
-        $selId = $this->getComboId($prop).$cnt;
+        $count = $count ? $count : $this->getCurrentFieldCount($prop);
+        $selId = $this->getComboId($prop).$count;
         $this->selectValueInCombobox($selId, $text, $new);
-        $this->blurNextDynamicDropdown($selId, $count);
-        if ($new) { $this->waitForTheFormToOpen('sub2'); }
+        $this->blurNextDynamicDropdown($this->getComboId($prop), $count);
     }
 
-    private function blurNextDynamicDropdown($prevId, $count)
+    private function blurNextDynamicDropdown($selId, $count)
     {
-        $selId = substr($prevId, 0, -1).$count;
-        $this->execute("$('$selId')[0].selectize.blur();");
+        $selector = $selId . ++$count;
+        $this->execute("$('$selector')[0].selectize.blur();");
     }
 /* ====================== MAP =============================================== */
 
@@ -1026,9 +1036,8 @@ class FeatureContext extends RawMinkContext implements Context
 
         $this->spin(function() use ($text, $count, $selId) {
             while ($count > 0) {
-                $selId = substr($selId, 0, -1).$count;
-                $selector = $selId.' option:selected';
-                $selected = $this->evaluate("$('$selector').text();");
+                $selector = $selId.$count;
+                $selected = $this->evaluate("$('$selector').text();");          //$this->log("\n[$selector] selected = [$selected]");
                 if ($text == $selected) { return true; }
                 --$count;
             }
@@ -1174,9 +1183,6 @@ class FeatureContext extends RawMinkContext implements Context
         }, "Form [$type] did not close.");
     }
 
-    /**
-     * @When I wait for the :type form to open
-     */
     private function waitForTheFormToOpen($type)
     {
         $this->spin(function() use ($type) {

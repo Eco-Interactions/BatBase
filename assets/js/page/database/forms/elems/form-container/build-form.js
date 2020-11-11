@@ -1,10 +1,10 @@
 /**
- * Initiates and appends the main entity form.
+ * Initiates and appends the entity forms.
  *
- * Exports:
+ * Export
  *     buildAndAppendRootForm
  *     getExitButton
- *     initSubForm
+ *     getSubForm
  *
  * TOC
  *     ROOT FORM
@@ -20,7 +20,6 @@ import { _cmbx, _el, _modal, _u } from '~util';
 import { _confg, _elems, _panel, _state } from '~form';
 
 let action, entity, fLvl;
-
 /* ============================== ROOT FORM ================================= */
 export function buildAndAppendRootForm(fields, id) {
     const state = _state('getFormState');
@@ -113,7 +112,7 @@ function addFormStyleClass() {
     $('#form-main, .form-popup').addClass(map[entity]);
 }
 /* ============================== SUB FORM ================================== */
-export function initSubForm(fLvl, fClasses, fVals, sId) {
+export function getSubForm(fLvl, fClasses, fVals, sId) {
     entity = _state('getFormProp', [fLvl, 'entity']);
     setFormScopeParams('create', entity, fLvl);
     return _elems('buildFormRows', [entity, fVals, fLvl])

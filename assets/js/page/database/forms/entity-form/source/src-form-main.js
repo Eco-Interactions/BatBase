@@ -64,7 +64,7 @@ export function setSrcEditRowStyle() {
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 export function initEntitySubForm(entity, fLvl, fVals, pSel) {
     _state('addEntityFormState', [entity, fLvl, pSel, 'create']);
-    return _elems('initSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
+    return _elems('getSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
 }
 /* ------------------- ENTITY FIELDS ---------------------------------------- */
 export function getPubOrCitFields() {

@@ -14,21 +14,6 @@
  *     SUBMIT-SUCCESS MSG
  */
 import { _el } from '~util';
-import { _elems, _form, _state } from '~form';
-import * as exit from './exit-form.js';
-/* ---------------------------- EXIT FORM ----------------------------------- */
-/**
- * Removes the form container with the passed id, clears and enables the combobox,
- * and contextually enables to parent form's submit button. Calls the exit
- * handler stored in the form's params object.
- */
-export function exitSubForm() {
-    exit.exitSubForm(...arguments);
-}
-/** Returns popup and overlay to their original/default state. */
-export function exitRootForm() {
-    exit.exitRootForm(...arguments);
-}
 /* ------------------------ SUBMIT BUTTON ----------------------------------- */
 export function toggleSubmitBttn(bttnId, enable = true) {
     return enable ? enableSubmitBttn(bttnId) : disableSubmitBttn(bttnId);

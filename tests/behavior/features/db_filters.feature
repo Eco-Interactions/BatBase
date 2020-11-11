@@ -61,7 +61,7 @@ Feature: Filtering the data displayed in the database table
       Given the database table is grouped by "Sources"
       And I toggle "open" the filter panel
       And I see "Source and Date Filters"
-      When I select "Journal" from the "Pub Type" dropdown
+      When I select "Journal" from the "Publication Type Filter" dropdown
       Then i see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
       And data in the interaction rows

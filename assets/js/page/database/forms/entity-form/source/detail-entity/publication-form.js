@@ -28,7 +28,7 @@ function initPubMemory() {
     _state('addEntityFormState', ['publication', 'sub', '#sel-Publication', 'create']);
 }
 function buildAndAppendPubForm(val) {
-    return _elems('initSubForm',
+    return _elems('getSubForm',
         ['sub', 'med-sub-form', {'Title': val}, '#sel-Publication'])
     .then(form => appendPubFormAndFinishBuild(form));
 }

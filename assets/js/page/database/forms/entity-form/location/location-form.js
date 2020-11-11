@@ -29,7 +29,7 @@ function buildLocForm(val) {
     };
     _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create']);
     _state('setOnFormCloseHandler', ['sub', _form.bind(null, 'enableCountryRegionField')]);
-    return _elems('initSubForm', ['sub', 'med-sub-form', vals, '#sel-Location'])
+    return _elems('getSubForm', ['sub', 'med-sub-form', vals, '#sel-Location'])
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {

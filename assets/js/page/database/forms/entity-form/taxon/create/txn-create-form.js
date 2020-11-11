@@ -28,7 +28,7 @@ function showNewTaxonForm(val, rank) {
         const pId = '#sel-'+rank;
         const vals = {'DisplayName': val};
         _state('addEntityFormState', ['taxon', 'sub2', pId, 'create']);
-        return _elems('initSubForm', ['sub2', 'sml-sub-form', vals, pId])
+        return _elems('getSubForm', ['sub2', 'sml-sub-form', vals, pId])
             .then(appendTxnFormAndFinishBuild);
     }
     function appendTxnFormAndFinishBuild(form) {

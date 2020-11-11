@@ -29,6 +29,9 @@ export function initCreateForm(entity) {
 export function finishEditFormBuild(entity) {
     build.finishInteractionFormBuild();
 }
+export function clearFormMemory() {
+    fields.clearFormFieldModuleMemory();
+}
 /** ------------------ FORM COMBOBOXES -------------------------------------- */
 export function initFormCombos(entity) {
     const events = fields.getIntFormFieldComboEvents();

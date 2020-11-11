@@ -5,6 +5,7 @@
  *     initTypeField
  *     onTagSelection
  *     onTypeSelectionInitTagField
+ *     resetTypeAndTagMemory
  *
  * TOC
  *     INTERACTION TYPE
@@ -24,10 +25,17 @@ import * as iForm from '../int-form-main.js';
  * objectGroup:     The object taxon group when selected in the form.
  * secondaryTagId:  This tag is always available regardless of the type selected.
  */
-const app = {
-    defaultTag: null,
-    objectGroup: null,
-    secondaryTagId: null
+let app = getTypeAndTagMemoryDefaults();
+
+export function resetTypeAndTagMemory() {
+    app = getTypeAndTagMemoryDefaults();
+}
+function getTypeAndTagMemoryDefaults() {
+    return {
+        defaultTag: null,
+        objectGroup: null,
+        secondaryTagId: null
+    };
 }
 /* ========================= INTERACTION TYPE =============================== */
 /**
@@ -133,7 +141,7 @@ function getInitVal(field, prevVal) {
     return $('#sel-'+field).data('init-val') || prevVal;
 }
 function selectInitValIfValidType(initVal, typeOpts) {
-    const validType = typeOpts.find(opt => opt.value == initVal);   /*dbug-log*///console.log('validType = ', validType)
+    const validType = typeOpts.find(opt => opt.value == initVal);   /*dbug-log*///console.log('selectInitValIfValidType initVal?[%s] validType?[%s]', initVal, validType);
     if (validType) {
         _cmbx('setSelVal', ['InteractionType', initVal]);
     } else {

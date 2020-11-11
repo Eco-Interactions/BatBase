@@ -36,6 +36,7 @@ export function _state(funcName, params = []) {
 }
 export function clearFormMemory() {
     _map('clearMemory');
+    form.clearEntityFormMemory(state.getFormEntity('top'));
     state.clearState();
 }
 /* ----------------- ENTITY FORMS ------------------------------------------- */

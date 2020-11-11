@@ -29,6 +29,13 @@ const forms = {
     'author': src, 'citation': src, 'editor': src, 'publication': src, 'publisher': src,
     'taxon': txn,'species': txn, 'genus': txn, 'family': txn, 'order': txn, 'class': txn
 };
+export function clearEntityFormMemory(entity) {
+    const map = {
+        'interaction': int.clearFormMemory
+    };
+    if (!map[entity]) { return; }
+    map[entity]();
+}
 /* =================== INIT FORM ============================================ */
 export function createEntity(entity, val) {
     return forms[entity].initCreateForm(...arguments);

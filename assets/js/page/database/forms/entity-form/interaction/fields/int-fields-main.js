@@ -25,6 +25,9 @@ export function getIntFormFieldComboEvents(argument) {
         'Object': { onChange: txn.onTaxonRoleSelection.bind(null, 'Object') },
     };
 }
+export function clearFormFieldModuleMemory() {
+    type.resetTypeAndTagMemory();
+}
 /* ------------------ SOURCE ------------------------------------------------ */
 export function fillCitationCombo() {
     return src.fillCitationCombo(...arguments);

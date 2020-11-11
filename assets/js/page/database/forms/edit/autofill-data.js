@@ -33,8 +33,11 @@ function addDisplayNameToForm(cEntity, id, entity) {
 /** Note: Source types will get their record data at fillSrcData. */
 function fillEntityData(cEntity, id, entity) {
     const hndlrs = {
-        'interaction': fillIntData, 'location': fillLocData,
-        'source': fillSrcData,      'taxon': fillTaxonData  };
+        'interaction': fillIntData,
+        'location': fillLocData,
+        'source': fillSrcData,
+        'taxon': fillTaxonData
+    };
     const rcrd = _state('getRcrd', [cEntity, id]);                  /*dbug-log*///console.log("      --fillEntityData [%s] [%s] = %O", cEntity, id, rcrd);
     return Promise.resolve(hndlrs[cEntity](cEntity, id, rcrd, entity));
 }
@@ -64,7 +67,6 @@ function removeFieldsWithSpecialHandling(fieldTypes) {
  * Values will be set in fields in the change event for the taxon role combos.
  */
 function setTypeAndTagInitValuesAsDataFieldElems(rcrd) {
-    $('#sel-InteractionType').data('init-val', rcrd.interactionType.id);
     $('#sel-InteractionType').data('init-val', rcrd.interactionType.id);
     $('#sel-InteractionTags').data('init-val', rcrd.tags.map(t => t.id).join(', '));
 }

@@ -62,7 +62,7 @@ function buildAndAppendCitForm(val) {
     .then(form => appendCitFormAndFinishBuild(form));
 }
 function initCitSubForm(val) {
-    return _elems('initSubForm',
+    return _elems('getSubForm',
         ['sub', 'med-sub-form', {'Title': val}, '#sel-CitationTitle']);
 }
 function appendCitFormAndFinishBuild(form) {                        /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');

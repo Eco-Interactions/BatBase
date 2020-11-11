@@ -34,7 +34,7 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
 function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('-------------build[%s]Taxon[%s]SelectForm', role, groupId);
     addNewFormState(role);
     return _state('initTaxonState', [role, groupId])
-        .then(data => _elems('initSubForm', ['sub', 'sml-sub-form',
+        .then(data => _elems('getSubForm', ['sub', 'sml-sub-form',
             {Group: groupId, 'Sub-Group': data.groupTaxon.id}, '#sel-'+role]));
 }
 function addNewFormState(role) {

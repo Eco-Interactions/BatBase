@@ -19,7 +19,7 @@
 import { executeMethod } from '~util';
 import { _state, getNextFormLevel } from '../forms-main.js';
 import buildFormFooter from './footer/form-footer.js';
-import * as base from './form-container.js';
+import * as base from './form-container/form-container-main.js';
 import * as elemUtil from './util/form-elems-util-main.js';
 import * as panel from './detail-panel/detail-panel.js';
 import * as rows from './rows/rows-main.js';
@@ -33,11 +33,11 @@ export function buildAndAppendRootForm(fields, id) {
     return base.buildAndAppendRootForm(fields, id);
 }
 export function exitRootForm() {
-    elemUtil.exitRootForm(...arguments);
+    base.exitRootForm(...arguments);
 }
 /* ---------------------------- SUB-FORM ------------------------------------ */
-export function initSubForm() {
-    return base.initSubForm(...arguments);
+export function getSubForm() {
+    return base.getSubForm(...arguments);
 }
 /** Returns true if the next sub-rank form exists in the dom. */
 export function hasOpenSubForm(fLvl) {
@@ -45,7 +45,7 @@ export function hasOpenSubForm(fLvl) {
     return $('#'+childFormLvl+'-form').length > 0;
 }
 export function exitSubForm(fLvl, focus, onExit, data) {
-    elemUtil.exitSubForm(fLvl, focus, onExit, data);
+    base.exitSubForm(fLvl, focus, onExit, data);
     ifParentFormValidEnableSubmit(fLvl);
 }
 /* -------------------------------- ROWS ------------------------------------ */
