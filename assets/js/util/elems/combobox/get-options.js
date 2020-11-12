@@ -34,13 +34,12 @@ function getEntityOpt(name, id) {                                   /*dbug-log*/
 }
 /** --------------------- GROUP OPTIONS ------------------------------------- */
 function getOptGroups(entityObj, sortedKeys) {
-    const gSorted = sortEntityDataByGroup(entityObj, sortedKeys);
-    return Object.keys(gSorted).map(getOptGroup);
+    return Object.keys(entityObj).map(getGroupOpt);
 
-    function getOptGroup(gName) {                                   /*dbug-log*///console.log('getOptGroup [%s] %O', gName, gSorted[gName]);
-        const $group = $(`<optgroup label="${gName}" />`);
-        $group.append(...gSorted[gName]);
-        return $group[0];
+    function getGroupOpt(gName) {
+        const opt = entityObj[gName];
+        opt.text = gName;                                           /*dbug-log*///console.log('getOptGroup [%s] %O', gName, gSorted[gName]);
+        return opt;
     }
 }
 function sortEntityDataByGroup(data, keys) {

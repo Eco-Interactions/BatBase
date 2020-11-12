@@ -330,7 +330,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iSelectFromTheDropdown($text, $prop)
     {
-        $this->selectValueInCombobox($this->getComboId($prop), $text);
+        $this->selectTextInCombobox($this->getComboId($prop), $text);
     }
 /* ------------------------- DYNAMIC ---------------------------------------- */
     /**
@@ -361,7 +361,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $count = $count ? $count : $this->getCurrentFieldCount($prop);
         $selId = $this->getComboId($prop).$count;
-        $this->selectValueInCombobox($selId, $text, $new);
+        $this->selectTextInCombobox($selId, $text, $new);
         $this->blurNextDynamicDropdown($this->getComboId($prop), $count);
     }
 
@@ -921,34 +921,6 @@ class FeatureContext extends RawMinkContext implements Context
         $this->addValueToFormInput($selector, $text);
     }
 
-
-    /**
-     * @When I uncheck the date-updated filter
-     */
-    public function iUncheckTheDateUpdatedFilter()
-    {
-        $this->iToggleTheFilterPanel('open');
-        $this->toggleTheDateFilter(false);
-        $this->iToggleTheFilterPanel('close');
-    }
-    /**
-     * @Given I set the date :type filter to :date
-     */
-    public function iSetTheDateFilterTo($type, $date)
-    {
-        $initialCount = $this->evaluate("$('#tbl-cnt').text().match(/\d+/)[0];");
-        $this->setDateFilterDefault($date);
-        $this->toggleTheDateFilter(true);
-        $this->selectComboValue($this->getComboId('Date Filter Type'), $type);
-        $this->clickOnPageElement('#filter-col1');
-        $this->spin(function() use ($initialCount) {
-            $postCount = $this->evaluate("$('#tbl-cnt').text().match(/\d+/)[0];");
-            return $postCount !== $initialCount && $postCount > 0;
-            }, "Date did not update as expected. type = [$type]. date = [$date]. initial [$initialCount]. (After can't be zero)");
-        $this->setDateFilterDefault($date, 'remove');
-    }
-
-
     /**
      * @When I add the :text interaction tag
      */
@@ -1281,12 +1253,12 @@ class FeatureContext extends RawMinkContext implements Context
             return $input->getValue() == $text;
         }, "Could not set [$text] in [$selector]");
     }
-    private function selectValueInCombobox($selId, $text, $new = false)
+    private function selectTextInCombobox($selId, $text, $new = false)
     {
         $this->spin(function() use ($selId, $text, $new) {
-            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);        //$this->log("\n            selectValueInCombobox - [$text]->[$val] in [$selId]\n");
+            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);        //$this->log("\n            selectTextInCombobox - [$text]->[$val] in [$selId]\n");
             $this->selectComboValue($selId, $val);
-            return $new || $this->getFieldData($selId) == $text;
+            return $new || $this->getFieldTextOrValue($selId) == $text;
         }, "Could not select [$text] in [$selId]");
     }
     private function selectComboValue($selId, $val)
@@ -1297,30 +1269,62 @@ class FeatureContext extends RawMinkContext implements Context
             $this->execute("$('$selId')[0].selectize.addItem('$val');");
         }
     }
+
+/* ============================== DATE FILTER =============================== */
+    /**
+     * @When I uncheck the date-updated filter
+     */
+    public function iUncheckTheDateUpdatedFilter()
+    {
+        $this->iToggleTheFilterPanel('open');
+        $this->toggleTheDateFilter(false);
+        $this->iToggleTheFilterPanel('close');
+    }
+    /**
+     * @Given I set the date :type filter to :date
+     */
+    public function iSetTheDateFilterTo($type, $date)
+    {
+        $initialCount = $this->evaluate("$('#tbl-cnt').text().match(/\d+/)[0];");
+        $selId = $this->getComboId('Date Filter Type');
+
+        $this->setDateFilterDefault($date);
+        $this->toggleTheDateFilter(true);
+        $this->selectComboValue($selId, $type);
+        $this->handleEqualAssert($this->getFieldValue($selId), $type);
+
+        $this->clickOnPageElement('#filter-col1');
+
+        $this->spin(function() use ($initialCount) {
+            $postCount = $this->evaluate("$('#tbl-cnt').text().match(/\d+/)[0];");
+            return $postCount !== $initialCount && $postCount > 0;
+        }, "Date did not update as expected. type = [$type]. date = [$date]. initial [$initialCount]. (After can't be zero)");
+
+        $this->setDateFilterDefault(false);
+    }
     /**
      * There doesn't seem to be a way to set the date on the flatpickr calendar
      * from these tests. Adding a data property to the calendar elem that will be
      * read on calendar load and set that date as the default for the calendar.
      * Doesn't quite test the user's input, but should test the filter functionality.
      */
-    private function setDateFilterDefault($date, $reset = false)
+    private function setDateFilterDefault($defaultDate)
     {
-        if ($reset) {
-            $this->execute("$('#selDateFilterType').data('default', false);");
-        } else {
-            $this->execute("$('#selDateFilterType').data('default', '$date');");
-        }
+        $selId = $this->getComboId('Date Filter Type');
+        $this->execute("$('$selId').data('default', '$defaultDate');");
     }
 
-    private function toggleTheDateFilter($state)
+    private function toggleTheDateFilter($enable)
     {
-        $this->spin(function() use ($state) {
-            try {
-                $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');
-                if ($state) { $checkbox->check(); } else { $checkbox->uncheck(); }
-                return $checkbox->isSelected() == $state;
-            } catch (Exception $e) { return; }
-        }, 'Date filter not ['.($state ? 'en' : 'dis').'abled].');
+        $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');
+        $this->spin(function() use ($enable, &$checkbox) {
+            if ($enable) {
+                $checkbox->check();
+            } else {
+                $checkbox->uncheck();
+            }
+            return $checkbox->isSelected() == $enable;
+        }, 'Date filter not ['.($enable ? 'en' : 'dis').'abled].');
     }
 /** ---------------------- Get From Page -------------------------------------*/
     private function getTableRow($text)
@@ -1370,7 +1374,7 @@ class FeatureContext extends RawMinkContext implements Context
         $selCntnrId = '#sel-cntnr-'.str_replace(' ','',$prop);
         return $this->evaluate("$('$selCntnrId').data('cnt');");
     }
-    private function getFieldData($fieldId)
+    private function getFieldTextOrValue($fieldId)
     {
         $val = $this->getFieldInnerText($fieldId);
         if ($val === null || $val === "") {
@@ -1475,9 +1479,11 @@ class FeatureContext extends RawMinkContext implements Context
     {
         return strpos($hystk, $ndl) !== false;
     }
-    private function handleEqualAssert($frst, $scnd, $isEq, $msg)
+    private function handleEqualAssert($first, $second, $isEq = true, $msg = null)
     {
-        if ($isEq && $frst != $scnd || !$isEq && $frst == $scnd) {
+        $msg = $msg ? $msg : "[$first] [$second] should have been ".($isEq ? 'equal' : 'not equal');
+
+        if ($isEq && $first != $second || !$isEq && $first == $second) {
             $this->iPutABreakpoint($msg);
         }
     }
@@ -1499,7 +1505,7 @@ class FeatureContext extends RawMinkContext implements Context
     private function textContainedInField($text, $fieldId, $isIn = true)
     {
         $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $fieldVal = $this->getFieldData($fieldId);
+        $fieldVal = $this->getFieldTextOrValue($fieldId);
         return !$isIn && strpos($fieldVal, $text) === false ||
             $isIn && (strpos($fieldVal, $text) != false || $fieldVal == $text); //strpos fails on exact match
     }
@@ -1508,7 +1514,7 @@ class FeatureContext extends RawMinkContext implements Context
         $should_nt = $isIn ? 'Should' : "Shouldn't";
         $this->spin(function () use ($text, $fieldId, $isIn)
         {
-            $fieldVal = $this->getFieldData($fieldId);
+            $fieldVal = $this->getFieldTextOrValue($fieldId);
             return $isIn ? $fieldVal == $text : $fieldVal != $text;
         }, "$should_nt  have found [$text] in [$fieldId].");
     }

@@ -4,7 +4,6 @@
  * Export
  *     addPanelEvents
  *     closeOpenPanels
- *     submitUpdates
  *     togglePanel
  *     updateSubmitEvent
  *
@@ -144,8 +143,4 @@ function closeVerticalPanel(panel) {
 /* ------------------------ UTIL ---------------------------------- */
 function getOpenPanels() {
     return Object.keys(panels).filter(key => !$(panels[key].id).hasClass('closed'));
-}
-/* ================ SUBMIT AND SUCCESS METHODS ============================== */
-export function submitUpdates(data, action, successFunc) {
-    _u('sendAjaxQuery', [data, 'lists/' + action, successFunc]);
 }

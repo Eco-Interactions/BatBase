@@ -35,8 +35,12 @@ function loadAsyncFilters(tblState) {
 }
 /* ------------------------ NAME FILTER ------------------------------------- */
 function initTxnNameSearchElem(tblState) {
-    const searchTreeElem = fM.getTreeTextFilterElem('Taxon');
-    $('#focus-filters').append(searchTreeElem);
+    const searchTreeElem = fM.getTreeTextFilterElem('Taxon');        /*dbug-log*///console.log('filter container = %O, length ?[%s] [even?]', $('#focus-filters')[0].lastChild, $('#focus-filters')[0].lastChild.children.length, $('#focus-filters')[0].lastChild.children.length % 2 === 0)
+    if ($('#focus-filters')[0].lastChild.children.length % 2 === 0) {
+        $('#focus-filters').append(searchTreeElem);
+    } else {
+        $($('#focus-filters')[0].lastChild).append(searchTreeElem);
+    }
 }
 /* ------------------------ RANK TAXON ------------------------------------- */
 /**
@@ -46,9 +50,9 @@ function initTxnNameSearchElem(tblState) {
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
 function loadTxnRankComboboxes(tblState) {
-    const rankOptsObj = buildTaxonSelectOpts(tblState);
-    const ranks = Object.keys(rankOptsObj);
-    updateTxnRankComboboxes(rankOptsObj, ranks, tblState);
+    const rOpts = buildTaxonSelectOpts(tblState);
+    const ranks = Object.keys(rOpts);
+    updateTxnRankComboboxes(rOpts, ranks, tblState);
 }
 /**
  * Builds select options for each rank with taxon data in the current group.
@@ -91,30 +95,40 @@ function buildTaxonSelectOpts(tblState) {                           /*dbug-log*/
         } else { optsObj[rank] = []; }
     }
 }
-function updateTxnRankComboboxes(rankOptsObj, ranks, tblState) {
+function updateTxnRankComboboxes(rOpts, ranks, tblState) {
     if ($('#focus-filters label').length) {
-        updateTaxonSelOptions(rankOptsObj, ranks, tblState);
+        updateTaxonSelOptions(rOpts, ranks, tblState);
     } else {
-        loadRankSelects(rankOptsObj, ranks, tblState);
+        buildRankSelects(rOpts, ranks, tblState);
     }
 }
-function loadRankSelects(rankOptsObj, ranks, tblState) {            /*dbug-log*///console.log("loadRankSelects for %O", rankOptsObj)
-    const elems = buildTaxonSelects(rankOptsObj, ranks);
-    $('#focus-filters').append(elems);
+function buildRankSelects(rOpts, ranks, tblState) {                 /*dbug-log*///console.log("buildRankSelects for %O", rOpts)
+    const filterRows = getRankFilterFields(rOpts, ranks, tblState);
+    $('#focus-filters').append(...filterRows);
     initRankComboboxes(tblState.allgroupRanks);
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
+}
+function getRankFilterFields(rOpts, ranks, tblState) {
+    const rows = [];
+    let fields = [];
+    Object.keys(rOpts).forEach(addRankComboToRows);
+    if (fields.length) { completeFilterRow(); }
+    return rows;
 
-    function buildTaxonSelects(opts, ranks) {
-        const elems = [];
-        ranks.forEach(rank => {
-            const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row' }]);
-            const span = _el('getElem', ['span', { text: rank + ': ' }]);
-            const sel = fM.newSel(opts[rank], 'field-input', `sel-${rank}Filter`, rank);
-            $(lbl).append([span, sel])
-            elems.push(lbl);
-        });
-        return elems;
+    function addRankComboToRows(rank) {
+        if (fields.length === 2) { completeFilterRow();  }
+        fields.push(getRankFilter(rank, rOpts[rank]))
     }
+    function completeFilterRow() {
+        const row = _el('getElem', ['div', { class: 'flex-row' }]);
+        row.append(...fields);
+        rows.push(row);
+        fields = [];
+    }
+}
+function getRankFilter(rank, opts) {
+    const sel = fM.newSel(opts, 'field-input', `sel-${rank}Filter`, rank);
+    return fM.getFilterField(rank, sel);
 }
 function initRankComboboxes(groupRanks) {
     const confg = {};
@@ -124,9 +138,9 @@ function initRankCombo(rank) {
     const confg = { id: `#sel-${rank}Filter`, name: rank + ' Filter', onChange: applyTxnFilter }
     _cmbx('initCombobox', [confg, true]);
 }
-function updateTaxonSelOptions(rankOptsObj, ranks, tblState) {      /*dbug-log*///console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rankOptsObj, ranks, tblState)
+function updateTaxonSelOptions(rOpts, ranks, tblState) {            /*dbug-log*///console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rOpts, ranks, tblState)
     ranks.forEach(rank => {
-        _cmbx('replaceSelOpts', [rank+'Filter', rankOptsObj[rank], null, rank]);
+        _cmbx('replaceSelOpts', [rank+'Filter', rOpts[rank], null, rank]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }

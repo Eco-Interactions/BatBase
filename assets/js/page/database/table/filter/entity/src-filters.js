@@ -16,7 +16,7 @@ import { _cmbx, _el } from '~util';
 import { _ui } from '~db';
 import * as fM from '../filter-main.js';
 /* ========================= UI ============================================ */
-export function loadSrcFilters(type) {                              /*Perm-log*/console.log("       --Loading source [%s] filters.", type);
+export function loadSrcFilters(type) {                              /*perm-log*/console.log("       --Loading source [%s] filters.", type);
     if ($('#focus-filters label').length) { return clearPanelCombos(type); }
     const buildUi = {
         'auths': loadNameSearchHtml.bind(null, 'Author', true),
@@ -42,19 +42,21 @@ function loadPubSearchHtml() {
         .then(loadPubSearchElems);
 }
 function loadPubSearchElems(pubTypeOpts) {
-    const pubTypeElem = buildPubTypeSelect(pubTypeOpts);
-    const searchTreeElem = fM.getTreeTextFilterElem('Publication');
-    $('#focus-filters').append([searchTreeElem, pubTypeElem]);
+    const row = _el('getElem', ['div', { class: 'flex-row' }])
+    $(row).append(getPubFilters(pubTypeOpts));
+    $('#focus-filters').append(row);
     _cmbx('initCombobox', [{ name: 'Publication Type Filter', onChange: applyPubFilter }, true]);
     $('#sel-PublicationTypeFilter')[0].selectize.clear('silent');
 }
+function getPubFilters(pubTypeOpts) {
+    const pubTypeElem = getPubTypeFilter(pubTypeOpts);
+    const searchTreeElem = fM.getTreeTextFilterElem('Publication');
+    return [searchTreeElem, pubTypeElem]
+}
 /** Builds the publication type dropdown */
-function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-    const lbl = _el('getElem', ['label', {class: "field-cntnr flex-row"}]);
-    const span = _el('getElem', ['span', { text: 'Type:' }]);
+function getPubTypeFilter(opts) {                                              //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const sel = fM.newSel(addAllOpt(opts), 'field-input', 'sel-PublicationTypeFilter', 'Publication Type');
-    $(lbl).append([span, sel]);
-    return lbl;
+    return fM.getFilterField('Type', sel);
 }
 function addAllOpt(opts) {
     opts.unshift({value: 'all', text: '- All -'});

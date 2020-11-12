@@ -8,7 +8,7 @@
 import { _ui, _u } from '~db';
 import { tableState } from 'db/table/table-main.js';
 import * as agGrid from 'libs/grid/ag-grid.js';
-import { getBaseTableConfg } from './table-confg.js';
+import { getBaseTableConfg } from './table-init-confg.js';
 import * as style from './row-styles.js';
 import * as model from './on-model-update.js';
 
@@ -18,7 +18,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which
  * creates and shows the table.
  */
-export function initTable(view, rowData, state) {                   /*Perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
+export function initTable(view, rowData, state) {                   /*perm-log*/console.log('           //--initTable [%s], rowData = %O, tblState = %O', view, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
     return init(view, rowData)

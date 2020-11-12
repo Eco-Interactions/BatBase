@@ -24,7 +24,7 @@
  *             Table Methods
  */
 import { _cmbx, _db, _u } from '~util';
-import { _table, _ui } from '~db';
+import { _filter, _table, _ui } from '~db';
 import * as pM from './panels-main.js';
 
 const tState = _table.bind(null, 'tableState');
@@ -100,9 +100,6 @@ function spreadIntListPanel() {
     $(`#list-pnl, #int-lists, #list-details, #mod-list-pnl, #load-list,
         #sel-list-cntnr, #list-count`).removeClass('vert');
     $('#list-details').append($('#list-count').detach());
-}
-function filtersApplied() {
-    return $('#filter-status').text() !== '(LIST)';
 }
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
@@ -193,7 +190,7 @@ function deleteInteractionList() {
 }
 function confmDelete() {                                            /*perm-log*/console.log('           --Deleted Interaction List');
     resetDeleteButton();
-    pM.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
+    _u('sendAjaxQuery', [{id: app.list.id}, 'lists/remove', onListDeleteComplete]);
     resetListUi();
     delete app.rowSelMode;
 }
@@ -211,11 +208,11 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*perm-log*/console.log('           +--Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    _table('onFilterChangeUpdateRowData');
+    _filter('onFilterChangeUpdateRowData');
     updateRelatedListUi();
 }
 function prepareMemoryForTableLoad() {
-    _table('setFilterState', ['list', app.list.details, 'direct']);
+    _filter('setFilterState', ['list', app.list.details, 'direct']);
     app.tblState = tState().get();
     app.listLoaded = true;
 }
@@ -256,7 +253,7 @@ function parseEntity(entity) {
 /** Submit new or edited interaction list. */
 function submitDataList(data, action, hndlr) {
     app.submitting = app.modMode; //Flag tells various event handlers how to handle submit
-    pM.submitUpdates(data, action, hndlr);
+    _u('sendAjaxQuery', [, 'lists/'+action, hndlr]);
 }
 function onListSubmitComplete(action, results) {
     const list = JSON.parse(results.list.entity);                   /*temp-log*///console.log('listSubmitComplete results = %O, list = %O', results, list)
@@ -423,9 +420,9 @@ function resetPrevListUiState() {
 /* --- Table Methods --- */
 /** Resets interactions displayed to the full default set of the current focus. */
 function resetTable() {
-    _table('setFilterState', ['list', false, 'direct']);
+    _filter('setFilterState', ['list', false, 'direct']);
     delete app.listLoaded;
-    _table('onFilterChangeUpdateRowData');
+    _filter('onFilterChangeUpdateRowData');
     updateUiAfterTableReset();
 }
 function updateUiAfterTableReset() {

@@ -63,9 +63,6 @@ export function applyTxnFilter() {
     return fTxn.applyTxnFilter(...arguments);
 }
 /* ===================== FILTER SETS ======================================== */
-export function isFilterSetActive() {
-    return fSets.isFilterSetActive();
-}
 export function onTableReloadCompleteApplyFilters(filters, id) {
     fSets.onTableReloadCompleteApplyFilters(filters, id);
 }
@@ -98,6 +95,13 @@ export function newSel(opts, c, i, field) {
     const elem = _el('getSelect', [opts, { class: c, id: i }]);
     if (field) { $(elem).data('field', field+' Filter'); }
     return elem;
+}
+export function getFilterField(lblTxt, input) {
+    const classes = lblTxt ? 'flex-row field-cntnr' : 'row-field';
+    const lbl = _el('getElem', ['label', { class: classes }]);
+    const span = lblTxt ? _el('getElem', ['span', { text: lblTxt + ': ' }]) : null;
+    $(lbl).append([span, input].filter(e=>e));
+    return lbl;
 }
 /* ====================== FILTER ROW DATA =================================== */
 export function getRowDataForCurrentFilters(rowData) {                          //console.log('getRowDataForCurrentFilters. rowData = %O', rowData);

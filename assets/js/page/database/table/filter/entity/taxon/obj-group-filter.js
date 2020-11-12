@@ -16,16 +16,13 @@ let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectGroupCombobox() {
     return _cmbx('getOptsFromStoredData', ['groupNames'])
-    .then(buildObjectGroupCombo)
+    .then(buildObjectGroupFilter)
     .then(finishGroupComboInit);
 }
-function buildObjectGroupCombo(groups) {
-    const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row fWidthRow' }]);
-    const span = _el('getElem', ['span', { text: 'Groups: ' }]);
+function buildObjectGroupFilter(groups) {
     const opts = groups.filter(r => r.text !== 'Bat');  		    /*dbug-log*///console.log('groups = %O', groups)
-    const sel = fM.newSel(opts, 'field-input', 'sel-ObjectGroupsFilter');
-    $(lbl).append([span, sel]);
-    return lbl;
+    const sel = fM.newSel(opts, '', 'sel-ObjectGroupsFilter');
+    return fM.getFilterField(null, sel);
 }
 function finishGroupComboInit(filterEl) {
     const confg = {

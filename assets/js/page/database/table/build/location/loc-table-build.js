@@ -16,7 +16,7 @@ import * as build from '../table-build-main.js';
 
 const tState = _table.bind(null, 'tableState');
 /** =============== LOCATION TABLE ========================================== */
-export function buildLocTable(v) {                                  /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
+export function buildLocTable(v) {                                  /*perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
     return _db('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
 
@@ -39,7 +39,7 @@ function addLocDataToTableParams(data) {
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  * Note: This is also the entry point for filter-related table rebuilds.
  */
-export function rebuildLocTable(topLoc) {                            /*Perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
+export function rebuildLocTable(topLoc) {                            /*perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
     const topLocs = topLoc || getTopRegionIds();
     _table('resetCurTreeStorageProps');
     tState().set({openRows: topLocs.length === 1 ? topLocs : []});
@@ -62,7 +62,7 @@ function startLocTableBuildChain(topLocs) {
 }
 
 /** Reloads the data-table with the location selected from the map view. */
-export function showLocInDataTable(loc) {                          /*Perm-log*/console.log("       --Showing Location in Table");
+export function showLocInDataTable(loc) {                          /*perm-log*/console.log("       --Showing Location in Table");
     _ui('updateUiForTableView');
     _cmbx('setSelVal', ['View', 'tree', 'silent']);
     rebuildLocTable([loc.id])
@@ -78,7 +78,7 @@ export function onLocViewChange(val) {
  * Event fired when the source view select box has been changed.
  */
 function updateLocView(v) {
-    const val = v || _cmbx('getSelVal', ['View']);                     /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
+    const val = v || _cmbx('getSelVal', ['View']);                     /*perm-log*/console.log('           --updateLocView. view = [%s]', val);
     resetLocUi(val);
     _table('resetTableState');
     _ui('setTreeToggleData', [false]);

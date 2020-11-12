@@ -9,7 +9,7 @@
  *     MODULE-EXECUTOR
  *     PAGE INIT
  */
-import { _db, _u, executeMethod } from '~util';
+import { _alert, _db, _u, executeMethod } from '~util';
 import * as forms from './forms/forms-main.js';
 import * as map from './map/map-main.js';
 import * as table from './table/table-main.js';
@@ -85,7 +85,7 @@ export function showIntroAndLoadingMsg(resettingData) {
     tutorial.startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = true) {/*Perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s], allDataAvailable ? [%s]', focus, isAllDataAvailable);
+export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = true) {/*perm-log*/console.log('   *//initSearchStateAndTable. focus? [%s], allDataAvailable ? [%s]', focus, isAllDataAvailable);
     setTableInitState(focus, isAllDataAvailable);
     ui.selectInitialSearchFocus(focus);
     if ($('body').data('env') === 'test' && isAllDataAvailable === false) { return; }

@@ -1,13 +1,4 @@
-/* ---- Selectize ----------------------------------------------------------- */
-.selectize-input {
-    padding: 4px 33px 4px 4px !important;
-}
-.selectize-input, .selectize-control.single .selectize-input.input-active {
-    display: inline-flex;
-}
-.selectize-dropdown {
-    z-index: 1111;
-}
+
 /**------------------------------ Table Styes ------------------------------- */
 #db-view {
     height: 86vh;

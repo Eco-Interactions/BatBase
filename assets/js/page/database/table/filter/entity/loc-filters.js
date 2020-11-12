@@ -19,7 +19,7 @@ const tState = _table.bind(null, 'tableState');
 /**
  * Builds the Location search comboboxes @loadLocComboboxes and the tree-text filter.
  */
-export function loadLocFilters(tblState) {                          /*Perm-log*/console.log("       --Loading location filters.");
+export function loadLocFilters(tblState) {                          /*perm-log*/console.log("       --Loading location filters.");
     if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
@@ -41,11 +41,16 @@ function loadLocNameSearchElem() {
  * set any previously 'selected' values.
  */
 function loadLocComboboxes(tblState) {
-    const opts = buildLocSelectOpts(tblState);
-    const selElems = buildLocSelects(opts);
-    $('#focus-filters').append(selElems);
+    $('#focus-filters').append(buildLocComboFilters(tblState));
     initLocCombos();
     setSelectedLocVals(tblState.selectedOpts);
+}
+function buildLocComboFilters(tblState) {
+    const row = _el('getElem', ['div', { class: 'flex-row' }]);
+    const opts = buildLocSelectOpts(tblState);
+    const selElems = getLocFilterFields(opts);
+    $(row).append(selElems);
+    return row;
 }
 /** Builds arrays of options objects for the location comboboxes. */
 function buildLocSelectOpts(tblState, data) {
@@ -124,7 +129,7 @@ function buildLocSelectOpts(tblState, data) {
         }
     }
     function addAllOption() {
-        Object.keys(tblState.selectedOpts).forEach(type => {                    //console.log('opts = %O, type = %s, tblStateOpts = %O', opts, type, tblState.selectedOpts)
+        Object.keys(tblState.selectedOpts).forEach(type => {
             opts[type].unshift({ text: '- All -', value: 'all'});
         });
     }
@@ -141,24 +146,18 @@ function initLocCombos() {
     _cmbx('initCombobox', [{ name: 'Country Filter', onChange: applyLocFilter }, true]);
 }
 /** Builds the location select elements */
-function buildLocSelects(locOpts) {
-    const selElems = [];
+function getLocFilterFields(locOpts) {
+    const filters = [];
     for (let locType in locOpts) {
-        let elem = buildLocSel(_u('ucfirst', [locType]), locOpts[locType]);
-        selElems.push(elem);
+        filters.push(getLocFilter(_u('ucfirst', [locType]), locOpts[locType]));
     }
-    return selElems;
-
-    function buildLocSel(locType, opts) {
-        const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row' }]);
-        const span = _el('getElem', ['span', { text: locType + ': ', class: "opts-span" }]);
-        const sel = fM.newSel(opts, 'field-input', `sel-${locType}Filter`, locType);
-        $(lbl).append([span, sel]);
-        $(sel).addClass('locSel');
-        return lbl;
-    }
+    return filters;
 }
-function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
+function getLocFilter(locType, opts) {                              /*dbug-log*///console.log('getLocFilter [%s] = %O', locType, opts);
+    const sel = fM.newSel(opts, 'field-input', `sel-${locType}Filter`, locType);
+    return fM.getFilterField(locType, sel);
+}
+function setSelectedLocVals(selected) {                             /*dbug-log*///console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
         _cmbx('setSelVal', [locType+'Filter', selected[locType], 'silent']);
     });

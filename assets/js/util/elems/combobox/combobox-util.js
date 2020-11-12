@@ -18,18 +18,25 @@ const confgs = {};
  * {obj} confg - required: name, onChange. All other props are selectize params.
  */
 export function initCombobox(confg, onBlur = false) {
-    const options = buildComboboxOptions(confg, onBlur);            /*dbug-log*///console.log("initCombobox. confg = %O finalConfg = %O", confg, options);
+    const options = buildComboboxOptions(confg, onBlur);            /*dbug-log*///console.log("initCombobox [%s] confg = %O finalConfg = %O", confg.name, confg, options);
     $(options.id).selectize(options);
     addToComboConfgMemory(confg, options);
 }
 function buildComboboxOptions(confg, onBlur) {
     const comboOpts = Object.assign({
-        create: confg.create ? confg.create : false,
         id: confg.id ? confg.id : '#sel-'+confg.name.split(' ').join(''),
     }, confg);
-    comboOpts.placeholder = getPlaceholer(comboOpts.id, confg.name, true); //confg.create
+    comboOpts.create = getComboCreateFunc(confg.create);
+    comboOpts.placeholder = getPlaceholer(comboOpts.id, confg.name, true);
     comboOpts.onBlur = onBlur ? saveOrRestoreSelection : false;
     return comboOpts;
+}
+function getComboCreateFunc(createFunc) {  console.log
+    return createFunc ? onComboCreate.bind(null, createFunc) : false;
+}
+function onComboCreate(createFunc, val) {
+    createFunc(val);
+    return { text: `Creating...`, value: 'new' };
 }
 /** For multiple combos in a container, their order number is appended to the field. */
 function addToComboConfgMemory(confg, options) {

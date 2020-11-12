@@ -49,8 +49,8 @@ Feature: Filtering the data displayed in the database table
         Given the database table is grouped by "Locations"
         And I toggle "open" the filter panel
         And I see "Location and Date Filters"
-        When I select "Costa Rica" from the "Country" dropdown
-        Then I should see "Central America" in the "Region" dropdown
+        When I select "Costa Rica" from the "Country Filter" dropdown
+        Then I should see "Central America" in the "Region Filter" dropdown
         And I should see "3" rows in the table data tree
         And data in the interaction rows
         And I should see "Country." in the filter status bar
@@ -94,9 +94,9 @@ Feature: Filtering the data displayed in the database table
       And I view interactions by "Bats"
       And I toggle "open" the filter panel
       And I see "Taxon and Date Filters"
-      When I select "Artibeus lituratus" from the "Species" dropdown
-      Then I should see "Artibeus" in the "Genus" dropdown
-      And I should see "Phyllostomidae" in the "Family" dropdown
+      When I select "Artibeus lituratus" from the "Species Filter" dropdown
+      Then I should see "Artibeus" in the "Genus Filter" dropdown
+      And I should see "Phyllostomidae" in the "Family Filter" dropdown
       And I should see "2" rows in the table data tree
       And I should see "Bats" in the taxon filter status bar
       And data in the interaction rows
@@ -121,33 +121,32 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to CREATE a set of filters.
         Given the database table is grouped by "Locations"
         And I toggle "open" the filter panel
-        And I select "Costa Rica" from the "Country" dropdown
+        And I select "Costa Rica" from the "Country Filter" dropdown
         And I set the date "cited" filter to "January 1, 1977"
-        When I add "Test Filter Set" to the "Saved Filters" dropdown
-        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        When I add "Test Filter Set" to the "Filter Set" dropdown
         And I press the "Save" button
         And I should see "Date Published, Country." in the save modal
         And I press the "Submit" button
         Then I should see "(SET) Date Published, Country." in the filter status bar
-        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        And I should see "Test Filter Set" in the "Filter Set" dropdown
 
 ## --------------- FILTER-SET EDIT --------------- ##
     @javascript
     Scenario:  I should be able to APPLY and EDIT a set of filters.
         Given the database table is grouped by "Sources"
         And I toggle "open" the filter panel
-        When I select "Test Filter Set" from the "Saved Filters" dropdown
-        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        When I select "Test Filter Set" from the "Filter Set" dropdown
+        And I should see "Test Filter Set" in the "Filter Set" dropdown
         And I press the "Apply" button
         Then I should see the table displayed in "Location" view
         And I should see "(SET) Date Published, Country." in the filter status bar
-        And I should see "Test Filter Set" in the "Saved Filters" dropdown
-        When I select "all" from the "Country" dropdown
+        And I should see "Test Filter Set" in the "Filter Set" dropdown
+        When I select "- All -" from the "Country Filter" dropdown
         And I press the "Update" button
         And I should see "Date Published, Region." in the save modal
         And I press the "Submit" button
         Then I should see "(SET) Date Published, Region." in the filter status bar
-        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        And I should see "Test Filter Set" in the "Filter Set" dropdown
 
 ## --------------- FILTER-SET DELETE  --------------- ##
  ##The first "Given" step is only needed because sometimes the tutorial isn't fully closed and this was easier than adding another wait
@@ -155,10 +154,10 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to DELETE a set of filters.
         Given the database table is grouped by "Sources"
         And I toggle "open" the filter panel
-        When I select "Test Filter Set" from the "Saved Filters" dropdown
-        And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        When I select "Test Filter Set" from the "Filter Set" dropdown
+        And I should see "Test Filter Set" in the "Filter Set" dropdown
         And I break "Press Delete and make sure it works. Tests not interacting with these buttons easily."
         And I press the "Delete" button
         And I press the "Confirm" button
         Then I should see "No Active Filters" in the filter status bar
-        And I should see "" in the "Saved Filters" dropdown
+        And I should see "" in the "Filter Set" dropdown

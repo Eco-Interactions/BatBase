@@ -15,15 +15,8 @@ import * as fM from '../filter-main.js';
 /* ====================== BUILD FILTER ELEM ================================= */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function getTreeTextFilterElem(entity) {
-    const lbl = buildTxtSearchLbl(entity);
-    const span = _el('getElem', ['span', { text: 'Name:' }]);
     const input = buildTxtSearchInput(entity);
-    $(lbl).append([span, input]);
-    return lbl;
-}
-function buildTxtSearchLbl(entity) {
-    const classes = 'field-cntnr flex-row';
-    return _el('getElem', ['label', { class: classes }]);
+    return fM.getFilterField('Name', input);
 }
 function buildTxtSearchInput(entity) {
     const attr = {
@@ -33,13 +26,7 @@ function buildTxtSearchInput(entity) {
         type: 'text',
     };
     const input = _el('getElem', ['input', attr]);
-    addInputClass(entity, input);
     return addInputChangeEvent(entity, input);
-}
-function addInputClass(entity, input) {
-    const map = { 'Location': 'locTxtInput', 'Taxon': 'taxonSel' };
-    if (!map[entity]) { return; }
-    $(input).addClass(map[entity]);
 }
 function addInputChangeEvent(entity, input) {
     $(input).change(onTextFilterChange.bind(null, entity));

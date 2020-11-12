@@ -23,7 +23,7 @@ const tState = _table.bind(null, 'tableState');
 export function buildTxnTable(v) {
     if (v) { return getTxnDataAndBuildTable(v); }
     return _db('getData', ['curView', true]).then(storedView => {
-        const view = storedView || getSelValOrDefault(_cmbx('getSelVal', ['View']));/*Perm-log*/console.log("       --Building [%s] Taxon Table", view);
+        const view = storedView || getSelValOrDefault(_cmbx('getSelVal', ['View']));/*perm-log*/console.log("       --Building [%s] Taxon Table", view);
         return getTxnDataAndBuildTable(view);
     });
 }
@@ -50,7 +50,7 @@ function updateTaxonTableState(data) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTxnTable(taxa) {                             /*Perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O', taxa);
+export function rebuildTxnTable(taxa) {                             /*perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O', taxa);
     const tS = tState().get(['api', 'flags']);
     if (!tS.api || tS.flags.allDataAvailable) { _ui('fadeTable'); }
     return startTxnTableBuildChain(taxa)
@@ -76,7 +76,7 @@ function setTaxonOpenRows(taxa) {
 }
 /** =================== TAXON VIEW ========================================== */
 /** Event fired when the taxon view select box has been changed. */
-export function onTxnViewChange(val) {                              /*Perm-log*/console.log('       --onTxnViewChange. [%s]', val)
+export function onTxnViewChange(val) {                              /*perm-log*/console.log('       --onTxnViewChange. [%s]', val)
     if (!val) { return; }
     $('#focus-filters').empty();
     buildTaxonTable(val);

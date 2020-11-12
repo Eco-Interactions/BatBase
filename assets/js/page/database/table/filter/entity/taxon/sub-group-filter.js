@@ -17,7 +17,7 @@ let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initSubGroupFilter(tblState) {
     return getSubGroupOpts(tblState)
-        .then(buildSubGroupCombo)
+        .then(getSubGroupFilter)
         .then(finishSubGroupComboInit);
 }
 /** @todo Move opts builders to app-util and replace this. */
@@ -30,12 +30,9 @@ function buildSubGroupOpts(subGroups) {
         return { text: group, value: group.split(' ')[1]};
     });
 }
-function buildSubGroupCombo(opts) {
-    const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row fWidthRow' }]);
-    const span = _el('getElem', ['span', { text: '' }]);
-    const sel = fM.newSel(opts, 'field-input', 'sel-Sub-GroupFilter');
-    $(lbl).append([span, sel]);
-    return lbl;
+function getSubGroupFilter(opts) {
+    const sel = fM.newSel(opts, '', 'sel-Sub-GroupFilter');
+    return fM.getFilterField(null, sel);
 }
 function finishSubGroupComboInit(filterElem) {
     const confg = {

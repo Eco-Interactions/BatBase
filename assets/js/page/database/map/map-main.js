@@ -734,7 +734,7 @@ export function buildLocMap() {
     return downloadDataAndBuildMap(addAllIntMrkrsToMap, 'map');
 }
 /** Switches to map view and centeres map on selected location. */
-export function showLocOnMap(locId, zoom) {                          /*Perm-log*/console.log("       --Showing Location on Map");
+export function showLocOnMap(locId, zoom) {                          /*perm-log*/console.log("       --Showing Location on Map");
     if ($('#shw-map').prop('loading')) { return; }
     _ui('updateUiForMapView');
     _cmbx('setSelVal', ['View', 'map', 'silent']);

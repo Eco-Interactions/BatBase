@@ -8,6 +8,11 @@
 /* CONTAINER FOR FIELD-ELEMS */
 .field-elems
     margin-top: .3em
+
+.row-field
+    flex-grow: 1
+    margin-right: 1em !important
+
 /* =========================== FORMS ======================================== */
 /* CONTAINER FOR FIELD ROWS */
 [id$="_row"]
@@ -41,3 +46,13 @@
     margin-left: 1em
     flex-grow: 1
     margin-right: 1em
+/* ------------------------- Selectize -------------------------------------- */
+.selectize-input
+    padding: 4px 33px 4px 4px !important
+
+.selectize-input, .selectize-control.single .selectize-input.input-active
+    display: inline-flex
+
+.selectize-dropdown
+    z-index: 1111
+    margin-left 0

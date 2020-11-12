@@ -4,6 +4,7 @@
  * Export
  *     getBaseTableConfg
  */
+import { _ui } from '~db';
 import { getColumnConfg } from './column-confg.js';
 import { getRowStyleClass, onModelUpdated } from './init-table-main.js';
 

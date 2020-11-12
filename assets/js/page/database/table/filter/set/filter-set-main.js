@@ -1,7 +1,7 @@
 /*
  * Handles the right section of the filter panel, saved filter set managment.
  *
- * Exports:
+ * Export
  *      onTableReloadCompleteApplyFilters
  *      isFilterSetActive
  *      initFilterSetsFeature
@@ -9,7 +9,7 @@
  *      createNewFilterSet
  *      updateFilterSetSel
  *
- * TOC:
+ * TOC
  *      INIT UI
  *      CREATE
  *      SELECT/EDIT
@@ -20,18 +20,16 @@
  *          SUBMIT & SUCCESS METHODS
  *          RESET & ENABLE/DISABLE UI
  */
-import * as pM from '../panels-main.js';
-import { _modal, _table, _ui, _u } from '../../../db-main.js';
+import { _cmbx, _db, _modal, _u } from '~util';
+import { _filter, _table, _ui } from '~db';
 /* Holds selected filter data and table state. */
 let app = {};
 const tState = _table.bind(null, 'tableState');
-export function isFilterSetActive() {
-    return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
-}
+
 /* ============================= INIT UI ==================================== */
 export function initFilterSetsFeature() {
     setFilterSetEventListeners();
-    _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
+    _cmbx('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
     disableFilterSetInputs();
 }
 function setFilterSetEventListeners() {
@@ -42,8 +40,8 @@ function setFilterSetEventListeners() {
 }
 function updateFilterSetSel(opts) {                                 /*dbug-log*///console.log('updateFilterSetSel. opts = %O', opts);
     addCreateOpt(opts);
-    _u('destroySelectizeInstance', ['SavedFilters']);
-    _u('initCombobox', [buildSavedFiltersComboConfg(opts)]);
+    _cmbx('destroySelectizeInstance', ['FilterSet']);
+    _cmbx('initCombobox', [buildSavedFiltersComboConfg(opts)]);
 }
 function addCreateOpt(opts) {
     opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'});
@@ -70,20 +68,18 @@ function buildSavedFiltersComboConfg(opts) {
     };
 }
 function buildOptGroups(opts) {
-    let groups = Array.from(new Set(opts.map(opt => opt.group)));
-    groups = groups.map(g => { return {text: g, value: g }});
-    return groups;
+    const groups = Array.from(new Set(opts.map(opt => opt.group)));
+    return groups.map(g => { return {text: g, value: g }});
 }
 /* ============================== CREATE ==================================== */
 export function createNewFilterSet(val) {                                 /*dbug-log*///console.log('createNewFilterSet. val = %s', val);
     enableFilterSetInputs('create');
     updateSubmitButton(createFilterSet);
     $('#filter-set-name + input').val(val).focus();
-    return { value: 'new', text: val ? val : "Creating New Filter Set" };
 }
 function createFilterSet() {
     const data = buildFilterData();
-    pM.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
+    _u('sendAjaxQuery', [data, 'lists/create', onFilterSubmitComplete.bind(null, 'create')])
     _modal('exitModal');
 }
 /* ========================= SELECT/EDIT ==================================== */
@@ -94,12 +90,12 @@ export function selectFilterSet(val) {
     if (!val) { return;  }                                          /*dbug-log*///console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
     updateSubmitButton(editFilterSet);
-    _u('getData', ['savedFilters']).then(filters => fillFilterData(val, filters));
+    _db('getData', ['savedFilters']).then(filters => fillFilterData(val, filters));
 }
 function editFilterSet() {
     const data = buildFilterData();
-    data.id = _u('getSelVal', ['Saved Filter Set']);
-    pM.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
+    data.id = _cmbx('getSelVal', ['FilterSet']);
+    _u('sendAjaxQuery', [data, 'lists/edit', onFilterSubmitComplete.bind(null, 'edit')]);
     _modal('exitModal');
 }
 function fillFilterData(id, filters) {
@@ -127,7 +123,7 @@ function buildFilterData() {
  * direct (applied to row data directly).
  */
 function getFilterSetJson(tState) {
-    const fState = _table('getFilterState');
+    const fState = _filter('getFilterState');
     const filters = {
         direct: getDirectFitlersForSet(fState.direct),
         focus: tState.curFocus,
@@ -149,7 +145,7 @@ function showCnfrmDeleteBttns() {                                   /*dbug-log*/
 }
 function confmDelete() {
     resetDeleteButton();
-    pM.submitUpdates({id: app.fltr.id}, 'remove', onFilterDeleteComplete);
+    _u('sendAjaxQuery', [{id: app.fltr.id}, 'lists/remove', onFilterDeleteComplete]);
 }
 function cancelDelete() {
     resetDeleteButton();
@@ -160,8 +156,7 @@ function resetDeleteButton() {
 }
 /* ================== APPLY FILTER SET ====================================== */
 function applyFilterSet() {
-    const filters = app.fltr.details;                               /*Perm-log*/console.log('//Applying Filter Set = %O', filters);
-    app.fltr.active = true;
+    const filters = app.fltr.details;                               /*perm-log*/console.log('//Applying Filter Set = %O', filters);
     reloadTableThenApplyFilters(filters, app.fltr.id);
 }
 function reloadTableThenApplyFilters(filters, id) {
@@ -170,16 +165,16 @@ function reloadTableThenApplyFilters(filters, id) {
     .then(onTableReloadCompleteApplyFilters.bind(null, filters, id));
 }
 function setSavedFilterFocusAndView(filters) {
-    _u('setSelVal', ['Focus', filters.focus, 'silent']);
+    _cmbx('setSelVal', ['Focus', filters.focus, 'silent']);
     setView(filters);
 }
 function setView(filters) {
     if (filters.view == tState().get('curView')) { return; }
     const view =  filters.view ? filters.view : 'tree'; //Location filters are only saved in tree view
-    _u('setData', ['curView', view]);
-    _u('setSelVal', ['View', filters.view, 'silent']);
+    _db('setData', ['curView', view]);
+    _cmbx('setSelVal', ['View', filters.view, 'silent']);
 }
-export function onTableReloadCompleteApplyFilters(filters, id) {                       /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
+export function onTableReloadCompleteApplyFilters(filters, id) {    /*dbug-log*///console.log('   --onTableReloadComplete. filters = %O', filters);
     setFiltersThatResetTableThenApplyRemaining(filters)
     .then(onAllFiltersApplied)
     .then(() => ifActiveSetResetVal(id));
@@ -187,7 +182,8 @@ export function onTableReloadCompleteApplyFilters(filters, id) {                
 function ifActiveSetResetVal(id) {
     if (!id) { return; }  //If no id, reapplying filters after form closed.
     fillFilterDetailFields(app.fltr.displayName, app.fltr.description);
-    _u('setSelVal', ['Saved Filter Set', id, 'silent'])
+    _cmbx('setSelVal', ['Filter Set', id, 'silent'])
+    addSetToFilterStatus();
 }
 /* ------------ SET IN FILTER MEMORY -------------- */
 function addFiltersToMemoryAndUi(filters) {
@@ -199,7 +195,7 @@ function addFiltersToMemoryAndUi(filters) {
 
         function handleFilter(type) {
             handleUiUpdate(type, filters[group][type]);
-            _table('setFilterState', [type, filters[group][type], group]);
+            _filter('setFilterState', [type, filters[group][type], group]);
         }
     }
 }
@@ -218,11 +214,11 @@ function setNameTextInput(type, val) {
 }
 function setComboElem(type, val) {
     const field = Object.keys(val)[0];
-    _u('setSelVal', [field, val[field], 'silent']);
+    _cmbx('setSelVal', [getFilterName(field), val[field], 'silent']);
 }
 function setDateElems(type, val) {
-    _u('setSelVal', ['Date Filter', type, 'silent']);
-    _table('toggleDateFilter', [true, val.time, 'skipSync']);
+    _cmbx('setSelVal', ['Date Filter Type', type, 'silent']);
+    _filter('toggleDateFilter', [true, val.time, 'skipSync']);
 }
 /* --------------- FILTERS THAT REBUILD TABLE ------- */
 function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
@@ -234,13 +230,14 @@ function setFiltersThatResetTableThenApplyRemaining(filters, setId) {
     function applyDirectFilters() {                                 /*dbug-log*///console.log('applyDirectFilters. args = %O', arguments)
         if (!Object.keys(filters.direct).length) { return; }
         addFiltersToMemoryAndUi(filters);
-        _table('onFilterChangeUpdateRowData');
+        _filter('onFilterChangeUpdateRowData');
     }
 }
 function setComboboxFilter(filter) {
     if (!filter) { return Promise.resolve(); }
-    const name = Object.keys(filter)[0];                            /*dbug-log*///console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
-    return _u('triggerComboChangeReturnPromise', [name, filter[name].value]);
+    const name = Object.keys(filter)[0];
+    const val = filter[name].value;
+    return _cmbx('triggerComboChangeReturnPromise', [getFilterName(name), val]);
 }
 function applyColumnFilters(filters) {                              /*dbug-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api');
@@ -254,14 +251,22 @@ function applyColumnFilters(filters) {                              /*dbug-log*/
 function onAllFiltersApplied() {
     if (!app.fltr) { return; } //reapplying filters after form closed.
     $('#sel-FilterSet')[0].selectize.addItem(app.fltr.id);
-    delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
 /* ====================== UTILITY =========================================== */
+function getFilterName(name) {
+    return name.includes('Filter') ? name : (name + 'Filter');
+}
 function addActiveFilterToMemory(set) {
-    const status = app.fltr ? app.fltr.active : false;
-    app.fltr = pM.parseUserNamed(set);
-    app.fltr.active = status;
+    app.fltr = parseUserNamed(set);
     return app.fltr;
+}
+function parseUserNamed(entity) {
+    return entity ? parseEntity(entity) : { details: [] };
+}
+function parseEntity(entity) {
+    entity.details = typeof entity.details == 'string' ?
+        JSON.parse(entity.details) : entity.details;
+    return entity
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 function showSaveFilterModal(success) {
@@ -285,17 +290,13 @@ function getActiveFilters(statusMsg) {
     if (!statusMsg) { statusMsg = 'No Active Filters.'; }
     return statusMsg;
 }
-function submitFilterSet(data, action, successFunc) {
-    const envUrl = $('body').data("base-url");
-    _u('sendAjaxQuery', [data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action)]);
-}
 function onFilterSubmitComplete(action, results) {
     addActiveFilterToMemory(JSON.parse(results.list.entity));       /*dbug-log*///console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
-    pM.updateUserNamedList(results.list, action)
+    _db('updateUserNamedList', [results.list, action])
     .then(onUpdateSuccessUpdateFilterUi.bind(null, app.fltr.id));
 }
 function onUpdateSuccessUpdateFilterUi(id) {
-    _u('getOptsFromStoredData', ['savedFilterNames'])
+    _cmbx('getOptsFromStoredData', ['savedFilterNames'])
     .then(updateFilterSetSel)
     .then(() => {
         $('#sel-FilterSet')[0].selectize.addItem(id);
@@ -305,9 +306,8 @@ function onUpdateSuccessUpdateFilterUi(id) {
 }
 function addSetToFilterStatus() {
     if (!dataFiltersSaved(app.fltr)) { return; }
-    app.fltr.active = true;
-    _ui('updateFilterStatusMsg');
-    delete app.fltr.active;
+    const status = $('#filter-status').text();
+    $('#filter-status').text('(SET) '+status);
 }
 function dataFiltersSaved(fltr) {
     const panleFilters = ifSetHasPanelFilters(fltr.details);
@@ -318,12 +318,12 @@ function ifSetHasPanelFilters(filters) {
     return Object.keys(filters.direct).length || Object.keys(filters.rebuild).length;
 }
 function onFilterDeleteComplete(results) {                          /*dbug-log*///console.log('listDeleteComplete results = %O', results)
-    pM.updateUserNamedList(results.list, 'delete')
+    _db('updateUserNamedList', [results.list, 'delete'])
     .then(onDeleteSuccessUpdateFilterUi);
 }
 function onDeleteSuccessUpdateFilterUi() {
     resetFilterUi();
-    _u('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
+    _cmbx('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
     $('#sel-FilterSet')[0].selectize.open();
 }
 function showSavedMsg() {
@@ -335,7 +335,7 @@ function hideSavedMsg() {
 }
 /* ------------------- RESET & ENABLE/DISABLE UI -----------------------------*/
 function resetFilterUi() {
-    if (app.filtr) { app.fltr = null; } // && !app.fltr.active
+    if (app.filtr) { app.fltr = null; }
     hideSavedMsg();
     clearFilterDetailFields();
     disableFilterSetInputs();
@@ -364,5 +364,5 @@ function enableFilterSetInputs(create) {
     }
 }
 function updateSubmitButton(func) {
-    pM.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
+    $('#save-filter').off('click').click(showSaveFilterModal.bind(null, func));
 }

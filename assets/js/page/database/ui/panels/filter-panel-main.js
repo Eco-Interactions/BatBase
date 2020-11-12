@@ -122,7 +122,7 @@ export function toggleFilterPanel() {
 }
 function buildAndShowFilterPanel() {                                /*dbug-log*///console.log('           +--buildAndShowFilterPanel')
     pM.togglePanel('filter', 'open');
-    window.setTimeout(sizeFilterPanelTab, 500);
+    sizeFilterPanelTab();
 }
 /* ======================= CLEAR FILTERS ==================================== */
 /* -------------------- RESET BUTTON ---------------------------------------- */
@@ -178,19 +178,13 @@ export function updateFilterStatusMsg() {                                       
     setFilterStatus(_filter('getActiveFilterVals'));
     enableClearFiltersButton();
 }
-
 function setFilterStatus(filters) {
     if (filters.length > 0) {
-        setStatus(getStatus(filters));
+        setStatus(filters);
     } else {
         resetFilterUi()
     }
 }
-function getStatus(filters) {
-    let status = filters.join(', ') + '.';
-    if (_filter('isFilterSetActive')) { status += ' (SET)'; }
-    return status;
-}
-function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
-    $('#filter-status').text(status);
+function setStatus(filters) {                                                   //console.log("setFilterStatus. status = ", status)
+    $('#filter-status').text(filters.join(', ') + '.');
 }

@@ -101,14 +101,14 @@ export function reloadTableWithCurrentFilters() {
  * Table-rebuild entry point after local database updates, filter clears, and
  * after edit-form close.
  */
-export function resetDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
+export function resetDataTable(focus) {                              /*perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     _table('resetTableState');
     return buildTable(focus)
         .then(() => _ui('updateUiForTableView'));
 }
 export function buildTable(f, view = false) {
     if (f === '') { return Promise.resolve(); } //Combobox cleared by user
-    const focus = f ? f : _cmbx('getSelVal', ['Focus']);                 /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view);
+    const focus = f ? f : _cmbx('getSelVal', ['Focus']);                 /*perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view);
     const prevFocus = _table('tableState').get('curFocus');
     _table('resetTableState');
     return updateFocusAndBuildTable(focus, view, prevFocus);

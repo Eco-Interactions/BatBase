@@ -29,7 +29,7 @@ import { modifySrcDataForLocalDb } from './entity/init-src-data.js';
 import { modifyIntDataForLocalDb } from './entity/init-int-data.js';
 import { modifyUsrDataForLocalDb } from './entity/init-usr-data.js';
 /* ====================== INIT FULL DATABASE ================================ */
-export function initLocalDatabase(reset) {                          /*Perm-log*/console.log("   *--initLocalDatabase");
+export function initLocalDatabase(reset) {                          /*perm-log*/console.log("   *--initLocalDatabase");
     return db.fetchServerData('data-state')
         .then(data => db.setDataInMemory('lclDataUpdtdAt', data.state))
         .then(() => initTaxonDataAndLoadTable(reset))
@@ -63,7 +63,7 @@ function getAndSetData(url) {
     return db.fetchServerData(url)
         .then(data => setData(url, data))
 }
-function setData(url, data) {                                       /*Perm-log*/console.log('           *-storing [%s] data = %O', url, data);
+function setData(url, data) {                                       /*perm-log*/console.log('           *-storing [%s] data = %O', url, data);
     const setDataFunc = {
         'geoJson': Function.prototype,
         'interaction': modifyIntDataForLocalDb,

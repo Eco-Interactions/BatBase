@@ -15,7 +15,7 @@ import { _table } from '~db';
  * data-tree view, by default, or loads the data-map view, if previously
  * selected.
  */
-export function initLocViewOpts(view) {                             /*Perm-log*/console.log("       --Init Location UI. view ? [%s]", view);
+export function initLocViewOpts(view) {                             /*perm-log*/console.log("       --Init Location UI. view ? [%s]", view);
     loadLocationViewOpts();
     if (view) { setLocView(view);
     } else { _db('getData', ['curView']).then(setLocView); }
@@ -34,7 +34,7 @@ function setLocView(view) {
  * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
-export function initSrcViewOpts(view) {                             /*Perm-log*/console.log("       --Init source UI. view ? [%s]", view);
+export function initSrcViewOpts(view) {                             /*perm-log*/console.log("       --Init source UI. view ? [%s]", view);
     loadSourceViewOpts();
     setSrcView(view);
 }

@@ -53,7 +53,7 @@ function setBasicStateContext() {
     if ($('body').data('this-url') !== '/search') { return; }
     const state = _table('tableState').get();
     const base = {focus: state.curFocus, view: state.curView};
-    Sentry.setContext('filter_state', Object.assign(base, _table('getCurrentFilterState')));
+    Sentry.setContext('filter_state', Object.assign(base, _filter('getFilterState')));
 }
 function setErrorContext (errData) {
     Sentry.setContext('error_data', errData);
