@@ -33,6 +33,7 @@ function updateLocSelOptions(tblState) {
 }
 function loadLocNameSearchElem() {
     const searchTreeElem = fM.getTreeTextFilterElem('Location');
+    $(searchTreeElem).addClass('fWidthRow');
     $('#focus-filters').append(searchTreeElem);
 }
 /**
@@ -151,7 +152,7 @@ function buildLocSelects(locOpts) {
     function buildLocSel(locType, opts) {
         const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row' }]);
         const span = _el('getElem', ['span', { text: locType + ': ', class: "opts-span" }]);
-        const sel = fM.newSel(opts, 'opts-box', `sel-${locType}Filter`, locType);
+        const sel = fM.newSel(opts, 'field-input', `sel-${locType}Filter`, locType);
         $(lbl).append([span, sel]);
         $(sel).addClass('locSel');
         return lbl;

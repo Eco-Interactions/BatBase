@@ -107,9 +107,9 @@ function loadRankSelects(rankOptsObj, ranks, tblState) {            /*dbug-log*/
     function buildTaxonSelects(opts, ranks) {
         const elems = [];
         ranks.forEach(rank => {
-            const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row taxonLbl' }]);
+            const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row' }]);
             const span = _el('getElem', ['span', { text: rank + ': ' }]);
-            const sel = fM.newSel(opts[rank], 'opts-box taxonSel', `sel-${rank}Filter`, rank);
+            const sel = fM.newSel(opts[rank], 'field-input', `sel-${rank}Filter`, rank);
             $(lbl).append([span, sel])
             elems.push(lbl);
         });

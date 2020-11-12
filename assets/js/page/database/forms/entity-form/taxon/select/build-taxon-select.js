@@ -74,7 +74,6 @@ function selectGroupTaxon() {
 function getUnspecifiedBttnAttrs() {
     return {
         id: 'select-group',
-        class: 'ag-fresh',
         type: 'button',
         value: 'Select Unspecified'
     };

@@ -31,9 +31,9 @@ function buildSubGroupOpts(subGroups) {
     });
 }
 function buildSubGroupCombo(opts) {
-    const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row fWidthLbl' }]);
+    const lbl = _el('getElem', ['label', { class: 'field-cntnr flex-row fWidthRow' }]);
     const span = _el('getElem', ['span', { text: '' }]);
-    const sel = fM.newSel(opts, 'opts-box fWidthFilter', 'sel-Sub-GroupFilter');
+    const sel = fM.newSel(opts, 'field-input', 'sel-Sub-GroupFilter');
     $(lbl).append([span, sel]);
     return lbl;
 }

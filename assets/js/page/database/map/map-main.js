@@ -739,7 +739,7 @@ export function showLocOnMap(locId, zoom) {                          /*Perm-log*
     _ui('updateUiForMapView');
     _cmbx('setSelVal', ['View', 'map', 'silent']);
     showLoc(locId, zoom, _table('tableState').get('rcrdsById'));
-    $('#tbl-filter-status').html('No Active Filters.');
+    $('#filter-status').html('No Active Filters.');
 }
 export function showTableRecordsOnMap() {                                       console.log('       +--showTableRecordsOnMap');
     const tblState = _table('tableState').get(null, ['curFocus', 'rcrdsById']);

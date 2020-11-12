@@ -37,5 +37,5 @@ function ifChildRowsAreInteractions(row) {
         !row.childrenAfterFilter[0].childrenAfterFilter;
 }
 function updateTotalCountDisplay(cnt) {
-    $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);
+    $("#tbl-cnt").text(`[ ${cnt} Interactions  ]`);
 }

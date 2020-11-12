@@ -36,9 +36,12 @@ button
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
     color: #222
     margin: 0 .3em 0 .2em
-    line-height: 1.4;
+    line-height: 1
+    height: 2em
+    font-size: .8em
     background: linear-gradient(#fff, #d3d3d3)
-    cursor: pointer;
+    cursor: pointer
+
 form input, form select, form textarea
     font-size: 1em
     padding: .2em
@@ -48,9 +51,9 @@ form input, form select, form textarea
 form label
     margin-right: .5em
 h2
-    font-size: 1.4em;
+    font-size: 1.4em
 h3
-    font-size: 1.3em;
+    font-size: 1.3em
 input[type='button']
     @extend button
 input[type='submit']
@@ -84,12 +87,12 @@ label.required:before
     justify-content: space-around
 /*------------ Lists -------------*/
 $list-styles
-    list-style-position: outside;
-    display: list-item;
+    list-style-position: outside
+    display: list-item
     padding: .25em .75em .25em 0
 ol>li
     @extends $list-styles
-    list-style: decimal;
+    list-style: decimal
 .disc-list>li
     @extends $list-styles
     list-style: disc

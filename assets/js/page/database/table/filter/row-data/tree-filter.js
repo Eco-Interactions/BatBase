@@ -22,12 +22,16 @@ export function getTreeTextFilterElem(entity) {
     return lbl;
 }
 function buildTxtSearchLbl(entity) {
-    const classes = 'field-cntnr flex-row' + (entity == 'Taxon' ? ' taxonLbl' : ' txtLbl');
+    const classes = 'field-cntnr flex-row';
     return _el('getElem', ['label', { class: classes }]);
 }
 function buildTxtSearchInput(entity) {
-    const attr = { type: 'text', name: 'name-'+entity,
-        placeholder: entity+' Name (Press Enter to Filter)' };
+    const attr = {
+        class: 'field-input',
+        name: 'name-'+entity,
+        placeholder: entity+' Name (Press Enter to Filter)',
+        type: 'text',
+    };
     const input = _el('getElem', ['input', attr]);
     addInputClass(entity, input);
     return addInputChangeEvent(entity, input);

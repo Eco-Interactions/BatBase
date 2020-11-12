@@ -165,7 +165,6 @@ function getFormWalkthroughBttn() {
 }
 function buildWalkthroughButton(titleInfo) {
     const attr = {
-        class: 'ag-fresh',
         id: fLvl + '-walkthrough',
         title: titleInfo,
         type: 'button',

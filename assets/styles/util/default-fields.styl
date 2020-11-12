@@ -1,7 +1,7 @@
 /* =========================== FIELDS ======================================= */
 /* CONTAINER FOR COMBOBOX GROUPS */
 .field-cntnr           /* .flex-row also on elems */
-    flex: 0 0 auto
+    flex: 1 0 auto
     width: 18em
     justify-content: space-between
 
@@ -12,6 +12,9 @@
 /* CONTAINER FOR FIELD ROWS */
 [id$="_row"]
     padding: .2em .75em .3em  .75em
+    width: 100%
+
+.fWidthRow
     width: 100%
 
 /* FORM FIELD-ROWS */
@@ -32,3 +35,9 @@
 /* FORM FOOTER */
 [id$="_footer"]
     margin-top: 1em
+
+/* ======================== ELEMENTS ======================================== */
+.field-input
+    margin-left: 1em
+    flex-grow: 1
+    margin-right: 1em

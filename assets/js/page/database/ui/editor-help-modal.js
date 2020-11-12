@@ -95,7 +95,7 @@ function getReportBttns() {
 }
 /** Returns a (submit or cancel) button */
 function buildFormButton(action, onClick) {
-    const attr = { id: 'rprt-'+action, class: 'ag-fresh', type: 'button', value: action}
+    const attr = { id: 'rprt-'+action, type: 'button', value: action}
     const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(onClick);
     return bttn;

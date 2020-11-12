@@ -1,0 +1,57 @@
+/*
+ * Database table-state bar,
+ *
+ * TOC
+ *     CONTAINER
+ *     EXPAND|COLLAPSE ROWS
+ *     TABLE STATUS
+ *         INTERACTION COUNT
+ *         VIEW FILTER
+ *         FILTER STATUS
+ *     SHOW|HIDE COLUMNS
+ */
+/* ======================= CONTAINER ======================================== */
+#tool-bar
+    margin: .7em auto .2em auto
+    padding: .1em
+    width: 100%
+
+#tool-bar>div
+    padding:.4em
+    align-items: center
+
+#tool-bar button
+    height: 2em
+    padding: .4em
+    width: fit-content
+
+/* ================= EXPAND|COLLAPSE ROWS =================================== */
+button[name="xpand-all"]
+    width: 105px
+
+button[name="xpand-1"], button[name="collapse-1"]
+    font-weight: 600
+
+#xpand-tree button
+    margin: 0em
+
+/* ====================== TABLE STATUS ======================================= */
+/* ------------ INTERACTION COUNT ---------------- */
+#tbl-cnt
+    margin-top: .4em
+    font-size: .9em
+    color: #666
+/* ------------ VIEW FILTER ---------------- */
+#view-fltr
+    font-size: .8em
+    color: #666
+    margin-right: .3em
+/* ------------ FILTER STATUS ---------------- */
+#tbl-status
+    flex-grow: 1
+    padding: .2em
+
+/* ==================== SHOW|HIDE COLUMNS =================================== */
+button[name="show-hide-col"]
+    opacity: .5
+    cursor: not-allowed

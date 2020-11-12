@@ -96,8 +96,7 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
 }
 /** ----------- CHANGE PARENT BUTTON --------------- */
 function buildEditPrntBttn(prnt) {
-    const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt',
-        class: 'ag-fresh' };
+    const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt' };
     const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(showParentTaxonSelectForm);
     return bttn;

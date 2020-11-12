@@ -122,6 +122,6 @@ function getCancelFunc(entity, level) {
 }
 /** Returns a (submit or cancel) button for the form level. */
 function buildFormButton(actn, lvl, val) {
-    const attr = { id: lvl+'-'+actn, class: 'ag-fresh', type: 'button', value: val}
+    const attr = { id: lvl+'-'+actn, type: 'button', value: val}
     return _el('getElem', ['input', attr]);
 }

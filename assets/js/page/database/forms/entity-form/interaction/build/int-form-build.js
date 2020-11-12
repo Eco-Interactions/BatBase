@@ -53,7 +53,7 @@ function modifyFormDisplay() {
 }
 /* ----------------------- REFERENCE-GUIDE BUTTON --------------------------- */
 function addReferenceGuideButton() {
-    const attr = { class: 'ag-fresh', type: 'button', value: 'Reference Guide' };
+    const attr = { type: 'button', value: 'Reference Guide' };
     const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(openReferenceGuideInNewTab);
     $('#top-help').prepend(bttn);

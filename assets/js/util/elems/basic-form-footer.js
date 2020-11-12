@@ -38,7 +38,7 @@ function getSubmitAndCancelBttns(confg) {
     return [getSubmitBttn(confg), getCancelBttn(confg)];
 }
 function getActionButton(actn, formName, val) {
-    const attr = { id: formName+'-'+actn, class: 'ag-fresh', type: 'button', value: val}
+    const attr = { id: formName+'-'+actn, type: 'button', value: val}
     return _el('getElem', ['input', attr]);
 }
 /* -------------------------- SUBMIT BUTTON --------------------------------- */

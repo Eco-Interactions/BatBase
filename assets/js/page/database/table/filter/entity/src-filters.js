@@ -8,6 +8,8 @@
  *
  * TOC
  *      UI
+ *          NAME TEXT
+ *          PUBLICATION
  *      FILTER
  */
 import { _cmbx, _el } from '~util';
@@ -16,20 +18,25 @@ import * as fM from '../filter-main.js';
 /* ========================= UI ============================================ */
 export function loadSrcFilters(type) {                              /*Perm-log*/console.log("       --Loading source [%s] filters.", type);
     if ($('#focus-filters label').length) { return clearPanelCombos(type); }
-    const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml,
-        'publ':loadPublSearchHtml };
+    const buildUi = {
+        'auths': loadNameSearchHtml.bind(null, 'Author', true),
+        'pubs': loadPubSearchHtml,
+        'publ': loadNameSearchHtml.bind(null, 'Publisher', true) };
     return buildUi[type]();
 }
 function clearPanelCombos(type) {
     if (type !== 'pubs') { return Promise.resolve(); }
     return Promise.resolve($('#sel-PublicationTypeFilter')[0].selectize.clear('silent'));
 }
-/** Builds a text input for searching author names. */
-function loadAuthSearchHtml() {
-    const searchTreeElem = fM.getTreeTextFilterElem('Author');
+/* ------------------------- NAME TEXT -------------------------------------- */
+/** Builds a text input for searching tree-column names. */
+function loadNameSearchHtml(entity, fWidth = false) {
+    const searchTreeElem = fM.getTreeTextFilterElem(entity);
+    if (fWidth) { $(searchTreeElem).addClass('fWidthRow'); }
     $('#focus-filters').append(searchTreeElem);
     return Promise.resolve();
 }
+/* ----------------------- PUBLICATION -------------------------------------- */
 function loadPubSearchHtml() {
     return _cmbx('getOptsFromStoredData', ['pubTypeNames'])
         .then(loadPubSearchElems);
@@ -39,26 +46,19 @@ function loadPubSearchElems(pubTypeOpts) {
     const searchTreeElem = fM.getTreeTextFilterElem('Publication');
     $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _cmbx('initCombobox', [{ name: 'Publication Type Filter', onChange: applyPubFilter }, true]);
-    $('#sel-PublicationTypeFilter')[0].selectize.clear('silent'); //todo: figure out where 'all' is getting selected and remove.
+    $('#sel-PublicationTypeFilter')[0].selectize.clear('silent');
 }
 /** Builds the publication type dropdown */
 function buildPubTypeSelect(opts) {                                             //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
     const lbl = _el('getElem', ['label', {class: "field-cntnr flex-row"}]);
     const span = _el('getElem', ['span', { text: 'Type:' }]);
-    const sel = fM.newSel(addAllOpt(opts), '', 'sel-PublicationTypeFilter', 'Publication Type');
-    const lblW = $(window).width() > 1500 ? '222px' : '230px';
-    $(sel).css('width', '177px');
-    $(lbl).css('width', lblW).append([span, sel]);
+    const sel = fM.newSel(addAllOpt(opts), 'field-input', 'sel-PublicationTypeFilter', 'Publication Type');
+    $(lbl).append([span, sel]);
     return lbl;
 }
 function addAllOpt(opts) {
     opts.unshift({value: 'all', text: '- All -'});
     return opts;
-}
-function loadPublSearchHtml() {
-    const searchTreeElem = fM.getTreeTextFilterElem('Publisher');
-    $('#focus-filters').append(searchTreeElem);
-    return Promise.resolve();
 }
  /* ===================== FILTER ============================================ */
 /**

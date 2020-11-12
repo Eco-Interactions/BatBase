@@ -76,9 +76,11 @@ function getDivWithContent (id, classes, content) {                 /*dbug-log*/
 /* ======================== CSV DOWNLOAD ==================================== */
 function buildCsvDownloadButton() {
     const attrs = {
-        class: 'ag-fresh map-dsbl ico-bttn', id: 'entity-csv',
-        name: 'csv',                         title: 'CSV Download Coming Soon',
-        text: 'CSV'
+        class: 'map-dsbl',
+        id: 'entity-csv',
+        name: 'csv',
+        text: 'CSV',
+        title: 'CSV Download Coming Soon',
     };
     $('#headln-txt').append($('<button/>', attrs));
 }

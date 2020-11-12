@@ -465,7 +465,7 @@ function getSelectLocationBttn(loc, editing) {
 }
 function buildSelectLocBttn(editing) {
     const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location';
-    const attr = {type: 'button', class:'ag-fresh popup-bttn', value: text};
+    const attr = {type: 'button', class:'popup-bttn', value: text};
     return _el('getElem', ['input', attr]);
 }
 function addSelectLocClickEvent(bttn, editing, locId) {
@@ -627,7 +627,7 @@ function loadLocInTable(loc) {
     _table('showLocInDataTable', [loc]);
 }
 function buildLoadInTableBttn() {
-    const attr = {type: 'button', class:'ag-fresh', value: 'Show Interactions In Data-Table'}
+    const attr = {type: 'button', value: 'Show Interactions In Data-Table'}
     return _el('getElem', ['input', attr]);
 }
 /* ============ Location Details Popup ================== */
@@ -723,7 +723,7 @@ function getNameHtml(loc) {
 }
 /** Click event added in location-form. */
 function getFillCoordsBttn(lat, lng) {
-    const attr = {type: 'button', id: 'fill-coords', class:'ag-fresh', value: 'Autofill Coordinates'};
+    const attr = {type: 'button', id: 'fill-coords', value: 'Autofill Coordinates'};
     const bttn = _el('getElem', ['input', attr]);
     $(bttn).click(_forms.bind(null, 'autofillCoordinateFields', [lat, lng]));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});

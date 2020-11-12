@@ -103,7 +103,7 @@ export function updateFilterPanelHeader(focus) {                    /*dbug-log*/
 export function toggleFilterPanelOrientation(style, close) {
     if (style == 'vert') { stackFilterPanel();
     } else { spreadFilterPanel(close); }
-    sizeFilterPanelTab();
+    window.setTimeout(sizeFilterPanelTab, 500);
 }
 function stackFilterPanel() {
     $('#filter-pnl, #filter-col1, #stored-filters').addClass('vert');
@@ -122,8 +122,7 @@ export function toggleFilterPanel() {
 }
 function buildAndShowFilterPanel() {                                /*dbug-log*///console.log('           +--buildAndShowFilterPanel')
     pM.togglePanel('filter', 'open');
-    sizeFilterPanelTab();
-    // if (isFilterSetActive()) { return; }
+    window.setTimeout(sizeFilterPanelTab, 500);
 }
 /* ======================= CLEAR FILTERS ==================================== */
 /* -------------------- RESET BUTTON ---------------------------------------- */
