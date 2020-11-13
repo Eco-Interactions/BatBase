@@ -171,6 +171,7 @@ class FeatureContext extends RawMinkContext implements Context
 /** -------------------------- Search Page Interactions --------------------- */
     /**
      * @Given I exit the tutorial
+     * @Given they exit the tutorial
      */
     public function iExitTheTutorial()
     {
@@ -1575,23 +1576,16 @@ class FeatureContext extends RawMinkContext implements Context
     }
 /** ================== Data Sync Feature Methods ===================================================================== */
     /**
-     * @Given an editor logs into the website
+     * @Given editor :cnt visits the database page
      */
-    public function anEditorLogsIntoTheWebsite()
-    {                                                                           $this->log("\n---- Editor 1 logging in.\n");
-        $this->editor1 = $this->getEditorSession();
-        $this->editorLogIn($this->editor1, 'testeditor');
+    public function anEditorVisitsTheDatabasePage($cnt)
+    {                                                                           //$this->log("\n---- Editor $cnt logging in.\n");
+        $editor = 'editor'.$cnt;
+        $this->$editor = $this->getEditorSession();
+        $this->editorLogIn($this->$editor, 'testeditor');
+        $this->editorVisitsSearchPage($this->$editor);                          //$this->log("\n        Visits search page.\n");
+        usleep(50000);
     }
-
-    /**
-     * @Given a second editor logs into the website
-     */
-    public function aSecondEditorLogsIntoTheWebsite()
-    {                                                                           $this->log("\n---- Editor 2 logging in.\n");
-        $this->editor2 = $this->getEditorSession();
-        $this->editorLogIn($this->editor2, 'testAdmin');
-    }
-
     /**
      * @Given editor :cnt creates two interactions
      */
@@ -1600,7 +1594,6 @@ class FeatureContext extends RawMinkContext implements Context
         $map = [[1,2], [3,4]];
         $editor = 'editor' . $cnt;
         $this->curUser = $this->$editor;
-        $this->editorVisitsSearchPage($this->curUser);                          $this->log("\n        Visits search page.\n");
         $this->userCreatesInteractions($this->curUser, $map[$cnt - 1]);
     }
 
@@ -1612,7 +1605,6 @@ class FeatureContext extends RawMinkContext implements Context
         $editor = 'editor' . $cnt;
         $this->curUser = $this->$editor;
         $this->iUncheckTheDateUpdatedFilter();
-        $this->iToggleTheFilterPanel('close');
         if ($cnt == 1) {
             $this->editorChangesLocationData();
         } else {
@@ -1700,8 +1692,6 @@ class FeatureContext extends RawMinkContext implements Context
     private function editorVisitsSearchPage($editor)
     {
         $editor->visit('http://localhost/BatBase/public/test.php/search');
-        usleep(400000);
-        $this->iExitTheTutorial();
     }
     /**
      * @Given I create an interaction
@@ -1766,7 +1756,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function editorChangesLocationData()
     {                                                                           $this->log("\n---- Editor changing Location data.\n");
-        $this->theDatabaseTableIsInFocus('Location');
+        $this->theDatabaseTableIsGroupedBy('Locations');
         $this->editLocationData();
         $this->moveLocationInteraction();
     }
@@ -1788,7 +1778,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iSelectFromTheDropdown('Costa Rica', 'Location');
         $this->curUser->getPage()->pressButton('Update Interaction');
         $this->iWaitForTheFormToClose('top');
-        $this->theDatabaseTableIsInFocus('Location');
+        $this->theDatabaseTableIsGroupedBy('Locations');
         $this->iUncheckTheDateUpdatedFilter();
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
@@ -1796,7 +1786,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function editorChangesTaxonData()
     {                                                                           $this->log("\n        Editor changing Taxon data.\n");
-        $this->theDatabaseTableIsInFocus('Taxon');
+        $this->theDatabaseTableIsGroupedBy('Taxa');
         $this->iGroupInteractionsBy('Arthropoda');
         $this->editTaxonData();
         $this->moveTaxonInteraction();
@@ -1821,7 +1811,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->curUser->getPage()->pressButton('Update Interaction');
         $this->iWaitForTheFormToClose('top');
         $this->iUncheckTheDateUpdatedFilter();
-        $this->theDatabaseTableIsInFocus('Taxon');
+        $this->theDatabaseTableIsGroupedBy('Taxa');
         $this->iGroupInteractionsBy('Arthropoda');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
@@ -1830,14 +1820,14 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function checkSourceData()
     {
-        $this->theDatabaseTableIsInFocus('Source');
+        $this->theDatabaseTableIsGroupedBy('Sources');
         $this->iExpandInTheDataTree('Revista de Biologia Tropical');
         $this->iExpandInTheDataTree('Two cases of bat pollination in Central America');
         $this->iShouldSeeInteractionsAttributed(6);
     }
     private function checkLocationData()
     {
-        $this->theDatabaseTableIsInFocus('Location');
+        $this->theDatabaseTableIsGroupedBy('Locations');
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iShouldSeeInteractionsUnder('2', 'Unspecified Costa Rica Interactions');
@@ -1845,7 +1835,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function checkTaxonData()
     {
-        $this->theDatabaseTableIsInFocus('Taxon');
+        $this->theDatabaseTableIsGroupedBy('Taxa');
         $this->iGroupInteractionsBy('Arthropoda');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');

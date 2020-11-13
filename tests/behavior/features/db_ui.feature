@@ -18,7 +18,7 @@ Feature: Search page features and database table controls
         Given I am on "/search"
         And the database has loaded
         And I exit the tutorial
-        And the database table is in "Taxon" view
+        And the database table is grouped by "Taxa"
         And I view interactions by "Bats"
 ## --------------- EXPAND AND COLLAPSE ROWS IN DATABASE TABLE --------------- ##
     @javascript
