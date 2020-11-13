@@ -23,7 +23,7 @@
  *             Reset & Enable/Disable UI
  *             Table Methods
  */
-import { _cmbx, _db, _u } from '~util';
+import { _cmbx, _db, _el, _u } from '~util';
 import { _filter, _table, _ui } from '~db';
 import * as pM from './panels-main.js';
 
@@ -109,7 +109,6 @@ export function newIntList(val) {                                   /*dbug-log*/
     updateUiForListCreate();
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
-    delete app.rowSelMode;
 }
 function updateUiForListCreate() {
     enableInputs('create');
@@ -121,6 +120,7 @@ function createDataList() {
     if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
+    if (!data) { return; } //No interactions selected; Alert shown to the user
     submitDataList(data, 'create', onListSubmitComplete.bind(null, 'create'));
 }
 /* ------ OPEN LIST ------- */
@@ -140,7 +140,8 @@ function editDataList() {
     if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
-    data.id = _cmbx('getSelVal', ['Int-lists']);
+    if (!data) { return; }//No interactions selected; Alert shown to the user
+    data.id = _cmbx('getSelVal', ['InteractionList']);
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
@@ -152,13 +153,14 @@ function fillListData(id) {
 }
 /* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {
-    const data = {
+    const ints = getInteractions();
+    if (!ints) { return false; }
+    return {
         displayName: _u('ucfirst', [$('#list-details input').val()]),
         type: 'interaction',
         description: $('#list-details textarea').val(),
-        details: JSON.stringify(getInteractions()),
+        details: JSON.stringify(ints),
     };
-    return data;
 }
 /* ----- ADD/REMOVE ROWS ----- */
 function getInteractions() {
@@ -179,9 +181,21 @@ function selectInteractions(select, rowNode) {
 }
 function getUpdatedIntSet(mode) {
     const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; });
-    return mode == 'add' ?
-        [ ...new Set(rows.concat(app.list.details).filter(id => id))] :
+    return mode == 'add' ? getIntsToAdd(rows) :
         app.list.details.filter(id => rows.indexOf(id) === -1);
+}
+function getIntsToAdd(rows) {
+    const ints = [ ...new Set(rows.concat(app.list.details).filter(id => id))];
+    return !ints.length ? showNoneSelectedAlert() : ints;
+}
+function showNoneSelectedAlert() {
+    const msg = 'None selected.';
+    const alert = _el('getElem', ['div', { id: 'list_alert', text: msg }]);
+    $('#list-submit-msg').before(alert);
+    window.setTimeout(removeAlert, 2000);
+}
+function removeAlert() {
+    $('#list_alert').fadeTo('slow', 0, () => $('#list_alert').remove());
 }
 /* ====================== DELETE INTERACTION LIST =========================== */
 function deleteInteractionList() {
@@ -192,7 +206,6 @@ function confmDelete() {                                            /*perm-log*/
     resetDeleteButton();
     _u('sendAjaxQuery', [{id: app.list.id}, 'lists/remove', onListDeleteComplete]);
     resetListUi();
-    delete app.rowSelMode;
 }
 function cancelDelete() {
     resetDeleteButton();
@@ -253,7 +266,7 @@ function parseEntity(entity) {
 /** Submit new or edited interaction list. */
 function submitDataList(data, action, hndlr) {
     app.submitting = app.modMode; //Flag tells various event handlers how to handle submit
-    _u('sendAjaxQuery', [, 'lists/'+action, hndlr]);
+    _u('sendAjaxQuery', [data, 'lists/'+action, hndlr]);
 }
 function onListSubmitComplete(action, results) {
     const list = JSON.parse(results.list.entity);                   /*temp-log*///console.log('listSubmitComplete results = %O, list = %O', results, list)
