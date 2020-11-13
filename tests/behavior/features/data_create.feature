@@ -198,6 +198,20 @@ Feature: Add new data to the database
         And I wait for the "sub2" form to close
         And I press the "Select Taxon" button
         And I wait for the "sub" form to close
+        ### Object Sub-Group ##
+        And I focus on the "Object" taxon field
+        And I see "Select Object Taxon"
+        And I select "Parasite" from the "Group" dropdown
+
+        # @todo
+        # And I should see "???" in the "Sub-Group" combobox
+        # And I select "Kingdom Protozoa" from the "Sub-Group" combobox
+
+
+        And I add "O Sub-Group Family" to the "Family" dropdown
+        And I see "New Taxon Family"
+        And I press the "Create Taxon" button
+        And I wait for the "sub2" form to close
         ### Object Class ##
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"

@@ -102,19 +102,24 @@ Feature: Filtering the data displayed in the database table
       And data in the interaction rows
       And I should see "Artibeus lituratus" in the filter status bar
 
-    @javascript
-    Scenario:  I should be able to filter the data tree to specific object groups.
-      Given the database table is grouped by "Taxa"
-      And I view interactions by "Bats"
-      And I toggle "open" the filter panel
-      # When I select "Artibeus lituratus" from the "Species" dropdown
+#@todo
+    # @javascript
+    # Scenario:  I should be able to filter the data tree to specific object groups.
+    #   Given the database table is grouped by "Taxa"
+    #   And I view interactions by "Bats"
+    #   And I toggle "open" the filter panel
+    #   When I select "Fish, Birds, Parasites" from the "Object Group Filter" combobox
+    #   Then I should see "#" rows in the table data tree
+    #   And data in the interaction rows
+    #   And I should see "Object Group" in the filter status bar
 
-    @javascript
-    Scenario:  I should be able to filter the data tree to taxon sub-groups.
-      Given the database table is grouped by "Taxa"
-      And I view interactions by "Bats"
-      And I toggle "open" the filter panel
-      # When I select "Artibeus lituratus" from the "Species" dropdown
+    # @javascript
+    # Scenario:  I should be able to filter the data tree to taxon sub-groups.
+    #   Given the database table is grouped by "Taxa"
+    #   And I view interactions by "Parasite"
+    #   And I toggle "open" the filter panel
+    #   # todo: change "dropdown" to "combobox" on all steps.
+    #   When I select "Kingdom Protozoa" from the "Sub-Group Filter" combobox
 
 ## --------------- FILTER-SET CREATE --------------- ##
     @javascript
