@@ -10,7 +10,7 @@
  *     APPLY FILTER
  */
 import { _cmbx, _db } from '~util';
-import { _ui } from '~db';
+import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../../filter-main.js';
 
 let timeout;
@@ -40,30 +40,43 @@ function finishSubGroupComboInit(filterElem) {
         maxItems: null,
         onChange: filterTableBySubGroup,
     };
-    $('#focus-filters').append(filterEl);
+    $('#focus-filters').prepend(filterElem);
+    _cmbx('initCombobox', confg);
 }
 /* ----------------------- APPLY FILTER ------------------------------------- */
-function filterTableBySubGroup(vals) {                                          //console.log('filterTableBySubGroups = %O', vals);
+function filterTableBySubGroup(vals) {
     if (!vals.length) { return; }
     _ui('fadeTable');
     if (!timeout) { timeout = setTimeout(filterBySubGroups, 1000); }
 }
 function filterBySubGroups() {
     timeout = null;
-    const groupNames = _cmbx('getSelVal', ['Sub-GroupFilter']);
-    const totalGroups = $('#sel-Sub-GroupFilter')[0].selectize.currentResults.total;   //console.log('selectedGroupCnt [%s] !== total [%s]', selectedGroupCnt, total, selectedGroupCnt !== total);
-    ifAllGroupsSelectedClearFilterCombo(groupNames.length, totalGroups);
-    updateSubGroupFilterState(groupNames, totalGroups);
-    fM.onFilterChangeUpdateRowData();
-    _ui('showTable');
+    const rootNames = getSelectedRootNames(_cmbx('getSelVal', ['Sub-GroupFilter']));
+    if (!rootNames) { return clearFilterAndResetTableToAllGroupTaxa(); }
+    const newRoots = getTxnRootRcrds(rootNames);                    /*dbug-log*///console.log('filterTableBySubGroups = %O', newRoots);
+    updateSubGroupFilterState(rootNames);
+    _table('rebuildTxnTable', [newRoots]);
+}
+function getSelectedRootNames(names) {
+    const total = $('#sel-Sub-GroupFilter')[0].selectize.currentResults.total;
+    const selected = names.length === total ? {} : names;
+    _table('setStateData', [{'selectedOpts': { 'Sub-Group': selected }}]);
+    return Object.keys(selected).length ? names : false;
+}
+function clearFilterAndResetTableToAllGroupTaxa() {
+    $('#sel-Sub-GroupFilter')[0].selectize.clear();
+    _table('resetDataTable', ['taxa']);
+}
+function getTxnRootRcrds(rootNames) {                               /*dbug-log*///console.log('getTxnRootRcrds ids = %O', rootNames);
+    const taxa = _table('getStateData', 'rcrdsById');
+    const subGroups = _table('getStateData', 'subGroups');
+    return rootNames.map(getRootRcrd);
 
-    function ifAllGroupsSelectedClearFilterCombo(selectedGroupCnt, totalGroups) {
-        if (selectedGroupCnt !== totalGroups) { return; }
-        $('#sel-Sub-GroupFilter')[0].selectize.clear();
+    function getRootRcrd(rootName) {
+        return getDetachedRcrd(subGroups[rootName].id, taxa, 'taxon');
     }
 }
-function updateSubGroupFilterState(gNames, totalGroups) {
-    const selected = gNames.length && gNames.length !== totalGroups ? gNames : false;
-    const state = { 'Sub-Group': selected };
-    fM.setFilterState('combo', state, 'direct');
+function updateSubGroupFilterState(rootNames) {
+    const filter = { 'Sub-Group': { text: 'Sub-Group', value: rootNames }};
+    fM.setFilterState('combo', filter, 'rebuild');
 }

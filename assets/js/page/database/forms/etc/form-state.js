@@ -11,7 +11,8 @@
  *     GETTERS
  *     SETTERS
  */
-import { _alert, _db, _u } from '~util';
+import { _db, _u } from '~util';
+import { alertFormIssue } from '~form';
 
 let fState = {}; //formState
 
@@ -124,7 +125,6 @@ export function initTaxonState(role, groupId, subGroupName) {       /*dbug-log*/
     function setTxnState(groups, groupNames, ranks) {
         const group = groups[groupId];
         const data = {
-            groupRanks: group.uiRanksShown,
             groupName: group.displayName,
             groups: groupNames,
             ranks: ranks, //Object with each (k) rank name and it's (v) id and order
@@ -133,6 +133,7 @@ export function initTaxonState(role, groupId, subGroupName) {       /*dbug-log*/
             subGroups: group.taxa,
         };
         data.groupTaxon = fState.records.taxon[group.taxa[data.subGroup].id];
+        data.groupRanks = group.taxa[data.subGroup].subRanks;
         fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroup, data);
         return data;
     }
@@ -184,7 +185,7 @@ export function getRcrd(entity, id) {
     if (!fState.records || !fState.records[entity]) { return; }
     const rcrd = fState.records[entity][id] ?
         _u('snapshot', [fState.records[entity][id]]) :
-        _alert('alertFormIssue', ['noRcrdFound', {id: id, entity: entity }]);
+        alertFormIssue('noRcrdFound', {id: id, entity: entity });
     return rcrd ? rcrd : false;
 }
 /* ---------------------------- Setters ------------------------------------- */

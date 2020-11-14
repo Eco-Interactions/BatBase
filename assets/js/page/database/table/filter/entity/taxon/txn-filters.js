@@ -62,7 +62,7 @@ function loadTxnRankComboboxes(tblState) {
 function buildTaxonSelectOpts(tblState) {                           /*dbug-log*///console.log("buildTaxonSelectOpts ranks = %O", tblState.taxaByRank);
     const optsObj = {};
     const taxaByRank = tblState.taxaByRank;
-    tblState.allgroupRanks.forEach(buildRankOptions);
+    tblState.allGroupRanks.forEach(buildRankOptions);
     return optsObj;
 
     function buildRankOptions(rank) {
@@ -105,7 +105,7 @@ function updateTxnRankComboboxes(rOpts, ranks, tblState) {
 function buildRankSelects(rOpts, ranks, tblState) {                 /*dbug-log*///console.log("buildRankSelects for %O", rOpts)
     const filterRows = getRankFilterFields(rOpts, ranks, tblState);
     $('#focus-filters').append(...filterRows);
-    initRankComboboxes(tblState.allgroupRanks);
+    initRankComboboxes(tblState.allGroupRanks);
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
 function getRankFilterFields(rOpts, ranks, tblState) {
@@ -146,7 +146,8 @@ function updateTaxonSelOptions(rOpts, ranks, tblState) {            /*dbug-log*/
 }
 function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*///console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    tblState.allgroupRanks.forEach(rank => {
+    _cmbx('setSelVal', ['Sub-GroupFilter', selected['Sub-Group'], 'silent']);
+    tblState.allGroupRanks.forEach(rank => {
         if (!selected[rank]) { return; }                            /*dbug-log*///console.log("selecting [%s] = ", rank, selected[rank])
         _cmbx('setSelVal', [rank+'Filter', selected[rank], 'silent']);
     });
@@ -212,9 +213,10 @@ function getSelectedTaxonRank(selected) {
     return ranks.reverse().find(rank => selected[rank]);
 }
 /** The selected taxon's ancestors will be selected in their ranks combobox. */
-function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {
+function getRelatedTaxaToSelect(selTaxon, taxonRcrds) {             /*dbug-log*///console.log('getRelatedTaxaToSelect taxon = %O', selTaxon);
     const selected = {};
-    selectAncestorTaxa(selTaxonObj);
+    selectAncestorTaxa(selTaxon);
+    selected['Sub-Group'] = selTaxon.group.subGroup.name;
     return selected;
     /** Adds parent taxa to selected object, until the group parent. */
     function selectAncestorTaxa(taxon) {

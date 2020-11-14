@@ -23,7 +23,7 @@ import * as sForm from '../src-form-main.js';
  * When a user enters a new author|editor into the combobox, a create form is built
  * and appended to the field's row.
  */
-export function initAuthOrEdForm(authCnt, value, authType) {        /*perm-log*/console.log('           /--init [%s][%s] Form - [%s]', authType, authCnt, value);
+export function initAuthOrEdForm(authCnt, authType, value) {        /*perm-log*/console.log('           /--init [%s][%s] Form - [%s]', authType, authCnt, value);
     const pId = '#sel-'+authType+authCnt;
     const fLvl = getSubFormLvl('sub2');
     if ($('#'+fLvl+'-form').length !== 0) {
@@ -37,15 +37,16 @@ export function initAuthOrEdForm(authCnt, value, authType) {        /*perm-log*/
     function appendAuthFormAndFinishBuild(form) {
         $('#'+authType+'_row').append(form);
         handleSubmitBttns();
-        $('#'+fLvl+'-cancel').click(clearComboOnFormClose);
         $('#FirstName_row input').focus();
-        sForm.addConfirmationBeforeSubmit(singular, fLvl);
     }
     function handleSubmitBttns() {
-        _elems('ifParentFormValidEnableSubmit', [fLvl]);
-        $('#'+fLvl+'-cancel').click(toggleOtherAuthorTypeSelect.bind(null, authType, true));
+        $('#'+fLvl+'-cancel').click(resetOnCreateFormCancel);
+        sForm.addConfirmationBeforeSubmit(singular, fLvl);
+        _elems('toggleSubmitBttn', [`#${fLvl}-submit`]);
     }
-    function clearComboOnFormClose() {
+    function resetOnCreateFormCancel() {
+        _elems('ifParentFormValidEnableSubmit', [fLvl]);
+        toggleOtherAuthorTypeSelect(authType, true);
         _cmbx('resetCombobox', [authType+authCnt]);
     }
 }
@@ -76,12 +77,12 @@ function selectAuthor(cnt, authId, field, fLvl) {                   /*dbug-log*/
  * authors is added to the new id.
  * Note: If create form selected from dropdown, the count of that combo is used.
  */
-export function onAuthAndEdSelection(selCnt, authType, val) {
+export function onAuthAndEdSelection(selCnt, authType, val) {       /*dbug-log*///console.log('onAuthAndEdSelection [%s][%s] = [%s]', authType, selCnt, val);
     let cnt = $('#sel-cntnr-'+authType).data('cnt');
     const fLvl = getSubFormLvl('sub');
     if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }
-    if (val === 'create') { return initAuthOrEdForm(selCnt, val, authType); }
+    if (val === 'create') { return initAuthOrEdForm(selCnt, authType, val); }
     if (lastAuthComboEmpty(cnt, authType)) { return; }
     buildNewAuthorSelect(cnt+1, val, fLvl, authType);
 
@@ -104,7 +105,8 @@ function removeFinalEmptySelectField(authType, cnt) {
 }
 /** Stops the form from adding multiple empty combos to the end of the field. */
 function lastAuthComboEmpty(cnt, authType) {
-    return $('#sel-'+authType+cnt).val() === '';
+    const comboVal = $('#sel-'+authType+cnt).val();
+    return comboVal === '' || comboVal === 'new';
 }
 function toggleOtherAuthorTypeSelect(type, enable) {
     const entity = type === 'Authors' ? 'Editors' : 'Authors';

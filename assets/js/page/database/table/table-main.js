@@ -28,6 +28,12 @@ export function _filter(funcName, params = []) {
 export function tableState() {
     return state.tableState();
 }
+export function getStateData() {
+    return state.tableState().get(...arguments);
+}
+export function setStateData() {
+    return state.tableState().set(...arguments);
+}
 export function resetCurTreeStorageProps() {
     state.resetCurTreeStorageProps();
 }

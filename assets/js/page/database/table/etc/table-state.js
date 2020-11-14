@@ -29,11 +29,12 @@ import { _db } from '~util';
  * {str} userRole       Stores the role of the user.
  *
  * In Taxon views:
- * {ary} allgroupRanks   Array of all ranks present in the current tree.
+ * {ary} allGroupRanks   Array of all ranks present in the current tree.
+ * {obj} allRanks        All ranks (k) and id (v)
+ * {str} groupName       Stores Taxon Group name
+ * {str} groupPluralName Stores Taxon Group's plural name
  * {obj} groups          Group records keyed by id.
  * {obj} subGroups       Sub-group taxa: name (k) {name, displayName, id} (v)
- * {obj} allRanks        All ranks (k) and id (v)
- * {str} groupName       Stores Taxon view Group name
  * {obj} taxaByRank      Taxon records in curTree organized by rank and keyed under their display name.
  */
 let tState = { flags: {}};

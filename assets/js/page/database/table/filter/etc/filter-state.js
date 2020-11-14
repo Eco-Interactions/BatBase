@@ -35,10 +35,10 @@ initFilterStateObj();
  *              {str} time  Datetime
  *              {str} type  'cited' or 'updated' (in the database)
  *          {str} name      Name text
- *          {obj} combo     (objGroup, subGroup, pubType)
+ *          {obj} combo     (objGroup, pubType)
  *              {obj} field value(v)
- *     {obj} rebuild        Filters rebuild the table: type (k) value (v)
- *          {obj} combo     (Taxon ranks, country||region)
+ *     {obj} rebuild        Filters rebuild the table: type (k) value (v) (NOTE: THERE CAN ONLY BE ONE.)
+ *          {obj} combo     (Taxon ranks and subGroup, country||region)
  *              {obj} field text(k) and value(v) (Will set the combo and trigger the table rebuild)
  *
  *
@@ -48,15 +48,15 @@ function initFilterStateObj(persisted = {}) {
     fS = { filters: { direct: persisted, rebuild: {} }};
 }
 /* =========================== SET ========================================== */
-export function setFilterState(key, value, filterGroup, fObj) {
-    if (!fObj) { fObj = fS.filters[filterGroup]; }
+export function setFilterState(key, value, fGroup, fObj) {
+    if (!fObj) { fObj = fS.filters[fGroup]; }
     if (value === false) { delete fObj[key];
     } else if (key === 'combo') { return setComboFilterState(...Object.keys(value));
     } else { fObj[key] = value; }
 
     function setComboFilterState(comboKey) {
-        if (!fObj.combo) { fObj.combo = {}; }
-        setFilterState(comboKey, value[comboKey], filterGroup, fObj.combo);
+        if (!fObj.combo || fGroup === 'rebuild') { fObj.combo = {}; }
+        setFilterState(comboKey, value[comboKey], fGroup, fObj.combo);
     }
 }
 /** Because of how time consuming it is to choose a date, it persists through reset */
@@ -73,8 +73,8 @@ function getFiltersThatPersistThroughTableRebuild(dFilters) {
     return filters;
 }
 /* =========================== GET ========================================== */
-export function getFilterStateKey(key, filterGroup = 'direct') {
-    return key ? fS.filters[filterGroup][key] : fS.filters[filterGroup];
+export function getFilterStateKey(key, fGroup = 'direct') {
+    return key ? fS.filters[fGroup][key] : fS.filters[fGroup];
 }
 export function getFilterState() {
     return Object.assign(
@@ -154,7 +154,7 @@ function getFilterDisplayNames(dFilters, rFilters) {                /*dbug-log*/
     }
 }
 /** Stores the most recent combobox selection. */
-function addComboValues(comboObj, group) {                                      //console.log('comboObj = %O', comboObj);
+function addComboValues(comboObj, group) {                          /*dbug-log*///console.log('addComboValues [%s] %O', group, comboObj);
     const comboKeys = Object.keys(comboObj);
     if (group === 'direct') { return comboKeys; }
     return comboKeys.map(k => comboObj[k].text);

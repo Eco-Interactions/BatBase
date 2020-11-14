@@ -181,7 +181,7 @@ export function showTodaysUpdates(focus) {                                      
     .then(showUpdatesAfterTableLoad);
 }
 function showUpdatesAfterTableLoad() {
-    _cmbx('setSelVal', ['Date Filter', 'updated']);
+    _cmbx('setSelVal', ['Date Filter Type', 'updated']);
     toggleDateFilter(true, 'today');
 }
 /* ------------------- APPLY FILTER ----------------------------------------- */

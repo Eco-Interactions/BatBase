@@ -18,7 +18,7 @@
  *     SUBMIT/SUCCESS METHODS
  *     MISC
  */
-import { _alert, _db, _u } from '~util';
+import { _db, _modal, _u } from '~util';
 import * as fM from './filter-panel-main.js';
 import * as iM from './int-list-panel.js';
 import { initReviewPanel } from './data-review/review-panel-main.js';
@@ -74,9 +74,9 @@ export function addPanelEventsAndStyles(userRole) {
     if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
 }
 function setInfoButtonClickEvents() {
-    $('#svd-list-hlp').click(_alert.bind(null, 'showInfoModal', ['saved-lists']));
-    $('#svd-fltr-hlp').click(_alert.bind(null, 'showInfoModal', ['sel-FilterSet']));
-    $('#fltr-pnl-hlp').click(_alert.bind(null, 'showInfoModal', ['filter-panel']));
+    $('#svd-list-hlp').click(_modal.bind(null, 'showInfoModal', ['saved-lists']));
+    $('#svd-fltr-hlp').click(_modal.bind(null, 'showInfoModal', ['sel-FilterSet']));
+    $('#fltr-pnl-hlp').click(_modal.bind(null, 'showInfoModal', ['filter-panel']));
 }
 export function updateSubmitEvent(id, event) {
     $(id).off('click').click(event);

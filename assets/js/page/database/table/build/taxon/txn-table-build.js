@@ -50,7 +50,7 @@ function updateTaxonTableState(data) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTxnTable(taxa) {                             /*perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O', taxa);
+export function rebuildTxnTable(taxa) {
     const tS = tState().get(['api', 'flags']);
     if (!tS.api || tS.flags.allDataAvailable) { _ui('fadeTable'); }
     return startTxnTableBuildChain(taxa)
@@ -61,7 +61,7 @@ export function rebuildTxnTable(taxa) {                             /*perm-log*/
  * The root ids are added to the global focus storage obj's 'openRows'  and will
  * be expanded on table load.
  */
-function startTxnTableBuildChain(taxa) {
+function startTxnTableBuildChain(taxa) {                            /*perm-log*/console.log('       --startTxnTableBuildChain taxa = %O', taxa);
     setTaxonOpenRows(taxa);
     const tS = tState().get();
     return build.buildTxnTree(taxa, tState)
@@ -107,8 +107,12 @@ function updateGroupTableState(groupId, group) {
         groupName: group.displayName,
         groupPluralName: group.pluralName,
         subGroups: group.taxa,
-        allgroupRanks: group.uiRanksShown,
+        allGroupRanks: getAllSubRanks(group.taxa),
     });
+}
+function getAllSubRanks(roots) {
+    return Object.values(roots).reduce((ranks, root) => {
+        return ranks.length > root.subRanks.length ? ranks : root.subRanks;}, []);
 }
 /** This catches errors in group value caused by exiting mid-tutorial. TODO */
 function getSelValOrDefault(val) {

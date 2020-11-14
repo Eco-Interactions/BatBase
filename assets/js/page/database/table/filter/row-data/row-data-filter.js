@@ -14,7 +14,6 @@
  *  		PUBLICATION TYPE
  *  		DATE/TIME
  *  		OBJECT GROUP
- *  		SUB-GROUP
  *  		USER INTERACTION-LIST
  */
 import { _u } from '~util';
@@ -26,8 +25,7 @@ let filters, rows;
 const filterFuncs = {
 	root: {
 		combo: 	{
-			'Publication Type': ifRowFromPubType,
-			'Sub-Group': ifIntWithSubGroup
+			'Publication Type': ifRowFromPubType
 		}
 	},
 	tree: {
@@ -175,10 +173,6 @@ function ifRowAfterDate(row, dateObj) {
 /* ------------------------ OBJECT GROUP ------------------------------------ */
 function ifIntWithGroup(row, groupIds) {  							/*dbug-log*///console.log('ifIntWithGroups = %O, row = %O', groupIds, row);
 	return groupIds.indexOf(row.objGroup) !== -1;
-}
-/* -------------------------- SUB-GROUP ------------------------------------- */
-function ifIntWithSubGroup(row, groupNames) { 						/*dbug-log*///console.log('ifIntWithSubGroups = %O, row = %O', groupNames, row);
-	return groupNames.indexOf(row.subGroup) !== -1;
 }
 /* --------------------- USER INTERACTION-LIST ------------------------------ */
 function ifIntInUserList(row, intIds) {

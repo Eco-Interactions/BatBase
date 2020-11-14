@@ -48,7 +48,7 @@ export default function(entity) {
                 'Prey',
                 'Cohabitation'
             ],
-            'Other Parasite': [
+            'Parasite': [
                 'Host'
             ],
             'Plant': [

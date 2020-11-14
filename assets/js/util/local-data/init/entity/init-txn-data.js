@@ -49,13 +49,13 @@ function storeTaxaByRankAndGroup(taxa, groups, roots) {
     db.setDataInMemory('group', groups);
     db.setDataInMemory('taxon', taxa);
 
-    function sortTaxaByGroupRoot(group, gTaxa) {
+    function sortTaxaByGroupRoot(group, gTaxa) {                    /*dbug-log*///console.log('sortTaxaByGroupRoot group %O', group);
         for (let gName in gTaxa) {
             const gTaxon = taxa[gTaxa[gName].id];
             separateAndStoreGroupTaxa(gTaxon, gTaxon.name, group);
         }
     }
-    function separateAndStoreGroupTaxa(taxon, subGroup, group) {    /*dbug-log*///console.log('[%s] taxon = %O group = %O', subGroup, taxon, group)
+    function separateAndStoreGroupTaxa(taxon, subGroup, group) {    /*dbug-log*///console.log('separateAndStoreGroupTaxa [%s] taxon = %O group = %O', subGroup, taxon, group)
         addGroupDataToTaxon(taxon, subGroup, group);
         const data = separateGroupTaxaByRank(taxon.children, subGroup, group, taxa);
         storeTaxaByGroupAndRank(data, subGroup, group.displayName);
@@ -96,14 +96,14 @@ function storeGroupTaxa(group, taxonRcrds) {
 }
 /* ========================= MODIFY GROUP DATA ============================== */
 function modifyGroupData(groups, ranks) {
-    modifyGroups(Object.keys(groups));
+    Object.values(groups).forEach(flattenGroupSubRanks);
     db.setDataInMemory('group', groups);
 
-    function modifyGroups(ids) {
-        ids.forEach(id => {
-            let group = groups[id]
-            group.uiRanksShown = fillRankNames(JSON.parse(group.uiRanksShown));
-        });
+    function flattenGroupSubRanks(group) {                          /*dbug-log*///console.log('flattenGroupSubRanks [%O]', group)
+        Object.values(group.taxa).forEach(flattenSubGroupRanks);
+    }
+    function flattenSubGroupRanks(subGroup) {
+        subGroup.subRanks = fillRankNames(JSON.parse(subGroup.subRanks));
     }
     function fillRankNames(rankAry) {
         return rankAry.map(id => ranks[id].displayName);

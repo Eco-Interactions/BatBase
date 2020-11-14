@@ -70,7 +70,7 @@ export function selectLoc(id) {
  */
 export function onLocSelection(val) {                               /*perm-log*/console.log('       +--onLocSelection [%s]', val);
     if (val === 'create') { return _form('createSubEntity', ['location', 'sub']); }
-    if (val === '' || isNaN(parseInt(val))) { return _panel('clearDetailPanel', ['loc']); }
+    if (ifNoLocSelected(val)) { return _panel('clearDetailPanel', ['loc']); }
     if ($('#form-map').length) { removeLocMap(); }
     const locRcrd = _state('getRcrd', ['location', val]);
     if (!locRcrd) { return; } //error alerted to developer and editor
@@ -78,6 +78,9 @@ export function onLocSelection(val) {                               /*perm-log*/
     _cmbx('setSelVal', ['Country-Region', prntVal, 'silent']);
     _panel('fillLocDataInDetailPanel', [locRcrd]);
     iForm.focusPinAndEnableSubmitIfFormValid('Location');
+}
+function ifNoLocSelected(val) {
+    return val === 'new' || val === '' || isNaN(parseInt(val));
 }
 function removeLocMap() {
     $('#form-map').fadeTo(400, 0, () => $('#form-map').remove());

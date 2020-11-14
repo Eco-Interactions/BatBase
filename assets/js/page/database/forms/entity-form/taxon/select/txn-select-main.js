@@ -68,6 +68,7 @@ export function onSubGroupSelection() {
 }
 /* ======================== RANKS =========================================== */
 export function onRankSelection(val) {
+    if (val === 'new') { return; } // New taxon being created.
     rank.onRankSelection(val, this.$input[0]);
 }
 /* ======================== SELECTED ======================================== */
