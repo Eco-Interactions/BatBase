@@ -26,6 +26,16 @@ class GroupRoot
     private $id;
 
     /**
+     * @var string
+     * JSON array with the rank IDs for each sub-rank in the sub-group.
+     *
+     * @ORM\Column(name="sub_ranks", type="string", length=255, nullable=false)
+     * @JMS\Expose
+     * @JMS\SerializedName("subRanks")
+     */
+    private $subRanks;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Group", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
@@ -79,6 +89,30 @@ class GroupRoot
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Set subRanks.
+     *
+     * @param string $subRanks
+     *
+     * @return GroupRoot
+     */
+    public function setSubRanks($subRanks)
+    {
+        $this->subRanks = $subRanks;
+
+        return $this;
+    }
+
+    /**
+     * Get subRanks.
+     *
+     * @return string
+     */
+    public function getSubRanks()
+    {
+        return $this->subRanks;
     }
 
     /**

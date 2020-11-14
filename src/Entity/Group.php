@@ -50,16 +50,6 @@ class Group
     private $pluralName;
 
     /**
-     * @var string
-     * JSON array with the rank IDs for each rank to display for the group.
-     *
-     * @ORM\Column(name="ui_ranks", type="string", length=255, nullable=false)
-     * @JMS\Expose
-     * @JMS\SerializedName("uiRanksShown")
-     */
-    private $uiRanksShown;
-
-    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(
@@ -191,30 +181,6 @@ class Group
     }
 
     /**
-     * Set uiRanksShown.
-     *
-     * @param string $uiRanksShown
-     *
-     * @return Group
-     */
-    public function setUiRanksShown($uiRanksShown)
-    {
-        $this->uiRanksShown = $uiRanksShown;
-
-        return $this;
-    }
-
-    /**
-     * Get uiRanksShown.
-     *
-     * @return string
-     */
-    public function getUiRanksShown()
-    {
-        return $this->uiRanksShown;
-    }
-
-    /**
      * Add a Taxon.
      *
      * @param \App\Entity\GroupRoot $groupRoot
@@ -247,8 +213,6 @@ class Group
     {
         $taxa = [];
 
-        if (!is_array($this->taxa)) { return [];}
-
         foreach ($this->taxa as $groupRoot) {
             array_push($taxa, $groupRoot->getTaxon());
         }
@@ -270,12 +234,13 @@ class Group
         foreach ($this->taxa as $groupRoot) {
             $taxon = $groupRoot->getTaxon();
             $taxa = array_merge($taxa, [ $taxon->getName() => [
-                'name' => $taxon->getName(),
+                'displayName' => $taxon->getDisplayName(),
                 'id' => $taxon->getId(),
-                'displayName' => $taxon->getDisplayName()
+                'name' => $taxon->getName(),
+                'subRanks' => $groupRoot->getSubRanks()
             ]]);
         }
-
+        ksort($taxa);
         return $taxa;
     }
 

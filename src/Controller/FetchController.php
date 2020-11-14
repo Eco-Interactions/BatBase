@@ -232,9 +232,9 @@ class FetchController extends AbstractController
     }
     private function logErr($lineNum, $msg, $trace)
     {
-        $this->logger->error("\n\n### Error @ [$line] = $msg\n$trace\n");
+        $this->logger->error("\n\n### Error @ [$lineNum] = $msg\n$trace\n");
         if ($this->getParameter('env') === 'prod') { return; };
-        print("\n\n### Error @ [$line] = $msg\n$trace\n");
+        print("\n\n### Error @ [$lineNum] = $msg\n$trace\n");
     }
     private function setGroups($group)
     {
