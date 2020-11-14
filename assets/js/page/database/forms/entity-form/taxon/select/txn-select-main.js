@@ -13,14 +13,17 @@
  *     RANKS
  *     SELECTED
  */
+import { _cmbx } from '~util';
 import { _elems, _form, _state, _val } from '~form';
 import * as build from './build-taxon-select.js';
 import * as rank from './rank/txn-rank-main.js';
 import * as group from './group-fields.js';
 
 
-export function initSelectFormCombos() {
-    _elems('initFormCombos', [null, 'sub', getSelectComboEvents()]);
+export function initSelectFormCombos(editHandlers = null) {
+    const events = getSelectComboEvents();
+    if (editHandlers) { replaceEditEvents(events, editHandlers); }
+    _elems('initFormCombos', [null, 'sub', events]);
 }
 function getSelectComboEvents() {
     return {
@@ -33,6 +36,13 @@ function getSelectComboEvents() {
         'Species': { onChange: onRankSelection, create: create.bind(null, 'species') },
     };
 }
+function replaceEditEvents(events, newEvents) {
+    Object.keys(newEvents).forEach(replaceOnChangeEvent);
+
+    function replaceOnChangeEvent(field) {
+        events[field].onChange = newEvents[field].onChange;
+    }
+}
 function create(rank, val) {
     return _form('createSubEntity', [rank, 'sub2', val]);
 }
@@ -42,6 +52,7 @@ export function initRoleTaxonSelect(role, gId) {
     const groupId = gId ? gId : getGroupId(role);
     if (role === 'Subject') { return build.initTaxonSelectForm('Subject', groupId); }
     build.initTaxonSelectForm('Object', groupId)
+    .then(() => _cmbx('removeOpt', ['Group', 1]))  //removes Bat group option
     .then(() => onGroupSelection(groupId))  // Builds the group's rank combos
     .then(() => build.selectPrevTaxonAndResetRoleField('Object'));
 }
@@ -64,7 +75,7 @@ export function onGroupSelection() {
     return group.onGroupSelection(...arguments);
 }
 export function onSubGroupSelection() {
-    group.onSubGroupSelection(...arguments);
+    return group.onSubGroupSelection(...arguments);
 }
 /* ======================== RANKS =========================================== */
 export function onRankSelection(val) {

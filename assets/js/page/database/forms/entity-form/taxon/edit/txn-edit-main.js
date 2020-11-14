@@ -2,10 +2,10 @@
  * Taxon edit-form.
  *
  * TOC
- *     FIELDS
- *     NAME FIELD AND RANK COMBOBOX
- *     PARENT TAXON ELEMS
- *         TAXON PARENT SELECT FORM
+ *     CORE FIELDS
+ *         NAME FIELD AND RANK COMBOBOX
+ *         PARENT TAXON NAME AND CHANGE BUTTON
+ *     TAXON PARENT SELECT FORM
  *         RANK COMBO ELEMS
  *         FINISH SELECT FORM BUILD
  *         DATA VALIDATION
@@ -38,7 +38,7 @@ function setScopeTaxonMemory(taxaRcrds, groupState) {
     taxonData = groupState;
     taxonData.rcrds = taxaRcrds;
 }
-/** ======================== FIELDS ========================================= */
+/** ======================== CORE FIELDS ==================================== */
 function buildTaxonEditFields(taxon) {
     const txnElems = getEditTaxonFields(taxon);
     const prntElems = getPrntTaxonElems(taxon);
@@ -71,7 +71,7 @@ function getTaxonRankOpts() {
         return { text: rank, value: taxonData.ranks[rank].ord};
     });
 }
-/** ----------------- PARENT TAXON ELEMS ------------------------------------ */
+/** ----------------- PARENT TAXON AND AND CHANGE BUTTON -------------------- */
 /**
  * <div>Taxon Parent: [parent name]</> <button>Change Parent</>
  * Button calls @showParentTaxonSelectForm.
@@ -127,37 +127,21 @@ function buildEditParentHdr() {
 }
 function getParentEditFields(prnt) {
     const group = _u('lcfirst', [prnt.group.displayName]);
+    const vals = { Group: prnt.group.id, 'Sub-Group': prnt.group.subGroup.id  };
     _state('addEntityFormState', [group, 'sub', null, 'edit']);
-    return _elems('buildFormRows', ['object', {}, 'sub', null])
+    return _elems('buildFormRows', ['object', vals, 'sub', null])
         .then(modifyAndReturnPrntRows);
 
     function modifyAndReturnPrntRows(rows) {                        /*dbug-log*///console.log('modifyAndReturnPrntRows = %O', rows);
-        removeTaxonGroupRow(rows);
-        const groupSelRow = getGroupRankRow(prnt, rows);
-        return [groupSelRow, rows].filter(r=>r);
+        ifNoSubGroupsRemoveField(rows);
+        return [rows].filter(r=>r);
     }
 }
-function removeTaxonGroupRow(rows, field = 'Group') {
-    $(rows)[0].removeChild($(rows)[0].childNodes[0]);
-    _state('removeSelFromStateMemory', ['sub', field]);
-}
-/** ------- GROUP DISPLAY NAME ------ */
-function getGroupRankRow(taxon, rows) {
+function ifNoSubGroupsRemoveField(rows) {
     const subGroups = Object.keys(taxonData.subGroups);
     if (subGroups.length > 1) { return; }
-    removeTaxonGroupRow(rows, 'Sub-Group');
-    return buildTaxonParentRow(taxonData.subGroups[subGroups[0]].displayName);
-}
-function buildTaxonParentRow(displayName) {
-    const groupRank = displayName.split(' ')[0];
-    const lbl = _el('getElem', ['label', { text: groupRank }]);
-    const groupParent = buildGroupNameSpan(displayName.split(' ')[1]);
-    return buildTaxonEditFormRow(groupRank, [lbl, groupParent], 'sub');
-}
-function buildGroupNameSpan(name) {
-    const span = _el('getElem', ['span', { text: name }]);
-    $(span).css({ 'padding-top': '.55em' });
-    return span;
+    $(rows)[0].removeChild($(rows)[0].childNodes[1]);
+    _state('removeSelFromStateMemory', ['sub', 'Sub-Group']);
 }
 function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };
@@ -171,20 +155,25 @@ function appendPrntFormElems(elems) {
  * Hides the species row. Adds styles and modifies event listeners.
  */
 function finishSelectPrntFormBuild() {
-    tForm.initSelectFormCombos();
+    const comboFuncs = {
+        'Group': { onChange: onParentGroupChange },
+        'Sub-Group': { onChange: onParentSubGroupChange }
+    };
+    tForm.initSelectFormCombos(comboFuncs);
     selectParentTaxon($('#txn-prnt').data('txn'));
     finishParentSelectFormUi();
 }
-function handleOnSubGroupSelection(val) {
+function onParentGroupChange(val) {
+    _form('onGroupSelection', [val])
+    .then(finishGroupChange);
+}
+function onParentSubGroupChange(val) {
     _form('onSubGroupSelection', [val])
-    .then(hideGroupAndSpeciesCombo)
-    .then(enableChangeParentSubmitBttn);
+    .then(finishGroupChange);
 }
 /** Note: Species combo needs to stay in DOM for the combo change methods. */
-function hideGroupAndSpeciesCombo() {
-    $('#Group_row, #Species_row').hide();
-}
-function enableChangeParentSubmitBttn() {
+function finishGroupChange() {
+    $('#Species_row').hide();
     _elems('toggleSubmitBttn', ['#sub-submit', true]);
 }
 export function selectParentTaxon(pId) {
@@ -199,15 +188,9 @@ function ifSubGroupSelect(pTaxon) {
     _cmbx('setSelVal', ['Sub-Group', pTaxon.group.subGroup.id, 'silent']);
 }
 function finishParentSelectFormUi() {
-    alignGroupRankText();
     clearAndDisableTopFormParentFields();
     $('#Species_row').hide();
     updateSubmitBttns();
-}
-function alignGroupRankText() {
-    if ($('#Sub-Group_row').length) { return; }
-    const groupRank = $('#txn-prnt span')[0].innerText.split(' ')[1];
-    $('#'+groupRank+'_row .field-row')[0].className += ' group-row';
 }
 function clearAndDisableTopFormParentFields() {
     $('#txn-prnt span').text('');
@@ -285,7 +268,7 @@ function buildFieldCntnr(fields) {
     $(cntnr).append(fields);
     return cntnr;
 }
-/** =============== FINISH MAIN FORM BUILD ================================== */
+/** =============== FINISH EDIT FORM BUILD ================================== */
 export function finishEditFormBuild(entity) {
     $('#top-submit').off('click').click(submitTaxonEdit);
     initTaxonEditRankCombo();

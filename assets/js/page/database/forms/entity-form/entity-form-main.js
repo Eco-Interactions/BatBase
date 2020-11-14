@@ -120,6 +120,9 @@ export function initRoleTaxonSelect() {
 export function selectParentTaxon(id) {
     return txn.selectParentTaxon(id);
 }
+export function onGroupSelection() {
+    return txn.onGroupSelection(...arguments);
+}
 export function onSubGroupSelection() {
     return txn.onSubGroupSelection(...arguments);
 }

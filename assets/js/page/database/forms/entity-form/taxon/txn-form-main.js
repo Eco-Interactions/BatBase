@@ -41,6 +41,9 @@ export function initRoleTaxonSelect() {
 export function initSelectFormCombos() {
     return select.initSelectFormCombos(...arguments);
 }
+export function onGroupSelection() {
+    return select.onGroupSelection(...arguments);
+}
 export function onSubGroupSelection() {
     return select.onSubGroupSelection(...arguments);
 }
