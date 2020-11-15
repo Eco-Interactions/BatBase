@@ -169,6 +169,9 @@ function getFieldValAlertHandler(tag, action) {
             show: handleNoGenusAndReturnAlertMsg,
             clear: false
         },
+        'rankNotAvailableInNewGroup': {
+            show: handleRankNotAvailableInNewGroupAndReturnAlertMsg
+        }
     };
     return alertMap[tag][action];
 }
@@ -271,6 +274,12 @@ function handleNoGenusAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     window.setTimeout(() => clearAlert(elem, fLvl), 2000);
     return '<span>Please select a genus before creating a species.</span>';
 }
+
+function handleRankNotAvailableInNewGroupAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    const groupName = _state('getTaxonProp', ['groupName']);
+    const valid = _state('getTaxonProp', ['groupRanks']).join(', ');
+    return `<span>Valid ${groupName} ranks: \n${valid}</span>`;
+}
 /* ===================== SHOW ALERT ========================================= */
 /** Returns the validation alert container for the passed field|form. */
 function getAlertElem(fieldName, fLvl) {                            /*dbug-log*///console.log("getAlertElem for %s", fieldName);
@@ -302,7 +311,7 @@ function clrFormLvlAlert(elem, fLvl) {
     _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ------------------------ DEFAULT HANDLER --------------------------------- */
-export function clearAlert(elem, fLvl, enableSubmit = true) {       /*dbug-log*///console.log('clearAlert. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+export function clearAlert(elem, fLvl, enableSubmit = true) {       /*dbug-log*///console.log('clearAlert. [%O] enableSubmit?[%s]', elem, enableSubmit);
     $(elem).fadeTo(200, 0, clearAndEnableSubmit);
 
     function clearAndEnableSubmit() {
@@ -316,7 +325,7 @@ function clearAlertElem(elem, fLvl) {
     $(elem).fadeTo(0, 1);
 }
 function enableSubmitIfFormReady(fLvl, enableSubmit) {
-    if (!$('#'+fLvl+'-form').length || !_elems('hasOpenSubForm', [fLvl])) { return; }
-    if (!enableSubmit) { return; }
+    if (!$('#'+fLvl+'-form').length || _elems('hasOpenSubForm', [fLvl])) { return; }
+    if (!enableSubmit) { return; }                                  /*dbug-log*///console.log('enableSubmitIfFormReady [%s]', fLvl)
     _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }

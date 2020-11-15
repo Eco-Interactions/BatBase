@@ -12,6 +12,11 @@
  *     ROW BUILDERS
  *     FINISH EDIT FORM BUILD
  *     DATA VALIDATION
+ *         RANK VALIDATION
+ *             RANK NOT AVAILABLE IN NEW GROUP
+ *             MUST REMAIN GENUS
+ *             NEEDS HIGHER RANK
+ *         ALERTS
  */
 import { _cmbx, _el, _u } from '~util';
 import { _state, _elems, _form, _val, formatAndSubmitData } from '~form';
@@ -156,16 +161,30 @@ function appendPrntFormElems(elems) {
  */
 function finishSelectPrntFormBuild() {
     const comboFuncs = {
-        'Group': { onChange: onParentGroupChange },
+        'Group': { onChange: onParentGroupChange, blur: true },
         'Sub-Group': { onChange: onParentSubGroupChange }
     };
     tForm.initSelectFormCombos(comboFuncs);
+    setGroupDataAttr();
     selectParentTaxon($('#txn-prnt').data('txn'));
     finishParentSelectFormUi();
 }
-function onParentGroupChange(val) {
+/**
+ * The Group field can not be left blank, as the rank combos are populates with
+ * the last selected group's taxa, so the previous selection is restored onBlur
+ * if the field remains empty.
+ */
+function setGroupDataAttr() {
+    const gId = _state('getTaxonProp', 'groupId');
+    $('#sel-Group').data('field', 'Group');
+    $('#sel-Group').data('val', gId);
+}
+function onParentGroupChange(val) {  console.log
+    if (!val) { return; }
     _form('onGroupSelection', [val])
-    .then(finishGroupChange);
+    .then(finishGroupChange)
+    .then(() => $('#sel-Group').data('val', val));
+;
 }
 function onParentSubGroupChange(val) {
     _form('onSubGroupSelection', [val])
@@ -206,8 +225,14 @@ function updateSubmitBttns() {
 function selectNewTaxonParent() {
     const selected = _form('getSelectedTaxon');
     const prnt = selected ? selected : _state('getTaxonProp', ['groupTaxon']);/*dbug-log*///console.log("selectNewTaxonParent called. prnt = %O", prnt);
-    if (ifInvalidParentRank(getRankVal(prnt.rank.displayName))) { return; }
+    if (ifInvalidParentRank(getRankVal(prnt.rank.displayName))) { return; } //Alert shown
+    updateGroupDataInFormState(prnt);
     exitPrntEdit(prnt);
+}
+function updateGroupDataInFormState(taxon) {
+    const oldSubGroup = _state('getTaxonProp', ['subGroup']);
+    if (oldSubGroup === taxon.group.subGroup.name) { return; }
+    _state('setTaxonGroupData', [taxon]);
 }
 function cancelPrntEdit() {
     const prnt = taxonData.rcrds[$('#txn-prnt').data('txn')];
@@ -237,7 +262,7 @@ function handleParentRankIssues(pRank) {
     const txnRank = $('#sel-Rank').val();                           /*dbug-log*///console.log("handleParentRankIssues. txnRank = %s. pRank = %s", txnRank, pRank);
     const issues = [
         { 'needsHigherRankPrnt': txnRank <= pRank },
-        { 'needsGenusPrnt': txnRank == 8 && pRank != 7 }
+        { 'needsGenusPrnt': txnRank == 8 && pRank != 7 },
     ];
     return !issues.every(handleIfValIssue);
 
@@ -280,34 +305,52 @@ function submitTaxonEdit() {
         rank:       $('#Taxon_row select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                              /*dbug-log*///console.log("taxon vals = %O", vals);
+    if (!isTaxonEditFormValid(vals)) { return } //Alert shown
     formatAndSubmitData('taxon', 'top', vals);
 }
 function initTaxonEditRankCombo() {
-    _cmbx('initCombobox', [{ name: 'Rank', onChange: validateTaxonRank }]);
+    _cmbx('initCombobox', [{ name: 'Rank', onChange: onRankChangeValidate }]);
     _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
 }
 /** ======================= DATA VALIDATION ================================== */
+function isTaxonEditFormValid(vals) {
+    const valIssues = {
+        'rankNotAvailableInNewGroup': rankIsNotAvailableInNewGroup(vals.rank)
+    };
+    for (let alertTag in valIssues) {
+        if (valIssues[alertTag]) { return shwTxnValAlert(alertTag, 'Taxon', 'top'); }
+    }
+    return true;
+}
+/* -------------------------- RANK VALIDATION ------------------------------- */
+/* -------- RANK NOT AVAILABLE IN NEW GROUP ---------------- */
+function rankIsNotAvailableInNewGroup(txnRank) {
+    return _state('getTaxonProp', ['groupRanks']).indexOf(txnRank) === -1;
+}
 /**
  * Ensures that the new taxon-rank is higher than its children, and that a
  * species taxon being edited has a genus parent selected.
  */
-function validateTaxonRank(txnRank) {
-    const pRank = $('#txn-prnt').data('rank');                   /*dbug-log*///console.log("validateTaxonRank. taxon = %s. parent = %s", txnRank, pRank);
+function onRankChangeValidate(txnRank) {
+    const pRank = $('#txn-prnt').data('rank');                      /*dbug-log*///console.log("onRankChangeValidate. taxon = %s. parent = %s", txnRank, pRank);
     const valIssues = {
         'isGenusPrnt': isGenusPrnt(),
-        'needsHigherRank': rankIsLowerThanKidRanks(txnRank)
+        'needsHigherRank': rankIsLowerThanKidRanks(txnRank),
+        'rankNotAvailableInNewGroup': rankIsNotAvailableInNewGroup(txnRank)
     };
     for (let alertTag in valIssues) {
         if (valIssues[alertTag]) { return shwTxnValAlert(alertTag, 'Taxon', 'top'); }
     }
     clearActiveAlert('clrNeedsHigherRank', txnRank);
 }
+/* ------------ MUST REMAIN GENUS ------------------------- */
 /** Returns true if the taxon's original rank is Genus and it has children. */
 function isGenusPrnt() {
     const orgTxnRank = $('#sel-Rank').data('rank');
     const txnId = $('#sel-Rank').data('txn');
     return orgTxnRank == 6 && getHighestChildRank(txnId) < 8;
 }
+/* \-------- NEEDS HIGHER RANK -------------------- */
 /**
  * Returns true if the passed rank is lower or equal to the highest rank of
  * the taxon-being-edited's children.
@@ -326,6 +369,7 @@ function getHighestChildRank(taxonId) {
         if (child.rank.ord < high) { high = child.rank.ord; }
     }
 }
+/* ------------------------- ALERTS ----------------------------------------- */
 function clearActiveAlert(alertTag, txnRank) {
     if ($('.top-active-alert').length) {
         _val(alertTag, [null, null, null, txnRank]);

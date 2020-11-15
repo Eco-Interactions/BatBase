@@ -63,7 +63,7 @@ export function rmvContrib(prop, rcrd, entity, edits) {             /*dbug-log*/
 export function rmvFromNameProp(prop, rcrd, entity, edits) {
     const taxonName = getTaxonName(edits, rcrd);
     const nameProp = getNameProp(edits, rcrd);
-    const nameObj = db.getMmryData(nameProp);                       /*dbug-log*///console.log('rmvFromNameProp [%s] from [%O] rcrd = %O, edits = %O', taxonName, nameObj, rcrd, edits);
+    const nameObj = db.getMmryData(nameProp);                       /*dbug-log*///console.log('rmvFromNameProp [%s] from [%s = %O] rcrd = %O, edits = %O', nameProp, taxonName, nameObj, rcrd, edits);
     delete nameObj[taxonName];
     db.setDataInMemory(nameProp, nameObj);
 }
@@ -71,9 +71,13 @@ function getTaxonName(edits, rcrd) {
     return edits.name ? edits.name.old : rcrd.name;
 }
 function getNameProp(edits, rcrd) {
+    const group = getGroup(edits.group, rcrd);
     const subGroup = getSubGroup(edits.subGroup, rcrd);
     const rank = getRank(edits.rank, rcrd);                         /*dbug-log*///console.log('getNameProp [%s][%s][%s]Names', rcrd.group.displayName, subGroup, rank);
-    return rcrd.group.displayName + subGroup + rank + 'Names';
+    return group + subGroup + rank + 'Names';
+}
+function getGroup(groupEdits, rcrd) {
+    return !groupEdits ? rcrd.group.displayName : groupEdits.old;
 }
 function getSubGroup(subGroupEdits, rcrd) {
     return !subGroupEdits ? rcrd.group.subGroup.name : subGroupEdits.old;

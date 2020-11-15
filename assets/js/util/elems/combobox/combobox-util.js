@@ -28,7 +28,7 @@ function buildComboboxOptions(confg, onBlur) {
     }, confg);
     comboOpts.create = getComboCreateFunc(confg.create);
     comboOpts.placeholder = getPlaceholer(comboOpts.id, confg.name, true);
-    comboOpts.onBlur = onBlur ? saveOrRestoreSelection : false;
+    comboOpts.onBlur = onBlur || confg.blur ? saveOrRestoreSelection : false;
     return comboOpts;
 }
 function getComboCreateFunc(createFunc) {  console.log

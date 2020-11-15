@@ -110,14 +110,14 @@ function getFocusOpts() {
     ];
 }
 /* --------------- VIEW OPTS --------------- */
-export function initTxnViewOpts(view, reset) {
-    views.initTxnViewOpts(view, reset);
+export function initTxnViewOpts() {
+    views.initTxnViewOpts(...arguments);
 }
-export function initLocViewOpts(view) {
-    views.initLocViewOpts(view);
+export function initLocViewOpts() {
+    views.initLocViewOpts(...arguments);
 }
-export function initSrcViewOpts(view) {
-    views.initSrcViewOpts(view);
+export function initSrcViewOpts() {
+    views.initSrcViewOpts(...arguments);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =================== */
 export function updateUiForMapView(noPopup) {

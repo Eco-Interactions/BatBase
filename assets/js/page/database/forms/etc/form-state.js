@@ -119,14 +119,15 @@ export function addEntityFormState(entity, level, pSel, action) {
 }
 /*------------- Taxon Params --------------------*/
 export function initTaxonState(role, groupId, subGroupName) {       /*dbug-log*///console.log('initTaxonState args = %O', arguments);
-    return _db('getData', [['group', 'groupNames', 'rankNames']])
-        .then(data => setTxnState(data.group, data.groupNames, data.rankNames));
+    return _db('getData', [['group', 'rankNames']])
+        .then(data => setTxnState(data.group, data.rankNames));
 
-    function setTxnState(groups, groupNames, ranks) {
+    function setTxnState(groups, ranks) {
         const group = groups[groupId];
         const data = {
             groupName: group.displayName,
-            groups: groupNames,
+            groupId: groupId,
+            groups: groups,
             ranks: ranks, //Object with each (k) rank name and it's (v) id and order
             role: role,
             subGroup: subGroupName || Object.keys(group.taxa)[0],
@@ -213,6 +214,15 @@ export function setFormProp(fLvl, prop, val) {
 export function setTaxonProp(prop, val) {
     if (!fState.forms.taxonData) { fState.forms.taxonData = {}; } //Edit-forms need specific props
     return fState.forms.taxonData[prop] = val;
+}
+export function setTaxonGroupData(taxon) {
+    const txnData = fState.forms.taxonData;
+    const group = txnData.groups[taxon.group.id];
+    txnData.groupName = group.displayName;
+    txnData.subGroups = group.taxa;
+    txnData.subGroup = taxon.group.subGroup.name;
+    txnData.groupTaxon = taxon;
+    txnData.groupRanks = group.taxa[taxon.group.subGroup.name].subRanks;
 }
 export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = fState.forms[fLvl].fieldData;

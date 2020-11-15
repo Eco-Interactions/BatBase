@@ -37,10 +37,14 @@ function getSelectComboEvents() {
     };
 }
 function replaceEditEvents(events, newEvents) {
-    Object.keys(newEvents).forEach(replaceOnChangeEvent);
+    Object.keys(newEvents).forEach(updateEvents);
 
-    function replaceOnChangeEvent(field) {
-        events[field].onChange = newEvents[field].onChange;
+    function updateEvents(field) {
+        Object.keys(newEvents[field]).forEach(updateConfgProp);
+
+        function updateConfgProp(prop) {
+            events[field][prop] = newEvents[field][prop];
+        }
     }
 }
 function create(rank, val) {

@@ -58,16 +58,12 @@ function setSrcView(view) {
 }
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTxnViewOpts(view, reset) {
-    loadTxnViewOpts(_table('tableState').get('groups'), reset);
-    setTaxonView(view);
+export function initTxnViewOpts(view) {
+    _cmbx('getOptsFromStoredData', ['pluralGroupNames'])
+    .then(loadTxnViewOpts)
+    .then(() => setTaxonView(view));
 }
-function loadTxnViewOpts(groups, reset) {
-    if ($('#sel-View').data('focus') === 'taxa' && !reset) { return; }
-    buildAndLoadTxnOpts(groups);
-}
-function buildAndLoadTxnOpts(groups) {
-    const opts = getViewOpts(groups);
+function loadTxnViewOpts(opts) {
     _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
     $('#sel-View').data('focus', 'taxa');
 }

@@ -62,8 +62,11 @@ function getRmvDataPropHndlrs(entity) {
             'parentSource': r.rmvFromParent,/* 'tag': rmvFromTagProp */
         },
         'taxon': {
+            'displayName': r.rmvFromNameProp,
+            'group': r.rmvFromNameProp,
             'parentTaxon': r.rmvFromParent,
-            'displayName': r.rmvFromNameProp
+            'subGroup': r.rmvFromNameProp,
+            'rank': r.rmvFromNameProp,
         }
     }[entity];
 }

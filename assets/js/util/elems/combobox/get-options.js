@@ -85,7 +85,7 @@ export function getFieldOptions(field) {                            /*dbug-log*/
         'Editors': [ getSrcOpts, 'authSrcs'],
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
-        'Group': [ getGroupOpts, null ],
+        'Group': [ getStoredOpts, 'groupNames' ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
         'Location': [ getRcrdOpts, null ],
         'Order': [ getTaxonOpts, 'Order' ],
@@ -185,12 +185,6 @@ export function getTaxonOpts(field, rank, r, g) {
             opts.push(...alphabetizeOpts(o));
             return opts;
         });
-}
-/** Builds opts for all Taxon groups available to be selected as the interaction object. */
-function getGroupOpts(field, prop) {
-    const groups = _state('getTaxonProp', ['groups']);
-    const opts = Object.keys(groups).map(g => { return { text: g, value: groups[g] }});
-    return alphabetizeOpts(opts);
 }
 function getSubGroupOpts(field, prop) {
     const group = _state('getTaxonProp', ['groupName']);

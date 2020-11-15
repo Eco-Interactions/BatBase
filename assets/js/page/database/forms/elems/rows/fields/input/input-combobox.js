@@ -137,21 +137,21 @@ function ifPreviousAlertClearIt(field, fLvl) {
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, comboEvents) {         /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, comboEvents);
+export function initFormCombos(entity, fLvl, comboConfg) {          /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], comboConfg = %O", entity, fLvl, comboConfg);
     const elems = _state('getFormProp', [fLvl, 'selElems']);        /*dbug-log*///console.log('elems = %O', elems)
     elems.forEach(selectizeElem);
     _state('setFormProp', [fLvl, 'selElems', []]);
 
     function selectizeElem(fieldName) {
-        const confg = getFieldConfg(comboEvents, fieldName);        /*dbug-log*///console.log("   Initializing [%s] confg = %O", fieldName, confg);
+        const confg = getFieldConfg(comboConfg, fieldName);         /*dbug-log*///console.log("   Initializing [%s] confg = %O", fieldName, confg);
         _cmbx('initCombobox', [confg]);
         if (!confg.create) { _cmbx('removeOpt', [fieldName, 'create']); }
     }
 }
-function getFieldConfg(comboEvents, fieldName) {
-    const baseConfg = getBaseFieldConfg(fieldName) ;                /*dbug-log*///console.log('[%s] baseConfg = %O, eventConfg = %O', fieldName, baseConfg, comboEvents);
-    const eventConfg = comboEvents[fieldName] || {};
-    return Object.assign(baseConfg, eventConfg);
+function getFieldConfg(comboConfg, fieldName) {
+    const baseConfg = getBaseFieldConfg(fieldName);                 /*dbug-log*///console.log('[%s] baseConfg = %O, comboConfg = %O', fieldName, baseConfg, comboConfg);
+    const fieldConfg = comboConfg[fieldName] || {};
+    return Object.assign(baseConfg, fieldConfg);
 }
 function getBaseFieldConfg(fieldName) {
     const confgMap = {
