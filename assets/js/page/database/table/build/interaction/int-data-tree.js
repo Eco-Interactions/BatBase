@@ -8,7 +8,7 @@ import { _alert, _db } from '~util';
 import { getTreeRcrds } from '../table-build-main.js';
 
 /** Replaces all interaction ids with records for every node in the tree.  */
-export async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
+export async function fillTreeWithInteractions(focus, dataTree) {   /*dbug-log*///console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
     const fillInts = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source'];
     const data = await _db('getData', [entities, true]);

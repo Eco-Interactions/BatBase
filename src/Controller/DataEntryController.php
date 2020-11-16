@@ -140,8 +140,25 @@ class DataEntryController extends AbstractController
         if (!property_exists($edits, 'parentTaxon')) { return; }
         $old = $this->getEntity('Taxon', $edits->parentTaxon['old']);
         $new = $this->getEntity('Taxon', $edits->parentTaxon['new']);
-        if ($old->getSubGroup() === $new->getSubGroup()) { return; }
-        $edits->subGroup = [ 'old' => $old->getSubGroup(), 'new' => $new->getSubGroup() ];
+        $this->checkForGroupEdits($new, $old, $edits);
+        $this->checkForSubGroupEdits($new, $old, $edits);
+    }
+    private function checkForGroupEdits($new, $old, &$edits)
+    {
+        $oldGroup = $old->getGroup()->getDisplayName();
+        $newGroup = $new->getGroup()->getId();
+        $this->trackEditsToData('group', $newGroup, $oldGroup, $edits);
+    }
+    private function checkForSubGroupEdits($new, $old, &$edits)
+    {
+        $oldGroup = $old->getSubGroup();
+        $newGroup = $new->getSubGroup();
+        $this->trackEditsToData('subGroup', $newGroup, $oldGroup, $edits);
+    }
+    private function trackEditsToData($field, $newVal, $oldVal, &$edits)
+    {
+        if ($newVal === $oldVal) { return; }
+        $edits->$field = [ 'new' => $newVal, 'old' => $oldVal ];
     }
     /*--------------------- Update Citation Text -----------------------------*/
     /**

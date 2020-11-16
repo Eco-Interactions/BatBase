@@ -2,7 +2,6 @@
  * Modifies taxon-data for local storage:
  * - rankNames - an object with each rank name (k) and it's id and ordinal (v).
  * - groupNames - an object with each group name (k) and it's id.
- * - pluralGroupNames - an object with each group's plural name (k) and it's id.
  * - [group][subGroup][rank]Names - object with all taxa in subGroup at the rank: name (k) id (v)
  * * group - resaved with 'uiRanksShown' filled with the rank display names.
  *
@@ -19,19 +18,10 @@ import { getNameObj } from '../init-helpers.js';
 
 export function modifyTxnDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyTxnDataForLocalDb called. data = %O", data);
     db.setDataInMemory('groupNames', getNameObj(Object.keys(data.group), data.group));
-    storePluralGroupNames(data.group);
     storeTaxaByRankAndGroup(data.taxon, data.group, data.groupRoot);
     modifyGroupData(data.group, data.rank);
     storeRankData(data.rank);
     db.deleteMmryData('groupRoot');
-}
-function storePluralGroupNames(groups) {
-    const names = {}
-    Object.values(groups).forEach(g => names[g.pluralName] = g.id);
-    db.setDataInMemory('pluralGroupNames', names);
-}
-function getPluralGroupOpt(group) {
-    return { text: group.pluralName, value: group.id }
 }
 /* ========================= RANKS ========================================== */
 function storeRankData(rankData) {

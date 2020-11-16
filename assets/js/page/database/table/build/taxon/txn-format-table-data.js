@@ -25,7 +25,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                /*dbug-log*/
         entity: "Taxon",
         interactions: intCount !== null,
         intCnt: intCount,
-        isParent: true,
+        isParent: intCount !== null || taxon.children.length,
         name: taxon.displayName,
         open: tblState.openRows.indexOf(taxon.id.toString()) !== -1,
         parentTaxon: taxon.isRoot ? false : taxon.parent,

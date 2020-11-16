@@ -31,11 +31,11 @@ Feature: Add new data to the database
         And I break "Open console"
         And I see "New Interaction"
         ## Publication Book ##
-        And I add "Test Book" to the "Publication" dropdown
+        And I add "Test Book" to the "Publication" combobox
         And I see "New Publication"
-        And I select "Book" from the "Publication Type" dropdown
+        And I select "Book" from the "Publication Type" combobox
         ## Publisher ##
-        And I add "Test Publisher" to the "Publisher" dropdown
+        And I add "Test Publisher" to the "Publisher" combobox
         And I see "New Publisher"
         And I check the "Show all fields" box
         And I type "Nice" in the "City" field "input"
@@ -46,7 +46,7 @@ Feature: Add new data to the database
         And I press submit in the confirmation popup
         And I wait for the "sub2" form to close
         ### Author ##
-        And I add "Smith, George" to the "Authors" dynamic dropdown
+        And I add "Smith, George" to the "Authors" dynamic combobox
         And I check the "Show all fields" box
         And I type "Bendry" in the "First Name" field "input"
         And I type "J" in the "Middle Name" field "input"
@@ -66,18 +66,18 @@ Feature: Add new data to the database
         And I press submit in the confirmation popup
         ## Book Citation ##
         And I see "New Citation"
-        And I should see "Book" in the "Citation Type" dropdown
+        And I should see "Book" in the "Citation Type" combobox
         And I type "29" in the "Edition" field "input"
         And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
         ## Publication Book with Editors ##
-        And I add "Test Book with Editors" to the "Publication" dropdown
+        And I add "Test Book with Editors" to the "Publication" combobox
         And I see "New Publication"
-        And I select "Book" from the "Publication Type" dropdown
+        And I select "Book" from the "Publication Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I select "Callaye, Bendry J Jr" from the "Editors" dynamic dropdown
-        And I select "Test Publisher" from the "Publisher" dropdown
+        And I select "Callaye, Bendry J Jr" from the "Editors" dynamic combobox
+        And I select "Test Publisher" from the "Publisher" combobox
         And I check the "Show all fields" box
         And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
@@ -86,40 +86,40 @@ Feature: Add new data to the database
         And I press submit in the confirmation popup
         ## Chapter Citation ##
         And I see "New Citation"
-        And I select "Chapter" from the "Citation Type" dropdown
+        And I select "Chapter" from the "Citation Type" combobox
         And I type "Test Title for Chapter" in the "Title" field "input"
         And I type "666-999" in the "Pages" field "input"
-        And I select "Cockle, Anya" from the "Authors" dynamic dropdown
+        And I select "Cockle, Anya" from the "Authors" dynamic combobox
         And I type "Test Abstract Text" in the "Abstract" field "textarea"
         And I see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, ed.). pp. 666-999. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
         ## Publication Journal ##
-        And I add "Test Journal" to the "Publication" dropdown
+        And I add "Test Journal" to the "Publication" combobox
         And I see "New Publication"
-        And I select "Journal" from the "Publication Type" dropdown
+        And I select "Journal" from the "Publication Type" combobox
         And I press the "Create Publication" button
         ## Article Citation ##
         And I see "New Citation"
-        And I should see "Article" in the "Citation Type" dropdown
+        And I should see "Article" in the "Citation Type" combobox
         And I type "1990" in the "Year" field "input"
         And I type "Test Title for Article" in the "Title" field "input"
         And I type "666-999" in the "Pages" field "input"
         And I type "4" in the "Volume" field "input"
         And I type "1" in the "Issue" field "input"
-        And I select "Cockle, Anya" from the "Authors" dynamic dropdown
+        And I select "Cockle, Anya" from the "Authors" dynamic combobox
         And I type "Test Abstract Text" in the "Abstract" field "textarea"
         And I see "Cockle, A. 1990. Test Title for Article. Test Journal 4 (1): 666-999." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
         ## Publication Thesis/Dissertation ##
-        And I add "Test Dissertation" to the "Publication" dropdown
+        And I add "Test Dissertation" to the "Publication" combobox
         And I see "New Publication"
         And I check the "Show all fields" box
-        And I select "Thesis/Dissertation" from the "Publication Type" dropdown
+        And I select "Thesis/Dissertation" from the "Publication Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I select "Callaye, Bendry J Jr" from the "Authors" dynamic dropdown
-        And I select "Test Publisher" from the "Publisher" dropdown
+        And I select "Callaye, Bendry J Jr" from the "Authors" dynamic combobox
+        And I select "Test Publisher" from the "Publisher" combobox
         And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
         And I type "https://www.publication.com" in the "Website" field "input"
@@ -127,17 +127,17 @@ Feature: Add new data to the database
         And I press submit in the confirmation popup
         ## Dissertation Citation ##
         And I see "New Citation"
-        And I should see "Ph.D. Dissertation" in the "Citation Type" dropdown
+        And I should see "Ph.D. Dissertation" in the "Citation Type" combobox
         And I see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
         ## Publication Other ##
-        And I add "Test Other" to the "Publication" dropdown
+        And I add "Test Other" to the "Publication" combobox
         And I see "New Publication"
-        And I select "Other" from the "Publication Type" dropdown
+        And I select "Other" from the "Publication Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I select "Callaye, Bendry J Jr" from the "Authors" dynamic dropdown
-        And I select "Test Publisher" from the "Publisher" dropdown
+        And I select "Callaye, Bendry J Jr" from the "Authors" dynamic combobox
+        And I select "Test Publisher" from the "Publisher" combobox
         And I check the "Show all fields" box
         And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
@@ -146,7 +146,7 @@ Feature: Add new data to the database
         And I press submit in the confirmation popup
         ## Other Citation ##
         And I see "New Citation"
-        And I should see "Other" in the "Citation Type" dropdown
+        And I should see "Other" in the "Citation Type" combobox
         And I see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
         And I press the "Create Citation" button
         And I wait for the "sub" form to close
@@ -161,7 +161,7 @@ Feature: Add new data to the database
         And I see the "new" location's pin on the map
         And I type "Test Location With GPS" in the "Display Name" field "input"
         And I type "Test Description" in the "Description" field "textarea"
-        And I select "Savanna" from the "Habitat Type" dropdown
+        And I select "Savanna" from the "Habitat Type" combobox
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
         And I break
@@ -169,11 +169,11 @@ Feature: Add new data to the database
         And I press the "Create Location" button
         And I wait for the "sub" form to close
         ## Without GPS ##
-        And I add "Test Location Without GPS" to the "Location" dropdown
+        And I add "Test Location Without GPS" to the "Location" combobox
         And i see "New Location"
         And I type "Test Description" in the "Description" field "textarea"
-        And I select "Costa Rica" from the "Country" dropdown
-        And I select "Savanna" from the "Habitat Type" dropdown
+        And I select "Costa Rica" from the "Country" combobox
+        And I select "Savanna" from the "Habitat Type" combobox
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
         And I press the "Create Location" button
@@ -182,17 +182,17 @@ Feature: Add new data to the database
         ### Subject Family ##
         And I focus on the "Subject" taxon field
         And I see "Select Subject Taxon"
-        And I add "Subject Family" to the "Family" dropdown
+        And I add "Subject Family" to the "Family" combobox
         And I see "New Taxon Family"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Subject Genus ##
-        And I add "SGenus" to the "Genus" dropdown
+        And I add "SGenus" to the "Genus" combobox
         And I see "New Taxon Genus"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Subject Species ##
-        And I add "SGenus Species" to the "Species" dropdown
+        And I add "SGenus Species" to the "Species" combobox
         And I see "New Taxon Species"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
@@ -201,42 +201,38 @@ Feature: Add new data to the database
         ### Object Sub-Group ##
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        And I select "Parasite" from the "Group" dropdown
-
-        # @todo
-        # And I should see "???" in the "Sub-Group" combobox
-        # And I select "Kingdom Protozoa" from the "Sub-Group" combobox
-
-
-        And I add "O Sub-Group Family" to the "Family" dropdown
+        And I select "Parasite" from the "Group" combobox
+        And I should see "Phylum Acanthocephala" in the "Sub-Group" combobox
+        And I select "Phylum Nematoda" from the "Sub-Group" combobox
+        And I add "O Sub-Group Family" to the "Family" combobox
         And I see "New Taxon Family"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Object Class ##
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        And I select "Arthropod" from the "Group" dropdown
-        And I add "Object Class" to the "Class" dropdown
+        And I select "Arthropod" from the "Group" combobox
+        And I add "Object Class" to the "Class" combobox
         And I see "New Taxon Class"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Object Order ##
-        And I add "Object Order" to the "Order" dropdown
+        And I add "Object Order" to the "Order" combobox
         And I see "New Taxon Order"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Object Family ##
-        And I add "Object Family" to the "Family" dropdown
+        And I add "Object Family" to the "Family" combobox
         And I see "New Taxon Family"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Object Genus ##
-        And I add "OGenus" to the "Genus" dropdown
+        And I add "OGenus" to the "Genus" combobox
         And I see "New Taxon Genus"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
         ### Object Species ##
-        And I add "OGenus Species" to the "Species" dropdown
+        And I add "OGenus Species" to the "Species" combobox
         And I see "New Taxon Species"
         And I press the "Create Taxon" button
         And I wait for the "sub2" form to close
@@ -265,12 +261,12 @@ Feature: Add new data to the database
         And I press the "Create Interaction" button
         And I press submit in the confirmation popup
         Then I should see "New Interaction successfully created." in the form header
-        And I should see "Test Book with Editors" in the "Publication" dropdown
-        And I should see "Test Title for Chapter" in the "Citation Title" dropdown
-        And I should see "Costa Rica" in the "Country-Region" dropdown
-        And I should see "Test Location With GPS" in the "Location" dropdown
-        And I should see "Genus SGenus" in the "Subject" dropdown
-        And I should see "Host" in the "Interaction Type" dropdown
+        And I should see "Test Book with Editors" in the "Publication" combobox
+        And I should see "Test Title for Chapter" in the "Citation Title" combobox
+        And I should see "Costa Rica" in the "Country-Region" combobox
+        And I should see "Test Location With GPS" in the "Location" combobox
+        And I should see "Genus SGenus" in the "Subject" combobox
+        And I should see "Host" in the "Interaction Type" combobox
         And the "Object" select field should be empty
         And the "Interaction Tags" select field should be empty
         And the "Note" field should be empty

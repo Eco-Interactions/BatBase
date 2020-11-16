@@ -58,24 +58,18 @@ function setSrcView(view) {
 }
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTxnViewOpts(view) {
-    _cmbx('getOptsFromStoredData', ['pluralGroupNames'])
-    .then(loadTxnViewOpts)
-    .then(() => setTaxonView(view));
+export function initTxnViewOpts(view, taxa, groups) {
+    loadTxnViewOpts(getViewOpts(taxa, groups));
+    setTaxonView(view);
 }
-function loadTxnViewOpts(opts) {
-    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
-    $('#sel-View').data('focus', 'taxa');
-}
-function getViewOpts(groups) {
-    const taxa = _table('tableState').get('rcrdsById');
-    const optsAry = [];
+function getViewOpts(taxa, groups) {
+    const opts = [];
     Object.keys(groups).forEach(buildGroupOpt);
-    return _cmbx('alphabetizeOpts', [optsAry]);
+    return _cmbx('alphabetizeOpts', [opts]);
 
     function buildGroupOpt(id) {
         if (!ifGroupHasInts(groups[id].taxa)) { return; }
-        optsAry.push({ text: groups[id].pluralName, value: id});
+        opts.push({ text: groups[id].pluralName, value: id});
     }
     function ifGroupHasInts(rootTaxa) {
         return Object.values(rootTaxa).find(t => ifTxnHasInts(t.id));
@@ -85,6 +79,10 @@ function getViewOpts(groups) {
         const hasInts = !!taxon.subjectRoles.length || !!taxon.objectRoles.length;
         return hasInts || taxon.children.find(ifTxnHasInts);
     }
+}
+function loadTxnViewOpts(opts) {
+    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
+    $('#sel-View').data('focus', 'taxa');
 }
 /** Restores stored group from previous session or sets the default 'Bats'. */
 function setTaxonView(view) {

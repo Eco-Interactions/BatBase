@@ -204,23 +204,18 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iViewInteractionsBy($type)
     {
-        $vals = [
-            'Bats' => 1,
-            'Arthropoda' => 3,
-            'Authors' => 'auths',
-            'Plants' => 2,
-            'Publications' => 'pubs',
-            'Publishers' => 'publ'
-        ];
+        $selId = $this->getComboId('View');
+        $val = $this->getValueToSelect($selId, $type);
         $newElems = [  //Add views with sub-groups
-            'Bats' => $this->getComboId('Object Groups Filter'),
-            'Arthropoda' => $this->getComboId('Order Filter'),
+            'Arthropods' => $this->getComboId('Order Filter'),
             'Authors' => $this->getNameFilter('Author'),
+            'Bats' => $this->getComboId('Object Groups Filter'),
+            'Parasites' => $this->getComboId('Sub-Group Filter'),
             'Plants' => $this->getComboId('Species Filter'),
             'Publications' => $this->getComboId('Publication Type Filter'),
             'Publishers' => $this->getNameFilter('Publisher')
         ];
-        $this->changeTableSort($this->getComboId('View'), $vals[$type], $newElems[$type]);
+        $this->changeTableSort($selId, $val, $newElems[$type]);
     }
 
     /**
@@ -245,7 +240,6 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->changeTableSort($this->getComboId('View'), 'map', '#map');
     }
-
 
     /**
      * @When I select :modType :selType from the list modification panel
@@ -313,63 +307,67 @@ class FeatureContext extends RawMinkContext implements Context
 
 /* ====================== SELECTIZE COMBOBOXES ============================== */
     /**
-     * @When I add :text to the :label dropdown
+     * @When I add :text to the :label combobox
      * Note: Selectize create method.
      */
-    public function iAddToTheDropdown($text, $label)
+    public function iAddToTheCombobox($text, $label)
     {
         $selId = $this->getComboId($label);
 
         $this->spin(function() use ($selId, $text){
             $this->execute("$('$selId')[0].selectize.createItem('$text');");
             return true;
-        }, "Couldn't find dropdown [$selId]");
+        }, "Couldn't find combobox [$selId]");
     }
     /**
-     * @When I select :text from the :prop dropdown
+     * @When I select :text from the :prop combobox
      * Note: Selectize select method.
      */
-    public function iSelectFromTheDropdown($text, $prop)
+    public function iSelectFromTheCombobox($text, $prop)
     {
         $this->selectTextInCombobox($this->getComboId($prop), $text);
     }
 /* ------------------------- DYNAMIC ---------------------------------------- */
     /**
-     * @When I change :text in the :prop dynamic dropdown
+     * @When I change :text in the :prop dynamic combobox
      */
-    public function iChangeInTheDynamicDropdown($text, $prop)
+    public function iChangeInTheDynamicCombobox($text, $prop)
     {
         $count = $this->getCurrentFieldCount($prop);
-        $this->iSelectFromTheDynamicDropdown($text, $prop, --$count);
+        $this->iSelectFromTheDynamicCombobox($text, $prop, --$count);
+        $this->blurNextDynamicCombobox($this->getComboId($prop), $count);
     }
 
     /**
-     * @When I add :text to the :prop dynamic dropdown
+     * @When I add :text to the :prop dynamic combobox
      */
-    public function iAddToTheDynamicDropdown($text, $prop)
+    public function iAddToTheDynamicCombobox($text, $prop)
     {
         $newFormLvl = $this->getOpenFormPrefix() === 'sub' ? 'sub2' : 'sub';
         $count = $this->getCurrentFieldCount($prop);
-        $this->iSelectFromTheDynamicDropdown($text, $prop, $count, 'new');
+        $this->iSelectFromTheDynamicCombobox($text, $prop, $count, 'new');
         $this->waitForTheFormToOpen($newFormLvl);
     }
 
     /**
-     * @When I select :text from the :prop dynamic dropdown
-     * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
+     * @When I select :text from the :prop dynamic combobox
+     * Note: Changes the last empty ($new) combobox, or the last filled (!$new).
      */
-    public function iSelectFromTheDynamicDropdown($text, $prop, $count = null, $new = false)
+    public function iSelectFromTheDynamicCombobox($text, $prop, $count = null, $new = false)
     {
         $count = $count ? $count : $this->getCurrentFieldCount($prop);
         $selId = $this->getComboId($prop).$count;
         $this->selectTextInCombobox($selId, $text, $new);
-        $this->blurNextDynamicDropdown($this->getComboId($prop), $count);
     }
 
-    private function blurNextDynamicDropdown($selId, $count)
+    private function blurNextDynamicCombobox($selId, $count)
     {
         $selector = $selId . ++$count;
-        $this->execute("$('$selector')[0].selectize.blur();");
+        $this->spin(function() use ($selector)
+        {
+            $this->execute("$('$selector')[0].selectize.blur();");
+            return true;
+        }, 'Unable to blur [$selector] combobox ');
     }
 /* ====================== MAP =============================================== */
 
@@ -784,9 +782,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :text in the :label dropdown
+     * @Then I should see :text in the :label combobox
      */
-    public function iShouldSeeInTheDropdown($text, $label)
+    public function iShouldSeeInTheCombobox($text, $label)
     {
         $selector = $this->getComboId($label) . ' option:selected';
         $this->spin(function() use ($text, $selector) {
@@ -1000,9 +998,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :text in the :prop dynamic dropdown
+     * @Then I should see :text in the :prop dynamic combobox
      */
-    public function iShouldSeeInTheDynamicDropdown($text, $prop)
+    public function iShouldSeeInTheDynamicCombobox($text, $prop)
     {
         $selId = $this->getComboId($prop);
         $count = $this->getCurrentFieldCount($prop);
@@ -1042,9 +1040,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     // /**
-    //  * @Then I should see :text in the :prop form dropdown
+    //  * @Then I should see :text in the :prop form combobox
     //  */
-    // public function iShouldSeeInTheFormDropdown($text, $prop)
+    // public function iShouldSeeInTheFormCombobox($text, $prop)
     // {
     //     $selId = '#'.str_replace(' ','',$prop).'-sel';
     //     $selector = $selId.' option:selected';
@@ -1723,27 +1721,27 @@ class FeatureContext extends RawMinkContext implements Context
     private function fillSrcAndLocFields($data)
     {                                                                           $this->log("\n        Filling Source and Location fields.\n");
         foreach ($data as $field => $value) {
-            $this->iSelectFromTheDropdown($value, $field);
+            $this->iSelectFromTheCombobox($value, $field);
         }
     }
     private function fillTaxaFields($data)
     {                                                                           $this->log("\n        Filling Taxa fields.\n");
         $ranks = array_keys($data);
         $this->iFocusOnTheTaxonField('Subject');
-        $this->iSelectFromTheDropdown($data[$ranks[0]], $ranks[0]);
+        $this->iSelectFromTheCombobox($data[$ranks[0]], $ranks[0]);
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdown('Arthropod', 'Group');
-        $this->iSelectFromTheDropdown($data[$ranks[1]], $ranks[1]);
+        $this->iSelectFromTheCombobox('Arthropod', 'Group');
+        $this->iSelectFromTheCombobox($data[$ranks[1]], $ranks[1]);
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
     }
     private function fillMiscIntFields($data)
     {                                                                           $this->log("\n        Filling remaining fields.\n");
         $fields = array_keys($data);
-        $this->iSelectFromTheDropdown($data[0], 'Interaction Type');
-        $this->iSelectFromTheDropdown($data[1], 'Interaction Tags');
+        $this->iSelectFromTheCombobox($data[0], 'Interaction Type');
+        $this->iSelectFromTheCombobox($data[1], 'Interaction Tags');
         $this->iTypeInTheField($data[2], 'Note', 'textarea');
     }
 
@@ -1766,7 +1764,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheRow('Santa Ana-Forest');
         $this->iChangeTheFieldTo('Display Name', 'input', 'Santa Ana-Desert');
-        $this->iSelectFromTheDropdown('Desert', 'Habitat Type');
+        $this->iSelectFromTheCombobox('Desert', 'Habitat Type');
         $this->curUser->getPage()->pressButton('Update Location');
         $this->iWaitForTheFormToClose('top');
     }
@@ -1775,7 +1773,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Santa Ana-Desert');
-        $this->iSelectFromTheDropdown('Costa Rica', 'Location');
+        $this->iSelectFromTheCombobox('Costa Rica', 'Location');
         $this->curUser->getPage()->pressButton('Update Interaction');
         $this->iWaitForTheFormToClose('top');
         $this->theDatabaseTableIsGroupedBy('Locations');
@@ -1804,8 +1802,8 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdown('Arthropod', 'Group');
-        $this->iSelectFromTheDropdown('Sphingidaey', 'Family');
+        $this->iSelectFromTheCombobox('Arthropod', 'Group');
+        $this->iSelectFromTheCombobox('Sphingidaey', 'Family');
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
         $this->curUser->getPage()->pressButton('Update Interaction');

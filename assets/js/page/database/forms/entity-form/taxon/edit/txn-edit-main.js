@@ -313,7 +313,7 @@ function initTaxonEditRankCombo() {
     _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
 }
 /** ======================= DATA VALIDATION ================================== */
-function isTaxonEditFormValid(vals) {
+function isTaxonEditFormValid(vals) {                               /*dbug-log*///console.log('isTaxonEditFormValid? %O', vals);
     const valIssues = {
         'rankNotAvailableInNewGroup': rankIsNotAvailableInNewGroup(vals.rank)
     };
@@ -324,7 +324,7 @@ function isTaxonEditFormValid(vals) {
 }
 /* -------------------------- RANK VALIDATION ------------------------------- */
 /* -------- RANK NOT AVAILABLE IN NEW GROUP ---------------- */
-function rankIsNotAvailableInNewGroup(txnRank) {
+function rankIsNotAvailableInNewGroup(txnRank) {                    /*dbug-log*///console.log('rankIsNotAvailableInNewGroup? [] %O', txnRank, _state('getTaxonProp', ['groupRanks']));
     return _state('getTaxonProp', ['groupRanks']).indexOf(txnRank) === -1;
 }
 /**
@@ -335,8 +335,7 @@ function onRankChangeValidate(txnRank) {
     const pRank = $('#txn-prnt').data('rank');                      /*dbug-log*///console.log("onRankChangeValidate. taxon = %s. parent = %s", txnRank, pRank);
     const valIssues = {
         'isGenusPrnt': isGenusPrnt(),
-        'needsHigherRank': rankIsLowerThanKidRanks(txnRank),
-        'rankNotAvailableInNewGroup': rankIsNotAvailableInNewGroup(txnRank)
+        'needsHigherRank': rankIsLowerThanKidRanks(txnRank)
     };
     for (let alertTag in valIssues) {
         if (valIssues[alertTag]) { return shwTxnValAlert(alertTag, 'Taxon', 'top'); }

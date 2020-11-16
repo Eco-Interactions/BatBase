@@ -213,6 +213,8 @@ class Group
     {
         $taxa = [];
 
+        if (!is_array($this->taxa)) { return [];} //Needed for test fixtures, not sure why
+
         foreach ($this->taxa as $groupRoot) {
             array_push($taxa, $groupRoot->getTaxon());
         }

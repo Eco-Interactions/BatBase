@@ -25,7 +25,7 @@ function updateRowsAndGetIntCounts(root) {
 }
 /** Sets new interaction totals for each tree node and returns count. */
 function updateTotalRowIntCounts(total, row) {                      /*dbug-log*///console.log('updateTotalRowIntCounts. total [%s], row = %O', total, row);
-    if (!row.childrenAfterFilter) { return total; }
+    if (!row.childrenAfterFilter || !row.childrenAfterFilter.length) { return total; }
     const rowCnt = ifChildRowsAreInteractions(row) ?
         row.childrenAfterFilter.length :
         row.childrenAfterFilter.reduce(updateTotalRowIntCounts, 0);
@@ -33,8 +33,7 @@ function updateTotalRowIntCounts(total, row) {                      /*dbug-log*/
     return total += rowCnt;
 }
 function ifChildRowsAreInteractions(row) {
-    return !row.childrenAfterFilter.length ||
-        !row.childrenAfterFilter[0].childrenAfterFilter;
+    return row.childrenAfterFilter[0].data.interactionType;
 }
 function updateTotalCountDisplay(cnt) {
     $("#tbl-cnt").text(`[ ${cnt} Interactions  ]`);

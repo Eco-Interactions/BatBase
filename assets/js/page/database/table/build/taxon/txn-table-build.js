@@ -34,7 +34,7 @@ function getTxnDataAndBuildTable(view) {
 function beginTaxonLoad(groupId, data) {
     updateTaxonTableState(data);                                                //console.log('Building Taxon Table. data = %O', _u('snapshot', [(data)]);
     const groupRoots = storeGroupAndReturnRootTaxa(groupId);
-    _ui('initTxnViewOpts', [groupId]);
+    _ui('initTxnViewOpts', [groupId, data.taxon, data.group]);
     return startTxnTableBuildChain(groupRoots, true);
 }
 function updateTaxonTableState(data) {

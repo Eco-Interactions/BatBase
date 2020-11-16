@@ -106,43 +106,43 @@ App\Entity\CitationType:
         citations: ['@Citation-3'] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-2: #added
+    CitationType-2:
         slug: chapter
         displayName: Chapter
         citations: ['@Citation-1'] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-3: #added
+    CitationType-3:
         slug: book
         displayName: Book
         citations: ['@Citation-2'] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-4: #added
+    CitationType-4:
         slug: museum-record
         displayName: Museum Record
         citations: [] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-5: #added
+    CitationType-5:
         slug: masters-thesis
         displayName: Master's Thesis
         citations: [] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-6: #added
+    CitationType-6:
         slug: report
         displayName: Report
         citations: [] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-7: #added
+    CitationType-7:
         slug: other
         displayName: Other
         citations: [] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-8: #added
+    CitationType-8:
         slug: ph-d-dissertation
         displayName: Ph.D. Dissertation
         citations: ['@Citation-4'] #
@@ -541,6 +541,211 @@ App\Entity\GeoJson:
         __calls:
           - setCoordinates: [<{geo6}>]
           - setDisplayPoint: [<{geo6}>]
+App\Entity\Group:
+    Group-1: #1
+        slug: bat
+        displayName: Bat
+        pluralName: Bats
+        taxa: ['@GroupRoot-1']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-2: #3
+        slug: plant
+        displayName: Plant
+        pluralName: Plants
+        taxa: ['@GroupRoot-2']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-3: #2
+        slug: arthropod
+        displayName: Arthropod
+        pluralName: Arthropods
+        taxa: ['@GroupRoot-3']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-4:
+        slug: bacteria
+        displayName: Bacteria
+        pluralName: Bacteria
+        taxa: ['@GroupRoot-4']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-5:
+        slug: fish
+        displayName: Fish
+        pluralName: Fishes
+        taxa: ['@GroupRoot-5']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-6:
+        slug: fungi
+        displayName: Fungi
+        pluralName: Fungi
+        taxa: ['@GroupRoot-6']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-7:
+        slug: virus
+        displayName: Virus
+        pluralName: Viruses
+        taxa: ['@GroupRoot-7']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-8:
+        slug: bird
+        displayName: Bird
+        pluralName: Birds
+        taxa: ['@GroupRoot-8']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-9:
+        slug: reptile
+        displayName: Reptile
+        pluralName: Reptiles
+        taxa: ['@GroupRoot-9']  #11
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-10:
+        slug: amphibian
+        displayName: Amphibian
+        pluralName: Amphibians
+        taxa: ['@GroupRoot-10']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-11:
+        slug: parasite
+        displayName: Parasite
+        pluralName: Parasites
+        taxa: ['@GroupRoot-11', '@GroupRoot-12', '@GroupRoot-13']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+App\Entity\GroupRoot:
+    GroupRoot-1:
+        group: '@Group-1'
+        taxon: '@Taxon-2'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-2:
+        group: '@Group-2'
+        taxon: '@Taxon-3'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-3:
+        group: '@Group-3'
+        taxon: '@Taxon-4'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
+    GroupRoot-4:
+        group: '@Group-4'
+        taxon: '@Taxon-26'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
+    GroupRoot-5:
+        group: '@Group-5'
+        taxon: '@Taxon-28'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-6:
+        group: '@Group-6'
+        taxon: '@Taxon-29'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-7:
+        group: '@Group-7'
+        taxon: '@Taxon-30'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-8:
+        group: '@Group-8'
+        taxon: '@Taxon-31'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-9:
+        group: '@Group-9'
+        taxon: '@Taxon-32'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-10:
+        group: '@Group-10'
+        taxon: '@Taxon-33'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-11:
+        group: '@Group-11'
+        taxon: '@Taxon-34'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
+    GroupRoot-12:
+        group: '@Group-11'
+        taxon: '@Taxon-36'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
+    GroupRoot-13:
+        group: '@Group-11'
+        taxon: '@Taxon-38'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{basic_ranks}>]
 App\Entity\HabitatType:
     HabitatType-1:
         slug: forest
@@ -676,7 +881,7 @@ App\Entity\Interaction:
         created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
-    Interaction-7: #added
+    Interaction-7:
         note: 'Coordinates for Les Nouragues are taken from Delaval et al.2005; elevation range of 40 to 100 mt is taken from Charles-Dominique 2001.'
         source: '@Source-8' #75
         interactionType: '@InteractionType-5' #Transport
@@ -687,7 +892,7 @@ App\Entity\Interaction:
         created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
-    Interaction-8:   #added
+    Interaction-8:
         source: '@Source-6' #36
         interactionType: '@InteractionType-1' #Visitation
         location: '@Location-35'  #Santa Ana - Forest
@@ -697,7 +902,7 @@ App\Entity\Interaction:
         created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-    Interaction-9: #added
+    Interaction-9:
         note: 'Bat cited as Leptonycteris sanborni'
         source: '@Source-1'  #
         interactionType: '@InteractionType-8'  #Roost
@@ -708,7 +913,7 @@ App\Entity\Interaction:
         created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:36", new \DateTimeZone("America/Los_Angeles")))>'
-    Interaction-10: #added
+    Interaction-10:
         note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
         source: '@Source-3'  #
         interactionType: '@InteractionType-1' #Visitation
@@ -716,6 +921,28 @@ App\Entity\Interaction:
         location: '@Location-59'  #
         subject: '@Taxon-21' #
         object: '@Taxon-23'  #
+        tags: [] #
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-11:
+        note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
+        source: '@Source-3'  #
+        interactionType: '@InteractionType-7' #Host
+        location: '@Location-59'  #
+        subject: '@Taxon-21' #
+        object: '@Taxon-36'  #
+        tags: [] #
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-12:
+        note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
+        source: '@Source-3'  #
+        interactionType: '@InteractionType-7' #Host
+        location: '@Location-59'  #
+        subject: '@Taxon-21' #
+        object: '@Taxon-38'  #
         tags: [] #
         created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -832,79 +1059,6 @@ App\Entity\InteractionType:
         activeForm: preyed upon
         passiveForm: preyed upon by
         interactions: []
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-App\Entity\Rank:
-    Rank-1: #7
-        displayName: Kingdom
-        ordinal: 10
-        pluralName: Kingdoms
-        taxa: ['@Taxon-3', '@Taxon-1']
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-2: #6
-        displayName: Phylum
-        ordinal: 30
-        pluralName: Phyla
-        taxa: ['@Taxon-4'] #
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-3: #5
-        displayName: Class
-        ordinal: 50
-        pluralName: Classes
-        taxa: ['@Taxon-27'] #
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-4: #
-        displayName: Order
-        ordinal: 70
-        pluralName: Orders
-        taxa: ['@Taxon-2', '@Taxon-8']
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-5: #3
-        displayName: Family
-        ordinal: 90
-        pluralName: Families
-        taxa: ['@Taxon-5', '@Taxon-9', '@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-6: #2
-        displayName: Genus
-        ordinal: 110
-        pluralName: Genera
-        taxa: ['@Taxon-6', '@Taxon-11', '@Taxon-12', '@Taxon-15', '@Taxon-19', '@Taxon-21', '@Taxon-24']
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-7: #1
-        displayName: Species
-        ordinal: 130
-        pluralName: Species
-        taxa: ['@Taxon-7', '@Taxon-13', '@Taxon-16', '@Taxon-17', '@Taxon-20', '@Taxon-22', '@Taxon-25']
-        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-    Rank-8: #1
-        displayName: Domain
-        ordinal: 5
-        pluralName: Domains
-        taxa: ['@Taxon-26', '@Taxon-30']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1449,14 +1603,14 @@ App\Entity\Location:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-18 01:38:27", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-    Location-59: #added
+    Location-59:
         displayName: Unspecified
         childLocs: ['@Location-60', '@Location-61', '@Location-62', '@Location-63', '@Location-64', '@Location-65', '@Location-66', '@Location-67', '@Location-68', '@Location-69']
         locationType: '@LocationType-5' #
         interactions: ['@Interaction-10'] #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-60:  #added
+    Location-60:
         displayName: Captivity
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
@@ -1466,63 +1620,63 @@ App\Entity\Location:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2017-07-16 16:38:57", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-    Location-61:  #added
+    Location-61:
         displayName: Forest
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-1' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-62: #added
+    Location-62:
         displayName: Savanna
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-2' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-63: #added
+    Location-63:
         displayName: Desert
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-3' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-64: #added
+    Location-64:
         displayName: Shrubland
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-4' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-65: #added
+    Location-65:
         displayName: 'Artificial Landscape'
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-6' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-66: #added
+    Location-66:
         displayName: Grassland
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-7' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-67: #added
+    Location-67:
         displayName: Wetlands
         parentLoc: '@Location-59'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-68: #added
+    Location-68:
         displayName: 'Rocky Areas'
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-9' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
-    Location-69: #added
+    Location-69:
         displayName: 'Caves and Subterranean Areas'
         parentLoc: '@Location-59' #
         locationType: '@LocationType-3' #
@@ -1569,7 +1723,7 @@ App\Entity\Publication:
     Publication-1:  #100
         slug: biology-of-bats-of-the-new-world-family-phyllostomatidae
         displayName: 'Biology of bats of the New World family Phyllostomatidae'
-        publicationType: '@PublicationType-2' #added
+        publicationType: '@PublicationType-2'
         source: '@Source-2' #2
         created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1577,7 +1731,7 @@ App\Entity\Publication:
     Publication-2:  #97
         slug: journal-of-mammalogy
         displayName: 'Journal of Mammalogy'
-        publicationType: '@PublicationType-1' #added
+        publicationType: '@PublicationType-1'
         source: '@Source-4' #11
         created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1585,7 +1739,7 @@ App\Entity\Publication:
     Publication-3:  #91
         slug: revista-de-biologia-tropical
         displayName: 'Revista de Biologia Tropical'
-        publicationType: '@PublicationType-1' #added
+        publicationType: '@PublicationType-1'
         source: '@Source-5' #35
         created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1620,14 +1774,14 @@ App\Entity\PublicationType:
         created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
-    PublicationType-4: #added
+    PublicationType-4:
         slug: other
         displayName: Other
         publications: []
         created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
-App\Entity\Publisher: #added
+App\Entity\Publisher:
     Publisher-1:
         displayName: 'University of Paris VI'
         city: 'city'
@@ -1646,178 +1800,79 @@ App\Entity\Publisher: #added
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-App\Entity\Group:
-    Group-1: #1
-        slug: bat
-        displayName: Bat
-        pluralName: Bats
-        taxa: "[@GroupRoot-1]"
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+App\Entity\Rank:
+    Rank-1: #7
+        displayName: Kingdom
+        ordinal: 10
+        pluralName: Kingdoms
+        taxa: ['@Taxon-3', '@Taxon-1']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-2: #3
-        slug: plant
-        displayName: Plant
-        pluralName: Plants
-        taxa: "[@GroupRoot-2]"
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-2: #6
+        displayName: Phylum
+        ordinal: 30
+        pluralName: Phyla
+        taxa: ['@Taxon-4'] #
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-3: #2
-        slug: arthropod
-        displayName: Arthropod
-        pluralName: Arthropods
-        taxa: ['@GroupRoot-3']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-3: #5
+        displayName: Class
+        ordinal: 50
+        pluralName: Classes
+        taxa: ['@Taxon-27'] #
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{all_ranks}>]
-    Group-4:
-        slug: bacteria
-        displayName: Bacteria
-        pluralName: Bacteria
-        taxa: ['@GroupRoot-4']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-4: #
+        displayName: Order
+        ordinal: 70
+        pluralName: Orders
+        taxa: ['@Taxon-2', '@Taxon-8']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{all_ranks}>]
-    Group-5:
-        slug: fish
-        displayName: Fish
-        pluralName: Fishes
-        taxa: ['@GroupRoot-5']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-5: #3
+        displayName: Family
+        ordinal: 90
+        pluralName: Families
+        taxa: ['@Taxon-5', '@Taxon-9', '@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-6:
-        slug: fungi
-        displayName: Fungi
-        pluralName: Fungi
-        taxa: ['@GroupRoot-6']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-6: #2
+        displayName: Genus
+        ordinal: 110
+        pluralName: Genera
+        taxa: ['@Taxon-6', '@Taxon-11', '@Taxon-12', '@Taxon-15', '@Taxon-19', '@Taxon-21', '@Taxon-24']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-7:
-        slug: virus
-        displayName: Virus
-        pluralName: Viruses
-        taxa: ['@GroupRoot-7']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-7: #1
+        displayName: Species
+        ordinal: 130
+        pluralName: Species
+        taxa: ['@Taxon-7', '@Taxon-13', '@Taxon-16', '@Taxon-17', '@Taxon-20', '@Taxon-22', '@Taxon-25']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-8:
-        slug: bird
-        displayName: Bird
-        pluralName: Birds
-        taxa: ['@GroupRoot-8']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+    Rank-8: #1
+        displayName: Domain
+        ordinal: 5
+        pluralName: Domains
+        taxa: ['@Taxon-26', '@Taxon-30']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-9:
-        slug: reptile
-        displayName: Reptile
-        pluralName: Reptiles
-        taxa: ['@GroupRoot-9']  #11
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-    Group-10:
-        slug: amphibian
-        displayName: Amphibian
-        pluralName: Amphibians
-        taxa: ['@GroupRoot-10']
-        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
-        updatedBy: '@User-1'
-        __calls:
-          - setUiRanksShown: [<{basic_ranks}>]
-App\Entity\GroupRoot:
-    GroupRoot-1:
-        group: '@Group-1'
-        taxon: '@Taxon-2'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-2:
-        group: '@Group-2'
-        taxon: '@Taxon-3'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-3:
-        group: '@Group-3'
-        taxon: '@Taxon-4'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-4:
-        group: '@Group-4'
-        taxon: '@Taxon-26'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-5:
-        group: '@Group-5'
-        taxon: '@Taxon-28'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-6:
-        group: '@Group-6'
-        taxon: '@Taxon-29'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-7:
-        group: '@Group-7'
-        taxon: '@Taxon-30'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-8:
-        group: '@Group-8'
-        taxon: '@Taxon-31'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-9:
-        group: '@Group-9'
-        taxon: '@Taxon-32'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-    GroupRoot-10:
-        group: '@Group-10'
-        taxon: '@Taxon-33'
-        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
 App\Entity\Source:
     Source-1: #1
         displayName: 'Feeding habits'
@@ -2482,6 +2537,8 @@ App\Entity\Taxon:
         slug: class-actinopterygii
         displayName: 'Class Actinopterygii'
         name: Actinopterygii
+        isRoot: true
+        group: '@GroupRoot-5'
         rank: '@Rank-3'
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -2541,6 +2598,75 @@ App\Entity\Taxon:
         isRoot: true
         group: '@GroupRoot-10'
         rank: '@Rank-3'
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-34:
+        slug: phylum-acanthocephala
+        displayName: 'Phylum Acanthocephala'
+        name: Acanthocephala
+        isRoot: true
+        group: '@GroupRoot-11'
+        rank: '@Rank-2'
+        childTaxa: ['@Taxon-35']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-35:
+        slug: class-spotted
+        displayName: 'Class Spotted'
+        name: Spotted
+        parentTaxon: '@Taxon-34'
+        rank: '@Rank-3'
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-36:
+        slug: phylum-nematoda
+        displayName: 'Phylum Nematoda'
+        name: Nematoda
+        isRoot: true
+        group: '@GroupRoot-12'
+        rank: '@Rank-2'
+        childTaxa: ['@Taxon-37']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-37:
+        slug: class-striped
+        displayName: 'Class Striped'
+        name: Striped
+        parentTaxon: '@Taxon-36'
+        rank: '@Rank-3'
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-38:
+        slug: kingdom-protozoa
+        displayName: 'Kingdom Protozoa'
+        name: Protozoa
+        isRoot: true
+        group: '@GroupRoot-13'
+        rank: '@Rank-1'
+        childTaxa: ['@Taxon-39']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-39:
+        slug: family-orange
+        displayName: 'Family Orange'
+        name: Orange
+        parentTaxon: '@Taxon-38'
+        rank: '@Rank-5'
         childTaxa: []
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
