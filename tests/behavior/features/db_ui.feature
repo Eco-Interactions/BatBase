@@ -26,13 +26,13 @@ Feature: Search page features and database table controls
         Given I see "2" rows in the table data tree
         And I break "Open console"
         When I press "Expand All"
-        Then I should see "10" interactions in the table
-        Then I should see "22" rows in the table data tree
+        Then I should see "12" interactions in the table
+        Then I should see "24" rows in the table data tree
 
     @javascript
     Scenario:  I should be able to collapse the data tree completely
         Given I press "Expand All"
-        And I see "22" rows in the table data tree
+        And I see "24" rows in the table data tree
         When I press "Collapse All"
         Then I should see "1" rows in the table data tree
 
@@ -52,13 +52,13 @@ Feature: Search page features and database table controls
     Scenario:  The toggle tree button text should sync with tree state.
         Given I see "2" rows in the table data tree
         When I press "xpand-1" "3" times
-        Then I should see "22" rows in the table data tree
+        Then I should see "24" rows in the table data tree
         And i see "Collapse All"
 
     @javascript
     Scenario:  The toggle tree button text should sync with tree state.
         Given I press "xpand-1" "3" times
-        And I see "22" rows in the table data tree
+        And I see "24" rows in the table data tree
         And I see "Collapse All"
         When I press "collapse-1"
         Then i see "Expand All"
