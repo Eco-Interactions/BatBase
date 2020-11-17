@@ -1255,18 +1255,29 @@ class FeatureContext extends RawMinkContext implements Context
     private function selectTextInCombobox($selId, $text, $new = false)
     {
         $this->spin(function() use ($selId, $text, $new) {
-            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);        //$this->log("\n            selectTextInCombobox - [$text]->[$val] in [$selId]\n");
+            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);    //$this->log("\n   selectTextInCombobox - [$text] in [$selId]");
             $this->selectComboValue($selId, $val);
-            return $new || $this->getFieldTextOrValue($selId) == $text;
+            return $new || $this->ifValIsSelected($selId, $val);
         }, "Could not select [$text] in [$selId]");
     }
     private function selectComboValue($selId, $val)
     {
         if ($this->evaluate("$('$selId')[0].multiple")) {
-            $this->execute("$('$selId')[0].selectize.setValue('$val');");
+            $this->setMultiComboboxValues($selId, $val);
         } else {
             $this->execute("$('$selId')[0].selectize.addItem('$val');");
         }
+    }
+    private function setMultiComboboxValues($selId, $val)
+    {
+        foreach ($val as $v) {                                                  //$this->log("\n  setting [$selId] -> [$v]");
+            $this->execute("$('$selId')[0].selectize.addItem('$v');");
+        }
+    }
+    private function ifValIsSelected($selId, $val)
+    {
+        $selected = $this->evaluate("$('$selId').val();");
+        return $selected == $val;
     }
 
 /* ============================== DATE FILTER =============================== */
@@ -1378,7 +1389,7 @@ class FeatureContext extends RawMinkContext implements Context
         $val = $this->getFieldInnerText($fieldId);
         if ($val === null || $val === "") {
             $val = $this->getFieldValue($fieldId);
-        }                                           //$this->log("\n field [$fieldId] val [$val]\n");
+        }                                                                       //$this->log("\n field [$fieldId] val [$val]\n");
         return $val;
     }
     private function getFieldInnerText($fieldId)
@@ -1425,10 +1436,22 @@ class FeatureContext extends RawMinkContext implements Context
     private function getValueToSelect($selId, $text)
     {
         $opts = $this->getComboboxOptions($selId);
+        if (strpos($text, '[') !== false) { return $this->getArrayValues($text, $opts); }
+        return $this->getValueForText($text, $opts);
+    }
+    private function getValueForText($text, $opts)
+    {                                                                           //$this->log("\ngetValueForText = [$text]");
         foreach ($opts as $key => $optAry) {
-            if ($optAry['text'] !== $text) { continue; }
+            if ($optAry['text'] !== $text) { continue; }                        //$this->log("\n value = ".$optAry['value']);
             return $optAry['value'];
         }
+    }
+    private function getArrayValues($text, $opts)
+    {                                                                          //$this->log("\ngetArrayValues = [$text]");
+        $textAry = explode(', ', str_replace(['[', ']'], '', $text));
+        $vals = array_map(function($t) use ($opts) {
+            return $this->getValueForText($t, $opts);}, $textAry);
+        return $vals;
     }
     private function getComboboxOptions($selId)
     {
