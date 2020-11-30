@@ -14,6 +14,7 @@
  *     addToTaxonNames
  *     updateDataProps
  */
+import { _u } from '~util';
 import * as db from '../../../local-data-main.js';
 /** Add the new record to the prop's stored records object.  */
 export function addToRcrdProp(prop, rcrd, entity) {
@@ -22,15 +23,15 @@ export function addToRcrdProp(prop, rcrd, entity) {
     db.setDataInMemory(prop, rcrds);
 }
 export function addGroupDataToRcrd(prop, rcrd, entity) {
-    const taxa = db.getMmryData('taxon');
+    const taxa = db.getMmryData('taxon');                           /*dbug-log*///console.log("               --addGroupDataToRcrd. [%s] = %O. rcrd = %O", prop, _u('snapshot', [taxa]), _u('snapshot', [rcrd]));
     const taxon = taxa[rcrd.id];
     taxon.group = getTaxonGroup(taxon, taxa);
     db.setDataInMemory('taxon', taxa);
 }
-function getTaxonGroup(taxon, taxa) {
+function getTaxonGroup(taxon, taxa, prev) {
     const parent = taxa[taxon.parent];
     if (parent.group) { return parent.group; }
-    return getTaxonGroup(parent, taxa);
+    return getTaxonGroup(parent, taxa, taxon);
 }
 export function addObjGroupIdToRcrd(prop, rcrd, entity) {
     const ints = db.getMmryData('interaction');

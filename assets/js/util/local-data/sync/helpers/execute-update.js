@@ -90,7 +90,8 @@ function trackDataSyncFailure(e, prop, params) {
     failed.data.push(getFailDataObj(e, prop, params));
 }
 function logSyncFailure(e, prop, params) {
-    console.log('               !!Tracking failure: [%s][%s]->[%s] [func = %s] [params = %O] [e = %O], [rcrd = %s]', params.entity, params.rcrd.id, prop, params.updateFunc.name, params, e, JSON.stringify(params.rcrd));
+    const funcName = params.updateFunc.name;
+    console.log('               !!Tracking failure: [%s][%s]->[%s] [func = %s] [params = %O] [e = %O], [rcrd = %s]', params.entity, params.rcrd.id, prop, funcName, params, e, JSON.stringify(params.rcrd));
 }
 function getFailDataObj(e, prop, params) {
     return {

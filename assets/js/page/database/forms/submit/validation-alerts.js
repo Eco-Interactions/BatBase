@@ -266,12 +266,12 @@ function enableChngPrntBtttn() {
 }
 /* ------------------- NEEDS FAMILY ----------------------------------------- */
 function handleNoFamilyAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    window.setTimeout(() => clearAlert(elem, fLvl), 2000);
+    window.setTimeout(() => clearAlert(elem, fLvl, false), 2000);
     return '<span>Please select a family before creating a genus.</span>';
 }
 /* ----------------------- NEEDS GENUS -------------------------------------- */
 function handleNoGenusAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    window.setTimeout(() => clearAlert(elem, fLvl), 2000);
+    window.setTimeout(() => clearAlert(elem, fLvl, false), 2000);
     return '<span>Please select a genus before creating a species.</span>';
 }
 

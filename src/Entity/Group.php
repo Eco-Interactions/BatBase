@@ -213,7 +213,11 @@ class Group
     {
         $taxa = [];
 
-        if (!is_array($this->taxa)) { return [];} //Needed for test fixtures, not sure why
+        /*
+         * Note: Needed for test fixtures, but breaks migrations. Doesn't seem to
+         * affect anything otherwise. Not sure why.
+         */
+        // if (!is_array($this->taxa)) { return [];}
 
         foreach ($this->taxa as $groupRoot) {
             array_push($taxa, $groupRoot->getTaxon());

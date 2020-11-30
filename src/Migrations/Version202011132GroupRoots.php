@@ -105,6 +105,7 @@ final class Version202011132GroupRoots extends AbstractMigration implements Cont
             $taxon = $this->createTaxon($displayName, $taxon);
             if ($displayName === 'Class Mammalia') { $this->updateBatParent($taxon); }
             $this->persistEntity($taxon, true);
+            $this->flush();
         }
     }
 

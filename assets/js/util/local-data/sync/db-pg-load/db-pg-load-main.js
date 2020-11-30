@@ -51,7 +51,7 @@ function entityHasUpdates(timeOne, timeTwo) {
 function syncDb(entities, dataUpdatedAt) {
     db.getAllStoredData().then(data => db.setMmryDataObj(data))
     .then(() => downloadAndStoreUpdatedData(entities))
-    // .then(() => db.setData('lclDataUpdtdAt', dataUpdatedAt))
+    .then(() => db.setData('lclDataUpdtdAt', dataUpdatedAt))
     .then(initSearchPage)
     .then(db.clearTempMemory);
 }
