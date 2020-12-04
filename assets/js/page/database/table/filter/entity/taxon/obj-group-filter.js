@@ -22,7 +22,9 @@ export function initObjectGroupCombobox() {
 function buildObjectGroupFilter(groups) {
     const opts = groups.filter(r => r.text !== 'Bat');  		    /*dbug-log*///console.log('groups = %O', groups)
     const sel = fM.newSel(opts, '', 'sel-ObjectGroupsFilter');
-    return fM.getFilterField(null, sel);
+    const filter = fM.getFilterField(null, sel);
+    filter.id = 'objGroupFilterCntnr';
+    return filter;
 }
 function finishGroupComboInit(filterEl) {
     const confg = {

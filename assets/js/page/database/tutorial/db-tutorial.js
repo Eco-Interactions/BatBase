@@ -6,21 +6,32 @@
  * set.
  * The search tips available by clicking on "Show Tips".
  *
- * Exports:
+ * Export
  *     startWalkthrough
  *     getFilterPanelSteps
  *     getSavedFilterSteps
  *     getSavedListSteps
  *
- * TOC:
+ * TOC
  *     INIT
  *     SET UP
- *     STEP SET UP
+ *     PRE-STEP SET UP
+ *         EVENT LISTENER
+ *         SET BUTTON EVENTS
+ *         LOAD INTS ON MAP
+ *         SET VIEW
+ *         TOGGLE PANELS
  *     TEAR DOWN
  *     TUTORIAL STEP CONFIG
- *         HELP MODAL STEPS
+ *         INTRO
+ *         TABLE
+ *         FILTER
+ *         CSV
+ *         MAP
+ *         LISTS
+ *         HELP-MODAL STEPS
  */
-import { _db } from '~util';
+import { _cmbx, _db, _u } from '~util';
 import { _table, _ui } from '~db';
 
 let intro, focus, isMapDataAvailable = false;
@@ -67,9 +78,13 @@ function setDbLoadDependentState() {
         return window.setTimeout(setDbLoadDependentState, 200);
     }
     $('#sel-Focus')[0].selectize.addItem('taxa');
-    $('#sel-View')[0].selectize.addItem('3');
+    $('#sel-View')[0].selectize.addItem('1');
 }
-/* ----------------- STEP SET UP -------------------------------------------- */
+/* ====================== PRE-STEP SET UP =================================== */
+function refreshIntro() {
+    intro ? intro.refresh() : null;
+}
+/* ----------------- EVENT LISTENER ----------------------------------------- */
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
     if (!$('#sel-View').val() && intro._currentStep > 2) { return waitForDbLoad('tbl'); }
@@ -100,20 +115,7 @@ function updateFlagAndReturn(geoJson) {
     isMapDataAvailable = !!geoJson;
     return Promise.resolve(!!geoJson);
 }
-function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
-    if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
-}
-function loadLocView(view) {
-    if ($('#sel-Focus')[0].selectize.getValue() !== 'locs') {
-        $('#sel-Focus')[0].selectize.addItem('locs');
-    }
-    window.setTimeout(setLocView(view), 400);
-}
-function setLocView(view) {
-    if ($('#sel-View')[0].selectize.getValue() !== view) {
-        $('#sel-View')[0].selectize.addItem(view);
-    }
-}
+/* -------------------------- SET BUTTON EVENTS ----------------------------- */
 function addBttnEvents() {
     const map = {
         'Full Tutorial': 'full', 'Table View': 'tbl',
@@ -138,6 +140,28 @@ function showTutorial(tutKey) {
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
     if (tutKey === 'map') { intro.goToStep(15); }
 }
+/* --------------------------- LOAD INTS ON MAP ----------------------------- */
+function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
+    if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
+}
+/* -------------------------------- SET VIEW -------------------------------- */
+function setTableView(view) {
+    const val = _cmbx('getOptionValueForText', ['View', view]);
+    _cmbx('setSelVal', ['View', val]);
+    window.setTimeout(refreshIntro, 2000);
+}
+function loadLocView(view) {
+    if ($('#sel-Focus')[0].selectize.getValue() !== 'locs') {
+        $('#sel-Focus')[0].selectize.addItem('locs');
+    }
+    window.setTimeout(setLocView(view), 400);
+}
+function setLocView(view) {
+    if ($('#sel-View')[0].selectize.getValue() !== view) {
+        $('#sel-View')[0].selectize.addItem(view);
+    }
+}
+/* --------------------------- TOGGLE PANELS -------------------------------- */
 function toggleFilterPanelInTutorial(close) {
     const closed = $('#filter-pnl').hasClass('closed');
     if ((close && closed) || !close && !closed) { return; }
@@ -184,6 +208,7 @@ function resetUi() {                                                            
 /* =================== TUTORIAL STEP CONFIG ================================= */
 function getSteps() {
     return [
+/* -------------------------------- INTRO ----------------------------------- */
         {
             element: '#help-opts',
             intro: `<h3><center>Welcome to the Bat Eco-Interactions <br> Database
@@ -214,6 +239,7 @@ function getSteps() {
                 <br><br><center>This tutorial will begin with the default Taxon table.`,
             position: 'top'
         },
+/* -------------------------------- TABLE ----------------------------------- */
         {
             element:'#focus-opts',
             intro: `<h3><center>Select the Table Tree view.<center></h3>
@@ -262,6 +288,8 @@ function getSteps() {
                 level or all at once.</b><br><br>You can try it now.</center>`,
             position: 'right'
         },
+
+/* -------------------------------- FILTER ---------------------------------- */
         {
             element: '#filter',
             intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>
@@ -270,29 +298,40 @@ function getSteps() {
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
-            element: '#filter-col1',
-            intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns
+            element: '#shw-chngd-ints',
+            intro: `<center><b>Check this box to filter interaction records by
+                time published/updated.</b></center><br>Only interactions
+                published/updated after the selected time will be displayed.`,
+            position: 'top',
+            setUpFunc: toggleFilterPanelInTutorial
+        },
+        {
+            element: '#focus-filters',
+            intro: `<h3><center>Taxon Filters</center></h3><br>These dropdowns
                 show all taxa in the selected group present in the table.</b><br><br>
-                 - Select a specific taxon from the dropdown menu and the table will
+                 - Select a specific taxon from one of the rank dropdowns and the table will
                 update to show it at the top of the data tree. The other dropdowns will
-                populate with related taxa.<br>(Filters will not work until the database
+                populate with related taxa.<br><br>(Filters will not work until the database
                 is fully downloaded.)`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
+        },
+        {
+            element: '#objGroupFilterCntnr',
+            intro: `<h3><center>Taxon-Group Filters</center></h3><br>
+                When viewing by Bats, you can filter to show only interactions with
+                selected object-groups, such as only interactions with amphibians, fish,
+                and reptiles. </b><br><br>
+                Some groups contian distinct branches of taxonomy, or sub-groups. These groups
+                can be filtered to selected sub-groups as well.<br><br>(Filters will not
+                work until the database is fully downloaded.)`,
+            position: 'top',
         },
         {
             element: '#filter-col1',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 <b>Locations</b> can be filtered by region, country, and display name.<br><br>
                 <b>Sources</b> can be filtered by author, publisher, and by the type of publication.`,
-            position: 'top',
-            setUpFunc: toggleFilterPanelInTutorial
-        },
-        {
-            element: '#shw-chngd-ints',
-            intro: `<center><b>Check this box to filter interaction records by
-                time published/updated.</b></center><br>Only interactions
-                published/updated after the selected time will be displayed.`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -312,6 +351,7 @@ function getSteps() {
             position: 'right',
             setUpFunc: clearFilters
         },
+/* ----------------------------------- CSV ---------------------------------- */
         {
             element: 'button[name="csv"]',
             intro: `<center><b>As a member of batbase.org, data displayed in
@@ -322,6 +362,7 @@ function getSteps() {
             position: 'left',
             setUpFunc: toggleFilterPanelInTutorial.bind(null, 'close')
         },
+/* -------------------------------- MAP ------------------------------------- */
         {
             element: '#shw-map',
             intro: `<center><b>Interactions in the table can be displayed on a
@@ -389,6 +430,7 @@ function getSteps() {
             position: 'top',
             setUpFunc: loadLocView.bind(null, 'tree')
         },
+/* -------------------------------- LISTS ----------------------------------- */
         {
             element: '#list-opts',
             intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
@@ -398,6 +440,7 @@ function getSteps() {
                 to explore them as a group.<br><br>`,
             position: 'right',
         },
+/* ----------------------------- CONCLUSION --------------------------------- */
         {
             element: '#help-opts',
             intro: `<b><center>Thank you for taking the time to learn about the
@@ -410,7 +453,7 @@ function getSteps() {
         },
     ];
 }
-/* ---------------------- HELP MODAL STEPS --------------------------------- */
+/* ----------------------- HELP-MODAL STEPS --------------------------------- */
 export function getFilterPanelSteps() {
     return [{
         element: '#filter-col1',

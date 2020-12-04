@@ -166,6 +166,16 @@ export function removeOpt(field, val) {
     const selApi = getSelApi(field);
     selApi.removeOption(val, 'silent');
 }
+/* -------------------- GET VALUE FOR TEXT ---------------------------------- */
+export function getOptionValueForText(field, text) {
+    const selApi = getSelApi(field);
+    return getValueForText(text, selApi.options);
+}
+function getValueForText(text, options) {
+    const key = Object.keys(options).filter(o => options[o].text === text);
+    return options[key].value;
+}
+
 /* ======================= HELPERS ========================================== */
 function getFieldConfgKey(field) {
     return field.split(' ').join('');

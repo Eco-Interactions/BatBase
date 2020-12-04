@@ -84,3 +84,6 @@ export function replaceSelOpts() {
 export function removeOpt() {
     return util.removeOpt(...arguments);
 }
+export function getOptionValueForText() {
+    return util.getOptionValueForText(...arguments);
+}
