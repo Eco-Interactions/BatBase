@@ -49,7 +49,7 @@ export function formSubmitError(jqXHR, textStatus) {                /*perm-log*/
 }
 function getFormAlertTag(errTxt) {                                    /*dbug-log*///console.log("errTxt = %O", errTxt)
     return isDuplicateContribution(errTxt) ? 'dupContrib' :
-        isDuplicateAuthor(errTxt) ? 'dupAuth' :
+        isDuplicateAuthor(errTxt) ? 'newDupAuth' :
             errTxt.includes("Duplicate entry") ? 'dupEnt'  : 'genSubmitErr';
 }
 function isDuplicateContribution(errTxt) {
@@ -129,8 +129,12 @@ function getFieldValAlertHandler(tag, action) {
             show: handleOpenSubFormAndReturnAlertMsg
         },
         /* --- SOURCE --- */
+        'newDupAuth': {
+            show: handleNewDupAuthAndReturnAlertMsg
+        },
         'dupAuth': {
-            show: handleDupAuthAndReturnAlertMsg
+            show: handleDupAuthAndReturnAlertMsg,
+            clear: false
         },
         'fillAuthBlanks': {
             show: handleAuthBlanksAndReturnAlertMsg,
@@ -202,10 +206,13 @@ function getRequiredFieldsEmptyAleryMsg(elem, tag, fLvl, fieldName) {
 }
 /* ============================= SOURCE ===================================== */
 /* --------------- DUPLICATE AUTHOR ----------------------------------------- */
-function handleDupAuthAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+function handleNewDupAuthAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return `<span>An author with this name already exists in the database.\n
         If you are sure this is a new author, add initials or modify their name
         and submit again. </span>`;
+}
+function handleDupAuthAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    return `<span>Duplicate selected.</span>`;
 }
 /* --------------- BLANKS IN AUTHOR ORDER ----------------------------------- */
 function handleAuthBlanksAndReturnAlertMsg(elem, tag, fLvl, fieldName) {

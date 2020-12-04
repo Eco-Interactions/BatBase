@@ -12,6 +12,7 @@
  *        TAGS COMBOBOX
  *        SINGLE SELECT/COMBOS
  *        MULTI-SELECT/COMBOS
+ *            AUTH|EDITOR VALIDATION
  *    COMBOBOX HELPERS
  *        INIT
  *        RESET
@@ -100,7 +101,20 @@ function storeMultiSelectValue(fLvl, cnt, field, e) {               /*dbug-log*/
     const valueObj = _state('getFormFieldData', [fLvl, field]).val; /*dbug-log*///console.log('fieldObj = %O', fieldObj);
     valueObj[cnt] = e.target.value || null;
     _state('setFormFieldData', [fLvl, field, valueObj, 'multiSelect']);
-    checkForBlanksInOrder(valueObj, field, fLvl);
+    checkForAuthValIssues(valueObj, field, fLvl);
+}
+/* ---------------- AUTH|EDITOR VALIDATION ---------------------------------- */
+function checkForAuthValIssues(vals, field, fLvl) {
+    const issues = [
+        checkForBlanksInOrder(vals, field, fLvl),
+        checkForDuplicates(vals, field, fLvl)
+    ].filter(i => i);
+    if (issues.length) { return; }
+    ifPreviousAlertClearIt(field, fLvl);
+}
+function ifPreviousAlertClearIt(field, fLvl) {
+    if (!$('#'+field+'_alert.'+fLvl+'-active-alert')) { return; }
+    _val('clrContribFieldAlert', [field, fLvl]);
 }
 /**
  * Author/editor fields must have all fields filled continuously. There can
@@ -108,8 +122,9 @@ function storeMultiSelectValue(fLvl, cnt, field, e) {               /*dbug-log*/
  */
 function checkForBlanksInOrder(vals, field, fLvl) {                 /*dbug-log*///console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
     let blank = checkForBlanks(vals);
-    if (blank === 'found') { return alertBlank(field, fLvl); }
-    ifPreviousAlertClearIt(field, fLvl);
+    if (blank !== 'found') { return; }
+    alertBlank(field, fLvl);
+    return true;
 }
 function checkForBlanks(vals) {
     let blanks = false;
@@ -127,9 +142,11 @@ function alertBlank(field, fLvl) {
     const alertTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
      _val('showFormValAlert', [field, alertTags[field], fLvl]);
 }
-function ifPreviousAlertClearIt(field, fLvl) {
-    if (!$('#'+field+'_alert.'+fLvl+'-active-alert')) { return; }
-    _val('clrContribFieldAlert', [field, fLvl]);
+function checkForDuplicates(vals, field, fLvl) {                    /*dbug-log*///console.log('checkForDuplicates. [%s] vals = %O', field, vals);
+    const dups = Object.values(vals).filter((v, i, self) => self.indexOf(v) !== i);
+    if (!dups.length) { return; }
+    _val('showFormValAlert', [field, 'dupAuth', fLvl]);
+    return true;
 }
 /* ====================== COMBOBOX HELPERS ================================== */
 /* -------------------------- INIT ------------------------------------------ */
