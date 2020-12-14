@@ -14,7 +14,7 @@ Feature: Website's core features
     Scenario:  The home page site-statistics should load
         Given I am on "/"
         When the data-statistics load in the page header
-        Then I should see "10" "Interactions" in the page header
+        Then I should see "12" "Interactions" in the page header
         And I should see "4" "Bat Species" in the page header
         And I should see "4" "Citations" in the page header
         And I should see "6" "Locations" in the page header
@@ -24,7 +24,7 @@ Feature: Website's core features
     Scenario:  The about->database page site statistics should load
         Given I am on "/db"
         When the data-statistics load in the page header
-        Then I should see "10" "Interactions" in the page header
+        Then I should see "12" "Interactions" in the page header
         And I should see "4" "Bat Species" in the page header
         And I should see "3" "Other Species" in the page header
         And I should see "4" "Citations" in the page header
@@ -42,7 +42,7 @@ Feature: Website's core features
     Scenario:  The about->database page site statistics should load
         Given I am on "/search"
         When the data-statistics load in the page header
-        Then I should see "10" "Interactions" in the page header
+        Then I should see "12" "Interactions" in the page header
         And I should see "4" "Bat Species" in the page header
         And I should see "3" "Other Species" in the page header
         And I should see "4" "Citations" in the page header

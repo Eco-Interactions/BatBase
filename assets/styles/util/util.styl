@@ -17,7 +17,7 @@ $dark-green = #2D7853
 $med-green = #36976F
 // --light-g = #3fb58b
 // --lighter-g = #77cab8
-// --lightest-g = #a2dadd
+$lightest-green = #d3f3e8
 
 $phoneWidth = 748px
 $tabletWidth = 1012px
@@ -36,9 +36,13 @@ button
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
     color: #222
     margin: 0 .3em 0 .2em
-    line-height: 1.4;
+    line-height: 1
+    height: 2em
+    font-size: .8em
     background: linear-gradient(#fff, #d3d3d3)
-    cursor: pointer;
+    cursor: pointer
+    min-width: fit-content
+
 form input, form select, form textarea
     font-size: 1em
     padding: .2em
@@ -48,9 +52,9 @@ form input, form select, form textarea
 form label
     margin-right: .5em
 h2
-    font-size: 1.4em;
+    font-size: 1.4em
 h3
-    font-size: 1.3em;
+    font-size: 1.3em
 input[type='button']
     @extend button
 input[type='submit']
@@ -61,8 +65,6 @@ a
    ------------------------- STYLE CLASSES ---------------------------------- */
 label.required:before
     content: "*"
-span.lbl
-    font-weight: bold
 .top-em-mrg
     margin-top: 1em
 .em-mrg
@@ -86,12 +88,12 @@ span.lbl
     justify-content: space-around
 /*------------ Lists -------------*/
 $list-styles
-    list-style-position: outside;
-    display: list-item;
+    list-style-position: outside
+    display: list-item
     padding: .25em .75em .25em 0
 ol>li
     @extends $list-styles
-    list-style: decimal;
+    list-style: decimal
 .disc-list>li
     @extends $list-styles
     list-style: disc

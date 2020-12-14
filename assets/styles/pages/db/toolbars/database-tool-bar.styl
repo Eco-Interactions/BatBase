@@ -1,0 +1,91 @@
+/*
+ * Database options-bar.
+ *
+ * TOC
+ *     CONTAINER
+ *     SECTION
+ *         DATA FOCUS|VIEW
+ *     BUTTONS
+ *         ICONS
+ */
+/* ======================= CONTAINER ======================================== */
+#db-opts   /* .flex-row also on elem */
+    margin: 1em auto 0 auto
+    font-size: 1em
+/* ========================= SECTION ======================================== */
+#db-opts>div
+    padding: .5em
+    align-items: center
+/* --------------------- DATA FOCUS|VIEW ------------------------------------ */
+#focus-opts span
+    padding-top: .3em
+
+.focus-sel
+    width: 5.5em
+    margin: 0 .5em
+
+.view-sel
+    width: 7em
+    margin-left: .5em
+/* ========================= BUTTONS ======================================== */
+#db-opts button
+    height: 2em
+    padding: .4em
+    width: fit-content
+/* -------------------------- ICONS ----------------------------------------- */
+$icon
+    float: left
+    width: 1.2em
+    margin-right: .3em
+
+/* ______ TUTORIAL|TIPS _____ */
+#strt-tut:before
+    @extends $icon
+    content: url(../../../images/icons/question.svg)
+    width: .7em
+
+#show-tips:before
+    @extends $icon
+    content: url(../../../images/icons/info.svg)
+    width: .4em
+
+/* ______ INTERACTION LISTS _____ */
+#lists:before
+    @extends $icon
+    content: url(../../../images/icons/tasks.svg)
+
+/* ______ DATA FILTERS _____ */
+#filter:before
+    @extends $icon
+    content: url(../../../images/icons/filter.svg)
+    width: 1em
+
+button[name="reset-tbl"]:before, button[name="clear-list"]:before
+    @extends $icon
+    content: url(../../../images/icons/undo-alt.svg)
+    margin-left: .3em
+
+/* ______ MISC: MAP & CSV _____ */
+#shw-map:before
+    @extends $icon
+    content: url(../../../images/icons/globe-africa.svg)
+
+button[name="csv"]:before
+    @extends $icon
+    content: url(../../../images/icons/file-download.svg)
+    width: .9em
+
+/* ______ EDITOR|ADMIN _____ */
+#new-data:before
+    @extends $icon
+    content: url(../../../images/icons/plus.svg)
+    width: 1em
+
+#rvw-data:before
+    @extends $icon
+    content: url(../../../images/icons/eye.svg)
+
+#data-help:before
+    @extends $icon
+    content: url(../../../images/icons/life-ring.svg)
+    margin-left: .3em

@@ -12,12 +12,12 @@ use Doctrine\ORM\EntityRepository;
  */
 class TaxonRepository extends EntityRepository
 {
-    public function findAllNonBatTaxa($batRealm)
+    public function findAllNonBatTaxa($batGroup)
     {
         return $this->createQueryBuilder('taxon')
-            ->leftJoin('taxon.realm', 'realm_taxon')
-            ->andWhere('realm_taxon.realm != :batRealm')
-            ->setParameter('batRealm', $batRealm)
+            ->leftJoin('taxon.group', 'group_taxon')
+            ->andWhere('group_taxon.group != :batGroup')
+            ->setParameter('batGroup', $batGroup)
             ->getQuery()
             ->execute();
     }

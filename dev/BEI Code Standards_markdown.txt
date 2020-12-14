@@ -1,0 +1,29 @@
+# BEI Code Standards
+
+## Elem Attributes
+    - ID for comboboxes: sel-[FieldName]
+      - Filter combos: { id: sel-filter-[FieldName], name: [FieldName] Filter }
+
+## Logs
+    /*perm-log*/
+    /*temp-log*/
+    /*dbug-log*/
+
+    TODO
+    REMOVE
+
+## DOCS
+    Block Tags:
+      @args {type} name - description (if array, type = typeInArray[])
+        Object props -> {type} ObjName.name - description,
+        ArrayObject props -> {type} ArrayName[].prop,
+        Optional -> @args {type} [name=default] - description
+      @prop  {type} name - description,
+      @async,
+      @fires (event that may fire),
+      @module name/sub(.export),
+      @see module:foo/bar(<moduleName>),
+      @requires <moduleName>,
+      @return {type} - description,
+      @since,
+      @todo

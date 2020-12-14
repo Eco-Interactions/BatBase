@@ -56,7 +56,7 @@ class Taxon
     private $name;
 
     /**
-     * True if the taxon is the root of the realm's taxon tree.
+     * True if the taxon is the root of the group's taxon tree.
      * @var bool
      *
      * @ORM\Column(name="is_root", type="boolean", nullable=true)
@@ -107,19 +107,19 @@ class Taxon
     private $linkUrl;
 
     /**
-     * @var \App\Entity\Realm
+     * @var \App\Entity\Group
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\RealmRoot", mappedBy="taxon", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="App\Entity\GroupRoot", mappedBy="taxon", cascade={"persist", "remove"})
      */
-    private $realm;
+    private $group;
 
     /**
-     * @var \App\Entity\Level
+     * @var \App\Entity\Rank
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumn(name="level_id", referencedColumnName="id", nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Rank", inversedBy="taxons")
+     * @ORM\JoinColumn(name="rank_id", referencedColumnName="id", nullable=false)
      */
-    private $level;
+    private $rank;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -432,102 +432,119 @@ class Taxon
     }
 
     /**
-     * Set Realm.
+     * Set Group.
      *
-     * @param \App\Entity\RealmRoot $realm
+     * @param \App\Entity\GroupRoot $group
      *
      * @return Taxon
      */
-    public function setRealm(\App\Entity\RealmRoot $realm)
+    public function setGroup(\App\Entity\GroupRoot $group)
     {
-        $this->realm = $realm;
+        $this->group = $group;
 
         return $this;
     }
 
     /**
-     * Get Realm.
+     * Get Group.
      *
-     * @return \App\Entity\Realm
+     * @return \App\Entity\Group
      */
-    public function getRealm()
+    public function getGroup()
     {
-        return $this->realm ? $this->realm->getRealm() : null;
+        return $this->group ? $this->group->getGroup() : null;
     }
 
     /**
-     * Get Realm data.
+     * Get Group data.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("realm")
+     * @JMS\SerializedName("group")
      * @Groups({"flattened"})
      *
-     * @return \App\Entity\Realm
+     * @return \App\Entity\Group
      */
-    public function getRealmData()
+    public function getGroupData()
     {
-        $realm = $this->getTaxonRealm();
-        if (!$realm) { return null; }
+        $group = $this->getTaxonGroup();
+        if (!$group) { return null; }
         return [
-            'id' => $realm->getId(),
-            'displayName' => $realm->getDisplayName(),
-            'pluralName' => $realm->getPluralName()
+            'id' => $group->getId(),
+            'displayName' => $group->getDisplayName(),
+            'pluralName' => $group->getPluralName()
         ];
     }
 
     /**
-     * Get Taxon Realm.
+     * Get Taxon Group.
      *
-     * @return Realm
+     * @return Group
      */
-    public function getTaxonRealm()
+    public function getTaxonGroup()
     {
-        return $this->findRealmAndReturnObj($this);
+        return $this->findGroupAndReturnObj($this);
     }
 
-    private function findRealmAndReturnObj($taxon)
+    private function findGroupAndReturnObj($taxon)
+    {
+        $root = $this->getRootTaxon($taxon);
+        return $root ? $root->getGroup() : false;
+    }
+
+    private function getRootTaxon($taxon)
     {
         if ($taxon->getSlug() === 'kingdom-animalia') { return false; }
-        if ($taxon->getIsRoot()) { return $taxon->getRealm(); }
+        if ($taxon->getIsRoot()) { return $taxon; }
         $parent = $taxon->getParentTaxon();
         if (!$parent) { return false; }
-        return $this->findRealmAndReturnObj($parent);
+        return $this->getRootTaxon($parent);
     }
 
     /**
-     * Set level.
+     * Get Group data.
      *
-     * @param \App\Entity\Level $level
+     * @return \App\Entity\Group
+     */
+    public function getSubGroup()
+    {
+        $groupRoot = $this->getRootTaxon($this);
+        return $groupRoot->getName();
+    }
+
+    /**
+     * Set rank.
+     *
+     * @param \App\Entity\Rank $rank
      *
      * @return Taxon
      */
-    public function setLevel(\App\Entity\Level $level)
+    public function setRank(\App\Entity\Rank $rank)
     {
-        $this->level = $level;
+        $this->rank = $rank;
 
         return $this;
     }
 
     /**
-     * Get level.
+     * Get rank.
      *
-     * @return \App\Entity\Level
+     * @return \App\Entity\Rank
      */
-    public function getLevel()
+    public function getRank()
     {
-        return $this->level;
+        return $this->rank;
     }
 
     /**
-     * Get level id and displayName.
+     * Get rank id and displayName.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("level")
+     * @JMS\SerializedName("rank")
      * @Groups({"normalized", "flattened"})
      */
-    public function getLevelData()
+    public function getRankData()
     {
         return [
-            "id" => $this->level->getId(),
-            "displayName" => $this->level->getDisplayName()
+            "id" => $this->rank->getId(),
+            "displayName" => $this->rank->getDisplayName()
         ];
     }
 

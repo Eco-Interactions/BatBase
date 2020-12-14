@@ -3,8 +3,7 @@
  */
 /* ---------------- Tab container in db-options panel ----------------------- */
 #filter-opts
-    padding: 5px
-    width: 135px
+    padding: .5em
     border-left: 1px black solid
     border-right: 1px black solid
 
@@ -12,72 +11,43 @@
     background: rgba(121, 201, 183, .1)
 /* ---------------- Filter Options Panel ------------------------------------ */
 #filter-pnl
-    max-height: 222px
-    border-radius: 10px
+    max-height: 17em
+    border-radius: .8em
 
 #filter-pnl.vert
-    max-height: 444px
+    max-height: 34em
     border-left: none
 
 #filter-pnl.closed
     max-height: 0
-
-#filter-pnl span
-    padding-top: 5px
-
-.sel-cntnr           /* .flex-row also on elems */
-    margin: .3em
-    flex: 0 0 auto
-    width: 222px
-    justify-content: space-between
 /* ----------- Table-Focus and Date Filters (First) Column ------------------ */
 #filter-col1
-    flex: 0 1 618px
+    width: 48em
     border-right: black 1px solid
 
+#filter-col1 span
+    min-width: 3.6em
+
 #filter-col1.vert
-    flex: initial
     border-bottom: black 1px solid
     border-right: none
 
 #focus-filter-hdr
     align-self: center
-    padding-bottom: 5px
+    padding-bottom: .7em
     font-weight: 600
 
 #focus-filters
     margin-bottom: .75em
-/* ---- Text filter ---- */
-.txtLbl
-    width: 303px
 
-.txtLbl input
-    height: 27px
-    width: 250px
-/* ---- Focus Specific ---- */
-.taxonLbl
-    margin: .3em 0 0 1em
-    width: 273px
+#focus-filters .field-cntnr
+    max-width: 26em
 
-.taxonSel   /*selectize combobox*/
-    width: 202px
+#focus-filters label
+    margin: .3em
 
-.objLbl
-    margin: .3em 0 0 1em
-    width: 563px
-
-.objSel
-    width: 492px
-
-.locLbl
-    width: 282px
-
-.locSel
-    width: 217px
-
-.locTxtInput
-    width: 238px !important
 /* --- Time Updated Filter --- */
+
 #shw-chngd-ints
     width: 100%
     margin-top: auto
@@ -88,59 +58,38 @@
     margin-bottom: 5px
 
 #shw-chngd
-    margin: 7px
+    margin: .5em
 
 .date-fltr-sel
-    margin: 0 .5em
-    width: 111px
+    margin: 0 .5em .5em .5em
+    width: 7em
 
 #filter-cal, #filter-cal+.form-control.input
-    width: 202px
-    font-size: .85em
-    padding: 4px
-    margin-left: 11px
+    padding: .3em
+    margin-left: .5em
 /* ----------------- Filter Sets (Second) Column ---------------------------- */
 #stored-filters
-    flex: 1 0 472px
-    padding-left: 10px
-
-#stored-filters.vert
-    flex: initial
+    flex-grow: 1
 
 #stored-filters button
-    height: 27px
-    width: 88px
+    height: 2em
+    width: 4em
 
 #stored-filters textarea
     font-weight: 600
     font-size: .8em
-    padding-left: 3px
-    flex-grow: 1
 
 .saved-filters-sel
-    width: 236px
+    width: 11em
+    margin-left: 0 !important
 
 .filter-set-details
-    flex-grow: 1
+    margin-left: .3em
 
 #filter-set-name
-    width: 46px !important
-    margin: 0 .3em 0 .6em
+    margin-left: .5em
 
 #filter-set-name + input
-    min-width: 222px
     font-weight: 600
     font-size: .8em
-    padding-left: 3px
-    flex-grow: 1
-
-.fltr-desc
-    width: 95px
-    padding-top: 4px
-
-#apply-filter
-    margin-top: 5px
-
-/*#delete-filter
-    align-self: flex-start
-*/
+    margin-left: .5em

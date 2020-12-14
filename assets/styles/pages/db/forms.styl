@@ -7,6 +7,9 @@
 //      Row Containers
 // Form Specific
 /*-------------------------- Database CRUD Popup -----------------------------*/
+/* ============= DETAIL PANEL =================== */
+#det-cnt-cntnr
+    margin-bottom: 3em
 /* ============= Core Form =================== */
 .form-ovrly
     align-items: center
@@ -19,10 +22,10 @@
     justify-content: space-between
     flex-direction: column
     overflow-y: scroll;
+    font-size: .9em
 
 div[id$="-help"] //Form tutorial/guide buttons
     width: 100%
-    // justify-content: flex-end
 
 #form-main
     padding: 5px 0 0 5px;
@@ -50,7 +53,6 @@ div[id$="_Rows"] //Form field container
     height 88vh
     max-height: 88vh
     min-width: 1200px
-    // max-width: 666px
 
 #form-main.med-form
     height 77vh
@@ -98,7 +100,6 @@ $sub-form-styles
     width: 100%
 /* --------- Fields -------- */
 #top-form label
-    font-size: 1em
     padding: 9px 0 2px 0
     flex: 0 1 121px
 
@@ -126,13 +127,16 @@ $sub-form-styles
 .form-popup input:invalid
     border: 1px dashed red
 /* ======================= FORM SPECIFIC ==================================== */
-#Realm_row .med-field //realm combobox class
+#Group_row .med-field //group combobox class
     width: webkit-fill-available
     margin-left: -2em
 
-#Realm_row .selectize-dropdown
-    margin-left 0
+#Sub-Group_row .med-field
+    width: webkit-fill-available
+    margin-left: -1em
 
+#Group_row .selectize-dropdown, #Sub-Group_row .selectize-dropdown
+    margin-left 0
 
 /* -------------- TO BE SORTED ------------------- */
 .warn-msg

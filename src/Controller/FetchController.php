@@ -72,14 +72,14 @@ class FetchController extends AbstractController
         $this->em = $this->getDoctrine()->getManager();
         $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
 
-        $level = $this->serializeEntityRecords('Level');
-        $realm = $this->serializeEntityRecords('Realm');
-        $realmRoot = $this->serializeEntityRecords('RealmRoot');
+        $rank = $this->serializeEntityRecords('Rank');
+        $group = $this->serializeEntityRecords('Group');
+        $groupRoot = $this->serializeEntityRecords('GroupRoot');
         $taxa = $this->serializeEntityRecords('Taxon', 'normalized');
 
         $response = new JsonResponse();
         $response->setData(array(
-            'level' => $level,  'realm' => $realm,  'realmRoot' => $realmRoot,
+            'rank' => $rank,  'group' => $group,  'groupRoot' => $groupRoot,
             'taxon' => $taxa
         ));
         return $response;
@@ -223,12 +223,18 @@ class FetchController extends AbstractController
         $rcrd = false;
         try {
             $rcrd = $this->serializer->serialize($entity, 'json', $this->setGroups($group));
-        } catch (\Throwable $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-            $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        } catch (\Exception $e) {                                               //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n\n");
-            $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        } catch (\Throwable $e) {
+            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
+        } catch (\Exception $e) {
+            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
         }
         return $rcrd;
+    }
+    private function logErr($lineNum, $msg, $trace)
+    {
+        $this->logger->error("\n\n### Error @ [$lineNum] = $msg\n$trace\n");
+        if ($this->getParameter('env') === 'prod') { return; };
+        print("\n\n### Error @ [$lineNum] = $msg\n$trace\n");
     }
     private function setGroups($group)
     {

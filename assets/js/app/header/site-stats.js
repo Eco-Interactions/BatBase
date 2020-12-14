@@ -1,16 +1,14 @@
 /**
  * Loads site statistics relevant to the current page.
  *
- * Exports
+ * Export
  * 	initHeaderStats
- *
  *
  * TOC
  * 		INIT STAT HEADER
  * 		LOAD STAT HEADER
- *
  */
-import { sendAjaxQuery } from '../util/util-main.js';
+import { _u } from '~util';
 
 /** @type {Object} Page URL (k) statdata-set key (v) */
 const pageStatKeys = {
@@ -28,18 +26,23 @@ const loadHeaderData = {
 	'project': loadAboutProjectHeaderStats
 }
 /* ------------------------ INIT STAT HEADER -------------------------------- */
-export default function initHeaderStats(pgPath) {
-	const pg = pgPath || 'home';
-	if (!ifPgHasStatistics(pg)) { return }
-    const envUrl = $('body').data("base-url");
-	sendAjaxQuery({tag: pageStatKeys[pg]}, envUrl + 'stats/', loadPageHeaderStatistics);
+export default function initHeaderStats() {
+	const statTag = getStatTagForPage();
+	if (!statTag) { return }
+	_u('sendAjaxQuery', [{tag: statTag}, 'stats/', loadPageHeaderStatistics]);
 
-	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  				//console.log('loadPageHeaderStatistics. args = %O', arguments);
-		loadHeaderData[pageStatKeys[pg]](data);
+	function loadPageHeaderStatistics(data, textStatus, jqXHR) {  	/*dbug-log*///console.log('loadPageHeaderStatistics. args = %O', arguments);
+		loadHeaderData[statTag](data);
 	}
 }
-function ifPgHasStatistics(pg) {
-	return Object.keys(pageStatKeys).indexOf(pg) !== -1;
+function getStatTagForPage() {
+	const pg = getPageName(window.location.pathname.split('/'));    /*dbug-log*///console.log('getStatTagForPage [%s] ?[%s]', pg, pageStatKeys[pg]);
+	return pageStatKeys[pg];
+}
+function getPageName(path) {
+    let pg = path.pop();
+    pg = !pg ? 'home' : (path.pop() === 'register' ? 'register' : pg)
+    return pg;
 }
 /* ------------------------ LOAD STAT HEADER -------------------------------- */
 function updateHeaderStats(counts) {
