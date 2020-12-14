@@ -32,7 +32,7 @@ class UserRepository extends EntityRepository
         $qb = $this->createQueryBuilder('u')
             ->where('u.lastActivityAt > :dt')
             ->orderBy('u.username', 'ASC')
-            ->setParameter('dt', new \DateTime('-24 hours', new \DateTimeZone('America/Los_Angeles') ));
+            ->setParameter('dt', new \DateTime('-24 hours', new \DateTimeZone('UTC')));
 
         return $qb->getQuery()->getResult();
     }

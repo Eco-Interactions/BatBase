@@ -26,7 +26,7 @@ export function addCoreEntityData(entity, rcrd) {                   /*dbug-log*/
  * Updates the stored core-records array and the stored entityType array.
  * Note: Taxa are the only core entity without 'types'.
  */
-function updateCoreData(entity, rcrd) {                             /*dbug-log*///console.log("           --Updating Record data", entity);
+function updateCoreData(entity, rcrd) {                             /*dbug-log*///console.log("           --Updating [%s] data = %O", entity, rcrd);
     a.addToRcrdProp(entity, rcrd);
     handleEntityLocalDataUpdates(entity, rcrd);
 }

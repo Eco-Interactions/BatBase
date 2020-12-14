@@ -179,7 +179,7 @@ class User extends BaseUser implements AdvancedUserInterface
      */
     public function isActiveNow()
     {   // Delay during wich the user will be considered as still active
-        $delay = new \DateTime('2 minutes ago', new \DateTimeZone('America/Los_Angeles'));
+        $delay = new \DateTime('2 minutes ago', new \DateTimeZone('UTC'));
         return ( $this->getLastActivityAt() > $delay );
     }
 

@@ -113,7 +113,7 @@ class FileUploadController extends AbstractController
         }
         $user = $this->security->getUser();
         $entity->setUpdatedBy($user);
-        $entity->setUpdated(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
+        $entity->setUpdated(new \DateTime('now', new \DateTimeZone('UTC')));
         $em->persist($entity);
         $em->flush();
 

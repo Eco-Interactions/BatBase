@@ -23,9 +23,9 @@ export function addToRcrdProp(prop, rcrd, entity) {
     db.setDataInMemory(prop, rcrds);
 }
 export function addGroupDataToRcrd(prop, rcrd, entity) {
-    const taxa = db.getMmryData('taxon');                           /*dbug-log*///console.log("               --addGroupDataToRcrd. [%s] = %O. rcrd = %O", prop, _u('snapshot', [taxa]), _u('snapshot', [rcrd]));
+    const taxa = db.getMmryData('taxon');                           /*dbug-log*///console.log("               --addGroupDataToRcrd. taxa = %O. rcrd = %O", _u('snapshot', [taxa]), _u('snapshot', [rcrd]));
     const taxon = taxa[rcrd.id];
-    taxon.group = getTaxonGroup(taxon, taxa);
+    taxon.group = taxon.group ? taxon.group : getTaxonGroup(taxon, taxa);
     db.setDataInMemory('taxon', taxa);
 }
 function getTaxonGroup(taxon, taxa, prev) {
@@ -36,7 +36,7 @@ function getTaxonGroup(taxon, taxa, prev) {
 export function addObjGroupIdToRcrd(prop, rcrd, entity) {
     const ints = db.getMmryData('interaction');
     const taxa = db.getMmryData('taxon');
-    const taxon = taxa[rcrd.object];
+    const taxon = taxa[rcrd.object];                                /*dbug-log*///console.log("               --addObjGroupIdToRcrd. taxon = %O. rcrd = %O", taxon, _u('snapshot', [rcrd]));
     rcrd.objGroup = taxon.group.id;
     db.setDataInMemory('interaction', ints);
 }

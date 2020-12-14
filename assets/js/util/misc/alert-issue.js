@@ -12,7 +12,7 @@
  *     ALERT USER
  */
 import { _u } from '~util';
-import { _table, } from '~db';
+import { _filter, _table } from '~db';
 /* =================== CREATE SENTRY EVENT ================================== */
 /** Sends Error object to Sentry, issue tracker. */
 export function reportErr(e) {
