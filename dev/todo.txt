@@ -6,15 +6,26 @@
 ### __________________________ CURRENT _____________________________________ ###
 > ____ LOGS ____
 SINCE LAST TEAM UPDATE:
+
+
+
     - Forms
+        - Taxon edit form
+            - 1 group show as before - the realm root class and name
+            - multiple groups show combo with
+            - validates that taxon rank is included in the new sub-groups ranks (eg, prevents class taxa from moving to a sub-group that should start at Family)
 
     - DB Page
-
+        - List panel no longer resets panel filters
+        - filters restyled
+        - icons added to the tutorial and tips buttons
     - Data
 
     - Bugs
 
     - QUESTIONS
+        - new feedback popup text
+        - set Tuli as user or editor? She'll show up on editor lists
 
 SINCE LAST SERVER UPDATE:
 
@@ -46,43 +57,61 @@ TEAM:
         - records added/edited
 
 TAYLOR:
-    - Reach out to users who experience issues/bugs that get resolved to thank them
-        for inadvertantly leading to sloving a bug in the code and invite them to check back?
-
-    2083-2085?
 
 
 > ____ TASKS _____
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
-    - Bugs
+    - b4 server update
+        - add taxon groups and sub groups to the definitions page
+            - link in forms
+
+
+    - random
+        - disable other rank combos when a rank create formis open
+        - form fields/rows/everything em => pxs
+        - create map -> on map click, drop teal marker.
+        - refactoring
+            - replace tState with getTableState where sensible
+            - taxon parent edit form confg tag shouldn't be 'object', and that's really not what's happening anyway... rename
+
+    - migration
+        - delete unused test users
+            - document remaining
+        - regenerate all citation text
+        - remove all periods at the end of author display names, and their sources
+        - trim any field that could have accidental white space
+            - trailing commas for author display names
+        - saved fitler sets
+            - replace 'Object Realm' with 'Object Group'
+            - update view ids for taxon focus from taxon id to group id
+        - Family Alcaligenaceae (4232) needs to be moved to Bacteria, and the higher taxa should be:
+            Class: Betaproteobacteria
+            Order: Alcaligenaceae
 
     - Site text update
-        - future devs
         - Project ->
-            - announcements
             - team page
 
-    - Adding form hints
-        - addFinalInfoStep about info in tooltips on fields
 
     - Sort invalid urls by the editor who created the source
 
-    - Data: see Data Cleanup below
-
     - fix cronjob to clean up hourly backups
+
     - testing
         - add interaction show page to tests
-        - page stat headers: about, db, home
-        - test editor report form
         - test data reset
         - test all validation 'error' handlers
         - csv
 
-    - Add multiple realm root functionality
 
+        - add glow around favicon for "dark" browser UIs?
     - optimize data sync downloads. It takes almost as long as full download,
         depending on how much needs to be updated
+    - data-publisher filter should only allow year selection
+    - fix panel elems in row containers that flex for sizing and remove custom styles.
+    - handle 'lists' like row-data-filters
+
 
 NEXT:
     - Review Data
@@ -112,6 +141,8 @@ NEXT:
 
     - Create model of local storage
         - of entity relations
+    - How to be able to ensure taxon display names are unique? Or better way to
+        label rank-combo opts in local storage
 
 > ____ DATA CLEANUP ____
     - forms - Add 'trim' to all values before submitting
@@ -230,3 +261,20 @@ TODOs:
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
+
+
+## WRITE DOCS
+    Block Tags:
+      @args {type} name - description (if array, type = typeInArray[])
+        Object props -> {type} ObjName.name - description,
+        ArrayObject props -> {type} ArrayName[].prop,
+        Optional -> @args {type} [name=default] - description
+      @prop  {type} name - description,
+      @async,
+      @fires (event that may fire),
+      @module name/sub(.export),
+      @see module:foo/bar(<moduleName>),
+      @requires <moduleName>,
+      @return {type} - description,
+      @since,
+      @todo

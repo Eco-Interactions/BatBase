@@ -13,6 +13,7 @@
  *     LOCAL-DATA UPDATE
  */
 import { _u } from '~util';
+import { _forms } from '~db';
 import * as db from '../../local-data-main.js';
 import { updateLocalEntityData, hasEdits } from '../db-sync-main.js';
 
