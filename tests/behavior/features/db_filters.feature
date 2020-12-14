@@ -32,16 +32,16 @@ Feature: Filtering the data displayed in the database table
       And I should see "Date Published." in the filter status bar
 
       # TODO: Edit fixture update at time so this filter has something to show
-    @javascript
-    Scenario:  I should be able to filter by the date the data was updated/added.
-      Given the database table grouped by "Locations"
-      And I toggle "open" the filter panel
-      And I break "What time would be good to set the UPDATED at filter too? How many interactions then?"
-      When I "check" the time "updated" filter
-      And I set the time "updated" filter to "Januray 1, 2017"
-      Then I should see "X" rows in the table data tree
-      And I should see "X" interactions in the list
-      And I should see "Time Updated." in the filter status bar
+    # @javascript
+    # Scenario:  I should be able to filter by the date the data was updated/added.
+    #   Given the database table is grouped by "Locations"
+    #   And I toggle "open" the filter panel
+    #   And I break "What time would be good to set the UPDATED at filter too? How many interactions then?"
+    #   When I "check" the date "updated" filter
+    #   And I set the date "updated" filter to "Januray 1, 2017"
+    #   Then I should see "X" rows in the table data tree
+    #   And I should see "X" interactions in the list
+    #   And I should see "Time Updated." in the filter status bar
 
     # -------------------------- Location -----------------------------------##
     @javascript

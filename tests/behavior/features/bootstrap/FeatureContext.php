@@ -1808,7 +1808,7 @@ class FeatureContext extends RawMinkContext implements Context
     private function editorChangesTaxonData()
     {                                                                           $this->log("\n        Editor changing Taxon data.\n");
         $this->theDatabaseTableIsGroupedBy('Taxa');
-        $this->iGroupInteractionsBy('Arthropoda');
+        $this->iGroupInteractionsBy('Arthropods');
         $this->editTaxonData();
         $this->moveTaxonInteraction();
     }
@@ -1833,7 +1833,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iWaitForTheFormToClose('top');
         $this->iUncheckTheDateUpdatedFilter();
         $this->theDatabaseTableIsGroupedBy('Taxa');
-        $this->iGroupInteractionsBy('Arthropoda');
+        $this->iGroupInteractionsBy('Arthropods');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
         $this->iExpandInTheDataTree('Family Sphingidaey');
@@ -1857,7 +1857,7 @@ class FeatureContext extends RawMinkContext implements Context
     private function checkTaxonData()
     {
         $this->theDatabaseTableIsGroupedBy('Taxa');
-        $this->iGroupInteractionsBy('Arthropoda');
+        $this->iGroupInteractionsBy('Arthropods');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
         $this->iExpandInTheDataTree('Family Sphingidaey');

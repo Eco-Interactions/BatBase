@@ -15,7 +15,7 @@ Encore
 /* -------- PROD ------- */
     /* Sends source maps to Sentry for bug/issue tracking. */
     // .addPlugin(new SentryWebpackPlugin({
-    //     include: '.', test: [/\.js$/], release: '20201117_TEST',
+    //     include: '.', test: [/\.js$/], release: '20201213_BB.',
     //     debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',
     //         'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
     // }))

@@ -311,7 +311,7 @@ Feature: Add new data to the database
         Then I should see "2" interactions under "Unspecified SGenus Interactions"
         And the expected data in the interaction row
         ## Object ##
-        And I view interactions by "Arthropoda"
+        And I view interactions by "Arthropods"
         And I filter the table to interactions created today
         And I expand "Class Object Class" in the data tree
         And I expand "Order Object Order" in the data tree
@@ -371,7 +371,7 @@ Feature: Add new data to the database
     # @javascript
     # Scenario:  I should see the newly created interactions under the object taxon
     #     Given the database table is grouped by "Taxa"
-    #     And I view interactions by "Arthropoda"
+    #     And I view interactions by "Arthropods"
     #     And I filter the table to interactions created today
     #     When I expand "Class Object Class" in the data tree
     #     When I expand "Order Object Order" in the data tree

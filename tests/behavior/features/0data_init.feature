@@ -14,11 +14,11 @@ Feature: Search Page Database Initialization
 
     ###----------------------- Taxon View -----------------------------------###
     @javascript
-    Scenario:  There should be 10 initial bat interactions in the database table.
+    Scenario:  There should be 12 initial bat interactions in the database table.
         Given I view interactions by "Bats"
         And I break "Open console"
         Then I see "Order Chiroptera"
-        And the count column should show "10" interactions
+        And the count column should show "12" interactions
         And data in the interaction rows
 
     @javascript
@@ -30,11 +30,17 @@ Feature: Search Page Database Initialization
 
     @javascript
     Scenario:  There should be 3 initial arthropod interactions in the database table.
-        Given I view interactions by "Arthropoda"
+        Given I view interactions by "Arthropods"
         Then I see "Phylum Arthropoda"
         And the count column should show "3" interactions
         And data in the interaction rows
 
+    @javascript
+    Scenario:  There should be 2 initial parasite interactions in the database table.
+        Given I view interactions by "Parasites"
+        Then I see "Phylum Arthropoda"
+        # And the count column should show "2" interactions
+        And data in the interaction rows
     ##------------------------- Location View -------------------------------###
     @javascript
     Scenario:  There should be 3 region location in initial the database table.

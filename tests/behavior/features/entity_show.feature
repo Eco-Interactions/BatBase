@@ -1,5 +1,5 @@
-# @app-entity
-# Feature: Entity show pages should load with the entity's data
+@app-entity
+Feature: Entity show pages should load with the entity's data
 #     In order to see all data on a specific entity
 #     As a web visitor
 #     I should be able see the entity's data displayed on the show page.
