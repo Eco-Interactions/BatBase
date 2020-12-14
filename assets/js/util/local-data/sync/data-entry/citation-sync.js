@@ -1,8 +1,10 @@
 /**
  * When Source data is changed, all related citation fullText is regenerated.
+ * Regenerates all citations for passed ids.
  *
  * Export
  *     ifSourceDataEditedUpdatedCitations
+ *     updateCitations
  *
  * TOC
  *     UPDATE RELATED CITATIONS
@@ -15,6 +17,7 @@ import * as db from '../../local-data-main.js';
 import { updateLocalEntityData, hasEdits } from '../db-sync-main.js';
 
 let srcRcrds;
+// window.setTimeout(updateAllCitations, 1000);  //Used for data-cleanup
 
 export default function ifSourceDataEditedUpdatedCitations(data) {  /*dbug-log*///console.log('ifSourceDataEditedUpdatedCitations data = %O', data);
     if (!isSrcDataEdited(data)) { return Promise.resolve(); }
@@ -54,6 +57,14 @@ function getSourceDetailData() {
     }
 }
 /* -------------------- REGENERATE CITATIONS -------------------------------- */
+/** Regenerates all citation data in server data. */
+function updateAllCitations() {                                     /*dbug-log*///console.log('updateAllCitations');
+    db.getData(['author', 'citSrcs', 'citation', 'publisher', 'source'])
+    .then(data => {
+        srcRcrds = data.source;
+        updateCitations(data.citSrcs, data)
+    });
+}
 function updateCitations(citIds, rcrds) {                           /*dbug-log*///console.log('updateCitations. citIds = %O, rcrds = %O', citIds, rcrds);
     const proms = [];
     citIds.forEach(id => proms.push(updateCitText(id)));
