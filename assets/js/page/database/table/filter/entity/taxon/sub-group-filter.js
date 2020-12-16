@@ -15,7 +15,7 @@ import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
-export function initSubGroupFilter(tblState) {
+export function initSubGroupFilter(tblState) {                      /*temp-log*/console.log("       --Loading taxon Sub-Group filters.");
     return getSubGroupOpts(tblState)
         .then(getSubGroupFilter)
         .then(finishSubGroupComboInit);

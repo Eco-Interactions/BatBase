@@ -28,7 +28,7 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
     $('#sel-'+role).data('loading', true);
     return buildTaxonSelectForm(role, gId)
         .then(form => appendTxnFormAndInitCombos(role, form))
-        .then(() => finishTaxonSelectBuild(role));
+        .then(() => finishTaxonSelectBuild(role, gId));
 }
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
 function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('-------------build[%s]Taxon[%s]SelectForm', role, groupId);
@@ -45,9 +45,9 @@ function addNewFormState(role) {
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first rank-combo into focus. Clears the [role]'s' combobox.
  */
-function finishTaxonSelectBuild(role) {
+function finishTaxonSelectBuild(role, gId) {
     addSelectRootTaxonBttn();
-    customizeElemsForTaxonSelectForm(role);
+    customizeElemsForTaxonSelectForm(role, gId);
     if (role === 'Object') { return; } //For Object, called after group-selection builds rank rows.
     selectPrevTaxonAndResetRoleField(role);
 }
@@ -80,13 +80,13 @@ function getUnspecifiedBttnAttrs() {
 }
 /* ------------- CUSTOMIZE ELEMS FOR TAXON SELECT-FORM ---------------------- */
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
-function customizeElemsForTaxonSelectForm(role) {
+function customizeElemsForTaxonSelectForm(role, gId) {
     $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
     $('#sub-hdr').append(getTaxonExitButton(role));
     $('#sub-submit')[0].value = "Select Taxon";
     $('#sub-cancel')[0].value = "Reset";
     $('#sub-submit').unbind("click").click(_form.bind(null, 'selectRoleTaxon'));
-    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role));
+    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role, gId));
 }
 function getTaxonExitButton(role) {
     const bttn = _elems('getExitButton');
@@ -137,10 +137,10 @@ function appendTxnFormAndInitCombos(role, form) {
  * Reinitializes the taxon select-form to the role-taxon previously selected or
  * to the default taxon-group for the role.
  */
-function resetTaxonSelectForm(role) {
+function resetTaxonSelectForm(role, gId) {
     $('#sel-'+role).data('reset', true);
     $('#sub-form').remove();
-    initTaxonSelectForm(role);
+    selectForm.initRoleTaxonSelect(role, gId);
 }
 /** Resets the taxon to the one previously selected in the interaction form.  */
 function resetPrevTaxonSelection(id, role) {

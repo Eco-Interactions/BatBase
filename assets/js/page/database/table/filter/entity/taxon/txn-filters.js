@@ -146,11 +146,14 @@ function updateTaxonSelOptions(rOpts, ranks, tblState) {            /*dbug-log*/
 }
 function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*///console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    _cmbx('setSelVal', ['Sub-GroupFilter', selected['Sub-Group'], 'silent']);
+    if (selected['Sub-Group']) { setSubGroupFilter(selected['Sub-Group']); }
     tblState.allGroupRanks.forEach(rank => {
         if (!selected[rank]) { return; }                            /*dbug-log*///console.log("selecting [%s] = ", rank, selected[rank])
         _cmbx('setSelVal', [rank+'Filter', selected[rank], 'silent']);
     });
+}
+function setSubGroupFilter(val) {
+    _cmbx('setSelVal', ['Sub-GroupFilter', val, 'silent']);
 }
 /* ====================== FILTER ============================================ */
 /**
