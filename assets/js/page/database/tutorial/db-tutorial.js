@@ -93,7 +93,7 @@ function onAfterStepChange(stepElem) {                                          
 }
 function waitForDbLoad(tag) {
     window.setTimeout(() => showDbStillLoadingAlert(tag), 500);
-    if (tag == 'map' || intro._currentStep >= 14) { return intro._currentStep = 13; }
+    if (tag == 'map' || intro._currentStep >= 15) { return intro._currentStep = 14; }
     intro.goToStep(3);
 }
 function showDbStillLoadingAlert(tag) {
@@ -138,7 +138,7 @@ function enableMapTutorialIfDataAvailable(elem, key) {
 }
 function showTutorial(tutKey) {
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(15); }
+    if (tutKey === 'map') { intro.goToStep(16); }
 }
 /* --------------------------- LOAD INTS ON MAP ----------------------------- */
 function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)

@@ -101,9 +101,9 @@ function showDataInitLoadingStatus() {
     $('#filter-status').text(status).css('color', 'teal').data('loading', true);
     showPopupMsg();
 }
-function toggleSearchOptions(toggleKey) {
+function toggleSearchOptions(toggleKey) {                           /*dbug-log*///console.log('toggleSearchOptions [%s]', toggleKey);
     handleButtons(toggleKey);
-    _cmbx('enableCombobox', ['Focus', toggleKey]);
+    toggleDatabaseFocusCombobox(toggleKey);
 }
 function handleButtons(toggleKey) {
     const opac = toggleKey === 'enable' ? 1 : .5;
@@ -111,6 +111,9 @@ function handleButtons(toggleKey) {
     const cursor = toggleKey === 'enable' ? 'pointer' : 'wait';
     $('.map-dsbl').css('cursor', cursor).prop('disabled', disabled).fadeTo('fast', opac);
     toggleMapButton(toggleKey, disabled);
+}
+function toggleDatabaseFocusCombobox(toggleKey) {
+    _cmbx('enableCombobox', ['Focus', toggleKey === 'enable']);
 }
 function toggleMapButton(toggleKey, disabled) {
     if (toggleKey === 'enable') { return; }
@@ -147,7 +150,7 @@ export function enableTableButtonsIfDataLoaded(allDataAvailable) {
     if (!allDataAvailable) { return enableViewOpts(); }
     enableTableButtons();
 }
-export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
+export function enableTableButtons() {                              /*dbug-log*///console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     if (app.dbInitializing || testingDbInit()) { updateUiAfterBaseDatabaseInit(); }
     unfadeButtons();
     enableButtonsAndUpdateCursors();

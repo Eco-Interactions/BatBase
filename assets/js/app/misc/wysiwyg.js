@@ -63,7 +63,7 @@ function addButtons() {
                     init: function(trumbowyg) {
                         const btnDef = {
                             hasIcon: false,
-                            fn: function() {                                    console.log("Saving WYSIWYG. trumbowyg = %O", trumbowyg);
+                            fn: function() {                                    //console.log("Saving WYSIWYG. trumbowyg = %O", trumbowyg);
                                 var blkId = trumbowyg.o.plugins.save.id;
                                 var data = { content: $('#' + blkId ).trumbowyg('html')};    //console.log("blkId = ", blkId)
                                 var url = 'admin/contentblock/' + blkId + '/update';

@@ -144,8 +144,8 @@ function updateTaxonSelOptions(rOpts, ranks, tblState) {            /*dbug-log*/
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
-function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*///console.log("selected in setSelectedTaxonVals = %O", selected);
-    if (!selected || !Object.keys(selected).length) {return;}
+function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*/console.log("selected in setSelectedTaxonVals = %O", selected);
+    if (!selected || !Object.keys(selected).length) {return;}       /*temp-log*/console.log('keys = [%s]', Object.keys(selected).join(', '));
     if (selected['Sub-Group']) { setSubGroupFilter(selected['Sub-Group']); }
     tblState.allGroupRanks.forEach(rank => {
         if (!selected[rank]) { return; }                            /*dbug-log*///console.log("selecting [%s] = ", rank, selected[rank])
