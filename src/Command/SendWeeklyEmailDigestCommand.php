@@ -5,15 +5,23 @@ namespace App\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Psr\Log\LoggerInterface as Logger;
+
+use App\Controller\MailerController as Mailer;
 
 class SendWeeklyEmailDigestCommand extends Command
 {
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:send-weekly-digest';
 
-/* ==================== CONSTRUCT/CONFIGURE COMMAND ================================================================= */
-    public function __construct(bool $requirePassword = false)
+    private $logger;
+    private $mailer;
+
+/* ____________________ CONSTRUCT/CONFIGURE COMMAND _________________________ */
+    public function __construct(Logger $logger, Mailer $mailer)
     {
+        $this->logger = $logger;
+        $this->mailer = $mailer;
         // best practices recommend to call the parent constructor first and
         // then set your own properties. That wouldn't work in this case
         // because configure() needs the properties set in this constructor
@@ -32,34 +40,39 @@ class SendWeeklyEmailDigestCommand extends Command
     {
         // ...
     }
-/* ==================== EXECUTE COMMAND ============================================================================= */
+/* ____________________ EXECUTE COMMAND _____________________________________ */
     /** this method must return the "exit status code". 0: success, 1: error */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln(['Creating Weekly Digest', '======================','']);
-
-        $emailHtml = $this->buildDigestHtml();
+        $digestData;
 
         try {
-            $this->sendDigestEmail($emailHtml);
+            $digestData = $this->getDigestData();
+        } catch (Exception $e) {
+            $this->logger->error("\n\n### Error @ [$e->getLine()] = $e->getMessage()\n");
+        }
+
+        try {
+            $output->writeln(['Sending Weekly Digest', '======================','']);
+            $this->mailer->sendAdminWeeklyDigestEmail($digestData);
+            $output->writeln(['SENT']);
             return 0;
         } catch (Exception $e) {
-            $output->writeln(['ERROR', $e->getMessage()]);
+            $output->writeln(['SEND ERROR', $e->getMessage()]);
+            $this->logger->error("\n\n### Error @ [$e->getLine()] = $e->getMessage()\n");
             return 1;
         }
     }
-/* ==================== BUILD DIGEST HTML =================================== */
-    private function buildDigestHtml($value='')
-    {
-        # code...
-    }
-/* =================== SEND DIGEST EMAIL ==================================== */
-    private function sendDigestEmail($value='')
+/* ======================== BUILD DIGEST DATA =============================== */
+    private function getDigestData()
     {
         # code...
     }
 }
-/* ==================== CONSOLE OUTPUT ============================================================================== */
+
+
+    /* ____________________ CONSOLE OUTPUT __________________________________ */
     // // outputs multiple lines to the console (adding "\n" at the end of each line)
     // $output->writeln([
     //     'User Creator',
