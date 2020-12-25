@@ -387,9 +387,6 @@
             "config/packages/mobile_detect.yaml"
         ]
     },
-    "swiftmailer/swiftmailer": {
-        "version": "6.3-dev"
-    },
     "symfony/apache-pack": {
         "version": "1.0",
         "recipe": {
@@ -498,6 +495,9 @@
             "src/Kernel.php"
         ]
     },
+    "symfony/http-client-contracts": {
+        "version": "v2.3.1"
+    },
     "symfony/http-foundation": {
         "version": "4.4.x-dev"
     },
@@ -509,6 +509,18 @@
     },
     "symfony/intl": {
         "version": "4.4.x-dev"
+    },
+    "symfony/mailer": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "15658c2a0176cda2e7dba66276a2030b52bd81b2"
+        },
+        "files": [
+            "config/packages/mailer.yaml"
+        ]
     },
     "symfony/mime": {
         "version": "v5.1.2"
@@ -629,20 +641,6 @@
     "symfony/string": {
         "version": "5.2-dev"
     },
-    "symfony/swiftmailer-bundle": {
-        "version": "2.5",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "2.5",
-            "ref": "ae4d22af30bbd484506bc1817c5a3ef72c855b93"
-        },
-        "files": [
-            "config/packages/dev/swiftmailer.yaml",
-            "config/packages/swiftmailer.yaml",
-            "config/packages/test/swiftmailer.yaml"
-        ]
-    },
     "symfony/templating": {
         "version": "4.4.x-dev"
     },
@@ -745,6 +743,12 @@
             "version": "1.0",
             "ref": "fe5a50faf580eb58f08ada2abe8afbd2d4941e05"
         }
+    },
+    "tijsverkoyen/css-to-inline-styles": {
+        "version": "2.2.3"
+    },
+    "twig/cssinliner-extra": {
+        "version": "v3.1.1"
     },
     "twig/extra-bundle": {
         "version": "3.x-dev"
