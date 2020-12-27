@@ -1,0 +1,8 @@
+# See https://symfony.com/doc/current/email/dev_environment.html
+swiftmailer:
+    # send all emails to a specific address
+    delivery_addresses: ['dev@batbase.org']
+    # delivery_whitelist:
+    #     # all email addresses matching these regexes will be delivered
+    #     # like normal, as well as being sent to dev@example.com
+    #     - '/@specialdomain\.com$/'
