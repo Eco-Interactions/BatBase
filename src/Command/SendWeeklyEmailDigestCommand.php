@@ -42,8 +42,8 @@ class SendWeeklyEmailDigestCommand extends Command
 
         $output->writeln(['Creating Weekly Digest', '======================','']);
         try {
-            $this->digest->sendAdminWeeklyDigestEmail();
-            $output->writeln(['SENT']);
+            $data = $this->digest->sendAdminWeeklyDigestEmail();
+            $output->writeln(['SENT', $data]);
             return 0;
         } catch (Exception $e) {
             $output->writeln(['SEND ERROR', $e->getMessage()]);

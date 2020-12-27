@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Service\SerializeData;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Asset\Packages;
 // use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class WeeklyDigestManager //extends AbstractController
@@ -10,15 +12,18 @@ class WeeklyDigestManager //extends AbstractController
 
     private $logger;
     private $mailer;
-    private $oneWeekAgo;
     private $templating;
+    private $packages;
 
+    private $oneWeekAgo;
 
     public function __construct(\Swift_Mailer $mailer, \Twig\Environment $templating,
-        LoggerInterface $logger)
+        LoggerInterface $logger, SerializeData $serialize, Packages $packages)
     {
         $this->logger = $logger;
         $this->mailer = $mailer;
+        $this->serialize = $serialize;
+        $this->packages = $packages;
         $this->templating   = $templating;
     }
     /**
@@ -26,18 +31,22 @@ class WeeklyDigestManager //extends AbstractController
      */
     public function sendAdminWeeklyDigestEmail()
     {
+        // $data = $this->getWeeklyDigestData();
+        // return $data;
 /* ==================== COMPOSE EMAIL ======================================= */
+        $data = ['pdf' => []];
         $message = new \Swift_Message('Test email');
         $message->setFrom('no-reply@batbase.org');
         $message->setTo('test@batbase.org');
+        $message->setSubject('BatBase Weekly Digest');
+
+        // $this->addEmbeddedLogoPath($data);
+
         $message->setBody(
-            $this->templating->render(
-                'emails/weekly-digest.html.twig',
-                [/*'name' => $name*/]
-            ),
+            $this->templating->render('emails/weekly-digest.html.twig', $data),
             'text/html'
         );
-
+        $this->attachNewPDFs($data['pdf'], $message);
 /* ======================= SEND EMAIL ======================================= */
         try {
             $this->mailer->send($message);
@@ -50,39 +59,78 @@ class WeeklyDigestManager //extends AbstractController
 
         $this->logger->info('email sent');
     }
+    // private function getEmbeddedLogoPath(&$data)
+    // {
+    //     $data['logo'] = $message->embed(\Swift_Image::fromPath('images/logos/BatLogo_Horizontal_Color.svg'));
+    // }
 /* ======================== BUILD DIGEST DATA =============================== */
     private function getWeeklyDigestData()
     {
         $this->oneWeekAgo = new \DateTime('-7 days', new \DateTimeZone('UTC'));
+
         $data = [
-            // 'data' => $this->getDataEntryData(),
-            // 'feedback' => $this->getFeedbackData(),
-            // 'pdf' => $this->getPDFData(),
+            'data' => $this->getUpdatedEntityData(),
+            'feedback' => $this->getFeedbackData(),
+            'pdf' => $this->getPDFData(),
             'users' => $this->getNewUserData(),
         ];
+        return $data;
     }
 /* ----------------------- DATA-ENTRY --------------------------------------- */
-    private function getDataEntryData()
+    private function getUpdatedEntityData()
     {
-        // $data = [];
+        $data = [];
+        $withUpdates = $this->getEntitiesUpdatedLastWeek('SystemDate');
+        foreach ($withUpdates as $updatedEntity) {
+            $entityName = $updatedEntity->getEntity();
+            $updated = $this->getEntitiesUpdatedLastWeek($entityName);
+            $created = $this->getEntitiesCreatedLastWeek($entityName);
+            $data = array_merge($data, [
+                $entityName => [
+                    'created' => count($created),
+                    'updated' => count($updated)
+                ]
+            ]);
+        }
+        return $data;
     }
 /* ----------------------- USER FEEDBACK ------------------------------------ */
     private function getFeedbackData()
     {
-        // $feedback = [];
+        $created = $this->getEntitiesCreatedLastWeek('Feedback');
+        $updated = $this->getEntitiesUpdatedLastWeek('Feedback');
+
+        $data = [
+            'created' => $this->serialize->serializeRecords($created),
+            'updated' => $this->serialize->serializeRecords($updated)
+        ];
+        return $data;
     }
 /* ----------------------- PDF SUBMISSIONS ---------------------------------- */
     private function getPDFData()
     {
-        # code...
+        $data = [];
+        $created = $this->getEntitiesCreatedLastWeek('File Upload');
+        foreach ($created as $pdf) {
+            array_push($data, [
+                'path' => $pdf->getPath(),
+                'data' => $this->serialize->serializeRecord($pdf)
+            ]);
+        }
+        return $data;
+    }
+    private function attachNewPDFs($pdfs, &$message)
+    {
+        foreach ($pdfs as $pdf) {
+            $message->attach(Swift_Attachment::fromPath($pdf['path']));
+        }
     }
 /* ----------------------- NEW USER ----------------------------------------- */
     private function getNewUserData()
     {
         $newUsers = $this->getEntitiesCreatedLastWeek('User');
-        $data = $this->serializeUsers($newUsers);
-
-
+        $data = $this->serialze->serializeRecords($newUsers);
+        return $data;
     }
 /* ======================== HELPERS ========================================= */
 /** Queries for all entities created in the last 7 days. */
@@ -91,7 +139,7 @@ class WeeklyDigestManager //extends AbstractController
         $repo = $this->em->getRepository('App:'.$entity);
         $query = $repo->createQueryBuilder('e')
             ->where('e.created > :lastWeek')
-            ->setParameter('lastWeek', $oneWeekAgo)
+            ->setParameter('lastWeek', $this->oneWeekAgo)
             ->getQuery();
         return $query->getResult();
     }
@@ -101,7 +149,8 @@ class WeeklyDigestManager //extends AbstractController
         $repo = $this->em->getRepository('App:'.$entity);
         $query = $repo->createQueryBuilder('e')
             ->where('e.updated > :lastWeek')
-            ->setParameter('lastWeek', $oneWeekAgo)
+            ->where('e.updated > e.created')
+            ->setParameter('lastWeek', $this->oneWeekAgo)
             ->getQuery();
         return $query->getResult();
     }
