@@ -557,19 +557,9 @@ class DataEntryController extends AbstractController
      */
     private function setUpdatedAtTimes($entityData)
     {
-        $this->setUpdatedAt($entityData->core);
+        $this->updateTracker->trackEntityUpdate($entityData->core);
         if (property_exists($entityData, 'detailEntity')) {
-            $this->setUpdatedAt($entityData->detail);
+            $this->updateTracker->trackEntityUpdate($entityData->detail);
         }
-        $this->setUpdatedAt('System');
-        $this->em->flush();
-    }
-    private function setUpdatedAt($name)
-    {
-        $entity = $this->em->getRepository('App:SystemDate')
-            ->findOneBy(['description' => $name]);
-        if (!$entity) { return; }
-        $entity->setDateVal(new \DateTime('now', new \DateTimeZone('UTC')));
-        $this->em->persist($entity);
     }
 }
