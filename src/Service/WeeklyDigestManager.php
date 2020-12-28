@@ -5,11 +5,11 @@ namespace App\Service;
 use App\Service\SerializeData;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Asset\Packages;
-// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
 
-class WeeklyDigestManager //extends AbstractController
+class WeeklyDigestManager
 {
-
+    private $em;
     private $logger;
     private $mailer;
     private $templating;
@@ -18,8 +18,11 @@ class WeeklyDigestManager //extends AbstractController
     private $oneWeekAgo;
 
     public function __construct(\Swift_Mailer $mailer, \Twig\Environment $templating,
-        LoggerInterface $logger, SerializeData $serialize, Packages $packages)
+        LoggerInterface $logger, SerializeData $serialize, Packages $packages,
+        EntityManagerInterface $em
+    )
     {
+        $this->em = $em;
         $this->logger = $logger;
         $this->mailer = $mailer;
         $this->serialize = $serialize;
@@ -69,7 +72,7 @@ class WeeklyDigestManager //extends AbstractController
         $this->oneWeekAgo = new \DateTime('-7 days', new \DateTimeZone('UTC'));
 
         $data = [
-            'data' => $this->getUpdatedEntityData(),
+            'dataUpdates' => $this->getUpdatedEntityData(),
             'feedback' => $this->getFeedbackData(),
             'pdf' => $this->getPDFData(),
             'users' => $this->getNewUserData(),
@@ -85,11 +88,10 @@ class WeeklyDigestManager //extends AbstractController
             $entityName = $updatedEntity->getEntity();
             $updated = $this->getEntitiesUpdatedLastWeek($entityName);
             $created = $this->getEntitiesCreatedLastWeek($entityName);
-            $data = array_merge($data, [
-                $entityName => [
-                    'created' => count($created),
-                    'updated' => count($updated)
-                ]
+            array_push($data, [
+                'name' => $entityName,
+                'created' => count($created),
+                'updated' => count($updated)
             ]);
         }
         return $data;
@@ -101,8 +103,8 @@ class WeeklyDigestManager //extends AbstractController
         $updated = $this->getEntitiesUpdatedLastWeek('Feedback');
 
         $data = [
-            'created' => $this->serialize->serializeRecords($created),
-            'updated' => $this->serialize->serializeRecords($updated)
+            'created' => $this->serialize->serializeRecords($created, $this->em),
+            'updated' => $this->serialize->serializeRecords($updated, $this->em)
         ];
         return $data;
     }
@@ -110,7 +112,7 @@ class WeeklyDigestManager //extends AbstractController
     private function getPDFData()
     {
         $data = [];
-        $created = $this->getEntitiesCreatedLastWeek('File Upload');
+        $created = $this->getEntitiesCreatedLastWeek('FileUpload');
         foreach ($created as $pdf) {
             array_push($data, [
                 'path' => $pdf->getPath(),
@@ -129,7 +131,7 @@ class WeeklyDigestManager //extends AbstractController
     private function getNewUserData()
     {
         $newUsers = $this->getEntitiesCreatedLastWeek('User');
-        $data = $this->serialze->serializeRecords($newUsers);
+        $data = $this->serialize->serializeRecords($newUsers, $this->em);
         return $data;
     }
 /* ======================== HELPERS ========================================= */
@@ -148,10 +150,11 @@ class WeeklyDigestManager //extends AbstractController
     {
         $repo = $this->em->getRepository('App:'.$entity);
         $query = $repo->createQueryBuilder('e')
-            ->where('e.updated > :lastWeek')
-            ->where('e.updated > e.created')
-            ->setParameter('lastWeek', $this->oneWeekAgo)
-            ->getQuery();
-        return $query->getResult();
+            ->where('e.updated > :lastWeek');
+        if ($entity !== 'SystemDate') {
+            $query->andWhere('e.updated > e.created');
+        }
+        $query->setParameter('lastWeek', $this->oneWeekAgo);
+        return $query->getQuery()->getResult();
     }
 }
