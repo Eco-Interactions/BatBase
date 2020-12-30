@@ -7,8 +7,8 @@ use App\Entity\Interaction;
 use App\Entity\Location;
 use App\Entity\Source;
 use App\Entity\Taxon;
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\SerializerInterface;
+use App\Service\SerializeData;
+use App\Service\TrackEntityUpdate;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,14 +23,17 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  */
 class DataEntryController extends AbstractController
 {
-    private $serializer;
-    private $logger;
     private $em;
+    private $logger;
+    private $tracker;
+    private $serialize;
 
-    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    public function __construct(SerializeData $serialize, LoggerInterface $logger,
+        TrackEntityUpdate $tracker)
     {
-        $this->serializer = $serializer;
+        $this->serialize = $serialize;
         $this->logger = $logger;
+        $this->tracker = $tracker;
     }
 
     private function buildReturnDataObj($coreName, $coreEntity, $formData)
@@ -535,9 +538,8 @@ class DataEntryController extends AbstractController
             if (!property_exists($entityData, $prop)) { continue; }
             try {
                 $entityData->$id = $entityData->$prop->getId();
-                $entityData->$prop = $this->serializer->serialize(
-                    $entityData->$prop, 'json',
-                    SerializationContext::create()->setGroups(array('normalized')));
+                $entityData->$prop = $this->serialize->serializeRecord(
+                    $entityData->$prop, 'normalized');
             } catch (\Throwable $e) {
                 return $this->sendErrorResponse($e);
             } catch (\Exception $e) {
@@ -557,9 +559,9 @@ class DataEntryController extends AbstractController
      */
     private function setUpdatedAtTimes($entityData)
     {
-        $this->updateTracker->trackEntityUpdate($entityData->core);
+        $this->tracker->trackEntityUpdate($entityData->core);
         if (property_exists($entityData, 'detailEntity')) {
-            $this->updateTracker->trackEntityUpdate($entityData->detail);
+            $this->tracker->trackEntityUpdate($entityData->detail);
         }
     }
 }
