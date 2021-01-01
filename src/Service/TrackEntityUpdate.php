@@ -28,7 +28,7 @@ class TrackEntityUpdate
         if (!$entity) { return; }
         $entity->setUpdated(new \DateTime('now', new \DateTimeZone('UTC')));
         $this->em->persist($entity);
-        if ($isSystemUpdate) { return; }
+        if ($isSystemUpdate) { return $this->em->flush(); }
         $this->trackEntityUpdate('System', true);
     }
 }

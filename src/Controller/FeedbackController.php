@@ -65,7 +65,7 @@ class FeedbackController extends AbstractController
         $em->persist($entity);
         $em->flush();
 
-        $this->tracker->trackEntityUpdate('Feedback');
+        // $this->tracker->trackEntityUpdate('Feedback');
 
         $response = new JsonResponse();
         $response->setData(array(
@@ -92,11 +92,11 @@ class FeedbackController extends AbstractController
 
         $requestContent = $request->getContent();
         $feedbackData = json_decode($requestContent);
-        $asgnUserId = $feedbackData->asgnUserId;
+        $assignedUserId = $feedbackData->assignedUserId;
         $adminNotes = $feedbackData->adminNotes;
         $status = $feedbackData->status;
 
-        $asgnUser = $em->getRepository('App:User')->find($asgnUserId);
+        $asgnUser = $em->getRepository('App:User')->find($assignedUserId);
 
         $entity->setAssignedUser($asgnUser);
         $entity->setAdminNotes($adminNotes);

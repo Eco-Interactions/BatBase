@@ -553,9 +553,9 @@ class DataEntryController extends AbstractController
      */
     private function setUpdatedAtTimes($entityData)
     {
-        $this->tracker->trackEntityUpdate($entityData->core);
+        $this->tracker->trackEntityUpdate(ucfirst($entityData->core));
         if (property_exists($entityData, 'detailEntity')) {
-            $this->tracker->trackEntityUpdate($entityData->detail);
+            $this->tracker->trackEntityUpdate(ucfirst($entityData->detail));
         }
     }
 }
