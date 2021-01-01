@@ -8,8 +8,8 @@ use App\Entity\Location;
 use App\Entity\Source;
 use App\Entity\Taxon;
 use App\Service\SerializeData;
+use App\Service\LogError;
 use App\Service\TrackEntityUpdate;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,7 +28,7 @@ class DataEntryController extends AbstractController
     private $tracker;
     private $serialize;
 
-    public function __construct(SerializeData $serialize, LoggerInterface $logger,
+    public function __construct(SerializeData $serialize, LogError $logger,
         TrackEntityUpdate $tracker)
     {
         $this->serialize = $serialize;
@@ -509,18 +509,12 @@ class DataEntryController extends AbstractController
     private function sendErrorResponse($e)
     {
         if ($this->ifNotDuplicateEntityError($e)) {
-            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
+            $this->logger->logError($e);
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData($e->getMessage());
         return $response;
-    }
-    private function logErr($line, $msg, $trace)
-    {
-        $this->logger->error("\n\n### Error @ [$line] = $msg\n$trace\n");
-        if ($_ENV['APP_ENV'] === 'prod') { return; };
-        print("\n\n### Error @ [$line] = $msg\n$trace\n");
     }
     private function ifNotDuplicateEntityError($e)
     {

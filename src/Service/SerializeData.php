@@ -3,8 +3,7 @@ namespace App\Service;
 
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
-use Psr\Log\LoggerInterface;
-
+use App\Service\LogError;
 /**
  * public:
  *     serializeRecords
@@ -20,7 +19,7 @@ class SerializeData
      * @param SerializerInterface $serializer
      * @param LoggerInterface     $logger
      */
-    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    public function __construct(SerializerInterface $serializer, LogError $logger)
     {
         $this->serializer = $serializer;
         $this->logger = $logger;
@@ -58,9 +57,9 @@ class SerializeData
         try {
             $rcrd = $this->serializer->serialize($entity, 'json', $this->setGroups($group));
         } catch (\Throwable $e) {
-            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
+            $this->logger->logError($e);
         } catch (\Exception $e) {
-            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
+            $this->logger->logError($e);
         }
         return $rcrd;
     }
@@ -72,19 +71,5 @@ class SerializeData
     {
         if (!$group) { return null; }
         return SerializationContext::create()->setGroups(array($group));
-    }
-    /**
-     * Logs the error with the line number, error message, and stack track. In
-     * DEV environment, the log message is printed as well.
-     * @param  number $lineNum Error line number
-     * @param  string $msg     Error message
-     * @param  string $trace   Error trace-log
-     */
-    private function logErr($lineNum, $msg, $trace)
-    {
-        $logMsg = "\n\n### Error @ [$lineNum] = $msg\n$trace\n";
-        $this->logger->error($logMsg);
-        if ($this->getParameter('env') === 'prod') { return; };
-        print($logMsg);
     }
 }

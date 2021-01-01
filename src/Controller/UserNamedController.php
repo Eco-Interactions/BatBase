@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\UserNamed;
+use App\Service\LogError;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,7 +11,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use JMS\Serializer\SerializerInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Saves and displays user specified data sets: Interactions and Filters
@@ -22,7 +22,7 @@ class UserNamedController extends AbstractController
     private $serializer;
     private $logger;
 
-    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    public function __construct(SerializerInterface $serializer, LogError $logger)
     {
         $this->serializer = $serializer;
         $this->logger = $logger;
@@ -169,7 +169,7 @@ class UserNamedController extends AbstractController
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {
-        $this->logger->error($e->getMessage());
+        $this->logger->logError($e);
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData(array(

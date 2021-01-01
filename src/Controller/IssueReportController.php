@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use App\Entity\IssueReport;
 use App\Entity\ImageUpload;
+use App\Service\LogError;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,7 +23,7 @@ class IssueReportController extends AbstractController
 {
     private $logger;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LogError $logger)
     {
         $this->logger = $logger;
     }
@@ -78,7 +78,7 @@ class IssueReportController extends AbstractController
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e)
     {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+        $this->logger->logError($e);
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData($e->getMessage());
