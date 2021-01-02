@@ -70,11 +70,14 @@ class WeeklyDigestManager
     private function getWeeklyDigestData()
     {
         $this->oneWeekAgo = new \DateTime('-7 days', new \DateTimeZone('UTC'));
-
+        $lastWeekString = $this->oneWeekAgo->format('m-d-Y');
+        $yesterday = new \DateTime('-1 day', new \DateTimeZone('UTC'));
         $data = [
+            'lastWeek' => $lastWeekString,
+            'yesterday' => $yesterday->format('m-d-Y'),
             'dataUpdates' => $this->getUpdatedEntityData(),
             'feedback' => $this->getFeedbackData(),
-            'pdf' => $this->getPDFData(),
+            'pdfs' => $this->getPDFData(),
             'users' => $this->getNewUserData(),
         ];
         return $data;
@@ -83,9 +86,11 @@ class WeeklyDigestManager
     private function getUpdatedEntityData()
     {
         $data = [];
+        $skip = ['System', 'FileUpload', 'Feedback', 'Source', 'GeoJson'];
         $withUpdates = $this->getEntitiesUpdatedLastWeek('SystemDate');
         foreach ($withUpdates as $updatedEntity) {
             $entityName = $updatedEntity->getEntity();
+            if (in_array($entityName, $skip)) { continue; }
             $updated = $this->getEntitiesUpdatedLastWeek($entityName);
             $created = $this->getEntitiesCreatedLastWeek($entityName);
             array_push($data, [
@@ -103,11 +108,42 @@ class WeeklyDigestManager
         $updated = $this->getEntitiesUpdatedLastWeek('Feedback');
 
         $data = [
-            'created' => $this->serialize->serializeRecords($created, $this->em),
-            'updated' => $this->serialize->serializeRecords($updated, $this->em)
+            // 'created' => $this->getCreatedFeedback($created),
+            // 'updated' => $this->getCreatedFeedback($updated)
         ];
         return $data;
     }
+    // private function getCreatedFeedback($created)
+    // {
+    //     $data = [];
+    //     foreach ($created as $feedback) {
+    //         array_push($data, [
+    //             'page' => $feedback->getRoute(),
+    //             'topic' => $feedback->getTopic(),
+    //             'feedback' => $feedback->getContent(),
+    //             'user' => $feedback->getCreatedBy()->getFullName(),
+    //             'userEmail' => $feedback->getCreatedBy()->getEmail()
+    //         ]);
+    //     }
+    //     return $data;
+    // }
+    // private function getUpdatedFeedback($updated)
+    // {
+    //     $data = [];
+    //     foreach ($created as $feedback) {
+    //         array_push($data, [
+    //             'status' => $feedback->getStatusStr(),
+    //             'assignedTo' => $feedback->assignedUser->getFullName(),
+    //             'notes' => $feedback->getAdminNotes(),
+    //             'page' => $feedback->getRoute(),
+    //             'topic' => $feedback->getTopic(),
+    //             'feedback' => $feedback->getContent(),
+    //             'user' => $feedback->getCreatedBy()->getFullName(),
+    //             'userEmail' => $feedback->getCreatedBy()->getEmail()
+    //         ]);
+    //     }
+    //     return $data;
+    // }
 /* ----------------------- PDF SUBMISSIONS ---------------------------------- */
     private function getPDFData()
     {
@@ -116,7 +152,11 @@ class WeeklyDigestManager
         foreach ($created as $pdf) {
             array_push($data, [
                 'path' => $pdf->getPath(),
-                'data' => $this->serialize->serializeRecord($pdf)
+                'filename' => $pdf->getFileName(),
+                'title' => $pdf->getTitle(),
+                'description' => $pdf->getDescription(),
+                'user' => $pdf->getCreatedBy()->getFullName(),
+                'userEmail' => $pdf->getCreatedBy()->getEmail()
             ]);
         }
         return $data;
@@ -131,7 +171,13 @@ class WeeklyDigestManager
     private function getNewUserData()
     {
         $newUsers = $this->getEntitiesCreatedLastWeek('User');
-        $data = $this->serialize->serializeRecords($newUsers, $this->em);
+        $data = [];
+        foreach ($newUsers as $user) {
+            array_push($data, [
+                'name' => $user->getFullName(),
+                'about' => $user->getAboutMe(),
+            ]);
+        }
         return $data;
     }
 /* ======================== HELPERS ========================================= */
