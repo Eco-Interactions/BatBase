@@ -64,7 +64,7 @@ class FileUploadController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $entity->setMimeType($entity->getPdfFile()->getMimeType());
-            $entity->setPath("uploads/publication/");
+            $entity->setPath();
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);

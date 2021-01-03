@@ -6,7 +6,18 @@ use App\Service\SerializeData;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Asset\Packages;
 use Doctrine\ORM\EntityManagerInterface;
-
+/**
+ * TOC
+ *     COMPOSE AND SEND EMAIL
+ *         BUILD EMAIL
+ *         SEND EMAIL
+ *     BUILD DIGEST DATA
+ *         DATA ENTRY
+ *         SUBMITTED PUBLICATIONS
+ *         NEW USER
+ *         USER FEEDBACK
+ *         HELPERS
+ */
 class WeeklyDigestManager
 {
     private $em;
@@ -14,14 +25,16 @@ class WeeklyDigestManager
     private $mailer;
     private $templating;
     private $packages;
+    /** string $rootPath */
+    private $rootPath;
 
     private $oneWeekAgo;
 
-    public function __construct(\Swift_Mailer $mailer, \Twig\Environment $templating,
-        LoggerInterface $logger, SerializeData $serialize, Packages $packages,
-        EntityManagerInterface $em
-    )
+    public function __construct(string $rootPath, \Swift_Mailer $mailer,
+        \Twig\Environment $templating, LoggerInterface $logger,
+        SerializeData $serialize, Packages $packages, EntityManagerInterface $em)
     {
+        $this->rootPath = $rootPath;
         $this->em = $em;
         $this->logger = $logger;
         $this->mailer = $mailer;
@@ -29,44 +42,102 @@ class WeeklyDigestManager
         $this->packages = $packages;
         $this->templating   = $templating;
     }
+/* ==================== COMPOSE AND SEND EMAIL ============================== */
     /**
-     *
+     * Sends an email to site admin's with various updates from site activity
+     * over the last week: Data entry, submitted publications, new users, and new
+     * user fedeback.
      */
     public function sendAdminWeeklyDigestEmail()
     {
-        // $data = $this->getWeeklyDigestData();
-        // return $data;
-/* ==================== COMPOSE EMAIL ======================================= */
-        $data = ['pdf' => []];
+        $data = $this->getWeeklyDigestData();
+        $users = $this->em->getRepository('App:User')->findAll();
+
+        foreach ($users as $user) {
+            if (!$user->hasRole('ROLE_ADMIN') && !$user->hasRole('ROLE_SUPER_ADMIN')) { continue; }
+            $email = $this->buildDigestEmail($user->getEmail(), $data);
+            $this->sendEmail($email);
+        }
+        return $data;
+    }
+/* ----------------------- BUILD EMAIL -------------------------------------- */
+    /**
+     * Build the email object with the weekly digest data and any submitted PDFs.
+     * @param  string $adminEmail   Admin email
+     * @param  array $data          Weekly digest data
+     * @return Class                Swiftmailer message object.
+     */
+    private function buildDigestEmail($adminEmail, $data)
+    {
+        $message = $this->initDigestEmail($adminEmail);
+        $this->attachNewPDFs($data['pdfs'], $message);
+        $this->addLogoToMessage($data, $message);
+        $this->setEmailBody($data, $message);
+        return $message;
+    }
+    /**
+     * Inits and returns the Swiftmailer email.
+     * @param  string $adminEmail   Admin email
+     * @return Class                Swiftmailer message object.
+     */
+    private function initDigestEmail($adminEmail)
+    {
         $message = new \Swift_Message('Test email');
-        $message->setFrom('no-reply@batbase.org');
-        $message->setTo('test@batbase.org');
-        $message->setSubject('BatBase Weekly Digest');
+        $message->setFrom('automated@batbase.org')
+            ->setTo($adminEmail)
+            ->setSubject('BatBase Weekly Digest '.$adminEmail);
+        return $message;
+    }
+    private function addLogoToMessage(&$data, &$message)
+    {
+        $logoPath = $this->rootPath."/public/build/images/BatLogo_Horizontal_Color.jpg";
+        $data['logo'] = $message->embed(\Swift_Image::fromPath($logoPath));
+    }
+    /**
+     * Attach PDF files to the email.
+     * @param array $pdfs     PDF data
+     * @param Class &$message Swiftmailer message object.
+     */
+    private function attachNewPDFs($pdfs, &$message)
+    {
+        foreach ($pdfs as $pdf) {
+            $pdfPath = $this->rootPath.'/public/'.$pdf['path'];
+            $message->attach(\Swift_Attachment::fromPath($pdfPath));
+        }
+    }
+    /**
+     * Builds email body from= twig template and the digest data.
 
-        // $this->addEmbeddedLogoPath($data);
-
+     * @param array $data          Weekly digest data
+     * @param Class &$message Swiftmailer message object.
+     */
+    private function setEmailBody($data, &$message)
+    {
         $message->setBody(
             $this->templating->render('emails/weekly-digest.html.twig', $data),
             'text/html'
         );
-        $this->attachNewPDFs($data['pdf'], $message);
-/* ======================= SEND EMAIL ======================================= */
+    }
+/* ----------------------- SEND EMAIL --------------------------------------- */
+    /**
+     * Attempts to send email and logs any errors.
+     * @param Class &$message Swiftmailer message object.
+     */
+    private function sendEmail($message)
+    {
         try {
             $this->mailer->send($message);
-        } catch (TransportExceptionInterface $e) {
-            // some error prevented the email sending; display an
-            // error message or try to resend the message
-            //debug information via the getDebug() method.
+        } catch (TransportExceptionInterface $e) {//debug information via the getDebug() method.
             $this->logger->error($e->getMessage());
         }
-
         $this->logger->info('email sent');
     }
-    // private function getEmbeddedLogoPath(&$data)
-    // {
-    //     $data['logo'] = $message->embed(\Swift_Image::fromPath('images/logos/BatLogo_Horizontal_Color.svg'));
-    // }
 /* ======================== BUILD DIGEST DATA =============================== */
+    /**
+     * Returns data about site activity over the last week: Data-entry, submitted
+     * publications, new users, and new user fedeback.
+     * @return array          Weekly digest data
+     */
     private function getWeeklyDigestData()
     {
         $this->oneWeekAgo = new \DateTime('-7 days', new \DateTimeZone('UTC'));
@@ -82,7 +153,10 @@ class WeeklyDigestManager
         ];
         return $data;
     }
-/* ----------------------- DATA-ENTRY --------------------------------------- */
+/* ----------------------- DATA ENTRY --------------------------------------- */
+    /**
+     * @return array  Each entity with updates, wth the totals created and edited.
+     */
     private function getUpdatedEntityData()
     {
         $data = [];
@@ -101,7 +175,46 @@ class WeeklyDigestManager
         }
         return $data;
     }
+/* ------------------- SUBMITTED PUBLICATIONS ------------------------------- */
+    /**
+     * @return array  Data for each publication submitted last week
+     */
+    private function getPDFData()
+    {
+        $data = [];
+        $created = $this->getEntitiesCreatedLastWeek('FileUpload');
+        foreach ($created as $pdf) {
+            array_push($data, [
+                'path' => $pdf->getPath().$pdf->getFileName(),
+                'filename' => $pdf->getFileName(),
+                'title' => $pdf->getTitle(),
+                'description' => $pdf->getDescription(),
+                'user' => $pdf->getCreatedBy()->getFullName(),
+                'userEmail' => $pdf->getCreatedBy()->getEmail()
+            ]);
+        }
+        return $data;
+    }
+/* ----------------------- NEW USER ----------------------------------------- */
+    /**
+     * @return array  Data for each new user from last week
+     */
+    private function getNewUserData()
+    {
+        $newUsers = $this->getEntitiesCreatedLastWeek('User');
+        $data = [];
+        foreach ($newUsers as $user) {
+            array_push($data, [
+                'name' => $user->getFullName(),
+                'about' => $user->getAboutMe(),
+            ]);
+        }
+        return $data;
+    }
 /* ----------------------- USER FEEDBACK ------------------------------------ */
+    /**
+     * @return array  Data for user feedback submitted last week
+     */
     private function getFeedbackData()
     {
         $created = $this->getEntitiesCreatedLastWeek('Feedback');
@@ -144,44 +257,12 @@ class WeeklyDigestManager
     //     }
     //     return $data;
     // }
-/* ----------------------- PDF SUBMISSIONS ---------------------------------- */
-    private function getPDFData()
-    {
-        $data = [];
-        $created = $this->getEntitiesCreatedLastWeek('FileUpload');
-        foreach ($created as $pdf) {
-            array_push($data, [
-                'path' => $pdf->getPath(),
-                'filename' => $pdf->getFileName(),
-                'title' => $pdf->getTitle(),
-                'description' => $pdf->getDescription(),
-                'user' => $pdf->getCreatedBy()->getFullName(),
-                'userEmail' => $pdf->getCreatedBy()->getEmail()
-            ]);
-        }
-        return $data;
-    }
-    private function attachNewPDFs($pdfs, &$message)
-    {
-        foreach ($pdfs as $pdf) {
-            $message->attach(Swift_Attachment::fromPath($pdf['path']));
-        }
-    }
-/* ----------------------- NEW USER ----------------------------------------- */
-    private function getNewUserData()
-    {
-        $newUsers = $this->getEntitiesCreatedLastWeek('User');
-        $data = [];
-        foreach ($newUsers as $user) {
-            array_push($data, [
-                'name' => $user->getFullName(),
-                'about' => $user->getAboutMe(),
-            ]);
-        }
-        return $data;
-    }
-/* ======================== HELPERS ========================================= */
-/** Queries for all entities created in the last 7 days. */
+/* ------------------------ HELPERS ----------------------------------------- */
+    /**
+     * Queries for all entities created in the last 7 days.
+     * @param  string $entity Entity name
+     * @return Class          Entities
+     */
     private function getEntitiesCreatedLastWeek($entity)
     {
         $repo = $this->em->getRepository('App:'.$entity);
@@ -191,7 +272,12 @@ class WeeklyDigestManager
             ->getQuery();
         return $query->getResult();
     }
-    /** Queries for all entities updated in the last 7 days */
+
+    /**
+     * Queries for all entities updated in the last 7 days.
+     * @param  string $entity Entity name
+     * @return Class          Entities
+     */
     private function getEntitiesUpdatedLastWeek($entity)
     {
         $repo = $this->em->getRepository('App:'.$entity);

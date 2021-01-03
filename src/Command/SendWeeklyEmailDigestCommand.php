@@ -43,9 +43,9 @@ class SendWeeklyEmailDigestCommand extends Command
         $output->writeln(['Creating Weekly Digest', '======================','']);
         try {
             $data = $this->digest->sendAdminWeeklyDigestEmail();
-            $output->writeln(['SENT']);
+            $output->writeln(['', 'SENT']);
             foreach ($data as $key => $value) {
-                $output->writeln([$key, print_r($value, true)]);
+                // $output->writeln([$key, print_r($value, true)]);
             }
             return 0;
         } catch (Exception $e) {
