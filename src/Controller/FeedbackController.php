@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Feedback;
 use App\Form\FeedbackType;
+use App\Service\TrackEntityUpdate;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,10 +17,12 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class FeedbackController extends AbstractController
 {
     protected $requestStack;
+    private $tracker;
 
-    public function __construct(RequestStack $requestStack)
+    public function __construct(RequestStack $requestStack, TrackEntityUpdate $tracker)
     {
         $this->requestStack = $requestStack;
+        $this->tracker = $tracker;
     }
 
     /**
@@ -62,6 +65,8 @@ class FeedbackController extends AbstractController
         $em->persist($entity);
         $em->flush();
 
+        // $this->tracker->trackEntityUpdate('Feedback');
+
         $response = new JsonResponse();
         $response->setData(array(
             'feedback' => $feedbackData,
@@ -87,11 +92,11 @@ class FeedbackController extends AbstractController
 
         $requestContent = $request->getContent();
         $feedbackData = json_decode($requestContent);
-        $asgnUserId = $feedbackData->asgnUserId;
+        $assignedUserId = $feedbackData->assignedUserId;
         $adminNotes = $feedbackData->adminNotes;
         $status = $feedbackData->status;
 
-        $asgnUser = $em->getRepository('App:User')->find($asgnUserId);
+        $asgnUser = $em->getRepository('App:User')->find($assignedUserId);
 
         $entity->setAssignedUser($asgnUser);
         $entity->setAdminNotes($adminNotes);
@@ -99,6 +104,8 @@ class FeedbackController extends AbstractController
 
         $em->persist($entity);
         $em->flush();
+
+        $this->tracker->trackEntityUpdate('Feedback');
 
         $response = new JsonResponse();
         $response->setData(array(

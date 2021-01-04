@@ -7,9 +7,9 @@ use App\Entity\Interaction;
 use App\Entity\Location;
 use App\Entity\Source;
 use App\Entity\Taxon;
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\SerializerInterface;
-use Psr\Log\LoggerInterface;
+use App\Service\SerializeData;
+use App\Service\LogError;
+use App\Service\TrackEntityUpdate;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,14 +23,17 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  */
 class DataEntryController extends AbstractController
 {
-    private $serializer;
-    private $logger;
     private $em;
+    private $logger;
+    private $tracker;
+    private $serialize;
 
-    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    public function __construct(SerializeData $serialize, LogError $logger,
+        TrackEntityUpdate $tracker)
     {
-        $this->serializer = $serializer;
+        $this->serialize = $serialize;
         $this->logger = $logger;
+        $this->tracker = $tracker;
     }
 
     private function buildReturnDataObj($coreName, $coreEntity, $formData)
@@ -506,18 +509,12 @@ class DataEntryController extends AbstractController
     private function sendErrorResponse($e)
     {
         if ($this->ifNotDuplicateEntityError($e)) {
-            $this->logErr($e->getLine(), $e->getMessage(), $e->getTraceAsString());
+            $this->logger->logError($e);
         }
         $response = new JsonResponse();
         $response->setStatusCode(500);
         $response->setData($e->getMessage());
         return $response;
-    }
-    private function logErr($line, $msg, $trace)
-    {
-        $this->logger->error("\n\n### Error @ [$line] = $msg\n$trace\n");
-        if ($_ENV['APP_ENV'] === 'prod') { return; };
-        print("\n\n### Error @ [$line] = $msg\n$trace\n");
     }
     private function ifNotDuplicateEntityError($e)
     {
@@ -535,9 +532,8 @@ class DataEntryController extends AbstractController
             if (!property_exists($entityData, $prop)) { continue; }
             try {
                 $entityData->$id = $entityData->$prop->getId();
-                $entityData->$prop = $this->serializer->serialize(
-                    $entityData->$prop, 'json',
-                    SerializationContext::create()->setGroups(array('normalized')));
+                $entityData->$prop = $this->serialize->serializeRecord(
+                    $entityData->$prop, 'normalized');
             } catch (\Throwable $e) {
                 return $this->sendErrorResponse($e);
             } catch (\Exception $e) {
@@ -557,19 +553,9 @@ class DataEntryController extends AbstractController
      */
     private function setUpdatedAtTimes($entityData)
     {
-        $this->setUpdatedAt($entityData->core);
+        $this->tracker->trackEntityUpdate(ucfirst($entityData->core));
         if (property_exists($entityData, 'detailEntity')) {
-            $this->setUpdatedAt($entityData->detail);
+            $this->tracker->trackEntityUpdate(ucfirst($entityData->detail));
         }
-        $this->setUpdatedAt('System');
-        $this->em->flush();
-    }
-    private function setUpdatedAt($name)
-    {
-        $entity = $this->em->getRepository('App:SystemDate')
-            ->findOneBy(['description' => $name]);
-        if (!$entity) { return; }
-        $entity->setDateVal(new \DateTime('now', new \DateTimeZone('UTC')));
-        $this->em->persist($entity);
     }
 }

@@ -6,19 +6,8 @@
 ### __________________________ CURRENT _____________________________________ ###
 > ____ LOGS ____
 SINCE LAST TEAM UPDATE:
-
-
-
     - Forms
-        - Taxon edit form
-            - 1 group show as before - the realm root class and name
-            - multiple groups show combo with
-            - validates that taxon rank is included in the new sub-groups ranks (eg, prevents class taxa from moving to a sub-group that should start at Family)
-
     - DB Page
-        - List panel no longer resets panel filters
-        - filters restyled
-        - icons added to the tutorial and tips buttons
     - Data
 
     - Bugs
@@ -62,6 +51,18 @@ TAYLOR:
 > ____ TASKS _____
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
+    - digest
+        - data
+            - new users
+            - feedback
+            - pdf
+            - new/updated data
+        - template
+        - email
+            - send async: https://symfony.com/doc/4.4/mailer.html#sending-messages-async
+
+
+
     - b4 server update
         - add taxon groups and sub groups to the definitions page
             - link in forms
@@ -105,9 +106,7 @@ CURRENT:
         - csv
 
 
-        - add glow around favicon for "dark" browser UIs?
-    - optimize data sync downloads. It takes almost as long as full download,
-        depending on how much needs to be updated
+
     - data-publisher filter should only allow year selection
     - fix panel elems in row containers that flex for sizing and remove custom styles.
     - handle 'lists' like row-data-filters
@@ -121,6 +120,9 @@ NEXT:
                 - removed once approved
             - Edit History
                 - all fields pending has, plus approvedBy
+        - Handle duplicates
+            - show page that allows sorting by fields that could indicate duplicates
+                - allow merging
     - Edit form
         - allow selection of another location and merging of all data and
             deletion of location being edited
@@ -156,13 +158,29 @@ NEXT:
 > ==== MEETING NOTES ====
 Prep:
     Changes:
+
+
+        Life isn't a bed of roses, nor is it a world of thorns. The world is as you make it realizing that with forward thinking action, you can move through those situations that stop many. - Byron Pulsifer
     Questions:
     Notes:
 Feedback:
 Next/future rounds:
+    todo:
+        - send list of broken urls and dois to kelly
+        - bibliography, add links
+        - add warning when createing a new taxon with an empty parent rank
+        - american samoa, guam,
+        - fnish data cleanup with those that weren't done programatically
+        - click on main map in new form and show countries locations
     Possible:
+        - Weekly 'digest' email with info about new members, submitted feedback and
+            publications, maybe totals from data entry?
+        - optimize data sync downloads. It takes almost as long as full download, depending on how much needs to be updated
+            - if new data hasn't been downloaded in a week, redownload all?
     Next:
+
         - UI:
+                - bold habitat type names
         - testing:
     Then:
     Future:

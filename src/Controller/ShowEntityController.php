@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
+use App\Service\LogError;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Psr\Log\LoggerInterface;
 
 /**
  * Handles individual entity (interaction and taxon) show pages.
@@ -20,7 +20,7 @@ class ShowEntityController extends AbstractController
     private $serializer;
     private $logger;
 
-    public function __construct(SerializerInterface $serializer, LoggerInterface $logger)
+    public function __construct(SerializerInterface $serializer, LogError $logger)
     {
         $this->serializer = $serializer;
         $this->logger = $logger;
@@ -38,14 +38,10 @@ class ShowEntityController extends AbstractController
             return $this->serializer->serialize($entity, 'json',
                 SerializationContext::create()->setGroups(array('flattened')));
         } catch (\Throwable $e) {
-            return $this->logError($e);
+            $this->logger->logError($e);
         } catch (\Exception $e) {
-            return $this->sendErrorResponse($e);
+            $this->logger->logError($e);
         }
-    }
-    private function logError($e)
-    {                                                                           //print("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
-        $this->logger->error("\n\n### Error @ [".$e->getLine().'] = '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
     }
 /* ----------------------------- INTERACTION -------------------------------- */
     /**

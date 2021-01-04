@@ -26,16 +26,16 @@ class SystemDate
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="string", length=255)
+     * @ORM\Column(name="entity", type="string", length=255)
      */
-    private $description;
+    private $entity;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="date_val", type="datetime")
+     * @ORM\Column(name="updated", type="datetime")
      */
-    private $dateVal;
+    private $updated;
 
     /**
      * @var User
@@ -57,51 +57,51 @@ class SystemDate
     }
 
     /**
-     * Set description.
+     * Set entity.
      *
-     * @param string $description
+     * @param string $entity
      *
      * @return SystemDate
      */
-    public function setDescription($description)
+    public function setEntity($entity)
     {
-        $this->description = $description;
+        $this->entity = $entity;
 
         return $this;
     }
 
     /**
-     * Get description.
+     * Get entity.
      *
      * @return string
      */
-    public function getDescription()
+    public function getEntity()
     {
-        return $this->description;
+        return $this->entity;
     }
 
     /**
-     * Set dateVal.
+     * Set last-updated datetime.
      *
-     * @param /DateTime $dateVal
+     * @param \DateTime $updatedAt
      *
      * @return SystemDate
      */
-    public function setDateVal($dateVal)
+    public function setUpdated(\DateTime $updatedAt)
     {
-        $this->dateVal = $dateVal;
+        $this->updated = $updatedAt;
 
         return $this;
     }
 
     /**
-     * Get dateVal.
+     * Get last updated datetime.
      *
-     * @return /DateTime
+     * @return \DateTime
      */
-    public function getDateVal()
+    public function getUpdated()
     {
-        return $this->dateVal;
+        return $this->updated;
     }
 
     /**
@@ -131,6 +131,6 @@ class SystemDate
      */
     public function __toString()
     {
-        return $this->getDescription();
+        return $this->getEntity();
     }
 }

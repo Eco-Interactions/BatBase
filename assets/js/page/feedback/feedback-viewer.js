@@ -22,13 +22,15 @@
  */
 import { _el, _u } from '~util';
 let submitEnabled = false;
+let feedbackId;
 
 $('#feedback_tbl').on('click', "a.feedback-link", showContextPage);
 /* ========================= SHOW CONTEXT PAGE ============================== */
 /** Shows the page the feedback was submitted from. */
-function showContextPage(e) {
+function showContextPage(e) {  													//console.log('id = [%s]', $(this).data('id'));
 	e.preventDefault()
-	_u('sendAjaxQuery', [null, 'feedback/load/'+$(this).data('id'), feedbackEntryRecieved]);
+	feedbackId = $(this).data('id');
+	_u('sendAjaxQuery', [null, 'feedback/load/'+feedbackId, feedbackEntryRecieved]);
 	clearBodyAndBuildIframe($(this).attr('href'));
 	return false;
 }
@@ -203,13 +205,13 @@ function toggleFeedbackSubmitButton(enable = true) {				/*dbug-log*///console.lo
 }
 /* ---------------------------- SUBMIT UPDATE ------------------------------- */
 function updateFeedback() {
-	const url = 'feedback/update/'+$(this).data('id');
-	const userId = $('#assignedUser').val();
+	const url = 'feedback/update/'+feedbackId;
+	const userId = $('#sel-assignedUser').val();
 	const data = {
 		assignedUserId: userId === 0 ? null : userId,
-		adminNotes: $adminNotesElem.val(),
-		status: $('#feedback-status').val()
-	};
+		adminNotes: $('#feedback-notes').val(),
+		status: $('#sel-feedbackStatus').val()
+	};   															/*dbug-log*///console.log('Updated feedback = %O', $('#sel-feedbackStatus').val(), data)
     _u('sendAjaxQuery', [data, url, feedbackUpdateSucess]);
 }
 function feedbackUpdateSucess(data, textStatus, jqXHR) {			/*dbug-log*///console.log('feedbackUpdateSucess data = ', data);

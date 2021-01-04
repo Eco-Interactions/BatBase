@@ -29,7 +29,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-
+    Monolog\Processor\PsrLogMessageProcessor:
+        tags: { name: monolog.processor, handler: sentry }
+# ------------------------ FOS USER ------------------------------------------ #
     App\Form\RegistrationType:
         tags:
             - { name: form.type, alias: app_user_registration }
@@ -37,7 +39,19 @@ services:
     App\Form\ProfileType:
         tags:
             - { name: form.type, alias: app_user_profile }
-
+# --------------------------- MENU ------------------------------------------- #
+    app.menu_builder:
+        class: App\Menu\MenuBuilder
+        arguments: ["@knp_menu.factory"]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: main } # The alias is what is used to retrieve the menu
+# ------------------------ MIGRATIONS ---------------------------------------- #
+    Doctrine\Migrations\Version\DbalMigrationFactory: ~
+    App\Migrations\Factory\MigrationFactoryDecorator:
+        decorates: Doctrine\Migrations\Version\DbalMigrationFactory
+        arguments: ['@App\Migrations\Factory\MigrationFactoryDecorator.inner', '@service_container']
+# ========================== APP SERVICES ==================================== #
+# ------------------------ USER ACTIVITY ------------------------------------- #
     App\EventSubscriber\ActivityListener:
         arguments:
             - '@security.token_storage'
@@ -46,22 +60,12 @@ services:
             - { name: kernel.event_listener,
                 event: kernel.controller,
                 method: onCoreController }
-
+# -------------------- NEW-USER EXAMPLE DATA --------------------------------- #
     app.add_example_data:
         class: App\EventSubscriber\AddExampleDataAfterRegistration
         tags:
             - { name: kernel.event_subscriber }
-
-    app.menu_builder:
-        class: App\Menu\MenuBuilder
-        arguments: ["@knp_menu.factory"]
-        tags:
-            - { name: knp_menu.menu_builder, method: createMainMenu, alias: main } # The alias is what is used to retrieve the menu
-
-    Monolog\Processor\PsrLogMessageProcessor:
-        tags: { name: monolog.processor, handler: sentry }
-
-    Doctrine\Migrations\Version\DbalMigrationFactory: ~
-    App\Migrations\Factory\MigrationFactoryDecorator:
-        decorates: Doctrine\Migrations\Version\DbalMigrationFactory
-        arguments: ['@App\Migrations\Factory\MigrationFactoryDecorator.inner', '@service_container']
+# ------------------------ USER ACTIVITY ------------------------------------- #
+    App\Service\WeeklyDigestManager:
+        arguments:
+            - '%kernel.project_dir%'

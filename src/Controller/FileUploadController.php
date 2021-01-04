@@ -4,10 +4,9 @@ namespace App\Controller;
 
 use App\Form\FileUploadType;
 use App\Entity\FileUpload;
+use App\Service\TrackEntityUpdate;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-// use Symfony\Component\HttpFoundation\File\Exception\FileException;
-// use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,10 +23,16 @@ class FileUploadController extends AbstractController
      * @var Security
      */
     private $security;
+    /**
+     * [$tracker description]
+     * @var [type]
+     */
+    private $tracker;
 
-    public function __construct(Security $security)
+    public function __construct(Security $security, TrackEntityUpdate $tracker)
     {
        $this->security = $security;
+       $this->tracker = $tracker;
     }
     /** ==================== FILE UPLOADS =================================== */
     /**
@@ -59,11 +64,13 @@ class FileUploadController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $entity->setMimeType($entity->getPdfFile()->getMimeType());
-            $entity->setPath("uploads/publication/");
+            $entity->setPath();
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->flush();
+
+            $this->tracker->trackEntityUpdate('File Upload');
 
             return $this->render('Uploads/submit_file.html.twig', [
                 'form' => $form->createView(),

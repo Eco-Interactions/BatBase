@@ -1,0 +1,95 @@
+<div style="width:fit-content;">
+    {# <img src="{{ email.image('@public' ~ asset('build/images/BatLogo_Horizontal_Color.jpg')) }}" alt="Logo">
+    <img src="{{ absolute_url(asset('build/images/BatLogo_Horizontal_Color.jpg')) }}" alt="Logo">
+     #}
+    <center>
+        <img src="{{ logo }}"  alt="Bat Eco-Interactions Logo">
+        <h3>Summary of Activity for the Week of {{ lastWeek }}</h3>
+    </center>
+    <br>
+    <hr>
+    <h3>Database</h3>
+    <p>
+        <code>
+            <table>
+                <thead style="text-align: left;">
+                    <th style="width: 10em;"></th>
+                    <th style="width: 5em;">Created</th>
+                    <th style="width: 5em;">Edited</th>
+                </thead>
+                <tbody>
+                    {% for entity in dataUpdates %}
+                        <tr>
+                            <td>{{ entity.name }}</td>
+                            <td>{{ entity.created }}</td>
+                            <td>{{ entity.updated }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </code>
+    </p>
+    <br>
+    <hr>
+    {% if users|length == 0 %}
+        <h4>New Users - 0</h4>
+    {% else %}
+        <h3>New Users - {{ users|length }}</h3>
+        <p>
+            <code>
+                <table>
+                    <thead style="text-align: left;">
+                        <th style="width: 10em;">Name</th>
+                        <th style="min-width: 20em; max-width: 800vw">About</th>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.about }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </code>
+        </p>
+    {% endif %}
+    <br>
+    <hr>
+    {% if pdfs|length == 0 %}
+        <h4>Submitted Publications - 0</h4>
+    {% else %}
+        <h3>Submitted Publications - {{ pdfs|length }}</h3>
+        <p>Files are attached.</p>
+        <p>
+            <code>
+                <table>
+                    <thead style="text-align: left;">
+                        <th style="min-width: 10em;max-width: 60em;">Title</th>
+                        <th style="min-width: 15em;max-width: 70em;">Description</th>
+                        <th style="min-width: 10em;">Submitted By</th>
+                        <th style="width: 20em;">Email</th>
+                    </thead>
+                    <tbody>
+                        {% for pdf in pdfs %}
+                            <tr>
+                                <td>{{ pdf.title }}</td>
+                                <td>{{ pdf.description }}</td>
+                                <td>{{ pdf.user }}</td>
+                                <td>{{ pdf.userEmail }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </code>
+        </p>
+    {% endif %}
+    <br>
+    <hr>
+    {% if feedback|length == 0 %}
+        <h4>User Feedback - 0</h4>
+    {% else %}
+    {% endif %}
+    <hr>
+    <br>
+</div>
