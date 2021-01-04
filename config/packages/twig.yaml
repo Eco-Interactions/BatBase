@@ -1,7 +1,8 @@
 twig:
     paths:
-        '%kernel.project_dir%/templates':   template
-        '%kernel.project_dir%/public/':     public
+        '%kernel.project_dir%/templates': templates
+        '%kernel.project_dir%/assets/images': images
+        '%kernel.project_dir%/assets/css': css
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
     exception_controller: null

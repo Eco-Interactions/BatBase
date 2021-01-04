@@ -85,7 +85,7 @@ class WeeklyDigestManager
         $message = new \Swift_Message('Test email');
         $message->setFrom('automated@batbase.org')
             ->setTo($adminEmail)
-            ->setSubject('BatBase Weekly Digest '.$adminEmail);
+            ->setSubject('BatBase Weekly Digest');
         return $message;
     }
     private function addLogoToMessage(&$data, &$message)
