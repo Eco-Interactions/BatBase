@@ -31,9 +31,9 @@ const panels = {
     'lists': { bttn: '#lists', key: 'lists',
         id: '#list-pnl',   tab: '#list-opts',   tabClass: 'hide-int-bttm-border'
     },
-    // 'review': { bttn: '#rvw-data', key: 'review',
-    //     id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
-    // }
+    'review': { bttn: '#rvw-data', key: 'review',
+        id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
+    }
 };
 
 /* ************************* FACADE ***************************************** */
