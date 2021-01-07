@@ -19,9 +19,9 @@
  *     MISC
  */
 import { _db, _modal, _u } from '~util';
-import * as fM from './filter-panel-main.js';
-import * as iM from './int-list-panel.js';
-import { initReviewPanel } from './data-review/review-panel-main.js';
+import * as filterPnl from './filter-panel-main.js';
+import * as listPnl from './int-list-panel.js';
+import * as reviewPnl from './data-review/review-panel-main.js';
 
 /* Panel confg */
 const panels = {
@@ -39,26 +39,26 @@ const panels = {
 /* ************************* FACADE ***************************************** */
 /* ======================== FILTER PANEL ==================================== */
 export function resetFilterPanelOnFocusChange() {
-    fM.resetFilterPanelOnFocusChange(...arguments);
+    filterPnl.resetFilterPanelOnFocusChange(...arguments);
 }
 export function updateFilterPanelHeader(focus) {
-    fM.updateFilterPanelHeader(focus);
+    filterPnl.updateFilterPanelHeader(focus);
 }
 export function enableClearFiltersButton() {
-    fM.enableClearFiltersButton();
+    filterPnl.enableClearFiltersButton();
 }
 export function clearFilterUi() {
-    fM.clearFilterUi();
+    filterPnl.clearFilterUi();
 }
 export function updateFilterStatusMsg() {
-    fM.updateFilterStatusMsg();
+    filterPnl.updateFilterStatusMsg();
 }
 export function updateTaxonFilterViewMsg(groupName) {
-    fM.updateTaxonFilterViewMsg(groupName);
+    filterPnl.updateTaxonFilterViewMsg(groupName);
 }
 /* -------- INTERACTION LISTS ------------- */
 export function enableListResetBttn() {
-    return iM.enableListResetBttn();
+    return listPnl.enableListResetBttn();
 }
 /* ============================ INTERNAL USE ================================ */
 export function updateUserNamedList(data, action) {
@@ -69,9 +69,9 @@ export function updateUserNamedList(data, action) {
 export function addPanelEventsAndStyles(userRole) {
     require('styles/pages/db/panels/panel.styl');
     setInfoButtonClickEvents();
-    fM.initFilterPanel();
-    iM.initListPanel();
-    if (userRole !== 'visitor' || userRole !== 'user') { initReviewPanel(userRole); }
+    filterPnl.initFilterPanel();
+    listPnl.initListPanel();
+    if (userRole !== 'visitor' || userRole !== 'user') { reviewPnl.initReviewPanel(userRole); }
 }
 function setInfoButtonClickEvents() {
     $('#svd-list-hlp').click(_modal.bind(null, 'showInfoModal', ['saved-lists']));
@@ -111,8 +111,8 @@ function openVerticalPanels(panel) {
     $('#fltr-int-pnl-cntnr').attr('class', 'flex-row');
     $('#filter-pnl, #list-pnl').removeClass('flex-row').addClass('flex-col');
     cssOpenPanel(panel);
-    iM.toggleListPanelOrientation('vert');
-    fM.toggleFilterPanelOrientation('vert');
+    listPnl.toggleListPanelOrientation('vert');
+    filterPnl.toggleFilterPanelOrientation('vert');
 }
 function closeOpenedPanelThenOpenNewPanel(opened, panel) {                      //console.log('closeOpenedPanelThenOpenNewPanel. toClose = %O, newPanel = %O', opened, panel)
     opened.forEach(key => closePanel(panels[key]));
@@ -134,8 +134,8 @@ function cssClosePanel(panel) {
 function closeVerticalPanel(panel) {
     cssClosePanel(panel);
     window.setTimeout(() => {
-        fM.toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
-        iM.toggleListPanelOrientation('horz');
+        filterPnl.toggleFilterPanelOrientation('horz', panel.id.includes('filter'));
+        listPnl.toggleListPanelOrientation('horz');
         $('#fltr-int-pnl-cntnr').attr('class', 'flex-col');
         $('#filter-pnl, #list-pnl').removeClass('flex-col').addClass('flex-row');
     }, 500);
