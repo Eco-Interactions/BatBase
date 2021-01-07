@@ -3,51 +3,33 @@
  * admin-editors to view all edited data and to send edits back to the editors
  * when needed.
  *
- * For now, toggles a column that shows the name of the most-recent editor of an
- * interaction/entity.
+ * Export
+ *     addDataReviewEvents\
  *
- * Exports:                     Imported By:
- *     addDataReviewEvents          panels-main
+ * TOC
+ *     INIT
+ *     TOGGLE
  */
 import { _table } from '~db';
-// import * as _u from '../../../util/util.js';
+import { _cmbx } from '~util';
 import * as pM from '../panels-main.js';
 
-// export function initReviewPanel() {
-//     $('#rvw-data').click(toggleEditorColumn);
-// }
-
-// function toggleEditorColumn() {
-//     const tblState = _table('tableState').get();
-//     const shown = $('#rvw-data').data('shown');
-//     tblState.columnApi.setColumnsVisible(['updatedBy'], !shown);
-//     $('#rvw-data').data('shown', !shown);
-// }
-
+/* ============================ INIT ======================================== */
 export function initReviewPanel(userRole) {
     // require('../../../../libs/rangePlugin.ts');
     require('styles/pages/db/panels/rvw-data.styl');
     initReviewComboboxes();
     $('#rvw-data').click(toggleReviewPanel);
 }
-/* ----------------------- COMBOBOXES --------------------------------------- */
 function initReviewComboboxes() {
-    // _u.initCombobox('Review-Editor');
-    // _u.initCombobox('Review-Status');
+    _cmbx('initCombobox', [{ name: 'Editor', id: '#sel-rvw-editor', maxItems: null, onChange: Function.prototype }]);
+    _cmbx('initCombobox', [{ name: 'Status', id: '#sel-rvw-status', onChange: Function.prototype }]);
     // initDateRangeSelect();
-}
-function getComboConfg(field) {
-    const confgs = {
-        'Review-Editor': { name: 'Editor', id: 'sel-rvw-editor', onChange: Function.prototype },
-        'Review-Status': { name: 'Status', id: 'sel-rvw-state', onChange: Function.prototype },
-        'Review-Date-Range': { name: 'Date Range', id: 'sel-rvw-date-start', onChange: Function.prototype },
-    };
-    return confgs[field];
 }
 function initDateRangeSelect() {
     // _u.initCombobox('Review-Date-Range');
 }
-/* ----------------------- COMBOBOXES --------------------------------------- */
+/* ========================== TOGGLE ======================================== */
 function toggleReviewPanel() {
     if ($('#review-pnl').hasClass('closed')) {
         buildAndShowReviewPanel();
@@ -55,6 +37,5 @@ function toggleReviewPanel() {
 }
 function buildAndShowReviewPanel() {
     pM.togglePanel('review', 'open');
-    // window.setTimeout(() => $('#rvw-editor-sel')[0].selectize.focus(), 500);
 }
 /* ------------- Select Records (First) Column ------------------------------- */
