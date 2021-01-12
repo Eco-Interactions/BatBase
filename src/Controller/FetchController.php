@@ -253,4 +253,20 @@ class FetchController extends AbstractController
         ));
         return $response;
     }
+    /**
+     * Gets all UserNamed entities created by the current user.
+     * @Route("/user", name="app_serialize_users")
+     */
+    public function serializeUserData(Request $request)
+    {
+        $this->em = $this->getDoctrine()->getManager();
+
+        $users = $this->getSerializedEntities('User');
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'users' => $users
+        ));
+        return $response;
+    }
 }

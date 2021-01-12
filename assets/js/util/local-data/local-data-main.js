@@ -92,8 +92,8 @@ export function initStoredData(reset) {
     showIntroAndLoadingMsg(reset);
     return init.initLocalDatabase(reset);
 }
-export function storeUserData() {
-    return init.storeUserData(...arguments);
+export function storeCustomUserData() {
+    return init.storeCustomUserData(...arguments);
 }
 /** ----------------------- TEMP DATA --------------------------------------- */
 export function getMmryData() {
