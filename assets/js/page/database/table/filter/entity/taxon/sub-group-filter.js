@@ -15,7 +15,7 @@ import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
-export function initSubGroupFilter(tblState) {                      /*temp-log*/console.log("       --Loading taxon Sub-Group filters.");
+export function initSubGroupFilter(tblState) {                      /*dbug-log*///console.log("       --Loading taxon Sub-Group filters.");
     return getSubGroupOpts(tblState)
         .then(getSubGroupFilter)
         .then(finishSubGroupComboInit);
@@ -47,9 +47,9 @@ function finishSubGroupComboInit(filterElem) {
 function filterTableBySubGroup(vals) {
     if (!vals.length) { return; }
     _ui('fadeTable');
-    if (!timeout) { timeout = setTimeout(filterBySubGroups, 1000); }
+    if (!timeout) { timeout = setTimeout(filterBySubGroups, 500); }
 }
-function filterBySubGroups() {
+function filterBySubGroups() {                                      /*dbug-log*///console.log("       filterBySubGroups");
     timeout = null;
     const rootNames = getSelectedRootNames(_cmbx('getSelVal', ['Sub-GroupFilter']));
     if (!rootNames) { return clearFilterAndResetTableToAllGroupTaxa(); }

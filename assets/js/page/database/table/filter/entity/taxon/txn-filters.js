@@ -219,7 +219,7 @@ function getSelectedTaxonRank(selected) {
 function getRelatedTaxaToSelect(selTaxon, taxonRcrds) {             /*dbug-log*///console.log('getRelatedTaxaToSelect taxon = %O', selTaxon);
     const selected = {};
     selectAncestorTaxa(selTaxon);
-    selected['Sub-Group'] = selTaxon.group.subGroup.name;
+    ifSubGroupsSelectSubGroupForFilter(selTaxon);
     return selected;
     /** Adds parent taxa to selected object, until the group parent. */
     function selectAncestorTaxa(taxon) {
@@ -227,6 +227,10 @@ function getRelatedTaxaToSelect(selTaxon, taxonRcrds) {             /*dbug-log*/
         selected[taxon.rank.displayName] = taxon.id;
         selectAncestorTaxa(getDetachedRcrd(taxon.parent, taxonRcrds));
     }
+}
+function ifSubGroupsSelectSubGroupForFilter(selTaxon) {
+    if (!$('#sel-SubGroupFilter').length) { return; }
+    selected['Sub-Group'] = selTaxon.group.subGroup.name;
 }
 /* --------------- UPDATE COMBOBOXES AFTER FILTER CHANGE -------------------- */
 /**
