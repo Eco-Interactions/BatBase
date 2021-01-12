@@ -27,9 +27,9 @@ function requireLibsAndStyles() {
 }
 /* --------------------------- COMBOBOXES ----------------------------------- */
 function initReviewComboboxes() {
+    _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
     initStatusCombobox();
     // initDateRangeCombobox();
-    _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
 }
 function initEditorCombobox(editorOpts) {                           /*dbug-log*/console.log('editorOpts = %O', editorOpts)
     const confg = {
