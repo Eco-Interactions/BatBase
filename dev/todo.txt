@@ -51,21 +51,7 @@ TAYLOR:
 > ____ TASKS _____
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
-    - digest
-        - data
-            - new users
-            - feedback
-            - pdf
-            - new/updated data
-        - template
-        - email
-            - send async: https://symfony.com/doc/4.4/mailer.html#sending-messages-async
 
-
-
-    - b4 server update
-        - add taxon groups and sub groups to the definitions page
-            - link in forms
 
 
     - random
@@ -77,8 +63,10 @@ CURRENT:
             - taxon parent edit form confg tag shouldn't be 'object', and that's really not what's happening anyway... rename
 
     - migration
-        - delete unused test users
-            - document remaining
+        - user
+            - delete unused test users & document remaining
+            - add 'role_editor' to cullen and kelly
+            - remove "" from tuli
         - regenerate all citation text
         - remove all periods at the end of author display names, and their sources
         - trim any field that could have accidental white space
