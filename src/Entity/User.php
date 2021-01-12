@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
+use JMS\Serializer\Annotation\Groups;
 use FOS\UserBundle\Model\User as BaseUser;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -13,6 +15,7 @@ use Symfony\Component\Security\Core\User\AdvancedUserInterface;
  * @ORM\Table(name="`user`")
  * @ORM\Entity(repositoryClass="App\Entity\UserRepository")
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class User extends BaseUser implements AdvancedUserInterface
 {
@@ -34,6 +37,8 @@ class User extends BaseUser implements AdvancedUserInterface
      *     minMessage="Tell us more about your interest in bat eco-interactions",
      *     maxMessage="Limit of 255 characters exceded"
      * )
+     * @JMS\Expose
+     * @JMS\SerializedName("aboutMe")
      */
     protected $aboutMe;
 
@@ -41,6 +46,8 @@ class User extends BaseUser implements AdvancedUserInterface
      * @var string
      *
      * @ORM\Column(name="first_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("firstName")
      */
     protected $firstName;
 
@@ -48,6 +55,8 @@ class User extends BaseUser implements AdvancedUserInterface
      * @var string
      *
      * @ORM\Column(name="last_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("lastName")
      */
     protected $lastName;
 
@@ -158,9 +167,10 @@ class User extends BaseUser implements AdvancedUserInterface
         return $this->lastName;
     }
 
-
     /**
      * Get fullName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("fullName")
      *
      * @return string
      */
@@ -192,6 +202,18 @@ class User extends BaseUser implements AdvancedUserInterface
     {   // Delay during wich the user will be considered as still active
         $delay = new \DateTime('2 minutes ago', new \DateTimeZone('UTC'));
         return ( $this->getLastActivityAt() > $delay );
+    }
+
+    /**
+     * Get fullName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("roles")
+     *
+     * @return string
+     */
+    public function getRoles()
+    {
+        return $this->roles;
     }
 
     /**

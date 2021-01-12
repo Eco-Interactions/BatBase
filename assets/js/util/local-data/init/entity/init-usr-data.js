@@ -6,13 +6,16 @@
  * - dataListNames - an object with each list's name (k) and id (v).
  * - user - current user's name or 'visitor'
  *
+ * - editorNames - an object with each editor's name(k) and id(v)
+ *
  * Export
+ *     modifyCustomUsrDataForLocalDb
  *     modifyUsrDataForLocalDb
  */
 import * as db from '../../local-data-main.js';
 import { getNameObj } from '../init-helpers.js';
-
-export function modifyUsrDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyUsrDataForLocalDb called. data = %O", data);
+/* ====================== CUSTOM USER LIST AND FILTER DATA ================== */
+export function modifyCustomUsrDataForLocalDb(data) {               /*dbug-log*///console.log("modifyCustomUsrDataForLocalDb called. data = %O", data);
     const filters = {};
     const filterIds = [];
     const int_sets = {};
@@ -55,4 +58,18 @@ function getFocusAndViewString(list) {
     };
     return list.details.focus === 'locs' ? 'Location' :
         map[list.details.focus] + ' - ' + map[list.details.view];
+}
+/* =========================== USER ENTITY ================================== */
+export function modifyUsrDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyUsrDataForLocalDb called. data = %O", data);
+    db.setDataInMemory('editorNames', getEditors(data.users));
+}
+function getEditors(users) {
+    const editorIds = Object.keys(users).filter(isEditor);
+    const data = {};
+    editorIds.forEach(id => data[users[id].fullName] = id);         /*dbug-log*///console.log("nameDataObj = %O", data);
+    return data;
+
+    function isEditor(id) {
+        return users[id].roles.indexOf('ROLE_EDITOR') !== -1;
+    }
 }
