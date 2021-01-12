@@ -24,15 +24,16 @@ export function handleFieldValidation(input, field, fLvl) {
 }
 /* ----------------------- COORDINATES -------------------------------------- */
 function setLatitudePattern(input, fLvl) {
-    return handleCoordPattern(input, fLvl, 'lat');
+    const pattern = '-?([0-8]?[0-9](\\.\\d+)?\|90(.[0]+)?)\\s?';
+    return handleCoordPattern(input, fLvl, 'lat', pattern);
 }
 function setLongitudePattern(input, fLvl) {
-    return handleCoordPattern(input, fLvl, 'long');
+    const pattern = '-?[1]?[0-7]?[0-9](\\.\\d+)?\|180((.[0]+)?)';
+    return handleCoordPattern(input, fLvl, 'long', pattern);
 }
-function handleCoordPattern(input, fLvl, prefix) {
-    const coordRegex = '-?\\d{1,2}(\\.?\\d*)';
+function handleCoordPattern(input, fLvl, prefix, pattern) {
     const msg = `Please enter a valid ${prefix}itude.`;
-    return addAttrAndValidation(input, { pattern: coordRegex }, msg, fLvl);
+    return addAttrAndValidation(input, { pattern: pattern }, msg, fLvl);
 }
 /* ---------------------------- URL ----------------------------------------- */
 function setHttpPatternAndPlaceholder(input, fLvl) {
