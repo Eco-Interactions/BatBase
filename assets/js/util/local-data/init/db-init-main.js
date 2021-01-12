@@ -27,7 +27,7 @@ import { modifyTxnDataForLocalDb } from './entity/init-txn-data.js';
 import { modifyLocDataForLocalDb } from './entity/init-loc-data.js';
 import { modifySrcDataForLocalDb } from './entity/init-src-data.js';
 import { modifyIntDataForLocalDb } from './entity/init-int-data.js';
-import { modifyUsrDataForLocalDb } from './entity/init-usr-data.js';
+import { modifyCustomUsrDataForLocalDb, modifyUsrDataForLocalDb } from './entity/init-usr-data.js';
 /* ====================== INIT FULL DATABASE ================================ */
 export function initLocalDatabase(reset) {                          /*perm-log*/console.log("   *--initLocalDatabase");
     return db.fetchServerData('data-state')
@@ -55,6 +55,7 @@ function downloadRemainingTableData() {
 function downloadRemainingDataAndFullyEnableDb() {
     return getAndSetData('geoJson')
         .then(() => getAndSetData('lists'))
+        .then(() => getAndSetData('user'))
         .then(() => db.setUpdatedDataInLocalDb())
         .then(() => _ui('onDataDownloadCompleteEnableUiFeatures'));
 }
@@ -67,10 +68,11 @@ function setData(url, data) {                                       /*perm-log*/
     const setDataFunc = {
         'geoJson': Function.prototype,
         'interaction': modifyIntDataForLocalDb,
-        'lists': modifyUsrDataForLocalDb,
+        'lists': modifyCustomUsrDataForLocalDb,
         'location': modifyLocDataForLocalDb,
         'source': modifySrcDataForLocalDb,
         'taxon': modifyTxnDataForLocalDb,
+        'user': modifyUsrDataForLocalDb,
     };
     return storeServerData(data)
         .then(() => setDataFunc[url](data));
@@ -86,6 +88,6 @@ function storeServerData(data) {                                    /*dbug-log*/
     }, Promise.resolve());
 }
 /* ===================== STORE NEW USER-DATA ================================ */
-export function storeUserData(data) {
-    modifyUsrDataForLocalDb(data)
+export function storeCustomUserData(data) {
+    modifyCustomUsrDataForLocalDb(data)
 }

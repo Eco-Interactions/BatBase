@@ -11,22 +11,50 @@
  *     TOGGLE
  */
 import { _table } from '~db';
-import { _cmbx } from '~util';
+import { _cmbx, _db } from '~util';
 import * as pM from '../panels-main.js';
 
 /* ============================ INIT ======================================== */
 export function initReviewPanel(userRole) {
-    // require('../../../../libs/rangePlugin.ts');
-    require('styles/pages/db/panels/rvw-data.styl');
+    requireLibsAndStyles();
     initReviewComboboxes();
     $('#rvw-data').click(toggleReviewPanel);
 }
-function initReviewComboboxes() {
-    _cmbx('initCombobox', [{ name: 'Editor', id: '#sel-rvw-editor', maxItems: null, onChange: Function.prototype }]);
-    _cmbx('initCombobox', [{ name: 'Status', id: '#sel-rvw-status', onChange: Function.prototype }]);
-    // initDateRangeSelect();
+/* ------------------------------ REQUIRE ----------------------------------- */
+function requireLibsAndStyles() {
+    // require('../../../../libs/rangePlugin.ts');
+    require('styles/pages/db/panels/rvw-data.styl');
 }
-function initDateRangeSelect() {
+/* --------------------------- COMBOBOXES ----------------------------------- */
+function initReviewComboboxes() {
+    _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
+    initStatusCombobox();
+    // initDateRangeCombobox();
+}
+function initEditorCombobox(editorOpts) {                           /*dbug-log*/console.log('editorOpts = %O', editorOpts)
+    const confg = {
+        id: '#sel-rvw-editor',
+        maxItems: null,
+        name: 'Editor',
+        onChange: Function.prototype,
+        options: editorOpts
+    };
+    _cmbx('initCombobox', [confg]);
+}
+function initStatusCombobox() {
+    const confg = {
+        id: '#sel-rvw-status',
+        maxItems: null,
+        name: 'Status',
+        onChange: Function.prototype,
+        options: getStatusOptions()
+    };
+    _cmbx('initCombobox', [confg]);
+}
+function getStatusOptions() {
+    // body...
+}
+function initDateRangeCombobox() {
     // _u.initCombobox('Review-Date-Range');
 }
 /* ========================== TOGGLE ======================================== */
