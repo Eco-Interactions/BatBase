@@ -28,11 +28,12 @@ export function buildTxnTable(v) {
     });
 }
 function getTxnDataAndBuildTable(view) {
+    if (isNaN(view)) { view = 1; } //Default Bat
     return _db('getData', [['rankNames', 'group', 'taxon']])
         .then(beginTaxonLoad.bind(null, view));
 }
 function beginTaxonLoad(groupId, data) {
-    updateTaxonTableState(data);                                                //console.log('Building Taxon Table. data = %O', _u('snapshot', [(data)]);
+    updateTaxonTableState(data);                                                //console.log('Building Taxon Table. data = %O', _u('snapshot', [(data)]));
     const groupRoots = storeGroupAndReturnRootTaxa(groupId);
     _ui('initTxnViewOpts', [groupId, data.taxon, data.group]);
     return startTxnTableBuildChain(groupRoots, true);

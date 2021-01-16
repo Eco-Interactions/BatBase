@@ -42,7 +42,7 @@ function submitFormData(data, fLvl, entity) {                                   
     addEntityDataToFormData(data, coreEntity, fLvl);
     storeParamsData(entity, coreEntity, fLvl);
     toggleWaitOverlay(true);
-    _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);
+    _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);           _u('logInProdEnv', ['data = ', JSON.stringify(data)]);
 }
 function formSubmitError() {
     toggleWaitOverlay(false);

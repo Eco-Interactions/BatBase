@@ -39,6 +39,10 @@ export function logInDevEnv() {
     if ($('body').data('env') === 'prod') { return; }
     console.log(...arguments);
 }
+export function logInProdEnv() {
+    if ($('body').data('env') !== 'prod') { return; }
+    console.log(...arguments);
+}
 export function snapshot(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
