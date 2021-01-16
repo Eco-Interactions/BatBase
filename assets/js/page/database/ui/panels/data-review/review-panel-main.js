@@ -22,7 +22,7 @@ export function initReviewPanel(userRole) {
 }
 /* ------------------------------ REQUIRE ----------------------------------- */
 function requireLibsAndStyles() {
-    // require('../../../../libs/rangePlugin.ts');
+    // require('libs/rangePlugin.ts');
     require('styles/pages/db/panels/rvw-data.styl');
 }
 /* --------------------------- COMBOBOXES ----------------------------------- */
