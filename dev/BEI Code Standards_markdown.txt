@@ -1,6 +1,7 @@
 # BEI Code Standards
 
-## Elem Attributes
+## HTML
+### Elem Attributes
     - ID for comboboxes: sel-[FieldName]
       - Filter combos: { id: sel-filter-[FieldName], name: [FieldName] Filter }
 
