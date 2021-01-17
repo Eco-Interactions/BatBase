@@ -14,6 +14,7 @@
 import * as db from './local-data/local-data-main.js';
 import * as cmbx from './elems/combobox/combobox-main.js';
 import * as elems from './elems/elems-main.js';
+import * as libs from './libs/libs-main.js';
 import * as alert from './misc/alert-issue.js';
 import * as modal from './misc/intro-modals.js';
 import * as misc from './misc/misc-util-main.js';
@@ -41,6 +42,9 @@ export function _alert(funcName, params = []) {
 }
 export function _cmbx(funcName, params = []) {
     return moduleMethod(funcName, cmbx, 'app-cmbx', params);
+}
+export function _lib(funcName, params = []) {
+    return moduleMethod(funcName, libs, 'app-libs', params);
 }
 export function _db(funcName, params = []) {
     return moduleMethod(funcName, db, 'app-db', params);

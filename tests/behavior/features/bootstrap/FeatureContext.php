@@ -1320,8 +1320,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     private function setDateFilterDefault($defaultDate)
     {
-        $selId = $this->getComboId('Date Filter Type');
-        $this->execute("$('$selId').data('default', '$defaultDate');");
+        // $selId = $this->getComboId('Date Filter Type');
+        $this->execute("$('#filter-cal').data('defaultDate', '$defaultDate');");
     }
 
     private function toggleTheDateFilter($enable)

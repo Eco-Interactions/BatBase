@@ -23,7 +23,7 @@
  *          TAXON
  *          TREE-TEXT
  */
-import { _cmbx } from '~util';
+import { _cmbx, _lib } from '~util';
 import { _table, _ui } from '~db';
 import * as fM from '../filter-main.js';
 let tblState;
@@ -63,55 +63,23 @@ export function toggleDateFilter(state, dateTime, skipSync) {       /*dbug-log*/
     if (filtering) { filterTableByDate(dateTime);
     } else { resetDateFilter(skipSync); }
 }
-/* ---------------------- FLATPICKR CAL CONFIG ------------------------------ */
-/** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal() {
     if (app.cal) { app.cal.destroy(); }
-    const flatpickr = require('flatpickr');
-    const calOpts = {
-        altInput: true, maxDate: "today",
-        disableMobile: true,
+    return _lib('getNewCalendar', [getDateFilterCalConfg()]);
+}
+function getDateFilterCalConfg() {
+    return {
+        elemId: '#filter-cal',
         enableTime: ifFilteringByUpdates(),
         onClose: filterByTime,
-        onReady: getCalOnReadyMethod(),
         plugins: getCalPlugins(ifFilteringByUpdates()),
     };
-    addDefaultTimeIfTesting(calOpts);
-    return new flatpickr('#filter-cal', calOpts);
+}
+function getCalPlugins(filterByDbUpdatedAt) {
+    return filterByDbUpdatedAt ? ['confirm'] : false;
 }
 function ifFilteringByUpdates() {
     return app.date && app.date.type === 'updated';
-}
-function getCalPlugins(filterByDbUpdatedAt) {
-    return filterByDbUpdatedAt ? getConfirmDatePlugin() : getMonthPlugin();
-}
-function getConfirmDatePlugin() {
-    const confirmDatePlugin = require('flatpickr/dist/plugins/confirmDate/confirmDate.js');
-    return [new confirmDatePlugin({showAlways: true})];
-}
-function getMonthPlugin() {
-    return [];
-    // const monthSelectPlugin = require('flatpickr/dist/plugins/monthSelectPlugin/monthSelectPlugin.js');
-    // return [new monthSelectPlugin({
-    //     shorthand: true, //defaults to false
-    //     dateFormat: "m.y", //defaults to "F Y"
-    //     altFormat: "F Y", //defaults to "F Y"
-    //     theme: "dark" // defaults to "light"
-    // })];
-}
-function getCalOnReadyMethod() {
-    return ifFilteringByUpdates() ?
-            function() {this.amPM.textContent = "AM"} : Function.prototype;
-}
-/**
- * There doesn't seem to be a way to set the date on the flatpickr calendar
- * from the selenium/behat tests. A data property is added to the calendar elem
- * and that date is set as the default for the calendar.
- */
-function addDefaultTimeIfTesting(calOpts) {
-    const date = $('#sel-DateFilterType').data('default');
-    if (!date) { return; }
-    calOpts.defaultDate = date;
 }
 /* -------------------------- STYLES AND STATE ------------------------------ */
 function applyDateFilterStyles(filtering) {
