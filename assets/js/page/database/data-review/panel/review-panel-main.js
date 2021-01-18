@@ -12,16 +12,10 @@
  */
 import { _table } from '~db';
 import { _cmbx, _db, _lib } from '~util';
-import * as pM from '../panels-main.js';
 
 /* ============================ INIT ======================================== */
-export function initReviewPanel(userRole) {
-    require('styles/pages/db/panels/rvw-data.styl');
-    initReviewComboboxes();
-    $('#rvw-data').click(toggleReviewPanel);
-}
 /* --------------------------- COMBOBOXES ----------------------------------- */
-function initReviewComboboxes() {
+export function initReviewComboboxes() {
     _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
     initStatusCombobox();
     initDateRangeCalendar();
@@ -47,7 +41,17 @@ function initStatusCombobox() {
     _cmbx('initCombobox', [confg]);
 }
 function getStatusOptions() {
-    // body...
+    const status = {
+        pending: 'pend',
+        approved: 'app',
+        rejected: 'rej',
+        new:    'new'
+    }
+    return Object.keys(status).map(buildStatusOption);
+
+    function buildStatusOption(key) {
+        return { text: key, value: status[key] };
+    }
 }
 function initDateRangeCalendar() {
     _lib('getNewCalendar', [getDateRangeCalConfg()]);

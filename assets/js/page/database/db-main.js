@@ -13,6 +13,7 @@ import { _alert, _db, _u, executeMethod } from '~util';
 import * as forms from './forms/forms-main.js';
 import * as map from './map/map-main.js';
 import * as table from './table/table-main.js';
+import * as review from './data-review/data-review-main.js';
 import * as tutorial from './tutorial/db-tutorial.js';
 import * as ui from './ui/ui-main.js';
 /*
@@ -37,6 +38,9 @@ export function _map(funcName, params = []) {
 }
 export function _table(funcName, params = []) {
     return moduleMethod(funcName, table, 'table', params);
+}
+export function _review(funcName, params = []) {
+    return moduleMethod(funcName, review, 'review', params);
 }
 export function _tutorial(funcName, params = []) {
     return moduleMethod(funcName, tutorial, 'tutorial', params);

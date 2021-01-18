@@ -19,9 +19,9 @@
  *     MISC
  */
 import { _db, _modal, _u } from '~util';
-import * as filterPnl from './filter-panel-main.js';
+import * as filterPnl from './filter-panel.js';
 import * as listPnl from './int-list-panel.js';
-import * as reviewPnl from './data-review/review-panel-main.js';
+import * as reviewPnl from './data-review-panel.js';
 
 /* Panel confg */
 const panels = {
@@ -59,10 +59,6 @@ export function updateTaxonFilterViewMsg(groupName) {
 /* -------- INTERACTION LISTS ------------- */
 export function enableListResetBttn() {
     return listPnl.enableListResetBttn();
-}
-/* ============================ INTERNAL USE ================================ */
-export function updateUserNamedList(data, action) {
-    return _db('updateUserNamedList', [data, action]);
 }
 /* ********************* MAIN CODE ****************************************** */
 /* ======================= EVENTS =========================================== */

@@ -7,3 +7,8 @@
  *
  *
  */
+import * as panel from './panel/review-panel-main.js';
+
+export function initReviewComboboxes() {
+    panel.initReviewComboboxes();
+}
