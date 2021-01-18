@@ -16,7 +16,7 @@ import * as pM from './panels-main.js';
 /* ============================ INIT ======================================== */
 export function initReviewPanel(userRole) {
     require('styles/pages/db/panels/rvw-data.styl');
-    _review('initReviewComboboxes');
+    _review('initDataReviewPanel', [userRole]);
     $('#rvw-data').click(toggleReviewPanel);
 }
 /* ========================== TOGGLE ======================================== */

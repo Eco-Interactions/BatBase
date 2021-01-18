@@ -10,69 +10,16 @@
  *     INIT
  *     TOGGLE
  */
-import { _table } from '~db';
-import { _cmbx, _db, _lib } from '~util';
-
+import * as admin from './admin/admin-review-panel-main.js';
+import * as editor from './editor/editor-review-panel-main.js';
 /* ============================ INIT ======================================== */
 /* --------------------------- COMBOBOXES ----------------------------------- */
-export function initReviewComboboxes() {
-    _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
-    initStatusCombobox();
-    initDateRangeCalendar();
-}
-function initEditorCombobox(editorOpts) {                           /*dbug-log*///console.log('editorOpts = %O', editorOpts)
-    const confg = {
-        id: '#sel-rvw-editor',
-        maxItems: null,
-        name: 'Editor',
-        onChange: Function.prototype,
-        options: editorOpts
+export function initDataReviewPanel(userRole) {
+    const map = {
+        // editor: editor.initEditorReviewPanel,
+        admin: admin.initAdminDataReviewPanel,
+        super: admin.initAdminDataReviewPanel,
     };
-    _cmbx('initCombobox', [confg]);
-}
-function initStatusCombobox() {
-    const confg = {
-        id: '#sel-rvw-status',
-        maxItems: null,
-        name: 'Status',
-        onChange: Function.prototype,
-        options: getStatusOptions()
-    };
-    _cmbx('initCombobox', [confg]);
-}
-function getStatusOptions() {
-    const status = {
-        pending: 'pend',
-        approved: 'app',
-        rejected: 'rej',
-        new:    'new'
-    }
-    return Object.keys(status).map(buildStatusOption);
-
-    function buildStatusOption(key) {
-        return { text: key, value: status[key] };
-    }
-}
-function initDateRangeCalendar() {
-    _lib('getNewCalendar', [getDateRangeCalConfg()]);
-}
-function getDateRangeCalConfg() {
-    return {
-        elemId: '#rvw-date-start',
-        // mode: 'range',
-        enableTime: false,
-        onClose: Function.prototype,
-        // plugins: false,
-        plugins: {'range': { input: '#rvw-date-end' }},
-    };
-}
-/* ========================== TOGGLE ======================================== */
-function toggleReviewPanel() {
-    if ($('#review-pnl').hasClass('closed')) {
-        buildAndShowReviewPanel();
-    } else { pM.togglePanel('review', 'close'); }
-}
-function buildAndShowReviewPanel() {
-    pM.togglePanel('review', 'open');
+    map[userRole]();
 }
 /* ------------- Select Records (First) Column ------------------------------- */
