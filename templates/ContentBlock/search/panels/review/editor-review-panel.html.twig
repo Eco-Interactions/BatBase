@@ -30,10 +30,26 @@
         <div class="flex-row spaced">
             <button id="rvw-hlp-col3" class="tbl-bttn hlp-bttn">?</button>
             <span style="flex-grow: 1;"></span>
-            <div id="rvw-hdr-col3">Modify Pending Records</div>
+            <div id="rvw-hdr-col3">Your Contributions</div>
             <span style="flex-grow: 1.6;"></span>
         </div>
-        <div id="rvw-pnl-col3-content" class="flex-col"></div>
-        <div class="flex-row submit-cntnr"></div>
+        <div id="rvw-pnl-col3-content" class="flex-col">
+            <label id="review-contrib" class="flex-row field-cntnr">
+                <span>Contributed:</span>
+                <span>## new records, ## updates</span>
+            </label>
+            <label id="review-pending" class="flex-row field-cntnr">
+                <span>Pending:</span>
+                <span>## records</span>
+                <div style="flex-grow:1;"></div>
+                <input type="button" class="tbl-bttn" value="View">
+            </label>
+            <label id="review-rejected" class="flex-row field-cntnr">
+                <span>Returned:</span>
+                <span>## records</span>
+                <div style="flex-grow:1;"></div>
+                <input type="button" class="tbl-bttn" value="View">
+            </label>
+        </div>
     </div>
 </div>
