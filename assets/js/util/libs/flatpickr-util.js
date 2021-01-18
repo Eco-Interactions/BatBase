@@ -10,6 +10,7 @@
  */
 import * as Flatpickr from 'flatpickr';
 import * as ConfirmDatePlugin from 'flatpickr/dist/plugins/confirmDate/confirmDate.js';
+import * as DateRangePlugin from 'flatpickr/dist/plugins/rangePlugin.js';
 /* ========================== INIT ========================================== */
 /**
  * Instantiates the flatpickr calendar and returns the flatpickr calendar.
@@ -20,7 +21,7 @@ export function getNewCalendar(confg) {                             /*dbug-log*/
     return new Flatpickr(confg.elemId, getCalOptions(confg));
 }
 function getCalOptions(confg) {
-    return {
+    const opts = {
         altInput: true,
         defaultDate: getDefaultTimeIfTesting(confg.elemId),
         disableMobile: true,
@@ -30,6 +31,8 @@ function getCalOptions(confg) {
         onReady: getCalOnReadyMethod(confg.enableTime),
         plugins: getCalPlugins(confg.plugins),
     };
+    if (confg.mode) { opts.mode = confg.mode }                       /*dbug-log*///console.log('getCalOpts = %O', opts)
+    return opts;
 }
 /** If time can be selected, sets the default time to be 1200 AM. */
 function getCalOnReadyMethod(time) {
@@ -51,17 +54,17 @@ function getDefaultTimeIfTesting(id) {
  */
 function getCalPlugins(plugins) {
     if (!plugins) { return []; }
-    return plugins.map(getPlugin);
+    return Object.keys(plugins).map(k => getPlugin(k, plugins[k]));
 }
-function getPlugin(pluginName) {                                    /*dbug-log*///console.log('New [%s]', pluginName);
+function getPlugin(name, opts) {                                    /*dbug-log*///console.log('New [%s] = %O', name, opts);
     return {
-        'confirm': getConfirmDatePlugin
-    }[pluginName]();
+        'confirm':  getConfirmDatePlugin,
+        'range':    getDateRangePlugin
+    }[name](opts);
 }
-function getConfirmDatePlugin() {                                   /*dbug-log*///console.log('getConfirmDatePlugin');
-    const opts = {showAlways: true};
+function getConfirmDatePlugin(opts) {                               /*dbug-log*///console.log('getConfirmDatePlugin. opts = %O', opts);
     return new ConfirmDatePlugin(opts);
 }
-function getDateRangePlugin() {
-
+function getDateRangePlugin(opts) {                                 /*dbug-log*///console.log('getDateRangePlugin. opts = %O', opts);
+    return new DateRangePlugin(opts);
 }

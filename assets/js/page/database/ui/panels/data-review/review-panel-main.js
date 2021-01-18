@@ -11,27 +11,22 @@
  *     TOGGLE
  */
 import { _table } from '~db';
-import { _cmbx, _db } from '~util';
+import { _cmbx, _db, _lib } from '~util';
 import * as pM from '../panels-main.js';
 
 /* ============================ INIT ======================================== */
 export function initReviewPanel(userRole) {
-    requireLibsAndStyles();
+    require('styles/pages/db/panels/rvw-data.styl');
     initReviewComboboxes();
     $('#rvw-data').click(toggleReviewPanel);
-}
-/* ------------------------------ REQUIRE ----------------------------------- */
-function requireLibsAndStyles() {
-    // require('libs/rangePlugin.ts');
-    require('styles/pages/db/panels/rvw-data.styl');
 }
 /* --------------------------- COMBOBOXES ----------------------------------- */
 function initReviewComboboxes() {
     _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
     initStatusCombobox();
-    // initDateRangeCombobox();
+    initDateRangeCalendar();
 }
-function initEditorCombobox(editorOpts) {                           /*dbug-log*/console.log('editorOpts = %O', editorOpts)
+function initEditorCombobox(editorOpts) {                           /*dbug-log*///console.log('editorOpts = %O', editorOpts)
     const confg = {
         id: '#sel-rvw-editor',
         maxItems: null,
@@ -54,8 +49,18 @@ function initStatusCombobox() {
 function getStatusOptions() {
     // body...
 }
-function initDateRangeCombobox() {
-    // _u.initCombobox('Review-Date-Range');
+function initDateRangeCalendar() {
+    _lib('getNewCalendar', [getDateRangeCalConfg()]);
+}
+function getDateRangeCalConfg() {
+    return {
+        elemId: '#rvw-date-start',
+        // mode: 'range',
+        enableTime: false,
+        onClose: Function.prototype,
+        // plugins: false,
+        plugins: {'range': { input: '#rvw-date-end' }},
+    };
 }
 /* ========================== TOGGLE ======================================== */
 function toggleReviewPanel() {

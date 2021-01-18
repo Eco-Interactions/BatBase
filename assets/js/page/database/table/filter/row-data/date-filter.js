@@ -76,7 +76,8 @@ function getDateFilterCalConfg() {
     };
 }
 function getCalPlugins(filterByDbUpdatedAt) {
-    return filterByDbUpdatedAt ? ['confirm'] : false;
+    const confirmConfg = { 'confirm': { showAlways: true }};
+    return filterByDbUpdatedAt ? confirmConfg : false;
 }
 function ifFilteringByUpdates() {
     return app.date && app.date.type === 'updated';
