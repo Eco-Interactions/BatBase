@@ -1,0 +1,5 @@
+{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+    {% embed 'ContentBlock/search/panels/review/admin-review-panel.html.twig' %} {% endembed %}
+{% elseif is_granted('ROLE_EDITOR') %}
+    {% embed 'ContentBlock/search/panels/review/editor-review-panel.html.twig' %} {% endembed %}
+{% endif %}
