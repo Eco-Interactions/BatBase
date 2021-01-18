@@ -1,10 +1,8 @@
 /**
- * Data review panel will allow editors to view the data they've edited, for
- * admin-editors to view all edited data and to send edits back to the editors
- * when needed.
+ * Handles opening and closing the Data-Review Panel. Inits the table @ _review.
  *
  * Export
- *     addDataReviewEvents\
+ *     initReviewPanel
  *
  * TOC
  *     INIT
@@ -23,8 +21,39 @@ export function initReviewPanel(userRole) {
 function toggleReviewPanel() {
     if ($('#review-pnl').hasClass('closed')) {
         buildAndShowReviewPanel();
-    } else { pM.togglePanel('review', 'close'); }
+    } else { hideReviewPanel(); }
 }
+function toggleDataOptsBarButtons(enable = true) {
+    const opac = enable ? 1 : .3;
+    const cursor = enable ? 'pointer' : 'not-allowed';
+    $('#new-data, #data-help').attr('disabled', !enable)
+        .css({ 'opacity': opac, 'cursor': cursor });
+}
+/* ------------------------------- SHOW ------------------------------------- */
 function buildAndShowReviewPanel() {
     pM.togglePanel('review', 'open');
+    $('#data-opts').append(getPseudoBorderStyle());
+    toggleDataOptsBarButtons(false);
+}
+function getPseudoBorderStyle() {
+    const panelT = $('#review-pnl').position().top;
+    const tabW = $('#data-opts').innerWidth();
+    const tabL = $('#data-opts').position().left + 1;                /*dbug-log*///console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL);
+    return `<style>.hide-rvw-bttm-border:before {
+        position: absolute;
+        content: '';
+        height: 3px;
+        z-index: 10;
+        width: ${tabW}px;
+        top: ${panelT}px;
+        left: ${tabL}px;
+        background: #d6ebff;
+        }</style>`;
+}
+/* ------------------------------- HIDE ------------------------------------- */
+function hideReviewPanel() {
+    pM.togglePanel('review', 'close');
+    $('.hide-rvw-bttm-border:before').remove();
+    toggleDataOptsBarButtons(true);
+
 }

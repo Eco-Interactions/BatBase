@@ -32,7 +32,7 @@ const panels = {
         id: '#list-pnl',   tab: '#list-opts',   tabClass: 'hide-int-bttm-border'
     },
     'review': { bttn: '#rvw-data', key: 'review',
-        id: '#review-pnl', tab: '#review-opts', tabClass: 'hide-rvw-bttm-border'
+        id: '#review-pnl', tab: '#data-opts', tabClass: 'hide-rvw-bttm-border'
     }
 };
 
@@ -101,7 +101,8 @@ function cssOpenPanel(panel) {
     window.setTimeout(() => $(panel.id).css('overflow-y', 'visible'), 1000);
 }
 function compatiblePanelOpened(opened, panel) {
-    return panel.key === 'review' ? false : opened.every(k => ['filter', 'lists'].indexOf(k) >= 0);
+    return panel.key === 'review' ?
+        false : opened.every(k => ['filter', 'lists'].indexOf(k) >= 0);
 }
 function openVerticalPanels(panel) {
     $('#fltr-int-pnl-cntnr').attr('class', 'flex-row');
