@@ -6,6 +6,10 @@
 >Test Users
     - TestUser: testuser123
     - testeditor: testeditor123
+    - Create process:
+        - Create user through the UI (so all required fields are filled)
+        - Add roles: $ php app/console fos:user:promote [USERNAME] [ROLE]
+        - Enable user: $ php app/console fos:user:activate [USERNAME]
 
 STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining

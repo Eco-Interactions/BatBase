@@ -18,6 +18,7 @@ export function initDataReviewPanel(userRole) {
     const map = {
         // editor: editor.initEditorReviewPanel,
         admin: admin.initAdminDataReviewPanel,
+        editor: admin.initAdminDataReviewPanel,
         super: admin.initAdminDataReviewPanel,
     };
     map[userRole]();

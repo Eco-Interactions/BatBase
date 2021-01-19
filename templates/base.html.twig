@@ -4,9 +4,9 @@
     {% set eifusername = app.user.username %}
     {% if is_granted('ROLE_SUPER_ADMIN') %}
         {% set eifrole = 'super' %}
-    {% elseif is_granted('ROLE_ADMIN') %}
+    {% elseif is_granted('ROLE_ADMIN') or is_granted('ROLE_QA_ADMIN') %}
         {% set eifrole = 'admin' %}
-    {% elseif is_granted('ROLE_EDITOR') %}
+    {% elseif is_granted('ROLE_EDITOR') or is_granted('ROLE_QA_EDITOR') %}
         {% set eifrole = 'editor' %}
     {% elseif is_granted('ROLE_USER') %}
         {% set eifrole = 'user' %}

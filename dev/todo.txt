@@ -65,6 +65,7 @@ CURRENT:
     - migration
         - user
             - delete unused test users & document remaining
+                - change to QA roles
             - add 'role_editor' to cullen and kelly
             - remove "" from tuli
         - regenerate all citation text
