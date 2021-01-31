@@ -32,8 +32,7 @@ let taxonData;
 export function getTaxonEditFields(id) {
     const taxa = _state('getEntityRcrds', ['taxon']);
     const group = taxa[id].group;
-    const role = group.displayName === 'Bat' ? 'Subject' : 'Object';
-    return _state('initTaxonState', [role, group.id, group.subGroup.name])
+    return _state('initTaxonState', [group.id, group.subGroup.name])
         .then(groupState => {
             setScopeTaxonMemory(taxa, groupState);
             return buildTaxonEditFields(taxa[id]);
@@ -179,7 +178,7 @@ function setGroupDataAttr() {
     $('#sel-Group').data('field', 'Group');
     $('#sel-Group').data('val', gId);
 }
-function onParentGroupChange(val) {  console.log
+function onParentGroupChange(val) {
     if (!val) { return; }
     _form('onGroupSelection', [val])
     .then(finishGroupChange)

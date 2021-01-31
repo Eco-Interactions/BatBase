@@ -54,11 +54,8 @@ function create(rank, val) {
 export function initRoleTaxonSelect(role, gId) {
     if (ifSubFormAlreadyInUse(role)) { return _val('openSubFormAlert', [role, 'sub']); }
     const groupId = gId ? gId : getGroupId(role);
-    if (role === 'Subject') { return build.initTaxonSelectForm('Subject', groupId); }
-    build.initTaxonSelectForm('Object', groupId)
-    .then(() => _cmbx('removeOpt', ['Group', 1]))  //removes Bat group option
-    .then(() => onGroupSelection(groupId))  // Builds the group's rank combos
-    .then(() => build.selectPrevTaxonAndResetRoleField('Object'));
+    build.initTaxonSelectForm(role, groupId)
+    .then(group.ifNoSubGroupsRemoveCombo);
 }
 function getGroupId(role) {
     const prevSelectedId = $('#sel-'+role).data('selTaxon');

@@ -4,7 +4,7 @@
 import { _state } from 'db/forms/forms-main.js';
 
 export default function(role) {
-    const groupFields = getGroupFields(role);
+    const groupFields = getGroupFields();
     const fields = getRoleFields(groupFields);
     return {
         'add': groupFields,
@@ -16,8 +16,7 @@ export default function(role) {
             'opt': false },
     };
 }
-function getGroupFields(role) {
-    if (role === 'subject') { return {}; }
+function getGroupFields() {
     const fields = {};
     ['Group', 'Sub-Group'].forEach(addFieldNotPresentInDom);
     return fields;
@@ -29,6 +28,5 @@ function getGroupFields(role) {
 }
 function getRoleFields(groupFields) {
     const lvls = _state('getTaxonProp', ['groupRanks']);
-    const addedFields = Object.keys(groupFields);
-    return !addedFields.length ? lvls : [...addedFields, ...lvls];
+    return [...Object.keys(groupFields), ...lvls];
 }

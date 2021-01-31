@@ -1,12 +1,10 @@
 /**
  * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
+ * the taxon group, sub-groups (if group has multiple taxon roots), and one for
  * each rank present in the group, (eg: Bat - Family, Genus, and Species), filled
  * with the taxa at that rank. When one is selected, the remaining boxes
  * are repopulated with related taxa and the 'select' button is enabled. A 'Select
  * Unspecified' button allows selection of a (sub)group's root taxon.
- *
- * The Subject is always a Bat. The Object field includes a Group combobox, and a
- * Sub-Group combobox for groups with multiple root-taxa.
  *
  * Export
  *     initTaxonSelectForm
@@ -33,24 +31,27 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
 function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('-------------build[%s]Taxon[%s]SelectForm', role, groupId);
     addNewFormState(role);
-    return _state('initTaxonState', [role, groupId])
-        .then(data => _elems('getSubForm', ['sub', 'sml-sub-form',
-            {Group: groupId, 'Sub-Group': data.groupTaxon.id}, '#sel-'+role]));
+    return _state('initTaxonState', [groupId])
+        .then(data => buildSelectForm(role, groupId, data));
 }
 function addNewFormState(role) {
     const lcRole = _u('lcfirst', [role]);
     _state('addEntityFormState', [lcRole, 'sub', '#sel-'+role, 'create']);
+}
+function buildSelectForm(role, groupId, data) {
+    const vals = {Group: groupId, 'Sub-Group': data.groupTaxon.id};
+    return _elems('getSubForm', ['sub', 'sml-sub-form', vals, '#sel-'+role]);
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first rank-combo into focus. Clears the [role]'s' combobox.
  */
 function finishTaxonSelectBuild(role, gId) {
-    addSelectRootTaxonBttn();
+    addSelectRootTaxonBttn(role);
     customizeElemsForTaxonSelectForm(role, gId);
-    if (role === 'Object') { return; } //For Object, called after group-selection builds rank rows.
     selectPrevTaxonAndResetRoleField(role);
 }
+/** Called after group-selection builds rank rows. */
 export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*///console.log('selectPrevTaxonAndResetRoleField [%s]', role)
     selectInitTaxonOrFocusFirstCombo(role);
     _cmbx('replaceSelOpts', [role, []]);
@@ -58,13 +59,14 @@ export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*/
     return Promise.resolve();
 }
 /* ----------------- SELECT UNSPECIFIED - ROOT TAXON  ----------------------- */
-function addSelectRootTaxonBttn() {
-    const bttn = buildSelectUnspecifedBttn();
+function addSelectRootTaxonBttn(role) {
+    const bttn = buildSelectUnspecifedBttn(role);
     $('#sub-form .bttn-cntnr').prepend(bttn);
 }
-function buildSelectUnspecifedBttn() {
+function buildSelectUnspecifedBttn(role) {
     const bttn = _el('getElem', ['input', getUnspecifiedBttnAttrs()]);
-    $(bttn).click(selectGroupTaxon);
+    $(bttn).click(selectGroupTaxon.bind(null));
+    $(bttn).data('role', _u('lcfirst', [role]));
     return bttn;
 }
 function selectGroupTaxon() {

@@ -30,6 +30,11 @@ export default function(entity) {
             'Bacteria': [
                 'Host'
             ],
+            'Bat': [
+                'Predation',
+                'Prey',
+                'Cohabitation'
+            ],
             'Bird': [
                 'Predation',
                 'Prey',

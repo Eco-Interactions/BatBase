@@ -118,7 +118,7 @@ export function addEntityFormState(entity, level, pSel, action) {
     };                                                              /*dbug-log*///console.log("   /addEntityFormState. fState = %O, arguments = %O", fState, arguments)
 }
 /*------------- Taxon Params --------------------*/
-export function initTaxonState(role, groupId, subGroupName) {       /*dbug-log*///console.log('initTaxonState args = %O', arguments);
+export function initTaxonState(groupId, subGroupName) {            /*dbug-log*///console.log('initTaxonState args = %O', arguments);
     return _db('getData', [['group', 'rankNames']])
         .then(data => setTxnState(data.group, data.rankNames));
 
@@ -129,12 +129,11 @@ export function initTaxonState(role, groupId, subGroupName) {       /*dbug-log*/
             groupId: groupId,
             groups: groups,
             ranks: ranks, //Object with each (k) rank name and it's (v) id and order
-            role: role,
             subGroup: subGroupName || Object.keys(group.taxa)[0],
             subGroups: group.taxa,
         };
         data.groupTaxon = fState.records.taxon[group.taxa[data.subGroup].id];
-        data.groupRanks = group.taxa[data.subGroup].subRanks;       if (role === 'Subject') {/*temp-log*/console.log('       --[%s] ranks = %O', data.groupRanks);}
+        data.groupRanks = group.taxa[data.subGroup].subRanks;       /*temp-log*///console.log('       --[%s] ranks = %O', data.groupRanks);
         fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroup, data);
         return data;
     }

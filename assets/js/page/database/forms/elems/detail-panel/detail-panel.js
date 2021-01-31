@@ -141,7 +141,7 @@ function getAllSourceInts(rcrd) {
 function fillTxnDetailData(entity, rcrd) {
     const txnRcrds = _state('getEntityRcrds', ['taxon']);
     const refs = {
-        'int': getTtlIntCnt(rcrd, 'objectRoles', txnRcrds) ||
+        'int': getTtlIntCnt(rcrd, 'objectRoles', txnRcrds) +
             getTtlIntCnt(rcrd, 'subjectRoles', txnRcrds)
     };
     getTaxonChildRefs(rcrd, txnRcrds);

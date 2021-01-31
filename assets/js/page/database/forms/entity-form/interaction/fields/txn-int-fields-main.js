@@ -7,7 +7,7 @@
  *     ROLE-TAXON SELECT-FORM INIT
  *     SELECT ROLE-TAXON
  */
-import { _cmbx } from '~util';
+import { _cmbx, _u } from '~util';
 import {  _elems, _form, _state, getSubFormLvl } from '~form';
 import * as iForm from '../int-form-main.js';
 /* ----------------- ROLE-FIELD FOCUS LISTENER ------------------------------ */
@@ -37,7 +37,7 @@ export function onTaxonRoleSelection(role, val) {                   /*perm-log*/
 }
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 export function selectRoleTaxon(e, groupTaxon) {
-    const role = _state('getTaxonProp', ['groupName']) === 'Bat' ? 'Subject' : 'Object';
+    const role = _u('ucfirst', [$('#select-group').data('role')]);
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
