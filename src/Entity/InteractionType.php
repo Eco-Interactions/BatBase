@@ -58,14 +58,14 @@ class InteractionType
      */
     private $activeForm;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="passive_form", type="string", length=255)
-     * @JMS\Expose
-     * @JMS\SerializedName("passiveForm")
-     */
-    private $passiveForm;
+    // *
+    //  * @var string
+    //  *
+    //  * @ORM\Column(name="passive_form", type="string", length=255)
+    //  * @JMS\Expose
+    //  * @JMS\SerializedName("passiveForm")
+
+    // private $passiveForm;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -76,6 +76,15 @@ class InteractionType
      *      fetch="EXTRA_LAZY" )
      */
     private $interactions;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(
+     *      targetEntity="App\Entity\ValidInteraction",
+     *      mappedBy="interactionType")
+     */
+    private $validInteractions;
 
     /**
      * @ORM\ManyToMany(targetEntity="Tag", mappedBy="intTypeConstraints")
@@ -233,30 +242,6 @@ class InteractionType
     }
 
     /**
-     * Set passiveForm.
-     *
-     * @param string $passiveForm
-     *
-     * @return InteractionType
-     */
-    public function setPassiveForm($passiveForm)
-    {
-        $this->passiveForm = $passiveForm;
-
-        return $this;
-    }
-
-    /**
-     * Get passiveForm.
-     *
-     * @return string
-     */
-    public function getPassiveForm()
-    {
-        return $this->passiveForm;
-    }
-
-    /**
      * Add interactions.
      *
      * @param \App\Entity\Interaction $interactions
@@ -290,19 +275,39 @@ class InteractionType
         return $this->interactions;
     }
 
-    // /**
-    //  * Returns an array of interactions ids.
-    //  * @JMS\VirtualProperty
-    //  * @JMS\SerializedName("interactions")
-    //  */
-    // public function getInteractionIds()
-    // {
-    //     $allIntIds = [];
-    //     foreach ($this->interactions as $interaction) {
-    //         array_push($allIntIds, $interaction->getId());
-    //     }
-    //     return $allIntIds;
-    // }
+    /**
+     * Add validInteraction.
+     *
+     * @param \App\Entity\ValidInteraction $validInteraction
+     *
+     * @return InteractionType
+     */
+    public function addValidInteraction(\App\Entity\ValidInteraction $validInteraction)
+    {
+        $this->validInteractions[] = $validInteraction;
+
+        return $this;
+    }
+
+    /**
+     * Remove validInteraction.
+     *
+     * @param \App\Entity\ValidInteraction $validInteraction
+     */
+    public function removeValidInteraction(\App\Entity\ValidInteraction $validInteraction)
+    {
+        $this->validInteractions->removeElement($validInteraction);
+    }
+
+    /**
+     * Get validInteractions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getValidInteractions()
+    {
+        return $this->validInteractions;
+    }
 
     /**
      * Add validTags.

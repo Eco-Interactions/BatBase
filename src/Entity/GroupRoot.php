@@ -48,6 +48,26 @@ class GroupRoot
     private $taxon;
 
     /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(
+     *      targetEntity="App\Entity\ValidInteraction",
+     *      mappedBy="objectGroup"
+     * )
+     */
+    private $validObjectInteraction;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(
+     *      targetEntity="App\Entity\ValidInteraction",
+     *      mappedBy="subjectGroup"
+     * )
+     */
+    private $validSubjectInteraction;
+
+    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
@@ -185,6 +205,74 @@ class GroupRoot
     public function getTaxonId()
     {
         return $this->taxon->getId();
+    }
+
+    /**
+     * Add validObjectInteractionss.
+     *
+     * @param \App\Entity\ValidInteraction $validInt
+     *
+     * @return GroupRoot
+     */
+    public function addValidObjectInteractions(\App\Entity\ValidInteraction $validInt)
+    {
+        $this->validObjectIntTypes[] = $validInt;
+
+        return $this;
+    }
+
+    /**
+     * Remove interactions.
+     *
+     * @param \App\Entity\ValidInteraction $validInt
+     */
+    public function removeValidObjectInteractions(\App\Entity\ValidInteraction $validInt)
+    {
+        $this->validObjectIntTypes->removeElement($validInt);
+    }
+
+    /**
+     * Get interactions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getValidObjectInteractionss()
+    {
+        return $this->validObjectInteractionss;
+    }
+
+    /**
+     * Add validSubjectInteractionss.
+     *
+     * @param \App\Entity\ValidInteraction $validInt
+     *
+     * @return GroupRoot
+     */
+    public function addValidsUbjectInteractions(\App\Entity\ValidInteraction $validInt)
+    {
+        $this->validSubjectInteractionss[] = $validInt;
+
+        return $this;
+    }
+
+    /**
+     * Remove interactions.
+     *
+     * @param \App\Entity\ValidInteraction $validInt
+     */
+    public function removeValidSubjectInteractions(\App\Entity\ValidInteraction $validInt)
+    {
+        $this->validSubjectInteractionss->removeElement($validInt);
+    }
+
+    /**
+     * Get interactions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getValidSubjectInteractionss()
+    {
+        return $this->validSubjectInteractionss;
     }
 
     /**

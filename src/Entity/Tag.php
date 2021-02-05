@@ -58,6 +58,12 @@ class Tag
     private $interactions;
 
     /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\ValidInteraction", mappedBy="tags")
+     * @ORM\JoinTable(name="valid_interaction_tag")
+     */
+    private $validInteractions;
+
+    /**
      * @ORM\ManyToMany(targetEntity="App\Entity\InteractionType", inversedBy="validTags")
      * @ORM\JoinTable(name="int_type_tag_contraints")
      */
@@ -246,6 +252,40 @@ class Tag
             array_push($intIds, $interaction->getId());
         }
         return $intIds;
+    }
+
+    /**
+     * Add validInteraction.
+     *
+     * @param \App\Entity\ValidInteraction $validInteraction
+     *
+     * @return Tag
+     */
+    public function addValidInteraction(\App\Entity\ValidInteraction $validInteraction)
+    {
+        $this->validInteractions[] = $validInteraction;
+
+        return $this;
+    }
+
+    /**
+     * Remove validInteraction.
+     *
+     * @param \App\Entity\ValidInteraction $validInteraction
+     */
+    public function removeValidInteraction(\App\Entity\ValidInteraction $validInteraction)
+    {
+        $this->validInteractions->removeElement($validInteraction);
+    }
+
+    /**
+     * Get validInteractions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getValidInteractions()
+    {
+        return $this->validInteractions;
     }
 
     /**
