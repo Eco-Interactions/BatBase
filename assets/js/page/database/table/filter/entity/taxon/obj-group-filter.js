@@ -36,10 +36,6 @@ function finishGroupComboInit(filterEl) {
     _cmbx('initCombobox', [confg]);
 }
 /* ----------------------- APPLY FILTER ------------------------------------- */
-/**
- * When viewing by publication, interactions can be filtered by the publication type.
- * Handles synchronizing with the tree-text filter.
- */
 function filterTableByObjectGroup(groupIds) {                       /*dbug-log*///console.log('filterTableByObjectGroup args = %O', arguments);
     if (!groupIds.length) { return; }
     _ui('fadeTable');

@@ -64,15 +64,13 @@ function getEntityConfg(confgName, entity) {
  * Returns an object of fields and field types for the passed entity.
  * Note: Source's have sub-entities that will return the core source fields.
  */
-export function getCoreFieldDefs(entity) {
+export function getCoreFieldDefs(entity) {                          /*dbug-log*/console.log('getCoreFieldDefs [%s]', entity);
     const coreEntityMap = {
         'author': 'source',         'citation': 'source',
         'publication': 'source',    'publisher': 'source',
-        'location': 'location',     'subject': 'taxonRanks',
-        'object': 'taxonRanks',      'plant': 'taxonRanks',
-        'arthropod': 'taxonRanks',   'taxon': 'taxon',
-        'interaction': 'interaction','bat': 'taxonRanks',
-        'editor': 'source',
+        'location': 'location',     'group': 'taxonGroup',
+        'taxon': 'taxon',           'interaction': 'interaction',
+        'editor': 'source'
     };
     const fields = {
         'location': { 'DisplayName': 'text', 'Description': 'textArea',
@@ -88,9 +86,14 @@ export function getCoreFieldDefs(entity) {
             'Year': 'year', 'Doi': 'doi','Website': 'url',
             'Authors': 'multiSelect', 'Editors': 'multiSelect'
         },
-        'taxonRanks': {
-            'Class': 'select', 'Order': 'select', 'Family': 'select',
-            'Genus': 'select', 'Species': 'select'
+        'taxonGroup': {
+            'Group': 'select',
+            'Sub-Group': 'select',
+            'Class': 'select',
+            'Order': 'select',
+            'Family': 'select',
+            'Genus': 'select',
+            'Species': 'select'
         },
         'taxon': { 'DisplayName': 'text' }
     };                                                                          //console.log('---------getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
@@ -99,7 +102,7 @@ export function getCoreFieldDefs(entity) {
 
 /** Returns the core entity. (eg, Source is returned for author, citation, etc.) */
 export function getCoreFormEntity(entity) {
-    var coreEntities = {
+    const coreEntities = {
         'author': 'source',         'citation': 'source',
         'publication': 'source',    'publisher': 'source',
         'location': 'location',     'taxon': 'taxon',

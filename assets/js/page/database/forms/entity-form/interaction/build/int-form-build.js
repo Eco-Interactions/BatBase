@@ -47,7 +47,6 @@ function modifyFormDisplay() {
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     $('.all-fields-cntnr').hide();
-    $('#Subject-lbl').text('Subject (Bat)');
     _elems('setCoreRowStyles', ['#form-main', '.top-row']);
     addReferenceGuideButton();
 }
