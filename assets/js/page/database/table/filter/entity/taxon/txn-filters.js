@@ -18,6 +18,7 @@ import { _cmbx, _el, _db, _u } from '~util';
 import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../../filter-main.js';
 import { initObjectGroupCombobox } from './obj-group-filter.js';
+import { initInteractionRoleCombobox } from './role-filter.js';
 import { initSubGroupFilter } from './sub-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
@@ -26,6 +27,7 @@ export function loadTxnFilters(tblState) {                          /*perm-log*/
     loadTxnRankComboboxes(tblState);
     if ($('input[name="name-Taxon"]').length) { return; } //elems already initialized
     initTxnNameSearchElem(tblState);
+    initTxnRoleComboIfBothRolesPossible(); //tblState.groupRoles
     _ui('updateTaxonFilterViewMsg', [tblState.groupPluralName]);
     return loadAsyncFilters(tblState);
 }
@@ -42,7 +44,7 @@ function initTxnNameSearchElem(tblState) {
         $($('#focus-filters')[0].lastChild).append(searchTreeElem);
     }
 }
-/* ------------------------ RANK TAXON ------------------------------------- */
+/* ------------------------ RANK TAXON -------------------------------------- */
 /**
  * Builds and initializes a search-combobox for each rank present in the
  * the unfiltered group tree. Each rank's box is populated with the names
@@ -154,6 +156,16 @@ function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*/
 }
 function setSubGroupFilter(val) {
     _cmbx('setSelVal', ['Sub-GroupFilter', val, 'silent']);
+}
+/* ------------------- INTERACTION ROLE ------------------------------------- */
+/**
+ * [initTxnRoleComboIfBothRolesPossible description]
+ * @param  {[type]} groupRoles [description]
+ * @return {[type]}            [description]
+ */
+function initTxnRoleComboIfBothRolesPossible(groupRoles) {
+    // test then load
+    initInteractionRoleCombobox();
 }
 /* ====================== FILTER ============================================ */
 /**
