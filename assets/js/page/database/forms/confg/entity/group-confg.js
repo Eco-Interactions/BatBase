@@ -3,7 +3,7 @@
  */
 import { _state } from 'db/forms/forms-main.js';
 
-export default function(role) {
+export default function() {
     const groupFields = getGroupFields();
     const fields = getRoleFields(groupFields);
     return {

@@ -50,8 +50,8 @@ export function getFormConfg(entity) {
 }
 function getFormConfgName(entity) {
     const map = {
-        subject: 'role',
-        object: 'role',
+        subject: 'group',
+        object: 'group',
         editor: 'author'
     };
     return map[entity] ? map[entity] : entity;
@@ -66,10 +66,15 @@ function getEntityConfg(confgName, entity) {
  */
 export function getCoreFieldDefs(entity) {                          /*dbug-log*/console.log('getCoreFieldDefs [%s]', entity);
     const coreEntityMap = {
-        'author': 'source',         'citation': 'source',
-        'publication': 'source',    'publisher': 'source',
-        'location': 'location',     'group': 'taxonGroup',
-        'taxon': 'taxon',           'interaction': 'interaction',
+        'author': 'source',
+        'citation': 'source',
+        'publication': 'source',
+        'publisher': 'source',
+        'location': 'location',
+        'object': 'taxonGroup',
+        'subject': 'taxonGroup',
+        'taxon': 'taxon',
+        'interaction': 'interaction',
         'editor': 'source'
     };
     const fields = {

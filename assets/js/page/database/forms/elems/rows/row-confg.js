@@ -32,7 +32,7 @@ function getIncludedFields(confg) {
     getFormFieldNames(confg).forEach(field => included[field] = allFields[field]);
     return included;
 }
-function getFieldTypes(confg) {
+function getFieldTypes(confg) {                                     /*dbug-log*///console.log('getFieldTypes confg = %O', confg);
     const coreFields = _confg('getCoreFieldDefs', [confg.entity]);
     return Object.assign(coreFields, confg.form.add);
 }

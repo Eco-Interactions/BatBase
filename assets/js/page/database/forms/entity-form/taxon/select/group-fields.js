@@ -39,7 +39,7 @@ function ifNotGroupComboRemove(i, elem) {
 /* ------------------ BUILD GROUP FIELDS ------------------------------------ */
 /** A row for each rank present in the group filled with the taxa at that rank.  */
 function buildAndAppendGroupRows(rootId) {
-    return _elems('getFormFieldRows', ['group', {'Sub-Group': rootId}, 'sub'])
+    return _elems('getFormFieldRows', [role, {'Sub-Group': rootId}, 'sub'])
     .then(appendGroupRowsAndFinishBuild);
 }
 function appendGroupRowsAndFinishBuild(rows) {                      /*dbug-log*///console.log('appendGroupRowsAndFinishBuild = %O', rows);
