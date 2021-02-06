@@ -72,7 +72,7 @@ function updateSubGroupState() {
     const subGroupName = _cmbx('getSelTxt', ['Sub-Group']).split(' ')[1];
     const subGroup =  _state('getTaxonProp', ['subGroups'])[subGroupName];/*temp-log*/console.log('onSubGroupSelection [%O]', subGroup);
     const subGroupTaxon = _state('getRcrd', ['taxon', subGroup.id]);
-    _state('setTaxonProp', ['subGroup', subGroup]);
+    _state('setTaxonProp', ['subGroup', subGroupName]);
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
     _state('setTaxonProp', ['groupRanks', subGroup.subRanks]);
 }

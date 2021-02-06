@@ -134,7 +134,7 @@ export function initTaxonState(role, groupId, subGroupName) {       /*dbug-log*/
             subGroups: group.taxa,
         };
         data.groupTaxon = fState.records.taxon[group.taxa[data.subGroup].id];
-        data.groupRanks = group.taxa[data.subGroup].subRanks;       if (role === 'Subject') {/*temp-log*/console.log('       --[%s] ranks = %O', data.groupRanks);}
+        data.groupRanks = group.taxa[data.subGroup].subRanks;       /*temp-log*/console.log('       --[%s] ranks = %O', data.groupRanks);
         fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroup, data);
         return data;
     }
@@ -225,6 +225,7 @@ export function setTaxonGroupData(taxon) {
     txnData.groupRanks = group.taxa[taxon.group.subGroup.name].subRanks;
 }
 export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
+    if (!fState.forms[fLvl]) { return; } // Form closed.
     const fieldData = fState.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }

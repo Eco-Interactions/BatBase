@@ -30,6 +30,7 @@ export function addFilterPanelEvents() {
 }
 function handleTableRebuild() {
     _table('buildTable', [false, false]);
+    $('#focus-filters input[type="text"]').val('');
 }
 /* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
 function resizeFilterPanelTab() {
