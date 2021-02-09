@@ -35,7 +35,7 @@ class ValidInteraction
      * )
      * @ORM\JoinColumn(nullable=false)
      */
-    private $objectGroup;
+    private $objectSubGroup;
 
     /**
      * @var \App\Entity\GroupRoot
@@ -47,8 +47,7 @@ class ValidInteraction
      * )
      * @ORM\JoinColumn(nullable=false)
      */
-    private $subjectGroup;
-
+    private $subjectSubGroup;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -64,7 +63,7 @@ class ValidInteraction
      * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="validInteractions")
      * @ORM\JoinTable(name="valid_interaction_tag")
      */
-    private $tags;
+    private $tags;  //if there are tags, one must be selected
 
     /**
      * @var \DateTime
@@ -119,72 +118,72 @@ class ValidInteraction
     }
 
     /**
-     * Set objectGroup.
+     * Set objectSubGroup.
      *
-     * @param \App\Entity\Group $objectGroup
+     * @param \App\Entity\GroupRoot $objectSubGroup
      *
      * @return ValidInteraction
      */
-    public function setObjectGroup(\App\Entity\Group $objectGroup)
+    public function setObjectSubGroup(\App\Entity\GroupRoot $objectSubGroup)
     {
-        $this->objectGroup = $objectGroup;
+        $this->objectSubGroup = $objectSubGroup;
 
         return $this;
     }
 
     /**
-     * Get objectGroup.
+     * Get objectSubGroup.
      *
-     * @return \App\Entity\Group
+     * @return \App\Entity\GroupRoot
      */
-    public function getObjectGroup()
+    public function getObjectSubGroup()
     {
-        return $this->objectGroup;
+        return $this->objectSubGroup;
     }
 
     /**
      * Get Group Id
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("objectGroup")
+     * @JMS\SerializedName("objectSubGroup")
      */
-    public function getObjectGroupId()
+    public function getObjectSubGroupId()
     {
-        return $this->objectGroup->getId();
+        return $this->objectSubGroup->getId();
     }
 
 
     /**
-     * Set subjectGroup.
+     * Set subjectSubGroup.
      *
-     * @param \App\Entity\Group $subjectGroup
+     * @param \App\Entity\GroupRoot $subjectSubGroup
      *
      * @return ValidInteraction
      */
-    public function setSubjectGroup(\App\Entity\Group $subjectGroup)
+    public function setSubjectSubGroup(\App\Entity\GroupRoot $subjectSubGroup)
     {
-        $this->subjectGroup = $subjectGroup;
+        $this->subjectSubGroup = $subjectSubGroup;
 
         return $this;
     }
 
     /**
-     * Get subjectGroup.
+     * Get subjectSubGroup.
      *
-     * @return \App\Entity\Group
+     * @return \App\Entity\GroupRoot
      */
-    public function getSubjectGroup()
+    public function getSubjectSubGroup()
     {
-        return $this->subjectGroup;
+        return $this->subjectSubGroup;
     }
 
     /**
      * Get Group Id
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("subjectGroup")
+     * @JMS\SerializedName("subjectSubGroup")
      */
-    public function getSubjectGroupId()
+    public function getSubjectSubGroupId()
     {
-        return $this->subjectGroup->getId();
+        return $this->subjectSubGroup->getId();
     }
 
     /**
@@ -368,12 +367,15 @@ class ValidInteraction
      */
     public function __toString()
     {
-        $citedAs = $this->getCitedAs();
-        if (!is_null($citedAs)) {
-            return $citedAs;
-        } else {
-            $desc_str = $this->getAuthorSource().' - '.$this->getSubjectGroup();
-            return $desc_str;
+        $string = $this->subjectSubGroup->getTaxon()->getDisplayName() + ' - ' +
+            $this->objectSubGroup->getTaxon()->getDisplayName() + ' - ' +
+            $this->interactionType->getDisplayName();
+        if (count($this->tags)) {
+            $string += ' - ';
+            foreach ($this->tags as $tag) {
+                $string += $tag->getDisplayName() + ' ';
+            }
         }
+        return $string;
     }
 }

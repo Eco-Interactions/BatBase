@@ -23,7 +23,7 @@ class LogError
      * Serializes entity records. Clears $em memory after each batch of 3000 records.
      * @param  Class  $error  Error class.
      */
-    public function logError($error)
+    public function logError($e)
     {
         $lineNum = $e->getLine();
         $errMsg = $e->getMessage();
@@ -41,7 +41,7 @@ class LogError
     {
         $logMsg = "\n\n### Error @ [$lineNum] = $msg\n$trace\n";
         $this->logger->error($logMsg);
-        if ($this->getParameter('env') === 'prod') { return; };
+        if (getenv('env') === 'prod') { return; };
         print($logMsg);
     }
 }

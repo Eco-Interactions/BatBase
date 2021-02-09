@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Service\SerializeData;
-use App\Service\AppDataManager;
+use App\Service\DataManager;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +21,7 @@ class DataEntryController extends AbstractController
     private $serialize;
     private $dataManager;
 
-    public function __construct(SerializeData $serialize, AppDataManager $dataManager)
+    public function __construct(SerializeData $serialize, DataManager $dataManager)
     {
         $this->serialize = $serialize;
         $this->dataManager = $dataManager;

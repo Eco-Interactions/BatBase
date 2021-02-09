@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Contribution;
+use App\Entity\Group;
 use App\Entity\Interaction;
 use App\Entity\Location;
 use App\Entity\Source;
@@ -26,7 +27,7 @@ use Doctrine\ORM\EntityManagerInterface;
  *         FLUSH DATA
  *     TRACK ENTITY-UPDATE
  */
-class AppDataManager
+class DataManager
 {
     private $em;
     private $logger;
@@ -59,7 +60,7 @@ class AppDataManager
 
         $this->setEntityData($coreData, $coreEntity, $returnData->coreEdits);
 
-        if ($coreName !== 'interaction') {
+        if (method_exists($coreEntity, 'getDisplayName')) {
             $returnData->name = $coreEntity->getDisplayName();
         }
 
@@ -437,7 +438,7 @@ class AppDataManager
         if ($this->ifNotDuplicateEntityError($e)) {
             $this->logger->logError($e);
         }
-        $returnData['error'] = $e->getMessage();
+        $returnData->error = $e->getMessage();
     }
     private function ifNotDuplicateEntityError($e)
     {

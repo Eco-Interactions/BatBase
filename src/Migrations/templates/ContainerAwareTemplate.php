@@ -19,10 +19,16 @@ class ContainerAwareTemplate extends AbstractMigration implements ContainerAware
     private $container;
     private $em;
     private $admin;
+    private $dataManager;
 
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
+    }
+
+    public function setDataManager(DataManager $manager)
+    {
+        $this->dataManager = $manager;
     }
 
     private function getEntity($className, $val, $prop = 'id')

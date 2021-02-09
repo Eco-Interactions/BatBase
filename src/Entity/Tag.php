@@ -64,12 +64,6 @@ class Tag
     private $validInteractions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\InteractionType", inversedBy="validTags")
-     * @ORM\JoinTable(name="int_type_tag_contraints")
-     */
-    private $intTypeConstraints;
-
-    /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Source", mappedBy="tags", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(name="source_tag")
      */
@@ -286,41 +280,6 @@ class Tag
     public function getValidInteractions()
     {
         return $this->validInteractions;
-    }
-
-    /**
-     *
-     * Add intTypeConstraint.
-     *
-     * @param \App\Entity\InteractionType $intTypeConstraint
-     *
-     * @return Tag
-     */
-    public function addIntTypeConstraint(\App\Entity\InteractionType $intTypeConstraint)
-    {
-        $this->intTypeConstraints[] = $intTypeConstraint;
-
-        return $this;
-    }
-
-    /**
-     * Remove intTypeConstraint.
-     *
-     * @param \App\Entity\InteractionType $intTypeConstraint
-     */
-    public function removeIntTypeConstraint(\App\Entity\InteractionType $intTypeConstraint)
-    {
-        $this->intTypeConstraints->removeElement($intTypeConstraint);
-    }
-
-    /**
-     * Get intTypeConstraints.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getIntTypeConstraints()
-    {
-        return $this->intTypeConstraints;
     }
 
     /**

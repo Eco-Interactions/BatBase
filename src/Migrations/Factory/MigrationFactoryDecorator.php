@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Migrations\Factory;
 
+use App\Service\DataManager;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\Migrations\Version\MigrationFactory;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -14,10 +15,12 @@ class MigrationFactoryDecorator implements MigrationFactory
     private $migrationFactory;
     private $container;
 
-    public function __construct(MigrationFactory $migrationFactory, ContainerInterface $container)
+    public function __construct(MigrationFactory $migrationFactory, ContainerInterface $container,
+        DataManager $dataManager)
     {
         $this->migrationFactory = $migrationFactory;
         $this->container        = $container;
+        $this->dataManager      = $dataManager;
     }
 
     public function createVersion(string $migrationClassName): AbstractMigration
@@ -26,8 +29,10 @@ class MigrationFactoryDecorator implements MigrationFactory
 
         if ($instance instanceof ContainerAwareInterface) {
             $instance->setContainer($this->container);
+            if (method_exists($instance, 'setDataManager')) {
+                $instance->setDataManager($this->dataManager);
+            }
         }
-
         return $instance;
     }
 }

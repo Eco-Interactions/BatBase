@@ -448,11 +448,11 @@ class Taxon
     /**
      * Get Group.
      *
-     * @return \App\Entity\Group
+     * @return \App\Entity\GroupRoot
      */
     public function getGroup()
     {
-        return $this->group ? $this->group->getGroup() : null;
+        return $this->group;
     }
 
     /**

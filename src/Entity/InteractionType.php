@@ -87,12 +87,6 @@ class InteractionType
     private $validInteractions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="intTypeConstraints")
-     * @ORM\JoinTable(name="int_type_tag_contraints")
-     */
-    private $validTags;
-
-    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
@@ -132,7 +126,7 @@ class InteractionType
     public function __construct()
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->validTags = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->validInteractions = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -307,61 +301,6 @@ class InteractionType
     public function getValidInteractions()
     {
         return $this->validInteractions;
-    }
-
-    /**
-     * Add validTags.
-     *
-     * @param \App\Entity\Tag $validTags
-     *
-     * @return InteractionType
-     */
-    public function addValidTag(\App\Entity\Tag $validTags)
-    {
-        $this->validTags[] = $validTags;
-
-        return $this;
-    }
-
-    /**
-     * Remove validTags.
-     *
-     * @param \App\Entity\Tag $validTags
-     */
-    public function removeValidTag(\App\Entity\Tag $validTags)
-    {
-        $this->validTags->removeElement($validTags);
-    }
-
-    /**
-     * Get validTags.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getValidTags()
-    {
-        return $this->validTags;
-    }
-
-    /**
-     * Serialize validTags.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("tags")
-     *
-     * @return array
-     */
-    public function serializeValidTags()
-    {
-        $tags = [];
-
-        foreach ($this->validTags as $tag) {
-            array_push($tags, [
-                'id' => $tag->getId(),
-                'displayName' => $tag->getDisplayName()
-            ]);
-        }
-
-        return $tags;
     }
 
     /**

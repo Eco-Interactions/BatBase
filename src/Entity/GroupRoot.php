@@ -27,6 +27,14 @@ class GroupRoot
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     * @JMS\Expose
+     */
+    private $description;
+
+    /**
+     * @var string
      * JSON array with the rank IDs for each sub-rank in the sub-group.
      *
      * @ORM\Column(name="sub_ranks", type="string", length=255, nullable=false)
@@ -109,6 +117,30 @@ class GroupRoot
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return GroupRoot
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 
     /**
