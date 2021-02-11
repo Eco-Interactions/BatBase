@@ -25,10 +25,11 @@ import { _state } from '~form';
  */
 let d = {
     opts: {},
-    selected: {}
+    ranks: [],
+    selected: {},
 };
 function resetOptMemory() {
-    d = { opts: {}, selected: {} };
+    d = { opts: {}, ranks: [], selected: {} };
 }
 /* ------------------- GET ALL OPTS FOR RELATED TAXA ------------------------ */
 export function getAllRankAndSelectedOpts(selId, selTaxon = null) {
@@ -36,12 +37,12 @@ export function getAllRankAndSelectedOpts(selId, selTaxon = null) {
     if (!d.taxon) { return; } //issue alerted to developer and editor
     d.group = d.taxon.group.name;
     d.subGroup = d.taxon.group.subGroup.name;
+    d.ranks = _state('getTaxonProp', ['subGroup']).subRanks;
     return buildRankTaxonOpts()
         .then(clearMemoryAndReturnOpts)
 }
 function clearMemoryAndReturnOpts() {
     window.setTimeout(() => resetOptMemory(), 500);
-    // const data = JSON.parse(JSON.stringify({ opts: d.opts, selected: d.selected }));
     return d;
 }
 function buildRankTaxonOpts() {
@@ -65,8 +66,7 @@ function buildChildRankOpts(pRank, children) {
     handleEmptyChildRanks(childRanks);
 }
 function getChildRanks(rankName) {
-    const ranks = _state('getTaxonProp', ['groupRanks']);
-    return ranks.slice(0, ranks.indexOf(rankName));
+    return d.ranks.slice(0, d.ranks.indexOf(rankName));
 }
 function addRelatedChild(id) {                                      /*dbug-log*///console.log('addRelatedChild. id = ', id);
     const childTxn = _state('getRcrd', ['taxon', id]);
@@ -117,13 +117,12 @@ function buildAncestorOpts(pTaxon) {
  * the 'none' value selected.
  */
 function buildOptsForEmptyRanks() {
-    const ranks = _state('getTaxonProp', ['groupRanks']);
     const proms = [];
     fillOptsForEmptyRanks();
     return Promise.all(proms);
 
     function fillOptsForEmptyRanks() {
-        ranks.forEach(rank => {                                     /*dbug-log*///console.log("--fillOptsForEmptyRank [%s]", rank)
+        d.ranks.forEach(rank => {                                     /*dbug-log*///console.log("--fillOptsForEmptyRank [%s]", rank)
             if (d.opts[rank] || rank == d.taxon.rank.displayName) { return; }
             buildAncestorOpts(rank);
         });

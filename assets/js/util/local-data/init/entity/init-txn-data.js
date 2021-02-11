@@ -18,8 +18,8 @@ import { getNameObj } from '../init-helpers.js';
 
 export function modifyTxnDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyTxnDataForLocalDb called. data = %O", data);
     db.setDataInMemory('groupNames', getNameObj(Object.keys(data.group), data.group));
-    storeTaxaByRankAndGroup(data.taxon, data.group, data.groupRoot);
     modifyGroupData(data.group, data.rank);
+    storeTaxaByRankAndGroup(data.taxon, data.group, data.groupRoot);
     storeRankData(data.rank);
     db.deleteMmryData('groupRoot');
 }
@@ -43,25 +43,25 @@ function storeRankData(rankData) {
 function storeTaxaByRankAndGroup(taxa, groups, roots) {
     for (let groupId in groups) {
         const group = groups[groupId];
-        sortTaxaByGroupRoot(group, group.taxa);
-        storeGroupTaxa(group, taxa);
+        sortTaxaBySubGroupRoot(group, group.subGroups);
+        storeGroupSubRootNames(group, taxa);
     }
     db.setDataInMemory('group', groups);
     db.setDataInMemory('taxon', taxa);
 
-    function sortTaxaByGroupRoot(group, gTaxa) {                    /*dbug-log*///console.log('sortTaxaByGroupRoot group %O', group);
-        for (let gName in gTaxa) {
-            const gTaxon = taxa[gTaxa[gName].id];
-            separateAndStoreGroupTaxa(gTaxon, gTaxon.name, group);
+    function sortTaxaBySubGroupRoot(group, gRoots) {                /*dbug-log*///console.log('-sortTaxaBySubGroupRoot group %O', group);
+        for (let id in gRoots) {
+            const gTaxon = taxa[gRoots[id].taxon];
+            separateAndStoreGroupTaxa(gTaxon, gRoots[id], group);
         }
     }
-    function separateAndStoreGroupTaxa(taxon, subGroup, group) {    /*dbug-log*///console.log('separateAndStoreGroupTaxa [%s] taxon = %O group = %O', subGroup, taxon, group)
+    function separateAndStoreGroupTaxa(taxon, subGroup, group) {    /*dbug-log*///console.log('--separateAndStoreGroupTaxa group = %O subGroup = %O taxon = %O', group, subGroup, taxon);
         addGroupDataToTaxon(taxon, subGroup, group);
         const data = separateGroupTaxaByRank(taxon.children, subGroup, group, taxa);
         storeTaxaByGroupAndRank(data, subGroup, group.displayName);
     }
 }
-function separateGroupTaxaByRank(cTaxa, subGroup, group, rcrds) {
+function separateGroupTaxaByRank(cTaxa, subGroup, group, rcrds) {   /*dbug-log*///console.log('---separateAndStoreGroupTaxa group = %O subGroup = %O rank[%s]', group, subGroup, rank);
     const data = {};
     cTaxa.forEach(separateTaxonAndChildren);
     return data;
@@ -82,25 +82,35 @@ function addGroupDataToTaxon(taxon, subGroup, group) {
         id: group.id,
         displayName: group.displayName,
         pluralName: group.pluralName,
-        subGroup: { id: group.taxa[subGroup].id, name: group.taxa[subGroup].name }
+        subGroup: { id: subGroup.id, name: subGroup.name }
     };
 }
 function storeTaxaByGroupAndRank(taxonObj, subGroup, group) {
-    for (let rank in taxonObj) {                                    /*dbug-log*///console.log("storing as [%s] = %O", group+subGroup+rank+'Names', taxonObj[rank]);
-        db.setDataInMemory(group+subGroup+rank+'Names', taxonObj[rank]);
+    for (let rank in taxonObj) {
+        const prop = group+subGroup.name+rank+'Names';              /*dbug-log*///console.log("storeTaxaByGroupAndRank [%s] = %O", prop, taxonObj[rank]);
+        db.setDataInMemory(prop, taxonObj[rank]);
     }
 }
-function storeGroupTaxa(group, taxonRcrds) {
-    const gIds = Object.values(group.taxa).map(t => t.id);
+function storeGroupSubRootNames(group, taxonRcrds) {
+    const gIds = Object.keys(group.subGroups);
     db.setDataInMemory(group.displayName+'SubGroupNames', getNameObj(gIds, taxonRcrds));
 }
 /* ========================= MODIFY GROUP DATA ============================== */
 function modifyGroupData(groups, ranks) {
-    Object.values(groups).forEach(flattenGroupSubRanks);
+    Object.values(groups).forEach(modifyGroup);
     db.setDataInMemory('group', groups);
 
+    function modifyGroup(group) {
+        buildSubGroupObject(group);
+        flattenGroupSubRanks(group);
+    }
+    function buildSubGroupObject(group) {
+        const subGroups ={};
+        group.subGroups.forEach(g => subGroups[g.id] = g);
+        group.subGroups = subGroups;                                /*dbug-log*///console.log('buildSubGroupObject = %O', subGroups);
+    }
     function flattenGroupSubRanks(group) {                          /*dbug-log*///console.log('flattenGroupSubRanks [%O]', group)
-        Object.values(group.taxa).forEach(flattenSubGroupRanks);
+        Object.values(group.subGroups).forEach(flattenSubGroupRanks);
     }
     function flattenSubGroupRanks(subGroup) {
         subGroup.subRanks = fillRankNames(JSON.parse(subGroup.subRanks));

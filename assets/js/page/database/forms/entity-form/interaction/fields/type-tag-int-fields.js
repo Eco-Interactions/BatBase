@@ -9,6 +9,7 @@
  *
  * TOC
  *     INTERACTION TYPE
+ *         BUILD VALID OPTIONS
  *         LOAD OPTIONS
  *     INTERACTION TAG
  *         CLEAR TYPE-TAGS
@@ -22,7 +23,8 @@ import { _confg, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 /**
  * defaultTag:      Required tag id for the selected interaction type.
- * objectGroup:     The object taxon group when selected in the form.
+ * object:          The selected object-taxon subGroup id
+ * object:          The selected subject-taxon subGroup id
  * secondaryTagId:  This tag is always available regardless of the type selected.
  */
 let app = getTypeAndTagMemoryDefaults();
@@ -33,39 +35,61 @@ export function resetTypeAndTagMemory() {
 function getTypeAndTagMemoryDefaults() {
     return {
         defaultTag: null,
-        objectGroup: null,
+        object: null,
+        subject: null,
         secondaryTagId: null
     };
 }
 /* ========================= INTERACTION TYPE =============================== */
 /**
- * Interaction Types are restricted by the Object Group.
- * Ex:
-        'Visitation': ['Plant'],
-        'Pollination': ['Plant'],
-        'Seed Dispersal': ['Plant'],
-        'Consumption': ['Plant', 'Fungi'],
-        'Transport': ['Plant', 'Arthropod'],
-        'Roost': ['Plant'],
-        'Predation': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
-        'Prey': [ 'Arthropod', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Mammal'],
-        'Host': ['Arthropod', 'Virus', 'Fungi', 'Bacteria', 'Other Parasite'],
-        'Cohabitation': ['Arthropod', 'Bird', 'Mammal', 'Bat'],
-        'Hematophagy': ['Bird', 'Mammal'],
+ * Once both a subject and object taxon have been selected, all valid interaction
+ * types are loaded in the field combobox,
+ * @param  {int} subjGroup  Taxon sub-group id
+ * @param  {int} objGroup)  Taxon sub-group id
  */
-export function initTypeField(objectGroup) {                        /*perm-log*/console.log(        '+--initTypeField = [%s]', objectGroup);
-    if (app.objectGroup === objectGroup) { return; }
-    app.objectGroup = objectGroup;
+export function initTypeField(subjGroup, objGroup) {                /*perm-log*/console.log(        '+--initTypeField subjGroup[%s] -> objGroup[%s]', subjGroup, objGroup);
+    if (ifGroupsUnchanged(subjGroup, objGroup)) { return; }
+    app.subject = subjGroup;
+    app.object = objGroup;
     loadIntTypeOptions();
 }
-/* ---------------------- LOAD OPTIONS -------------------------------------- */
-function loadIntTypeOptions() {
-    const types = _confg('getFormConfg', ['taxon']).groups[app.objectGroup];/*dbug-log*///console.log('types = %O', types)
-    _cmbx('getSelectStoredOpts', ['intTypeNames', types])
-    .then(loadComboOptionsForType)
-    .then(() => _cmbx('enableCombobox', ['InteractionType', true]))
+function ifGroupsUnchanged(subjGroup, objGroup) {
+    return app.subject === subjGroup && app.object === objGroup;
 }
-function loadComboOptionsForType(opts) {                            /*dbug-log*///console.log('opts = %O', opts)
+/* ---------------------- BUILD VALID OPTIONS ------------------------------- */
+function loadIntTypeOptions() {
+    loadTypeOptions(buildValidInteractionTypeOptions());
+    _cmbx('enableCombobox', ['InteractionType', true]);
+}
+function buildValidInteractionTypeOptions() {
+    const data = _state('getEntityRcrds', [['interactionType', 'validInteraction']]);
+    const validInts = getAllValidInteractions(data.validInteraction);/*dbug-log*///console.log('buildInteractionTypeOptions for validInts = %O data = %O', validInts, data);
+    return validInts.map(buildIntTypeOpt)
+
+    function buildIntTypeOpt(id) {
+        const int = data.validInteraction[id];
+        const txt = data.interactionType[int.interactionType].displayName;
+        return { text: txt, value: int.interactionType };
+    }
+}
+/**
+ * Valid Interaction entties describe the valid combinations of subject & object
+ * subGroups, interaction types, and tags.
+ * @return {ary} All ValidInteraction ids for the selected su|object taxon groups
+ */
+function getAllValidInteractions(validInteractions) {
+    const validInts = Object.keys(validInteractions).filter(ifValidInt);
+    app.validInts = validInts;
+    return validInts;
+
+    function ifValidInt(id) {
+        const vInt = validInteractions[id];
+        return vInt.subjectSubGroup == app.subject &&
+            vInt.objectSubGroup == app.object;
+    }
+}
+/* ---------------------- LOAD OPTIONS -------------------------------------- */
+function loadTypeOptions(opts) {                                    /*dbug-log*///console.log('loadTypeOptions = %O', opts)
     const prevType = _cmbx('getSelVal', [`InteractionType`]);
     _cmbx('replaceSelOpts', ['InteractionType', opts]);
     _cmbx('focusCombobox', ['InteractionType']);

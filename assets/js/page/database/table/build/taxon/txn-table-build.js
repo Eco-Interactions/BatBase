@@ -96,7 +96,7 @@ function storeGroupAndReturnRootTaxa(val) {
     const groupId = val || getSelValOrDefault(_cmbx('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], groupId [%s]', val, groupId)
     const group = getDetachedRcrd(groupId, tState().get('groups'), 'group');/*dbug-log*///console.log("groupTaxon = %O", group);
     updateGroupTableState(groupId, group);
-    return Object.values(group.taxa).map(getRootTaxonRcrd);
+    return Object.values(group.subGroups).map(getRootTaxonRcrd);
 }
 function getRootTaxonRcrd(root) {
     return getDetachedRcrd(root.id, tState().get('rcrdsById'), 'taxon');
@@ -107,13 +107,13 @@ function updateGroupTableState(groupId, group) {
         curView: groupId,
         groupName: group.displayName,
         groupPluralName: group.pluralName,
-        subGroups: group.taxa,
-        allGroupRanks: getAllSubRanks(group.taxa),
+        subGroups: group.subGroups,
+        allGroupRanks: getAllSubRanks(group.subGroups),
     });
 }
-function getAllSubRanks(roots) {
-    return Object.values(roots).reduce((ranks, root) => {
-        return ranks.length > root.subRanks.length ? ranks : root.subRanks;}, []);
+function getAllSubRanks(subGroups) {
+    return Object.values(subGroups).reduce((ranks, sGroup) => {
+        return ranks.length > sGroup.subRanks.length ? ranks : sGroup.subRanks;}, []);
 }
 /** This catches errors in group value caused by exiting mid-tutorial. TODO */
 function getSelValOrDefault(val) {

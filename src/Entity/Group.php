@@ -229,24 +229,24 @@ class Group
     /**
      * Get Taxa for serialization.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("taxa")
+     * @JMS\SerializedName("subGroups")
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function serializeTaxa()
+    public function serializeGroupRoots()
     {
         $taxa = [];
 
         foreach ($this->taxa as $groupRoot) {
             $taxon = $groupRoot->getTaxon();
-            $taxa = array_merge($taxa, [ $taxon->getName() => [
-                'displayName' => $taxon->getDisplayName(),
-                'id' => $taxon->getId(),
+            $taxa = array_merge($taxa, [ $taxon->getId() => [
+                'id' => $groupRoot->getId(),
                 'name' => $taxon->getName(),
-                'subRanks' => $groupRoot->getSubRanks()
+                'subRanks' => $groupRoot->getSubRanks(),
+                'taxon' => $taxon->getId()
             ]]);
-        }
-        ksort($taxa);
+        }                                                           /*dbug-log*///print_r($taxa);
+        sort($taxa);
         return $taxa;
     }
 

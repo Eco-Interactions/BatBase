@@ -31,7 +31,7 @@ class ValidInteraction
      * @ORM\ManyToOne(
      *     targetEntity="GroupRoot",
      *     inversedBy="validObjectInteractions",
-     *     cascade={"persist", "remove"}
+     *     cascade={"persist"}
      * )
      * @ORM\JoinColumn(nullable=false)
      */
@@ -43,7 +43,7 @@ class ValidInteraction
      * @ORM\ManyToOne(
      *     targetEntity="GroupRoot",
      *     inversedBy="validSubjectInteractions",
-     *     cascade={"persist", "remove"}
+     *     cascade={"persist"}
      * )
      * @ORM\JoinColumn(nullable=false)
      */

@@ -26,8 +26,8 @@ function getSubGroupOpts(tblState) {
         .then(buildSubGroupOpts);
 }
 function buildSubGroupOpts(subGroups) {
-    return Object.keys(subGroups).map(group => {
-        return { text: group, value: group.split(' ')[1]};
+    return Object.keys(subGroups).map(name => {
+        return { text: name, value: subGroups[name] };
     });
 }
 function getSubGroupFilter(opts) {

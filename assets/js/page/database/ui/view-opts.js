@@ -68,11 +68,11 @@ function getViewOpts(taxa, groups) {
     return _cmbx('alphabetizeOpts', [opts]);
 
     function buildGroupOpt(id) {
-        if (!ifGroupHasInts(groups[id].taxa)) { return; }
+        if (!ifGroupHasInts(groups[id].subGroups)) { return; }
         opts.push({ text: groups[id].pluralName, value: id});
     }
-    function ifGroupHasInts(rootTaxa) {
-        return Object.values(rootTaxa).find(t => ifTxnHasInts(t.id));
+    function ifGroupHasInts(subGroups) {
+        return Object.values(subGroups).find(g => ifTxnHasInts(g.taxon));
     }
     function ifTxnHasInts(id){
         const taxon = taxa[id];

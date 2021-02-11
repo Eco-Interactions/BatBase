@@ -178,7 +178,7 @@ function getCitTypeOpts(field, prop) {
 /** Returns an array of taxonyms for the passed rank and the form's taxon group. */
 export function getTaxonOpts(field, rank, r, g) {
     const group = r ? r : _state('getTaxonProp', ['groupName']);
-    const subGroup = g ? g : _state('getTaxonProp', ['subGroup']);  /*dbug-log*///console.log('getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
+    const subGroup = g ? g : _state('getTaxonProp', ['subGroup']).name;/*dbug-log*///console.log('        getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
     const opts = [ { text: `Add a new ${rank}...`, value: 'create'} ];
     return getStoredOpts(null, group+subGroup+rank+'Names')
         .then(o => {

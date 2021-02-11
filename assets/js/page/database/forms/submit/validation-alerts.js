@@ -284,7 +284,7 @@ function handleNoGenusAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 
 function handleRankNotAvailableInNewGroupAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     const groupName = _state('getTaxonProp', ['groupName']);
-    const valid = _state('getTaxonProp', ['groupRanks']).join(', ');
+    const valid = _state('getTaxonProp', ['subGroup']).subRanks.join(', ');
     return `<span>Valid ${groupName} ranks: \n${valid}</span>`;
 }
 /* ===================== SHOW ALERT ========================================= */

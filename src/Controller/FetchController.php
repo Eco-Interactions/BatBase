@@ -219,12 +219,14 @@ class FetchController extends AbstractController
         $interaction = $this->getSerializedEntities('Interaction', 'normalized');
         $intType = $this->getSerializedEntities('InteractionType');
         $tag = $this->getSerializedEntities('Tag');
+        $validInts = $this->getSerializedEntities('ValidInteraction');
 
         $response = new JsonResponse();
         $response->setData(array(
             'interaction' => $interaction,
             'interactionType' => $intType,
-            'tag' => $tag
+            'tag' => $tag,
+            'validInteraction' => $validInts
         ));
         return $response;
     }

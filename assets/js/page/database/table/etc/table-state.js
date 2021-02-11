@@ -34,7 +34,7 @@ import { _db } from '~util';
  * {str} groupName       Stores Taxon Group name
  * {str} groupPluralName Stores Taxon Group's plural name
  * {obj} groups          Group records keyed by id.
- * {obj} subGroups       Sub-group taxa: name (k) {name, displayName, id} (v)
+ * {obj} subGroups       Sub-group taxa: id (k) {id, name, subRanks[], taxon(id)} (v)
  * {obj} taxaByRank      Taxon records in curTree organized by rank and keyed under their display name.
  */
 let tState = { flags: {}};

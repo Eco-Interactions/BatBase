@@ -73,12 +73,11 @@ export function onSubGroupSelection(val) {
     return buildAndAppendGroupRows(val);
 }
 function updateSubGroupState() {
-    const subGroupName = _cmbx('getSelTxt', ['Sub-Group']).split(' ')[1];
-    const subGroup =  _state('getTaxonProp', ['subGroups'])[subGroupName];/*temp-log*/console.log('onSubGroupSelection [%O]', subGroup);
-    const subGroupTaxon = _state('getRcrd', ['taxon', subGroup.id]);
-    _state('setTaxonProp', ['subGroup', subGroup]);
+    const subGroupId = _cmbx('getSelVal', ['Sub-Group']);
+    const subGroup =  _state('getTaxonProp', ['subGroups'])[subGroupId];
+    const subGroupTaxon = _state('getRcrd', ['taxon', subGroup.taxon]);/*temp-log*/console.log('onSubGroupSelection [%s]', _cmbx('getSelTxt', ['Sub-Group']));
+    _state('setTaxonProp', ['subGroupId', subGroupId]);
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
-    _state('setTaxonProp', ['groupRanks', subGroup.subRanks]);
 }
 function clearPreviousSubGroupCombos() {
     const groupRows = $('#Group_row, #Sub-Group_row').detach();

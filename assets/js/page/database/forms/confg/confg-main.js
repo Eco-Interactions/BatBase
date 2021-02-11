@@ -8,6 +8,7 @@
  *   NOTE: The required and suggested fields will be the default shown in form.
  * > optional - All remaining available fields for the entity.
  * > order - Order to display the fields in both the default and expanded forms.
+ *
  * {
  *    add: { FieldName: fieldType, ... }
  *    required: [ FieldName, ... ],
@@ -64,7 +65,7 @@ function getEntityConfg(confgName, entity) {
  * Returns an object of fields and field types for the passed entity.
  * Note: Source's have sub-entities that will return the core source fields.
  */
-export function getCoreFieldDefs(entity) {                          /*dbug-log*/console.log('getCoreFieldDefs [%s]', entity);
+export function getCoreFieldDefs(entity) {
     const coreEntityMap = {
         'author': 'source',
         'citation': 'source',
@@ -76,7 +77,7 @@ export function getCoreFieldDefs(entity) {                          /*dbug-log*/
         'taxon': 'taxon',
         'interaction': 'interaction',
         'editor': 'source'
-    };
+    };                                                              /*dbug-log*///console.log('getCoreFieldDefs entity[%s] core?[%s]', entity, coreEntityMap[entity]);
     const fields = {
         'location': { 'DisplayName': 'text', 'Description': 'textArea',
             'Elevation': 'num', 'ElevationMax': 'num', 'Longitude': 'lng',
@@ -101,7 +102,7 @@ export function getCoreFieldDefs(entity) {                          /*dbug-log*/
             'Species': 'select'
         },
         'taxon': { 'DisplayName': 'text' }
-    };                                                                          //console.log('---------getCoreFieldDefs [%s] fields = %O', coreEntityMap[entity], fields[coreEntityMap[entity]]);
+    };                                                              /*dbug-log*///console.log('fields = %O', fields[coreEntityMap[entity]]);
     return fields[coreEntityMap[entity]];
 }
 
@@ -116,7 +117,7 @@ export function getCoreFormEntity(entity) {
     return coreEntities[entity];
 }
 export function getCoreEntity(entity) {
-    const details = ['author', 'citation', 'publication', 'publisher'];         //console.log('hasParentEntity? [%s]. Entity = %s', details.indexOf(entity) !== -1, entity);
+    const details = ['author', 'citation', 'publication', 'publisher'];/*dbug-log*///console.log('hasParentEntity? [%s]. Entity = %s', details.indexOf(entity) !== -1, entity);
     return details.indexOf(entity) !== -1 ? 'source' : entity;
 }
 /* *********************** SERVER FIELD CONFG ******************************* */
@@ -125,7 +126,7 @@ export function getCoreEntity(entity) {
  * A 'false' field will not be added to the final form data. An array of
  * fields will add the form value to each field for the specified entity.
  */
-export function getFieldTranslations(entity) {                                  //console.log('entity = ', entity)
+export function getFieldTranslations(entity) {                      /*dbug-log*///console.log('getFieldTranslaations [%s] ', entity)
     const fieldTrans = {
         'author': {
             'displayName': { 'source': 'displayName', 'author': 'displayName' },

@@ -1,5 +1,5 @@
 /**
- * Central memory for all form-related code.
+ * All form state data for the core form and any sub-forms.
  *
  * Export
  *     getFormEntity
@@ -8,18 +8,29 @@
  *
  * TOC
  *     INIT FORM MEMORY
+ *         STATE CORE
+ *         FORM DATA
+ *         ENTITY FORM
+ *             TAXON
  *     GETTERS
+ *         ENTITY RECORDS
+ *         EDIT FORM
+ *         TAXON
  *     SETTERS
+ *         ENTITY FORM
+ *             COMBOBOX
+ *             TAXON
  */
 import { _db, _u } from '~util';
 import { alertFormIssue } from '~form';
 
-let fState = {}; //formState
+let fState = {};
 
 export function clearState() {
     fState = {};
 }
-/*--------------------- INIT FORM MEMORY -------------------------------------*/
+/* ========================= INIT FORM-STATE ================================ */
+/* ----------------------- STATE CORE --------------------------------------- */
 /**
  * -- Property descriptions:
  * > action - ie, Create, Edit.
@@ -53,6 +64,7 @@ export function initFormState(action, entity, id) {
         };
     }
 }
+/* ----------------------- FORM DATA ---------------------------------------- */
 function getDataKeysForEntityRootForm(action, entity) {
     const map = {
         'author': {
@@ -63,9 +75,9 @@ function getDataKeysForEntityRootForm(action, entity) {
         },
         'interaction': {
             'create': ['author', 'citation', 'interactionType', 'location',
-                'publication', 'publisher', 'source', 'taxon'],
+                'publication', 'publisher', 'source', 'taxon', 'validInteraction'],
             'edit': ['author', 'citation', 'interaction', 'interactionType',
-                'location', 'publication', 'publisher', 'source', 'taxon'],
+                'location', 'publication', 'publisher', 'source', 'taxon', 'validInteraction'],
         },
         'location': {
             'edit': ['location']
@@ -82,6 +94,7 @@ function getDataKeysForEntityRootForm(action, entity) {
     }
     return map[entity][action];
 }
+/* ----------------------- ENTITY FORM -------------------------------------- */
 /**
  * Adds the properties and confg that will be used throughout the code for
  * generating, validating, and submitting entity sub-forms.
@@ -117,34 +130,26 @@ export function addEntityFormState(entity, level, pSel, action) {
         selElems: [],
     };                                                              /*dbug-log*///console.log("   /addEntityFormState. fState = %O, arguments = %O", fState, arguments)
 }
-/*------------- Taxon Params --------------------*/
-export function initTaxonState(groupId, subGroupName) {            /*dbug-log*///console.log('initTaxonState args = %O', arguments);
+/* ___________________________ TAXON ________________________________________ */
+export function initTaxonState(groupId, subGroupId) {
     return _db('getData', [['group', 'rankNames']])
         .then(data => setTxnState(data.group, data.rankNames));
 
     function setTxnState(groups, ranks) {
-        const group = groups[groupId];
+        const group = groups[groupId];                              /*dbug-log*///console.log('initTaxonState subGroup[%s] group[%s] = %O ', subGroupId, groupId, group);
         const data = {
             groupName: group.displayName,
             groupId: groupId,
-            groups: groups,
-            ranks: ranks, //Object with each (k) rank name and it's (v) id and order
-            subGroup: subGroupName || Object.keys(group.taxa)[0],
-            subGroups: group.taxa,
+            groups: groups, // Used in edit form if new parent in different group
+            subGroupId: subGroupId || Object.keys(group.subGroups)[0],
+            subGroups: group.subGroups,
         };
-        data.groupTaxon = fState.records.taxon[group.taxa[data.subGroup].id];
-        data.groupRanks = group.taxa[data.subGroup].subRanks;       /*temp-log*///console.log('       --[%s] ranks = %O', data.groupRanks);
-        fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroup, data);
+        data.groupTaxon = fState.records.taxon[group.subGroups[data.subGroupId].taxon];
+        fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
         return data;
     }
 }
-/* ---------------------------- Getters ------------------------------------- */
-export function isEditForm() {
-    return fState.action === 'edit';
-}
-export function getEditEntityId(type) {
-    return fState.editing[type];
-}
+/* ============================ GETTERS ===================================== */
 export function getFormState() {
     return Object.keys(fState).length ? fState : false;
 }
@@ -163,15 +168,10 @@ export function getFormEntity(fLvl) {
 export function getFormParentId(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].pSelId : false;
 }
-export function getTaxonProp(prop) {
-    return fState.forms.taxonData ? fState.forms.taxonData[prop] : false;
-}
-export function getGroupState() {
-    return fState.forms.taxonData;
-}
 export function getFormFieldData(fLvl, field) {
     return fState.forms[fLvl].fieldData[field];
 }
+/* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(entity) {
     if (!fState.records) { return; } //form closing
     return typeof entity == 'string' ? fState.records[entity] : buildRcrdsObj(entity);
@@ -180,7 +180,8 @@ function buildRcrdsObj(entities) {
     const rcrds = {};
     entities.forEach(ent => { rcrds[ent] = fState.records[ent]});
     return rcrds;
-}/** Returns the record for the passed id and entity-type. */
+}
+/** Returns the record for the passed id and entity-type. */
 export function getRcrd(entity, id) {
     if (!fState.records || !fState.records[entity]) { return; }
     const rcrd = fState.records[entity][id] ?
@@ -188,7 +189,31 @@ export function getRcrd(entity, id) {
         alertFormIssue('noRcrdFound', {id: id, entity: entity });
     return rcrd ? rcrd : false;
 }
-/* ---------------------------- Setters ------------------------------------- */
+/* ----------------------- EDIT FORM ---------------------------------------- */
+export function isEditForm() {
+    return fState.action === 'edit';
+}
+export function getEditEntityId(type) {
+    return fState.editing[type];
+}
+/* --------------------------- TAXON ---------------------------------------- */
+export function getGroupState() {
+    return fState.forms.taxonData;
+}
+export function getTaxonProp(prop) {
+    if (!fState.forms.taxonData) { return false; } //Form closed.
+    const edge = {
+        'subGroup': getSubGroupEntity
+    };
+    return prop in edge ? edge[prop]() : fState.forms.taxonData[prop];
+}
+function getSubGroupEntity() {
+    return fState.forms.taxonData.subGroups[fState.forms.taxonData.subGroupId];
+}
+/* ============================ SETTERS ===================================== */
+export function setStateProp(prop, val) {
+    fState[prop] = val;
+}
 /**
  * Edge case: After form submit, the updated data is fetched and stored here, but
  * if the form is closed before the data is stored, cancel storing the data.
@@ -197,31 +222,9 @@ export function addEntityRecords(entity, rcrds) {
     if (!fState.records) { return; } //See comment for explanation
     fState.records[entity] = rcrds;
 }
-export function addRequiredFieldInput(fLvl, input) {
-    fState.forms[fLvl].reqElems.push(input);
-}
-export function addComboToFormState(fLvl, field) {                  /*dbug-log*///console.log('addComboTo[%s]Memory [%s]', fLvl, field);
-    if (!fState.forms) { return; } //form was closed.
-    fState.forms[fLvl].selElems.push(field);
-}
-export function setStateProp(prop, val) {
-    fState[prop] = val;
-}
+/* ----------------------- ENTITY FORM -------------------------------------- */
 export function setFormProp(fLvl, prop, val) {
     fState.forms[fLvl][prop] = val;
-}
-export function setTaxonProp(prop, val) {
-    if (!fState.forms.taxonData) { fState.forms.taxonData = {}; } //Edit-forms need specific props
-    return fState.forms.taxonData[prop] = val;
-}
-export function setTaxonGroupData(taxon) {
-    const txnData = fState.forms.taxonData;
-    const group = txnData.groups[taxon.group.id];
-    txnData.groupName = group.displayName;
-    txnData.subGroups = group.taxa;
-    txnData.subGroup = taxon.group.subGroup.name;
-    txnData.groupTaxon = taxon;
-    txnData.groupRanks = group.taxa[taxon.group.subGroup.name].subRanks;
 }
 export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = fState.forms[fLvl].fieldData;
@@ -235,8 +238,30 @@ export function setFormEntityType(fLvl, type) {
 export function setOnFormCloseHandler(fLvl, hndlr) {
     fState.forms[fLvl].onFormClose = hndlr;
 }
-/* Note: Sub-group sel is removed from Object form for single-root realms. */
+export function addRequiredFieldInput(fLvl, input) {
+    fState.forms[fLvl].reqElems.push(input);
+}
+/* _________________________ COMBOBOX _______________________________________ */
+export function addComboToFormState(fLvl, field) {                  /*dbug-log*///console.log('addComboTo[%s]Memory [%s]', fLvl, field);
+    if (!fState.forms) { return; } //form was closed.
+    fState.forms[fLvl].selElems.push(field);
+}
+/* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
 export function removeSelFromStateMemory(fLvl, fieldName) {
     const idx = fState.forms[fLvl].selElems.indexOf(fieldName);
     fState.forms[fLvl].selElems.splice(idx, 1);
+}
+/* ___________________________ TAXON ________________________________________ */
+export function setTaxonProp(prop, val) {
+    if (!fState.forms.taxonData) { fState.forms.taxonData = {}; } //Edit-forms need specific props
+    return fState.forms.taxonData[prop] = val;
+}
+/** When a new taxon parent is selected in the taxon edit-form, groups data is updated. */
+export function setTaxonGroupData(taxon) {
+    const txnData = fState.forms.taxonData;
+    const group = txnData.groups[taxon.group.id];
+    txnData.groupName = group.displayName;
+    txnData.subGroupId = taxon.group.subGroup.id;
+    txnData.subGroups = group.subGroups;
+    txnData.groupTaxon = taxon;
 }

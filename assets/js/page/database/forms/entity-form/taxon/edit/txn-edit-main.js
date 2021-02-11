@@ -32,7 +32,7 @@ let taxonData;
 export function getTaxonEditFields(id) {
     const taxa = _state('getEntityRcrds', ['taxon']);
     const group = taxa[id].group;
-    return _state('initTaxonState', [group.id, group.subGroup.name])
+    return _state('initTaxonState', [group.id, group.subGroup.id])
         .then(groupState => {
             setScopeTaxonMemory(taxa, groupState);
             return buildTaxonEditFields(taxa[id]);
@@ -41,6 +41,7 @@ export function getTaxonEditFields(id) {
 function setScopeTaxonMemory(taxaRcrds, groupState) {
     taxonData = groupState;
     taxonData.rcrds = taxaRcrds;
+    taxonData.subGroup = _state('getTaxonProp', ['subGroup']);
 }
 /** ======================== CORE FIELDS ==================================== */
 function buildTaxonEditFields(taxon) {
@@ -71,7 +72,7 @@ function getRankVal(rank) {
 }
 /** Returns an array of options for the ranks in the taxon's group. */
 function getTaxonRankOpts() {
-    return taxonData.groupRanks.reverse().map(rank => {
+    return taxonData.subGroup.subRanks.reverse().map(rank => {
         return { text: rank, value: taxonData.ranks[rank].ord};
     });
 }
@@ -229,8 +230,8 @@ function selectNewTaxonParent() {
     exitPrntEdit(prnt);
 }
 function updateGroupDataInFormState(taxon) {
-    const oldSubGroup = _state('getTaxonProp', ['subGroup']);
-    if (oldSubGroup === taxon.group.subGroup.name) { return; }
+    const oldSubGroup = _state('getTaxonProp', ['subGroupId']);
+    if (oldSubGroup === taxon.group.subGroup.id) { return; }
     _state('setTaxonGroupData', [taxon]);
 }
 function cancelPrntEdit() {
@@ -324,7 +325,7 @@ function isTaxonEditFormValid(vals) {                               /*dbug-log*/
 /* -------------------------- RANK VALIDATION ------------------------------- */
 /* -------- RANK NOT AVAILABLE IN NEW GROUP ---------------- */
 function rankIsNotAvailableInNewGroup(txnRank) {                    /*dbug-log*///console.log('rankIsNotAvailableInNewGroup? [] %O', txnRank, _state('getTaxonProp', ['groupRanks']));
-    return _state('getTaxonProp', ['groupRanks']).indexOf(txnRank) === -1;
+    return _state('getTaxonProp', ['subGroup']).subRanks.indexOf(txnRank) === -1;
 }
 /**
  * Ensures that the new taxon-rank is higher than its children, and that a
