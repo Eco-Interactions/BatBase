@@ -61,10 +61,7 @@ function createEntity(entity, fLvl, val) {
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
     return build.resetInteractionForm();
 }
-/** ====================== FORM-FIELD HELPERS =============================== */
-export function initTypeField() {
-    return fields.initTypeField(...arguments);
-}
+/** ====================== FORM-FIELD FACADE ================================ */
 /* ------------------------ PUBLICATION ------------------------------------- */
 export function onPubClear() {
     fields.onPubClear();
@@ -87,13 +84,21 @@ export function addRoleTaxonFocusListeners() {
     return fields.addRoleTaxonFocusListeners(...arguments);
 }
 export function enableRoleTaxonFieldCombos() {
-    _cmbx('enableCombobox', ['Subject']);
-    _cmbx('enableCombobox', ['Object']);
+    return fields.enableRoleTaxonFieldCombos(...arguments);
 }
-function enableTaxonRanks(enable = true) {
-    $.each($('#sub-form select'), (i, sel) => {
-        _cmbx('enableCombobox', ['#'+sel.id, enable])
-    });
+/* --------------------- INTERACTION TYPE ----------------------------------- */
+export function initTypeField() {
+    return fields.initTypeField(...arguments);
+}
+/* --------------------------- TAGS ----------------------------------------- */
+export function clearTypeTagData() {
+    return fields.clearTypeTagData(...arguments);
+}
+export function initTagField() {
+    return fields.initTagField(...arguments);
+}
+export function loadInteractionTypeTags() {
+    return fields.loadInteractionTypeTags(...arguments);
 }
 /* ========================== HELPERS ======================================= */
 export function focusPinAndEnableSubmitIfFormValid(field) {

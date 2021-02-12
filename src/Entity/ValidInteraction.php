@@ -60,6 +60,10 @@ class ValidInteraction
     private $interactionType;
 
     /**
+     * NOTE:
+     * - JS FORM VALIDATION ENSURES THAT AT LEAST ONE TAG, IF ANY HERE, WILL BE
+     * SELECTED FOR THIS TYPE OF VALID INTERACTIONS.
+     * - "Secondary" TAG IS ALWAYS VALID, AND IS NOT ADDED HERE. HANDLED IN JS CODE.
      * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="validInteractions")
      * @ORM\JoinTable(name="valid_interaction_tag")
      */

@@ -4,6 +4,7 @@
 export default function(entity) {
 	return {
         'add': {},
+        'defaultTags': ['Secondary'], //Always valid and available when tags load.
         'info': {
             'Subject': {
                 tooltip: 'Bats are always the subject. Check bat taxonomy and names ' +

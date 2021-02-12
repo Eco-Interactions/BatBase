@@ -197,7 +197,7 @@ function getServerValidationAlertMsg(elem, tag, fLvl, fieldName) {
 /* ----------------- SUB-FORM ALREADY OPEN ---------------------------------- */
 function handleOpenSubFormAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     const subEntity = fS.forms[fLvl] ? fS.forms[fLvl].entity : '';
-    setOnFormCloseClearAlert(elem, fLvl);
+    window.setTimeout(() => clearAlert(elem, fLvl, false), 2000);
     return '<p>Please finish the open '+ _u('ucfirst', [subEntity]) + ' form.</p>';
 }
 /* ----------------- REQUIRED-FIELD EMPTY ----------------------------------- */

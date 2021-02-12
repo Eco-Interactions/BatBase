@@ -66,7 +66,7 @@ function finishComboboxInit() {
     _cmbx('enableCombobox', ['CitationTitle', false]);
     iForm.addRoleTaxonFocusListeners();
     _cmbx('enableCombobox', ['InteractionType', false]);
-    _cmbx('enableCombobox', ['InteractionTags', false]);
+    iForm.initTagField();
     focusPubFieldIfNewRecord();
 }
 function focusPubFieldIfNewRecord() {

@@ -13,7 +13,6 @@ import { getNameObj, getTypeObj } from '../init-helpers.js';
 export function modifyIntDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyIntDataForLocalDb called. data = %O", data);
     db.setDataInMemory('intTypeNames', getTypeObj(data.interactionType));
     db.setDataInMemory('tagNames', getNameObj(Object.keys(data.tag), data.tag));
-    db.deleteMmryData('tag');
     addObjGroupIdProp(data.interaction);
 }
 function addObjGroupIdProp(ints) {

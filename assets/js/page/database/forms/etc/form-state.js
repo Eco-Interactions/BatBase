@@ -74,10 +74,10 @@ function getDataKeysForEntityRootForm(action, entity) {
             'edit': ['source', 'citation', 'author', 'publisher']
         },
         'interaction': {
-            'create': ['author', 'citation', 'interactionType', 'location',
-                'publication', 'publisher', 'source', 'taxon', 'validInteraction'],
-            'edit': ['author', 'citation', 'interaction', 'interactionType',
-                'location', 'publication', 'publisher', 'source', 'taxon', 'validInteraction'],
+            'create': ['author', 'citation', 'interactionType', 'location', 'publication',
+                'publisher', 'source', 'tag', 'taxon', 'validInteraction'],
+            'edit': ['author', 'citation', 'interaction', 'interactionType', 'location',
+                'publication', 'publisher', 'source', 'tag', 'taxon', 'validInteraction'],
         },
         'location': {
             'edit': ['location']
@@ -98,6 +98,7 @@ function getDataKeysForEntityRootForm(action, entity) {
 /**
  * Adds the properties and confg that will be used throughout the code for
  * generating, validating, and submitting entity sub-forms.
+ *
  * -- Property descriptions:
  * > action - create || edit
  * > confg - The form config object used during form building.
@@ -110,11 +111,18 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > pSelId - The id of the parent select of the form.
  * > reqElems - All required elements in the form.
  * > selElems - Contains all selElems until they are initialized with selectize.
- * --- Misc entity specific properties
- * > Citation forms: rcrds - { src: pubSrc, pub: pub } (parent publication)
- * > Interaction create form: unchanged - exists after form submit and before any changes
- * > Location forms: geoJson - geoJson entity for this location, if it exists.
- * > Taxon forms: taxonData - added to fState.forms (see props @initTaxonParams)
+ *
+ * --- Entity-specific properties
+ * > Citation forms:
+ *         rcrds - { src: pubSrc, pub: pub } (parent publication)
+ * > Interaction create form:
+ *         unchanged - exists after form submit and before any changes
+ *         valData - ValidInteraction data for the selected subject and object groups
+ *             [{id, subjectSubGroup(id), objectSubGroup(id), interactionType(id), tags(id array)}]
+ * > Location forms:
+ *         geoJson - geoJson entity for this location, if it exists.
+ * > Taxon forms:
+ *         taxonData - added to fState.forms (see props @initTaxonParams)
  */
 export function addEntityFormState(entity, level, pSel, action) {
     fState.forms[entity] = level;

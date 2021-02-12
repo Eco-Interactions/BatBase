@@ -3,17 +3,22 @@
  * to select a new parent taxon in the taxon edit-form.
  *
  * TOC
- *     ROLE-FIELD FOCUS LISTENERS
- *     ROLE-TAXON SELECT-FORM INIT
+ *     ENABLE FIELDS
+ *     FIELD FOCUS-LISTENERS
  *     SELECT ROLE-TAXON
  *     ON ROLE SELECTION
  */
 import { _cmbx, _u } from '~util';
-import {  _elems, _form, _state, getSubFormLvl } from '~form';
+import {  _elems, _form, _state, _val, getSubFormLvl } from '~form';
 import * as iForm from '../int-form-main.js';
 
 const app = { Object: null, Subject: null };
-/* ----------------- ROLE-FIELD FOCUS LISTENER ------------------------------ */
+/* ======================= ENABLE FIELDS ==================================== */
+export function enableRoleTaxonFieldCombos() {
+    _cmbx('enableCombobox', ['Subject']);
+    _cmbx('enableCombobox', ['Object']);
+}
+/* ====================== FIELD FOCUS-LISTENERS ============================= */
 /** Displays the [Role] Taxon select form when the field gains focus. */
 export function addRoleTaxonFocusListeners() {
     ['Subject', 'Object'].forEach(addRoleFocusListener);
@@ -21,11 +26,22 @@ export function addRoleTaxonFocusListeners() {
 function addRoleFocusListener(role) {
     $(`#sel-${role}`)[0].selectize.on('focus', initRoleTaxonSelect.bind(null, role));
 }
-/* ----------------- ROLE-TAXON SELECT-FORM INIT ---------------------------- */
 function initRoleTaxonSelect(role) {
+    if (ifSubFormAlreadyInUse(role)) { return _val('openSubFormAlert', [role, 'sub']); }
     _form('initRoleTaxonSelect', [role]);
 }
-/* ------------------- SELECT ROLE-TAXON ------------------------------------ */
+function getOppositeRole(role) {
+    return role === 'Subject' ? 'Object' : 'Subject';
+}
+/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
+function ifSubFormAlreadyInUse(role) {
+    return _form('ifFormAlreadyOpenAtLevel', ['sub']) ||
+        ifOppositeRoleFormLoading(role);
+}
+function ifOppositeRoleFormLoading(role) {
+    return $('#sel-'+getOppositeRole(role)).data('loading');
+}
+/* =================== SELECT ROLE-TAXON ==================================== */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 export function selectRoleTaxon(e, groupTaxon) {
     const role = _u('ucfirst', [$('#select-group').data('role')]);
@@ -41,7 +57,7 @@ function getSelectedTaxonOption(groupTaxon) {
     if (!taxon) { return; } //issue alerted to developer and editor
     return { text: taxon.displayName, value: taxon.id};
 }
-/* ------------------- ON ROLE SELECTION ------------------------------------ */
+/* =================== ON ROLE SELECTION ==================================== */
 /**
  * When complete, the select form is removed and the most specific taxon is displayed
  * in the interaction-form <role> combobox. When both roles are selected, the

@@ -14,7 +14,7 @@
  *     SELECTED
  */
 import { _cmbx } from '~util';
-import { _elems, _form, _state, _val } from '~form';
+import { _elems, _form, _state } from '~form';
 import * as build from './build-taxon-select.js';
 import * as rank from './rank/txn-rank-main.js';
 import * as group from './group-fields.js';
@@ -52,7 +52,6 @@ function create(rank, val) {
 }
 /* ======================= INIT =========================================== */
 export function initRoleTaxonSelect(role, gId) {
-    if (ifSubFormAlreadyInUse(role)) { return _val('openSubFormAlert', [role, 'sub']); }
     const groupId = gId ? gId : getGroupId(role);
     build.initTaxonSelectForm(role, groupId)
     .then(group.ifNoSubGroupsRemoveCombo);
@@ -61,15 +60,6 @@ function getGroupId(role) {
     const prevSelectedId = $('#sel-'+role).data('selTaxon');
     if (!prevSelectedId) { return role === 'Subject' ? 1 : 2; } //defaults: Bats (1), Plants (2)
     return _state('getRcrd', ['taxon', prevSelectedId]).group.id;
-}
-/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-function ifSubFormAlreadyInUse(role) {
-    return _form('ifFormAlreadyOpenAtLevel', ['sub']) ||
-        ifOppositeRoleFormLoading(role);
-}
-function ifOppositeRoleFormLoading(role) {
-    const oppRole = role === 'Subject' ? 'Object' : 'Subject';
-    return $('#sel-'+oppRole).data('loading');
 }
 /* ======================= GROUPS =========================================== */
 export function onGroupSelection() {
