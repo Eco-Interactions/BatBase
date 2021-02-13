@@ -28,7 +28,7 @@ import * as iForm from '../int-form-main.js';
  * validInts:       Valid interaction ids for the selected subject and object groups
  */
 let app = getTagFieldDefaultState();
-// load default tags on form init
+
 export function resetTagState() {
     app = getTagFieldDefaultState();
 }
@@ -59,7 +59,7 @@ export function clearTypeTagData() {
 }
 /* ==================== LOAD INTERACTION-TYPE TAGS ========================== */
 export function loadInteractionTypeTags(tags) {
-    if (tags.length === 1) { handleRequiredTag(tags[0]); }
+    handleRequiredTag(tags[0].id, tags.length);
     addTypeTagOpts(tags);
 }
 /* -------------------------- REQUIRED TAG ---------------------------------- */
@@ -69,42 +69,43 @@ export function loadInteractionTypeTags(tags) {
  * though this will be handled through later validation.
  * @param  {array} typeTags  Tags for the selected ValidInteraction type
  */
-function handleRequiredTag(typeTag) {
-    app.requiredTag = typeTag.id;
-    const initVal = $('#sel-InteractionTags').data('init-val') || [];
-    initVal.push(typeTag.id);                                       /*dbug-log*///console.log('handleRequiredTag tag[%s] initVal[%O]', typeTag.id, initVal);
-    $('#sel-InteractionTags').data('init-val', initVal);
+function handleRequiredTag(tagId, count) {
+    app.requiredTag = count === 1 ? tagId : null;
+    $('#sel-InteractionTags').data('req-tag', app.requiredTag);     /*dbug-log*///console.log('handleRequiredTag tag?[%s]', app.requiredTag);
 }
 function addTypeTagOpts(typeTags) {                                 /*dbug-log*///console.log('addTypeTagOpts typeTags = %O', typeTags);
     loadTagOpts(buildTagOpts(typeTags));
 }
 /* ------------------------ BUILD TAG-OPTS ---------------------------------- */
 function buildTagOpts(typeTags) {
-    const tOpts = [...app.defaultTagOpts];
-    typeTags.forEach(addValidTagOpt);
-    return _cmbx('alphabetizeOpts', [tOpts]);
-
-    function addValidTagOpt(tag) {
-        tOpts.push({ text: tag.displayName, value: tag.id });
-    }
+    const opts = typeTags.map(getTagOpt).concat(app.defaultTagOpts);
+    return _cmbx('alphabetizeOpts', [opts]);
+}
+function getTagOpt(tag) {
+    return { text: tag.displayName, value: tag.id };
 }
 /* ------------------------- LOAD TAG-OPTS ---------------------------------- */
-function loadTagOpts(opts) {                                        /*dbug-log*///console.log('loadTagOpts = %O,', opts);
-    const selected = _cmbx('getSelVal', ['InteractionTags']);
+function loadTagOpts(opts) {
+    const selected = _cmbx('getSelVal', ['InteractionTags']).filter(ifDefaultTag);/*dbug-log*///console.log('loadTagOpts = %O, selectedDefaults = %O', opts, selected);
     _cmbx('replaceSelOpts', ['InteractionTags', opts]);
-    selectTagInitVal(selected);
+    afterTypeTagsLoaded(selected);
 }
-/* ------------------------ INIT-VAL ---------------------------------------- */
-/**
- * Init-val is set when there is a required tag, when tag data is persistsed into
- * a new interaction, and during edit-form build to fill the field with record data.
- */
-function selectTagInitVal(prevSelected) {
-    let vals = $('#sel-InteractionTags').data('init-val');
-    vals = vals ? vals.map(v=>v) : [];
-    vals = vals.concat(prevSelected);                               /*dbug-log*///console.log('selectTagInitVal %O', vals);
+function ifDefaultTag(id) {
+    return app.defaultTagOpts.some(o => o.value == id);
+}
+/* ---------------------- AFTER TYPE-TAGS LOAD ------------------------------ */
+function afterTypeTagsLoaded(selectedDefaults) {
+    const vals = [getInitVal(), app.requiredTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('afterTypeTagsLoaded select = %O', vals);
     if (!vals.length) { return; }
     _cmbx('setSelVal', ['InteractionTags', vals]);
+}
+/**
+ * Init-val is set when tag data is persistsed into a new interaction, and during
+ * edit-form build to fill the field with record data.
+ */
+function getInitVal() {
+    const initVal = $('#sel-InteractionTags').data('init-val');
+    return initVal ? initVal : null;
 }
 /* ====================== ON TAG SELECTION ================================== */
 export function onTagSelection(tags) {                              /*dbug-log*///console.log('tags = ', tags);
