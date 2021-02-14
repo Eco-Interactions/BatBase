@@ -149,6 +149,11 @@ function checkForDuplicates(vals, field, fLvl) {                    /*dbug-log*/
     return true;
 }
 /* ====================== COMBOBOX HELPERS ================================== */
+/** Since the change event is not triggered, the field data is updated here. */
+export function setSilentVal(fLvl, field, val) {
+    _cmbx('setSelVal', [field, val, 'silent']);
+    _state('setFormFieldData', [fLvl, field, val]);
+}
 /* -------------------------- INIT ------------------------------------------ */
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array

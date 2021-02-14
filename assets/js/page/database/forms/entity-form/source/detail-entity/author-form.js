@@ -66,7 +66,7 @@ function ifFieldNotShownOrNoValToSelect(field, authObj) {
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {                   /*dbug-log*///console.log('selectAuthor. args = %O', arguments)
     if (!$('#sel-'+field+cnt).length) { return Promise.resolve(); } //field hidden for certain citation types
-    _cmbx('setSelVal', [field+cnt, authId, 'silent']);
+    _elems('setSilentVal', [fLvl, field+cnt, authId]);
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
 /* ----------------------- ON AUTHOR|EDITOR SELECTION ----------------------- */

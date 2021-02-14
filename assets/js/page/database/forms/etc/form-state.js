@@ -234,7 +234,7 @@ export function addEntityRecords(entity, rcrds) {
 export function setFormProp(fLvl, prop, val) {
     fState.forms[fLvl][prop] = val;
 }
-export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---setForm[%s]FieldData [%s] =? [%s]', fLvl, field, val);
+export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = fState.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }

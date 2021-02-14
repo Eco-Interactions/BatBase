@@ -26,7 +26,7 @@ function setCitType(citTypes) {
     const rcrds = _state('getFormProp', ['sub', 'rcrds']);
     const pubType = rcrds.pub.publicationType.displayName;
     const defaultType = getDefaultCitType(pubType, rcrds);
-    _cmbx('setSelVal', ['CitationType', citTypes[defaultType], 'silent']);
+    _elems('setSilentVal', ['sub', 'CitationType', citTypes[defaultType]]);
     return loadCitTypeFields(citTypes[defaultType], defaultType);
 }
 function getDefaultCitType(pubType, rcrds) {

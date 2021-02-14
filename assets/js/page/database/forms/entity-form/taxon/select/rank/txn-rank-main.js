@@ -27,7 +27,7 @@ export function onRankSelection(val, elem) {                       /*dbug-log*//
     const fLvl = getSubFormLvl('sub');
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
-    repopulateCombosWithRelatedTaxa(val);
+    repopulateCombosWithRelatedTaxa(va, fLvl);
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
 }
  /* ----------------------- VALIDATE AND CREATE ----------------------------- */
@@ -67,25 +67,25 @@ function getChildOpts(selTxn) {
  * ancestors selected. Child ranks populate with only decendant taxa and
  * have no initial selection.
  */
-function repopulateCombosWithRelatedTaxa(selId) {
+function repopulateCombosWithRelatedTaxa(selId, fLvl) {
     return getAllRankAndSelectedOpts(selId)
-    .then(optData => repopulateRankCombos(optData.opts, optData.selected));
+    .then(optData => repopulateRankCombos(optData.opts, optData.selected, fLvl));
 
 }
-function repopulateRankCombos(optsObj, selected) {                  /*dbug-log*///console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected);
+function repopulateRankCombos(optsObj, selected, fLvl) {            /*dbug-log*///console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected);
     Object.keys(optsObj).forEach(rank => {
-        repopulateRankCombo(optsObj[rank], rank, selected)
+        repopulateRankCombo(optsObj[rank], rank, selecte, fLvld)
     });
 }
 /**
  * Replaces the options for the rank combo. Selects the selected taxon and
  * its direct ancestors.
  */
-function repopulateRankCombo(opts, rank, selected) {                /*dbug-log*///console.log("repopulateRankCombo [%s] = %O", rank, opts);
+function repopulateRankCombo(opts, rank, selected, fLvl) {          /*dbug-log*///console.log("repopulateRankCombo [%s] = %O", rank, opts);
     _cmbx('replaceSelOpts', [rank, opts]);
     if (!rank in selected) { return; }
     if (selected[rank] == 'none') { return resetPlaceholer(rank); }
-    _cmbx('setSelVal', [rank, selected[rank], 'silent']);
+    _elems('setSilentVal', [fLvl, rank, selected[rank]]);
 }
 function resetPlaceholer(rank) {
     _cmbx('updatePlaceholderText', [ rank, null, 0]);

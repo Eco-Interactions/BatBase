@@ -74,8 +74,7 @@ export function onLocSelection(val) {                               /*perm-log*/
     if ($('#form-map').length) { removeLocMap(); }
     const locRcrd = _state('getRcrd', ['location', val]);
     if (!locRcrd) { return; } //error alerted to developer and editor
-    const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
-    _cmbx('setSelVal', ['Country-Region', prntVal, 'silent']);
+    selectParentCountryRegion(locRcrd);
     _panel('fillLocDataInDetailPanel', [locRcrd]);
     iForm.focusPinAndEnableSubmitIfFormValid('Location');
 }
@@ -84,6 +83,11 @@ function ifNoLocSelected(val) {
 }
 function removeLocMap() {
     $('#form-map').fadeTo(400, 0, () => $('#form-map').remove());
+}
+function selectParentCountryRegion(locRcrd) {
+    const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
+    _elems('setSilentVal', ['top', 'Country-Region', prntVal]);
+
 }
 /* =================== WAYS TO SELECT LOCATION NOTE ========================= */
 /** Adds a message above the location fields in interaction forms. */

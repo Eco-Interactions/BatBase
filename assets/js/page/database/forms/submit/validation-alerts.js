@@ -262,7 +262,7 @@ function handleNeedsHigherRankAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 /** Resets the taxon's rank. */
 export function clrNeedsHigherRank(elem, fLvl, e, taxonRank) {
     const txnRank = taxonRank || $('#sel-Rank').data('rank');
-    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
+    _elems('setSilentVal', ['top', 'Rank', $('#sel-Rank').data('rank')]);
     clearAlert($('#Taxon_alert')[0], fLvl);
     enableChngPrntBtttn();
 }

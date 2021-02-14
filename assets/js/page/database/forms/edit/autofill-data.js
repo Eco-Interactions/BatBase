@@ -96,7 +96,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
         delete fields.Longitude;
         delete fields.Country;
         ['lat', 'long'].forEach(setCoordField);
-        _cmbx('setSelVal', ['Country', rcrd.country.id, 'silent']);
+        _elems('setSilentVal', ['top', 'Country', rcrd.country.id]);
     }
     function setCoordField(prefix) {
         const value = rcrd[`${prefix}itude`];
@@ -149,11 +149,10 @@ function setTitleField(entity, srcRcrd) {
     const name = entity === 'publication' ?
         srcRcrd.displayName : getCitTitle(srcRcrd.citation);
     $('#Title_row input[type="text"]').val(name).change();
-
-    function getCitTitle(citId) {
-        return _state('getRcrd', ['citation', citId]).displayName;
-    }
-} /* End setTitleField */
+}
+function getCitTitle(citId) {
+    return _state('getRcrd', ['citation', citId]).displayName;
+}
 function setPublisherField(entity, srcRcrd) {
     if (!_elems('ifFieldIsDisplayed', ['Publisher', 'top'])) { return; }
     _cmbx('setSelVal', ['Publisher', srcRcrd.parent]);

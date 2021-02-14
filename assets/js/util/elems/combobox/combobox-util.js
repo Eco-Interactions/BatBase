@@ -25,11 +25,22 @@ export function initCombobox(confg, onBlur = false) {
 function buildComboboxOptions(confg, onBlur) {
     const comboOpts = Object.assign({
         id: confg.id ? confg.id : '#sel-'+confg.name.split(' ').join(''),
+        onItemAdd: workAroundSelectizeEvent
     }, confg);
     comboOpts.create = getComboCreateFunc(confg.create);
     comboOpts.placeholder = getPlaceholer(comboOpts.id, confg.name, true);
     comboOpts.onBlur = onBlur || confg.blur ? saveOrRestoreSelection : false;
     return comboOpts;
+}
+/**
+ * When replacing or adding new options to a combobox, this event was causing the
+ * change event to fire, even with 'silent'. No noticeable side effects to this yet...
+ */
+function workAroundSelectizeEvent(val) {
+    let e = this._events['item_add'];
+    delete this._events['item_add'];
+    this.addItem(val);
+    this._events['item_add'] = e;
 }
 function getComboCreateFunc(createFunc) {  console.log
     return createFunc ? onComboCreate.bind(null, createFunc) : false;
@@ -154,13 +165,7 @@ export function replaceSelOpts(field, opts, changeHndlr, name) {    /*dbug-log*/
     clearCombobox(selApi);
     selApi.addOption(opts);
     selApi.refreshOptions(false); //Don't trigger options-dropdown
-    const onChange = changeHndlr ? changeHndlr : confgs[getFieldConfgKey(field)].onChange;
-    replaceOnChangeEvent(selApi, onChange);
     updatePlaceholder(selApi, field, confgs[getFieldConfgKey(field)].name, opts.length);
-}
-function replaceOnChangeEvent(selApi, onChange = false) {           /*dbug-log*///console.log('replaceOnChangeEvent selApi = %O, onChange = %O', selApi, onChange);
-    selApi.off('change');
-    selApi.on('change', onChange);
 }
 export function removeOpt(field, val) {
     const selApi = getSelApi(field);
@@ -190,11 +195,10 @@ function isMultiSelCombo(field) {
     return !!$(confgs[getFieldConfgKey(field)].id)[0].multiple;
 }
 function clearCombobox(selApi) {
-    replaceOnChangeEvent(selApi);
     selApi.clear('silent');
     selApi.clearOptions();
 }
-function toggleChangeHandler(field, selApi, remove = false) {       /*dbug-log*///console.log('toggleChangeHandler [%s]remove?[%s] %O', field, remove, selApi);
-    if (remove) { return selApi.off('change'); }
-    selApi.on('change', confgs[getFieldConfgKey(field)].onChange);
-}
+// function toggleChangeHandler(field, selApi, remove = false) {       /*dbug-log*///console.log('toggleChangeHandler [%s]remove?[%s] %O', field, remove, selApi);
+//     if (remove) { return selApi.off('change'); }
+//     selApi.on('change', confgs[getFieldConfgKey(field)].onChange);
+// }

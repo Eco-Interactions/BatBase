@@ -79,7 +79,6 @@ export function finishFieldBuild(input, field, entity, fLvl) {
 /* ------------------------ CHANGE HANDLER ---------------------------------- */
 function addFieldOnChangeHandler() {                                /*dbug-log*///console.log('addFieldOnChangeHandler [%s][%s][%s] = %O', fLvl, entity, field.name, input);
     ifCitationFormAutoGenerateCitationOnChange();
-    if (input.id.includes('sel-cntnr')) { return; } //change event added during combo build
     $(input).change(storeFieldValue.bind(null, input, field.name, fLvl, null));
 }
 function ifCitationFormAutoGenerateCitationOnChange() {
@@ -87,7 +86,7 @@ function ifCitationFormAutoGenerateCitationOnChange() {
         $(input).change(_form.bind(null, 'handleCitText', [fLvl]));
     }
 }
-function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*///console.log('fieldName [%s] field = %O', fieldName, elem);
+function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*///console.log('storeFieldValue [%s] field = %O', fieldName, elem);
     const val = value || $(elem).val();
     _state('setFormFieldData', [fLvl, fieldName, val]);
 }

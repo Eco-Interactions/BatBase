@@ -204,7 +204,7 @@ export function selectParentTaxon(pId) {
 }
 function ifSubGroupSelect(pTaxon) {
     if (!$('#Sub-Group_row').length) { return; }
-    _cmbx('setSelVal', ['Sub-Group', pTaxon.group.subGroup.id, 'silent']);
+    _elems('setSilentVal', ['sub', 'Sub-Group', pTaxon.group.subGroup.id]);
 }
 function finishParentSelectFormUi() {
     clearAndDisableTopFormParentFields();
@@ -310,7 +310,7 @@ function submitTaxonEdit() {
 }
 function initTaxonEditRankCombo() {
     _cmbx('initCombobox', [{ name: 'Rank', onChange: onRankChangeValidate }]);
-    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank'), 'silent']);
+    _elems('setSilentVal', ['top', 'Rank', $('#sel-Rank').data('rank')]);
 }
 /** ======================= DATA VALIDATION ================================== */
 function isTaxonEditFormValid(vals) {                               /*dbug-log*///console.log('isTaxonEditFormValid? %O', vals);
