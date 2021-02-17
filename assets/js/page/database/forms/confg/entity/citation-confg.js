@@ -3,158 +3,242 @@
  */
 export default function(entity) {
 	return {
-        'add': {
-        	'Title': 'text',
-        	'Volume': 'num',
-        	'Abstract': 'fullTextArea',
-            'Issue': 'num',
-            'Pages': 'page',
-            'CitationType': 'select',
-            'CitationText': 'fullTextArea'
+        core: 'source',
+        views: { //fields added will be built and displayed.
+            all: [  //will be merged with type.views
+                'CitationText',
+                'Abstract',
+                [ 'Title', 'CitationType' ]
+            ],
         },
-        'info': {
-        	'Doi': "Digital Object Identifier provided by the Publisher",
-        	'Website': 'Copy and paste link to article, if available'
+        fields: {
+            Abstract: {
+                name: 'Abstract',
+                type: 'fullTextArea',
+            },
+            ChapterTitle: {   // MERGE WITH TITLE
+                name: 'ChapterTitle',
+                prop: {    // TODO: DRY
+                    core: ['DisplayName'],
+                    detail: ['DisplayName', 'Title'],
+                },
+                type: 'text',
+            },
+            CitationText: {
+                name: 'CitationText',
+                required: true,
+                prop: {    // TODO: DRY
+                    core: ['Description'],
+                    detail: ['fullText'],
+                },
+                type: 'fullTextArea',
+            },
+            CitationType: {
+                entity: 'CitationType',
+                name: 'CitationType',
+                required: true,
+                type: 'select',
+            },
+            Doi: {
+                info: {
+                    tooltip: 'Digital Object Identifier provided by the Publisher',
+                }
+            },
+            Edition: {
+                name: 'Edition',
+                prop: {
+                    detail: 'PublicationVolume'
+                },
+                type: 'num',
+            },
+            Issue: {
+                name: 'Issue',
+                prop: {
+                    detail: 'PublicationIssue'
+                },
+                type: 'num',
+            },
+            Pages: {
+                name: 'Pages',
+                prop: {
+                    detail: 'PublicationPages'
+                },
+                type: 'page',
+            },
+            ParentSource: {
+                required: true, //Publication
+            },
+            SourceType: {  //MERGES WITH CORE.FIELDS. ADDS/OVERWRITES FIELD PROPS
+                // entity: 'SourceType'
+                // name: 'SourceType',
+                // required: true,
+                // type: 'text',
+                value: '' //TODO
+            },
+            Title: {
+                name: 'Title',
+                prop: {    // TODO: DRY
+                    core: ['Description'],
+                    detail: ['FullText', 'Title'],
+                },
+                required: true,
+                type: 'text',
+            },
+            Website: {
+                info: {
+                    tooltip: 'Copy and paste link to article, if available',
+                }
+            },
+            Volume: {
+                name: 'Volume',
+                prop: {
+                    detail: 'PublicationVolume'
+                },
+                type: 'num',
+            }
         },
-        'required': [
-        	'Title',
-        	'CitationType'
-        ],
-        'suggested': [
-        	'CitationText',
-        	'Abstract',
-        	'Doi',
-        	'Website'],
-        'optional': [],
-        'order': {  //will be merged with type.order
-            'sug': [
-            	'CitationText',
-            	'Abstract',
-            	[ 'Title', 'CitationType' ] ],
-            'opt': false,
-        },
-        'types': {
-            'Article': {
-                'name': 'Article',
-                'required': [
-                	'Authors',
-                	'Year'],
-                'suggested': [
-                	'Issue',
-                	'Pages',
-                	'Volume'], //todo: change suggested to 'deafult'
-                'optional': [],
-                'order': {
-                    'sug': [
+        types: {
+            Article: {
+                name: 'Article',
+                fields: {
+                    Authors: {
+                        required: true
+                    },
+                    Year: {
+                        required: true
+                    }
+                },
+                // 'required': [
+                // 	'Authors',
+                // 	'Year'],
+                // 'suggested': [
+                // 	'Issue',
+                // 	'Pages',
+                // 	'Volume'], //todo: change suggested to 'deafult'
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
                         ['Doi', 'Website'],
                         ['Authors']],
-                    'opt': false,
+                    // 'opt': false,
                 }
             },
-            'Book': {
-                'name': 'Book',
-                'required': [
-                	'Authors'],
-                'suggested': [
-                	'Volume'],
-                'optional': [],
-                'order': {
-                    'sug': [
+            Book: {
+                name: 'Book',
+                fields: {
+                    Pages: {
+                        required: true
+                    },
+                    Authors: {
+                        required: true
+                    }
+                },
+                // 'suggested': [
+                // 	'Volume'],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Volume', 'Doi'],
                         ['Website', 'Authors']],
-                    'opt': false,
+                    // 'opt': false,
                 }
             },
-            'Chapter': {
-                'name': 'Chapter',
-                'required': [
-                	'Pages',
-                	'Authors'],
-                'suggested': [],
-                'optional': [],
-                'order': {
-                    'sug': [
+            Chapter: {
+                name: 'Chapter',
+                fields: {
+                    Pages: {
+                        required: true
+                    },
+                    Authors: {
+                        required: true
+                    }
+                },
+                // 'required': [
+                // 	'Pages',
+                // 	'Authors'],
+                // 'suggested': [],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Pages', 'Doi'],
                         ['Website', 'Authors']],
-                    'opt': false,
+                    // 'opt': false,
                 }
             },
             "Master's Thesis": {
-                'name': "Master's Thesis",
-                'required': [],
-                'suggested': [],
-                'optional': [],
-                'order': {
-                    'sug': [
+                name: "Master's Thesis",
+                // 'required': [],
+                // 'suggested': [],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Doi', 'Website']],
-                    'opt': false,
                 }
             },
             'Museum record': {
-                'name': 'Museum record',
-                'required': [],
-                'suggested': [
-                	'Authors',
-                	'Year',
-                	'Pages'],
-                'optional': [],
-                'order': {
-                    'sug': [
+                name: 'Museum record',
+                // 'required': [],
+                // 'suggested': [
+                // 	'Authors',
+                // 	'Year',
+                // 	'Pages'],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Year', 'Pages'],
                         ['Doi', 'Website'],
                         ['Authors']],
-                    'opt': false,
+                    // 'opt': false,
                 }
             },
-            'Other': {
-                'name': 'Other',
-                'required': [],
-                'suggested': [
-                	'Authors',
-                	'Year',
-                	'Issue',
-                	'Pages',
-                	'Volume'],
-                'optional': [],
-                'order': {
-                    'sug': [
+            Other: {
+                name: 'Other',
+                // 'required': [],
+                // 'suggested': [
+                // 	'Authors',
+                // 	'Year',
+                // 	'Issue',
+                // 	'Pages',
+                // 	'Volume'],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
                         ['Website'],
                         ['Doi', 'Authors']],
-                    'opt': false,
                 }
             },
             'Ph.D. Dissertation': {
-                'name': 'Ph.D. Dissertation',
-                'required': [],
-                'suggested': [],
-                'optional': [],
-                'order': {
-                    'sug': [
+                name: 'Ph.D. Dissertation',
+                // 'required': [],
+                // 'suggested': [],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Website','Doi']],
-                    'opt': false,
+                    // 'opt': false,
                 }
             },
-            'Report': {
-                'name': 'Report',
-                'required': [],
-                'suggested': [
-                	'Authors',
-                	'Year',
-                	'Pages',
-                	'Volume',
-                	'Issue'],
-                'optional': [],
-                'order': {
-                    'sug': [
+            Report: {
+                name: 'Report',
+                // 'required': [],
+                // 'suggested': [
+                // 	'Authors',
+                // 	'Year',
+                // 	'Pages',
+                // 	'Volume',
+                // 	'Issue'],
+                // 'optional': [],
+                views: {
+                    all: [
                     	['Year', 'Pages'],
                     	['Volume', 'Issue'],
                         ['Website','Doi'],
                         ['Doi', 'Authors']],
-                    'opt': false,
+                    // 'opt': false,
                 }
             }
         }

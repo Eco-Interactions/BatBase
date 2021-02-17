@@ -3,33 +3,32 @@
  */
 export default function(entity) {
 	return {
-        'add': {
-            'City': 'text',
-            'Country': 'text'
+        core: 'source',
+        fields: {
+            City: {
+                name: 'City',
+                required: true,
+                type: 'text'
+            },
+            Country: {
+                name: 'Country',
+                required: true,
+                type: 'text'
+            },
         },
-        'required': [
-            'DisplayName',
-            'City',
-            'Country'
-        ],
-        'suggested': [],
-        'optional': [
-            'Description',
-            'Website',
-        ],
-        'order': {
-            'sug': [
-                'DisplayName',
-                'City',
-                'Country'
-            ],
-            'opt': [
+        views: {
+            all: [
                 'DisplayName',
                 'City',
                 'Country',
                 'Description',
                 'Website',
-            ]
+            ],
+            simple: [
+                'DisplayName',
+                'City',
+                'Country'
+            ],
         }
     };
 }

@@ -3,17 +3,30 @@
  */
 export default function(entity) {
 	return {
-        'add': {},
-        'required': [
-            'DisplayName'
-        ],
-        'suggested': [],
-        'optional': [],
-        'order': {
-            'sug': [
+        fields: {
+            DisplayName: {
+                name: DisplayName,
+                required: true
+            },
+            Name: {
+                name: 'Name',
+                required: true,
+                type: 'text',
+
+            },
+            ParentTaxon: {
+                required: true
+            },
+            Rank: {
+                entity: 'Rank',
+                required: true
+            }
+            // 'group': relationship... might not be needed
+        },
+        views: {
+            all: [
                 'DisplayName'
-            ],
-            'opt': false
+            ]
         }
     };
 }

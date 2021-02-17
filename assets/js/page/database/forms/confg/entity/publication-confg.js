@@ -3,122 +3,141 @@
  */
 export default function(entity) {
 	return {
-        'add': {
-            'Title' : 'text',
-            'PublicationType': 'select',
-            'Publisher': 'select'
-        },
-        'required': [
-            'PublicationType',
-            'Title'
-        ],
-        'suggested': [],
-        'optional': [],
-        'order': {  //will be merged with type.order
-            'sug': [
+        core: 'source',
+        views: { //fields added will be built and displayed.
+            all: [  //will be merged with type.views
                 ['Title', 'PublicationType']
             ],
-            'opt': [
-                ['Title', 'PublicationType']
-            ]
         },
-        'types': {
-            'Book': {
-                'name': 'Book',
-                'required': [
-                    'Authors',
-                    'Editors',
-                    'Publisher',
-                    'Year'
-                ],
-                'suggested': [],
-                'optional': [
-                    'Description',
-                    'Website',
-                    'Doi'
-                ],
-                'order': {
-                    'sug': [
-                        ['Year', 'Publisher'],
-                        ['Authors', 'Editors']
-                    ],
-                    'opt': [
+        fields: {
+            Doi: {
+                info: {
+                    tooltip: 'Digital Object Identifier provided by the Publisher',
+                }
+            },
+            ParentSource: {
+                required: true, //Publisher
+            },
+            PublicationType: {
+                entity: 'PublicationType',
+                name: 'PublicationType',
+                type: 'select',
+                required: true
+            },
+            Publisher: {   // MERGE WITH TITLE
+                entity: 'Source',
+                name: 'Publisher',
+                // prop: {    // TODO: DRY
+                //     core: ['DisplayName'],
+                //     detail: ['DisplayName', 'Title'],
+                // },
+                type: 'select',
+            },
+            SourceType: {
+                value: '' //TODO
+            },
+            Title: {
+                name: 'Title',
+                prop: {    // TODO: DRY
+                    core: ['DisplayName'],
+                    detail: ['DisplayName'],
+                },
+                required: true,
+                type: 'text',
+            },
+            Website: {
+                info: {
+                    tooltip: 'Copy and paste link to publication, if available',
+                }
+            }
+        },
+        types: {
+            Book: {
+                name: 'Book',
+                fields: {
+                    Authors: {
+                        required: true
+                    },
+                    Year: {
+                        required: true
+                    },
+                    Editors: {
+                        required: true
+                    },
+                    Publisher: {
+                        required: true
+                    }
+                },
+                views: {
+                    all: [
                         ['Year', 'Doi'],
                         ['Website', 'Description'],
                         ['Publisher'],
                         ['Authors', 'Editors']
-                    ]
+                    ],
+                    simple: [
+                        ['Year', 'Publisher'],
+                        ['Authors', 'Editors']
+                    ],
                 }
             },
-            'Journal': {
-                'name': 'Journal',
-                'required': [],
-                'suggested': [],
-                'optional': [
-                    'Year',
-                    'Description',
-                    'Website',
-                    'Doi',
-                    'Publisher'
-                ],
-                'order': {
-                    'sug': [],
-                    'opt': [
+            Journal: {
+                name: 'Journal',
+                required: [],
+                views: {
+                    all: [
                         ['Year', 'Doi'],
                         ['Website', 'Description'],
                         ['Publisher'],
-                    ]
+                    ],
+                    simple: [], //No additional fields shown
                 }
             },
-            'Other': {
-                'name': 'Other',
-                'required': [
-                    'Authors',
-                    'Year'
-                ],
-                'suggested': [
-                    'Publisher'
-                ],
-                'optional': [
-                    'Description',
-                    'Website',
-                    'Doi'
-                ],
-                'order':  {
-                    'sug': [
-                        ['Year', 'Publisher'],
-                        'Authors'
-                    ],
-                    'opt': [
+            Other: {
+                name: 'Other',
+                fields: {
+                    Authors: {
+                        required: true
+                    },
+                    Year: {
+                        required: true
+                    }
+                },
+                views:  {
+                    all: [
                         ['Year', 'Doi'],
                         ['Website', 'Description'],
                         ['Publisher', 'Authors'],
-                    ]
+                    ],
+                    simple: [
+                        ['Year', 'Publisher'],
+                        'Authors'
+                    ],
                 }
             },
             'Thesis/Dissertation': {
-                'name': 'Thesis/Dissertation',
-                'required': [
-                    'Authors',
-                    'Publisher',
-                    'Year'
-                ],
-                'suggested': [],
-                'optional': [
-                    'Description',
-                    'Website',
-                    'Doi'
-                ],
-                'order':  {
-                    'sug': [
-                        ['Year', 'Publisher'],
-                        'Authors'
-                    ],
-                    'opt': [
+                name: 'Thesis/Dissertation',
+                fields:{
+                    Authors: {
+                        required: true
+                    },
+                    Publisher: {
+                        required: true
+                    },
+                    Year: {
+                        required: true
+                    }
+                },
+                views:  {
+                    all: [
                         ['Year', 'Doi'],
                         ['Website', 'Description'],
                         ['Publisher', 'Authors'],
-                    ]
+                    ],
+                    simple: [
+                        ['Year', 'Publisher'],
+                        'Authors'
+                    ],
                 }
             }
         }

@@ -1,39 +1,49 @@
 /**
- * Author form configuration.
+ * Author/editor form configuration.
  */
 export default function(entity) {
 	return {
-        'add': {
-            'FirstName': 'text',
-            'MiddleName': 'text',
-            'LastName': 'text',
-            'Suffix': 'text'
-        },
-        'required': [
-            'LastName'
-        ],
-        'suggested': [
-            'FirstName',
-            'MiddleName',
-            'Suffix'
-        ],
-        'optional': [
-            'Website',
-        ],
-        'order': {
-            'sug': [
-                'FirstName',
-                'MiddleName',
-                'LastName',
-                'Suffix'
-            ],
-            'opt': [
+        core: 'source',
+        views: { //fields added will be built and displayed
+            all: [
                 'FirstName',
                 'MiddleName',
                 'LastName',
                 'Suffix',
                 'Website',
+            ],
+            simple: [
+                'FirstName',
+                'MiddleName',
+                'LastName',
+                'Suffix'
             ]
+        },
+        fields: {
+            FirstName: {
+                type: 'text',
+                name: 'FirstName'
+            },
+            MiddleName: {
+                type: 'text',
+                name: 'MiddleName'
+            },
+            LastName: {
+                type: 'text',
+                name: 'LastName',
+                required: true
+            },
+            Suffix: {
+                type: 'text',
+                name: 'Suffix'
+            },
+            SourceType: {
+                entity: 'SourceType',
+                name: 'SourceType',
+                required: true,
+                type: 'text',
+                value: '' //TOOD
+            },
         }
     };
 }
