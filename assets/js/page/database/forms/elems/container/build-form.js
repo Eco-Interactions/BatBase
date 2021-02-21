@@ -1,5 +1,6 @@
 /**
  * Initiates and appends the entity forms.
+ * TODO: document
  *
  * Export
  *     buildAndAppendRootForm
@@ -21,10 +22,16 @@ import { _confg, _elems, _panel, _state } from '~form';
 
 let action, entity, fLvl;
 /* ============================== ROOT FORM ================================= */
-export function buildAndAppendRootForm(fields, id) {
+/**
+ * [buildAndAppendRootForm description]
+ * @param  {[type]} fields [description]
+ * @param  {[type]} id     Entity ID is added to the bottom right of the edit-form detail panel
+ * @return {[type]}        [description]
+ */
+export function buildAndAppendRootForm(fields, id = null) {         /*dbug-log*/console.log('buildAndAppendRootForm [%s] = %O', id, fields);
     const state = _state('getFormState');
     setFormScopeParams(state.action, state.entity, 'top');
-    const form = buildForm(id, fields);
+    const form = buildForm(id, fields);                                         console.log('form = %O', form)
     appendAndStyleForm(form, entity);
     return Promise.resolve();
 }
@@ -32,10 +39,10 @@ export function buildAndAppendRootForm(fields, id) {
  * Returns the form window elements - the form and the detail panel.
  * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
  */
-function buildForm(id, fields) {
+function buildForm(id, fields) {                                    /*dbug-log*/console.log('buildForm id?[%s] fields[%O]', id, fields);
     return [getExitButtonRow(), getMainFormAndDetailPanelHtml(id, fields)];
 }
-function getMainFormAndDetailPanelHtml(id, fields) {
+function getMainFormAndDetailPanelHtml(id, fields) {                /*dbug-log*/console.log('getMainFormAndDetailPanelHtml [%s] = %O', id, fields);
     const cntnr = _el('getElem', ['div', { class: 'flex-row' }]);
     const detailPanelHtml = _panel('getDetailPanelElems', [entity, id, action]);
     $(cntnr).append([buildMainForm(fields), detailPanelHtml]);
@@ -69,7 +76,7 @@ function getValMsgCntnr(fLvl) {
     return _el('getElem', ['div', { id: fLvl+'_alert' }]);
 }
 /* ----------------------------- FORM --------------------------------------- */
-function getForm(fields) {
+function getForm(fields) {                                          /*dbug-log*/console.log('getForm %O', fields);
     const form = buildFormElem();
     $(form).append([
         buildEntityFieldContainer(fields),
@@ -155,12 +162,12 @@ function getFormHelpElems() {
     return cntnr;
 }
 function getFormWalkthroughBttn() {
-    let formInfoStepCount = getFormInfoStepCount();
-    if (!formInfoStepCount) { return; }
+    let infoSteps = _state('getFormConfg', [fLvl, 'infoSteps']);
+    if (!infoSteps) { return; }
     const titleInfo = "Hover your mouse over any field and it's help popup will show, if it has one.";
     const bttn = buildWalkthroughButton(titleInfo);
     $(bttn).click(_modal.bind(null, 'showTutorialModal', [fLvl]));
-    setIntroWalkthroughAttrs(bttn, titleInfo, ++formInfoStepCount);
+    setIntroWalkthroughAttrs(bttn, titleInfo, ++infoSteps);
     return bttn;
 }
 function buildWalkthroughButton(titleInfo) {
@@ -172,14 +179,10 @@ function buildWalkthroughButton(titleInfo) {
     };
     return _el('getElem', ['input', attr]);
 }
-function getFormInfoStepCount() {
-    const formInfoConfg = _confg('getFormConfg', [entity]).info;
-    return formInfoConfg ? Object.keys(formInfoConfg).length : false;
-}
-function setIntroWalkthroughAttrs(bttn, titleInfo, formInfoStepCount) {
+function setIntroWalkthroughAttrs(bttn, titleInfo, infoSteps) {
     $(bttn).attr({
         'data-intro': titleInfo,
         'data-intro-group': fLvl+'-intro',
-        'data-step': formInfoStepCount
+        'data-step': infoSteps
     });
 }

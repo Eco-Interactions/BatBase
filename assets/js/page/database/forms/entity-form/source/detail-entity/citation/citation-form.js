@@ -76,7 +76,7 @@ function appendCitFormAndFinishBuild(form) {                        /*dbug-log*/
 function finishCitFormUiLoad() {
     _cmbx('enableCombobox', ['Publication', false]);
     $('#Abstract_f textarea').focus();
-    _elems('setCoreRowStyles', ['citation']);
+    _elems('setDynamicFormStyles', ['citation']);
 }
 /* ----------------------- AUTO-GENERATE CITATION --------------------------- */
 /** Note: to prevent multiple rebuilds, a timeout is used. */

@@ -167,17 +167,36 @@ export function getStateProp(prop) {                                /*dbug-log*/
 export function getFormLvlState(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl] : false;
 }
-export function getFormProp(fLvl, prop) {                           /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
-    return fState.forms[fLvl] ? fState.forms[fLvl][prop] : false;
+export function getFormParentId(fLvl) {
+    return fState.forms[fLvl] ? fState.forms[fLvl].pSelId : false;
 }
 export function getFormEntity(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].entity : false;
 }
-export function getFormParentId(fLvl) {
-    return fState.forms[fLvl] ? fState.forms[fLvl].pSelId : false;
+export function getFormProp(fLvl, prop) {                           /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
+    return fState.forms[fLvl] ? fState.forms[fLvl][prop] : false;
+}
+export function getFormConfg(fLvl, prop = null) {
+    return fState.forms[fLvl] ? (prop ?
+        fState.forms[fLvl].confg[prop] : fState.forms.confg[fLvl]) : false;
 }
 export function getFormFieldData(fLvl, field) {
-    return fState.forms[fLvl].fieldData[field];
+    return fState.forms[fLvl].confg[field];
+    // return fState.forms[fLvl].fieldData[field];
+}
+export function getFormData(fLvl, field) {
+    if (!fState.forms) { return; } //form closing
+    return fState.forms[fLvl].confg[field].value;
+    // return fState.forms[fLvl].fieldData[field];
+}
+/** Returns an object with field names(k) and values(v) of all form fields*/
+export function getCurrentFormFieldVals(fLvl) {
+    const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
+    const vals = {};
+    for (let field in fieldData) {
+        vals[field] = fieldData[field].val;
+    }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fieldsData = %O returnedVals = %O', fieldData, vals);
+    return vals;
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(entity) {
@@ -234,14 +253,14 @@ export function addEntityRecords(entity, rcrds) {
 export function setFormProp(fLvl, prop, val) {
     fState.forms[fLvl][prop] = val;
 }
+export function setFormConfg(fLvl, prop, val = null) {
+    fState.forms[fLvl].confg[prop] = val;
+}
 export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
     const fieldData = fState.forms[fLvl].fieldData;
     if (!fieldData[field]) { fieldData[field] = {} }
     if (type) { fieldData[field].type = type; }
     fieldData[field].val = val;
-}
-export function setFormEntityType(fLvl, type) {
-    fState.forms[fLvl].entityType = type;
 }
 export function setOnFormCloseHandler(fLvl, hndlr) {
     fState.forms[fLvl].onFormClose = hndlr;

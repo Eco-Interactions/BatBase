@@ -37,7 +37,7 @@ function appendPubFormAndFinishBuild(form) {
     sForm.initFormCombos('publication', 'sub');
     sForm.addConfirmationBeforeSubmit('publication', 'sub');
     $('#Title_f input').focus();
-    _elems('setCoreRowStyles', ['publication']);
+    _elems('setDynamicFormStyles', ['publication']);
     $('#PublicationType-lbl').css('min-width', '125px');
 }
 /* --------------------- PUBLICATION-TYPE FIELDS ---------------------------- */
@@ -52,7 +52,7 @@ export function loadPubTypeFields(typeId) {                         /*dbug-log*/
     function finishPubTypeFields() {
         setPubComboLabelWidth();
         ifBookAddAuthEdNote();
-        _elems('setCoreRowStyles', ['publication']);
+        _elems('setDynamicFormStyles', ['publication']);
         ifThesisDissertationModifyLabel();
     }
 }

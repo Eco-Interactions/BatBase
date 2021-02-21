@@ -1,7 +1,6 @@
 /**
  * Returns the form-config for the passed entity and current field-display (all|simple).
  * { *: default confg-properties returned
- *    combo: true, //Set during input build
  *    core: entityName,
  *    *display: view, //Defaults to 'simple' display, if defined.
  *    *fields: {  //RETURNED VALUE IS views[display] MAPPED WITH EACH FIELD'S CONFG.
@@ -18,6 +17,7 @@
  *        }, ...
  *    },
  *    *group: top|sub|sub2, //SET DURING CONFG BUILD
+ *    infoSteps: ##, //Count of fields with steps for the form tutorial, intro.js
  *    misc: {
  *        entityProp: value
  *    },
@@ -30,10 +30,6 @@
  *              name: (req)
  *              [confg prop with type-data]
  *         }
- *    },
- *    views: { //fields will be built and displayed according to the view
- *       *all:   [ FullRowFieldName, [FieldName, SecondFieldInRow, ...], ...] [REQUIRED]
- *       simple: [ ...SameFormat ]
  *    }
  * }
  *
@@ -60,17 +56,55 @@ let confg = null;
 export function getFormConfg(fVals, entity, fLvl, showSimpleView = true) {/*dbug-log*/console.log('getFormConfg [%s][%s] fVals?[%O] showSimpleView?[%s]', fLvl, entity, fVals, showSimpleView);
     confg = getBaseConfg(getConfgName(entity), entity);             /*dbug-log*///console.log('   --baseConfg [%s][%O]', entity, _u('snapshot', [confg]));
     buildFormConfg(fVals, fLvl, showSimpleView);                    /*dbug-log*/console.log('   --formConfg [%s][%O]', entity, _u('snapshot', [confg]));
+    removeUnneedConfg();
+    _state('setFormProp', [fLvl, 'confg', confg]);
     return confg;
 }
 function getConfgName(entity) {
     const map = {
-        Subject: 'group',
-        Object: 'group',
-        Editor: 'author'
+        subject: 'group',
+        object: 'group',
+        editor: 'author'
     };
     return map[entity] ? map[entity] : _u('lcfirst', [entity]);
 }
-function getBaseConfg(name, entity) {                               /*dbug-log*///console.log('getBaseConfg [%s] for [%s]', name, entity);
+/**
+ * Base form-confg properties:
+ * { *: required confg-properties
+ *    core: entityName,
+ *    *fields: {
+ *         //CORE.FIELDS AND TYPE.FIELDS WILL BE MERGED IN.
+ *        FieldName: { //DisplayName
+ *            info: { intro: "", *tooltip: ""(req) },
+ *            label: Field label text (Name-prop used if absent)
+ *            *name: FieldName,  [REQUIRED]
+ *            prop: { entityName: [propName, ...], ... } //server entity:prop when different than exactly formEntity:FieldName
+ *            required: true, //Set if true
+ *            *type: "",  [REQUIRED]
+ *        }, ...
+ *    },
+ *    misc: {
+ *        entityProp: value
+ *    },
+ *    *name: formName (entity or su|object)
+ *    types: { //ENTITY SUB-TYPES
+ *         Type name: {
+ *              name: (req)
+ *              [confg prop with type-data]
+ *         }
+ *    },
+ *    views: { //fields will be built and displayed according to the view
+ *       *all:   [ FullRowFieldName, [FieldName, SecondFieldInRow, ...], ...] [REQUIRED]
+ *       simple: [ ...SameFormat ]
+ *    }
+ * }
+ *
+ *
+ * @param  {[type]} name    [description]
+ * @param  {[type]} entity) {                                          console.log('getBaseConfg [%s] for [%s]', name, entity [description]
+ * @return {[type]}         [description]
+ */
+function getBaseConfg(name, entity) {                               /*dbuglog*/console.log('getBaseConfg [%s] for [%s]', name, entity);
     return require(`./entity/${name}-confg.js`).default(entity);
 }
 function buildFormConfg(fVals, fLvl, showSimpleView) {

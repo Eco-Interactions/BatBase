@@ -36,7 +36,7 @@ function buildLocForm(val) {
         $('#Location_f')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
         _cmbx('enableCombobox', ['Country-Region', false]);
-        _elems('setCoreRowStyles', ['location']);
+        _elems('setDynamicFormStyles', ['location']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
         $('#Latitude_f input').focus();
     }
@@ -96,7 +96,7 @@ export function addMapToLocationEditForm(id) {
 }
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
-    _elems('setCoreRowStyles', ['location']);
+    _elems('setDynamicFormStyles', ['location']);
     if (!$('#Latitude_f input').val()) { return; }
     _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['Country'])]);
 }

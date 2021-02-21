@@ -19,10 +19,11 @@
 import { _el, executeMethod } from '~util';
 import { _state, getNextFormLevel } from '../forms-main.js';
 import * as footer from './footer/form-footer.js';
-import * as base from './form-container/form-container-main.js';
+import * as row from './row/form-row-main.js';
+import * as cntnr from './container/form-container-main.js';
 import * as elemUtil from './util/form-elems-util-main.js';
 import * as panel from './detail-panel/detail-panel.js';
-import * as fields from './fields/form-fields-main.js';
+import * as fields from './field/form-fields-main.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
 export function _panel(funcName, params = []) {
     return executeMethod(funcName, panel, 'panel', 'elems-main', params);
@@ -30,14 +31,14 @@ export function _panel(funcName, params = []) {
 /* =================== STRUCTURE ============================================ */
 /* ---------------------------- ROOT-FORM ----------------------------------- */
 export function buildAndAppendRootForm() {
-    return base.buildAndAppendRootForm(...arguments);
+    return cntnr.buildAndAppendRootForm(...arguments);
 }
 export function exitRootForm() {
-    base.exitRootForm(...arguments);
+    cntnr.exitRootForm(...arguments);
 }
 /* ---------------------------- SUB-FORM ------------------------------------ */
 export function getSubForm() {
-    return base.getSubForm(...arguments);
+    return cntnr.getSubForm(...arguments);
 }
 /** Returns true if the next sub-rank form exists in the dom. */
 export function hasOpenSubForm(fLvl) {
@@ -45,7 +46,7 @@ export function hasOpenSubForm(fLvl) {
     return $('#'+childFormLvl+'-form').length > 0;
 }
 export function exitSubForm(fLvl, focus, onExit, data) {
-    base.exitSubForm(fLvl, focus, onExit, data);
+    cntnr.exitSubForm(fLvl, focus, onExit, data);
     ifParentFormValidEnableSubmit(fLvl);
 }
 /* ------------------------------ FOOTER ------------------------------------ */
@@ -54,7 +55,7 @@ export function getFormFooter() {
 }
 /* --------------------------- SUBMIT|EXIT BUTTON --------------------------- */
 export function getExitButton() {
-    return base.getExitButton();
+    return cntnr.getExitButton();
 }
 export function toggleSubmitBttn() {
     return elemUtil.toggleSubmitBttn(...arguments);
@@ -79,14 +80,15 @@ export function exitSuccessMsg() {
 }
 /* ============================== FIELDS ==================================== */
 /* ------------------------- COMPLETE FIELDS -------------------------------- */
-export function getFormRows() {
-    return fields.getFormRows(...arguments);
+export function getFormRows(entity, fVals, fLvl) {
+    const rowCntnr = cntnr.getRowContainer(entity, fLvl)
+    return row.getFormRows(entity, fVals, fLvl, rowCntnr);
 }
 export function getFormFieldRows() {
-    return fields.getFormFieldRows(...arguments);
+    return row.getFormFieldRows(...arguments);
 }
-export function setCoreRowStyles() {
-    fields.setCoreRowStyles(...arguments);
+export function setDynamicFormStyles() {
+    fields.setDynamicFieldStyles(...arguments);
 }
 export function buildFormField(fConfg) {
     return _el('getFieldInput', [fConfg])
@@ -110,9 +112,6 @@ export function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
     return fields.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl);
 }
 /*---------------------- FILL FORM-DATA --------------------------------------*/
-export function getCurrentFormFieldVals() {
-    return fields.getCurrentFormFieldVals(...arguments);
-}
 export function fillComplexFormFields() {
     return fields.fillComplexFormFields(...arguments);
 }
@@ -125,7 +124,7 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
 
     function handleToggleFields() {
         if (ifOpenSubForm(fLvl)) { return showOpenSubFormAlert(fLvl); }
-        const fVals = getCurrentFormFieldVals(fLvl);
+        const fVals = _state('getCurrentFormFieldVals', [fLvl]);
         fields.toggleFormFields(entity, fLvl, fVals);
     }
 }/** Returns true if the next sub-rank form exists in the dom. */

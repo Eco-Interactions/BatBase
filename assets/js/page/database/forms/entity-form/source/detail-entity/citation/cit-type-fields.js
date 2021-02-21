@@ -57,7 +57,7 @@ export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*/
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(type, fLvl);
         sForm.handleCitText(fLvl);
-        _elems('setCoreRowStyles', ['citation']);
+        _elems('setDynamicFormStyles', ['citation']);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
 }

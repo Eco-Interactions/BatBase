@@ -5,6 +5,7 @@
  *     EXIT FORM
  */
 import * as build from './build-form.js';
+import * as row from './form-row-container.js';
 import * as exit from './exit-form.js';
 /* ============================= BUILD FORM ================================= */
 export function buildAndAppendRootForm() {
@@ -16,6 +17,10 @@ export function getExitButton(fields, id) {
 }
 export function getSubForm(fields, id) {
     return build.getSubForm(...arguments);
+}
+/* =============================== ROW ====================================== */
+export function getRowContainer() {
+    return row.getRowContainer(...arguments);
 }
 /* ============================== EXIT FORM ================================= */
 /**

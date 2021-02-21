@@ -55,6 +55,10 @@ function getCoreGroupAndRankFieldConfg() {
             name: 'Family',
             type: 'select'
         },
+        Genus: {
+            name: 'Genus',
+            type: 'select'
+        },
         Species: {
             name: 'Species',
             type: 'select'

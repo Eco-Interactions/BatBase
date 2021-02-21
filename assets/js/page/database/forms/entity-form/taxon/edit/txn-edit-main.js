@@ -134,7 +134,7 @@ function getParentEditFields(prnt) {
     const group = _u('lcfirst', [prnt.group.displayName]);
     const vals = { Group: prnt.group.id, 'Sub-Group': prnt.group.subGroup.id  };
     _state('addEntityFormState', [group, 'sub', null, 'edit']);
-    return _elems('getFormRows', ['group', vals, 'sub', null])
+    return _elems('getFormRows', ['group', vals, 'sub'])
         .then(modifyAndReturnPrntRows);
 
     function modifyAndReturnPrntRows(rows) {                        /*dbug-log*///console.log('modifyAndReturnPrntRows = %O', rows);

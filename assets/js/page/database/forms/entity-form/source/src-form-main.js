@@ -59,7 +59,7 @@ export function finishEditFormBuild(entity) {                       /*dbug-log*/
     addConfirmationBeforeSubmit(entity, 'top');
 }
 export function setSrcEditRowStyle(entity) {
-    _elems('setCoreRowStyles', [entity]);
+    _elems('setDynamicFormStyles', [entity]);
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 export function initEntitySubForm(entity, fLvl, fVals, pSel) {
