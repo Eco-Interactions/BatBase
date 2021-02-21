@@ -534,8 +534,8 @@ export function addVolatileMapPin(val, type, cntryId) {                         
     } else { addNewLocPinAndFillCoordFields(latLng); }
     $('#cnt-legend').html('');
 }
-function getMapPinCoords() {                                                    //console.log('Lat: [%s], Lng: [%s]', $('#Latitude_row input').val(), $('#Longitude_row input').val())
-    return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
+function getMapPinCoords() {                                                    //console.log('Lat: [%s], Lng: [%s]', $('#Latitude_f input').val(), $('#Longitude_f input').val())
+    return L.latLng($('#Latitude_f input').val(), $('#Longitude_f input').val());
 }
 function addEditFormMapData(latLng, locId, cntryId) {
     if (latLng) { geocodeCoordinates(latLng); }
@@ -553,8 +553,8 @@ function addNewLocPinAndFillCoordFields(latLng) {
     fillCoordFields(latLng);
 }
 function fillCoordFields(latLng) {                                              //console.log('fillCoordFields latLng = %O', latLng);
-    $('#Latitude_row input').val(latLng.lat.toFixed(5));
-    $('#Longitude_row input').val(latLng.lng.toFixed(5));
+    $('#Latitude_f input').val(latLng.lat.toFixed(5));
+    $('#Longitude_f input').val(latLng.lng.toFixed(5));
 }
 /* ---- Update Form UI After Reverse Geocode Success ---- */
 /**
@@ -597,7 +597,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
         $('#sel-Country')[0].selectize.addItem(loc.cntryId, 'silent');
-        $('#location_Rows #DisplayName_row input[type="text"]').change(); //Required fields handle submit button enabling
+        $('#location_fields #DisplayName_f input[type="text"]').change(); //Required fields handle submit button enabling
         addParentLocDataToMap(loc.cntryId); //, zoomFlag === 'create'
     }
     addPinToMap(latLng, marker, zoomFlag);

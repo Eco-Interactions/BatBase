@@ -21,9 +21,9 @@ export function initPublisherForm(value) {                          /*perm-log*/
     .then(appendPublFormAndFinishBuild);
 
     function appendPublFormAndFinishBuild(form) {
-        $('#Publisher_row').append(form);
+        $('#Publisher_f').append(form);
         _elems('toggleSubmitBttn', ['#'+prntLvl+'-submit', false]);
-        $('#DisplayName_row input').focus();
+        $('#DisplayName_f input').focus();
         sForm.addConfirmationBeforeSubmit('publisher', fLvl);
     }
 }

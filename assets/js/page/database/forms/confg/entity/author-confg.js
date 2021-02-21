@@ -4,21 +4,6 @@
 export default function(entity) {
 	return {
         core: 'source',
-        views: { //fields added will be built and displayed
-            all: [
-                'FirstName',
-                'MiddleName',
-                'LastName',
-                'Suffix',
-                'Website',
-            ],
-            simple: [
-                'FirstName',
-                'MiddleName',
-                'LastName',
-                'Suffix'
-            ]
-        },
         fields: {
             FirstName: {
                 type: 'text',
@@ -43,7 +28,23 @@ export default function(entity) {
                 required: true,
                 type: 'text',
                 value: '' //TOOD
-            },
+            }
+        },
+        name: entity,
+        views: { //fields added will be built and displayed
+            all: [
+                'FirstName',
+                'MiddleName',
+                'LastName',
+                'Suffix',
+                'Website',
+            ],
+            simple: [
+                'FirstName',
+                'MiddleName',
+                'LastName',
+                'Suffix'
+            ]
         }
     };
 }

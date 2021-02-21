@@ -148,7 +148,7 @@ function setAdditionalFields(entity, srcRcrd, detail) {
 function setTitleField(entity, srcRcrd) {
     const name = entity === 'publication' ?
         srcRcrd.displayName : getCitTitle(srcRcrd.citation);
-    $('#Title_row input[type="text"]').val(name).change();
+    $('#Title_f input[type="text"]').val(name).change();
 }
 function getCitTitle(citId) {
     return _state('getRcrd', ['citation', citId]).displayName;
@@ -158,14 +158,14 @@ function setPublisherField(entity, srcRcrd) {
     _cmbx('setSelVal', ['Publisher', srcRcrd.parent]);
 }
 function setWebsiteField (srcRcrd) {
-    $('#Website_row input').val(srcRcrd.linkUrl);
+    $('#Website_f input').val(srcRcrd.linkUrl);
 }
 function setCitationEdgeCaseFields(entity, citRcrd) {
     if (entity !== 'citation') { return; }
-    $('#CitationText_row textarea').val(citRcrd.fullText);
-    $('#Issue_row input').val(parseInt(citRcrd.publicationIssue));
-    $('#Pages_row input').val(citRcrd.publicationPages);
-    $('#Volume_row input').val(parseInt(citRcrd.publicationVolume));
+    $('#CitationText_f textarea').val(citRcrd.fullText);
+    $('#Issue_f input').val(parseInt(citRcrd.publicationIssue));
+    $('#Pages_f input').val(citRcrd.publicationPages);
+    $('#Volume_f input').val(parseInt(citRcrd.publicationVolume));
 }
 /* ------------------------- TAXON ------------------------------------------ */
 function fillTaxonData(entity, id, rcrd, dEntity) {                 /*dbug-log*///console.log('fillTaxonData. rcrd = %O', rcrd)
@@ -213,10 +213,10 @@ function setMultiSelect(field, prop, rcrd) {                        /*dbug-log*/
 }
 function setInput(field, prop, rcrd) {                              /*dbug-log*///console.log("setInputField [%s] [%s] rcrd = %O", field, prop, rcrd);
     const val = isNaN(parseInt(rcrd[prop])) ? rcrd[prop] : parseInt(rcrd[prop]);
-    $('#'+field+'_row input').val(val).change();
+    $(`#${field}_f input`).val(val).change();
 }
 function setTextArea(field, prop, rcrd) {
-    $('#'+field+'_row textarea').val(rcrd[prop]).change();
+    $(`#${field}_f textarea`).val(rcrd[prop]).change();
 }
 function setSelect(field, prop, rcrd) {                             /*dbug-log*///console.log("setSelect [%s] [%s] rcrd = %O", field, prop, rcrd);
     const id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;

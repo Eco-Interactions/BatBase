@@ -6,31 +6,31 @@
  *     STRUCTURE
  *         ROOT-FORM
  *         SUB-FORM
- *         ROWS
  *         FOOTER
  *         SUBMIT|EXIT BUTTON
  *         FORM-STATUS MESSAGES
  *     FIELDS
+ *         COMPLETE FIELDS
  *         COMBOBOXES
  *         REQUIRED FIELDS
  *         FILL FORM-DATA
  *         TOGGLE FORM-FIELDS
  */
-import { executeMethod } from '~util';
+import { _el, executeMethod } from '~util';
 import { _state, getNextFormLevel } from '../forms-main.js';
-import buildFormFooter from './footer/form-footer.js';
+import * as footer from './footer/form-footer.js';
 import * as base from './form-container/form-container-main.js';
 import * as elemUtil from './util/form-elems-util-main.js';
 import * as panel from './detail-panel/detail-panel.js';
-import * as rows from './rows/rows-main.js';
+import * as fields from './fields/form-fields-main.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
 export function _panel(funcName, params = []) {
     return executeMethod(funcName, panel, 'panel', 'elems-main', params);
 }
 /* =================== STRUCTURE ============================================ */
 /* ---------------------------- ROOT-FORM ----------------------------------- */
-export function buildAndAppendRootForm(fields, id) {
-    return base.buildAndAppendRootForm(fields, id);
+export function buildAndAppendRootForm() {
+    return base.buildAndAppendRootForm(...arguments);
 }
 export function exitRootForm() {
     base.exitRootForm(...arguments);
@@ -48,19 +48,9 @@ export function exitSubForm(fLvl, focus, onExit, data) {
     base.exitSubForm(fLvl, focus, onExit, data);
     ifParentFormValidEnableSubmit(fLvl);
 }
-/* -------------------------------- ROWS ------------------------------------ */
-export function buildFormRows() {
-    return rows.buildFormRows(...arguments);
-}
-export function getFormFieldRows() {
-    return rows.getFormFieldRows(...arguments);
-}
-export function setCoreRowStyles() {
-    rows.setCoreRowStyles(...arguments);
-}
 /* ------------------------------ FOOTER ------------------------------------ */
 export function getFormFooter() {
-    return buildFormFooter(...arguments);
+    return footer.getFormFooter(...arguments);
 }
 /* --------------------------- SUBMIT|EXIT BUTTON --------------------------- */
 export function getExitButton() {
@@ -88,32 +78,43 @@ export function exitSuccessMsg() {
     elemUtil.exitSuccessMsg(...arguments);
 }
 /* ============================== FIELDS ==================================== */
-export function getFieldInput() {
-    return rows.getFieldInput(...arguments);
+/* ------------------------- COMPLETE FIELDS -------------------------------- */
+export function getFormRows() {
+    return fields.getFormRows(...arguments);
+}
+export function getFormFieldRows() {
+    return fields.getFormFieldRows(...arguments);
+}
+export function setCoreRowStyles() {
+    fields.setCoreRowStyles(...arguments);
+}
+export function buildFormField(fConfg) {
+    return _el('getFieldInput', [fConfg])
+        .then(fields.buildFormField.bind(null, fConfg));
 }
 /* -------------------------- COMBOBOXES ------------------------------------ */
 export function initFormCombos() {
-    return rows.initFormCombos(...arguments);
+    return fields.initFormCombos(...arguments);
 }
 export function resetFormCombobox() {
-    return rows.resetFormCombobox(...arguments);
+    return fields.resetFormCombobox(...arguments);
 }
-export function buildMultiSelectElem() {
-    return rows.buildMultiSelectElem(...arguments);
+export function buildMultiSelectInput() {
+    return fields.buildMultiSelectInput(...arguments);
 }
 /* -------------------- REQUIRED FIELDS ------------------------------------- */
 export function ifAllRequiredFieldsFilled() {
-    return rows.ifAllRequiredFieldsFilled(...arguments);
+    return fields.ifAllRequiredFieldsFilled(...arguments);
 }
 export function ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl) {
-    return rows.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl);
+    return fields.ifAllRequiredFieldsFilled(fLvl) && !hasOpenSubForm(fLvl);
 }
 /*---------------------- FILL FORM-DATA --------------------------------------*/
 export function getCurrentFormFieldVals() {
-    return rows.getCurrentFormFieldVals(...arguments);
+    return fields.getCurrentFormFieldVals(...arguments);
 }
 export function fillComplexFormFields() {
-    return rows.fillComplexFormFields(...arguments);
+    return fields.fillComplexFormFields(...arguments);
 }
 export function ifFieldIsDisplayed(field, fLvl) {
     return !!_state('getFormFieldData', [fLvl, field]);
@@ -125,7 +126,7 @@ export function setToggleFieldsEvent(elem, entity, fLvl) {
     function handleToggleFields() {
         if (ifOpenSubForm(fLvl)) { return showOpenSubFormAlert(fLvl); }
         const fVals = getCurrentFormFieldVals(fLvl);
-        rows.toggleFormFields(entity, fLvl, fVals);
+        fields.toggleFormFields(entity, fLvl, fVals);
     }
 }/** Returns true if the next sub-rank form exists in the dom. */
 function ifOpenSubForm(fLvl) {

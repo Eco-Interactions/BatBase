@@ -2,8 +2,7 @@
  * Builds and manages the form fields.
  *
  * Export
- *     getFieldInput
- *     buildMultiSelectElem
+= *    buildMultiSelectInput
  *     fillComplexFormFields
  *     getCurrentFormFieldVals
  *     ifAllRequiredFieldsFilled
@@ -13,26 +12,46 @@
  *
  * TOC
  *     INIT FORM-FIELDS
+ *         BUILD FIELD-ROWS
  *     TOGGLE FORM-FIELDS
  *     GET FIELD-DATA
- *     FILL FORM-FIELD DATA
+ *     SET FORM-FIELD DATA
  *     IF REQUIRED FIELDS FILLED
  */
-import { _u } from '~util';
+import { _el, _u } from '~util';
 import { _elems, _form, _state } from '~form';
-import * as fields from './input/input-main.js';
-/* ==================== INIT FORM-FIELDS ================================== */
-export function getFieldInput() {
-    return fields.getFieldInput(...arguments);
+import * as build from './form-field.js';
+import * as combo from './form-combo.js';
+import * as rows from './form-row.js';
+
+/* ======================== FORM COMBOS ===================================== */
+export function resetFormCombobox() {
+    combo.resetFormCombobox(...arguments);
 }
-export function buildMultiSelectElem() {
-    return fields.buildMultiSelectElem(...arguments);
+export function setSilentVal() {
+    combo.setSilentVal(...arguments);
 }
 export function initFormCombos() {
-    fields.initFormCombos(...arguments);
+    combo.initFormCombos(...arguments);
 }
-export function resetFormCombobox() {
-    fields.resetFormCombobox(...arguments);
+/* ==================== INIT FORM-FIELDS ================================== */
+export function buildFormField() {
+    return build.buildFormField(...arguments);
+}
+export function buildMultiSelectInput() {
+    const input = _el('buildMultiSelectInput', [...arguments]);
+    build.setOnMultiSelectChangeListener(input);
+    return input;
+}
+export function setCoreRowStyles() {
+    rows.setCoreRowStyles(...arguments);
+}
+/* ------------------- BUILD FIELD-ROWS ------------------------------------- */
+export function getFormFieldRows() {
+    return rows.getFormFieldRows(...arguments);
+}
+export function getFormRows() {
+    return rows.getFormRows(...arguments);
 }
 /* ==================== TOGGLE FORM-FIELDS ================================== */
 /**
@@ -41,12 +60,12 @@ export function resetFormCombobox() {
  */
 export function toggleFormFields(entity, fLvl, fVals) {
     updateFormMemoryOnFieldToggle(fLvl);
-    $('#'+entity+'_Rows').empty();
+    $(`#${entity}_fields`).empty();
     _elems('getFormFieldRows', [entity, fVals, fLvl])
     .then(appendAndFinishRebuild);
 
     function appendAndFinishRebuild(rows) {
-        $('#'+entity+'_Rows').append(rows);
+        $(`#${entity}_fields`).append(rows);
         _form('initFormCombos', [_u('lcfirst', [entity]), fLvl]);
         _elems('fillComplexFormFields', [fLvl])
         .then(finishComplexForms);
@@ -55,12 +74,12 @@ export function toggleFormFields(entity, fLvl, fVals) {
         const complex = ['citation', 'publication', 'location'];
         if (complex.indexOf(entity) === -1) { return; }
         if (entity !== 'location') { _form('finishSrcFieldLoad', [entity, fVals, fLvl]); }
-        _elems('setCoreRowStyles', ['#'+entity+'_Rows', '.'+fLvl+'-row']);
+        _elems('setCoreRowStyles', [entity]);
     }
 }
 function updateFormMemoryOnFieldToggle(fLvl) {
     const isChecked = $(`#${fLvl}-all-fields`)[0].checked;
-    _state('setFormProp', [fLvl, 'expanded', isChecked]);
+    _state('setFormProp', [fLvl, 'simple', !isChecked]);
     _state('setFormProp', [fLvl, 'reqElems', []]);
 }
 
@@ -74,7 +93,7 @@ export function getCurrentFormFieldVals(fLvl) {
     }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fieldsData = %O returnedVals = %O', fieldData, vals);
     return vals;
 }
-/* ================== FILL FORM-FIELD DATA ================================== */
+/* =================== SET FORM-FIELD DATA ================================== */
 /**
  * When either source-type fields are regenerated or the form fields are toggled
  * between all available fields and the default shown, the fields that can
@@ -121,8 +140,8 @@ function isCntnrFilled(elem) {                                      /*dbug-log*/
     return isAFieldSelected('Authors') || isAFieldSelected('Editors');
 }
 function isAFieldSelected(entity) {                                 /*dbug-log*///console.log('[%s] field = %O', entity, $('#sel-cntnr-'+entity)[0]);
-    if (!$('#sel-cntnr-'+entity).length) { return false; } //When no editor select is loaded.
-    const fields = $('#sel-cntnr-'+entity)[0].firstChild.children;/*dbug-log*///c//console.log('fields = %O', fields);
+    if (!$(`#${entity}_f-cntnr`).length) { return false; } //When no editor select is loaded.
+    const fields = $(`#${entity}_f-cntnr`)[0].firstChild.children;/*dbug-log*///c//console.log('fields = %O', fields);
     let isSelected = false;
     $.each(fields, (i, field) => { if ($(field).val()) { isSelected = true; } });
     return isSelected;

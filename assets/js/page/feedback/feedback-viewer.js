@@ -86,7 +86,7 @@ function getSubmittedFeedbackElems(feedback, data) {
 }
 function getDisplayElems(name, dText, label = null) {
 	const displayText = _el('getElem', ['span', { text: dText }]);
-	return _el('getFieldRow', [getFeedbackFieldConfg(name, label, displayText)]);
+	return _el('getFieldElems', [getFeedbackFieldConfg(name, label, displayText)]);
 }
 /* __________________________ SUBMITTED-BY __________________________________ */
 function getSubmittedBy(feedback) {
@@ -127,7 +127,7 @@ function getAssignedUserField(users, assignedId) {
 	const select = _el('getSelect', [
 		getUserOpts(users), {id: 'sel-assignedUser'}, onDataChange, assignedId]);
 	$(select).data('original', assignedId);
-	return _el('getFieldRow', [getFeedbackFieldConfg('fAssigned', 'Assigned to:', select)]);
+	return _el('getFieldElems', [getFeedbackFieldConfg('fAssigned', 'Assigned to:', select)]);
 }
 function getUserOpts(users) {
 	const opts = [{ text: '- None - ', value: 0 }];
@@ -139,7 +139,7 @@ function getFeedbackStatuElem(curStatus) {
 	const select = _el('getSelect', [
 		getStatusOpts(), {id: 'sel-feedbackStatus'}, onDataChange, curStatus]);
 	$(select).data('original', curStatus);
-	return _el('getFieldRow', [getFeedbackFieldConfg('fStatus', 'Status:', select)]);
+	return _el('getFieldElems', [getFeedbackFieldConfg('fStatus', 'Status:', select)]);
 }
 function getStatusOpts() {
 	const statuses = ['Closed', 'Follow-Up', 'Read', 'Unread'];
@@ -149,7 +149,7 @@ function getStatusOpts() {
 function getAdminNotesElem(notes) {
 	const input = buildAdminNotesTextarea(notes);
 	$(input).data('original', notes).keyup(onDataChange);
-	return _el('getFieldRow', [getFeedbackFieldConfg('fNotes', 'Notes:', input)]);
+	return _el('getFieldElems', [getFeedbackFieldConfg('fNotes', 'Notes:', input)]);
 }
 function buildAdminNotesTextarea(notes) {
 	const attr = {

@@ -8,7 +8,7 @@
  *      INIT COMBOBOX
  *      APPLY FILTER
  */
-import { _cmbx, _el } from '~util';
+import { _cmbx } from '~util';
 import { _ui } from '~db';
 import * as fM from '../../filter-main.js';
 

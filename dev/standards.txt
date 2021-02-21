@@ -1,14 +1,25 @@
 # BEI Code Standards
 
 ## HTML
+    -
 ### Elem Attributes
     - ID for comboboxes: sel-[FieldName]
       - Filter combos: { id: sel-filter-[FieldName], name: [FieldName] Filter }
+
+    - Form
+      - Entity
+        - Container ID: ${entity}_fields
+          - Field Container ID: ${field}_fCntnr
+            - DBPAGE Field Container CLASS: ${formLvl}_fCntnr
+            - Label & Input Container ID: ${formLvl}_f
+
 
 ## Logs
     /*perm-log*/
     /*temp-log*/
     /*dbug-log*/
+
+    getPubOrCitFields [%s][%s] typeId[%s] type?[%s]', fLvl, entity, typeId, type
 
     TODO
     REMOVE
@@ -28,3 +39,5 @@
       @return {type} - description,
       @since,
       @todo
+
+

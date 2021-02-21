@@ -33,11 +33,11 @@ function buildAndAppendPubForm(val) {
     .then(form => appendPubFormAndFinishBuild(form));
 }
 function appendPubFormAndFinishBuild(form) {
-    $('#CitationTitle_row')[0].parentNode.after(form);
+    $('#CitationTitle_f')[0].parentNode.after(form);
     sForm.initFormCombos('publication', 'sub');
     sForm.addConfirmationBeforeSubmit('publication', 'sub');
-    $('#Title_row input').focus();
-    _elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
+    $('#Title_f input').focus();
+    _elems('setCoreRowStyles', ['publication']);
     $('#PublicationType-lbl').css('min-width', '125px');
 }
 /* --------------------- PUBLICATION-TYPE FIELDS ---------------------------- */
@@ -52,15 +52,15 @@ export function loadPubTypeFields(typeId) {                         /*dbug-log*/
     function finishPubTypeFields() {
         setPubComboLabelWidth();
         ifBookAddAuthEdNote();
-        _elems('setCoreRowStyles', ['#publication_Rows', '.sub-row']);
+        _elems('setCoreRowStyles', ['publication']);
         ifThesisDissertationModifyLabel();
     }
 }
 /* Fixes and aligns label and row styles. */
 function setPubComboLabelWidth() {
-    if ($('#PublicationType_row.top-row').length) { return setPublicationTypeLabel(); }
-    const rowW = $('#PublicationType_row').width() - 14;
-    $('#PublicationType_row, #Publisher_row, #Editors_row').css('max-width', rowW);
+    if ($('#PublicationType_f.top-f').length) { return setPublicationTypeLabel(); }
+    const rowW = $('#PublicationType_f').width() - 14;
+    $('#PublicationType_f, #Publisher_f, #Editors_f').css('max-width', rowW);
     $('#PublicationType-lbl, #Publisher-lbl, #Editors-lbl').css('min-width', '125px');
     $('#Authors-lbl').css('min-width', '109px');
 }
@@ -79,7 +79,7 @@ function ifBookAddAuthEdNote() {
     $(note).html('<i>Note: there must be at least one author OR editor ' +
         'selected for book publications.</i>')
     $(note).css({'margin': 'auto'});
-    $('#Authors_row')[0].parentNode.before(note);
+    $('#Authors_f')[0].parentNode.before(note);
 }
 /* --------------------- FINISH EDIT-FORM ----------------------------------- */
 export function finishPublicationEditForm() {

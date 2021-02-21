@@ -57,12 +57,9 @@ export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*/
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(type, fLvl);
         sForm.handleCitText(fLvl);
-        setCitationFormRowStyles(fLvl);
+        _elems('setCoreRowStyles', ['citation']);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
-}
-function setCitationFormRowStyles(fLvl) {
-    _elems('setCoreRowStyles', ['#citation_Rows', '.'+fLvl+'-row']);
 }
 /* ------------------- UPDATE UI FOR CITATION-TYPE -------------------------- */
 /**
@@ -87,14 +84,14 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
 
         function reshowAuthorField() {
             if (!rmvdAuthField.authRow) { return; } //Field was never removed
-            $('#citation_Rows').append(rmvdAuthField.authRow);
+            $('#citation_fields').append(rmvdAuthField.authRow);
             _state('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
             _state('setFormFieldData', [fLvl, 'Authors', {}, 'multiSelect']);
             delete rmvdAuthField.authRow;
             delete rmvdAuthField.authElem;
         }
         function removeAuthorField() {
-            rmvdAuthField.authRow = $('#Authors_row').detach();
+            rmvdAuthField.authRow = $('#Authors_f').detach();
             _state('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
             removeFromFieldData();
 
@@ -113,21 +110,21 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
         }
     }
     function disableFilledFields() {
-        $('#Title_row input').prop('disabled', true);
-        $('#Year_row input').prop('disabled', true);
+        $('#Title_f input').prop('disabled', true);
+        $('#Year_f input').prop('disabled', true);
         disableAuthorField();
     }
     function disableAuthorField() {
-        if ($('#sel-cntnr-Authors')[0].children.length > 1) {
-            $('#sel-cntnr-Authors')[0].lastChild.remove();
+        if ($(`#Authors_f-cntnr`)[0].children.length > 1) {
+            $(`#Authors_f-cntnr`)[0].lastChild.remove();
         }
-        _cmbx('enableComboboxes', [$('#sel-cntnr-Authors select'), false]);
+        _cmbx('enableComboboxes', [$(`#Authors_f-cntnr select`), false]);
     }
     function disableTitleField() {
-        $('#Title_row input').prop('disabled', true);
+        $('#Title_f input').prop('disabled', true);
     }
     function enableTitleField() {
-        $('#Title_row input').prop('disabled', false);
+        $('#Title_f input').prop('disabled', false);
     }
 }
 /* ---------------------------- EDIT-FORM ----------------------------------- */

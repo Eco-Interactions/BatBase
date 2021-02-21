@@ -13,7 +13,7 @@
  */
 import * as db from './local-data/local-data-main.js';
 import * as cmbx from './elems/combobox/combobox-main.js';
-import * as elems from './elems/elems-main.js';
+import * as elems from './elems/build/elem-build-main.js';
 import * as libs from './libs/libs-main.js';
 import * as alert from './misc/alert-issue.js';
 import * as modal from './misc/intro-modals.js';

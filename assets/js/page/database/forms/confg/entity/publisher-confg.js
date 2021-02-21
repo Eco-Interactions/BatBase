@@ -16,6 +16,7 @@ export default function(entity) {
                 type: 'text'
             },
         },
+        name: entity,
         views: {
             all: [
                 'DisplayName',

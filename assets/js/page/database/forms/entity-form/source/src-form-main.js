@@ -58,8 +58,8 @@ export function finishEditFormBuild(entity) {                       /*dbug-log*/
     finishSrcFieldLoad(entity, 'top');
     addConfirmationBeforeSubmit(entity, 'top');
 }
-export function setSrcEditRowStyle() {
-    _elems('setCoreRowStyles', ['#form-main', '.top-row']);
+export function setSrcEditRowStyle(entity) {
+    _elems('setCoreRowStyles', [entity]);
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 export function initEntitySubForm(entity, fLvl, fVals, pSel) {
@@ -104,7 +104,7 @@ function buildConfirmationModalHtml(fLvl) {
     return links.length ? hdr + links.join('<br><br>') : false;
 
     function buildLinkHtmlForValues(field) {
-        const url = $(`#${fLvl}-form #${field}_row input`).val();
+        const url = $(`#${fLvl}-form #${field}_f input`).val();
         return url ? buildUrlLink(field, url) : null;
     }
 }

@@ -69,7 +69,7 @@ function getFieldConfg(name, input, min, max) {
     };
 }
 function getFeedbackFieldRow(confg) {
-    const row = _el('getFieldRow', [confg]);
+    const row = _el('getFieldElems', [confg]);
     moveAlertsToRightOfLabel(row, confg);
     return row;
 }
@@ -119,8 +119,8 @@ function toggleFeedbackSubmitButton(enable = true) {
 function postFeedback() {
     const data = {
         route: $('body').data('this-url'),
-        topic: $('#topic_row input').val(),
-        feedback: $('#feedback_row textarea').val()
+        topic: $('#topic_f input').val(),
+        feedback: $('#feedback_f textarea').val()
     };
     closePopup() && _u('sendAjaxQuery', [data, 'feedback/post']);
     _alert('alertIssue', ['feedback', data]);

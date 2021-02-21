@@ -134,7 +134,7 @@ function getParentEditFields(prnt) {
     const group = _u('lcfirst', [prnt.group.displayName]);
     const vals = { Group: prnt.group.id, 'Sub-Group': prnt.group.subGroup.id  };
     _state('addEntityFormState', [group, 'sub', null, 'edit']);
-    return _elems('buildFormRows', ['group', vals, 'sub', null])
+    return _elems('getFormRows', ['group', vals, 'sub', null])
         .then(modifyAndReturnPrntRows);
 
     function modifyAndReturnPrntRows(rows) {                        /*dbug-log*///console.log('modifyAndReturnPrntRows = %O', rows);
@@ -152,7 +152,7 @@ function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };
     const cntnr = _el('getElem', ['div', attr]);
     $(cntnr).append(elems);
-    $('#Parent_row').after(cntnr);
+    $('#Parent_f').after(cntnr);
 }
 /** ------------------ FINISH SELECT FORM BUILD ----------------------------- */
 /**
@@ -192,7 +192,7 @@ function onParentSubGroupChange(val) {
 }
 /** Note: Species combo needs to stay in DOM for the combo change methods. */
 function finishGroupChange() {
-    $('#Species_row').hide();
+    $('#Species_f').hide();
     _elems('toggleSubmitBttn', ['#sub-submit', true]);
 }
 export function selectParentTaxon(pId) {
@@ -203,12 +203,12 @@ export function selectParentTaxon(pId) {
     _cmbx('setSelVal', [pRank, pId]);
 }
 function ifSubGroupSelect(pTaxon) {
-    if (!$('#Sub-Group_row').length) { return; }
+    if (!$('#Sub-Group_f').length) { return; }
     _elems('setSilentVal', ['sub', 'Sub-Group', pTaxon.group.subGroup.id]);
 }
 function finishParentSelectFormUi() {
     clearAndDisableTopFormParentFields();
-    $('#Species_row').hide();
+    $('#Species_f').hide();
     updateSubmitBttns();
 }
 function clearAndDisableTopFormParentFields() {
@@ -301,8 +301,8 @@ export function finishEditFormBuild(entity) {
 }
 function submitTaxonEdit() {
     const vals = {
-        displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
-        rank:       $('#Taxon_row select').text(),
+        displayName: $('#Taxon_f > div.form-field.flex-row > input[type="text"]').val(),
+        rank:       $('#Taxon_f select').text(),
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                              /*dbug-log*///console.log("taxon vals = %O", vals);
     if (!isTaxonEditFormValid(vals)) { return } //Alert shown

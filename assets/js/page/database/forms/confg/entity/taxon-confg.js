@@ -21,8 +21,8 @@ export default function(entity) {
                 entity: 'Rank',
                 required: true
             }
-            // 'group': relationship... might not be needed
         },
+        name: entity,
         views: {
             all: [
                 'DisplayName'

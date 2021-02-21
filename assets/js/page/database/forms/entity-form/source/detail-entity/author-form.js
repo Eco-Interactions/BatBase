@@ -35,9 +35,9 @@ export function initAuthOrEdForm(authCnt, authType, value) {        /*perm-log*/
     .then(appendAuthFormAndFinishBuild);
 
     function appendAuthFormAndFinishBuild(form) {
-        $('#'+authType+'_row').append(form);
+        $('#'+authType+'_f').append(form);
         handleSubmitBttns();
-        $('#FirstName_row input').focus();
+        $('#FirstName_f input').focus();
     }
     function handleSubmitBttns() {
         $('#'+fLvl+'-cancel').click(resetOnCreateFormCancel);
@@ -61,7 +61,7 @@ export function selectExistingAuthsOrEds(field, authObj, fLvl) {       /*dbug-lo
     }, Promise.resolve());
 }
 function ifFieldNotShownOrNoValToSelect(field, authObj) {
-    return !Object.keys(authObj).length || !$('#sel-cntnr-'+field).length;
+    return !Object.keys(authObj).length || !$(`#${field}_f-cntnr`).length;
 }
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {                   /*dbug-log*///console.log('selectAuthor. args = %O', arguments)
@@ -78,7 +78,7 @@ function selectAuthor(cnt, authId, field, fLvl) {                   /*dbug-log*/
  * Note: If create form selected from dropdown, the count of that combo is used.
  */
 export function onAuthAndEdSelection(selCnt, authType, val) {       /*dbug-log*///console.log('onAuthAndEdSelection [%s][%s] = [%s]', authType, selCnt, val);
-    let cnt = $('#sel-cntnr-'+authType).data('cnt');
+    let cnt = $(`#${authType}_f-cntnr`).data('cnt');
     const fLvl = getSubFormLvl('sub');
     if (val === '' || parseInt(val) === NaN) { return handleFieldCleared(authType, cnt); }
     if (cnt === 1) { toggleOtherAuthorTypeSelect(authType, false);  }
@@ -101,7 +101,7 @@ function syncWithOtherAuthorTypeSelect(authType) {
 function removeFinalEmptySelectField(authType, cnt) {
     $('#sel-'+authType+cnt)[0].selectize.destroy();
     $('#sel-'+authType+cnt)[0].parentNode.remove();
-    $('#sel-cntnr-'+authType).data('cnt', --cnt);
+    $(`#${authType}_f-cntnr`).data('cnt', --cnt);
 }
 /** Stops the form from adding multiple empty combos to the end of the field. */
 function lastAuthComboEmpty(cnt, authType) {
@@ -110,17 +110,17 @@ function lastAuthComboEmpty(cnt, authType) {
 }
 function toggleOtherAuthorTypeSelect(type, enable) {
     const entity = type === 'Authors' ? 'Editors' : 'Authors';
-    if (!$('#sel-cntnr-'+entity).length) { return; }
+    if (!$(`#${entity}_f-cntnr`).length) { return; }
     _cmbx('enableFirstCombobox', [entity, enable]);
 }
 /* ------------------ BUILD NEXT COMBO -------------------------------------- */
 /** Builds a new, empty author combobox */
 function buildNewAuthorSelect(cnt, val, prntLvl, authType) {        /*dbug-log*///console.log('buildNewAuthorSelect[%s][%s]', authType, cnt)
-    return _elems('buildMultiSelectElem', [null, authType, prntLvl, cnt])
+    return _elems('buildMultiSelectInput', [null, authType, prntLvl, cnt])
         .then(appendNewAuthSelect);
 
     function appendNewAuthSelect(sel) {
-        $('#sel-cntnr-'+authType).append(sel).data('cnt', cnt);
+        $(`#${authType}_f-cntnr`).append(sel).data('cnt', cnt);
         _cmbx('initCombobox', [getAuthSelConfg(authType, cnt)]);
     }
 }

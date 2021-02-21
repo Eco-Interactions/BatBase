@@ -3,15 +3,12 @@
  */
 import { _state } from 'db/forms/forms-main.js';
 
-export default function() {
+export default function(role) {
     const groupFields = getGroupFields();
     const fieldOrder = getRoleFields(groupFields);
     return {
+        name: role,
         fields: getCoreGroupAndRankFieldConfg(),
-        // 'add': groupFields,
-        // 'required': [],
-        // 'suggested': fields,
-        // 'optional': [],
         views: {
             all: fieldOrder
         },

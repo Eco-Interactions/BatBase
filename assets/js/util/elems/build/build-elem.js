@@ -1,6 +1,6 @@
 /**
+ * Basic HTML element builder.
  * @module app/util/elem/build
- * Builds an HTML element.
  */
 /**
  * @ars {String} tag - Element type

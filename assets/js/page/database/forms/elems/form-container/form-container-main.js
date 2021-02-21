@@ -7,7 +7,7 @@
 import * as build from './build-form.js';
 import * as exit from './exit-form.js';
 /* ============================= BUILD FORM ================================= */
-export function buildAndAppendRootForm(fields, id) {
+export function buildAndAppendRootForm() {
     build.buildAndAppendRootForm(...arguments);
     return Promise.resolve();
 }

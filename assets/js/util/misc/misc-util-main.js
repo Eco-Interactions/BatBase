@@ -46,8 +46,12 @@ export function logInProdEnv() {
 export function snapshot(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
+/* ========================= ELEM =========================================== */
 export function addEnterKeypressClick(elem) {
     $(elem).keypress(function(e){ //Enter
         if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
     });
+}
+export function getInnerWidthInEm(pxW) {
+    return pxW / parseFloat($('html').css('font-size'));
 }

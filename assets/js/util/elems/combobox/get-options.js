@@ -65,7 +65,7 @@ export function getOptsFromStoredData(prop) {
         return getOptions(data, Object.keys(data).sort());
     });
 }
-function getStoredOpts(field, prop) {
+function getStoredOpts(fName, prop) {
     return getOptsFromStoredData(prop);
 }
 export function getSelectStoredOpts(prop, include) {
@@ -74,7 +74,7 @@ export function getSelectStoredOpts(prop, include) {
 }
 /** --------------------- FIELD DATA ---------------------------------------- */
 /** Returns and array of options for the passed field type. */
-export function getFieldOptions(field) {                            /*dbug-log*///console.log("getSelectOpts. for [%s]", field);
+export function getFieldOptions(fName) {                            /*dbug-log*/console.log("getSelectOpts. for [%s]", fName);
     const optMap = {
         'Authors': [ getSrcOpts, 'authSrcs'],
         'CitationType': [ getCitTypeOpts, 'citTypeNames'],
@@ -98,10 +98,10 @@ export function getFieldOptions(field) {                            /*dbug-log*/
         'Species': [ getTaxonOpts, 'Species' ],
         'Subject': [() => []]
     };
-    if (!optMap[field]) { return Promise.resolve([]); }
-    const getOpts = optMap[field][0];
-    const fieldKey = optMap[field][1];
-    return Promise.resolve(getOpts(field, fieldKey));
+    if (!optMap[fName]) { return Promise.resolve([]); }
+    const getOpts = optMap[fName][0];
+    const fieldKey = optMap[fName][1];
+    return Promise.resolve(getOpts(fName, fieldKey));
 }
 /* ----------------------- BASIC ENTITY-OPTIONS ----------------------------- */
 /**
@@ -136,7 +136,7 @@ function getEntityDisplayName(entity) {
 //     return _u('getOptsFromStoredData', [entity+"Tags"]);
 // }
 /** Returns an array of source-type (prop) options objects. */
-function getSrcOpts(field, prop, rcrds) {
+function getSrcOpts(fName, prop, rcrds) {
     return _db('getData', [prop]).then(callSrcOptsBuildHandler);
 
     function callSrcOptsBuildHandler(ids) {
@@ -144,7 +144,7 @@ function getSrcOpts(field, prop, rcrds) {
     }
     function getFieldName() {
         return {
-            'authSrcs': field ? field.slice(0, -1) : 'Author',
+            'authSrcs': fName ? fName.slice(0, -1) : 'Author',
             'pubSrcs': 'Publication',
             'publSrcs': 'Publisher',
         }[prop];
@@ -157,7 +157,7 @@ export function buildSrcOpts(srcType, ids, rcrds) {                 /*dbug-log*/
     return opts;
 }
 /** Return the citation type options available for the parent-publication's type. */
-function getCitTypeOpts(field, prop) {
+function getCitTypeOpts(fName, prop) {
     const fLvl = getSubFormLvl('sub');
     return _db('getData', [prop]).then(buildCitTypeOpts);
 
@@ -176,7 +176,7 @@ function getCitTypeOpts(field, prop) {
 }
 /* -------------------------- TAXON ----------------------------------------- */
 /** Returns an array of taxonyms for the passed rank and the form's taxon group. */
-export function getTaxonOpts(field, rank, r, g) {
+export function getTaxonOpts(fName, rank, r, g) {
     const group = r ? r : _state('getTaxonProp', ['groupName']);
     const subGroup = g ? g : _state('getTaxonProp', ['subGroup']).name;/*dbug-log*///console.log('        getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
     const opts = [ { text: `Add a new ${rank}...`, value: 'create'} ];
@@ -186,13 +186,13 @@ export function getTaxonOpts(field, rank, r, g) {
             return opts;
         });
 }
-function getSubGroupOpts(field, prop) {
+function getSubGroupOpts(fName, prop) {
     const group = _state('getTaxonProp', ['groupName']);
     return getStoredOpts(null, group+'SubGroupNames');
 }
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */
-function getCntryRegOpts(field, prop) {
+function getCntryRegOpts(fName, prop) {
     const proms = ['Country', 'Region'].map(getFieldOptions);
     return Promise.all(proms).then(data => data[0].concat(data[1]));
 }

@@ -15,9 +15,9 @@ let fS; //form state
  * added @handleAdditionalEntityData.
  */
 export function getValidatedFormData(entity, fLvl, submitting = false) {
-    fS = _state('getFormState');                                         //console.log('           --getValidatedFormData. [%s]', entity);
+    fS = _state('getFormState');                                    /*dbug-log*/console.log('           --getValidatedFormData. [%s] fState = %O', entity, fS);
     const elems = getFormFieldElems(entity, fLvl);
-    const fVals = {};
+    const fVals = {}; //Why am i looping through elems when there is a fieldData state object?
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }
     if (fVals.displayName) { fVals.displayName = _u('ucfirst', [fVals.displayName]) }
     return handleAdditionalEntityData(entity)
@@ -199,7 +199,7 @@ export function getValidatedFormData(entity, fLvl, submitting = false) {
 }
 /** Taxon edit forms can potentially have nested create forms. */
 function getFormFieldElems(entity, fLvl) {
-    let id = '#' + entity + '_Rows';
+    let id = `#${entity}_fields`;
     if ($(id+'_'+fLvl).length) { id = id + '_' + fLvl; }
     return $(id)[0].children;
 }

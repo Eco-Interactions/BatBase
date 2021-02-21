@@ -127,11 +127,11 @@ function getPrevSelId(role) {
         $('#sel-'+role).data('selTaxon') : null;
 }
 function focusFirstRankCombobox(lcRole) {
-    _cmbx('focusFirstCombobox', ['#'+lcRole+'_Rows']);
+    _cmbx('focusFirstCombobox', [`#${lcRole}_fields`]);
 }
 function appendTxnFormAndInitCombos(role, form) {
     const lcRole = _u('lcfirst', [role]);
-    $('#'+role+'_row').append(form);
+    $(`#${role}_f`).append(form);
     selectForm.initSelectFormCombos();
 }
 /* -------------- RESET SELECT-FORM TO INIT STATE --------------------------- */

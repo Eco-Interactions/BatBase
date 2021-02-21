@@ -31,7 +31,7 @@ export function onGroupSelection(val) {                             /*temp-log*/
 }
 /* ------------------- CLEAR PREVIOUS GROUP COMBOS -------------------------- */
 function clearPreviousGroupCombos() {
-    $(`#${role}_Rows>div`).each(ifNotGroupComboRemove);
+    $(`#${role}_fields>div`).each(ifNotGroupComboRemove);
 }
 function ifNotGroupComboRemove(i, elem) {
     if (i !== 0) { elem.remove(); }
@@ -44,7 +44,7 @@ function buildAndAppendGroupRows(rootId) {
 }
 function appendGroupRowsAndFinishBuild(rows) {                      /*dbug-log*///console.log('appendGroupRowsAndFinishBuild = %O', rows);
     ifNoSubGroupsRemoveCombo(rows);
-    $(`#${role}_Rows`).append(rows);
+    $(`#${role}_fields`).append(rows);
     _state('setFormFieldData', ['sub', 'Group', null, 'select']);
     selectForm.initSelectFormCombos();
     _elems('toggleSubmitBttn', ['#sub-submit', false]);
@@ -60,7 +60,7 @@ export function ifNoSubGroupsRemoveCombo(rows = false) {
     const subGroups = Object.keys(_state('getTaxonProp', ['subGroups']));/*dbug-log*///console.log('ifNoSubGroupsRemoveCombo. subGroups = %O, rows = %O', subGroups, rows)
     if (subGroups.length > 1) { return; }
     if (!rows) { // Taxon edit-form parent select-form
-        $('#Sub-Group_row').remove();
+        $('#Sub-Group_f').remove();
     } else { // Taxon select-form
         rows.splice(0, 1);
     }
@@ -80,7 +80,7 @@ function updateSubGroupState() {
     _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
 }
 function clearPreviousSubGroupCombos() {
-    const groupRows = $('#Group_row, #Sub-Group_row').detach();
-    $(`#${role}_Rows`).empty();
-    $(`#${role}_Rows`).append(groupRows);
+    const gFields = $('#Group_f, #Sub-Group_f').detach();
+    $(`#${role}_fields`).empty();
+    $(`#${role}_fields`).append(gFields);
 }

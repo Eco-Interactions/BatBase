@@ -18,7 +18,7 @@
  */
 
 import { _cmbx, _el } from '~util';
-import { _form, _panel, _state } from '~form';
+import { _elems, _form, _panel, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 
 /* ======================= COUNTRY/REGION =================================== */
@@ -87,7 +87,6 @@ function removeLocMap() {
 function selectParentCountryRegion(locRcrd) {
     const prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     _elems('setSilentVal', ['top', 'Country-Region', prntVal]);
-
 }
 /* =================== WAYS TO SELECT LOCATION NOTE ========================= */
 /** Adds a message above the location fields in interaction forms. */
@@ -95,7 +94,7 @@ export function addLocationSelectionMethodsNote() {
     const cntnr = _el('getElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
     const mapInfo = getMapInfoText();
     $(cntnr).append(mapInfo);
-    $('#Country-Region_row')[0].parentNode.before(cntnr);
+    $('#Country-Region_f')[0].parentNode.before(cntnr);
 }
 function getMapInfoText() {
     const text = `<span>Select or create a location using the fields below or </span>`;
@@ -111,7 +110,7 @@ function getInfoLinkTextToOpenMap(argument) {
 /** Open popup with the map interface for location selection. */
 function showInteractionFormMap() {                                 /*dbug-log*///console.log('showInteractionFormMap')
     if ($('#form-map').length) { return; }
-    const pElem = $('#Location_row')[0].parentNode;
+    const pElem = $('#Location_f')[0].parentNode;
     _form('addMapToLocForm', ['int', $(pElem)]);
     if (_cmbx('getSelVal', ['Country-Region'])) { return; }
     _cmbx('focusCombobox', ['Country-Region', true]);

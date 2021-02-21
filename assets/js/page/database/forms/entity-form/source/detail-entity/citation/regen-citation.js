@@ -14,7 +14,7 @@ import { _cmbx, _u } from '~util';
 import { _state, _elems, getNextFormLevel, getValidatedFormData } from '~form';
 
 export function buildCitTextAndUpdateField(fLvl) {
-    const $elem = $('#CitationText_row textarea');
+    const $elem = $('#CitationText_f textarea');
     if (!$elem.val()) { initializeCitField($elem); }
 
     return getCitationFieldText($elem, fLvl)

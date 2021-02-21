@@ -66,8 +66,8 @@ function initCitSubForm(val) {
         ['sub', 'med-sub-form', {'Title': val}, '#sel-CitationTitle']);
 }
 function appendCitFormAndFinishBuild(form) {                        /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
-    $('#CitationText_row textarea').attr('disabled', true);
-    $('#CitationTitle_row')[0].parentNode.after(form);
+    $('#CitationText_f textarea').attr('disabled', true);
+    $('#CitationTitle_f')[0].parentNode.after(form);
     sForm.initFormCombos('citation', 'sub');
     sForm.addConfirmationBeforeSubmit('citation', 'sub');
     return types.selectDefaultCitType()
@@ -75,8 +75,8 @@ function appendCitFormAndFinishBuild(form) {                        /*dbug-log*/
 }
 function finishCitFormUiLoad() {
     _cmbx('enableCombobox', ['Publication', false]);
-    $('#Abstract_row textarea').focus();
-    _elems('setCoreRowStyles', ['#citation_Rows', '.sub-row']);
+    $('#Abstract_f textarea').focus();
+    _elems('setCoreRowStyles', ['citation']);
 }
 /* ----------------------- AUTO-GENERATE CITATION --------------------------- */
 /** Note: to prevent multiple rebuilds, a timeout is used. */
@@ -96,7 +96,7 @@ function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*/
  */
 function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl) {
     if (!_elems('ifAllRequiredFieldsFilled', [fLvl])) { return; }
-    const empty = $('#citation_Rows div.field-row').filter(hightlightIfEmpty);
+    const empty = $('#citation_fields div.form-field').filter(hightlightIfEmpty);
     if (!empty.length && $('.warn-msg').length) { return $('.warn-msg').remove(); }
     if ($('.warn-msg').length) { return; }
     $('#'+fLvl+'-submit').before('<div class="warn-msg warn">Please add highlighted data if available.</div>')

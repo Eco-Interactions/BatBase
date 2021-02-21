@@ -67,8 +67,8 @@ export function finishEntityEditFormBuild(entity) {
 }
 export function finishEditFormInit(entity, id) {
     const cmplxFnshrs = {
-        'citation': src.setSrcEditRowStyle,
-        'publication': src.setSrcEditRowStyle,
+        'citation': src.setSrcEditRowStyle.bind(null, 'citation'),
+        'publication': src.setSrcEditRowStyle.bind(null, 'publication'),
         'location': addMapToLocationEditForm,
     };
     if (!cmplxFnshrs[entity]) { return Promise.resolve(); }

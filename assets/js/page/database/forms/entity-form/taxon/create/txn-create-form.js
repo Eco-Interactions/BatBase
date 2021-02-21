@@ -32,10 +32,10 @@ function showNewTaxonForm(val, rank) {
             .then(appendTxnFormAndFinishBuild);
     }
     function appendTxnFormAndFinishBuild(form) {
-        $('#'+rank+'_row').append(form);
+        $(`#${rank}_f`).append(form);
         _elems('toggleSubmitBttn', ['#sub2-submit'])
         $('#sub2-hdr')[0].innerText += ' '+ rank;
-        $('#DisplayName_row input').focus();
+        $('#DisplayName_f input').focus();
         updateTaxonSubmitBttn(rank);
     }
 }
@@ -50,13 +50,13 @@ function validateAndSubmit(rank) {
     submitForm('#sub2-form',  'sub2', 'taxon');
 }
 function ifEmptyNameField() {
-    return !$('#DisplayName_row input').val();
+    return !$('#DisplayName_f input').val();
 }
 function ifSpeciesValIssue(rank) {
     return rank === 'Species' && !hasCorrectBinomialNomenclature();
 
     function hasCorrectBinomialNomenclature() {
-        const species = $('#DisplayName_row input')[0].value;
+        const species = $('#DisplayName_f input')[0].value;
         const genus = _cmbx('getSelTxt', ['Genus']);                /*dbug-log*///console.log('Genus = %s, Species = %s', genus, species);
         const speciesParts = species.split(' ');
         return genus === speciesParts[0];

@@ -31,8 +31,12 @@ div[id$="-help"] //Form tutorial/guide buttons
     padding: 5px 0 0 5px;
     overflow-x: hidden;
 
-div[id$="_Rows"] //Form field container
+div[id$="_fields"] //Contains all entity-form fields
     min-width: 100%
+
+#form-main .selectize-control
+    width: 75%
+
 
 /* --- Large (Interaction) Forms --- */
 .form-popup.lrg-form
@@ -127,15 +131,15 @@ $sub-form-styles
 .form-popup input:invalid
     border: 1px dashed red
 /* ======================= FORM SPECIFIC ==================================== */
-#Group_row .med-field //group combobox class
+#Group_f .med-field //group combobox class
     width: webkit-fill-available
     margin-left: -2em
 
-#Sub-Group_row .med-field
+#Sub-Group_f .med-field
     width: webkit-fill-available
     margin-left: -1em
 
-#Group_row .selectize-dropdown, #Sub-Group_row .selectize-dropdown
+#Group_f .selectize-dropdown, #Sub-Group_f .selectize-dropdown
     margin-left 0
 
 /* -------------- TO BE SORTED ------------------- */

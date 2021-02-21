@@ -4,141 +4,150 @@
 export default function(entity) {
 	return {
         core: 'source',
+        fields: getPublicationFieldConfg(),
+        name: entity,
+        type: null,  //Holds type confg once type selected
+        types: getPublicationTypeConfg(),
         views: { //fields added will be built and displayed.
-            all: [  //will be merged with type.views
+            all: [  //will be merged with type.views  //merge here rather than later?
                 ['Title', 'PublicationType']
             ],
         },
-        fields: {
-            Doi: {
-                info: {
-                    tooltip: 'Digital Object Identifier provided by the Publisher',
-                }
-            },
-            ParentSource: {
-                required: true, //Publisher
-            },
-            PublicationType: {
-                entity: 'PublicationType',
-                name: 'PublicationType',
-                type: 'select',
-                required: true
-            },
-            Publisher: {   // MERGE WITH TITLE
-                entity: 'Source',
-                name: 'Publisher',
-                // prop: {    // TODO: DRY
-                //     core: ['DisplayName'],
-                //     detail: ['DisplayName', 'Title'],
-                // },
-                type: 'select',
-            },
-            SourceType: {
-                value: '' //TODO
-            },
-            Title: {
-                name: 'Title',
-                prop: {    // TODO: DRY
-                    core: ['DisplayName'],
-                    detail: ['DisplayName'],
-                },
-                required: true,
-                type: 'text',
-            },
-            Website: {
-                info: {
-                    tooltip: 'Copy and paste link to publication, if available',
-                }
+    };
+}
+function getPublicationFieldConfg() {
+    return {
+        Doi: {
+            info: {
+                tooltip: 'Digital Object Identifier provided by the Publisher',
             }
         },
-        types: {
-            Book: {
-                name: 'Book',
-                fields: {
-                    Authors: {
-                        required: true
-                    },
-                    Year: {
-                        required: true
-                    },
-                    Editors: {
-                        required: true
-                    },
-                    Publisher: {
-                        required: true
-                    }
+        ParentSource: {
+            required: true, //Publisher
+        },
+        PublicationType: {
+            entity: 'PublicationType',
+            name: 'PublicationType',
+            type: 'select',
+            required: true
+        },
+        Publisher: {   // MERGE WITH TITLE
+            entity: 'Source',
+            name: 'Publisher',
+            // prop: {    // TODO: DRY
+            //     core: ['DisplayName'],
+            //     detail: ['DisplayName', 'Title'],
+            // },
+            type: 'select',
+        },
+        SourceType: {
+            value: '' //TODO
+        },
+        Title: {
+            name: 'Title',
+            prop: {    // TODO: DRY
+                core: ['DisplayName'],
+                detail: ['DisplayName'],
+            },
+            required: true,
+            type: 'text',
+        },
+        Website: {
+            info: {
+                tooltip: 'Copy and paste link to publication, if available',
+            }
+        }
+    };
+}
+
+function getPublicationTypeConfg() {
+    return  {
+        Book: {
+            name: 'Book',
+            fields: {
+                Authors: {
+                    required: true
                 },
-                views: {
-                    all: [
-                        ['Year', 'Doi'],
-                        ['Website', 'Description'],
-                        ['Publisher'],
-                        ['Authors', 'Editors']
-                    ],
-                    simple: [
-                        ['Year', 'Publisher'],
-                        ['Authors', 'Editors']
-                    ],
+                Year: {
+                    required: true
+                },
+                Editors: {
+                    required: true
+                },
+                Publisher: {
+                    required: true
                 }
             },
-            Journal: {
-                name: 'Journal',
-                required: [],
-                views: {
-                    all: [
-                        ['Year', 'Doi'],
-                        ['Website', 'Description'],
-                        ['Publisher'],
-                    ],
-                    simple: [], //No additional fields shown
+            views: {
+                all: [
+                    ['Year', 'Doi'],
+                    ['Website', 'Description'],
+                    ['Publisher'],
+                    ['Authors', 'Editors']
+                ],
+                simple: [
+                    ['Year', 'Publisher'],
+                    ['Authors', 'Editors']
+                ],
+            }
+        },
+        Journal: {
+            name: 'Journal',
+            required: [],
+            views: {
+                all: [
+                    ['Year', 'Doi'],
+                    ['Website', 'Description'],
+                    ['Publisher'],
+                ],
+                simple: [], //No additional fields shown
+            }
+        },
+        Other: {
+            name: 'Other',
+            fields: {
+                Authors: {
+                    required: true
+                },
+                Year: {
+                    required: true
                 }
             },
-            Other: {
-                name: 'Other',
-                fields: {
-                    Authors: {
-                        required: true
-                    },
-                    Year: {
-                        required: true
-                    }
+            views:  {
+                all: [
+                    ['Year', 'Doi'],
+                    ['Website', 'Description'],
+                    ['Publisher', 'Authors'],
+                ],
+                simple: [
+                    ['Year', 'Publisher'],
+                    'Authors'
+                ],
+            }
+        },
+        'Thesis/Dissertation': {
+            name: 'Thesis/Dissertation',
+            fields:{
+                Authors: {
+                    required: true
                 },
-                views:  {
-                    all: [
-                        ['Year', 'Doi'],
-                        ['Website', 'Description'],
-                        ['Publisher', 'Authors'],
-                    ],
-                    simple: [
-                        ['Year', 'Publisher'],
-                        'Authors'
-                    ],
+                Publisher: {
+                    required: true
+                },
+                Year: {
+                    required: true
                 }
             },
-            'Thesis/Dissertation': {
-                name: 'Thesis/Dissertation',
-                fields:{
-                    Authors: {
-                        required: true
-                    },
-                    Publisher: {
-                        required: true
-                    },
-                    Year: {
-                        required: true
-                    }
-                },
-                views:  {
-                    all: [
-                        ['Year', 'Doi'],
-                        ['Website', 'Description'],
-                        ['Publisher', 'Authors'],
-                    ],
-                    simple: [
-                        ['Year', 'Publisher'],
-                        'Authors'
-                    ],
-                }
+            views:  {
+                all: [
+                    ['Year', 'Doi'],
+                    ['Website', 'Description'],
+                    ['Publisher', 'Authors'],
+                ],
+                simple: [
+                    ['Year', 'Publisher'],
+                    'Authors'
+                ],
             }
         }
     };

@@ -1,22 +1,30 @@
 
 /* =========================== FORMS ======================================== */
-/* CONTAINER FOR FIELD ROWS */
-[id$="_row"]
+/* CONTAINER FOR FORM-ROW */
+.row
+    display: flex  //default: row nowrap
+    justify-content: space-evenly
+    width: 100%
+/* CONTAINER FOR FIELDS WITH MULTIPLE/DYNAMIC INPUTS, VERTICALLY STACKED */
+[id$="_f-cntnr"]
+    display: flex
+    flex-direction: col
+    // justify-content: stretch
+
+[id$="_f-cntnr"]>div
+    margin-top: .5em
+
+/* CONTAINER FOR FIELD DIV>(alertDIV, fieldDIV) */
+[id$="_f"]
     padding: .2em .75em .3em  .75em
-    width: 100%
+    // width: 100%
+    // flex-grow: 1
 
-.fWidthRow
-    width: 100%
-
-/* FORM FIELD-ROWS */
-[id$="_row"] .field-cntnr
-    flex-grow: 1
-
-/* FORM FIELD-ROWS */
-[id$="_row"] .field-row
+/* FORM FIELD (fieldDIV>[LABEL, INPUT] ) */
+[id$="_f"] .form-field
     justify-content: space-between
 
-/* LABEL IN FIELD-ELEMS */
+/* FIELD LABEL */
 [id$="_lbl"]
     font-size: 1em
     padding: 0.2em .5em 0.2em 0

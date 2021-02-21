@@ -52,7 +52,12 @@ TAYLOR:
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
 
+    - Show when a tag is required to be selected
+    - keep default tags selected regardless of type tags
+    - validate required tags are selected before form submit
+        - and that all relational fields that need values have them "required" fields
 
+    - TRACK USER ACTIVITY WITH CREATE/EDIT ACTIONS
 
     - random
         - disable other rank combos when a rank create formis open
@@ -78,6 +83,9 @@ CURRENT:
         - Family Alcaligenaceae (4232) needs to be moved to Bacteria, and the higher taxa should be:
             Class: Betaproteobacteria
             Order: Alcaligenaceae
+        - Delete Taxon 4677
+            - check for new sub-group duplicates
+        - remove int-type-tag-restrictions
 
     - Site text update
         - Project ->

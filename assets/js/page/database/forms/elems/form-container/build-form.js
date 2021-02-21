@@ -87,7 +87,7 @@ function buildFormElem() {
     return form;
 }
 function buildEntityFieldContainer(fields) {
-    const attr = { id: entity+'_Rows', class: 'flex-row flex-wrap' };
+    const attr = { id: entity+'_fields', class: 'flex-row flex-wrap' };
     const div = _el('getElem', ['div', attr]);
     $(div).append(fields);
     return div;
@@ -115,7 +115,7 @@ function addFormStyleClass() {
 export function getSubForm(fLvl, fClasses, fVals, sId) {
     entity = _state('getFormProp', [fLvl, 'entity']);
     setFormScopeParams('create', entity, fLvl);
-    return _elems('buildFormRows', [entity, fVals, fLvl])
+    return _elems('getFormRows', [entity, fVals, fLvl])
         .then(rows => buildSubFormContainer(rows, fClasses))
         .then(subForm => finishSubFormInit(subForm, sId));
 }

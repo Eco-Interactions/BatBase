@@ -26,7 +26,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
         .then(finishSrcTypeFormBuild);
 
     function finishSrcTypeFormBuild(rows) {                         /*dbug-log*///console.log('rows = %O', rows)
-        $('#'+entity+'_Rows').append(rows);
+        $(`#${entity}_fields`).append(rows);
         sForm.initFormCombos(entity, fLvl);
         return _elems('fillComplexFormFields', [fLvl])
         .then(afterComplexFieldsFilled);
@@ -34,7 +34,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
     function afterComplexFieldsFilled () {
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         updateFieldsForSourceType(entity, fLvl)
-        $('#Title_row input').focus();
+        $('#Title_f input').focus();
         if (_state('getStateProp', ['action']) === 'create') { return; }
         $('.top-pin').hide(); //edit-forms show pins after type change otherwise.
     }

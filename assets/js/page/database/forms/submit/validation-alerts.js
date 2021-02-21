@@ -239,7 +239,7 @@ function clrIsGenusPrnt(elem, fLvl, e) {
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusNameAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     const genus = _cmbx('getSelTxt', ['Genus']);
-    $('#DisplayName_row input').change(clearAlert.bind(null, elem, fLvl));
+    $('#DisplayName_f input').change(clearAlert.bind(null, elem, fLvl));
     return `<span>Species must begin with the Genus name "${genus}".</span>`;
 }
 /* ---------------- MUST HAVE GENUS PARENT ---------------------------------- */

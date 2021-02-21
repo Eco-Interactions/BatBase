@@ -33,12 +33,12 @@ function buildLocForm(val) {
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
-        $('#Location_row')[0].parentNode.after(form);
+        $('#Location_f')[0].parentNode.after(form);
         initFormCombos(null, 'sub');
         _cmbx('enableCombobox', ['Country-Region', false]);
-        _elems('setCoreRowStyles', ['#location_Rows', '.sub-row']);
+        _elems('setCoreRowStyles', ['location']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
-        $('#Latitude_row input').focus();
+        $('#Latitude_f input').focus();
     }
 }
 function onCreateFormLoadComplete() {
@@ -59,8 +59,8 @@ function scrollToLocFormWindow() {
     $('#form-main')[0].scrollTo(0, 150);
 }
 function addNotesToForm() {
-    addHowToCreateWithGpsNote($('#Latitude_row')[0].parentNode);
-    addSelectSimilarLocationNote($('#ElevationMax_row')[0].parentNode);
+    addHowToCreateWithGpsNote($('#Latitude_f')[0].parentNode);
+    addSelectSimilarLocationNote($('#ElevationMax_f')[0].parentNode);
 }
 function addHowToCreateWithGpsNote(pElem) {
     const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">Enter
@@ -96,8 +96,8 @@ export function addMapToLocationEditForm(id) {
 }
 function finishEditForm(id) {
     $('input.leaflet-control-create-icon').click(initCreateForm);
-    _elems('setCoreRowStyles', ['#form-main', '.top-row']);
-    if (!$('#Latitude_row input').val()) { return; }
+    _elems('setCoreRowStyles', ['location']);
+    if (!$('#Latitude_f input').val()) { return; }
     _map('addVolatileMapPin', [id, 'edit', _cmbx('getSelVal', ['Country'])]);
 }
 /** ================== SHARED HELPERS ======================================= */
@@ -117,7 +117,7 @@ export function initFormCombos(entity, fLvl) {
     _elems('initFormCombos', ['location', fLvl, events]);
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
-export function addMapToLocForm(type, $formElem = $('#location_Rows')) {
+export function addMapToLocForm(type, $formElem = $('#location_fields')) {
     const mapContainer = _el('getElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
     $formElem.after(mapContainer);
     initLocFormMap(type);
@@ -134,7 +134,7 @@ export function focusParentAndShowChildLocs(type, val) {
 }
 /* ----------- COORDINATE FIELD LISTENER --------------- */
 export function addListenerToGpsFields(fLvl, params = [true]) {
-    $('#Latitude_row input, #Longitude_row input').change(validateLocFields);
+    $('#Latitude_f input, #Longitude_f input').change(validateLocFields);
 
     function validateLocFields() {
         const coords = getCoordVals().filter(c=>c);
@@ -153,12 +153,12 @@ function getCoordVals() {
 }
 function lintCoord(prefix) {
     const field = prefix+'itude';
-    const input = $('#'+field+'_row input')[0];
+    const input = $(`#${field}_f input`)[0];
     return input.validity.valid ? input.value : null;
 }
 /* ----------- AUTOFILL COORDINATES --------------- */
 
 export function autofillCoordinateFields(lat, lng) {
-    $('#Latitude_row input').val(lat);
-    $('#Longitude_row input').val(lng);
+    $('#Latitude_f input').val(lat);
+    $('#Longitude_f input').val(lng);
 }
