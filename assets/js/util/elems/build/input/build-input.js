@@ -18,11 +18,21 @@ import { _cmbx, _el } from '~util';
 import { handleFieldValidation } from './val-input.js';
 let f;
 /* ======================= INPUT BUIDLERS =================================== */
-export function getFieldInput(fConfg) {                             /*dbug-log*/console.log('getFieldInput [%O]', fConfg);
+export function getFieldInput(fConfg) {                             /*dbug-log*/console.log('+--getFieldInput [%O]', fConfg);
     f = fConfg;
     return Promise.resolve(getInput(f.type))
-        .then(handleFieldValidation.bind(null, fConfg));
+        .then(handleFieldValidation.bind(null, f.type))
+        .then(updateConfgAndReturn.bind(null, f));
 }
+function updateConfgAndReturn(fConfg, input) {                      /*dbug-log*///console.log('   --updateConfgAndReturn [%O][%O]', fConfg, input);
+    fConfg.input = input;
+    return fConfg;
+}
+/**
+ * [getInput description]
+ * @param  {[type]} type [description]
+ * @return {[type]}      [description]
+ */
 function getInput(type) {
     return {
         doi:            buildInput,
@@ -67,11 +77,11 @@ function buildLongTextArea() {
  * the select's fieldName to the subForm config's 'selElem' array to later
  * init the 'selectize' combobox.
  */
-function buildSelect() {                                            /*dbug-log*/console.log("buildSelect [%s][%O]", f.name, f);
+function buildSelect() {                                            /*dbug-log*///console.log("       --buildSelect [%s][%O]", f.name, f);
     return _cmbx('getFieldOptions', [f.name])
         .then(finishSelectBuild.bind(null, f));
 
-    function finishSelectBuild(fConfg, opts) {                      /*dbug-log*/console.log('finishSelectBuild [%s] ?[%s] opts[%O]', fConfg, opts);
+    function finishSelectBuild(fConfg, opts) {                      /*dbug-log*///console.log('           --finishSelectBuild [%s] ?[%s] opts[%O]', fConfg, opts);
         const attr = { class: fConfg.class, id: 'sel-' + fConfg.name };
         fConfg.combo = true; //Flag for the combobox selectize-library
         return _el('getSelect', [opts, attr]);
@@ -83,7 +93,7 @@ function buildSelect() {                                            /*dbug-log*/
  * be reaplced inline upon selection. Either with an existing Author's name,
  * or the Author create form when the user enters a new Author's name.
  */
-function buildMultiSelectField() {                                  /*dbug-log*/console.log("buildMultiSelectField [%s][%s]", f);
+function buildMultiSelectField() {                                  /*dbug-log*///console.log("       --buildMultiSelectField [%s][%s]", f);
     return buildMultiSelectInput(f)
         .then(returnFinishedMultiSelectField);
 
@@ -94,12 +104,9 @@ function buildMultiSelectField() {                                  /*dbug-log*/
             name: f.name,
         };
         return _el('getFieldElems', [fConfg]);
-        // $(cntnr).data('inputType', 'multiSelect').data('cnt', 1);
-        // $(cntnr).append(fields);
-        // return cntnr;
     }
 }
-export function buildMultiSelectInput(field, cnt = 1) {
+export function buildMultiSelectInput(field, cnt = 1) {             /*dbug-log*///console.log("           --buildMultiSelectInput [%s][%O]", cnt, field);
     return buildSelect(field)
         .then(finishFieldInput);
 
@@ -111,12 +118,6 @@ export function buildMultiSelectInput(field, cnt = 1) {
         };
         if (cnt) { $(input).data('cnt', cnt); }
         return _el('getFieldElems', [fConfg]);
-
-
-        // const wrapper = _el('getElem', ['div', {class: 'flex-row'}]);
-        // const lbl = buildMultiSelectLbl(cnt);
-        // $(wrapper).append([lbl, input]);
-        // return wrapper;
     }
 }
 function getCntLabel(cnt) {

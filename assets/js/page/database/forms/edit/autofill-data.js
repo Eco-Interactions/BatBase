@@ -16,6 +16,8 @@
 import { _cmbx, _db, _u  } from '~util';
 import { _state, _elems, _confg, _form, _panel } from '~form';
 
+let formConfg = null;
+
 export function fillFormWithEntityData(entity, id) {
     const cEntity =  _confg('getCoreEntity', [entity]);
     addDisplayNameToForm(cEntity, id, entity);
@@ -101,7 +103,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
     function setCoordField(prefix) {
         const value = rcrd[`${prefix}itude`];
         if (!value) { return; }
-        const $input = $(`#${_u('ucfirst', [prefix])}itude_row input`);
+        const $input = $(`#${_u('ucfirst', [prefix])}itude_f input`);
         $input.val(parseFloat(value));
     }
     function handleGeoJsonFill(geoId) {
@@ -117,7 +119,7 @@ function fillLocData(entity, id, rcrd, dEntity) {
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, src, dEntity) {
     const detail = _state('getRcrd', [dEntity, src[dEntity]]);       /*dbug-log*///console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
-    const fields = getSourceFields(dEntity);
+    const fields = _state('getFormConfg', ['top', 'fields']);
     setSrcData();
     setDetailData();
     setAdditionalFields(dEntity, src, detail);
@@ -207,8 +209,8 @@ function addDataToField(field, fieldHndlr, rcrd) {                  /*dbug-log*/
 function setMultiSelect(field, prop, rcrd) {                        /*dbug-log*///console.log("setMultiSelect [%s] [%s] rcrd = %O", field, prop, rcrd);
     if (!rcrd[prop] || !ifFieldInForm(field)) { return; }
     const ucProp = _u('ucfirst', [prop]);
-    _state('setFormFieldData', ['top', ucProp, rcrd[prop]]);
-    if (!$('#sel-cntnr-'+ucProp).length) { return; } //can this be the first line here?
+    _state('setFormFieldData', ['top', ucProp, rcrd[prop]]);  //working??
+    if (!$(`#${ucProp}_f-cntnr`).length) { return; } //Field data must be set in state, regardless of whether the data is currently displayed??
     _form('selectExistingAuthsOrEds', [ucProp, rcrd[prop], 'top']);
 }
 function setInput(field, prop, rcrd) {                              /*dbug-log*///console.log("setInputField [%s] [%s] rcrd = %O", field, prop, rcrd);

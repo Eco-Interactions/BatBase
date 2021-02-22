@@ -92,7 +92,7 @@ export function setDynamicFormStyles() {
 }
 export function buildFormField(fConfg) {
     return _el('getFieldInput', [fConfg])
-        .then(fields.buildFormField.bind(null, fConfg));
+        .then(fields.buildFormField);
 }
 /* -------------------------- COMBOBOXES ------------------------------------ */
 export function initFormCombos() {
@@ -119,16 +119,6 @@ export function ifFieldIsDisplayed(field, fLvl) {
     return !!_state('getFormFieldData', [fLvl, field]);
 }
 /* -------------------- TOGGLE FORM-FIELDS ---------------------------------- */
-export function setToggleFieldsEvent(elem, entity, fLvl) {
-    $(elem).click(handleToggleFields);
-
-    function handleToggleFields() {
-        if (ifOpenSubForm(fLvl)) { return showOpenSubFormAlert(fLvl); }
-        const fVals = _state('getCurrentFormFieldVals', [fLvl]);
-        fields.toggleFormFields(entity, fLvl, fVals);
-    }
-}/** Returns true if the next sub-rank form exists in the dom. */
-function ifOpenSubForm(fLvl) {
-    const childFormLvl = getNextFormLevel('child', fLvl);
-    return $('#'+childFormLvl+'-form').length > 0;
+export function ifMutlipleDisplaysGetToggle() {
+    return fields.ifMutlipleDisplaysGetToggle(...arguments);
 }

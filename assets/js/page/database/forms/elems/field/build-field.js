@@ -27,16 +27,15 @@ import { _state } from '~form';
 
 let f;
 
-export function buildFormField(fConfg, input) {
-    f = fConfg;                                                     /*dbug-log*/console.log('buildFormField field[%O]', f);
-    const field = buildFormFieldElems(input);
+export function buildFormField(fConfg) {
+    f = fConfg;                                                     /*dbug-log*/console.log('buildFormField fConfg[%O]', f);
+    const field = buildFormFieldElems();
     addPinIfFieldDataCanPersistThroughMultipleSubmits(field);
     updateFormFieldState();
     return field;
 }
 /* ====================== BUILD FIELD ======================================= */
-function buildFormFieldElems(input) {                               /*dbug-log*/console.log('buildFormFieldElems input[%O]', input);
-    f.input = input;
+function buildFormFieldElems() {                                    /*dbug-log*/console.log('buildFormFieldElems', );
     handleFieldChangeListeners(f);
     return _el('getFieldElems', [f]);
 }
@@ -48,7 +47,9 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/
 }
 /* -------------------------- FIELD STATE ----------------------------------- */
 function updateFormFieldState() {                                   /*dbug-log*/console.log('updateFormState f[%O]', _u('snapshot', [f]));
-    if (f.combo) { _state('addComboToFormState', [f.group, f.name]) };
+    if (f.combo) { _state('addComboToFormState', [f.group, f.name]); }
+    //todo remove build-data before storing confg
+    _state('setFormFieldData', [f.group, f.name, f]);
 }
 /* --------------------------- SET VALUE ------------------------------------ */
 function setFieldValue() {

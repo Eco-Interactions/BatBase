@@ -4,6 +4,9 @@
 export default function(entity) {
 	return {
         fields: getInteractionFieldConfg(),
+        misc: {
+            defaultTags: ['Secondary'], //Always valid and available when tags load.
+        },
         name: entity,
         pinnable: true, // phrasing?
         views: {

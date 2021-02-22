@@ -101,12 +101,11 @@ function getDataKeysForEntityRootForm(action, entity) {
  *
  * -- Property descriptions:
  * > action - create || edit
- * > confg - The form config object used during form building.
- * > expanded - show all fields (true) or show default.
+ * > confg - The form config. See file for details.
+ * > simple - All fields are shown unless simple default-display confg present
  * > entity - Name of this form's entity.
- * > entityType - Sub-entity type. Eg, publication-types: Book, Journal, etc.
  * > onFormClose - Handles form exit/reset.
- * > fieldData - Obj with each form field (k) and it's (v) { value, fieldType }
+// * > fieldData - Obj with each form field (k) and it's (v) { value, fieldType }
  * > misc - Obj to hold the various special-case props
  * > pSelId - The id of the parent select of the form.
  * > reqElems - All required elements in the form.
@@ -124,19 +123,17 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Taxon forms:
  *         taxonData - added to fState.forms (see props @initTaxonParams)
  */
-export function addEntityFormState(entity, level, pSel, action) {
+export function addEntityFormState(entity, level, pSel, action) {   /*dbug-log*/console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, level, pSel, action);
     fState.forms[entity] = level;
     fState.forms[level] = {
         action: action,
-        expanded: false,
-        fieldData: {},
+        confg: {},
         entity: entity,
-        entityType: false,
         onFormClose: null,
         pSelId: pSel,
         reqElems: [],
         selElems: [],
-    };                                                              /*dbug-log*///console.log("   /addEntityFormState. fState = %O, arguments = %O", fState, arguments)
+    };
 }
 /* ___________________________ TAXON ________________________________________ */
 export function initTaxonState(groupId, subGroupId) {
@@ -176,13 +173,14 @@ export function getFormEntity(fLvl) {
 export function getFormProp(fLvl, prop) {                           /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
     return fState.forms[fLvl] ? fState.forms[fLvl][prop] : false;
 }
-export function getFormConfg(fLvl, prop = null) {
-    return fState.forms[fLvl] ? (prop ?
-        fState.forms[fLvl].confg[prop] : fState.forms.confg[fLvl]) : false;
+export function getFormConfg(fLvl, prop = null) {                   /*dbug-log*/console.log('getFormConfg [%s][%s] [%O]', fLvl, prop, fState.forms[fLvl].confg);
+    if (!fState.forms[fLvl]) { return false; }
+    const fConfg = fState.forms[fLvl].confg
+    return prop ? fConfg[prop] : fConfg;
 }
-export function getFormFieldData(fLvl, field) {
-    return fState.forms[fLvl].confg[field];
-    // return fState.forms[fLvl].fieldData[field];
+export function getFormFieldData(fLvl, field, prop) {
+    const fData = fState.forms[fLvl].confg[field];
+    return prop ? fData[prop] : fData;
 }
 export function getFormData(fLvl, field) {
     if (!fState.forms) { return; } //form closing
@@ -191,11 +189,11 @@ export function getFormData(fLvl, field) {
 }
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) {
-    const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
+    const fieldData = fState.forms[fLvl].fields;
     const vals = {};
     for (let field in fieldData) {
-        vals[field] = fieldData[field].val;
-    }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fieldsData = %O returnedVals = %O', fieldData, vals);
+        vals[field] = fieldData[field].value;
+    }                                                               /*dbug-log*/console.log('getCurrentFormFieldVals fields[%O] vals[%O]', fieldData, vals);
     return vals;
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
@@ -256,11 +254,10 @@ export function setFormProp(fLvl, prop, val) {
 export function setFormConfg(fLvl, prop, val = null) {
     fState.forms[fLvl].confg[prop] = val;
 }
-export function setFormFieldData(fLvl, field, val, type) {          /*dbug-log*///console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
-    const fieldData = fState.forms[fLvl].fieldData;
-    if (!fieldData[field]) { fieldData[field] = {} }
-    if (type) { fieldData[field].type = type; }
-    fieldData[field].val = val;
+export function setFormFieldData(fLvl, field, val, prop) {         /*dbug-log*/console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
+    let fData = fState.forms[fLvl].confg.fields[field];
+    if (prop) { return fData[prop] = val; }
+    fData = val;
 }
 export function setOnFormCloseHandler(fLvl, hndlr) {
     fState.forms[fLvl].onFormClose = hndlr;
@@ -269,7 +266,7 @@ export function addRequiredFieldInput(fLvl, input) {
     fState.forms[fLvl].reqElems.push(input);
 }
 /* _________________________ COMBOBOX _______________________________________ */
-export function addComboToFormState(fLvl, field) {                  /*dbug-log*///console.log('addComboTo[%s]Memory [%s]', fLvl, field);
+export function addComboToFormState(fLvl, field) {                  /*dbug-log*/console.log('addComboTo[%s]Memory [%s]', fLvl, field);
     if (!fState.forms) { return; } //form was closed.
     fState.forms[fLvl].selElems.push(field);
 }

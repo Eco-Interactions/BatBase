@@ -12,7 +12,7 @@
  * TOC
  *     INIT FORM-FIELDS
  *         BUILD FIELD-ROWS
- *     TOGGLE FORM-FIELDS
+ *     TOGGLE FIELD-DISPLAY
  *     GET FIELD-DATA
  *     SET FORM-FIELD DATA
  *     IF REQUIRED FIELDS FILLED
@@ -54,9 +54,9 @@ export function getFormFieldRows() {
 export function getFormRows() {
     return row.getFormRows(...arguments);
 }
-/* ==================== TOGGLE FORM-FIELDS ================================== */
-export function toggleFormFields() {
-    return toggle.toggleFormFields(...arguments);
+/* ================== TOGGLE FIELD-DISPLAY ================================== */
+export function ifMutlipleDisplaysGetToggle() {
+    return toggle.ifMutlipleDisplaysGetToggle(...arguments);
 }
 /* =================== SET FORM-FIELD DATA ================================== */
 /**

@@ -46,8 +46,7 @@ function buildEditFields(entity, id) {
 }
 /** Returns the passed entity's form fields. */
 function getEditFields(entity, id) {
-    const formConfg = _confg('getFormConfg', [entity]);
-    return _elems('getFormFieldRows', [entity, {}, 'top']);
+    return _elems('getFormRows', [entity, {}, 'top']);
 }
 /* ----------------------- FINISH FORM INIT --------------------------------- */
 function finishEditFormBuild(entity) {
