@@ -86,7 +86,7 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
             if (!rmvdAuthField.authRow) { return; } //Field was never removed
             $('#citation_fields').append(rmvdAuthField.authRow);
             _state('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
-            _state('setFormFieldData', [fLvl, 'Authors', {}, 'multiSelect']);
+            _state('setFieldState', [fLvl, 'Authors', {}, 'value']);
             delete rmvdAuthField.authRow;
             delete rmvdAuthField.authElem;
         }

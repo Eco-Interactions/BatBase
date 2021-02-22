@@ -27,7 +27,7 @@ export function onRankSelection(val, elem) {                       /*dbug-log*//
     const fLvl = getSubFormLvl('sub');
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
-    repopulateCombosWithRelatedTaxa(va, fLvl);
+    repopulateCombosWithRelatedTaxa(val, fLvl);
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
 }
  /* ----------------------- VALIDATE AND CREATE ----------------------------- */
@@ -74,7 +74,7 @@ function repopulateCombosWithRelatedTaxa(selId, fLvl) {
 }
 function repopulateRankCombos(optsObj, selected, fLvl) {            /*dbug-log*///console.log('repopulateRankCombos. optsObj = %O, selected = %O', optsObj, selected);
     Object.keys(optsObj).forEach(rank => {
-        repopulateRankCombo(optsObj[rank], rank, selecte, fLvld)
+        repopulateRankCombo(optsObj[rank], rank, selected, fLvl)
     });
 }
 /**

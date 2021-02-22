@@ -17,11 +17,11 @@ import { _elems } from '~form';
  * NOTE: FIRST METHOD IN INTERACTION FORM FIELD-ROW BUILD CHAIN.
  */
 /** @return {ary} Rows for each field in the entity field obj. */
-export function getFormFieldRows(confg) {                             /*dbug-log*/console.log("getFormFieldRows [%O]",confg);
-    return Promise.all(confg.fields.map(getFormRow))
+export function getFormFieldRows(confg) {                           /*dbug-log*/console.log("+--getFormFieldRows [%O]",confg);
+    return Promise.all(confg.view.map(getFormRow))
         .then(rows => rows);
 }
-function getFormRow(f) {                                            /*dbug-log*/console.log("getFormRow[%O]", f);
+function getFormRow(f) {                                            /*dbug-log*///console.log("   --getFormRow[%O]", f);
     const row = _el('getElem', ['div', { class: 'row' }]);
     $(row).data('field-cnt', getRowFieldCnt(f)); //used for styling
     return Promise.all(getRowFields(f))
@@ -32,10 +32,10 @@ function getFormRow(f) {                                            /*dbug-log*/
         return row;
     }
 }
-function getRowFields(f) {                                          /*dbug-log*/console.log("getRowFields[%O]", f);
+function getRowFields(f) {                                          /*dbug-log*///console.log("       --getRowFields[%O]", f);
     return Array.isArray(f) ? f.map(getFormField) : [getFormField(f)];
 
-    function getFormField(fConfg) {                                 /*dbug-log*/console.log("getFormField[%O]", fConfg);
+    function getFormField(fConfg) {                                 /*dbug-log*///console.log("           --getFormField[%O]", fConfg);
         return _elems('buildFormField', [fConfg]);
     }
 }

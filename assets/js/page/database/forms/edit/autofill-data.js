@@ -209,7 +209,7 @@ function addDataToField(field, fieldHndlr, rcrd) {                  /*dbug-log*/
 function setMultiSelect(field, prop, rcrd) {                        /*dbug-log*///console.log("setMultiSelect [%s] [%s] rcrd = %O", field, prop, rcrd);
     if (!rcrd[prop] || !ifFieldInForm(field)) { return; }
     const ucProp = _u('ucfirst', [prop]);
-    _state('setFormFieldData', ['top', ucProp, rcrd[prop]]);  //working??
+    _state('setFieldState', ['top', ucProp, rcrd[prop], 'value']);  //working??
     if (!$(`#${ucProp}_f-cntnr`).length) { return; } //Field data must be set in state, regardless of whether the data is currently displayed??
     _form('selectExistingAuthsOrEds', [ucProp, rcrd[prop], 'top']);
 }

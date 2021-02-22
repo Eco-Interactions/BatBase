@@ -15,18 +15,14 @@
  *         REQUIRED FIELDS
  */
 import { _cmbx, _el } from '~util';
-import { handleFieldValidation } from './val-input.js';
+import { handleInputValidation } from './val-input.js';
 let f;
 /* ======================= INPUT BUIDLERS =================================== */
 export function getFieldInput(fConfg) {                             /*dbug-log*/console.log('+--getFieldInput [%O]', fConfg);
     f = fConfg;
     return Promise.resolve(getInput(f.type))
-        .then(handleFieldValidation.bind(null, f.type))
-        .then(updateConfgAndReturn.bind(null, f));
-}
-function updateConfgAndReturn(fConfg, input) {                      /*dbug-log*///console.log('   --updateConfgAndReturn [%O][%O]', fConfg, input);
-    fConfg.input = input;
-    return fConfg;
+        .then(handleInputValidation.bind(null, f.type))
+        .then(finishInputBuild.bind(null, f));
 }
 /**
  * [getInput description]
@@ -123,4 +119,15 @@ export function buildMultiSelectInput(field, cnt = 1) {             /*dbug-log*/
 function getCntLabel(cnt) {
     const map = {1: '1st: ', 2:'2nd: ', 3:'3rd: '};
     return cnt in map ? map[cnt] : cnt+'th: ';
+}
+/* ========================== FINISH BUILD ================================== */
+function finishInputBuild(fConfg, input) {                          /*dbug-log*/console.log('   --finishInputBuild [%O][%O]', fConfg, input);
+    fConfg.input = input;
+    setFieldValue(fConfg);
+    return fConfg;
+}
+/* --------------------------- SET VALUE ------------------------------------ */
+function setFieldValue(fConfg) {
+    if (!fConfg.value || fConfg.type === 'multiSelect') { return; }
+    $(fConfg.input).val(fConfg.value);
 }

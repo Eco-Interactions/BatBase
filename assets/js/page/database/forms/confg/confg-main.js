@@ -3,7 +3,7 @@
  * { *: default confg-properties returned
  *    core: entityName,
  *    *display: view, //Defaults to 'simple' display, if defined.
- *    *fields: {  //RETURNED VALUE IS views[display] MAPPED WITH EACH FIELD'S CONFG.
+ *    *fields: {
  *         //CORE.FIELDS AND TYPE.FIELDS WILL BE MERGED IN.
  *        FieldName: { //DisplayName
  *            class: "",
@@ -30,7 +30,8 @@
  *              name: (req)
  *              [confg prop with type-data]
  *         }
- *    }
+ *    },
+ *    view: [] //RETURNED VALUE IS views[display] MAPPED WITH EACH FIELD'S CONFG.
  * }
  *
  * Export
@@ -111,7 +112,7 @@ function buildFormConfg(fVals, fLvl, showSimpleView) {
     handleConfgMerges();
     confg.display = showSimpleView && confg.views.simple ? 'simple' : 'all';
     confg.group = fLvl;
-    confg.fields = getDisplayedFieldConfgs(fVals);
+    confg.view = getDisplayedFieldConfgs(fVals);
     delete confg.views;
 }
 /* ====================== MERGE CONFG-DATA ================================== */

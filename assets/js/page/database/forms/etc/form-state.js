@@ -182,10 +182,9 @@ export function getFormFieldData(fLvl, field, prop) {
     const fData = fState.forms[fLvl].confg[field];
     return prop ? fData[prop] : fData;
 }
-export function getFormData(fLvl, field) {
+export function getFormData(fLvl, field) {                          /*dbug-log*/console.log('getFormConfg [%s][%s] [%O]', fLvl, field, fState.forms[fLvl].confg.fields);
     if (!fState.forms) { return; } //form closing
-    return fState.forms[fLvl].confg[field].value;
-    // return fState.forms[fLvl].fieldData[field];
+    return fState.forms[fLvl].confg.fields[field].value;
 }
 /** Returns an object with field names(k) and values(v) of all form fields*/
 export function getCurrentFormFieldVals(fLvl) {
@@ -251,10 +250,12 @@ export function addEntityRecords(entity, rcrds) {
 export function setFormProp(fLvl, prop, val) {
     fState.forms[fLvl][prop] = val;
 }
-export function setFormConfg(fLvl, prop, val = null) {
-    fState.forms[fLvl].confg[prop] = val;
+export function setFormConfg(fLvl, val, prop = null) {
+    let fConfg = fState.forms[fLvl].confg;
+    if (prop) { return fConfg[prop] = val; }
+    fConfg = val;
 }
-export function setFormFieldData(fLvl, field, val, prop) {         /*dbug-log*/console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
+export function setFieldState(fLvl, field, val, prop = null) {      /*dbug-log*/console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
     let fData = fState.forms[fLvl].confg.fields[field];
     if (prop) { return fData[prop] = val; }
     fData = val;

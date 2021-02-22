@@ -3,8 +3,7 @@
  * TODO: DOCUMENT
  *
  * Export
- *     getFieldInput
- *     buildMultiSelectInput
+ *     handleInputValidation
  *
  * TOC
  *     INPUT BUILDERS
@@ -16,13 +15,13 @@
  */
 import { _cmbx, _el } from '~util';
 let input;
-export function handleFieldValidation(type, input) {               /*dbug-log*/console.log("handleFieldValidation [%s][%O]", type, input);
+export function handleInputValidation(type, input) {                /*dbug-log*/console.log("+--handleInputValidation [%s][%O]", type, input);
     input = input;
-    setFieldValidation(type);
+    setInputValidation(type);
     return input;
 }
 /* ======================== SET HANDLER ===================================== */
-function setFieldValidation(type) {
+function setInputValidation(type) {
     const map = {
         doi: setDoiPattern,
         lat: setLatitudePattern,

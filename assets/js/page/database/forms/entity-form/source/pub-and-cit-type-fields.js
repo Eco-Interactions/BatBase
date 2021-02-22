@@ -41,7 +41,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {
     const capsType = _u('ucfirst', [entity]);
-    _state('setFormFieldData', [fLvl, capsType+'Type', typeId]);
+    _state('setFieldState', [fLvl, capsType+'Type', typeId, 'value']);
     _state('setFormProp', [fLvl, 'reqElems', []]);
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
@@ -105,7 +105,7 @@ function updateFieldLabelsForType(entity, fLvl) {
     }
     function updateComboText(lblElem, field, newTxt) {
         return lblElem.nextSibling.id.includes('-cntnr') ?
-            updateAllComboPlaceholders($('#sel-cntnr-'+field)[0].children) :
+            updateAllComboPlaceholders($(`#${field}_f-cntnr`)[0].children) :
             _cmbx('updatePlaceholderText', [field, newTxt]);
 
         function updateAllComboPlaceholders(elems) {

@@ -28,7 +28,7 @@ export function ifMutlipleDisplaysGetToggle(entity, fLvl) {         /*dbug-log*/
 }
 /** On create-form init, if the 'simple' display is availble it is the default set. */
 function ifFormHasMultipleFieldDisplays(fLvl) {
-    const defaultDisplay = _state('getFormConfg', [fLvl, 'display']);     /*dbug-log*/console.log('   --ifFormHasMultipleFieldDisplays default[%s]', defaultDisplay);
+    const defaultDisplay = _state('getFormConfg', [fLvl, 'display']);/*dbug-log*/console.log('   --ifFormHasMultipleFieldDisplays default[%s]', defaultDisplay);
     return defaultDisplay !== 'all';
 }
 function buildToggleFieldsContainer() {

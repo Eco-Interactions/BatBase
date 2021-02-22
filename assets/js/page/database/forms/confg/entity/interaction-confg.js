@@ -37,6 +37,7 @@ function getInteractionFieldConfg() {
             type: 'select'
         },
         'Country-Region': {
+            label: 'Country/Region',
             name: 'Country-Region',
             type: 'select'
         },
@@ -75,6 +76,9 @@ function getInteractionFieldConfg() {
                 intro: `Read about Interaction Types on the <a href="/definitions"
                     target="_blank">Definitions page</a>.`
             },
+            misc: {
+                customValueStore: true
+            },
             name: 'InteractionType',
             required: true,
             type: 'select'
@@ -90,7 +94,6 @@ function getInteractionFieldConfg() {
         },
         Note: {
             name: 'Note',
-            required: true,
             type: 'fullTextArea'
         },
     };

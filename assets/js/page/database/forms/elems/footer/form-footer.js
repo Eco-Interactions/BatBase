@@ -12,7 +12,7 @@ import { _elems, _state, exitFormLevel, submitForm } from '~form';
  * Returns row with a checkbox that will toggle optional form fields on the left
  * and the submit/cancel buttons on the right.
  */
-export function getFormFooter(entity, fLvl, action) {
+export function getFormFooter(entity, fLvl, action) {               /*dbug-log*/console.log("+--getFormFooter [%s][%s][%s]", entity, fLvl, action);
     const cntnr = getFooterRowContainer();
     $(cntnr).append(...buildFooterElems(entity, fLvl, action));
     return cntnr;
@@ -29,7 +29,7 @@ function buildFooterElems(entity, fLvl, action) {
 /* ------------------ SUBMIT AND CANCEL BUTTONS ----------------------------- */
 /** Returns the buttons with the events bound. */
 function buildSubmitAndCancelBttns(fLvl, action, entity) {
-    const events = getBttnEvents(entity, fLvl);                     /*dbug-log*/console.log("buildSubmitAndCancelBttns events[%O]", events);
+    const events = getBttnEvents(entity, fLvl);                     /*dbug-log*///console.log("   --buildSubmitAndCancelBttns events[%O]", events);
     return [getSubmitBttn(), getCancelBttn()];
 
     function getSubmitBttn() {

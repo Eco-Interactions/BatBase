@@ -50,7 +50,7 @@ function getBaseFieldConfg(fieldName) {
 /** The change event is not triggered, so the field data is updated here. */
 export function setSilentVal(fLvl, field, val) {
     _cmbx('setSelVal', [field, val, 'silent']);
-    _state('setFormFieldData', [fLvl, field, val]);
+    _state('setFieldState', [fLvl, field, val, 'value']);
 }
 /* -------------------------------- RESET ----------------------------------- */
 /**

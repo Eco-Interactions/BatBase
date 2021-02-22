@@ -44,10 +44,7 @@ export function finishInteractionFormBuild() {                      /*dbug-log*/
     finishComboboxInit();
 }
 function modifyFormDisplay() {
-    $('#Note_row label')[0].innerText += 's';
-    $('#Country-Region_row label')[0].innerText = 'Country/Region';
-    $('.all-fields-cntnr').hide();
-    _elems('setCoreRowStyles', ['interaction']);
+    _elems('setDynamicFormStyles', ['interaction']);
     addReferenceGuideButton();
 }
 /* ----------------------- REFERENCE-GUIDE BUTTON --------------------------- */
@@ -92,10 +89,11 @@ function showSubmitModal() {
 function buildConfirmationModalHtml() {
     const subj = _cmbx('getSelTxt', ['Subject']);
     const obj = _cmbx('getSelTxt', ['Object']);
-    const typeVerb = getIntTypeVerbForm(_cmbx('getSelVal', ['InteractionType']));
+    const typeVerb = getIntTypeVerbForm();
     return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
 }
-function getIntTypeVerbForm(typeId) {
+function getIntTypeVerbForm() {
+    const typeId = _state('getFormData', ['top', 'InteractionType']);
     const types = _state('getEntityRcrds', ['interactionType']);
     return types[typeId].activeForm;
 }

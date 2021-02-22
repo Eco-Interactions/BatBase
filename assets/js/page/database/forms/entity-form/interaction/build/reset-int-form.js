@@ -68,7 +68,7 @@ function getPinnedFieldVals() {
 }
 /* ------------------------ CLEAR FIELD DATA -------------------------------- */
 function clearField(field, vals) {
-    _state('setFormFieldData', ['top', field, null]);
+    _state('setFieldState', ['top', field, null, , 'value']);
     if (field === 'Note') { return $('#txt-Note').val(""); }
     _panel('clearFieldDetails', [field]);
     _cmbx('resetCombobox', [field]);

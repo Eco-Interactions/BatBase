@@ -108,7 +108,7 @@ function selectTypeInitVal(prevType, typeOpts) {
 /* ======================== ON TYPE SELECTION =============================== */
 export function onTypeSelection(val) {
     if (!val) { return onTypeClear(); }
-    const validInt = app.validInts[val];
+    const validInt = app.validInts[val];                            /*dbug-log*/console.log('onTypeSelection validInt[%O]', validInt)
     setInteractionTypeFieldData(validInt.interactionType);
     iForm.loadInteractionTypeTags(validInt.tags);
     iForm.focusPinAndEnableSubmitIfFormValid('InteractionType');
@@ -118,5 +118,5 @@ function onTypeClear() {
     setInteractionTypeFieldData(null);
 }
 function setInteractionTypeFieldData(val) {
-    _state('setFormFieldData', ['top', 'InteractionType', val]);
+    _state('setFieldState', ['top', 'InteractionType', val, 'value']);
 }

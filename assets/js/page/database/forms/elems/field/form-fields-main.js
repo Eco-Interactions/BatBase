@@ -18,12 +18,12 @@
  *     IF REQUIRED FIELDS FILLED
  */
 import { _el } from '~util';
+import { _state } from '~form';
 import * as build from './build-field.js';
 import * as combo from './combo-field.js';
 import * as fill from './complex-fields.js';
 import * as style from './style-field.js';
 import * as toggle from './toggle-fields.js';
-import * as req from './required-fields.js';
 
 /* ======================== FORM COMBOS ===================================== */
 export function resetFormCombobox() {
@@ -71,5 +71,12 @@ export function fillComplexFormFields() {
 /* ================== IF REQUIRED FIELDS FILLED ============================= */
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {
-    return req.ifAllRequiredFieldsFilled(...arguments);
+    const fields = _state('getFormConfg', [fLvl, 'fields']);         /*dbug-log*/console.log("+--ifAllRequiredFieldsFilled... [%s][%O]", fLvl, fields)
+    return Object.values(fields).every(isRequiredFieldFilled.bind(null, fLvl));
+}
+/** Note: checks the first input of multiSelect container elems.  */
+function isRequiredFieldFilled(fLvl, field) {                       /*dbug-log*/console.log('       --isRequiredFieldFilled[%s] [%O]', fLvl, field);
+    if (!field.required) { return true; }
+    if (field.value === 'invalid') { return false; }                /*dbug-log*/console.log('       --[%s] = [%O]', field.name, field.value ? field.value : null);
+    return field.value;
 }

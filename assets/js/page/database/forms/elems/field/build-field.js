@@ -23,41 +23,36 @@
  *             MULTI-SELECT DATA
  */
 import { _el, _u } from '~util';
-import { _state } from '~form';
+import { _elems, _state } from '~form';
 
 let f;
 
 export function buildFormField(fConfg) {
-    f = fConfg;                                                     /*dbug-log*/console.log('buildFormField fConfg[%O]', f);
+    f = fConfg;                                                     /*dbug-log*/console.log('+--buildFormField fConfg[%O]', f);
     const field = buildFormFieldElems();
     addPinIfFieldDataCanPersistThroughMultipleSubmits(field);
     updateFormFieldState();
     return field;
 }
 /* ====================== BUILD FIELD ======================================= */
-function buildFormFieldElems() {                                    /*dbug-log*/console.log('buildFormFieldElems', );
+function buildFormFieldElems() {                                    /*dbug-log*/console.log('   --buildFormFieldElems', );
     handleFieldChangeListeners(f);
     return _el('getFieldElems', [f]);
 }
 /* -------------------------- IF PINNABLE ------------------------------------ */
-function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/console.log('addPinIfFieldDataCanPersistThroughMultipleSubmits pinnable?[%s] field[%O]', f.pinnable, field);
+function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/console.log('    --addPinIfFieldDataCanPersistThroughMultipleSubmits pinnable?[%s] field[%O]', f.pinnable, field);
     if (!f.pinnable) { return; }
     const pin = getFormFieldPin(f.name);
     $(field.lastChild).append(pin);
 }
 /* -------------------------- FIELD STATE ----------------------------------- */
-function updateFormFieldState() {                                   /*dbug-log*/console.log('updateFormState f[%O]', _u('snapshot', [f]));
+function updateFormFieldState() {                                   /*dbug-log*/console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
     if (f.combo) { _state('addComboToFormState', [f.group, f.name]); }
     //todo remove build-data before storing confg
-    _state('setFormFieldData', [f.group, f.name, f]);
-}
-/* --------------------------- SET VALUE ------------------------------------ */
-function setFieldValue() {
-    _state('setFormFieldData', [f.group, f.name, f.value, f.type]);
-    if (f.type != 'multiSelect') { $(f.input).val(f.value); }
+    _state('setFieldState', [f.group, f.name, f]);
 }
 /* =========================== ON FIELD CHANGE ============================== */
-function handleFieldChangeListeners() {                             /*dbug-log*/console.log('handleFieldChangeListeners',);
+function handleFieldChangeListeners() {                             /*dbug-log*/console.log('   --handleFieldChangeListeners',);
     ifCitationFormAutoGenerateCitationOnChange();
     onChangeStoreFieldValue(f);
     if (f.required) { handleRequiredField(); }
@@ -85,18 +80,25 @@ function handleRequiredField() {
  * is enabled if all of it's required fields have values and it has no open child
  * forms.
  */
-function checkRequiredFields(e) {                                   /*dbug-log*/console.log('checkRequiredFields e = %O', e)
+function checkRequiredFields(e) {                                   /*dbug-log*/console.log('   @--checkRequiredFields e = %O', e)
     const fLvl = $(e.currentTarget).data('fLvl');
    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ----------------------- STORE FIELD-DATA --------------------------------- */
 function onChangeStoreFieldValue() {
-    if (f.type === 'multiSelect') { return setOnMultiSelectChangeListener(); }
+    if (ifCustomFieldStoreListener()) { return setCustomFieldStoreListener(); }
     $(f.input).change(storeFieldValue.bind(null, f.input, f.name, f.group, null));
 }
-function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/console.log('storeFieldValue [%s] fieldConfg = %O', fieldName, elem);
+function ifCustomFieldStoreListener() {
+    return f.misc && f.misc.customValueStore;
+}
+function setCustomFieldStoreListener() {
+    if (f.type === 'multiSelect') { return setOnMultiSelectChangeListener(); }
+    //Otherwise, handled elsewhere
+}
+function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/console.log('   @--storeFieldValue [%s] fieldConfg = %O', fieldName, elem);
     const val = value || $(elem).val();
-    _state('setFormFieldData', [fLvl, fieldName, val]);
+    _state('setFieldState', [fLvl, fieldName, val, 'value']);
 }
 /* ________________ MULTI-SELECT DATA ________________ */
 /**
@@ -116,7 +118,7 @@ export function setOnMultiSelectChangeListener(input = f.input) {   /*dbug-log*/
 function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*/console.log('storeMultiSelectValue. lvl = %s, cnt = %s, fName = %s, e = %O', fLvl, cnt, fName, e);
     const valueObj = _state('getFormFieldData', [fLvl, fName]).val; /*dbug-log*/console.log('fieldObj = %O', fieldObj);
     valueObj[cnt] = e.target.value || null;
-    _state('setFormFieldData', [fLvl, fName, valueObj, 'multiSelect']);
+    _state('setFieldState', [fLvl, fName, valueObj, 'value']);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }
 /* ---------------- AUTH|EDITOR VALIDATION ---------------------------------- */

@@ -104,6 +104,9 @@ export function resetFormCombobox() {
 export function buildMultiSelectInput() {
     return fields.buildMultiSelectInput(...arguments);
 }
+export function setSilentVal() {
+    fields.setSilentVal(...arguments);
+}
 /* -------------------- REQUIRED FIELDS ------------------------------------- */
 export function ifAllRequiredFieldsFilled() {
     return fields.ifAllRequiredFieldsFilled(...arguments);

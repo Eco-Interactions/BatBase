@@ -11,6 +11,9 @@ function getSourceFieldConfg() {
     return {   //MERGED AND OVERWRITTEN WITH DETAIL.FIELDS
         Authors: {  // handle merging this and editor and their field trans
             entity: 'Contribution',
+            misc: {
+                customValueStore: true
+            },
             name: 'Authors',
             prop: {
                 core: 'Contributor'
@@ -40,6 +43,9 @@ function getSourceFieldConfg() {
         },
         Editors: {
             entity: 'Contribution',
+            misc: {
+                customValueStore: true
+            },
             name: 'Editors',
             prop: {
                 core: 'Contributor'
