@@ -11,13 +11,13 @@
  *         FORM COMBOBOXES
  *         MAP METHODS
  */
-import { _cmbx, _el, _u } from '~util';
+import { _cmbx, _el } from '~util';
 import { _map } from '~db';
-import { _state, _elems, _form, _val, getSubFormLvl, submitForm } from '~form';
+import { _state, _elems, _form } from '~form';
 
 /** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
-export function initCreateForm(entity, val) {                                   console.log("       --initLocForm [%s]", val);
+export function initCreateForm(entity, val) {                       /*dbug-log*/console.log("       --initLocForm [%s]", val);
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
     buildLocForm(val)
     .then(onCreateFormLoadComplete);

@@ -1,7 +1,7 @@
 /**
  * Returns the form-config for the passed entity and current field-display (all|simple).
  * { *: default confg-properties returned
- *    core: entityName,
+ *    core: EntityName, ucfirst
  *    *display: view, //Defaults to 'simple' display, if defined.
  *    *fields: {
  *         //CORE.FIELDS AND TYPE.FIELDS WILL BE MERGED IN.
@@ -11,9 +11,10 @@
  *            info: { intro: "", *tooltip: ""(req) },
  *            label: Field label text (Name-prop used if absent)
  *            *name: FieldName,  [REQUIRED]
- *            prop: { entityName: [propName, ...], ... } //server entity:prop when different than exactly formEntity:FieldName
+ *            prep: funcNameString //prep data for server when different than exactly formEntity:FieldName
+ *            //prop: { entityName: {propName: hdnlr, ...}, ... } //server entity:prop when different than exactly formEntity:FieldName
  *            required: true, //Set if true
- *            *type: "",  [REQUIRED]
+ *            *type: "", null if field-data auto-derived [REQUIRED]
  *        }, ...
  *    },
  *    *group: top|sub|sub2, //SET DURING CONFG BUILD
@@ -21,9 +22,10 @@
  *    misc: {
  *        entityProp: value
  *    },
- *    *name: formName (entity or su|object)
+ *    *name: formName (entity or su|object) ucfirst
  *    onInvalidInput: Fired when an input fails HTML validation  //TODO
  *    onValidInput: Fired after invalid input validates (perhaps merge with all checkReqFieldsAndToggleSubmitBttn calls?)  //TODO
+ *    prep: [], //server-data handled before form-submit
  *    type: Type name, once selected. Only for entities with subTypes
  *    types: { //ENTITY SUB-TYPES
  *         Type name: {
@@ -55,7 +57,7 @@ let confg = null;
 
 /* *************************** FORM CONFG *********************************** */
 export function getFormConfg(fVals, entity, fLvl, showSimpleView = true) {/*dbug-log*/console.log('getFormConfg [%s][%s] fVals?[%O] showSimpleView?[%s]', fLvl, entity, fVals, showSimpleView);
-    confg = getBaseConfg(getConfgName(entity), entity);             /*dbuglog*/console.log('   --baseConfg [%s][%O]', entity, _u('snapshot', [confg]));
+    confg = getBaseConfg(getConfgName(entity), entity);              /*dbuglog*/console.log('   --baseConfg [%s][%O]', entity, _u('snapshot', [confg]));
     buildFormConfg(fVals, fLvl, showSimpleView);                    /*dbug-log*/console.log('   --formConfg [%s][%O]', entity, _u('snapshot', [confg]));
     removeUnneedConfg();
     _state('setFormProp', [fLvl, 'confg', confg]);

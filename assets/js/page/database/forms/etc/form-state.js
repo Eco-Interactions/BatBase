@@ -173,7 +173,7 @@ export function getFormEntity(fLvl) {
 export function getFormProp(fLvl, prop) {                           /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
     return fState.forms[fLvl] ? fState.forms[fLvl][prop] : false;
 }
-export function getFormConfg(fLvl, prop = null) {                   /*dbug-log*/console.log('getFormConfg [%s][%s] [%O]', fLvl, prop, fState.forms[fLvl].confg);
+export function getFormConfg(fLvl, prop = null) {                   /*dbug-log*/console.log('getFormConfg [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl].confg);
     if (!fState.forms[fLvl]) { return false; }
     const fConfg = fState.forms[fLvl].confg
     return prop ? fConfg[prop] : fConfg;

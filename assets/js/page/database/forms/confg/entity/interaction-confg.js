@@ -25,13 +25,14 @@ function getInteractionFieldConfg() {
         Publication: {
             entity: 'Publication',
             name: 'Publication',
+            prep: {},
             type: 'select'
         },
         CitationTitle: {
             entity: 'Source',
             name: 'CitationTitle',
-            prop: {
-                core: 'Source',
+            prep: { //func: [args]
+                renameField: ['Source'],
             },
             required: true,
             type: 'select'
@@ -39,12 +40,12 @@ function getInteractionFieldConfg() {
         'Country-Region': {
             label: 'Country/Region',
             name: 'Country-Region',
+            prep: {},
             type: 'select'
         },
         Location: {
             entity: 'Publication',
             name: 'Location',
-            required: true,
             type: 'select'
         },
         Subject: {
@@ -90,6 +91,9 @@ function getInteractionFieldConfg() {
                 tooltip: 'Tags indicate the part of the object organism in the interaction'
             },
             name: 'InteractionTags',
+            prep: { //func: [args]
+                renameField: ['Tags'],
+            },
             type: 'tags'
         },
         Note: {

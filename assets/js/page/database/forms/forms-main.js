@@ -81,13 +81,9 @@ export function _val(funcName, params = []) {
 export function getValidatedFormData() {
     return submit.getValidatedFormData(...arguments);
 }
-export function submitForm(formId, fLvl, entity) {
-    $('#'+fLvl+'-submit').attr('disabled', true).fadeTo('fast', .6);
-    submit.valAndSubmitFormData(formId, fLvl, entity);
-}
-/* Refactor: only used for taxon forms */
-export function formatAndSubmitData(entity, fLvl, formVals) {
-    return submit.buildFormDataAndSubmit(entity, fLvl, formVals);
+/* Vals passed in taxon edit-forms */
+export function handleFormSubmit(entity, fLvl, formVals) {
+    return submit.handleFormSubmit(entity, fLvl, formVals);
 }
 /* ======================= MODULE HELPERS =================================== */
 /* Handles captures of event objects and returns wrapped in array. */

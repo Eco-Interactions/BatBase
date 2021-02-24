@@ -15,7 +15,7 @@
  *         FORM COMBOBOXES
  */
 import { _cmbx, _el, _modal } from '~util';
-import { _state, _elems, submitForm } from '~form';
+import { _state, _elems, handleFormSubmit } from '~form';
 import * as iForm from '../int-form-main.js';
 
 /* ======================= CREATE-FORM BUILD ================================ */
@@ -79,7 +79,7 @@ function showSubmitModal() {
         html: buildConfirmationModalHtml(),
         selector: '#top-submit',
         dir: 'left',
-        submit: submitForm.bind(null, '#top-form', 'top', 'interaction'),
+        submit: handleFormSubmit.bind(null, 'top'),
         bttn: 'SUBMIT INTERACTION'
     };
     _modal('showSaveModal', [ modalConfg ]);

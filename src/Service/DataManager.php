@@ -52,9 +52,11 @@ class DataManager
      */
     public function createEntity($coreName, $data)
     {
-        $coreClass = 'App\\Entity\\'. ucfirst($coreName);                       //print("\ncoreClass = ". $coreClass);
+        $coreClass = 'App\\Entity\\'. $coreName;                               //print("\ncoreClass = ". $coreClass);
+        // $coreClass = 'App\\Entity\\'. ucfirst($coreName);                       print("\ncoreClass = ". $coreClass);
+
         $coreEntity = new $coreClass();
-        $coreData = $data->$coreName;
+        $coreData = $data->core;
 
         $returnData = $this->buildReturnDataObj($coreName, $coreEntity, $data);
 
@@ -64,7 +66,7 @@ class DataManager
             $returnData->name = $coreEntity->getDisplayName();
         }
 
-        if (property_exists($coreData, 'hasDetail')) {
+        if (property_exists($data, 'detailEntity')) {
             $returnData->detailEntity = $this->handleDetailEntity(
                 $coreData, $data, $returnData
             );
@@ -96,7 +98,7 @@ class DataManager
             $returnData->name = $coreEntity->getDisplayName();
         }
 
-        if (property_exists($coreData, 'hasDetail')) {
+        if (property_exists($data, 'detailEntity')) {
             $returnData->detailEntity = $this->handleDetailEntity(
                 $coreData, $data, $returnData
             );
@@ -114,9 +116,9 @@ class DataManager
     }
 /* ------------------- RETURN-DATA BUILDER ---------------------------------- */
     private function buildReturnDataObj($coreName, $coreEntity, $formData)
-    {
+    { //print("buildReturnDataObj");
         $data = new \stdClass;
-        $data->core = $coreName;
+        $data->core = lcfirst($coreName);
         $data->coreId = $coreEntity->getId();  //Created entities have ids added before returning
         $data->coreEntity = $coreEntity;
         $data->coreEdits = $this->getEditsObj($formData, 'core');
@@ -153,10 +155,11 @@ class DataManager
     private function setDetailEntityData($cData, $data, &$returnData)
     {
         $dName = property_exists($cData->rel, "sourceType") ?
-            $cData->rel->sourceType : 'geoJson';                            //print('detail name = '.$dName);
+            lcfirst($cData->rel->sourceType) : 'geoJson';                            //print('detail name = '.$dName);
         $returnData->detail = $dName;
-        if (!property_exists($cData, "hasDetail")) { return false; }
-        $dData = $data->$dName;
+        if (!property_exists($data, 'detail')) { return false; }
+        // if (!property_exists($cData, 'hasDetail')) { return false; }
+        $dData = $data->detail;
 
         return $this->setDetailData( $dData, $dName, $returnData);
     }
@@ -172,7 +175,8 @@ class DataManager
     }
     private function setCoreEntity($coreName, &$coreEntity, &$dEntity)
     {
-        $setCore = 'set'.ucfirst($coreName);
+        $setCore = 'set'.$coreName;
+        // $setCore = 'set'.ucfirst($coreName);
         $dEntity->$setCore($coreEntity);
     }
     /** Returns either a newly created entity or an existing entity to edit. */
@@ -182,13 +186,15 @@ class DataManager
             $curDetail = $this->getEntity(ucfirst($dName), $edits->editing);
             if ($curDetail) { return $curDetail; }
         }
-        $dClass = 'App\\Entity\\'. ucfirst($dName);
+        $dClass = 'App\\Entity\\'. $dName;
+        // $dClass = 'App\\Entity\\'. ucfirst($dName);
         return new $dClass();
     }
     /** Adds the detail entity to the core entity. Eg, A Publication to it's Source record. */
     private function addDetailToCoreEntity(&$coreEntity, &$dEntity, $dName)
     {
-        $setMethod = 'set'. ucfirst($dName);
+        $setMethod = 'set'. $dName;
+        // $setMethod = 'set'. ucfirst($dName);
         $coreEntity->$setMethod($dEntity);
         $this->em->persist($coreEntity);
     }
@@ -214,14 +220,14 @@ class DataManager
     private function setRelatedEntityData($data, &$entity, &$edits)
     {
         $edgeCases = [
-            "contributor" => function($ary) use (&$entity, &$edits) {
+            "Contributor" => function($ary) use (&$entity, &$edits) {
                 $this->handleContributors($ary, $entity, $edits); },
-            "tags" => function($ary) use (&$entity, &$edits) {
+            "Tags" => function($ary) use (&$entity, &$edits) {
                 $this->handleTags($ary, $entity, $edits); },
-            "source" => function($id) use (&$entity, &$edits) {
+            "Source" => function($id) use (&$entity, &$edits) {
                 $this->addInteractionToSource($id, $entity, $edits); }
         ];
-        foreach ($data as $rEntityName => $val) {
+        foreach ($data as $rEntityName => $val) {  //print("field [$rEntityName] type of [$val][".gettype($val)."]\n");
             if (array_key_exists($rEntityName, $edgeCases)) {
                 call_user_func($edgeCases[$rEntityName], $val);
             } else {
@@ -234,16 +240,22 @@ class DataManager
     private function getEntity($relField, $val)
     {
         $relClass = $this->getEntityClass($relField);
-        $prop = is_numeric($val) ? 'id'  : 'displayName';
+        $prop = is_numeric($val) ? 'id'  : 'displayName';//print("prop [$prop]");
         return $this->returnEntity($relClass, $val, $prop);
     }
     /** Handles field name to class name translations. */
     private function getEntityClass($relField)
     {
-        $classMap = [ "parentSource" => "Source", "parentLoc" => "Location",
-            "parentTaxon" => "Taxon", "subject" => "Taxon", "object" => "Taxon" ];
+        $classMap = [
+            "ParentSource" => "Source",
+            "ParentLoc" => "Location",
+            "ParentTaxon" => "Taxon",
+            "Subject" => "Taxon",
+            "Object" => "Taxon"
+        ];
         return array_key_exists($relField, $classMap) ?
-            $classMap[$relField] : ucfirst($relField);
+            $classMap[$relField] : $relField;
+            // $classMap[$relField] : ucfirst($relField);
     }
     private function handleContributors($ary, &$entity, &$edits)
     {
@@ -312,7 +324,7 @@ class DataManager
     {
         $contributors = $entity->getContributors();
         $removed = [];
-        foreach ($contributors as $contrib) {
+        foreach ($contributors as $contrib) { //print("line 327");
             $authId = $contrib->getAuthorSource()->getId();
             if (property_exists($authObj, $authId)) { continue; }
             $entity->removeContributor($contrib);
@@ -368,7 +380,7 @@ class DataManager
     private function addInteractionToSource($id, $entity, &$edits)
     {
         $relEntity = $this->getEntity("Source", $id);
-        $this->setRelDataAndTrackEdits($entity, "source", $relEntity, $edits);
+        $this->setRelDataAndTrackEdits($entity, "Source", $relEntity, $edits);
         $className = $this->em->getClassMetadata(get_class($entity))->getName();
         if ($className === "App\Entity\Interaction" && !$relEntity->getIsDirect()) {
             $relEntity->setIsDirect(true);
@@ -381,8 +393,11 @@ class DataManager
      */
     private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits)
     {
-        $setField = 'set'. ucfirst($field);
-        $getField = 'get'. ucfirst($field);
+        $setField = 'set'. $field;
+        $getField = 'get'. $field;
+
+        // $setField = 'set'. ucfirst($field);
+        // $getField = 'get'. ucfirst($field);
 
         $curVal = $entity->$getField();
         if ($curVal === $newVal) { return; }
@@ -396,8 +411,8 @@ class DataManager
      */
     private function setRelDataAndTrackEdits(&$entity, $field, $newVal, &$edits)
     {
-        $setField = 'set'. ucfirst($field);
-        $getField = 'get'. ucfirst($field);
+        $setField = 'set'. $field;
+        $getField = 'get'. $field;
 
         $oldVal = $entity->$getField() ? $entity->$getField()->getId() : null;
         $oldEntity = $entity->$getField();
@@ -452,9 +467,9 @@ class DataManager
      */
     private function setUpdatedAtTimes($entityData)
     {
-        $this->tracker->trackEntityUpdate(ucfirst($entityData->core));
+        $this->tracker->trackEntityUpdate($entityData->core);
         if (property_exists($entityData, 'detailEntity')) {
-            $this->tracker->trackEntityUpdate(ucfirst($entityData->detail));
+            $this->tracker->trackEntityUpdate($entityData->detail);
         }
     }
 }

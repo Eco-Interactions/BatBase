@@ -11,7 +11,7 @@
  *         SUBMIT CONFIRMATION-MODAL
  */
 import { _db, _modal } from '~util';
-import { _state, _elems, submitForm } from '~form';
+import { _state, _elems, handleFormSubmit } from '~form';
 import * as entityForm from './detail-entity/src-detail-entity-form-main.js';
 import * as typeFields from './pub-and-cit-type-fields.js';
 /* ------------------- FORM INIT -------------------------------------------- */
@@ -92,7 +92,7 @@ export function addConfirmationBeforeSubmit(entity, fLvl) {
 }
 function showSubmitModal(entity, fLvl) {
     const linkHtml = buildConfirmationModalHtml(fLvl);
-    const submit = submitForm.bind(null, `#${fLvl}-form`, fLvl, entity);
+    const submit = handleFormSubmit.bind(null, fLvl, entity);
     if (!linkHtml) { return submit(); }
     _modal('showSaveModal', [ buildModalConfg(fLvl, linkHtml, submit) ]);
     $(`#${fLvl}-submit`).css({'opacity': .5, cursor: 'not-allowed'})

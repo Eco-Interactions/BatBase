@@ -7,7 +7,7 @@
  *     SUBMIT AND CANCEL BUTTONS
  */
 import { _el, _u } from '~util';
-import { _elems, _state, exitFormLevel, submitForm } from '~form';
+import { _elems, _state, exitFormLevel, handleFormSubmit } from '~form';
 /**
  * Returns row with a checkbox that will toggle optional form fields on the left
  * and the submit/cancel buttons on the right.
@@ -55,7 +55,7 @@ function getBttnEvents(entity, fLvl) {                              /*dbug-log*/
     };
 }
 function getSubmitEvent(entity, fLvl) {
-    return submitForm.bind(null, `#${fLvl}form`, fLvl, entity);
+    return handleFormSubmit.bind(null, fLvl, entity);
 }
 function getCancelFunc(entity, fLvl) {
     if (fLvl === 'top') { return _elems.bind(null, 'exitRootForm'); }

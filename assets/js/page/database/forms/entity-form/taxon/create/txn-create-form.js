@@ -10,7 +10,7 @@
  *         VALIDATE
  */
 import { _cmbx, _el, _u } from '~util';
-import { _state, _elems, _val, submitForm } from '~form';
+import { _state, _elems, _val, handleFormSubmit } from '~form';
 
 export function initFormCombos(entity, fLvl) {} //No combos in this form.
 /* ========================= INIT =========================================== */
@@ -47,7 +47,7 @@ function updateTaxonSubmitBttn(rank) {
 function validateAndSubmit(rank) {
     if (ifEmptyNameField()) { return valAlert(rank, 'needsName'); }
     if (ifSpeciesValIssue(rank)) { return valAlert(rank, 'needsGenusName'); }
-    submitForm('#sub2-form',  'sub2', 'taxon');
+    handleFormSubmit('sub2', 'taxon');
 }
 function ifEmptyNameField() {
     return !$('#DisplayName_f input').val();

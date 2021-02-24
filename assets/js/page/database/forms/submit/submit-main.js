@@ -16,31 +16,27 @@
 import { _db, _el, _u, executeMethod } from '~util';
 import { _state, _elems, _confg, clearFormMemory } from '~form';
 import * as val from './validation-alerts.js';
-import formatDataForServer from './format-data.js';
-import * as data from './get-form-data.js';
+import * as prep from './data/submit-data-main.js';
 
 export function _validation(funcName, params = []) {
     return executeMethod(funcName, val, 'val', 'submit-main', params);
 }
 /** ----------------------- VALIDATE DATA ----------------------------------- */
-export function getValidatedFormData(entity, fLvl, submitting) {
-    return data.getValidatedFormData(entity, fLvl, submitting);
-}
-export function valAndSubmitFormData(formId, fLvl, entity) {                    //console.log("       --getFormValuesAndSubmit. formId = %s, fLvl = %s, entity = %s", formId, fLvl, entity);
-    getValidatedFormData(entity, fLvl, true)
-        .then(vals => buildFormDataAndSubmit(entity, fLvl, vals));
+export function getValidatedFormData(entity, fLvl, submitting) { /*dbug-log*/console.log(' !!!!!!!!!!!!!  getValidatedFormData')
+    // return handleFormSubmit(entity, fLvl);
 }
 /* used by edit-form */
-export function buildFormDataAndSubmit(entity, fLvl, formVals) {
-    const data = formatDataForServer(entity, fLvl, formVals)
-    submitFormData(data, fLvl, entity);
+export function handleFormSubmit(fLvl) {
+    $(`#${fLvl}-submit`).attr('disabled', true).fadeTo('fast', .6);
+    const confg = _state('getFormConfg', [fLvl]);
+    prep.prepareDataForServer(confg)
+    .then(data => submitFormData(data, fLvl, confg));
 }
 /* ------------------------- SUBMIT FORM ------------------------------------ */
-function submitFormData(data, fLvl, entity) {                                   console.log("   --submit[%s]FormData [ %s ]= %O", entity, fLvl, data);
-    const coreEntity = _confg('getCoreFormEntity', [entity]);
+function submitFormData(data, fLvl, confg) {                                   console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
     const url = 'crud/entity/' + _state('getFormProp', [fLvl, 'action']);
-    addEntityDataToFormData(data, coreEntity, fLvl);
-    storeParamsData(entity, coreEntity, fLvl);
+    addEntityDataToFormData(data, confg);
+    storeParamsData(data);
     toggleWaitOverlay(true);
     _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);           _u('logInProdEnv', ['data = ', JSON.stringify(data)]);
 }
@@ -48,18 +44,28 @@ function formSubmitError() {
     toggleWaitOverlay(false);
     val.formSubmitError(...arguments);
 }
-function addEntityDataToFormData(data, coreEntity, fLvl) {
-    data.coreEntity = coreEntity;
-    if (fLvl !== 'top') { return; }
+function addEntityDataToFormData(data, confg) {
+    addEntityNames(confg.core);
+    if (confg.group !== 'top') { return; }
     const editingIds = _state('getStateProp', ['editing']);
     if (editingIds) { data.ids = editingIds; }
+
+    function addEntityNames(core) {
+        data.coreEntity = core ? core : confg.name;
+        if (core) { data.detailEntity =  confg.name; }
+    }
 }
-/** Stores data relevant to the form submission that will be used later. */
-function storeParamsData(entity, coreEntity, fLvl) {
-    const data = {
-        detailEntity: entity === coreEntity ? false : entity,
-        entity: coreEntity,
-        fLvl: fLvl
+/**
+ * Stores data relevant to the form submission that will be used later.
+ * TODO: REFACTOR
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+function storeParamsData(data) {
+    const params = {
+        detailEntity: data.detailEntity ? data.detailEntity : false,
+        entity: data.coreEntity,
+        fLvl: data.group
     };
     _state('setStateProp', ['submit', data]);
 }

@@ -114,7 +114,7 @@ class DataEntryController extends AbstractController
         foreach ($serialize as $p) {
             $prop = $p.'Entity';
             $id = $p.'Id';
-            if (!property_exists($entityData, $prop)) { continue; }
+            if (!property_exists($entityData, $prop) || !$entityData->$prop ) { continue; }
             try {
                 $entityData->$id = $entityData->$prop->getId();
                 $entityData->$prop = $this->serialize->serializeRecord(
