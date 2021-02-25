@@ -102,5 +102,4 @@ function toggleFormFields(entity, fLvl, fVals) {
 function updateFormMemoryOnFieldToggle(fLvl) {
     const isChecked = $(`#${fLvl}-all-fields`)[0].checked;
     _state('setFormProp', [fLvl, 'simple', !isChecked]);
-    _state('setFormProp', [fLvl, 'reqElems', []]);
 }

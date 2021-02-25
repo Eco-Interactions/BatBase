@@ -67,13 +67,11 @@ function ifCitationFormAutoGenerateCitationOnChange() {
 /**
  * Required field's have a 'required' class added which appends '*' to their
  * label. Added to the input elem is a change event reponsible for enabling/
- * disabling the submit button and a form-level data property. The input elem
- * is added to the form param's reqElems property.
+ * disabling the submit button and a form-level data property.
  */
 function handleRequiredField() {
     $(f.input).change(checkRequiredFields);
     $(f.input).data('fLvl', f.group);
-    _state('addRequiredFieldInput', [f.group, f.input]);
 }
 /**
  * On a required field's change event, the submit button for the element's form

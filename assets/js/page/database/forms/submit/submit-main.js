@@ -14,7 +14,7 @@
  *             SUB-ENTITY
  */
 import { _db, _el, _u, executeMethod } from '~util';
-import { _state, _elems, _confg, clearFormMemory } from '~form';
+import { _state, _elems, clearFormMemory } from '~form';
 import * as val from './validation-alerts.js';
 import * as prep from './data/submit-data-main.js';
 
@@ -34,11 +34,16 @@ export function handleFormSubmit(fLvl) {
 }
 /* ------------------------- SUBMIT FORM ------------------------------------ */
 function submitFormData(data, fLvl, confg) {                                   console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
-    const url = 'crud/entity/' + _state('getFormProp', [fLvl, 'action']);
     addEntityDataToFormData(data, confg);
-    storeParamsData(data);
+    _state('setFormConfg', [fLvl, true, 'submit']);
     toggleWaitOverlay(true);
-    _u('sendAjaxQuery', [data, url, onSuccess, val.formSubmitError]);           _u('logInProdEnv', ['data = ', JSON.stringify(data)]);
+    submitForm(data, fLvl);
+}
+function submitForm(data, fLvl) {
+    const url = 'crud/entity/' + _state('getFormProp', [fLvl, 'action']);
+    const fSuccess = onSuccess.bind(null, fLvl);
+    const fError = val.formSubmitError.bind(null, fLvl);
+    _u('sendAjaxQuery', [data, url, fSuccess, fError]);                         _u('logInProdEnv', ['data = ', JSON.stringify(data)]);
 }
 function formSubmitError() {
     toggleWaitOverlay(false);
@@ -55,35 +60,20 @@ function addEntityDataToFormData(data, confg) {
         if (core) { data.detailEntity =  confg.name; }
     }
 }
-/**
- * Stores data relevant to the form submission that will be used later.
- * TODO: REFACTOR
- * @param  {[type]} data [description]
- * @return {[type]}      [description]
- */
-function storeParamsData(data) {
-    const params = {
-        detailEntity: data.detailEntity ? data.detailEntity : false,
-        entity: data.coreEntity,
-        fLvl: data.group
-    };
-    _state('setStateProp', ['submit', data]);
-}
 /* ----------------- ON SUBMIT SUCCESS ---------------------------- */
-function onSuccess(data, textStatus, jqXHR) {                                   _u('logAjaxData', [data, arguments]);
+function onSuccess(fLvl, data, textStatus, jqXHR) {                             _u('logAjaxData', [data, arguments]);
     _db('afterServerDataUpdateSyncLocalDatabase', [data.results])
-    .then(onDataSynced);
+    .then(data => onDataSynced(fLvl, data));
 }
-function onDataSynced(data) {                                                   console.log('       --onDataSynced.');
-    if (!_state('getStateProp', ['submit'])) { return; } //form closed.
+function onDataSynced(fLvl, data) {                                             console.log('       --onDataSynced.');
+    if (!_state('getFormConfg', [fLvl, 'submit'])) { return; } //form closed.
     toggleWaitOverlay(false);
     if (data.fails) { return val.errUpdatingData('dataSyncFailures'); }
     if (noDataChanges()) { return showNoChangesMessage(); }
     addDataToStoredRcrds(data.core, data.detail)
-    .then(handleFormComplete.bind(null, data));
+    .then(handleFormComplete.bind(null, fLvl, data));
 
     function noDataChanges() {
-        const fLvl = _state('getStateProp', ['submit']).fLvl;
         const action = _state('getFormProp', [fLvl, 'action'])
         return action === 'edit'  && !hasChngs(data);
     }
@@ -117,10 +107,9 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
     }
 }
 /*----------- Top-Form Success Methods ------------*/
-function handleFormComplete(data) {
-    const fLvl = _state('getStateProp', ['submit']).fLvl;              //console.log('handleFormComplete fLvl = ', fLvl);
+function handleFormComplete(fLvl, data) {                                       console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    const onClose = _state('getFormProp', ['top', 'onFormClose']);             //console.log('onClose = %O', onClose);
+    const onClose = _state('getFormProp', ['top', 'onFormClose']);              console.log('onClose = %O', onClose);
     if (onClose) { onClose(data);
     } else { _elems('exitRootForm'); }
 }

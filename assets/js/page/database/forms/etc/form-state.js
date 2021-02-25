@@ -108,7 +108,6 @@ function getDataKeysForEntityRootForm(action, entity) {
 // * > fieldData - Obj with each form field (k) and it's (v) { value, fieldType }
  * > misc - Obj to hold the various special-case props
  * > pSelId - The id of the parent select of the form.
- * > reqElems - All required elements in the form.
  * > selElems - Contains all selElems until they are initialized with selectize.
  *
  * --- Entity-specific properties
@@ -131,7 +130,6 @@ export function addEntityFormState(entity, level, pSel, action) {   /*dbug-log*/
         entity: entity,
         onFormClose: null,
         pSelId: pSel,
-        reqElems: [],
         selElems: [],
     };
 }

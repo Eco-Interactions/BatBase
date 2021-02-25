@@ -42,8 +42,7 @@ let fS;
  * Shows server-validation message to editor for duplicated authors or editors,
  * non-unique display names, or general form-error message.
  */
-export function formSubmitError(jqXHR, textStatus) {                /*perm-log*/console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
-    const fLvl = _state('getStateProp', ['submit']).fLvl;
+export function formSubmitError(fLvl, jqXHR, textStatus) {                /*perm-log*/console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
     const tag = getFormAlertTag(jqXHR.responseText);
     showFormValAlert(fLvl, tag, fLvl);
 }
