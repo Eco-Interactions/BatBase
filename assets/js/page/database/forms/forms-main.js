@@ -103,7 +103,7 @@ export function getNextFormLevel(next, curLvl) {
  * the passed form lvl is reduced by one and returned.
  */
 export function getSubFormLvl(lvl) {
-    const topEntity = state.getFormProp('top', 'entity');
+    const topEntity = state.getFormState('top', 'entity');
     const fLvls = state.getStateProp('formLevels');
     return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }

@@ -49,7 +49,7 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/
 function updateFormFieldState() {                                   /*dbug-log*/console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
     if (f.combo) { _state('addComboToFormState', [f.group, f.name]); }
     //todo remove build-data before storing confg
-    _state('setFieldState', [f.group, f.name, f]);
+    _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data
 }
 /* =========================== ON FIELD CHANGE ============================== */
 function handleFieldChangeListeners() {                             /*dbug-log*/console.log('   --handleFieldChangeListeners',);
@@ -96,7 +96,7 @@ function setCustomFieldStoreListener() {
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/console.log('   @--storeFieldValue [%s] fieldConfg = %O', fieldName, elem);
     const val = value || $(elem).val();
-    _state('setFieldState', [fLvl, fieldName, val, 'value']);
+    _state('setFieldState', [fLvl, fieldName, val]);
 }
 /* ________________ MULTI-SELECT DATA ________________ */
 /**
@@ -116,7 +116,7 @@ export function setOnMultiSelectChangeListener(input = f.input) {   /*dbug-log*/
 function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*/console.log('storeMultiSelectValue. lvl = %s, cnt = %s, fName = %s, e = %O', fLvl, cnt, fName, e);
     const valueObj = _state('getFormFieldData', [fLvl, fName]).val; /*dbug-log*/console.log('fieldObj = %O', fieldObj);
     valueObj[cnt] = e.target.value || null;
-    _state('setFieldState', [fLvl, fName, valueObj, 'value']);
+    _state('setFieldState', [fLvl, fName, valueObj]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }
 /* ---------------- AUTH|EDITOR VALIDATION ---------------------------------- */

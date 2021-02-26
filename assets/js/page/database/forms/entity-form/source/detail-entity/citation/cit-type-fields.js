@@ -23,7 +23,7 @@ export function selectDefaultCitType() {
         .then(types => setCitType(types));
 }
 function setCitType(citTypes) {
-    const rcrds = _state('getFormProp', ['sub', 'rcrds']);
+    const rcrds = _state('getFormState', ['sub', 'rcrds']);
     const pubType = rcrds.pub.publicationType.displayName;
     const defaultType = getDefaultCitType(pubType, rcrds);
     _elems('setSilentVal', ['sub', 'CitationType', citTypes[defaultType]]);
@@ -86,13 +86,14 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
             if (!rmvdAuthField.authRow) { return; } //Field was never removed
             $('#citation_fields').append(rmvdAuthField.authRow);
             _state('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
-            _state('setFieldState', [fLvl, 'Authors', {}, 'value']);
+            _state('setFieldState', [fLvl, 'Authors', {}]);
             delete rmvdAuthField.authRow;
             delete rmvdAuthField.authElem;
         }
         function removeAuthorField() {
             rmvdAuthField.authRow = $('#Authors_f').detach();
-            _state('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
+
+            // _state('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
             removeFromFieldData();
 
             function removeAuthorElem() {
@@ -103,7 +104,7 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
                 });
             }
             function removeFromFieldData() {
-                const data = _state('getFormProp', [fLvl, 'fieldData']);
+                const data = _state('getFormState', [fLvl, 'fieldData']);
                 delete data.Authors;
                 _state('setFormProp', [fLvl, 'fieldData', data]);
             }
@@ -136,8 +137,8 @@ function addPubData(typeId, type, fLvl) {
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
-    const rcrds = _state('getFormProp', [fLvl, 'rcrds']);
+    const fieldData = _state('getFormState', [fLvl, 'fieldData']);
+    const rcrds = _state('getFormState', [fLvl, 'rcrds']);
     addPubTitle(addValues, fLvl, type);
     addPubYear(addValues, fLvl);
     addAuthorsToCitation(addValues, fLvl, type);

@@ -15,6 +15,9 @@ export default function(entity) {
                 required: true,
                 type: 'text'
             },
+            SourceType: {
+                value: 'Publisher'
+            }
         },
         name: entity,
         views: {

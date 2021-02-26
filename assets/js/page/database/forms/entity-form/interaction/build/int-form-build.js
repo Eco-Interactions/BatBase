@@ -67,7 +67,7 @@ function finishComboboxInit() {
     focusPubFieldIfNewRecord();
 }
 function focusPubFieldIfNewRecord() {
-    const action = _state('getFormProp', ['top', 'action']);
+    const action = _state('getFormState', ['top', 'action']);
     _cmbx('focusCombobox', ['Publication', action === 'create']);
 }
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */

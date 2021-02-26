@@ -19,7 +19,7 @@
  *         ALERTS
  */
 import { _cmbx, _el, _u } from '~util';
-import { _state, _elems, _form, _val, formatAndSubmitData } from '~form';
+import { _state, _elems, _form, _val, handleFormSubmit } from '~form';
 import * as tForm from '../txn-form-main.js';
 
 let taxonData;
@@ -306,7 +306,7 @@ function submitTaxonEdit() {
         parentTaxon: $('#txn-prnt').data('txn')
     };                                                              /*dbug-log*///console.log("taxon vals = %O", vals);
     if (!isTaxonEditFormValid(vals)) { return } //Alert shown
-    formatAndSubmitData('taxon', 'top', vals);
+    handleFormSubmit('taxon', 'top', vals);
 }
 function initTaxonEditRankCombo() {
     _cmbx('initCombobox', [{ name: 'Rank', onChange: onRankChangeValidate }]);

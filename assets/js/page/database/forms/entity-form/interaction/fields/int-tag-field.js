@@ -43,7 +43,7 @@ function getTagFieldDefaultState() {
 /** Loads the default interaction tags (eg. 'Secondary') and enables the combobox. */
 export function initTagField() {
     const tags = _state('getEntityRcrds', ['tag']);
-    const defaults = _state('getFormConfg', ['top', 'misc']).defaultTags;
+    const defaults = _state('getFormState', ['top', 'misc']).defaultTags;
     app.defaultTagOpts = Object.keys(tags).map(ifDefaultTagGetOpt).filter(o=>o);
     loadTagOpts(app.defaultTagOpts);
 

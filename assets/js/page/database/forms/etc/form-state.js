@@ -22,7 +22,7 @@
  *             TAXON
  */
 import { _db, _u } from '~util';
-import { alertFormIssue } from '~form';
+import { _confg, alertFormIssue } from '~form';
 
 let fState = {};
 
@@ -55,9 +55,9 @@ export function initFormState(action, entity, id) {
 
     function initMainState(data) {
         fState = {
-            action: action,
-            editing: action === 'edit' ? { core: id || null, detail: null } : false,
-            entity: entity,
+            action: action,//
+            editing: action === 'edit' ? { core: id || null, detail: null } : false,//
+            entity: entity,//
             forms: {},
             formLevels: ['top', 'sub', 'sub2'],
             records: data,
@@ -122,12 +122,14 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Taxon forms:
  *         taxonData - added to fState.forms (see props @initTaxonParams)
  */
-export function addEntityFormState(entity, level, pSel, action) {   /*dbug-log*/console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, level, pSel, action);
-    fState.forms[entity] = level;
-    fState.forms[level] = {
+export function addEntityFormState(entity, fLvl, pSel, action) {   /*dbug-log*/console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, fLvl, pSel, action);
+    fState.forms[entity] = fLvl;
+    fState.forms[fLvl] = _confg('getFormConfg', [entity, fLvl]);
+    Object.assign(fState.forms[fLvl], finishFormStateInit(pSel, action));       //console.log('new formState[%s] [%O]', fLvl, fState.forms[fLvl]);
+}
+function finishFormStateInit(pSel, action) {
+    return {
         action: action,
-        confg: {},
-        entity: entity,
         onFormClose: null,
         pSelId: pSel,
         selElems: [],
@@ -153,9 +155,6 @@ export function initTaxonState(groupId, subGroupId) {
     }
 }
 /* ============================ GETTERS ===================================== */
-export function getFormState() {
-    return Object.keys(fState).length ? fState : false;
-}
 export function getStateProp(prop) {                                /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
     return fState[prop];
 }
@@ -168,13 +167,10 @@ export function getFormParentId(fLvl) {
 export function getFormEntity(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].entity : false;
 }
-export function getFormProp(fLvl, prop) {                           /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
-    return fState.forms[fLvl] ? fState.forms[fLvl][prop] : false;
-}
-export function getFormConfg(fLvl, prop = null) {                   /*dbug-log*/console.log('getFormConfg [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl].confg);
-    if (!fState.forms[fLvl]) { return false; }
-    const fConfg = fState.forms[fLvl].confg
-    return prop ? fConfg[prop] : fConfg;
+export function getFormState(fLvl, prop = null) {
+    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*/console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl].confg);
+    const fData = fState.forms[fLvl];
+    return prop ? fData[prop] : fData;
 }
 export function getFormFieldData(fLvl, field, prop) {
     const fData = fState.forms[fLvl].confg[field];
@@ -248,15 +244,10 @@ export function addEntityRecords(entity, rcrds) {
 export function setFormProp(fLvl, prop, val) {
     fState.forms[fLvl][prop] = val;
 }
-export function setFormConfg(fLvl, val, prop = null) {
-    let fConfg = fState.forms[fLvl].confg;
-    if (prop) { return fConfg[prop] = val; }
-    fConfg = val;
-}
-export function setFieldState(fLvl, field, val, prop = null) {      /*dbug-log*/console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
-    let fData = fState.forms[fLvl].confg.fields[field];
-    if (prop) { return fData[prop] = val; }
-    fData = val;
+export function setFieldState(fLvl, field, val, prop = 'value') {      /*dbug-log*/console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
+    let fData = fState.forms[fLvl].fields[field];
+    if (!prop) { return fData = val; }
+    fData[prop] = val;
 }
 export function setOnFormCloseHandler(fLvl, hndlr) {
     fState.forms[fLvl].onFormClose = hndlr;

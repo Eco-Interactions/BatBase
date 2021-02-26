@@ -60,8 +60,11 @@ function getSourceFieldConfg() {
         SourceType: {
             entity: 'SourceType',
             name: 'SourceType',
+            prep: {
+                setCoreType: []
+            },
             required: true,
-            type: null, //not shown??
+            type: null
         },
         Website: {
             name: 'Website',

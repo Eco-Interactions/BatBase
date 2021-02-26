@@ -46,7 +46,7 @@ function buildCitationText(fLvl) {
 /* -------------------- GET ALL DATA FOR CITATION --------------------------- */
 function getDataForCitation(fData, fLvl) {                          /*dbug-log*///console.log('getDataForCitation [%s] fData = %O', fLvl, fData)
     const data = {
-        pubSrc: _state('getFormProp', [fLvl, 'rcrds']).src,
+        pubSrc: _state('getFormState', [fLvl, 'rcrds']).src,
         citSrc: { authors: fData.authors, year: fData.year },
         cit: buildCitData(fData),
         showWarnings: true

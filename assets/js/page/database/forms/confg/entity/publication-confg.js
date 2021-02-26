@@ -11,7 +11,7 @@ export default function(entity) {
         views: { //fields added will be built and displayed.
             all: [  //will be merged with type.views  //merge here rather than later?
                 ['Title', 'PublicationType']
-            ],
+            ]
         },
     };
 }
@@ -22,32 +22,25 @@ function getPublicationFieldConfg() {
                 tooltip: 'Digital Object Identifier provided by the Publisher',
             }
         },
-        ParentSource: {
-            required: true, //Publisher
-        },
         PublicationType: {
             entity: 'PublicationType',
             name: 'PublicationType',
             type: 'select',
             required: true
         },
-        Publisher: {   // MERGE WITH TITLE
+        Publisher: {
             entity: 'Source',
             name: 'Publisher',
-            // prop: {    // TODO: DRY
-            //     core: ['DisplayName'],
-            //     detail: ['DisplayName', 'Title'],
-            // },
             type: 'select',
         },
         SourceType: {
-            value: '' //TODO
+            value: 'Publisher'
         },
         Title: {
             name: 'Title',
-            prop: {    // TODO: DRY
-                core: ['DisplayName'],
-                detail: ['DisplayName'],
+            prep: {    // TODO: DRY
+                setDisplayName: [],
+                setDisplayName: ['detail']
             },
             required: true,
             type: 'text',
@@ -75,6 +68,9 @@ function getPublicationTypeConfg() {
                     required: true
                 },
                 Publisher: {
+                    prep: {
+                        setParent: ['Source']
+                    },
                     required: true
                 }
             },
@@ -132,6 +128,9 @@ function getPublicationTypeConfg() {
                     required: true
                 },
                 Publisher: {
+                    prep: {
+                        setParent: ['Source']
+                    },
                     required: true
                 },
                 Year: {

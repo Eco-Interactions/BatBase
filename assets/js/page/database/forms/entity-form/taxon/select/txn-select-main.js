@@ -82,8 +82,8 @@ export function getSelectedTaxon(aboveRank) {
     return !selected ? false : _state('getRcrd', ['taxon', $(selected).val()]);
 
     function ifEditingTaxon() {
-        const action = _state('getFormProp', ['top', 'action']);
-        const entity = _state('getFormProp', ['top', 'entity']);
+        const action = _state('getFormState', ['top', 'action']);
+        const entity = _state('getFormState', ['top', 'entity']);
         return action == 'edit' && entity == 'taxon';
     }
 }

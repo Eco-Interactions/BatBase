@@ -59,7 +59,7 @@ function getSubmitEvent(entity, fLvl) {
 }
 function getCancelFunc(entity, fLvl) {
     if (fLvl === 'top') { return _elems.bind(null, 'exitRootForm'); }
-    let onExit = _state('getFormProp', [fLvl, 'onFormClose']);
+    let onExit = _state('getFormState', [fLvl, 'onFormClose']);
     onExit = onExit || Function.prototype;
     return exitFormLevel.bind(null, fLvl, true, onExit);
 }

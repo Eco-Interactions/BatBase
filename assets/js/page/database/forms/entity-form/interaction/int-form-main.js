@@ -102,7 +102,7 @@ export function loadInteractionTypeTags() {
 }
 /* ========================== HELPERS ======================================= */
 export function focusPinAndEnableSubmitIfFormValid(field) {
-    const editing = _state('getFormProp', ['top', 'action']) === 'edit';
+    const editing = _state('getFormState', ['top', 'action']) === 'edit';
     if (!editing) { $('#'+field+'_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
 }
@@ -123,7 +123,7 @@ export function checkIntFieldsAndEnableSubmit() {
  * flag tracking the state of the new interaction form.
  */
 function resetIfFormWaitingOnChanges() {
-    if (!_state('getFormProp', ['top', 'unchanged'])) { return; }
+    if (!_state('getFormState', ['top', 'unchanged'])) { return; }
     _elems('exitSuccessMsg');
     _state('setFormProp', ['top', 'unchanged', false]);
 }

@@ -27,7 +27,7 @@ import { _el, _u } from '~util';
 import { _state } from '~form';
 
 /* ===================== INIT DETAIL PANEL ================================== */
-export function getDetailPanelElems(entity, id, action) {                       //console.log("getDetailPanelElems. action = %s, entity = %s", action, entity)
+export function getDetailPanelElems(entity, id, action) {                       console.log("getDetailPanelElems action[%s] entity[%s] id?[%s]", action, entity, id);
     const cntnr = _el('getElem', ['div', { 'id': 'form-details' }]);
     $(cntnr).append(buildPanelHeader(entity));
     $(cntnr).append(getDetailElems(entity, action));

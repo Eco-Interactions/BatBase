@@ -20,8 +20,8 @@ function getLocationFieldConfg() {
         Country: {
             entity: 'Location',
             name: 'Country',
-            prop: {
-                core: 'parentLoc'
+            prep: {
+                setParent: ['Location']
             },
             required: true,
             type: 'select',
@@ -71,7 +71,11 @@ function getLocationFieldConfg() {
         LocationType: {
             name: 'LocationType',
             entity: 'LocationType',
-            required: true
+            prep: {
+                setCoreType: []
+            },
+            required: true,
+            value: 'Point'
         },
         Longitude: {
             info: {

@@ -145,7 +145,7 @@ export function addListenerToGpsFields(fLvl, params = [true]) {
     }
 }
 function ifEditingDisableSubmit(fLvl, coords) {
-    if (_state('getFormProp', [fLvl, 'action']) !== 'edit') { return; }
+    if (_state('getFormState', [fLvl, 'action']) !== 'edit') { return; }
     _elems('toggleSubmitBttn', ['#top-submit', false]);
 }
 function getCoordVals() {

@@ -33,8 +33,8 @@ function buildServerDataObj() {                                     /*dbug-log*/
     if (lcl.confg.core) { setEntityObj('detail'); }
     return serverData;
 
-    function setEntityObj(prop) {
-        serverData[prop] = Object.assign({}, entityData);
+    function setEntityObj(dKey) {
+        serverData[dKey] = Object.assign({}, entityData);
     }
 }
 /**
@@ -44,8 +44,8 @@ function buildServerDataObj() {                                     /*dbug-log*/
  * @param {[type]} v [description]
  * @param {String} e [description]
  */
-function setServerData(g, p, v, e = 'core') {                       /*dbug-log*/console.log('           --setServerData [%s][%s][%s] = [%O]', e, g, p, v);
-    lcl.data[e][g][p] = v;
+function setServerData(g, p, v, k = 'core') {                       /*dbug-log*/console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
+    lcl.data[k][g][p] = v;
 }
 /**
  * [getDataForServer description]
@@ -53,10 +53,10 @@ function setServerData(g, p, v, e = 'core') {                       /*dbug-log*/
  * @return {[type]}         [description]
  */
 function getDataForServer(fConfg) {                                 /*dbug-log*/console.log('       --getDataForServer [%s][%O]', fConfg.name, fConfg);
-    const group = fConfg.entity ? 'rel' : 'flat';
+    const fKey = fConfg.entity ? 'rel' : 'flat';
     if (!fConfg.value) { return handleEmptyFieldData(fConfg); }
-    if (fConfg.prep) { return handleDataPreparation(group, fConfg);  }
-    setServerData(group, fConfg.name, fConfg.value);
+    if (fConfg.prep) { return handleDataPreparation(fKey, fConfg);  }
+    setServerData(fKey, fConfg.name, fConfg.value);
 }
 function handleEmptyFieldData(fConfg) {
     if (!fConfg.required) { return Promise.resolve(); } //TODO handle edit form
@@ -67,16 +67,26 @@ function handleEmptyFieldData(fConfg) {
  * @param  {[type]} fConfg
  * @return {[type]}         [description]
  */
-function handleDataPreparation(group, fConfg) {                     /*dbug-log*/console.log('           --handleDataPreparation [%s][%O]', group, fConfg);
+function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*/console.log('           --handleDataPreparation [%s][%O]', dKey, fConfg);
     Object.keys(fConfg.prep).forEach(handleDataPrep);
 
     function handleDataPrep(handler) {
-        eval(handler)(group, fConfg.value, ...fConfg.prep[handler]);
+        eval(handler)(fKey, fConfg.value, ...fConfg.prep[handler]);
     }
 }
 /* =========================== DATA WRANGLERS =============================== */
-function renameField(g, val, name, entity = 'core') {               /*dbug-log*/console.log('               --renameField [%s][%s][%s] = [%s]', name, entity, g, val);
+function renameField(g, val, name, dKey = 'core') {                 /*dbug-log*/console.log('               --renameField [%s][%s][%s] = [%s]', name, entity, g, val);
     setServerData(g, name, val, entity);
+}
+function setCoreType(g, val, entity) {                              /*dbug-log*/console.log('               --setCoreType [%s][%s] = [%s]', g, entity, val);
+    // body...
+}
+function setParent(g, val, entity) {                                /*dbug-log*/console.log('               --setParent [%s][%s] = [%s]', g, entity, val);
+    // body...
+}
+
+function setDisplayName(g, val, dKey = 'core') {                    /*dbug-log*/console.log('               --setDisplayName [%s][%s] = [%s]', dKey, g, val);
+    // body...
 }
 
 // function checkForErrors(entity, fVals, fLvl) {

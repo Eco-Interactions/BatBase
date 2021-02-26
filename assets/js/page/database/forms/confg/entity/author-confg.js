@@ -23,11 +23,7 @@ export default function(entity) {
                 name: 'Suffix'
             },
             SourceType: {
-                entity: 'SourceType',
-                name: 'SourceType',
-                required: true,
-                type: 'text',
-                value: '' //TOOD
+                value: 'Author'
             }
         },
         name: entity,

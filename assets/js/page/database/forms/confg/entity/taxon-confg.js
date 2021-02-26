@@ -15,6 +15,9 @@ export default function(entity) {
 
             },
             ParentTaxon: {
+                prep: {
+                    setParent: ['Taxon']
+                },
                 required: true
             },
             Rank: {

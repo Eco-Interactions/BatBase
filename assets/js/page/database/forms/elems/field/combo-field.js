@@ -19,7 +19,8 @@ import { _state } from '~form';
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(entity, fLvl, comboConfg) {          /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], comboConfg = %O", entity, fLvl, comboConfg);
-    const elems = _state('getFormProp', [fLvl, 'selElems']);        /*dbug-log*///console.log('elems = %O', elems)
+    //todo
+    const elems = _state('getFormState', [fLvl, 'selElems']);        /*dbug-log*///console.log('elems = %O', elems)
     elems.forEach(selectizeElem);
     _state('setFormProp', [fLvl, 'selElems', []]);
 
@@ -50,7 +51,7 @@ function getBaseFieldConfg(fieldName) {
 /** The change event is not triggered, so the field data is updated here. */
 export function setSilentVal(fLvl, field, val) {
     _cmbx('setSelVal', [field, val, 'silent']);
-    _state('setFieldState', [fLvl, field, val, 'value']);
+    _state('setFieldState', [fLvl, field, val]);
 }
 /* -------------------------------- RESET ----------------------------------- */
 /**

@@ -118,5 +118,5 @@ function onTypeClear() {
     setInteractionTypeFieldData(null);
 }
 function setInteractionTypeFieldData(val) {
-    _state('setFieldState', ['top', 'InteractionType', val, 'value']);
+    _state('setFieldState', ['top', 'InteractionType', val]);
 }

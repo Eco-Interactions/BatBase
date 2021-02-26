@@ -28,13 +28,13 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {
-    const submitData = _state('getStateProp', ['submit']);          /*dbug-log*///console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
-    if (!submitData) { return; }
-    if (submitData.entity === 'interaction') { return refocusAndShowUpdates(submitData); }
+    const confg = _state('getFormState', ['top']);                  /*dbug-log*/console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
+    if (!confg.submit) { return; }
+    if (confg.name === 'Interaction') { return refocusAndShowUpdates(); }
     _table('reloadTableWithCurrentFilters');
 }
-function refocusAndShowUpdates(submitData) {                        /*dbug-log*///console.log('refocusAndShowUpdates.')
-    if (_state('getFormProp', ['top', 'action']) === 'create') {
+function refocusAndShowUpdates() {                                  /*dbug-log*/console.log('refocusAndShowUpdates.')
+    if (_state('getFormState', ['top', 'action']) === 'create') {
         _filter('showTodaysUpdates', ['srcs']);
     } else {
         _table('reloadTableWithCurrentFilters');
@@ -47,7 +47,7 @@ function refocusAndShowUpdates(submitData) {                        /*dbug-log*/
  * handler stored in the form's params object.
  */
 export function exitSubForm(fLvl, focus, onExit, data) {
-    const exitFunc = onExit || _state('getFormProp', [fLvl, 'onFormClose']);
+    const exitFunc = onExit || _state('getFormState', [fLvl, 'onFormClose']);
     $('#'+fLvl+'-form').remove();                                   /*perm-log*/console.log("               --exitSubForm fLvl = %s, onExit = %O", fLvl, exitFunc);
     _elems('resetFormCombobox', [fLvl, !!focus]);
     if (exitFunc) { exitFunc(data); }

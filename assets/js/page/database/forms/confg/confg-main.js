@@ -56,11 +56,9 @@ import { mergeIntoFormConfg } from './util/merge-confgs.js';
 let confg = null;
 
 /* *************************** FORM CONFG *********************************** */
-export function getFormConfg(fVals, entity, fLvl, showSimpleView = true) {/*dbug-log*/console.log('getFormConfg [%s][%s] fVals?[%O] showSimpleView?[%s]', fLvl, entity, fVals, showSimpleView);
-    confg = getBaseConfg(getConfgName(entity), entity);              /*dbuglog*/console.log('   --baseConfg [%s][%O]', entity, _u('snapshot', [confg]));
-    buildFormConfg(fVals, fLvl, showSimpleView);                    /*dbug-log*/console.log('   --formConfg [%s][%O]', entity, _u('snapshot', [confg]));
-    removeUnneedConfg();
-    _state('setFormProp', [fLvl, 'confg', confg]);
+export function getFormConfg(entity, fLvl, showSimpleView = true) { /*dbug-log*/console.log('+--getFormConfg [%s][%s] showSimpleView?[%s]', fLvl, entity, showSimpleView);
+    confg = getBaseConfg(getConfgName(entity), entity);             /*dbug-log*/console.log('   --baseConfg [%s][%O]', entity, _u('snapshot', [confg]));
+    buildFormConfg(fLvl, showSimpleView);                           /*dbug-log*/console.log('   --formConfg [%s][%O]', entity, _u('snapshot', [confg]));
     return confg;
 }
 function getConfgName(entity) {
@@ -107,23 +105,18 @@ function getConfgName(entity) {
  * @param  {[type]} entity) {                                          console.log('getBaseConfg [%s] for [%s]', name, entity [description]
  * @return {[type]}         [description]
  */
-function getBaseConfg(name, entity) {                               /*dbuglog*/console.log('getBaseConfg [%s] for [%s]', name, entity);
+function getBaseConfg(name, entity) {                               /*dbug-log*/console.log('getBaseConfg [%s] for [%s]', name, entity);
     return require(`./entity/${name}-confg.js`).default(entity);
 }
-function buildFormConfg(fVals, fLvl, showSimpleView) {
-    handleConfgMerges();
+function buildFormConfg(fLvl, showSimpleView) {
+    if (confg.core) { mergeCoreEntityConfg(confg); }
     confg.display = showSimpleView && confg.views.simple ? 'simple' : 'all';
     confg.group = fLvl;
-    confg.view = getDisplayedFieldConfgs(fVals);
-    delete confg.views;
+    confg.view = getDisplayedFieldConfgs();
 }
 /* ====================== MERGE CONFG-DATA ================================== */
-function handleConfgMerges() {                                      /*dbuglog*/console.log('handleConfgMerges confg[%O]', _u('snapshot', [confg]));
-    mergeEntityTypeConfg();
-    if (confg.core) { mergeCoreEntityConfg(confg); }
-}
-function mergeEntityTypeConfg(fLvl) {
-    const type = _state('getFormProp', [fLvl, 'type']);            /*dbuglog*/console.log('mergeEntityTypeConfg type?[%s]', type);
+export function mergeEntityTypeConfg(fLvl) {
+    const type = _state('getFormState', [fLvl, 'type']);            /*dbug-log*/console.log('mergeEntityTypeConfg type?[%s]', type);
     if (!type) { return; }
     // merge core into types and then into form confg. (handles view concat)
     mergeIntoFormConfg(confg, confg.types[type]);
@@ -134,7 +127,7 @@ function mergeEntityTypeConfg(fLvl) {
  * @return {[type]}        [description]
  */
 function mergeCoreEntityConfg(confg) {
-    const cEntityConfg = getConfg(confg.core);                      /*dbuglog*/console.log('mergeCoreAndDetailConfgs confg[%O], cEntityConfg[%O]', views, cEntityConfg);
+    const cEntityConfg = getBaseConfg(confg.core);                   /*dbug-log*/console.log('mergeCoreAndDetailConfgs confg[%O], cEntityConfg[%O]', confg, cEntityConfg);
     mergeIntoFormConfg(confg, cEntityConfg);
 }
 
@@ -143,11 +136,11 @@ function mergeCoreEntityConfg(confg) {
  * [getFieldsToDisplay description]
  * @return {[type]}        [description]
  */
-function getDisplayedFieldConfgs(fVals) {                           /*dbuglog*/console.log("getDisplayedFieldConfgs confg[%O] vals?[%O]", confg, fVals);
+function getDisplayedFieldConfgs() {                                /*dbug-log*/console.log("getDisplayedFieldConfgs confg[%O]", confg);
     confg.infoSteps = 0;
     return confg.views[confg.display].map(getFieldConfgs);
 
-    function getFieldConfgs(name) {                                 /*dbuglog*/console.log("getFieldConfg field[%s][%O]", name, confg.fields[name]);
+    function getFieldConfgs(name) {                                 /*dbug-log*/console.log("getFieldConfg field[%s][%O]", name, confg.fields[name]);
         if (Array.isArray(name)) { return name.map(getFieldConfgs); }
         const fConfg = confg.fields[name];
         if (fConfg.info) { ++confg.infoSteps; }
@@ -155,7 +148,6 @@ function getDisplayedFieldConfgs(fVals) {                           /*dbuglog*/c
         fConfg.group = confg.group;
         fConfg.formName = confg.name;
         fConfg.pinnable = confg.pinnable || false;
-        // if (fVals[name]) {  }
         return fConfg;
     }
 }
@@ -167,11 +159,6 @@ function getFieldClass(fLvl) {
     }[fLvl];
 }
 
-
-function removeUnneedConfg() {
-    delete confg.views;
-    delete confg.types;
-}
 
 
 

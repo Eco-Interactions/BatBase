@@ -17,8 +17,8 @@ import { _elems } from '~form';
  * NOTE: FIRST METHOD IN INTERACTION FORM FIELD-ROW BUILD CHAIN.
  */
 /** @return {ary} Rows for each field in the entity field obj. */
-export function getFormFieldRows(confg) {                           /*dbug-log*/console.log("+--getFormFieldRows [%O]",confg);
-    return Promise.all(confg.view.map(getFormRow))
+export function getFormFieldRows(viewConfg) {                       /*dbug-log*/console.log("+--getFormFieldRows [%O]",viewConfg);
+    return Promise.all(viewConfg.map(getFormRow))
         .then(rows => rows);
 }
 function getFormRow(f) {                                            /*dbug-log*///console.log("   --getFormRow[%O]", f);

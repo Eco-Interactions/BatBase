@@ -41,8 +41,8 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
 }
 function resetOnFormTypeChange(entity, typeId, fLvl) {
     const capsType = _u('ucfirst', [entity]);
-    _state('setFieldState', [fLvl, capsType+'Type', typeId, 'value']);
-    _state('setFormProp', [fLvl, 'reqElems', []]);
+    _state('setFieldState', [fLvl, capsType+'Type', typeId]);
+    // _state('setFormProp', [fLvl, 'reqElems', []]);
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 /* ----------------- GET SOURCE-TYPE ROWS ----------------------------------- */
@@ -50,24 +50,42 @@ function resetOnFormTypeChange(entity, typeId, fLvl) {
  * Builds and return the form-field rows for the selected source type.
  * @return {ary} Form-field rows ordered according to the form config.
  */
-export function getPubOrCitFields(entity, typeId, fLvl, type) {
+/**
+ * [getPubOrCitFields description]
+ * @param  {[type]}  entity [description]
+ * @param  {[type]}  typeId [description]
+ * @param  {[type]}  fLvl   [description]
+ * @param  {Str|Bool} type   Passed for edit-form builds
+ * @return {[type]}         [description]
+ */
+export function getPubOrCitFields(entity, typeId, fLvl, type = false) {/*dbug-log*/console.log('getPubOrCitFields [%s][%s] typeId[%s] type?[%s]', fLvl, entity, typeId, type);
     const fVals = getFilledSrcVals(entity, typeId, fLvl);
-    setSourceType(entity, fLvl, type);
-    $('#'+entity+'_Rows').empty();
+    setSourceType(entity, fLvl, typeId, type);
+    $(`#${entity}_fields`).empty();
     return _elems('getFormFieldRows', [entity, fVals, fLvl]);
 }
 function getFilledSrcVals(entity, typeId, fLvl) {
-    const vals = _elems('getCurrentFormFieldVals', [fLvl]);
+    const vals = _state('getCurrentFormFieldVals', [fLvl]);
     vals[_u('ucfirst', [entity])+'Type'] = typeId;
     return vals;
 }
 /** Update form state for the selected source type. */
-function setSourceType(entity, fLvl, tName) {
-    const type = tName || getSourceTypeFromCombo(entity);           /*dbug-log*///console.log('               --type = [%s]', type);
-    _state('setFormProp', [fLvl, 'entityType', type]);
+function setSourceType(entity, fLvl, tId, tName) {
+    const typeField = _u('ucfirst', [entity])+'Type';
+    const val = {
+        text: tName ? tName : getSourceTypeNameFromCombo(typeField),
+        value: tId ? tId : getSourceTypeIdFromCombo(typeField)
+    };                                                               /*dbug-log*/console.log('--setSourceType[%s] = %O', typeField, val);
+    _state('setFieldState', [fLvl, typeField, val]);
+    _state('setFormProp', [fLvl, 'type', text]);
+    // const type = tName || getSourceTypeFromCombo(entity);
+    // _state('setFormProp', [fLvl, 'entityType', type]);
 }
-function getSourceTypeFromCombo(entity) {
-    return _cmbx('getSelTxt', [_u('ucfirst', [entity])+'Type']);
+function getSourceTypeNameFromCombo(tField) {
+    return _cmbx('getSelTxt', [tField]);
+}
+function getSourceTypeIdFromCombo(tField) {
+    return _cmbx('getSelVal', [tField]);
 }
 /* ================= UPDATE SOURCE-TYPE FIELDS ============================== */
 export function updateFieldsForSourceType (entity, fLvl) {

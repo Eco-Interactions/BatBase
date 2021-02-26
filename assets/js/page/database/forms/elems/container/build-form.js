@@ -29,9 +29,9 @@ let action, entity, fLvl;
  * @return {[type]}        [description]
  */
 export function buildAndAppendRootForm(fields, id = null) {         /*dbug-log*/console.log('buildAndAppendRootForm [%s] = %O', id, fields);
-    const state = _state('getFormState');
-    setFormScopeParams(state.action, state.entity, 'top');
-    const form = buildForm(id, fields);                                         console.log('form = %O', form)
+    const fState = _state('getFormState', ['top']);
+    setFormScopeParams(fState.action, fState.name, 'top');
+    const form = buildForm(id, fields);
     appendAndStyleForm(form, entity);
     return Promise.resolve();
 }
@@ -120,7 +120,7 @@ function addFormStyleClass() {
 }
 /* ============================== SUB FORM ================================== */
 export function getSubForm(fLvl, fClasses, fVals, sId) {
-    entity = _state('getFormProp', [fLvl, 'entity']);
+    entity = _state('getFormState', [fLvl, 'entity']);
     setFormScopeParams('create', entity, fLvl);
     return _elems('getFormRows', [entity, fVals, fLvl])
         .then(rows => buildSubFormContainer(rows, fClasses))
@@ -162,7 +162,7 @@ function getFormHelpElems() {
     return cntnr;
 }
 function getFormWalkthroughBttn() {
-    let infoSteps = _state('getFormConfg', [fLvl, 'infoSteps']);
+    let infoSteps = _state('getFormState', [fLvl, 'infoSteps']);
     if (!infoSteps) { return; }
     const titleInfo = "Hover your mouse over any field and it's help popup will show, if it has one.";
     const bttn = buildWalkthroughButton(titleInfo);

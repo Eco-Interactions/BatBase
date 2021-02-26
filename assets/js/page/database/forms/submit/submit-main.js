@@ -21,33 +21,17 @@ import * as prep from './data/submit-data-main.js';
 export function _validation(funcName, params = []) {
     return executeMethod(funcName, val, 'val', 'submit-main', params);
 }
-/** ----------------------- VALIDATE DATA ----------------------------------- */
-export function getValidatedFormData(entity, fLvl, submitting) { /*dbug-log*/console.log(' !!!!!!!!!!!!!  getValidatedFormData')
+/** ----------------------- DATA PREPARATION -------------------------------- */
+export function getValidatedFormData(entity, fLvl, submitting) {    /*dbug-log*/console.log(' !!!!!!!!!!!!!  getValidatedFormData')
     // return handleFormSubmit(entity, fLvl);
 }
 /* used by edit-form */
 export function handleFormSubmit(fLvl) {
     $(`#${fLvl}-submit`).attr('disabled', true).fadeTo('fast', .6);
-    const confg = _state('getFormConfg', [fLvl]);
+    const confg = _state('getFormState', [fLvl]);
     prep.prepareDataForServer(confg)
-    .then(data => submitFormData(data, fLvl, confg));
-}
-/* ------------------------- SUBMIT FORM ------------------------------------ */
-function submitFormData(data, fLvl, confg) {                                   console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
-    addEntityDataToFormData(data, confg);
-    _state('setFormConfg', [fLvl, true, 'submit']);
-    toggleWaitOverlay(true);
-    submitForm(data, fLvl);
-}
-function submitForm(data, fLvl) {
-    const url = 'crud/entity/' + _state('getFormProp', [fLvl, 'action']);
-    const fSuccess = onSuccess.bind(null, fLvl);
-    const fError = val.formSubmitError.bind(null, fLvl);
-    _u('sendAjaxQuery', [data, url, fSuccess, fError]);                         _u('logInProdEnv', ['data = ', JSON.stringify(data)]);
-}
-function formSubmitError() {
-    toggleWaitOverlay(false);
-    val.formSubmitError(...arguments);
+    .then(data => submitFormData(data, fLvl, confg))
+    .then(() => _state('setFormProp', [fLvl, 'submit', true]));
 }
 function addEntityDataToFormData(data, confg) {
     addEntityNames(confg.core);
@@ -60,13 +44,29 @@ function addEntityDataToFormData(data, confg) {
         if (core) { data.detailEntity =  confg.name; }
     }
 }
+/* ------------------------- SUBMIT FORM ------------------------------------ */
+function submitFormData(data, fLvl, action) {                       /*dbug-log*/console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
+    addEntityDataToFormData(data);
+    toggleWaitOverlay(true);
+    submitForm(data, fLvl, action);
+}
+function submitForm(data, fLvl, action) {
+    const url = `crud/entity/${action}`;
+    const fSuccess = onSuccess.bind(null, fLvl);
+    const fError = val.formSubmitError.bind(null, fLvl);
+    _u('sendAjaxQuery', [data, url, fSuccess, fError]);                         _u('logInProdEnv', ['data = ', JSON.stringify(data)]);
+}
+function formSubmitError() {
+    toggleWaitOverlay(false);
+    val.formSubmitError(...arguments);
+}
 /* ----------------- ON SUBMIT SUCCESS ---------------------------- */
 function onSuccess(fLvl, data, textStatus, jqXHR) {                             _u('logAjaxData', [data, arguments]);
     _db('afterServerDataUpdateSyncLocalDatabase', [data.results])
     .then(data => onDataSynced(fLvl, data));
 }
 function onDataSynced(fLvl, data) {                                             console.log('       --onDataSynced.');
-    if (!_state('getFormConfg', [fLvl, 'submit'])) { return; } //form closed.
+    if (!_state('getFormState', [fLvl, 'submit'])) { return; } //form closed.
     toggleWaitOverlay(false);
     if (data.fails) { return val.errUpdatingData('dataSyncFailures'); }
     if (noDataChanges()) { return showNoChangesMessage(); }
@@ -74,7 +74,7 @@ function onDataSynced(fLvl, data) {                                             
     .then(handleFormComplete.bind(null, fLvl, data));
 
     function noDataChanges() {
-        const action = _state('getFormProp', [fLvl, 'action'])
+        const action = _state('getFormState', [fLvl, 'action'])
         return action === 'edit'  && !hasChngs(data);
     }
 }
@@ -109,7 +109,7 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
 /*----------- Top-Form Success Methods ------------*/
 function handleFormComplete(fLvl, data) {                                       console.log('handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    const onClose = _state('getFormProp', ['top', 'onFormClose']);              console.log('onClose = %O', onClose);
+    const onClose = _state('getFormState', ['top', 'onFormClose']);              console.log('onClose = %O', onClose);
     if (onClose) { onClose(data);
     } else { _elems('exitRootForm'); }
 }

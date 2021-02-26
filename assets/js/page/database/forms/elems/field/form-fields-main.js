@@ -71,7 +71,7 @@ export function fillComplexFormFields() {
 /* ================== IF REQUIRED FIELDS FILLED ============================= */
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled(fLvl) {
-    const fields = _state('getFormConfg', [fLvl, 'fields']);         /*dbug-log*/console.log("+--ifAllRequiredFieldsFilled... [%s][%O]", fLvl, fields)
+    const fields = _state('getFormState', [fLvl, 'fields']);         /*dbug-log*/console.log("+--ifAllRequiredFieldsFilled... [%s][%O]", fLvl, fields)
     return Object.values(fields).every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */

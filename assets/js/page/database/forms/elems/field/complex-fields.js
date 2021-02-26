@@ -13,7 +13,7 @@ import { _form, _state } from '~form';
  *
  */
 export function fillComplexFormFields(fLvl) {
-    const fieldData = _state('getFormProp', [fLvl, 'fieldData']);
+    const fieldData = _state('getFormState', [fLvl, 'fieldData']);
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
     const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs);
     return fields.reduce(fillAllComplexFieldsWithData, Promise.resolve());

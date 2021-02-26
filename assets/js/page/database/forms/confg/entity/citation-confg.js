@@ -73,10 +73,14 @@ function getCitationFieldConfg() {
             type: 'page',
         },
         ParentSource: {
-            required: true, //Publication
+            prep: {
+                setParent: ['Source']
+            },
+            required: true,
+            value: 'Publication'
         },
         SourceType: {  //MERGES WITH CORE.FIELDS. ADDS/OVERWRITES FIELD PROPS
-            value: '' //TODO
+            value: 'Citation'
         },
         Title: {
             name: 'Title',
