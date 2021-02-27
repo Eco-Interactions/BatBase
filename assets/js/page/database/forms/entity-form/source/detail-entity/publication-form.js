@@ -38,7 +38,6 @@ function appendPubFormAndFinishBuild(form) {
     sForm.addConfirmationBeforeSubmit('publication', 'sub');
     $('#Title_f input').focus();
     _elems('setDynamicFormStyles', ['publication']);
-    $('#PublicationType-lbl').css('min-width', '125px');
 }
 /* --------------------- PUBLICATION-TYPE FIELDS ---------------------------- */
 /**
@@ -50,27 +49,9 @@ export function loadPubTypeFields(typeId) {                         /*dbug-log*/
         .then(finishPubTypeFields);
 
     function finishPubTypeFields() {
-        setPubComboLabelWidth();
         ifBookAddAuthEdNote();
         _elems('setDynamicFormStyles', ['publication']);
-        ifThesisDissertationModifyLabel();
     }
-}
-/* Fixes and aligns label and row styles. */
-function setPubComboLabelWidth() {
-    if ($('#PublicationType_f.top-f').length) { return setPublicationTypeLabel(); }
-    const rowW = $('#PublicationType_f').width() - 14;
-    $('#PublicationType_f, #Publisher_f, #Editors_f').css('max-width', rowW);
-    $('#PublicationType-lbl, #Publisher-lbl, #Editors-lbl').css('min-width', '125px');
-    $('#Authors-lbl').css('min-width', '109px');
-}
-function setPublicationTypeLabel() {
-    $('#PublicationType-lbl').css('min-width', '125px');
-}
-function ifThesisDissertationModifyLabel() {
-    const type = _cmbx('getSelTxt', ['PublicationType']);
-    if (type !== 'Thesis/Dissertation') { return; }
-    $('#Publisher-lbl').css({'flex': '0 0 157px'});
 }
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote() {
@@ -83,6 +64,5 @@ function ifBookAddAuthEdNote() {
 }
 /* --------------------- FINISH EDIT-FORM ----------------------------------- */
 export function finishPublicationEditForm() {
-    $('#PublicationType-lbl').css('min-width', '125px');
     ifBookAddAuthEdNote();
 }

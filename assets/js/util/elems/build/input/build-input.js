@@ -18,7 +18,7 @@ import { _cmbx, _el } from '~util';
 import { handleInputValidation } from './val-input.js';
 let f;
 /* ======================= INPUT BUIDLERS =================================== */
-export function getFieldInput(fConfg) {                             /*dbug-log*/console.log('+--getFieldInput [%O]', fConfg);
+export function getFieldInput(fConfg) {                             /*dbug-log*///console.log('+--getFieldInput [%O]', fConfg);
     f = fConfg;
     return Promise.resolve(getInput(f.type))
         .then(handleInputValidation.bind(null, f.type))
@@ -121,7 +121,7 @@ function getCntLabel(cnt) {
     return cnt in map ? map[cnt] : cnt+'th: ';
 }
 /* ========================== FINISH BUILD ================================== */
-function finishInputBuild(fConfg, input) {                          /*dbug-log*/console.log('   --finishInputBuild [%O][%O]', fConfg, input);
+function finishInputBuild(fConfg, input) {                          /*dbug-log*///console.log('   --finishInputBuild [%O][%O]', fConfg, input);
     fConfg.input = input;
     setFieldValue(fConfg);
     return fConfg;

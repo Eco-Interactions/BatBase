@@ -48,6 +48,7 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/
 /* -------------------------- FIELD STATE ----------------------------------- */
 function updateFormFieldState() {                                   /*dbug-log*/console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
     if (f.combo) { _state('addComboToFormState', [f.group, f.name]); }
+    f.shown = true;
     //todo remove build-data before storing confg
     _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data
 }
@@ -114,7 +115,7 @@ export function setOnMultiSelectChangeListener(input = f.input) {   /*dbug-log*/
  * @return {[type]}       [description]
  */
 function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*/console.log('storeMultiSelectValue. lvl = %s, cnt = %s, fName = %s, e = %O', fLvl, cnt, fName, e);
-    const valueObj = _state('getFormFieldData', [fLvl, fName]).val; /*dbug-log*/console.log('fieldObj = %O', fieldObj);
+    const valueObj = _state('getFormFieldData', [fLvl, fName, 'value']); /*dbug-log*/console.log('fieldObj = %O', fieldObj);
     valueObj[cnt] = e.target.value || null;
     _state('setFieldState', [fLvl, fName, valueObj]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE

@@ -13,14 +13,15 @@ import { _form, _state } from '~form';
  *
  */
 export function fillComplexFormFields(fLvl) {
-    const fieldData = _state('getFormState', [fLvl, 'fieldData']);
+    const fieldData = _state('getFormState', [fLvl, 'fields']);
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };
     const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs);
     return fields.reduce(fillAllComplexFieldsWithData, Promise.resolve());
 
     function fillAllComplexFieldsWithData(p, field) {
+        if (!field.shown) { return Promise.resolve(); }
         const type = fieldData[field].type;
-        const val = fieldData[field].val;
+        const val = fieldData[field].value;
         return p.then(() => fieldHndlrs[type]([field, val, fLvl]));
     }
 }

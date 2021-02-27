@@ -43,7 +43,7 @@ export function logInProdEnv() {
     if ($('body').data('env') !== 'prod') { return; }
     console.log(...arguments);
 }
-export function snapshot(obj) {
+export function snapshot(obj) {                                     /*dbug-log*///console.log('snapshot [%O]', obj);
     return JSON.parse(JSON.stringify(obj));
 }
 /* ========================= ELEM =========================================== */

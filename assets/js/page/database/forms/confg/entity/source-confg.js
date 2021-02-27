@@ -30,9 +30,9 @@ function getSourceFieldConfg() {
         },
         DisplayName: {
             name: 'DisplayName',
-            prop: { // TODO DRY
-                core: 'DisplayName',
-                detail: 'DisplayName'
+            prep: {    // TODO: DRY
+                setDisplayName: [],
+                setDisplayName: ['detail']
             },
             required: true,
             type: 'text',
@@ -68,12 +68,13 @@ function getSourceFieldConfg() {
         },
         Website: {
             name: 'Website',
-            prop: {
-                core: 'LinkUrl'
+            prep: { //func: [args]
+                renameField: ['LinkUrl'],
             },
             type: 'url',
         },
         Year: {
+            class: 'sml-field',
             name: 'Year',
             required: true,
             type: 'year',

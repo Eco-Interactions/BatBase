@@ -17,7 +17,7 @@ export default function(entity) {
 }
 function getPublicationFieldConfg() {
     return {
-        Doi: {
+        Doi: {//Source field
             info: {
                 tooltip: 'Digital Object Identifier provided by the Publisher',
             }
@@ -33,19 +33,14 @@ function getPublicationFieldConfg() {
             name: 'Publisher',
             type: 'select',
         },
-        SourceType: {
+        SourceType: {//Source field
             value: 'Publisher'
         },
-        Title: {
-            name: 'Title',
-            prep: {    // TODO: DRY
-                setDisplayName: [],
-                setDisplayName: ['detail']
-            },
-            required: true,
-            type: 'text',
+        DisplayName: { //Source field
+            label: 'Title',
+            // type: 'text',
         },
-        Website: {
+        Website: {//Source field
             info: {
                 tooltip: 'Copy and paste link to publication, if available',
             }
@@ -76,9 +71,8 @@ function getPublicationTypeConfg() {
             },
             views: {
                 all: [
-                    ['Year', 'Doi'],
-                    ['Website', 'Description'],
-                    ['Publisher'],
+                    ['Year', 'Doi', 'Website'],
+                    ['Publisher', 'Description'],
                     ['Authors', 'Editors']
                 ],
                 simple: [
@@ -92,9 +86,8 @@ function getPublicationTypeConfg() {
             required: [],
             views: {
                 all: [
-                    ['Year', 'Doi'],
-                    ['Website', 'Description'],
-                    ['Publisher'],
+                    ['Year', 'Doi', 'Website'],
+                    ['Publisher', 'Description'],
                 ],
                 simple: [], //No additional fields shown
             }
@@ -111,13 +104,13 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Year', 'Doi'],
-                    ['Website', 'Description'],
-                    ['Publisher', 'Authors'],
+                    ['Year', 'Doi', 'Website'],
+                    ['Publisher', 'Description'],
+                    ['Authors'],
                 ],
                 simple: [
                     ['Year', 'Publisher'],
-                    'Authors'
+                    ['Authors']
                 ],
             }
         },
@@ -139,13 +132,13 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Year', 'Doi'],
-                    ['Website', 'Description'],
-                    ['Publisher', 'Authors'],
+                    ['Year', 'Doi', 'Website'],
+                    ['Publisher', 'Description'],
+                    ['Authors']
                 ],
                 simple: [
                     ['Year', 'Publisher'],
-                    'Authors'
+                    ['Authors']
                 ],
             }
         }

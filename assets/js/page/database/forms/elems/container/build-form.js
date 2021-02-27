@@ -120,7 +120,7 @@ function addFormStyleClass() {
 }
 /* ============================== SUB FORM ================================== */
 export function getSubForm(fLvl, fClasses, fVals, sId) {
-    entity = _state('getFormState', [fLvl, 'entity']);
+    entity = _state('getFormState', [fLvl, 'name']);
     setFormScopeParams('create', entity, fLvl);
     return _elems('getFormRows', [entity, fVals, fLvl])
         .then(rows => buildSubFormContainer(rows, fClasses))

@@ -101,11 +101,9 @@ function getDataKeysForEntityRootForm(action, entity) {
  *
  * -- Property descriptions:
  * > action - create || edit
- * > confg - The form config. See file for details.
  * > simple - All fields are shown unless simple default-display confg present
  * > entity - Name of this form's entity.
  * > onFormClose - Handles form exit/reset.
-// * > fieldData - Obj with each form field (k) and it's (v) { value, fieldType }
  * > misc - Obj to hold the various special-case props
  * > pSelId - The id of the parent select of the form.
  * > selElems - Contains all selElems until they are initialized with selectize.
@@ -173,7 +171,7 @@ export function getFormState(fLvl, prop = null) {
     return prop ? fData[prop] : fData;
 }
 export function getFormFieldData(fLvl, field, prop) {
-    const fData = fState.forms[fLvl].confg[field];
+    const fData = fState.forms[fLvl].fields[field];
     return prop ? fData[prop] : fData;
 }
 export function getFormData(fLvl, field) {                          /*dbug-log*/console.log('getFormConfg [%s][%s] [%O]', fLvl, field, fState.forms[fLvl].confg.fields);
@@ -254,6 +252,11 @@ export function setOnFormCloseHandler(fLvl, hndlr) {
 }
 export function addRequiredFieldInput(fLvl, input) {
     fState.forms[fLvl].reqElems.push(input);
+}
+export function updateFormTypeConfg(fLvl, type) {
+    const vals = getCurrentFormFieldVals(fLvl);
+    fState.forms[fLvl].type = type;
+    _confg('updateFormTypeConfg', [fState.forms[fLvl], fLvl, vals]);
 }
 /* _________________________ COMBOBOX _______________________________________ */
 export function addComboToFormState(fLvl, field) {                  /*dbug-log*/console.log('addComboTo[%s]Memory [%s]', fLvl, field);
