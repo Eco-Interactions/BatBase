@@ -34,7 +34,7 @@ function buildAndAppendPubForm(val) {
 }
 function appendPubFormAndFinishBuild(form) {
     $('#CitationTitle_f')[0].parentNode.after(form);
-    sForm.initFormCombos('publication', 'sub');
+    sForm.initCombos('sub', 'publication');
     sForm.addConfirmationBeforeSubmit('publication', 'sub');
     $('#Title_f input').focus();
     _elems('setDynamicFormStyles', ['publication']);

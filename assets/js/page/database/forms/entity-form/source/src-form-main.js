@@ -1,5 +1,5 @@
 /**
- * Source form code: Authors, Citations, Publication, and Publisher.
+ * Source forms: Author, Citation, Publication, and Publisher.
  *
  * TOC
  *     FORM INIT
@@ -16,8 +16,8 @@ import * as entityForm from './detail-entity/src-detail-entity-form-main.js';
 import * as typeFields from './pub-and-cit-type-fields.js';
 /* ------------------- FORM INIT -------------------------------------------- */
 /** Inits comboboxes for the source forms. */
-export function initFormCombos() {
-    entityForm.initFormCombos(...arguments);
+export function initCombos() {
+    entityForm.initCombos(...arguments);
 }
 export function initCreateForm() {
     return entityForm.initCreateForm(...arguments);
@@ -53,8 +53,6 @@ function getSrcRcrd(pubId) {
 /* ----------------- PUBLICATION|CITATION FINISH BUILD ---------------------- */
 /** Note: Only citation & publication forms use this. */
 export function finishEditFormBuild(entity) {                       /*dbug-log*///console.log('---finishEditFormBuild')
-    $('.all-fields-cntnr').hide();
-    initFormCombos(entity, 'top');
     finishSrcFieldLoad(entity, 'top');
     addConfirmationBeforeSubmit(entity, 'top');
 }

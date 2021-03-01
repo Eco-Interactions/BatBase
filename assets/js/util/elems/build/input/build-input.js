@@ -4,7 +4,7 @@
  *
  * Export
  *     getFieldInput
- *     buildMultiSelectInput
+ *     buildMultiSelectField
  *
  * TOC
  *     INPUT BUILDERS
@@ -14,7 +14,7 @@
  *         CHANGE HANDLER
  *         REQUIRED FIELDS
  */
-import { _cmbx, _el } from '~util';
+import { _cmbx, _el, _u } from '~util';
 import { handleInputValidation } from './val-input.js';
 let f;
 /* ======================= INPUT BUIDLERS =================================== */
@@ -35,7 +35,7 @@ function getInput(type) {
         fullTextArea:   buildLongTextArea,
         lat:            buildInput,
         lng:            buildInput,
-        multiSelect:    buildMultiSelectField,
+        multiSelect:    buildMultiSelectFieldCntnr,
         num:            buildNumberInput,
         page:           buildInput,
         select:         buildSelect,
@@ -63,7 +63,7 @@ function buildTextArea() {
     return _el('getElem', ['textarea', {class: f.class }]);
 }
 function buildLongTextArea() {
-    const attr = { class: 'xlrg-field '+f.class, id:'txt-'+f.name };
+    const attr = { class: 'xlrg-field '+f.class, id:'txt-'+f.id };
     return _el('getElem', ['textarea', attr]);
 }
 /* --------------------- SINGLE SELECT/COMBOS ------------------------------- */
@@ -73,12 +73,12 @@ function buildLongTextArea() {
  * the select's fieldName to the subForm config's 'selElem' array to later
  * init the 'selectize' combobox.
  */
-function buildSelect() {                                            /*dbug-log*///console.log("       --buildSelect [%s][%O]", f.name, f);
-    return _cmbx('getFieldOptions', [f.name])
-        .then(finishSelectBuild.bind(null, f));
+function buildSelect(fConfg = f) {                                  /*dbug-log*/console.log("       --buildSelect [%O]", fConfg);
+    return _cmbx('getFieldOptions', [fConfg.name])
+        .then(finishSelectBuild.bind(null, fConfg));
 
-    function finishSelectBuild(fConfg, opts) {                      /*dbug-log*///console.log('           --finishSelectBuild [%s] ?[%s] opts[%O]', fConfg, opts);
-        const attr = { class: fConfg.class, id: 'sel-' + fConfg.name };
+    function finishSelectBuild(fConfg, opts) {                      /*dbug-log*/console.log('           --finishSelectBuild fConfg[%O] opts[%O]', fConfg, opts);
+        const attr = { class: fConfg.class, id: 'sel-' + fConfg.id };
         fConfg.combo = true; //Flag for the combobox selectize-library
         return _el('getSelect', [opts, attr]);
     }
@@ -89,36 +89,44 @@ function buildSelect() {                                            /*dbug-log*/
  * be reaplced inline upon selection. Either with an existing Author's name,
  * or the Author create form when the user enters a new Author's name.
  */
-function buildMultiSelectField() {                                  /*dbug-log*///console.log("       --buildMultiSelectField [%s][%s]", f);
-    return buildMultiSelectInput(f)
-        .then(returnFinishedMultiSelectField);
+function buildMultiSelectFieldCntnr() {                             /*dbug-log*/console.log("       --buildMultiSelectFieldCntnr [%s][%s]", f);
+    return buildMultiSelectField(f)
+        .then(finishMultiSelectFieldCntnr);
 
-    function returnFinishedMultiSelectField(input) {
+    function finishMultiSelectFieldCntnr(field) {
         const fConfg = {
             dir: 'col',
             input: input,
+            label: false,
             name: f.name,
         };
         return _el('getFieldElems', [fConfg]);
     }
 }
-export function buildMultiSelectInput(field, cnt = 1) {             /*dbug-log*///console.log("           --buildMultiSelectInput [%s][%O]", cnt, field);
-    return buildSelect(field)
+/**
+ * [buildMultiSelectField description]
+ * @param  {[type]} fConfg [description]
+ * @param  {[type]} cnt    [description]
+ * @return {[type]}        [description]
+ */
+export function buildMultiSelectField(fConfg, cnt = 1) {             /*dbug-log*/console.log("           --buildMultiSelectField [%s][%O]", cnt, fConfg);
+    return buildSelect(fConfg)
         .then(finishFieldInput);
 
     function finishFieldInput(input) {
-        const fConfg = {
+        fConfg = {
             input: input,
-            label: getCntLabel(cnt),
+            label: getCntLabel()+': '+fConfg.name,
             name: f.name+cnt
         };
-        if (cnt) { $(input).data('cnt', cnt); }
+        $(input).data('cnt', cnt);
         return _el('getFieldElems', [fConfg]);
+        // if (cnt) { $(input).data('cnt', cnt); }
     }
-}
-function getCntLabel(cnt) {
-    const map = {1: '1st: ', 2:'2nd: ', 3:'3rd: '};
-    return cnt in map ? map[cnt] : cnt+'th: ';
+    function getCntLabel(cnt) {
+        const map = { 1: '1st', 2:'2nd', 3:'3rd' };
+        return cnt in map ? map[cnt] : cnt+'th';
+    }
 }
 /* ========================== FINISH BUILD ================================== */
 function finishInputBuild(fConfg, input) {                          /*dbug-log*///console.log('   --finishInputBuild [%O][%O]', fConfg, input);

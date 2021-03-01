@@ -123,7 +123,7 @@ function getDataKeysForEntityRootForm(action, entity) {
 export function addEntityFormState(entity, fLvl, pSel, action) {   /*dbug-log*/console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, fLvl, pSel, action);
     fState.forms[entity] = fLvl;
     fState.forms[fLvl] = _confg('getFormConfg', [entity, fLvl]);
-    Object.assign(fState.forms[fLvl], finishFormStateInit(pSel, action));       //console.log('new formState[%s] [%O]', fLvl, fState.forms[fLvl]);
+    Object.assign(fState.forms[fLvl], finishFormStateInit(pSel, action));       console.log('new formState[%s] [%O]', fLvl, fState.forms[fLvl]);
 }
 function finishFormStateInit(pSel, action) {
     return {
@@ -156,21 +156,22 @@ export function initTaxonState(groupId, subGroupId) {
 export function getStateProp(prop) {                                /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
     return fState[prop];
 }
-export function getFormLvlState(fLvl) {
-    return fState.forms[fLvl] ? fState.forms[fLvl] : false;
-}
 export function getFormParentId(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].pSelId : false;
+}
+export function getFormComboFields(fLvl) {                          /*dbug-log*/console.log('getFormComboFields [%s]', fLvl);//console.trace();
+    return Object.values(getFormFieldData(fLvl)).filter(f => f.combo);
 }
 export function getFormEntity(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].entity : false;
 }
 export function getFormState(fLvl, prop = null) {
-    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*/console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl].confg);
+    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*/console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl]);//console.trace();
     const fData = fState.forms[fLvl];
     return prop ? fData[prop] : fData;
 }
-export function getFormFieldData(fLvl, field, prop) {
+export function getFormFieldData(fLvl, field, prop) {               /*dbug-log*/console.log('getFormFieldData [%s] field?[%s] prop?[%s] [%O]', fLvl, field, prop, fState.forms[fLvl]);//console.trace();
+    if (!field) { return fState.forms[fLvl].fields; }
     const fData = fState.forms[fLvl].fields[field];
     return prop ? fData[prop] : fData;
 }
@@ -259,10 +260,6 @@ export function updateFormTypeConfg(fLvl, type) {
     _confg('updateFormTypeConfg', [fState.forms[fLvl], fLvl, vals]);
 }
 /* _________________________ COMBOBOX _______________________________________ */
-export function addComboToFormState(fLvl, field) {                  /*dbug-log*/console.log('addComboTo[%s]Memory [%s]', fLvl, field);
-    if (!fState.forms) { return; } //form was closed.
-    fState.forms[fLvl].selElems.push(field);
-}
 /* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
 export function removeSelFromStateMemory(fLvl, fieldName) {
     const idx = fState.forms[fLvl].selElems.indexOf(fieldName);

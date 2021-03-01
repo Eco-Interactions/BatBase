@@ -45,12 +45,12 @@ export function getFieldElems(fConfg) {                             /*dbug-log*/
 }
 /* ======================== CONTAINER ======================================= */
 function buildContainer() {
-    const selector = f.type.includes('multi') ? '_f-cntnr' : '_f';
-    const attr = { class: getCntnrClass(), id: f.name + selector};
+    const elSuffx = f.type.includes('multi') ? '_f-cntnr' : '_f';
+    const attr = { class: getCntnrClass(), id: f.id+elSuffx};
     return _el('getElem', ['div', attr]);
     /** Returns the style classes for the field container. */
     function getCntnrClass() {
-        const groupClass = f.group ? f.group + selector : null;
+        const groupClass = f.group ? f.group + elSuffx : null;
         const rowClass = f.class ? f.class : null;
         return [groupClass, rowClass].filter(c => c).join(' ');
     }
@@ -82,7 +82,8 @@ function getInfoTxt(info, key = 'tooltip') {
 /* -------------------------- LABEL ----------------------------------------- */
 function buildFieldLabel() {
     if (f.label === false) { return; }
-    const attr = { id: f.name+'_lbl', class: getLabelClass(), text: getFieldName()};
+    f.label = getFieldName();
+    const attr = { id: f.id+'_lbl', class: getLabelClass(), text: f.label };
     return _el('getElem', ['label', attr]);
 }
 function getLabelClass() {
@@ -90,8 +91,7 @@ function getLabelClass() {
 }
 function getFieldName() {
     if (f.label) { return f.label; }
-    const fName = f.name.includes('-') ? f.name : f.name.replace(/([A-Z])/g, ' $1'); //Adds space between pascal-cased words
-    return _u('ucfirst', [fName]).trim();
+    return _u('addSpaceBetweenCamelCaseUnlessHyphen', [f.name]);
 }
 /* =========================== VALIDATION =================================== */
 // Data-entry form validation handled in form module. TODO: MERGE

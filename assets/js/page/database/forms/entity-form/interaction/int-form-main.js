@@ -33,9 +33,9 @@ export function clearFormMemory() {
     fields.clearFormFieldModuleMemory();
 }
 /** ------------------ FORM COMBOBOXES -------------------------------------- */
-export function initFormCombos(entity) {
-    const events = fields.getIntFormFieldComboEvents();
-    _elems('initFormCombos', ['interaction', 'top', events]);
+export function initCombos(entity) {
+    const events = fields.getIntComboConfg();
+    _elems('initFormCombos', ['top', events]);
 }
 /** ====================== FORM-FIELD HELPERS =============================== */
 /*------------------ CITATION ------------------------------------------------*/

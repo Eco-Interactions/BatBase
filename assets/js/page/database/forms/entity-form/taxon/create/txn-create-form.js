@@ -12,7 +12,7 @@
 import { _cmbx, _el, _u } from '~util';
 import { _state, _elems, _val, handleFormSubmit } from '~form';
 
-export function initFormCombos(entity, fLvl) {} //No combos in this form.
+export function initCombos(entity, fLvl) {} //No combos in this form.
 /* ========================= INIT =========================================== */
 export function initCreateForm(rank, value) {                       /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, value);
     const val = value === 'create' ? '' : value;

@@ -46,8 +46,12 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/
     $(field.lastChild).append(pin);
 }
 /* -------------------------- FIELD STATE ----------------------------------- */
+/**
+ * Note: This method is the first form-method after the util elem-build.
+ * @param  {[type]} ) {                                              console.log('       --updateFormState f[%O]', _u('snapshot', [f]) [description]
+ * @return {[type]}   [description]
+ */
 function updateFormFieldState() {                                   /*dbug-log*/console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
-    if (f.combo) { _state('addComboToFormState', [f.group, f.name]); }
     f.shown = true;
     //todo remove build-data before storing confg
     _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data

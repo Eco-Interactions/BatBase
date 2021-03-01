@@ -88,7 +88,7 @@ function toggleFormFields(entity, fLvl, fVals) {
 
     function appendAndFinishRebuild(rows) {
         $(`#${fLvl}-top`).append(rows);
-        _form('initFormCombos', [_u('lcfirst', [entity]), fLvl]);
+        _form('initCombos', [fLvl]);
         _elems('fillComplexFormFields', [fLvl])
         .then(finishComplexForms);
     }

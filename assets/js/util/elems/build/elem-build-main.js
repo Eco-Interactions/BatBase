@@ -28,10 +28,11 @@ export function getFieldElems() {
     return field.getFieldElems(...arguments);
 }
 /* ------------------------ INPUT ------------------------------------------- */
-export function getFieldInput() {
+export function getFieldInput(f) {
+    f.id = f.id ? f.id : (f.label ? f.label : f.name);
     return input.getFieldInput(...arguments);
 }
-export function buildMultiSelectInput() {
-    return input.buildMultiSelectInput(...arguments);
+export function buildMultiSelectField() {
+    return input.buildMultiSelectField(...arguments);
 }
 /* ---------------------- FORM-ROW ------------------------------------------- */

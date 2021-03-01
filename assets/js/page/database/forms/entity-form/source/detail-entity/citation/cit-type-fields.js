@@ -68,15 +68,19 @@ export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*/
  */
 export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*///console.log('handleSpecialCaseTypeUpdates [%s]', type)
     const hndlrs = {
-        'Book': updateBookFields, 'Chapter': updateBookFields,
-        "Master's Thesis": disableTitleField, 'Other': disableFilledFields,
-        'Ph.D. Dissertation': disableTitleField, 'Museum record': disableFilledFields,
-        'Report': disableFilledFields };
-        if (Object.keys(hndlrs).indexOf(type) === -1) { return; }
+        'Book': updateBookFields,
+        'Chapter': updateBookFields,
+        "Master's Thesis": toggleTitleField,
+        'Museum record': disableFilledFields,
+        'Other': disableFilledFields,
+        'Ph.D. Dissertation': disableTitleField,
+        'Report': disableFilledFields
+    };
+    if (Object.keys(hndlrs).indexOf(type) === -1) { return; }
     hndlrs[type](type, fLvl);
 
     function updateBookFields() {
-        const fS = _state('getFormLvlState', [fLvl]);
+        const fS = _state('getFormState', [fLvl]);
         const pubAuths = fS.rcrds.src.authors;
         if (!pubAuths) { return reshowAuthorField(); }
         removeAuthorField();
@@ -137,7 +141,7 @@ function addPubData(typeId, type, fLvl) {
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const fieldData = _state('getFormState', [fLvl, 'fieldData']);
+    const fData = _state('getFormState', [fLvl, 'fields']);
     const rcrds = _state('getFormState', [fLvl, 'rcrds']);
     addPubTitle(addValues, fLvl, type);
     addPubYear(addValues, fLvl);
@@ -148,7 +152,7 @@ function addPubValues(fLvl, addValues, type) {
      * be skipped, ie. have it's own title. (may not actually be needed. REFACTOR and check in later)
      */
     function addPubTitle(addTitle, fLvl, type) {
-        if (fieldData.Title.val) { return; }
+        if (fData.Title.value) { return; }
         const skip = ['Chapter'];
         fieldData.Title = {};
         fieldData.Title.val = addTitle && skip.indexOf(type) === -1 ?

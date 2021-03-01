@@ -2,7 +2,7 @@
  * Builds and manages the form fields.
  *
  * Export
-= *    buildMultiSelectInput
+= *    buildMultiSelectField
  *     fillComplexFormFields
  *     ifAllRequiredFieldsFilled
  *     initFormCombos
@@ -39,8 +39,8 @@ export function initFormCombos() {
 export function buildFormField() {
     return build.buildFormField(...arguments);
 }
-export function buildMultiSelectInput() {
-    const input = _el('buildMultiSelectInput', [...arguments]);
+export function buildMultiSelectField() {
+    const input = _el('buildMultiSelectField', [...arguments]);
     build.setOnMultiSelectChangeListener(input);
     return input;
 }

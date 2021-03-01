@@ -23,7 +23,7 @@ import * as group from './group-fields.js';
 export function initSelectFormCombos(editHandlers = null) {
     const events = getSelectComboEvents();
     if (editHandlers) { replaceEditEvents(events, editHandlers); }
-    _elems('initFormCombos', [null, 'sub', events]);
+    _elems('initCombos', ['sub', events]);
 }
 function getSelectComboEvents() {
     return {

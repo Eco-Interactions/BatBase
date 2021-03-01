@@ -54,8 +54,8 @@ export function finishPubOrCitEditForm(entity) {
 }
 /* ------------------------- INIT FORM COMBOS ------------------------------- */
 /** Inits comboboxes for the source forms. */
-export function initFormCombos(entity, fLvl) {
-    const events = getEntityComboEvents(entity);                    /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
+export function initCombos(entity, fLvl) {
+    const events = getEntityComboEvents(entity);                    /*dbug-log*///console.log("initCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
     if (!events) { return; }
     _elems('initFormCombos', [entity, fLvl, events]);
 }
@@ -64,9 +64,9 @@ function getEntityComboEvents(entity) {
         'citation': {
             'CitationType': {
                 onChange: loadCitTypeFields },
-            'Authors': {
-                create: initAuthOrEdForm.bind(null, 1, 'Authors'),
-                onChange: onAuthAndEdSelection.bind(null, 1, 'Authors')
+            'Author': {
+                create: initAuthOrEdForm.bind(null, 1, 'Author'),
+                onChange: onAuthAndEdSelection.bind(null, 1, 'Author')
             },
         },
         'publication': {
@@ -75,13 +75,13 @@ function getEntityComboEvents(entity) {
             'Publisher': {
                 create: initPublisherForm,
                 onChange: onPublSelection },
-            'Authors': {
-                create: initAuthOrEdForm.bind(null, 1, 'Authors'),
-                onChange: onAuthAndEdSelection.bind(null, 1, 'Authors')
+            'Author': {
+                create: initAuthOrEdForm.bind(null, 1, 'Author'),
+                onChange: onAuthAndEdSelection.bind(null, 1, 'Author')
             },
-            'Editors': {
-                create: initAuthOrEdForm.bind(null, 1, 'Editors'),
-                onChange: onAuthAndEdSelection.bind(null, 1, 'Editors')
+            'Editor': {
+                create: initAuthOrEdForm.bind(null, 1, 'Editor'),
+                onChange: onAuthAndEdSelection.bind(null, 1, 'Editor')
             }
         }
     }[entity];
@@ -89,9 +89,9 @@ function getEntityComboEvents(entity) {
 /* ************************* ENTITY FORMS *********************************** */
 export function initCreateForm(entity, name) {                      /*dbug-log*///console.log('initCreateForm [%s] name [%s]', entity, name)
     const funcs = {
-        'author': initAuthOrEdForm.bind(null, 1, 'Authors'),
+        'author': initAuthOrEdForm.bind(null, 1, 'Author'),
         'citation': initCitForm,
-        'editor': initAuthOrEdForm.bind(null, 1, 'Editors'),
+        'editor': initAuthOrEdForm.bind(null, 1, 'Editor'),
         'publication': initPubForm,
         'publisher': initPublisherForm
     };

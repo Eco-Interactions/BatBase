@@ -1,7 +1,7 @@
 /**
  * Entry point for entity-specific code.
  *
- * Note - required form methods: initCreateForm, initFormCombos
+ * Note - required form methods: initCreateForm, initCombos
  *
  * TOC
  *     INIT FORM
@@ -17,7 +17,7 @@
  *             CITATION
  */
 import { _u } from '~util';
-import { _val } from '~form';
+import { _state, _val } from '~form';
 import * as int from './interaction/int-form-main.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/src-form-main.js';
@@ -56,23 +56,28 @@ function openSubFormAlert(ent, fLvl) {
     _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
 }
 /* ------------------------- FORM COMBOS ------------------------------------ */
-export function initFormCombos(entity, fLvl) {                      /*dbug-log*///console.log('initFormCombos [%s][%s]', fLvl, entity)
-    forms[entity].initFormCombos(...arguments);
+export function initCombos(fLvl) {                                  /*dbug-log*/console.log('initCombos [%s]', fLvl)
+    const entity = _state('getFormData', [fLvl, 'entity']);
+    forms[entity].initCombos(fLvl, entity);
 }
 /* -------------------------- EDIT FORMS ------------------------------------ */
-/** Used by complex forms: citation, interaction, location, taxon. */
-export function finishEntityEditFormBuild(entity) {
-    return Promise.resolve(
-        forms[entity].finishEditFormBuild(entity));
-}
+/**
+ * [finishEditFormInit description]
+ * @param  {[type]} entity [description]
+ * @param  {[type]} id     [description]
+ * @return {[type]}        [description]
+ */
 export function finishEditFormInit(entity, id) {
-    const cmplxFnshrs = {
+    forms[entity].initCombos('top', entity);
+    return finishCmplxFormBuilds(entity, id);
+}
+function finishCmplxFormBuilds(entity, id) {
+    const map = {
         'citation': src.setSrcEditRowStyle.bind(null, 'citation'),
         'publication': src.setSrcEditRowStyle.bind(null, 'publication'),
         'location': addMapToLocationEditForm,
     };
-    if (!cmplxFnshrs[entity]) { return Promise.resolve(); }
-    return Promise.resolve(cmplxFnshrs[entity](id));
+    return !map[entity] ? Promise.resolve() : Promise.resolve(map[entity](id));
 }
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */

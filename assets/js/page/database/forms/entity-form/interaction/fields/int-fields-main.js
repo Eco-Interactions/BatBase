@@ -15,12 +15,12 @@ import * as txn from './txn-int-fields.js';
 import * as type from './int-type-field.js';
 import * as tag from './int-tag-field.js';
 
-export function getIntFormFieldComboEvents(argument) {
+export function getIntComboConfg() {
     return {
         'CitationTitle': { onChange: src.onCitSelection, create: create('citation', 'sub') },
         'Country-Region': { onChange: loc.onCntryRegSelection },
         'InteractionType': { onChange: type.onTypeSelection },
-        'InteractionTags': { onChange: tag.onTagSelection },
+        'InteractionTags': { onChange: tag.onTagSelection, delimiter: ",", maxItems: null  },
         'Location': { onChange: loc.onLocSelection, create: create('location', 'sub')},
         'Publication': { onChange: src.onPubSelection, create: create('publication', 'sub')},
         'Subject': { onChange: txn.onTaxonRoleSelection.bind(null, 'Subject') },

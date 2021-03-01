@@ -38,6 +38,7 @@ function getInteractionFieldConfg() {
             type: 'select'
         },
         'Country-Region': {
+            id: 'Country-Region', //label is used for id, but '/' is an invalid selector character
             label: 'Country/Region',
             name: 'Country-Region',
             prep: {},

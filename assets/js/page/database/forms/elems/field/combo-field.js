@@ -11,40 +11,25 @@
  *     GET INPUT
  *     COMBO UTIL
  */
-import { _cmbx } from '~util';
+import { _cmbx, _u } from '~util';
 import { _state } from '~form';
 /* ========================== INIT ========================================== */
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initFormCombos(entity, fLvl, comboConfg) {          /*dbug-log*///console.log("initFormCombos. [%s] formLvl = [%s], comboConfg = %O", entity, fLvl, comboConfg);
-    //todo
-    const elems = _state('getFormState', [fLvl, 'selElems']);        /*dbug-log*///console.log('elems = %O', elems)
-    elems.forEach(selectizeElem);
+export function initFormCombos(fLvl, cConfg) {
+    const cFields = _state('getFormComboFields', [fLvl]);           /*dbug-log*///console.log('initFormCombos [%s] cConfg[%O] cFields[%O]', fLvl, cConfg, cFields);
+    cFields.forEach(f => selectizeElem(f, cConfg[f.id]));
     _state('setFormProp', [fLvl, 'selElems', []]);
 
-    function selectizeElem(fieldName) {
-        const confg = getFieldConfg(comboConfg, fieldName);         /*dbug-log*///console.log("   Initializing [%s] confg = %O", fieldName, confg);
-        _cmbx('initCombobox', [confg]);
-        if (!confg.create) { _cmbx('removeOpt', [fieldName, 'create']); }
-    }
 }
-function getFieldConfg(comboConfg, fieldName) {
-    const baseConfg = getBaseFieldConfg(fieldName);                 /*dbug-log*///console.log('[%s] baseConfg = %O, comboConfg = %O', fieldName, baseConfg, comboConfg);
-    const fieldConfg = comboConfg[fieldName] || {};
-    return Object.assign(baseConfg, fieldConfg);
-}
-function getBaseFieldConfg(fieldName) {
-    const confgMap = {
-        'Authors': { id: '#sel-Authors1', confgName: 'Authors1' },
-        'Editors': { id: '#sel-Editors1', confgName: 'Editors1' },
-        'InteractionTags': { delimiter: ",", maxItems: null },
-    };
-    const confg = confgMap[fieldName] ? confgMap[fieldName] : {};
-    confg.name = fieldName.replace(/([A-Z])/g, ' $1').trim(); //Adds a space between words in CamelCase string.
-    if (!confg.id) { confg.id = '#sel-'+fieldName; }
-    return confg;
+function selectizeElem(fConfg, confg) {                             /*dbug-log*///console.log("   Initializing [%s] selectizeConfg[%O]", fConfg.label, confg);
+    confg.confgName = fConfg.name;
+    confg.id = confg.id ? confg.id : '#sel-'+fConfg.id;
+    confg.name = fConfg.label;
+    _cmbx('initCombobox', [confg]);
+    if (!confg.create) { _cmbx('removeOpt', [fConfg.id, 'create']); }
 }
 /* =========================== UTILITY ====================================== */
 /* ---------------------------- SET ----------------------------------------- */

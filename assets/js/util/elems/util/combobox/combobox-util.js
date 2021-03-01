@@ -186,7 +186,7 @@ function getFieldConfgKey(field) {
     return field.split(' ').join('');
 }
 function getSelApi(field) {
-    field = getFieldConfgKey(field);                              /*dbug-log*///console.log('getSelApi [%s] = %O', field, _u('snapshot', [confgs]));
+    field = getFieldConfgKey(field);                              /*dbug-log*/console.log('getSelApi [%s] = %O', field, _u('snapshot', [confgs]));
     if (!confgs[field]) { return _alert('alertIssue', ['comboboxNotFound', {field: field}]); }
     //If the combo was removed
     return $(confgs[field].id).length ? $(confgs[field].id)[0].selectize : false;

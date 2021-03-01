@@ -34,7 +34,7 @@ function buildLocForm(val) {
 
     function appendLocFormAndFinishBuild(form) {
         $('#Location_f')[0].parentNode.after(form);
-        initFormCombos(null, 'sub');
+        initCombos('sub');
         _cmbx('enableCombobox', ['Country-Region', false]);
         _elems('setDynamicFormStyles', ['location']);
         _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
@@ -75,7 +75,6 @@ function addSelectSimilarLocationNote(prevElem) {
 }
 /** ======================= EDIT FORM ======================================= */
 export function finishEditFormBuild(entity) {
-    initFormCombos('Location', 'top');
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
@@ -110,11 +109,11 @@ function afterMapLoads(onLoadFunc, id) {
     }
 }
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
-export function initFormCombos(entity, fLvl) {
+export function initCombos(fLvl) {
     const events = {
         'Country': { onChange: focusParentAndShowChildLocs.bind(null, 'create') }
     };
-    _elems('initFormCombos', ['location', fLvl, events]);
+    _elems('initFormCombos', [fLvl, events]);
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
 export function addMapToLocForm(type, $formElem = $('#location_fields')) {

@@ -89,6 +89,7 @@ function getConfgName(entity) {
  *         //CORE.FIELDS AND TYPE.FIELDS WILL BE MERGED IN.
  *        FieldName: { //DisplayName
  *            class: '' //Otherwise set to form-level default
+ *            //id: escaped id, added during field build
  *            info: { intro: "", *tooltip: ""(req) },
  *            label: Field label text (Name-prop used if absent)
  *            *name: FieldName,  [REQUIRED]

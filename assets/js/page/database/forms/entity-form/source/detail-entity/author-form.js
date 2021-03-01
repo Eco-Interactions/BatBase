@@ -109,7 +109,7 @@ function lastAuthComboEmpty(cnt, authType) {
     return comboVal === '' || comboVal === 'new';
 }
 function toggleOtherAuthorTypeSelect(type, enable) {
-    const entity = type === 'Authors' ? 'Editors' : 'Authors';
+    const entity = type === 'Author' ? 'Editor' : 'Author';
     if (!$(`#${entity}_f-cntnr`).length) { return; }
     _cmbx('enableFirstCombobox', [entity, enable]);
 }

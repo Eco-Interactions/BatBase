@@ -27,7 +27,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
 
     function finishSrcTypeFormBuild(rows) {                         /*dbug-log*/console.log('   --finishSrcTypeFormBuild rows[%O]', rows)
         $(`#${entity}_fields`).append(rows);
-        sForm.initFormCombos(entity, fLvl);
+        sForm.initCombos(entity, fLvl);
         return _elems('fillComplexFormFields', [fLvl])
             .then(afterComplexFieldsFilled);
     }

@@ -68,7 +68,7 @@ function initCitSubForm(val) {
 function appendCitFormAndFinishBuild(form) {                        /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
     $('#CitationText_f textarea').attr('disabled', true);
     $('#CitationTitle_f')[0].parentNode.after(form);
-    sForm.initFormCombos('citation', 'sub');
+    sForm.initCombos('sub', 'citation');
     sForm.addConfirmationBeforeSubmit('citation', 'sub');
     return types.selectDefaultCitType()
         .then(() => finishCitFormUiLoad());
@@ -108,7 +108,7 @@ function hightlightIfEmpty(i, el) {
     return true;
 }
 function ifFieldShouldBeSkipped (el, label, input) {
-    const ignore = ['Authors'];
+    const ignore = ['Author'];
     const skip = $(input).val() || ignore.indexOf(label.id.split('-')[0]) !== -1;
     if (skip && el.className.includes('warn')) { $(el).removeClass('warn'); }
     return skip;

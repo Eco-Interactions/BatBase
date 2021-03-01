@@ -59,7 +59,7 @@ function openReferenceGuideInNewTab() {
 }
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
-    iForm.initFormCombos('interaction', 'top');
+    iForm.initCombos('top');
     _cmbx('enableCombobox', ['CitationTitle', false]);
     iForm.addRoleTaxonFocusListeners();
     _cmbx('enableCombobox', ['InteractionType', false]);
