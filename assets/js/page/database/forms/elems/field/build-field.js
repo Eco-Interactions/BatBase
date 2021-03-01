@@ -24,23 +24,30 @@
  */
 import { _el, _u } from '~util';
 import { _elems, _state } from '~form';
-
-let f;
-
+/* ====================== BUILD FIELD ======================================= */
 export function buildFormField(fConfg) {
-    f = fConfg;                                                     /*dbug-log*/console.log('+--buildFormField fConfg[%O]', f);
-    const field = buildFormFieldElems();
-    addPinIfFieldDataCanPersistThroughMultipleSubmits(field);
-    updateFormFieldState();
+    const field = buildFormFieldElems(fConfg);
+    updateFormFieldState(fConfg);
     return field;
 }
-/* ====================== BUILD FIELD ======================================= */
-function buildFormFieldElems() {                                    /*dbug-log*/console.log('   --buildFormFieldElems', );
+/**
+ * [buildFormFieldElems description]
+ * @param  {[type]} f
+ * @return {[type]}    [description]
+ */
+function buildFormFieldElems(f) {                                   /*dbug-log*///console.log('+--buildFormField f[%O]', f);
     handleFieldChangeListeners(f);
-    return _el('getFieldElems', [f]);
+    const field = f.type.includes('multi') ? f.input : _el('getFieldElems', [f]);
+    addPinIfFieldDataCanPersistThroughMultipleSubmits(f, field);
+    return field;
 }
 /* -------------------------- IF PINNABLE ------------------------------------ */
-function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/console.log('    --addPinIfFieldDataCanPersistThroughMultipleSubmits pinnable?[%s] field[%O]', f.pinnable, field);
+/**
+ * [addPinIfFieldDataCanPersistThroughMultipleSubmits description]
+ * @param {[type]} f [description]
+ * @param {[type]} field
+ */
+function addPinIfFieldDataCanPersistThroughMultipleSubmits(f, field) {/*dbug-log*///console.log('    --addPinIfFieldDataCanPersistThroughMultipleSubmits pinnable?[%s] field[%O]', f.pinnable, field);
     if (!f.pinnable) { return; }
     const pin = getFormFieldPin(f.name);
     $(field.lastChild).append(pin);
@@ -48,24 +55,29 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(field) { /*dbug-log*/
 /* -------------------------- FIELD STATE ----------------------------------- */
 /**
  * Note: This method is the first form-method after the util elem-build.
+    //todo remove build-data before storing confg
  * @param  {[type]} ) {                                              console.log('       --updateFormState f[%O]', _u('snapshot', [f]) [description]
  * @return {[type]}   [description]
  */
-function updateFormFieldState() {                                   /*dbug-log*/console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
+function updateFormFieldState(f) {                                  /*dbug-log*///console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
     f.shown = true;
-    //todo remove build-data before storing confg
     _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data
 }
 /* =========================== ON FIELD CHANGE ============================== */
-function handleFieldChangeListeners() {                             /*dbug-log*/console.log('   --handleFieldChangeListeners',);
-    ifCitationFormAutoGenerateCitationOnChange();
+/** [handleFieldChangeListeners description] */
+function handleFieldChangeListeners(f) {                             /*dbug-log*///console.log('   --handleFieldChangeListeners',);
+    ifCitationFormAutoGenerateCitationOnChange(f);
     onChangeStoreFieldValue(f);
-    if (f.required) { handleRequiredField(); }
+    if (f.required) { handleRequiredField(f); }
 }
 /* -------------- IF CITATION FORM, REGENERATE CITATION --------------------- */
-function ifCitationFormAutoGenerateCitationOnChange() {
+/**
+ * [ifCitationFormAutoGenerateCitationOnChange description]
+ * @return {[type]} [description]
+ */
+function ifCitationFormAutoGenerateCitationOnChange(f) {
     if (f.name === 'citation'){
-        $(f.input).change(_form.bind(null, 'handleCitText', [fLvl]));
+        $(f.input).change(_form.bind(null, 'handleCitText', [f.group]));
     }
 }
 /* ---------------- IF REQUIRED FIELD, HANDLE SUBMIT ------------------------ */
@@ -74,7 +86,7 @@ function ifCitationFormAutoGenerateCitationOnChange() {
  * label. Added to the input elem is a change event reponsible for enabling/
  * disabling the submit button and a form-level data property.
  */
-function handleRequiredField() {
+function handleRequiredField(f) {
     $(f.input).change(checkRequiredFields);
     $(f.input).data('fLvl', f.group);
 }
@@ -83,48 +95,44 @@ function handleRequiredField() {
  * is enabled if all of it's required fields have values and it has no open child
  * forms.
  */
-function checkRequiredFields(e) {                                   /*dbug-log*/console.log('   @--checkRequiredFields e = %O', e)
+function checkRequiredFields(e) {                                   /*dbug-log*///console.log('   --checkRequiredFields e = %O', e)
     const fLvl = $(e.currentTarget).data('fLvl');
    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ----------------------- STORE FIELD-DATA --------------------------------- */
-function onChangeStoreFieldValue() {
-    if (ifCustomFieldStoreListener()) { return setCustomFieldStoreListener(); }
+/**
+ * [onChangeStoreFieldValue description]
+ * @return {[type]} [description]
+ */
+function onChangeStoreFieldValue(f) {
+    if (ifCustomFieldStoreListener(f)) { return setCustomFieldStoreListener(f); }
     $(f.input).change(storeFieldValue.bind(null, f.input, f.name, f.group, null));
 }
-function ifCustomFieldStoreListener() {
+function ifCustomFieldStoreListener(f) {
     return f.misc && f.misc.customValueStore;
 }
-function setCustomFieldStoreListener() {
-    if (f.type === 'multiSelect') { return setOnMultiSelectChangeListener(); }
+function setCustomFieldStoreListener(f) {
+    if (f.type === 'multiSelect') { return setOnMultiSelectChangeListener(f); }
     //Otherwise, handled elsewhere
 }
-function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/console.log('   @--storeFieldValue [%s] fieldConfg = %O', fieldName, elem);
+function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*///console.log('   --storeFieldValue [%s][%O]', fieldName, elem);
     const val = value || $(elem).val();
     _state('setFieldState', [fLvl, fieldName, val]);
 }
 /* ________________ MULTI-SELECT DATA ________________ */
-/**
- * [setOnMultiSelectChangeListener description]
- * @param {[type]} ) {                                 console.log('setOnMultiSelectChangeListener input[%O]', f.input [description]
- */
-export function setOnMultiSelectChangeListener(input = f.input) {   /*dbug-log*/console.log('setOnMultiSelectChangeListener input[%O]', input);
- //PAUSE   // f.input
+/** [setOnMultiSelectChangeListener description] */
+export function setOnMultiSelectChangeListener(f) {                 /*dbug-log*///console.log('setOnMultiSelectChangeListener fConfg[%O]', f);
+    $(f.input).change(storeMultiSelectValue.bind(null, f.group, f.cnt, f.name));
 }
-/**
- * [storeMultiSelectValue description]
- * @param  {[type]} fLvl  [description]
- * @param  {[type]} cnt   [description]
- * @param  {[type]} fieldConfg [description]
- * @return {[type]}       [description]
- */
-function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*/console.log('storeMultiSelectValue. lvl = %s, cnt = %s, fName = %s, e = %O', fLvl, cnt, fName, e);
-    const valueObj = _state('getFormFieldData', [fLvl, fName, 'value']); /*dbug-log*/console.log('fieldObj = %O', fieldObj);
+/** [storeMultiSelectValue description] */
+function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('storeMultiSelectValue. lvl = %s, cnt = %s, fName = %s, e = %O', fLvl, cnt, fName, e);
+    const valueObj = _state('getFormFieldData', [fLvl, fName, 'value']);/*dbug-log*///console.log('valueObj[%O]', valueObj);
     valueObj[cnt] = e.target.value || null;
     _state('setFieldState', [fLvl, fName, valueObj]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }
 /* ---------------- AUTH|EDITOR VALIDATION ---------------------------------- */
+//TODO
 function checkForAuthValIssues(vals, fName, fLvl) {
     const issues = [
         checkForBlanksInOrder(vals, fName, fLvl),
@@ -141,7 +149,7 @@ function ifPreviousAlertClearIt(fName, fLvl) {
  * Author/editor fields must have all fields filled continuously. There can
  * be no blanks in the selected order. If found, an alert is shown to the user.
  */
-function checkForBlanksInOrder(vals, fName, fLvl) {                 /*dbug-log*/console.log('checkForBlanksInOrder. [%s] vals = %O', fName, vals);
+function checkForBlanksInOrder(vals, fName, fLvl) {                 /*dbug-log*///console.log('checkForBlanksInOrder. [%s] vals = %O', fName, vals);
     let blank = checkForBlanks(vals);
     if (blank !== 'found') { return; }
     alertBlank(fName, fLvl);
@@ -160,10 +168,10 @@ function checkForBlanks(vals) {
     }
 }
 function alertBlank(fName, fLvl) {
-    const alertTags = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
+    const alertTags = { Author: 'fillAuthBlanks', Editor: 'fillEdBlanks' };
      _val('showFormValAlert', [fName, alertTags[fName], fLvl]);
 }
-function checkForDuplicates(vals, fName, fLvl) {                    /*dbug-log*/console.log('checkForDuplicates. [%s] vals = %O', fName, vals);
+function checkForDuplicates(vals, fName, fLvl) {                    /*dbug-log*///console.log('checkForDuplicates. [%s] vals = %O', fName, vals);
     const dups = Object.values(vals).filter((v, i, self) => self.indexOf(v) !== i);
     if (!dups.length) { return; }
     _val('showFormValAlert', [fName, 'dupAuth', fLvl]);
@@ -177,7 +185,7 @@ function checkForDuplicates(vals, fName, fLvl) {                    /*dbug-log*/
  * @param  {[type]} fName [description]
  * @return {[type]}       [description]
  */
-function getFormFieldPin(fName) {                                   /*dbug-log*/console.log('getFormFieldPin [%s]', fName);
+function getFormFieldPin(fName) {                                   /*dbug-log*///console.log('getFormFieldPin [%s]', fName);
     const pin = buildPinElem(fName);
     handledRelatedFieldPins(pin, fName);
     return pin;

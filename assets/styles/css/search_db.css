@@ -218,9 +218,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .all-fields-cntnr {
     padding-top: 1em;
 }
-[id^="sel-cntnr-"]>div {
+/*[id^="sel-cntnr-"]>div {
     margin-top: .5em
-}
+}*/
 /** ------------ Error Styles -------------- */
 [id$="_alert"] {
     display: flex;

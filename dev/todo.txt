@@ -16,23 +16,6 @@ SINCE LAST TEAM UPDATE:
         - new feedback popup text
         - set Tuli as user or editor? She'll show up on editor lists
 
-SINCE LAST SERVER UPDATE:
-
-SINCE LAST USER UPDATE:
-    - Publication upload
-    - Site designed for mobile use
-    - Ability to save set of filters and lists of interactions
-    - Added new realms: Bacteria, Virus, Fungi, Bird, Reptile, and Amphibian.
-    - Added Interaction and Taxon pages
-    - Data Entry
-        - Error reporting feature
-        - Forms improved
-            - Added mapping to location forms
-            - Tutorials added to forms
-
-    Upcoming:
-        - Data review features
-
 
 > ____ QUESTIONS _____
 TEAM:

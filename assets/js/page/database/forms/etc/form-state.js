@@ -120,7 +120,7 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Taxon forms:
  *         taxonData - added to fState.forms (see props @initTaxonParams)
  */
-export function addEntityFormState(entity, fLvl, pSel, action) {   /*dbug-log*/console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, fLvl, pSel, action);
+export function addEntityFormState(entity, fLvl, pSel, action) {   /*dbug-log*///console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, fLvl, pSel, action);
     fState.forms[entity] = fLvl;
     fState.forms[fLvl] = _confg('getFormConfg', [entity, fLvl]);
     Object.assign(fState.forms[fLvl], finishFormStateInit(pSel, action));       console.log('new formState[%s] [%O]', fLvl, fState.forms[fLvl]);
@@ -159,23 +159,23 @@ export function getStateProp(prop) {                                /*dbug-log*/
 export function getFormParentId(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].pSelId : false;
 }
-export function getFormComboFields(fLvl) {                          /*dbug-log*/console.log('getFormComboFields [%s]', fLvl);//console.trace();
+export function getFormComboFields(fLvl) {                          /*dbug-log*///console.log('getFormComboFields [%s]', fLvl);//console.trace();
     return Object.values(getFormFieldData(fLvl)).filter(f => f.combo);
 }
 export function getFormEntity(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].entity : false;
 }
 export function getFormState(fLvl, prop = null) {
-    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*/console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl]);//console.trace();
+    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*///console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl]);//console.trace();
     const fData = fState.forms[fLvl];
     return prop ? fData[prop] : fData;
 }
-export function getFormFieldData(fLvl, field, prop) {               /*dbug-log*/console.log('getFormFieldData [%s] field?[%s] prop?[%s] [%O]', fLvl, field, prop, fState.forms[fLvl]);//console.trace();
+export function getFormFieldData(fLvl, field, prop) {               /*dbug-log*///console.log('getFormFieldData [%s] field?[%s] prop?[%s] [%O]', fLvl, field, prop, fState.forms[fLvl]);//console.trace();
     if (!field) { return fState.forms[fLvl].fields; }
     const fData = fState.forms[fLvl].fields[field];
     return prop ? fData[prop] : fData;
 }
-export function getFormData(fLvl, field) {                          /*dbug-log*/console.log('getFormConfg [%s][%s] [%O]', fLvl, field, fState.forms[fLvl].confg.fields);
+export function getFormData(fLvl, field) {                          /*dbug-log*///console.log('getFormConfg [%s][%s] [%O]', fLvl, field, fState.forms[fLvl].confg.fields);
     if (!fState.forms) { return; } //form closing
     return fState.forms[fLvl].confg.fields[field].value;
 }
@@ -185,7 +185,7 @@ export function getCurrentFormFieldVals(fLvl) {
     const vals = {};
     for (let field in fieldData) {
         vals[field] = fieldData[field].value;
-    }                                                               /*dbug-log*/console.log('getCurrentFormFieldVals fields[%O] vals[%O]', fieldData, vals);
+    }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fields[%O] vals[%O]', fieldData, vals);
     return vals;
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
@@ -240,10 +240,10 @@ export function addEntityRecords(entity, rcrds) {
     fState.records[entity] = rcrds;
 }
 /* ----------------------- ENTITY FORM -------------------------------------- */
-export function setFormProp(fLvl, prop, val) {
+export function setFormState(fLvl, prop, val) {
     fState.forms[fLvl][prop] = val;
 }
-export function setFieldState(fLvl, field, val, prop = 'value') {      /*dbug-log*/console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
+export function setFieldState(fLvl, field, val, prop = 'value') {   /*dbug-log*///console.log('---set[%s]FormFieldData [%s] =? [%s]', fLvl, field, val);
     let fData = fState.forms[fLvl].fields[field];
     if (!prop) { return fData = val; }
     fData[prop] = val;
@@ -261,9 +261,9 @@ export function updateFormTypeConfg(fLvl, type) {
 }
 /* _________________________ COMBOBOX _______________________________________ */
 /* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
-export function removeSelFromStateMemory(fLvl, fieldName) {
-    const idx = fState.forms[fLvl].selElems.indexOf(fieldName);
-    fState.forms[fLvl].selElems.splice(idx, 1);
+export function removeFieldFromComboInit(fLvl, fieldName) {
+    const field = fState.forms[fLvl].fields[fieldName];
+    field.combo = false;
 }
 /* ___________________________ TAXON ________________________________________ */
 export function setTaxonProp(prop, val) {

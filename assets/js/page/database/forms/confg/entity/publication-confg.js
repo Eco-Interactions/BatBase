@@ -10,7 +10,11 @@ export default function(entity) {
         types: getPublicationTypeConfg(),
         views: { //fields added will be built and displayed.
             all: [  //will be merged with type.views  //merge here rather than later?
-                ['Title', 'PublicationType']
+                ['Title', 'Year', 'PublicationType'],
+                [ 'Description', { fields: ['Doi', 'Website'] }],
+            ],
+            simple: [
+                ['Title', 'Year', 'PublicationType']
             ]
         },
     };
@@ -53,13 +57,13 @@ function getPublicationTypeConfg() {
         Book: {
             name: 'Book',
             fields: {
-                Authors: {
+                Author: {
                     required: true
                 },
                 Year: {
                     required: true
                 },
-                Editors: {
+                Editor: {
                     required: true
                 },
                 Publisher: {
@@ -71,14 +75,8 @@ function getPublicationTypeConfg() {
             },
             views: {
                 all: [
-                    ['Year', 'Doi', 'Website'],
-                    ['Publisher', 'Description'],
-                    ['Authors', 'Editors']
-                ],
-                simple: [
-                    ['Year', 'Publisher'],
-                    ['Authors', 'Editors']
-                ],
+                    ['Publisher', 'Author', 'Editor']
+                ]
             }
         },
         Journal: {
@@ -86,16 +84,15 @@ function getPublicationTypeConfg() {
             required: [],
             views: {
                 all: [
-                    ['Year', 'Doi', 'Website'],
-                    ['Publisher', 'Description'],
+                    ['Publisher']
                 ],
-                simple: [], //No additional fields shown
+                simple: [] // No fields added unless 'show all fields' selected
             }
         },
         Other: {
             name: 'Other',
             fields: {
-                Authors: {
+                Author: {
                     required: true
                 },
                 Year: {
@@ -104,20 +101,17 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Year', 'Doi', 'Website'],
-                    ['Publisher', 'Description'],
-                    ['Authors'],
+                    ['Publisher', 'Author', 'Editor']
                 ],
                 simple: [
-                    ['Year', 'Publisher'],
-                    ['Authors']
+                    ['Author', 'Editor']
                 ],
             }
         },
         'Thesis/Dissertation': {
             name: 'Thesis/Dissertation',
             fields:{
-                Authors: {
+                Author: {
                     required: true
                 },
                 Publisher: {
@@ -132,14 +126,8 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Year', 'Doi', 'Website'],
-                    ['Publisher', 'Description'],
-                    ['Authors']
-                ],
-                simple: [
-                    ['Year', 'Publisher'],
-                    ['Authors']
-                ],
+                    ['Publisher', 'Author'],
+                ]
             }
         }
     };

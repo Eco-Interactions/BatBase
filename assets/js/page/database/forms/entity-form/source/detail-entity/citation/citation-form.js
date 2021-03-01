@@ -55,7 +55,7 @@ function enablePubField() {
 function addPubRcrdsToMemory(pubRcrds) {
     const pubSrc = _state('getRcrd', ['source', $('#sel-Publication').val()]);
     const pub = pubRcrds[pubSrc.publication];
-    _state('setFormProp', ['sub', 'rcrds', { pub: pub, src: pubSrc}]);
+    _state('setFormState', ['sub', 'rcrds', { pub: pub, src: pubSrc}]);
 }
 function buildAndAppendCitForm(val) {
     return initCitSubForm(val)

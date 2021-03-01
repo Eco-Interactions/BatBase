@@ -13,5 +13,10 @@ function setFieldWidths(row) {
     $(row.childNodes).each((idx, field) => setFieldWidth(field, w));
 }
 function setFieldWidth(field, w) {                                  /*dbug-log*///console.log('setFieldWidth field[%O][%s]', field, w);
-    $(field).css({'width': w+'%'});
+    const flex = isSmallField(field) ? '0 0 20' : `1 0 ${w}`;
+    $(field).css({'flex': flex+'%'});
+}
+function isSmallField(field) {
+    if (!$(field).data('fieldClass')) { return; }
+    return $(field).data('fieldClass').includes('sml-field');
 }

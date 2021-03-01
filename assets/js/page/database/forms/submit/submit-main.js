@@ -31,7 +31,7 @@ export function handleFormSubmit(fLvl) {
     const confg = _state('getFormState', [fLvl]);
     prep.prepareDataForServer(confg)
     .then(data => submitFormData(data, fLvl, confg))
-    .then(() => _state('setFormProp', [fLvl, 'submit', true]));
+    .then(() => _state('setFormState', [fLvl, 'submit', true]));
 }
 function addEntityDataToFormData(data, confg) {
     addEntityNames(confg.core);

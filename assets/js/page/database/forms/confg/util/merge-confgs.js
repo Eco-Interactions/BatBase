@@ -56,9 +56,15 @@ function mergeFieldConfgData(field, prop, val) {                    /*dbug-log*/
  * @param  {[type]} mViews [description]
  * @return {[type]}        [description]
  */
-function mergeViewConfg(mViews) {                               /*dbug-log*///console.log('mergeViewConfg mViews[%O]', mViews);
-    if (mViews.simple) { mergeFormViewConfg('simple', mViews.simple) }
-    mergeFormViewConfg('all', mViews.all);
+function mergeViewConfg(mViews) {                                   /*dbug-log*///console.log('mergeViewConfg mViews[%O]', mViews);
+    handleSimpleViewMerge(mViews);
+    mergeFormViewConfg('all', mViews);
+}
+/** [handleSimpleViewMerge description] */
+function handleSimpleViewMerge(mViews) {
+    if (mViews.simple) { return mergeFormViewConfg('simple', mViews); }
+    if (!lcl.confg.views.simple || !mViews.all) { return; }
+    lcl.confg.views.simple = lcl.confg.views.simple.concat(mViews.all)
 }
 /**
  * [mergeFormViewConfg description]
@@ -66,10 +72,11 @@ function mergeViewConfg(mViews) {                               /*dbug-log*///co
  * @param  {array} viewData Values represent form rows. Strings are full-width
  *                           fields and arrays of strings are multi-field rows.
  */
-function mergeFormViewConfg(prop, viewData) {                       /*dbug-log*///console.log('mergeFormViewConfg prop[%s] = [%O]', prop, viewData);
+function mergeFormViewConfg(prop, mViews) {                         /*dbug-log*///console.log('mergeFormViewConfg prop[%s] = [%O]', prop, mViews);
     handleTargetFormViewInit(prop);
-    lcl.confg.views[prop] = lcl.confg.views[prop].concat(viewData);
+    lcl.confg.views[prop] = lcl.confg.views[prop].concat(mViews[prop]);
 }
+/** Inits missing optional view-sets with the 'all' view-set fields. */
 function handleTargetFormViewInit(prop) {                             /*dbug-log*///console.log('handleTargetFormViewInit prop[%s] current?[%O]', prop, lcl.confg.views[prop]);
     if (lcl.confg.views[prop]) { return; } //View present in form confg
     lcl.confg.views[prop] = lcl.confg.views.all.map(v => v);

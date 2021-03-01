@@ -114,5 +114,5 @@ function setFieldInitVal(field, data) {
 function resetFormUi() {
     $('#top-cancel').val(' Close ');
     _elems('toggleSubmitBttn', ['#top-submit', false]);
-    _state('setFormProp', ['top', 'unchanged', true]);
+    _state('setFormState', ['top', 'unchanged', true]);
 }

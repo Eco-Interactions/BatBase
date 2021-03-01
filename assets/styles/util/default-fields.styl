@@ -8,17 +8,17 @@
 /* CONTAINER FOR FIELDS WITH MULTIPLE/DYNAMIC INPUTS, VERTICALLY STACKED */
 [id$="_f-cntnr"]
     display: flex
-    flex-direction: col
+    flex-direction: column
     // justify-content: stretch
 
-[id$="_f-cntnr"]>div
-    margin-top: .5em
+[id$="_f-cntnr"]>div[id$="_f"]
+    margin-bottom: .5em
 
 /* CONTAINER FOR FIELD DIV>(alertDIV, fieldDIV) */
 [id$="_f"]
     padding: .2em .75em .3em  .75em
     // width: 100%
-    // flex-grow: 1
+    flex-grow: 1
 
 /* FORM FIELD (fieldDIV>[LABEL, INPUT] ) */
 [id$="_f"] .form-field

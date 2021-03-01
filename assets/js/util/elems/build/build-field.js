@@ -35,11 +35,11 @@ let f = null;
  * Builds a form field.
  * @return {Node}   containerDiv->(alertDiv, fieldDiv->(label, input))
  */
-export function getFieldElems(fConfg) {                             /*dbug-log*/console.log('getFieldElems confg[%O]', fConfg);
+export function getFieldElems(fConfg, field = false) {              /*dbug-log*///console.log('+--getFieldElems [%s]confg[%O]', fConfg.name, fConfg);
     f = fConfg;
     const cntnr = buildContainer();
     const alertDiv = _el('getElem', ['div', { id: f.name+'_alert'}]);
-    const fieldElems = getFieldLabelAndInput();
+    const fieldElems = field ? field : getFieldLabelAndInput();
     $(cntnr).append([alertDiv, fieldElems]);
     return cntnr;
 }
@@ -47,11 +47,13 @@ export function getFieldElems(fConfg) {                             /*dbug-log*/
 function buildContainer() {
     const elSuffx = f.type.includes('multi') ? '_f-cntnr' : '_f';
     const attr = { class: getCntnrClass(), id: f.id+elSuffx};
-    return _el('getElem', ['div', attr]);
+    const cntnr = _el('getElem', ['div', attr]);
+    $(cntnr).data('fieldClass', f.class);
+    return cntnr;
     /** Returns the style classes for the field container. */
     function getCntnrClass() {
         const groupClass = f.group ? f.group + elSuffx : null;
-        const rowClass = f.class ? f.class : null;
+        const rowClass = null;//f.class ? f.class : null;
         return [groupClass, rowClass].filter(c => c).join(' ');
     }
 }
@@ -106,10 +108,10 @@ function setValidationEvents() {
 function setCharLimitsAlertEvent() {
     const min = f.val.charLimits.min;
     const max = f.val.charLimits.max;
-    $(f.input).keyup(updateCharLimits.bind(null, field, min, max));
+    $(f.input).keyup(updateCharLimits.bind(null, f, min, max));
 }
 //Field bound to change event
-function updateCharLimits(field, min, max, e) {
+function updateCharLimits(f, min, max, e) {
     const alert = {
         new: getCharAlert(e.target.value.length, min, max),
         old: $(`#${f.name}_alert`).text(),

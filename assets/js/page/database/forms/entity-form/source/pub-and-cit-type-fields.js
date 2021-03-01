@@ -27,7 +27,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
 
     function finishSrcTypeFormBuild(rows) {                         /*dbug-log*/console.log('   --finishSrcTypeFormBuild rows[%O]', rows)
         $(`#${entity}_fields`).append(rows);
-        sForm.initCombos(entity, fLvl);
+        sForm.initCombos(fLvl, entity);
         return _elems('fillComplexFormFields', [fLvl])
             .then(afterComplexFieldsFilled);
     }
@@ -42,7 +42,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
 function resetOnFormTypeChange(entity, typeId, fLvl) {
     const capsType = _u('ucfirst', [entity]);
     _state('setFieldState', [fLvl, capsType+'Type', typeId]);
-    // _state('setFormProp', [fLvl, 'reqElems', []]);
+    // _state('setFormState', [fLvl, 'reqElems', []]);
     _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
 }
 /* ----------------- GET SOURCE-TYPE ROWS ----------------------------------- */

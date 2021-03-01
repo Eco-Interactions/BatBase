@@ -74,7 +74,7 @@ function buildValidInteractionTypeOptions() {
 function getAllValidInteractionTypes(validInteractions) {           /*dbug-log*///console.log('-getAllValidInteractionTypes = %O', validInteractions);
     const types = [];
     Object.keys(validInteractions).forEach(ifValidAddData);
-    _state('setFormProp', ['top', 'valData', app.validInts]);
+    _state('setFormState', ['top', 'valData', app.validInts]);
     return types;
 
     function ifValidAddData(id) {

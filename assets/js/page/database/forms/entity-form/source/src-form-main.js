@@ -43,7 +43,7 @@ function ifCitationAddPubToMemory(entity, srcRcrd) {
     function setPubDataInMemory(pubRcrds) {
         const pubSrc = _state('getRcrd', ['source', srcRcrd.parent]);
         const pub = pubRcrds[pubSrc.publication]
-        _state('setFormProp', ['top', 'rcrds', { pub: pub, src: pubSrc}]);
+        _state('setFormState', ['top', 'rcrds', { pub: pub, src: pubSrc}]);
     }
 }
 function getSrcRcrd(pubId) {
@@ -74,8 +74,9 @@ export function loadSrcTypeFields() {
 export function handleCitText() {
     entityForm.handleCitText(...arguments);
 }
-export function finishSrcFieldLoad(entity, fLvl) {
+export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*///console.log('finishSrcFieldLoad [%s] entity[%s]', fLvl, entity);
     if (entity === 'citation' || entity === 'publication') {
+        initCombos(fLvl, entity);
         entityForm.finishPubOrCitEditForm(entity);
         typeFields.updateFieldsForSourceType(entity, fLvl);
     }

@@ -21,15 +21,27 @@ import { _state } from '~form';
 export function initFormCombos(fLvl, cConfg) {
     const cFields = _state('getFormComboFields', [fLvl]);           /*dbug-log*///console.log('initFormCombos [%s] cConfg[%O] cFields[%O]', fLvl, cConfg, cFields);
     cFields.forEach(f => selectizeElem(f, cConfg[f.id]));
-    _state('setFormProp', [fLvl, 'selElems', []]);
-
 }
-function selectizeElem(fConfg, confg) {                             /*dbug-log*///console.log("   Initializing [%s] selectizeConfg[%O]", fConfg.label, confg);
-    confg.confgName = fConfg.name;
-    confg.id = confg.id ? confg.id : '#sel-'+fConfg.id;
-    confg.name = fConfg.label;
+function selectizeElem(fConfg, confg) {                             /*dbug-log*///console.log("   Initializing [%s] selectizeConfg[%O]", fConfg.id, confg);
+    confg.confgName = getFormComboConfgName(fConfg, confg);
+    confg.id = getFormComboId(fConfg, confg);
+    confg.name = getFormComboDisplayName(fConfg);
     _cmbx('initCombobox', [confg]);
     if (!confg.create) { _cmbx('removeOpt', [fConfg.id, 'create']); }
+}
+function getFormComboConfgName(fConfg, confg) {
+     const name = confg.confgName ? confg.confgName : fConfg.id;
+     return appendCountIfMultiInputField(name, fConfg.count);
+}
+function getFormComboId(fConfg, confg) {
+    const id = confg.id ? confg.id : '#sel-'+fConfg.id;
+     return appendCountIfMultiInputField(id, fConfg.count);
+}
+function getFormComboDisplayName(fConfg) {
+    return fConfg.label ? fConfg.label : fConfg.name;
+}
+function appendCountIfMultiInputField(string, count) {
+    return count ? string + count : string;
 }
 /* =========================== UTILITY ====================================== */
 /* ---------------------------- SET ----------------------------------------- */

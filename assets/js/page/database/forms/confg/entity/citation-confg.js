@@ -110,7 +110,7 @@ function getCitationTypeConfg() {
         Article: {
             name: 'Article',
             fields: {
-                Authors: {
+                Author: {
                     required: true
                 },
                 Year: {
@@ -122,7 +122,7 @@ function getCitationTypeConfg() {
                     ['Year', 'Pages'],
                     ['Volume', 'Issue'],
                     ['Doi', 'Website'],
-                    ['Authors']],
+                    ['Author']],
             }
         },
         Book: {
@@ -131,14 +131,14 @@ function getCitationTypeConfg() {
                 Pages: {
                     required: true
                 },
-                Authors: {
+                Author: {
                     required: true
                 }
             },
             views: {
                 all: [
                     ['Volume', 'Doi'],
-                    ['Website', 'Authors']],
+                    ['Website', 'Author']],
             }
         },
         Chapter: {
@@ -147,14 +147,14 @@ function getCitationTypeConfg() {
                 Pages: {
                     required: true
                 },
-                Authors: {
+                Author: {
                     required: true
                 }
             },
             views: {
                 all: [
                     ['Pages', 'Doi'],
-                    ['Website', 'Authors']],
+                    ['Website', 'Author']],
             }
         },
         "Master's Thesis": {
@@ -170,7 +170,7 @@ function getCitationTypeConfg() {
                 all: [
                     ['Year', 'Pages'],
                     ['Doi', 'Website'],
-                    ['Authors']],
+                    ['Author']],
             }
         },
         Other: {
@@ -180,7 +180,7 @@ function getCitationTypeConfg() {
                     ['Year', 'Pages'],
                     ['Volume', 'Issue'],
                     ['Website'],
-                    ['Doi', 'Authors']],
+                    ['Doi', 'Author']],
             }
         },
         'Ph.D. Dissertation': {
@@ -197,7 +197,7 @@ function getCitationTypeConfg() {
                     ['Year', 'Pages'],
                     ['Volume', 'Issue'],
                     ['Website','Doi'],
-                    ['Doi', 'Authors']],
+                    ['Doi', 'Author']],
             }
         }
     };

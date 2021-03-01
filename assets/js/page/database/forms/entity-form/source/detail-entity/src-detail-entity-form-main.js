@@ -54,10 +54,10 @@ export function finishPubOrCitEditForm(entity) {
 }
 /* ------------------------- INIT FORM COMBOS ------------------------------- */
 /** Inits comboboxes for the source forms. */
-export function initCombos(entity, fLvl) {
+export function initCombos(fLvl, entity) {
     const events = getEntityComboEvents(entity);                    /*dbug-log*///console.log("initCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
     if (!events) { return; }
-    _elems('initFormCombos', [entity, fLvl, events]);
+    _elems('initFormCombos', [fLvl, events]);
 }
 function getEntityComboEvents(entity) {
     return  {

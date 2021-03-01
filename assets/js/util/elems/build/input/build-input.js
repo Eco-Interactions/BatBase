@@ -73,11 +73,11 @@ function buildLongTextArea() {
  * the select's fieldName to the subForm config's 'selElem' array to later
  * init the 'selectize' combobox.
  */
-function buildSelect(fConfg = f) {                                  /*dbug-log*/console.log("       --buildSelect [%O]", fConfg);
+function buildSelect(fConfg = f) {                                  /*dbug-log*///console.log("       --buildSelect [%O]", fConfg);
     return _cmbx('getFieldOptions', [fConfg.name])
         .then(finishSelectBuild.bind(null, fConfg));
 
-    function finishSelectBuild(fConfg, opts) {                      /*dbug-log*/console.log('           --finishSelectBuild fConfg[%O] opts[%O]', fConfg, opts);
+    function finishSelectBuild(fConfg, opts) {                      /*dbug-log*///console.log('           --finishSelectBuild fConfg[%O] opts[%O]', fConfg, opts);
         const attr = { class: fConfg.class, id: 'sel-' + fConfg.id };
         fConfg.combo = true; //Flag for the combobox selectize-library
         return _el('getSelect', [opts, attr]);
@@ -89,19 +89,8 @@ function buildSelect(fConfg = f) {                                  /*dbug-log*/
  * be reaplced inline upon selection. Either with an existing Author's name,
  * or the Author create form when the user enters a new Author's name.
  */
-function buildMultiSelectFieldCntnr() {                             /*dbug-log*/console.log("       --buildMultiSelectFieldCntnr [%s][%s]", f);
-    return buildMultiSelectField(f)
-        .then(finishMultiSelectFieldCntnr);
-
-    function finishMultiSelectFieldCntnr(field) {
-        const fConfg = {
-            dir: 'col',
-            input: input,
-            label: false,
-            name: f.name,
-        };
-        return _el('getFieldElems', [fConfg]);
-    }
+function buildMultiSelectFieldCntnr() {                             /*dbug-log*///console.log("       --buildMultiSelectFieldCntnr fConfg[%O]", f);
+    return buildMultiSelectField(f);
 }
 /**
  * [buildMultiSelectField description]
@@ -109,24 +98,34 @@ function buildMultiSelectFieldCntnr() {                             /*dbug-log*/
  * @param  {[type]} cnt    [description]
  * @return {[type]}        [description]
  */
-export function buildMultiSelectField(fConfg, cnt = 1) {             /*dbug-log*/console.log("           --buildMultiSelectField [%s][%O]", cnt, fConfg);
+export function buildMultiSelectField(fConfg, cnt = 1) {            /*dbug-log*///console.log("           --buildMultiSelectField [%s][%O]", cnt, fConfg);
     return buildSelect(fConfg)
-        .then(finishFieldInput);
-
-    function finishFieldInput(input) {
-        fConfg = {
-            input: input,
-            label: getCntLabel()+': '+fConfg.name,
-            name: f.name+cnt
-        };
-        $(input).data('cnt', cnt);
-        return _el('getFieldElems', [fConfg]);
-        // if (cnt) { $(input).data('cnt', cnt); }
-    }
-    function getCntLabel(cnt) {
-        const map = { 1: '1st', 2:'2nd', 3:'3rd' };
-        return cnt in map ? map[cnt] : cnt+'th';
-    }
+        .then(finishFieldInput.bind(null, fConfg, cnt));
+}
+function finishFieldInput(fConfg, cnt, input) {                     /*dbug-log*///console.log('               --finishFieldInput cnt[%s] fConfg[%O] input[%O]', cnt, fConfg, input);
+    const confg = getMultiInputFieldConfg(fConfg, cnt, input);
+    addCountToInputData(cnt, input);
+    return _el('getFieldElems', [confg]);
+}
+function getMultiInputFieldConfg(fConfg, cnt, input) {
+    return {
+        'class': fConfg.class,
+        cnt: cnt,
+        group: fConfg.group,
+        id: fConfg.name + cnt,
+        input: input,
+        label: getCntLabel(cnt)+': '+fConfg.name,
+        name: fConfg.name+cnt,
+        type: 'select'
+    };
+}
+function getCntLabel(cnt) {
+    const map = { 1: '1st', 2:'2nd', 3:'3rd' };
+    return cnt in map ? map[cnt] : cnt+'th';
+}
+function addCountToInputData(cnt, input) {
+    input.id += cnt;
+    $(input).data('cnt', cnt);
 }
 /* ========================== FINISH BUILD ================================== */
 function finishInputBuild(fConfg, input) {                          /*dbug-log*///console.log('   --finishInputBuild [%O][%O]', fConfg, input);

@@ -26,7 +26,7 @@ function initEditForm(id, entity) {
 /* --------------------------- FORM FIELDS ---------------------------------- */
 /** Returns the form fields for the passed entity.  */
 function getEditFormFields(id, entity) {
-    _state('setFormProp', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
+    // _state('setFormState', ['top', 'expanded', true]); //All possible fields are shown in edit fields.
     return buildEditFields(entity, id);
 }
 

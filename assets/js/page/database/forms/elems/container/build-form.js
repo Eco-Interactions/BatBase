@@ -28,7 +28,7 @@ let action, entity, fLvl;
  * @param  {[type]} id     Entity ID is added to the bottom right of the edit-form detail panel
  * @return {[type]}        [description]
  */
-export function buildAndAppendRootForm(fields, id = null) {         /*dbug-log*/console.log('buildAndAppendRootForm [%s] = %O', id, fields);
+export function buildAndAppendRootForm(fields, id = null) {         /*dbug-log*///console.log('+--buildAndAppendRootForm [%s] = %O', id, fields);
     const fState = _state('getFormState', ['top']);
     setFormScopeParams(fState.action, fState.name, 'top');
     const form = buildForm(id, fields);
@@ -39,10 +39,10 @@ export function buildAndAppendRootForm(fields, id = null) {         /*dbug-log*/
  * Returns the form window elements - the form and the detail panel.
  * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
  */
-function buildForm(id, fields) {                                    /*dbug-log*/console.log('buildForm id?[%s] fields[%O]', id, fields);
+function buildForm(id, fields) {                                    /*dbug-log*///console.log('buildForm id?[%s] fields[%O]', id, fields);
     return [getExitButtonRow(), getMainFormAndDetailPanelHtml(id, fields)];
 }
-function getMainFormAndDetailPanelHtml(id, fields) {                /*dbug-log*/console.log('getMainFormAndDetailPanelHtml [%s] = %O', id, fields);
+function getMainFormAndDetailPanelHtml(id, fields) {                /*dbug-log*///console.log('getMainFormAndDetailPanelHtml [%s] = %O', id, fields);
     const cntnr = _el('getElem', ['div', { class: 'flex-row' }]);
     const detailPanelHtml = _panel('getDetailPanelElems', [entity, id, action]);
     $(cntnr).append([buildMainForm(fields), detailPanelHtml]);
@@ -76,7 +76,7 @@ function getValMsgCntnr(fLvl) {
     return _el('getElem', ['div', { id: fLvl+'_alert' }]);
 }
 /* ----------------------------- FORM --------------------------------------- */
-function getForm(fields) {                                          /*dbug-log*/console.log('getForm %O', fields);
+function getForm(fields) {                                          /*dbug-log*///console.log('getForm %O', fields);
     const form = buildFormElem();
     $(form).append([
         buildEntityFieldContainer(fields),
@@ -145,7 +145,7 @@ function buildSubFormHdr() {
     return _el('getElem', ['p', attr]);
 }
 function finishSubFormInit(subForm, sId) {
-    _state('setFormProp', [fLvl, 'pSelId', sId]);
+    _state('setFormState', [fLvl, 'pSelId', sId]);
     _cmbx('enableCombobox', [sId.split('sel-').pop(), false]);
     return subForm;
 }

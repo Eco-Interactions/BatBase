@@ -56,8 +56,8 @@ function openSubFormAlert(ent, fLvl) {
     _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
 }
 /* ------------------------- FORM COMBOS ------------------------------------ */
-export function initCombos(fLvl) {                                  /*dbug-log*/console.log('initCombos [%s]', fLvl)
-    const entity = _state('getFormData', [fLvl, 'entity']);
+export function initCombos(fLvl) {                                  /*dbug-log*///console.log('initCombos [%s]', fLvl)
+    const entity = _state('getFormState', [fLvl, 'name']);
     forms[entity].initCombos(fLvl, entity);
 }
 /* -------------------------- EDIT FORMS ------------------------------------ */

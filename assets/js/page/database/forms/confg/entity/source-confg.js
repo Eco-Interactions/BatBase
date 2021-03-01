@@ -9,12 +9,14 @@ export default function(entity) {
 
 function getSourceFieldConfg() {
     return {   //MERGED AND OVERWRITTEN WITH DETAIL.FIELDS
-        Authors: {  // handle merging this and editor and their field trans
+        Author: {  // handle merging this and editor and their field trans
+            count: 1,
             entity: 'Contribution',
+            label: false,
             misc: {
                 customValueStore: true
             },
-            name: 'Authors',
+            name: 'Author',
             prop: {
                 core: 'Contributor'
             },
@@ -41,12 +43,14 @@ function getSourceFieldConfg() {
             name: 'Doi',
             type: 'doi',
         },
-        Editors: {
+        Editor: {
+            count: 1,
             entity: 'Contribution',
+            label: false,
             misc: {
                 customValueStore: true
             },
-            name: 'Editors',
+            name: 'Editor',
             prop: {
                 core: 'Contributor'
             },

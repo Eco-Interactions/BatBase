@@ -146,7 +146,7 @@ function ifNoSubGroupsRemoveField(rows) {
     const subGroups = Object.keys(taxonData.subGroups);
     if (subGroups.length > 1) { return; }
     $(rows)[0].removeChild($(rows)[0].childNodes[1]);
-    _state('removeSelFromStateMemory', ['sub', 'Sub-Group']);
+    _state('removeFieldFromComboInit', ['sub', 'Sub-Group']);
 }
 function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };

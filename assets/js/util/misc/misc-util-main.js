@@ -34,6 +34,10 @@ export function stripString(text) {
     const str = text.trim();
     return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
 }
+export function addSpaceBetweenCamelCaseUnlessHyphen(string) {
+    if (string.includes('-')) { return string; }
+    return string.replace(/([A-Z])/g, ' $1');
+}
 /* ========================= MISC =========================================== */
 export function logInDevEnv() {
     if ($('body').data('env') === 'prod') { return; }
@@ -45,6 +49,9 @@ export function logInProdEnv() {
 }
 export function snapshot(obj) {                                     /*dbug-log*///console.log('snapshot [%O]', obj);
     return JSON.parse(JSON.stringify(obj));
+}
+export function isObj(v) {
+    return v.constructor.name === 'Object';
 }
 /* ========================= ELEM =========================================== */
 export function addEnterKeypressClick(elem) {

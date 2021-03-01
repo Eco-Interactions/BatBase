@@ -45,7 +45,7 @@ function buildAndAppendGroupRows(rootId) {
 function appendGroupRowsAndFinishBuild(rows) {                      /*dbug-log*///console.log('appendGroupRowsAndFinishBuild = %O', rows);
     ifNoSubGroupsRemoveCombo(rows);
     $(`#${role}_fields`).append(rows);
-    _state('setFormFieldData', ['sub', 'Group', null, 'select']);
+    // _state('setFieldState', ['sub', 'Group', null]);
     selectForm.initSelectFormCombos();
     _elems('toggleSubmitBttn', ['#sub-submit', false]);
     bindGroupRootTaxonToSelectUnspecfiedBttn();
@@ -64,7 +64,7 @@ export function ifNoSubGroupsRemoveCombo(rows = false) {
     } else { // Taxon select-form
         rows.splice(0, 1);
     }
-    _state('removeSelFromStateMemory', ['sub', 'Sub-Group']);
+    _state('removeFieldFromComboInit', ['sub', 'Sub-Group']);
 }
 /* ------------------ SELECT SUB-GROUP -------------------------------------- */
 export function onSubGroupSelection(val) {
