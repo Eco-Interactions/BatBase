@@ -99,25 +99,24 @@ function buildMultiSelectFieldCntnr() {                             /*dbug-log*/
  * @param  {[type]} cnt    [description]
  * @return {[type]}        [description]
  */
-export function buildMultiSelectField(fConfg, cnt = 1) {            /*dbug-log*///console.log("           --buildMultiSelectField [%s][%O]", cnt, fConfg);
+export function buildMultiSelectField(fConfg) {                     /*dbug-log*///console.log("--buildMultiSelectField [%O]", fConfg);
     return buildSelect(fConfg)
-        .then(finishFieldInput.bind(null, fConfg, cnt));
+        .then(finishFieldInput.bind(null, fConfg));
 }
-function finishFieldInput(fConfg, cnt, input) {                     /*dbug-log*///console.log('               --finishFieldInput cnt[%s] fConfg[%O] input[%O]', cnt, fConfg, input);
-    const confg = getMultiInputFieldConfg(fConfg, cnt, input);
-    addCountToInputData(cnt, input);
+function finishFieldInput(fConfg, input) {                          /*dbug-log*///console.log('--finishFieldInput fConfg[%O] input[%O]', fConfg, input);
+    const confg = getMultiInputFieldConfg(fConfg, input);
+    addCountToInputData(fConfg.count, input);
     return _el('getFieldElems', [confg]);
 }
-function getMultiInputFieldConfg(fConfg, cnt, input) {
+function getMultiInputFieldConfg(c, input) {
     return {
-        'class': fConfg.class,
-        cnt: cnt,
-        group: fConfg.group,
-        id: fConfg.name + cnt,
+        'class': c.class,
+        group: c.group,
+        id: c.name + c.count,
         input: input,
-        label: getCntLabel(cnt)+': '+fConfg.name,
-        name: fConfg.name+cnt,
-        required: fConfg.required || false,
+        label: getCntLabel(c.count)+': '+c.name,
+        name: c.name+c.count,
+        required: c.required || false,
         type: 'select'
     };
 }

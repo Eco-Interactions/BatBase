@@ -13,7 +13,6 @@
 import { _db, _modal } from '~util';
 import { _state, _elems, handleFormSubmit } from '~form';
 import * as entityForm from './detail-entity/src-detail-entity-form-main.js';
-import * as typeFields from './pub-and-cit-type-fields.js';
 /* ------------------- FORM INIT -------------------------------------------- */
 /** Inits comboboxes for the source forms. */
 export function initCombos() {
@@ -61,7 +60,7 @@ export function initEntitySubForm(entity, fLvl, fVals, pSel) {
 }
 /* ------------------- ENTITY FIELDS ---------------------------------------- */
 export function loadSrcTypeFields() {
-    return typeFields.loadSrcTypeFields(...arguments);
+    return entityForm.loadSrcTypeFields(...arguments);
 }
 export function handleCitText() {
     entityForm.handleCitText(...arguments);

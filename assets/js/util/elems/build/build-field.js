@@ -66,8 +66,8 @@ function getFieldLabelAndInput() {
 }
 /* ========================= FIELD ========================================== */
 function buildFieldContainer(group, info, dir = 'row') {
-    const c = f.type.includes('multi') ? '' : 'field-elems';
-    const attr = { class: `${c} flex-${dir}`, title: getInfoTxt(info)};
+    const c = f.type.includes('multi') ? 'cntnr flex-col' : `field-elems flex-${dir}`;
+    const attr = { class: c, title: getInfoTxt(info)};
     const cntnr = _el('getElem', ['div', attr]);
     if (info) { addTutorialDataAttr(cntnr, group, info); }
     return cntnr;

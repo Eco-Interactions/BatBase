@@ -130,7 +130,7 @@ export function enableComboboxes($pElems, enable) {
     $pElems.each((i, elem) => { enableCombobox(elem.id.split('sel-')[1], enable)});
 }
 export function enableFirstCombobox(field, enable = true) {
-    const selElems = $(`#${ucProp}_f-cntnr .selectized`).toArray();/*dbug-log*///console.log("[%s] first elem = %O", field, selElems);
+    const selElems = $(`#${field}_f-cntnr .selectized`).toArray();  /*dbug-log*///console.log("[%s] first elem = %O", field, selElems);
     const firstElem = $('#'+ selElems[0].id)[0].selectize;
     return enable ? firstElem.enable() : firstElem.disable();
 }

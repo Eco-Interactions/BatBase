@@ -15,7 +15,7 @@
  */
 import { _cmbx, _u } from '~util';
 import { _state, _elems, getSubFormLvl } from '~form';
-import * as sForm from './src-form-main.js';
+import * as sForm from '../src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
 export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*///console.log('+--loadSrcTypeFields [%s] id?[%s] type[%s]', entity, typeId, type);
     const fLvl = getSubFormLvl('sub');

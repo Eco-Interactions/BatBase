@@ -2,7 +2,7 @@
  * Builds and manages the form fields.
  *
  * Export
-= *    buildMultiSelectField
+= *    buildDynamicFormField
  *     fillComplexFormFields
  *     ifAllRequiredFieldsFilled
  *     initFormCombos
@@ -36,10 +36,8 @@ export function initFormCombos() {
 export function buildFormField() {
     return build.buildFormField(...arguments);
 }
-export function buildMultiSelectField() {
-    const input = _el('buildMultiSelectField', [...arguments]);
-    build.setOnMultiSelectChangeListener(input);
-    return input;
+export function buildDynamicFormField() {
+    return build.buildDynamicFormField(...arguments);
 }
 /* ------------------- BUILD FIELD-ROWS ------------------------------------- */
 export function getFormFieldRows() {

@@ -76,13 +76,13 @@ export function getSelectStoredOpts(prop, include) {
 /** Returns and array of options for the passed field type. */
 export function getFieldOptions(fName) {                            /*dbug-log*/console.log("getSelectOpts. for [%s]", fName);
     const optMap = {
-        'Authors': [ getSrcOpts, 'authSrcs'],
+        'Author': [ getSrcOpts, 'authSrcs'],
         'CitationType': [ getCitTypeOpts, 'citTypeNames'],
         'Class': [ getTaxonOpts, 'Class' ],
         'Country': [ getStoredOpts, 'countryNames' ],
         'Country-Region': [ getCntryRegOpts, null ],
         'CitationTitle': [() => []],
-        'Editors': [ getSrcOpts, 'authSrcs'],
+        'Editor': [ getSrcOpts, 'authSrcs'],
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
         'Group': [ getStoredOpts, 'groupNames' ],

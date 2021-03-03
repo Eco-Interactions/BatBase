@@ -104,8 +104,8 @@ export function initFormCombos() {
 export function resetFormCombobox() {
     return fields.resetFormCombobox(...arguments);
 }
-export function buildMultiSelectField() {
-    return fields.buildMultiSelectField(...arguments);
+export function buildDynamicFormField() {
+    return fields.buildDynamicFormField(...arguments);
 }
 export function setSilentVal() {
     fields.setSilentVal(...arguments);

@@ -14,10 +14,11 @@
  *     FINISH EDIT-FORM
  */
 import { _cmbx, _el } from '~util';
-import { _state, _elems, _panel } from '~form';
-import * as sForm from '../src-form-main.js';
+import { _elems, _form, _panel, _state } from '~form';
+import * as sForm from '../../src-form-main.js';
 /* -------------------------- PUBLICATION CREATE ---------------------------- */
 export function initPubForm(v) {                                    /*perm-log*/console.log('       /--initPubForm [%s]', v);
+    if (_form('ifFormInUse', ['sub'])) { return _form('alertInUse', ['sub']); }
     clearCitationFormData();
     _state('addEntityFormState', getPubInitParams(v));
     return buildAndAppendPubForm();
@@ -58,7 +59,7 @@ export function loadPubTypeFields(fLvl, typeId) {                   /*dbug-log*/
 /** Shows the user a note above the author and editor elems. */
 function showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl) {
     if (!isBothEditorAndAuthorFieldsAvailable(fLvl)) { return; }
-    const note =`<div class="a-mrg i g";>Note: At least one author OR editor is required.</div>`;
+    const note =`<div class="a-mrg i g";>Note: This publication type can have either authors OR editors.</div>`;
     $(note).insertBefore($('#Author_f-cntnr')[0].parentNode);
 }
 function isBothEditorAndAuthorFieldsAvailable(fLvl) {

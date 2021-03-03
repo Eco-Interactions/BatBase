@@ -14,9 +14,9 @@
  *
  */
 import { _el, _u } from '~util';
-import { _elems, _state, getNextFormLevel } from '~form';
+import { _elems, _form, _state, getNextFormLevel } from '~form';
 /* ================== SHOW ALL FIELDS CHECKBOX ============================== */
-export function ifMutlipleDisplaysGetToggle(entity, fLvl) {         /*dbug-log*/console.log('+-- ifMutlipleDisplaysGetToggle [%s][%s]', entity, fLvl);
+export function ifMutlipleDisplaysGetToggle(entity, fLvl) {         /*dbug-log*///console.log('+--ifMutlipleDisplaysGetToggle [%s][%s]', entity, fLvl);
     if (!ifFormHasMultipleFieldDisplays(fLvl)) { return null; }
     const cntnr = buildToggleFieldsContainer();
     $(cntnr).append([getCheckbox(fLvl, entity), getLabel(fLvl)]);
@@ -24,7 +24,7 @@ export function ifMutlipleDisplaysGetToggle(entity, fLvl) {         /*dbug-log*/
 }
 /** On create-form init, if the 'simple' display is availble it is the default set. */
 function ifFormHasMultipleFieldDisplays(fLvl) {
-    const defaultDisplay = _state('getFormState', [fLvl, 'display']);/*dbug-log*/console.log('   --ifFormHasMultipleFieldDisplays default[%s]', defaultDisplay);
+    const defaultDisplay = _state('getFormState', [fLvl, 'display']);/*dbug-log*///console.log('--ifFormHasMultipleFieldDisplays default[%s]', defaultDisplay);
     return defaultDisplay !== 'all';
 }
 function buildToggleFieldsContainer() {
@@ -50,15 +50,14 @@ function buildChkbxInput(fLvl) {
 }
 /* ===================== TOGGLE FIELD-DISPLAY =============================== */
 /** [handleToggleFields description] */
-function handleToggleFields(fLvl, entity) {                         /*dbug-log*/console.log('@--handleToggleFields [%s][%s]', fLvl, entity);
-    if (ifOpenSubForm(fLvl)) { return showOpenSubFormAlert(fLvl); }
+function handleToggleFields(fLvl, entity) {                         /*dbug-log*///console.log('@--handleToggleFields [%s][%s]', fLvl, entity);
+    if (ifOpenSubForm(fLvl)) { return _form('alertInUse', [fLvl]); }
     $(`#${entity}_fields`).remove();
     toggleFormFields(fLvl, entity);
 }
 /** Returns true if the next sub-rank form exists in the dom. */
 function ifOpenSubForm(fLvl) {
-    const childFormLvl = getNextFormLevel('child', fLvl);
-    return $(`#${childFormLvl}-form`).length > 0;
+    return $(`#${getNextFormLevel('child', fLvl)}-form`).length > 0;
 }
 /** [toggleFormFields description] */
 function toggleFormFields(fLvl, entity) {

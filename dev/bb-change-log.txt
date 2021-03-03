@@ -13,7 +13,12 @@ SINCE LAST SERVER UPDATE:
                 - Fields can be stacked in the same row (eg, doi and website)
                 - arbitrary number of fields in row
                     - styled by percentage based on total "fields" in row and field size (eg, year is a "small" field)
-
+        - Entity Forms
+            - Publication
+                - Author|editor
+                    - note changed to "Note: This publication type can have either authors OR editors."
+                    - opposite type disabled and label hidden after selection
+                    - labels now show order: 1st, 2nd, etc.
 
 
 SINCE LAST USER UPDATE:

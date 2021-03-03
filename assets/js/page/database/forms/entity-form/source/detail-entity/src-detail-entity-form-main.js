@@ -6,10 +6,12 @@
  *
  */
 import { _elems } from '~form';
-import * as author from './author-form.js';
-import * as publisher from './publisher-form.js';
+import * as author from './author/author-form.js';
+import * as publisher from './publisher/publisher-form.js';
 import * as citation from './citation/citation-form.js';
-import * as publication from './publication-form.js';
+import * as publication from './publication/publication-form.js';
+import * as typeFields from './pub-and-cit-type-fields.js';
+
 /* --------------------------- AUTHOR --------------------------------------- */
 export function selectExistingAuthsOrEds() {
     return author.selectExistingAuthsOrEds(...arguments);
@@ -52,6 +54,9 @@ export function finishPubOrCitEditForm(entity) {
     if (entity === 'citation') { return citation.finishCitationEditForm(); }
     publication.finishPublicationEditForm();
 }
+export function loadSrcTypeFields() {
+    return typeFields.loadSrcTypeFields(...arguments);
+}
 /* ------------------------- INIT FORM COMBOS ------------------------------- */
 /** Inits comboboxes for the source forms. */
 export function initCombos(fLvl, entity) {
@@ -65,8 +70,8 @@ function getEntityComboEvents(fLvl, entity) {
             'CitationType': {
                 onChange: loadCitTypeFields.bind(null, fLvl) },
             'Author': {
-                create: initAuthOrEdForm.bind(null, 1, 'Author'),
-                onChange: onAuthAndEdSelection.bind(null, 1, 'Author')
+                create: author.initAuthOrEdForm.bind(null, 1, 'Author'),
+                onChange: author.onAuthAndEdSelection.bind(null, 1, 'Author')
             },
         },
         'publication': {
@@ -76,12 +81,12 @@ function getEntityComboEvents(fLvl, entity) {
                 create: initPublisherForm,
                 onChange: onPublSelection },
             'Author': {
-                create: initAuthOrEdForm.bind(null, 1, 'Author'),
-                onChange: onAuthAndEdSelection.bind(null, 1, 'Author')
+                create: author.initAuthOrEdForm.bind(null, 1, 'Author'),
+                onChange: author.onAuthAndEdSelection.bind(null, 1, 'Author')
             },
             'Editor': {
-                create: initAuthOrEdForm.bind(null, 1, 'Editor'),
-                onChange: onAuthAndEdSelection.bind(null, 1, 'Editor')
+                create: author.initAuthOrEdForm.bind(null, 1, 'Editor'),
+                onChange: author.onAuthAndEdSelection.bind(null, 1, 'Editor')
             }
         }
     }[entity];

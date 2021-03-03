@@ -21,6 +21,7 @@ function getSourceFieldConfg() {
                 core: 'Contributor'
             },
             type: 'multiSelect',
+            value: {} //Added here so property exists as obj on init
         },
         Description: {
             name: 'Description',
@@ -54,7 +55,8 @@ function getSourceFieldConfg() {
             prop: {
                 core: 'Contributor'
             },
-            type: 'multiSelect'
+            type: 'multiSelect',
+            value: {} //Added here so property exists as obj on init
         },
         ParentSource: {
             entity: 'Source',

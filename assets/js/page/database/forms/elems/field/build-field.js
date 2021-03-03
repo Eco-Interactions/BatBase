@@ -45,6 +45,16 @@ function buildFormFieldElems(f) {                                   /*dbug-log*/
     addPinIfFieldDataCanPersistThroughMultipleSubmits(f, field);
     return field;
 }
+export function buildDynamicFormField(fConfg) {
+    return _el('buildMultiSelectField', [fConfg])
+        .then(addChangeEventAndReturnField);
+
+    function addChangeEventAndReturnField(input) {
+        fConfg.input = input;
+        setOnMultiSelectChangeListener(fConfg);
+        return input;
+    }
+}
 /* -------------------------- IF PINNABLE ------------------------------------ */
 /**
  * [addPinIfFieldDataCanPersistThroughMultipleSubmits description]
@@ -125,14 +135,14 @@ function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/
 }
 /* ________________ MULTI-SELECT DATA ________________ */
 /** [setOnMultiSelectChangeListener description] */
-export function setOnMultiSelectChangeListener(f) {                 /*dbug-log*///console.log('setOnMultiSelectChangeListener fConfg[%O]', f);
-    $(f.input).change(storeMultiSelectValue.bind(null, f.group, f.cnt, f.name));
+function setOnMultiSelectChangeListener(f) {                        /*dbug-log*///console.log('setOnMultiSelectChangeListener fConfg[%O]', f);
+    $(f.input).change(storeMultiSelectValue.bind(null, f.group, f.count, f.name));
 }
 /** [storeMultiSelectValue description] */
-function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('storeMultiSelectValue. lvl = %s, cnt = %s, fName = %s, e = %O', fLvl, cnt, fName, e);
-    const valueObj = _state('getFormFieldData', [fLvl, fName, 'value']);/*dbug-log*///console.log('valueObj[%O]', valueObj);
-    valueObj[cnt] = e.target.value || null;
-    _state('setFieldState', [fLvl, fName, valueObj]);
+function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('@--storeMultiSelectValue lvl[%s] cnt[%s]fName[%s], e[%O]', fLvl, cnt, fName, e);
+    const vals = _state('getFormData', [fLvl, fName]);              /*dbug-log*///console.log('   --vals[%O]', vals);
+    vals[cnt] = e.target.value || null;
+    _state('setFieldState', [fLvl, fName, vals]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }
 /* ---------------- AUTH|EDITOR VALIDATION ---------------------------------- */

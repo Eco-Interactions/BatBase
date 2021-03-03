@@ -48,7 +48,7 @@ function refocusAndShowUpdates() {                                  /*dbug-log*/
  */
 export function exitSubForm(fLvl, focus, onExit, data) {
     const exitFunc = onExit || _state('getFormState', [fLvl, 'onFormClose']);
-    $('#'+fLvl+'-form').remove();                                   /*perm-log*/console.log("               --exitSubForm fLvl = %s, onExit = %O", fLvl, exitFunc);
+    $(`#${fLvl}-form`).remove();                                   /*perm-log*/console.log("               --exitSubForm fLvl = %s, onExit = %O", fLvl, exitFunc);
     _elems('resetFormCombobox', [fLvl, !!focus]);
     if (exitFunc) { exitFunc(data); }
 }
