@@ -28,7 +28,7 @@ export function onRankSelection(val, elem) {                       /*dbug-log*//
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
     repopulateCombosWithRelatedTaxa(val, fLvl);
-    _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', true]);
+    _elems('toggleSubmitBttn', [`#${fLvl}-submit`, true]);
 }
  /* ----------------------- VALIDATE AND CREATE ----------------------------- */
 function openTaxonCreateForm(selElem, fLvl) {

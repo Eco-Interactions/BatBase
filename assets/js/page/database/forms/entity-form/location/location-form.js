@@ -27,9 +27,9 @@ function buildLocForm(val) {
         'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#sel-Country-Region').val()
     };
-    _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create']);
+    _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create', vals]);
     _state('setOnFormCloseHandler', ['sub', _form.bind(null, 'enableCountryRegionField')]);
-    return _elems('getSubForm', ['sub', 'med-sub-form', vals, '#sel-Location'])
+    return _elems('getSubForm', ['sub', 'med-sub-form', '#sel-Location'])
         .then(appendLocFormAndFinishBuild);
 
     function appendLocFormAndFinishBuild(form) {
@@ -63,13 +63,13 @@ function addNotesToForm() {
     addSelectSimilarLocationNote($('#ElevationMax_f')[0].parentNode);
 }
 function addHowToCreateWithGpsNote(pElem) {
-    const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">Enter
+    const note = `<p class="loc-gps-note" style="margin-top: 5px;">Enter
         decimal data (convert <a href="https://www.fcc.gov/media/radio/dms-decimal"
         target="_blank">here</a>) and see the green pin’s popup for name suggestions.</p>`;
     $(pElem).before(note);
 }
 function addSelectSimilarLocationNote(prevElem) {
-    const note = `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">
+    const note = `<p class="loc-gps-note" style="margin-top: 5px;">
         Select an existing location by clicking inside its pin's popup.</p>`;
     $(prevElem).after(note);
 }
@@ -117,7 +117,7 @@ export function initCombos(fLvl) {
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
 export function addMapToLocForm(type, $formElem = $('#location_fields')) {
-    const mapContainer = _el('getElem', ['div', { id: 'form-map', class: 'skipFormData' }]);
+    const mapContainer = _el('getElem', ['div', { id: 'form-map' }]);
     $formElem.after(mapContainer);
     initLocFormMap(type);
 }

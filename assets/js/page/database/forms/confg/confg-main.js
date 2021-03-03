@@ -8,11 +8,11 @@
  *        FieldName: { //DisplayName
  *            class: "",
  *            combo: true, //set during input build to trigger selectize combobox init
+ *            id: '' //set using 'name' otherwise
  *            info: { intro: "", *tooltip: ""(req) },
  *            label: Field label text (Name-prop used if absent)
  *            *name: FieldName,  [REQUIRED]
  *            prep: funcNameString //prep data for server when different than exactly formEntity:FieldName
- *            //prop: { entityName: {propName: hdnlr, ...}, ... } //server entity:prop when different than exactly formEntity:FieldName
  *            required: true, //Set if true
  *            *type: "", null if field-data auto-derived [REQUIRED]
  *        }, ...
@@ -37,122 +37,77 @@
  * }
  *
  * Export
- *     getFormConfg  (TODO: only exporting method for confg)
- *     getCoreFieldDefs
- *     getCoreEntity
- *     getFieldTranslations
- *     getCoreFormEntity
+ *     getFormConfg
+ *     onEntityTypeChangeUpdateConfg
+ *     onFieldViewChangeUpdateConfg
  *
  * TOC
- *     FORM CONFG
- *         MERGE CONFG-DATA
- *         BUILD CURRENT FIELD-CONFG
- *     //SERVER FIELD CONFG
+ *     INIT FORM-CONFG
+ *     REBUILD FORM-CONFG
+ *         FORM-TYPE CHANGED
+ *         FIELD-VIEW CHANGED
+ *     CONFG BUILDERS
+ *         BASE CONFG
+ *         FIELD CONFG
  */
 import { _u } from '~util';
 import { _state } from '../forms-main.js';
 import { mergeIntoFormConfg } from './util/merge-confgs.js';
-
-let confg = null;
-
-/* *************************** FORM CONFG *********************************** */
-export function getFormConfg(entity, fLvl, showSimpleView = true) { /*dbug-log*/console.log('+--getFormConfg [%s][%s] showSimpleView?[%s]', fLvl, entity, showSimpleView);
-    confg = getBaseConfg(entity);                                   /*dbug-log*///console.log('   --baseConfg [%s][%O]', entity, _u('snapshot', [confg]));
-    buildFormConfg(fLvl, showSimpleView);                           /*dbug-log*///console.log('   --formConfg [%s][%O]', entity, _u('snapshot', [confg]));
+import { getBaseFormConfg } from './util/base-confg.js';
+/* ====================== INIT FORM-CONFG =================================== */
+export function initFormConfg(entity, fLvl, action, vals) {         /*dbug-log*///console.log('+--initFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
+    const confg = getBaseConfg(entity, fLvl);
+    initDisplayConfg(confg, action, !!confg.views.simple, vals);
     return confg;
 }
-function buildFormConfg(fLvl, showSimpleView = true) {
-    confg.display = showSimpleView && confg.views.simple ? 'simple' : 'all';
-    confg.group = fLvl;
-    confg.view = getDisplayedFieldConfgs(confg);
+function initDisplayConfg(confg, action, hasSimpleView, vals) {
+    confg.display = action === 'create' && hasSimpleView ? 'simple' : 'all';
+    setDisplayedFieldConfg(confg, confg.views, vals);
+    delete confg.views;
 }
-/* ======================== BUILD BASE-CONFG ================================ */
-function getBaseConfg(entity) {
-    const cName = getConfgName(entity);                             /*dbug-log*///console.log('   --getBaseConfg [%s] for [%s]', cName, entity);
-    const confg = getConfg(cName, entity);
-    if (confg.core) { mergeCoreEntityConfg(confg); }
-    return confg;
-}
-function getConfgName(entity) {
-    const map = {
-        subject: 'group',
-        object: 'group',
-        editor: 'author'
-    };
-    return map[entity] ? map[entity] : _u('lcfirst', [entity]);
-}
+/* ====================== REBUILD FORM-CONFG ================================ */
+/* ------------------------ FORM-TYPE CHANGED ------------------------------- */
 /**
- * Base form-confg properties:
- * { *: required confg-properties
- *    core: entityName,
- *    *fields: {
- *         //CORE.FIELDS AND TYPE.FIELDS WILL BE MERGED IN.
- *        FieldName: { //DisplayName
- *            class: '' //Otherwise set to form-level default
- *            //id: escaped id, added during field build
- *            info: { intro: "", *tooltip: ""(req) },
- *            label: Field label text (Name-prop used if absent)
- *            *name: FieldName,  [REQUIRED]
- *            prep: [], //server-data handled before form-submit
- *            required: true, //Set if true
- *            *type: "",  [REQUIRED]
- *        }, ...
- *    },
- *    misc: {
- *        entityProp: value
- *    },
- *    *name: formName (entity or su|object)
- *    types: { //ENTITY SUB-TYPES
- *         Type name: {
- *              name: (req)
- *              [confg prop with type-data]
- *         }
- *    },
- *    views: { //fields will be built and displayed according to the view
- *       *all:   [ [REQUIRED]
- *           FullRowFieldName,
- *           [FirstFieldName, Second, ...],
- *           [{fields: [FirstStackedField, SecondStacked]}, SecondRowField...]
- *       simple: [ ...SameFormat ]
- *    }
- * }
- *
- *
- * @param  {[type]} name    [description]
- * @param  {[type]} entity) {                                          console.log('getBaseConfg [%s] for [%s]', name, entity [description]
- * @return {[type]}         [description]
+ * On form entity-type change, entity-type confg merged with current confg.
+ * @param  {[type]} c     Current form confg
+ * @param  {[type]} vals Current field values.
  */
-function getConfg(name, entity) {                                   /*dbug-log*///console.log('getConfg [%s] for [%s]', name, entity);
-    return require(`./entity/${name}-confg.js`).default(entity);
+export function onEntityTypeChangeUpdateConfg(c, vals) {            /*dbug-log*/console.log('+--onEntityTypeChangeUpdateConfg [%s][%s][%O] vals[%O]', c.name, c.type, c, vals);
+    const mConfg = getBaseConfg(c.name, c.group, c.type);
+    updateConfg(c, mConfg, vals);                                   /*dbug-log*///console.log('   --FINAL [%s] confg[%O]', c.name, c);
 }
-/* ====================== MERGE CONFG-DATA ================================== */
-/**
- * [mergeCoreAndDetailConfgs description]
- * @param  {[type]} confg [description]
- * @return {[type]}        [description]
- */
-function mergeCoreEntityConfg(c) {
-    const cEntityConfg = getBaseConfg(c.core);                      /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], cEntityConfg[%O]', c, cEntityConfg);
-    mergeIntoFormConfg(c, cEntityConfg);
-}
-export function updateFormTypeConfg(c, fLvl, fVals) {               /*dbug-log*///console.log('+--updateFormTypeConfg [%s][%s][%s] fVals[%O]', fLvl, c.name, c.type, fVals);
-    const mConfg = getBaseConfg(c.name);
-    mergeIntoFormConfg(mConfg, mConfg.types[c.type]);
-    updateConfg(c, mConfg, fVals);                                  /*dbug-log*///console.log('   --final[%O]', _u('snapshot', [c]));
-}
-function updateConfg(c, mConfg, fVals) {                            /*dbug-log*///console.log('   --updateConfg confg[%O] mConfg[%O]', _u('snapshot', [c]), _u('snapshot', [mConfg]));
-    const replace = ['fields', 'views'];
+/** [updateConfg description] */
+function updateConfg(c, mConfg, vals) {                             /*dbug-log*///console.log('   --updateConfg confg[%O] mConfg[%O]', _u('snapshot', [c]), _u('snapshot', [mConfg]));
+    const replace = ['fields'];
     replace.forEach(p => c[p] = mConfg[p]);
-    c.view = getDisplayedFieldConfgs(c, fVals);
+    setDisplayedFieldConfg(c, mConfg.views, vals);
 }
-/* ==================== BUILD CURRENT FIELD-CONFG =========================== */
-/**
- * [getFieldsToDisplay description]
- * @return {[type]}        [description]
- */
-function getDisplayedFieldConfgs(c, fVals = {}) {                    /*dbug-log*///console.log("getDisplayedFieldConfgs confg[%O]", c);
+/* ----------------------- FIELD-VIEW CHANGED ------------------------------- */
+
+export function onFieldViewChangeUpdateConfg(c, vals) {             /*dbug-log*/console.log('+--onFieldViewChangeUpdateConfg [%s][%s][%O] vals[%O]', c.name, c.type, c, vals);
+    const mConfg = getBaseConfg(c.name, c.group, c.type);
+    c.display = c.display === 'all' ? 'simple' : 'all';
+    setDisplayedFieldConfg(c, mConfg.views, vals);                  /*dbug-log*///console.log('   --FINAL [%s] confg[%O]', c.name, c);
+}
+/* ====================== CONFG BUILDERS ==================================== */
+/* ----------------------- BASE CONFG --------------------------------------- */
+function getBaseConfg(entity, fLvl, type) {
+    const confg = getBaseFormConfg(entity, fLvl);
+    if (confg.core) { mergeCoreEntityConfg(confg); }
+    if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
+    delete confg.types;                                              /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
+    return confg;
+}
+/** [mergeCoreEntityConfg description] */
+function mergeCoreEntityConfg(c) {
+    const coreConfg = getBaseFormConfg(c.core);                      /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
+    mergeIntoFormConfg(c, coreConfg);
+}
+/* ------------------------- FIELD CONFG ------------------------------------ */
+/** [setDisplayedFieldConfg description] */
+function setDisplayedFieldConfg(c, viewSets, vals = {}) {           /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
     c.infoSteps = 0;
-    return c.views[c.display].map(getFieldConfgs);
+    c.view = viewSets[c.display].map(getFieldConfgs);
 
     function getFieldConfgs(name) {                                 /*dbug-log*///console.log("getFieldConfg field[%s][%O]", name, confg.fields[name]);
         if (_u('isObj', [name])) { return getStackedFieldConfgs(name)}
@@ -162,7 +117,7 @@ function getDisplayedFieldConfgs(c, fVals = {}) {                    /*dbug-log*
         setFieldStyleClass(fConfg, c.group);
         fConfg.group = c.group;
         fConfg.pinnable = c.pinnable || false;
-        setFieldValue(fConfg, fVals);
+        setFieldValue(fConfg, vals);
         return fConfg;
     }
     function getStackedFieldConfgs(fObj) {                          /*dbug-log*///console.log('getStackedFieldConfgs [%O]', fObj);
@@ -176,11 +131,7 @@ function getDisplayedFieldConfgs(c, fVals = {}) {                    /*dbug-log*
         return Object.values(c.fields).find(f => f.label === name);
     }
 }
-/**
- * [setFieldStyleClass description]
- * @param {[type]} fConfg [description]
- * @param {[type]} fLvl   [description]
- */
+/** [setFieldStyleClass description] */
 function setFieldStyleClass(fConfg, fLvl) {
     if (fConfg.class) { return; } //Style class set in form-confg
     const dClasses = {
@@ -190,13 +141,20 @@ function setFieldStyleClass(fConfg, fLvl) {
     };                                                              /*dbug-log*///console.log('setFieldStyleClass fConfg[%O] fLvl[%s]', fConfg, fLvl);
     fConfg.class = dClasses[fLvl];
 }
-/**
- * [setFieldValue description]
- * @param {[type]} f     [description]
- * @param {[type]} fVals [description]
- */
+/** [setFieldValue description] */
 function setFieldValue(f, vals) {
     const val = vals[f.label] ? vals[f.label] : vals[f.name];
     if (!val) { return; }
     f.value = val;
 }
+/* ====================== GET DEFAULT-CONFG ================================= */
+// export function getDefaultConfgData(entity, params) {
+//     const confg = getBaseConfg(entity, null);
+//     const map = {
+//         publication: getDefaultCitationType
+//     };
+//     return map[entity] ? map[entity](confg, ...arguments) : false;
+// }
+// function getDefaultCitationType(confg, e, pType) {
+//     return confg.types[pType.displayName].misc.defaultCitType;
+// }

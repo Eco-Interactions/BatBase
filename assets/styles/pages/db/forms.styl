@@ -35,8 +35,7 @@ div[id$="_fields"] //Contains all entity-form fields
     min-width: 100%
 
 #form-main .selectize-control
-    width: 75%
-
+    width: -webkit-fill-available
 
 /* --- Large (Interaction) Forms --- */
 .form-popup.lrg-form
@@ -48,7 +47,7 @@ div[id$="_fields"] //Contains all entity-form fields
     max-width 1330px;
 
 #form-main.lrg-form
-    height 88vh
+    // height 88vh
     flex 1 0 942px
 /* --- Medium Forms --- */
 .form-popup.med-form
@@ -66,8 +65,8 @@ div[id$="_fields"] //Contains all entity-form fields
 #form-main.med-form .top-row
     width 450px
 
-#form-main.med-form label
-    flex: 0 1 100px
+// #form-main.med-form label
+    // flex: 0 1 100px
 
 /* --- Small Forms --- */
 .form-popup.sml-form
@@ -95,48 +94,25 @@ $sub-form-styles
     @extends $sub-form-styles
     flex: 1 1 385px
     margin-top: .5em
-
-/* --------- Row Containers -------- */
-.top-row
-    width 468px
-
-.full-row
-    width: 100%
 /* --------- Fields -------- */
-#top-form label
-    padding: 9px 0 2px 0
-    flex: 0 1 121px
-
-#sub-form label, #sub2-form label
+#sub-form .sub_lbl, #sub2-form .sub2_lbl
     font-size: 1em
     padding: 9px 0 2px 0
-    flex: unset
 
 #top-form textarea
     height: 63px
-    flex-grow 1
-
-.xlrg-field.top
-    width: 88%
-
-.lrg-field
-    flex: 1 1 302px
-
-.med-field
-    flex: 1 1 240px
-
-.sml-field
-    max-width: 8em !important
 /* ------ VALIDATION ----- */
 .form-popup input:invalid
     border: 1px dashed red
 /* ======================= FORM SPECIFIC ==================================== */
+#interaction_fields .top_lbl
+    padding: 9px 0 2px 0
+    flex: 0 0 5em
+
 #Group_f .med-field //group combobox class
-    width: webkit-fill-available
     margin-left: -2em
 
 #Sub-Group_f .med-field
-    width: webkit-fill-available
     margin-left: -1em
 
 #Group_f .selectize-dropdown, #Sub-Group_f .selectize-dropdown

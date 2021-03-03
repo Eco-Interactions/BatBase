@@ -18,12 +18,9 @@
  *     IF REQUIRED FIELDS FILLED
  */
 import { _el } from '~util';
-import { _state } from '~form';
 import * as build from './build-field.js';
 import * as combo from './combo-field.js';
-import * as fill from './complex-fields.js';
-import * as style from './style-field.js';
-import * as toggle from './toggle-fields.js';
+import * as util from './util/field-util-main.js';
 
 /* ======================== FORM COMBOS ===================================== */
 export function resetFormCombobox() {
@@ -44,9 +41,6 @@ export function buildMultiSelectField() {
     build.setOnMultiSelectChangeListener(input);
     return input;
 }
-export function setDynamicFieldStyles() {
-    style.setDynamicFieldStyles(...arguments);
-}
 /* ------------------- BUILD FIELD-ROWS ------------------------------------- */
 export function getFormFieldRows() {
     return row.getFormFieldRows(...arguments);
@@ -54,11 +48,17 @@ export function getFormFieldRows() {
 export function getFormRows() {
     return row.getFormRows(...arguments);
 }
-/* ================== TOGGLE FIELD-DISPLAY ================================== */
-export function ifMutlipleDisplaysGetToggle() {
-    return toggle.ifMutlipleDisplaysGetToggle(...arguments);
+/* =================== FORM-FIELD UTILITY =================================== */
+export function setDynamicFieldStyles() {
+    util.setDynamicFieldStyles(...arguments);
 }
-/* =================== SET FORM-FIELD DATA ================================== */
+export function ifMutlipleDisplaysGetToggle() {
+    return util.ifMutlipleDisplaysGetToggle(...arguments);
+}
+
+export function rebuildFieldsOnFormConfgChanged() {
+    return util.rebuildFieldsOnFormConfgChanged(...arguments);
+}
 /**
  * When either source-type fields are regenerated or the form fields are toggled
  * between all available fields and the default shown, the fields that can
@@ -66,17 +66,9 @@ export function ifMutlipleDisplaysGetToggle() {
  * reinitiation are handled here.
  */
 export function fillComplexFormFields() {
-    return fill.fillComplexFormFields(...arguments);
+    return util.fillComplexFormFields(...arguments);
 }
-/* ================== IF REQUIRED FIELDS FILLED ============================= */
 /** Returns true if all the required elements for the current form have a value. */
-export function ifAllRequiredFieldsFilled(fLvl) {
-    const fields = _state('getFormState', [fLvl, 'fields']);         /*dbug-log*/console.log("+--ifAllRequiredFieldsFilled... [%s][%O]", fLvl, fields)
-    return Object.values(fields).every(isRequiredFieldFilled.bind(null, fLvl));
-}
-/** Note: checks the first input of multiSelect container elems.  */
-function isRequiredFieldFilled(fLvl, field) {                       /*dbug-log*/console.log('       --isRequiredFieldFilled[%s] [%O]', fLvl, field);
-    if (!field.required) { return true; }
-    if (field.value === 'invalid') { return false; }                /*dbug-log*/console.log('       --[%s] = [%O]', field.name, field.value ? field.value : null);
-    return field.value;
+export function ifAllRequiredFieldsFilled() {
+    return util.ifAllRequiredFieldsFilled(...arguments);
 }

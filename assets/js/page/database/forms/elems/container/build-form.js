@@ -119,10 +119,10 @@ function addFormStyleClass() {
     $('#form-main, .form-popup').addClass(map[entity]);
 }
 /* ============================== SUB FORM ================================== */
-export function getSubForm(fLvl, fClasses, fVals, sId) {
+export function getSubForm(fLvl, fClasses, sId) {
     entity = _state('getFormState', [fLvl, 'name']);
     setFormScopeParams('create', entity, fLvl);
-    return _elems('getFormRows', [entity, fVals, fLvl])
+    return _elems('getFormRows', [entity, fLvl])
         .then(rows => buildSubFormContainer(rows, fClasses))
         .then(subForm => finishSubFormInit(subForm, sId));
 }

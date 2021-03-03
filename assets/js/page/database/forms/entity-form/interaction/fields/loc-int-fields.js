@@ -91,13 +91,13 @@ function selectParentCountryRegion(locRcrd) {
 /* =================== WAYS TO SELECT LOCATION NOTE ========================= */
 /** Adds a message above the location fields in interaction forms. */
 export function addLocationSelectionMethodsNote() {
-    const cntnr = _el('getElem', ['div', {id: 'loc-note', class: 'skipFormData'}]);
+    const cntnr = _el('getElem', ['div', {id: 'loc-note', class: 'a-mrg g' }]);
     const mapInfo = getMapInfoText();
     $(cntnr).append(mapInfo);
     $('#Country-Region_f')[0].parentNode.before(cntnr);
 }
 function getMapInfoText() {
-    const text = `<span>Select or create a location using the fields below or </span>`;
+    const text = `<span>Select a location using the fields below or </span>`;
     const link = getInfoLinkTextToOpenMap();
     return [ text, link ];
 }

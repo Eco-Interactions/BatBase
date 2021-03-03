@@ -27,7 +27,9 @@ function getPublicationFieldConfg() {
             }
         },
         PublicationType: {
+            class: 'no-grow',
             entity: 'PublicationType',
+            label: 'Type',
             name: 'PublicationType',
             type: 'select',
             required: true
@@ -73,6 +75,9 @@ function getPublicationTypeConfg() {
                     required: true
                 }
             },
+            misc: {
+                defaultCitType: null //If publication has authors: 'Book', otherwise: 'Chapter'
+            },
             views: {
                 all: [
                     ['Publisher', 'Author', 'Editor']
@@ -81,7 +86,9 @@ function getPublicationTypeConfg() {
         },
         Journal: {
             name: 'Journal',
-            required: [],
+            misc: {
+                defaultCitType: 'Article'
+            },
             views: {
                 all: [
                     ['Publisher']
@@ -99,12 +106,12 @@ function getPublicationTypeConfg() {
                     required: true
                 }
             },
+            misc: {
+                defaultCitType: 'Other'
+            },
             views:  {
                 all: [
                     ['Publisher', 'Author', 'Editor']
-                ],
-                simple: [
-                    ['Author', 'Editor']
                 ],
             }
         },
@@ -123,6 +130,9 @@ function getPublicationTypeConfg() {
                 Year: {
                     required: true
                 }
+            },
+            misc: {
+                defaultCitType: 'Ph.D. Dissertation'
             },
             views:  {
                 all: [

@@ -24,12 +24,14 @@ export function getFormFooter() {
     return footer.getFormFooter(...arguments);
 }
 /* --------------------- INPUT FIELD ------------------------------------------- */
-export function getFieldElems() {
+export function getFieldElems(f) {
+    f.id = f.id ? f.id : f.name;
     return field.getFieldElems(...arguments);
 }
 /* ------------------------ INPUT ------------------------------------------- */
 export function getFieldInput(f) {
-    f.id = f.id ? f.id : (f.label ? f.label : f.name);
+    f.id = f.id ? f.id : f.name;
+    f.class = 'f-input ' + (f.class ? f.class : '');
     return input.getFieldInput(...arguments);
 }
 export function buildMultiSelectField() {

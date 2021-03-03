@@ -12,10 +12,10 @@ export function buildAndAppendRootForm() {
     build.buildAndAppendRootForm(...arguments);
     return Promise.resolve();
 }
-export function getExitButton(fields, id) {
+export function getExitButton() {
     return build.getExitButton(...arguments);
 }
-export function getSubForm(fields, id) {
+export function getSubForm() {
     return build.getSubForm(...arguments);
 }
 /* =============================== ROW ====================================== */

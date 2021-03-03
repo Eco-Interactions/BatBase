@@ -5,19 +5,18 @@
  *
  *
  */
-import { _u } from '~util';
 import { _state } from '~form';
 import * as build from './build-rows.js';
 
-export function getFormRows(entity, fVals, fLvl, cntnr) {           /*dbug-log*/console.log('+--getFormRows [%s] fVals[%O] cntnr[%O]', entity, fVals, cntnr);
-    return getFormFieldRows(entity, fVals, fLvl)
+export function getFormRows(fLvl, cntnr) {                          /*dbug-log*///console.log('+--getFormRows [%s] cntnr[%O]', fLvl, cntnr);
+    return getFormFieldRows(fLvl)
         .then(finishFormRowBuild.bind(null, cntnr));
 }
-function finishFormRowBuild(cntnr, rows) {
+function finishFormRowBuild(cntnr, rows) {                          /*dbug-log*///console.log('   --finishFormRowBuild cntnr[%O] rows[%O]', cntnr, rows);
     $(cntnr).append(rows);
     return cntnr;
 }
-export function getFormFieldRows(entity, fVals, fLvl) {             /*dbug-log*/console.log('+--getFormFieldRows [%s][%s] = %O', entity, fLvl, fVals);
-    const viewConfg = _state('getFormState', [fLvl, 'view']);       /*dbug-log*/console.log('   --viewConfg[%O]', _u('snapshot', [viewConfg]));
-    return build.getFormFieldRows(viewConfg);
+export function getFormFieldRows(fLvl) {                            /*dbug-log*///console.log('+--getFormFieldRows [%s]', fLvl);
+    const fS = _state('getFormState', [fLvl]);                      /*dbug-log*///console.log('   --viewConfg[%O]', fS.view, fS.name);
+    return build.getFormFieldRows(fS.view, fS.name);
 }

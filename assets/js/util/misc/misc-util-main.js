@@ -36,7 +36,7 @@ export function stripString(text) {
 }
 export function addSpaceBetweenCamelCaseUnlessHyphen(string) {
     if (string.includes('-')) { return string; }
-    return string.replace(/([A-Z])/g, ' $1');
+    return string.replace(/([A-Z])/g, ' $1').trim();
 }
 /* ========================= MISC =========================================== */
 export function logInDevEnv() {

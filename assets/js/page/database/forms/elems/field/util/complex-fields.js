@@ -1,17 +1,14 @@
 /**
- *
- *
- *
- */
-import { _form, _state } from '~form';
-
-/**
  * When either source-type fields are regenerated or the form fields are toggled
  * between all available fields and the default shown, the fields that can
  * not be reset as easily as simply setting a value in the form input during
  * reinitiation are handled here.
  *
+ * Export
+ *     fillComplexFormFields
  */
+import { _form, _state } from '~form';
+/** [fillComplexFormFields description] */
 export function fillComplexFormFields(fLvl) {
     const fieldData = _state('getFormState', [fLvl, 'fields']);
     const fieldHndlrs = { 'multiSelect': getMultiSelectHandler() };

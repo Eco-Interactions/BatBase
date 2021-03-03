@@ -26,6 +26,10 @@ import { _el, _u } from '~util';
 import { _elems, _state } from '~form';
 /* ====================== BUILD FIELD ======================================= */
 export function buildFormField(fConfg) {
+    return _el('getFieldInput', [fConfg])
+        .then(buildField.bind(null, fConfg));
+}
+function buildField(fConfg) {
     const field = buildFormFieldElems(fConfg);
     updateFormFieldState(fConfg);
     return field;

@@ -26,14 +26,13 @@ export function selectExistingAuthsOrEds() {
     return entityForm.selectExistingAuthsOrEds(...arguments);
 }
 /* =========================== EDIT FORMS =================================== */
-/* ----------------- PUBLICATION|CITATION-TYPE FIELDS ----------------------- */
-export function getPubOrCitEditFields(entity, id) {
+/* ---------------------- ADD STATE DATA ------------------------------------ */
+export function addSourceDataToFormState(id, entity) {
     const srcRcrd = _state('getRcrd', ['source', id]);
     const type = _state('getRcrd', [entity, srcRcrd[entity]]);
     const typeId = type[entity+'Type'].id;
     const typeName = type[entity+'Type'].displayName;
-    return ifCitationAddPubToMemory(entity, srcRcrd, id)
-        .then(() => getPubOrCitFields(entity, typeId, 'top', typeName));
+    return ifCitationAddPubToMemory(entity, srcRcrd, id);
 }
 function ifCitationAddPubToMemory(entity, srcRcrd) {
     if (entity !== 'citation') { return Promise.resolve(); }
@@ -46,10 +45,6 @@ function ifCitationAddPubToMemory(entity, srcRcrd) {
         _state('setFormState', ['top', 'rcrds', { pub: pub, src: pubSrc}]);
     }
 }
-function getSrcRcrd(pubId) {
-    const rcrd = _state('getRcrd', ['source', _state('getStateProp', '[editing]').core]);
-    return _state('getRcrd', ['source', rcrd.parent]);
-}
 /* ----------------- PUBLICATION|CITATION FINISH BUILD ---------------------- */
 /** Note: Only citation & publication forms use this. */
 export function finishEditFormBuild(entity) {                       /*dbug-log*///console.log('---finishEditFormBuild')
@@ -61,13 +56,10 @@ export function setSrcEditRowStyle(entity) {
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 export function initEntitySubForm(entity, fLvl, fVals, pSel) {
-    _state('addEntityFormState', [entity, fLvl, pSel, 'create']);
-    return _elems('getSubForm', [fLvl, 'sml-sub-form', fVals, pSel]);
+    _state('addEntityFormState', [entity, fLvl, pSel, 'create', fVals]);
+    return _elems('getSubForm', [fLvl, 'sml-sub-form', pSel]);
 }
 /* ------------------- ENTITY FIELDS ---------------------------------------- */
-export function getPubOrCitFields() {
-    return typeFields.getPubOrCitFields(...arguments);
-}
 export function loadSrcTypeFields() {
     return typeFields.loadSrcTypeFields(...arguments);
 }
@@ -78,7 +70,6 @@ export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*/
     if (entity === 'citation' || entity === 'publication') {
         initCombos(fLvl, entity);
         entityForm.finishPubOrCitEditForm(entity);
-        typeFields.updateFieldsForSourceType(entity, fLvl);
     }
 }
 /* -------------------- SUBMIT CONFIRMATION-MODAL --------------------------- */

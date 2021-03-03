@@ -79,6 +79,9 @@ function finishCmplxFormBuilds(entity, id) {
     };
     return !map[entity] ? Promise.resolve() : Promise.resolve(map[entity](id));
 }
+export function addSourceDataToFormState() {
+    return src.addSourceDataToFormState(...arguments);
+}
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationCombo() {
@@ -134,9 +137,6 @@ export function onSubGroupSelection() {
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {
     src.finishSrcFieldLoad(...arguments);
-}
-export function getPubOrCitEditFields() {
-    return src.getPubOrCitEditFields(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */

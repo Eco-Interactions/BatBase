@@ -16,6 +16,7 @@
  *         ENTITY RECORDS
  *         EDIT FORM
  *         TAXON
+ *         STATE PREDICATES
  *     SETTERS
  *         ENTITY FORM
  *             COMBOBOX
@@ -120,21 +121,22 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Taxon forms:
  *         taxonData - added to fState.forms (see props @initTaxonParams)
  */
-export function addEntityFormState(entity, fLvl, pSel, action) {   /*dbug-log*///console.log("       #### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s]", entity, fLvl, pSel, action);
+export function addEntityFormState(entity, fLvl, pSel, action, vals) {/*dbug-log*/console.log("#### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s] vals[%O]", entity, fLvl, pSel, action, vals);
     fState.forms[entity] = fLvl;
-    fState.forms[fLvl] = _confg('getFormConfg', [entity, fLvl]);
-    Object.assign(fState.forms[fLvl], finishFormStateInit(pSel, action));       console.log('new formState[%s] [%O]', fLvl, fState.forms[fLvl]);
-}
-function finishFormStateInit(pSel, action) {
-    return {
-        action: action,
-        onFormClose: null,
-        pSelId: pSel,
-        selElems: [],
-    };
+    fState.forms[fLvl] = _confg('initFormConfg', [entity, fLvl, action, vals]);
+    finishFormStateInit(pSel, action);
+
+    function finishFormStateInit(pSel, action) {
+        const p = {
+            action: action,
+            onFormClose: null,
+            pSelId: pSel,
+        };
+        Object.assign(fState.forms[fLvl], p);                       /*dbug-log*/console.log('--finishFormStateInit FINAL [%s][%O]', fLvl, fState.forms[fLvl]);
+    }
 }
 /* ___________________________ TAXON ________________________________________ */
-export function initTaxonState(groupId, subGroupId) {
+export function initTaxonState(fLvl, groupId, subGroupId) {
     return _db('getData', [['group', 'rankNames']])
         .then(data => setTxnState(data.group, data.rankNames));
 
@@ -148,8 +150,15 @@ export function initTaxonState(groupId, subGroupId) {
             subGroups: group.subGroups,
         };
         data.groupTaxon = fState.records.taxon[group.subGroups[data.subGroupId].taxon];
-        fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
+        fState.forms.taxonData = data;                        /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
+        // fState.forms[fLvl].taxonData = data;                        /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
+        handleSubGroupFieldState(data.subGroupId, Object.keys(subGroups).length);
         return data;
+    }
+    function handleSubGroupFieldState(sGroupId, sGroupCnt) {
+        const shwn = sGroupCnt === 1;
+        fState.forms[fLvl].fields['Sub-group'].shown = shwn;
+        fState.forms[fLvl].fields['Sub-group'].value = shwn ? sGroupId : null;
     }
 }
 /* ============================ GETTERS ===================================== */
@@ -166,7 +175,7 @@ export function getFormEntity(fLvl) {
     return fState.forms[fLvl] ? fState.forms[fLvl].entity : false;
 }
 export function getFormState(fLvl, prop = null) {
-    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*///console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl]);//console.trace();
+    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*/console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl]);//console.trace();
     const fData = fState.forms[fLvl];
     return prop ? fData[prop] : fData;
 }
@@ -207,9 +216,6 @@ export function getRcrd(entity, id) {
     return rcrd ? rcrd : false;
 }
 /* ----------------------- EDIT FORM ---------------------------------------- */
-export function isEditForm() {
-    return fState.action === 'edit';
-}
 export function getEditEntityId(type) {
     return fState.editing[type];
 }
@@ -254,10 +260,16 @@ export function setOnFormCloseHandler(fLvl, hndlr) {
 export function addRequiredFieldInput(fLvl, input) {
     fState.forms[fLvl].reqElems.push(input);
 }
-export function updateFormTypeConfg(fLvl, type) {
+/* ----------------- ON CHANGE UPDATE FIELD DISPLAY ------------------------- */
+/** [onEntityTypeChangeUpdateConfg description] */
+export function onEntityTypeChangeUpdateConfg(fLvl) {               /*dbug-log*///console.log('+--onTypeChangeUpdateStateConfgAndFields [%s]', fLvl);
     const vals = getCurrentFormFieldVals(fLvl);
-    fState.forms[fLvl].type = type;
-    _confg('updateFormTypeConfg', [fState.forms[fLvl], fLvl, vals]);
+    _confg('onEntityTypeChangeUpdateConfg', [fState.forms[fLvl], vals]);
+}
+/** [onFieldViewChangeUpdateConfg description] */
+export function onFieldViewChangeUpdateConfg(fLvl) {
+    const vals = getCurrentFormFieldVals(fLvl);
+    _confg('onFieldViewChangeUpdateConfg', [fState.forms[fLvl], vals]);
 }
 /* _________________________ COMBOBOX _______________________________________ */
 /* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
@@ -278,4 +290,18 @@ export function setTaxonGroupData(taxon) {
     txnData.subGroupId = taxon.group.subGroup.id;
     txnData.subGroups = group.subGroups;
     txnData.groupTaxon = taxon;
+}
+
+/* ====================== STATE PREDICATES =================================== */
+export function isEditForm() {
+    return fState.action === 'edit';
+}
+/** [isFieldShown description] */
+export function isFieldShown(fLvl, field) {                         /*dbug-log*///console.log('isFieldShown [%s][%O]', fLvl, field);
+    if (Array.isArray(field)) { return areFieldsShown(fLvl, field); }
+    const fConfg =  fState.forms[fLvl].fields[field]
+    return fConfg ? fConfg.shown : false;
+}
+export function areFieldsShown(fLvl, fields) {
+    return fields.map(f => isFieldShown(fLvl, f)).every(b=>b);
 }

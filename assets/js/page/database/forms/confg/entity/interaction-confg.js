@@ -78,6 +78,7 @@ function getInteractionFieldConfg() {
                 intro: `Read about Interaction Types on the <a href="/definitions"
                     target="_blank">Definitions page</a>.`
             },
+            label: 'Type',
             misc: {
                 customValueStore: true
             },
@@ -91,6 +92,7 @@ function getInteractionFieldConfg() {
             info: {
                 tooltip: 'Tags indicate the part of the object organism in the interaction'
             },
+            label: 'Tags',
             name: 'InteractionTags',
             prep: { //func: [args]
                 renameField: ['Tags'],

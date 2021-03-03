@@ -55,15 +55,15 @@ export function finishPubOrCitEditForm(entity) {
 /* ------------------------- INIT FORM COMBOS ------------------------------- */
 /** Inits comboboxes for the source forms. */
 export function initCombos(fLvl, entity) {
-    const events = getEntityComboEvents(entity);                    /*dbug-log*///console.log("initCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
+    const events = getEntityComboEvents(fLvl, entity);                    /*dbug-log*///console.log("initCombos. [%s] formLvl = [%s], events = %O", entity, fLvl, events);
     if (!events) { return; }
     _elems('initFormCombos', [fLvl, events]);
 }
-function getEntityComboEvents(entity) {
+function getEntityComboEvents(fLvl, entity) {
     return  {
         'citation': {
             'CitationType': {
-                onChange: loadCitTypeFields },
+                onChange: loadCitTypeFields.bind(null, fLvl) },
             'Author': {
                 create: initAuthOrEdForm.bind(null, 1, 'Author'),
                 onChange: onAuthAndEdSelection.bind(null, 1, 'Author')
@@ -71,7 +71,7 @@ function getEntityComboEvents(entity) {
         },
         'publication': {
             'PublicationType': {
-                onChange: loadPubTypeFields },
+                onChange: loadPubTypeFields.bind(null, fLvl) },
             'Publisher': {
                 create: initPublisherForm,
                 onChange: onPublSelection },

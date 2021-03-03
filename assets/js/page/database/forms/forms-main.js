@@ -61,9 +61,6 @@ export function selectIntLoc(id) {
 export function autofillCoordinateFields() {
     form.autofillCoordinateFields(...arguments);
 }
-export function getPubOrCitEditFields() {
-    return form.getPubOrCitEditFields(...arguments);
-}
 /** --------------------------- FORM UI ------------------------------------- */
 export function _elems(funcName, params = []) {
     return moduleMethod(funcName, elems, 'form-elems', params);
@@ -101,6 +98,7 @@ export function getNextFormLevel(next, curLvl) {
 /**
  * Returns the sub form's lvl. If the top form is not the interaction form,
  * the passed form lvl is reduced by one and returned.
+ * TODO: REPLAVE WITH (GETFORMSTATE, ENTITY)
  */
 export function getSubFormLvl(lvl) {
     const topEntity = state.getFormState('top', 'name');

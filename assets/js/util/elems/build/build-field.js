@@ -19,6 +19,7 @@ import { _el, _u } from '~util';
  * @arg  {String}   [f.class] - Field style-class
  * @arg  {Object}   [f.flow] - Flex-direction class suffix.
  * @arg  {String}   [f.group] - Used for styling and intro-tutorials
+ * @arg  {Str}      *[f.id] - Set in confg or to f.name in elem-build-main
  * @arg  {Str|Obj}  [f.info] - Text used for tooltip and|or intro-tutorial.
  * @arg  {Node}     *f.input - Field input element [required]
  * @arg  {String}   [f.type] - Flags edge-case field types: 'multiSelect'
@@ -38,7 +39,7 @@ let f = null;
 export function getFieldElems(fConfg, field = false) {              /*dbug-log*///console.log('+--getFieldElems [%s]confg[%O]', fConfg.name, fConfg);
     f = fConfg;
     const cntnr = buildContainer();
-    const alertDiv = _el('getElem', ['div', { id: f.name+'_alert'}]);
+    const alertDiv = _el('getElem', ['div', { id: f.id+'_alert'}]);
     const fieldElems = field ? field : getFieldLabelAndInput();
     $(cntnr).append([alertDiv, fieldElems]);
     return cntnr;
@@ -48,7 +49,6 @@ function buildContainer() {
     const elSuffx = f.type.includes('multi') ? '_f-cntnr' : '_f';
     const attr = { class: getCntnrClass(), id: f.id+elSuffx};
     const cntnr = _el('getElem', ['div', attr]);
-    $(cntnr).data('fieldClass', f.class);
     return cntnr;
     /** Returns the style classes for the field container. */
     function getCntnrClass() {
@@ -66,7 +66,8 @@ function getFieldLabelAndInput() {
 }
 /* ========================= FIELD ========================================== */
 function buildFieldContainer(group, info, dir = 'row') {
-    const attr = { class: 'field-elems flex-'+dir, title: getInfoTxt(info)};
+    const c = f.type.includes('multi') ? '' : 'field-elems';
+    const attr = { class: `${c} flex-${dir}`, title: getInfoTxt(info)};
     const cntnr = _el('getElem', ['div', attr]);
     if (info) { addTutorialDataAttr(cntnr, group, info); }
     return cntnr;
@@ -89,7 +90,8 @@ function buildFieldLabel() {
     return _el('getElem', ['label', attr]);
 }
 function getLabelClass() {
-    return f.required ? 'required' : '';
+    const group = `${f.group}_lbl`;
+    return group + (f.required ? ' required' : '');
 }
 function getFieldName() {
     if (f.label) { return f.label; }

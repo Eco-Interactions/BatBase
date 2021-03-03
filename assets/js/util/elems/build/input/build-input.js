@@ -90,7 +90,8 @@ function buildSelect(fConfg = f) {                                  /*dbug-log*/
  * or the Author create form when the user enters a new Author's name.
  */
 function buildMultiSelectFieldCntnr() {                             /*dbug-log*///console.log("       --buildMultiSelectFieldCntnr fConfg[%O]", f);
-    return buildMultiSelectField(f);
+    return buildMultiSelectField(f)
+        .then(buildMultiSelectCntnr.bind(null, f));
 }
 /**
  * [buildMultiSelectField description]
@@ -116,6 +117,7 @@ function getMultiInputFieldConfg(fConfg, cnt, input) {
         input: input,
         label: getCntLabel(cnt)+': '+fConfg.name,
         name: fConfg.name+cnt,
+        required: fConfg.required || false,
         type: 'select'
     };
 }
@@ -127,6 +129,10 @@ function addCountToInputData(cnt, input) {
     input.id += cnt;
     $(input).data('cnt', cnt);
 }
+function buildMultiSelectCntnr(fConfg, field) {
+    fConfg.input = field;
+    return _el('getFieldElems', [fConfg]);
+}
 /* ========================== FINISH BUILD ================================== */
 function finishInputBuild(fConfg, input) {                          /*dbug-log*///console.log('   --finishInputBuild [%O][%O]', fConfg, input);
     fConfg.input = input;
@@ -136,5 +142,6 @@ function finishInputBuild(fConfg, input) {                          /*dbug-log*/
 /* --------------------------- SET VALUE ------------------------------------ */
 function setFieldValue(fConfg) {
     if (!fConfg.value || fConfg.type === 'multiSelect') { return; }
-    $(fConfg.input).val(fConfg.value);
+    const val = _u('isObj', fConfg.value) ? fConfg.value.value : fConfg.value;
+    $(fConfg.input).val(val);
 }

@@ -18,16 +18,26 @@ import { _elems } from '~form';
  */
 /** @return {ary} Rows for each field in the entity field obj. */
 export function getFormFieldRows(viewConfg) {                       /*dbug-log*///console.log("+--getFormFieldRows [%O]",viewConfg);
-    return Promise.all(viewConfg.map(getFormRow))
-        .then(rows => rows);
+    const rows = [];
+    return handleRowBuildChain(viewConfg)
+        .then(() => rows);
+
+    function handleRowBuildChain(viewConfg) {
+        return viewConfg.reduce((p, f) => p.then(getFormRow.bind(null, f)),
+            Promise.resolve());
+    }
+    function getFormRow(f) {
+        return buildFormRow(f)
+            .then(row => rows.push(row));
+    }
 }
-function getFormRow(f) {                                            /*dbug-log*///console.log("   --getFormRow[%O]", f);
+function buildFormRow(f) {                                            /*dbug-log*///console.log("   --buildFormRow[%O]", f);
     const row = _el('getElem', ['div', { class: 'row' }]);
     $(row).data('field-cnt', getRowFieldCnt(f)); //used for styling
     return Promise.all(getRowFields(f))
         .then(appendFieldsAndReturnRow.bind(null, row));
 }
-function appendFieldsAndReturnRow(row, elems) {                     /*dbug-log*///console.log("   --appendFieldsAndReturnRow row[%O] elems[%O]", elems);
+function appendFieldsAndReturnRow(row, elems) {                     /*dbug-log*///console.log("   --appendFieldsAndReturnRow row[%O] elems[%O]", row, elems);
     $(row).append(...elems);
     return row;
 }
@@ -38,12 +48,13 @@ function getRowFields(fs) {                                          /*dbug-log*
         return r.map(f => f.fields ? getStackedFields(f) : getFormField(f));
     }
     function getStackedFields(fObj) {
-        const row = _el('getElem', ['div', { class: 'flex-col' }]);
+        const row = _el('getElem', ['div', { class: 'flex-col s-fields' }]);
         const fConfgs = Object.values(fObj.fields);
-        return Promise.all(fConfgs.map(getFormField))
+        return Promise.all(fConfgs.map(getFormField).filter(f=>f))
             .then(appendFieldsAndReturnRow.bind(null, row));
     }
-    function getFormField(fConfg) {                                 /*dbug-log*///console.log("           --getFormField[%O]", fConfg);
+    function getFormField(fConfg) {                                 /*dbug-log*///console.log("           --getFormField [%s][%O]", fConfg.name, fConfg);
+        if (fConfg.shown === false) { return Promise.resolve(); }
         return _elems('buildFormField', [fConfg]);
     }
 }

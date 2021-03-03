@@ -67,7 +67,7 @@ export function ifParentFormValidEnableSubmit(fLvl) {
 }
 export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
     const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
-    toggleSubmitBttn('#'+fLvl+'-submit', reqFieldsFilled);
+    toggleSubmitBttn(`#${fLvl}-submit`, reqFieldsFilled);
     return reqFieldsFilled;
 }
 /* --------------------- FORM-STATUS MESSAGES ------------------------------- */
@@ -80,9 +80,9 @@ export function exitSuccessMsg() {
 }
 /* ============================== FIELDS ==================================== */
 /* ------------------------- COMPLETE FIELDS -------------------------------- */
-export function getFormRows(entity, fVals, fLvl) {
+export function getFormRows(entity, fLvl) {
     const rowCntnr = cntnr.getRowContainer(entity, fLvl)
-    return row.getFormRows(entity, fVals, fLvl, rowCntnr);
+    return row.getFormRows(fLvl, rowCntnr);
 }
 export function getFormFieldRows() {
     return row.getFormFieldRows(...arguments);
@@ -90,9 +90,12 @@ export function getFormFieldRows() {
 export function setDynamicFormStyles() {
     fields.setDynamicFieldStyles(...arguments);
 }
-export function buildFormField(fConfg) {
-    return _el('getFieldInput', [fConfg])
-        .then(fields.buildFormField);
+export function buildFormField() {
+    return fields.buildFormField(...arguments);
+}
+export function onFormConfgChanged(fLvl, entity) {
+    toggleSubmitBttn(`#${fLvl}-submit`, false);
+    return fields.rebuildFieldsOnFormConfgChanged(fLvl, entity);
 }
 /* -------------------------- COMBOBOXES ------------------------------------ */
 export function initFormCombos() {
