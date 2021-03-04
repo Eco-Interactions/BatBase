@@ -114,7 +114,7 @@ function getMultiInputFieldConfg(c, input) {
         group: c.group,
         id: c.name + c.count,
         input: input,
-        label: getCntLabel(c.count)+': '+c.name,
+        label: getCntLabel(c.count)+' '+c.name,
         name: c.name+c.count,
         required: c.required || false,
         type: 'select'

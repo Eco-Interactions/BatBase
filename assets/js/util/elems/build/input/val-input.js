@@ -78,7 +78,7 @@ function validateInput(msg, e) {                                    /*dbug-log*/
     if (valid) { return; }
     if (msg) { setCustomInvalidMsg(e.currentTarget, msg); }
     e.currentTarget.reportValidity();
-    // _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false])   //replace
+    // _elems('toggleSubmitBttn', [fLvl, false])   //replace
 }
 function setCustomInvalidMsg(elem, msg) {                          /*dbug-log*///console.log('setCustomInvalidMsg [%s] for [%O]', msg, elem);
     elem.setCustomValidity(msg);

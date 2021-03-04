@@ -55,6 +55,7 @@ function getRowFields(fs) {                                          /*dbug-log*
     }
     function getFormField(fConfg) {                                 /*dbug-log*///console.log("           --getFormField [%s][%O]", fConfg.name, fConfg);
         if (fConfg.shown === false) { return Promise.resolve(); }
+        if (fConfg.emptyField) { return _el('getElem', ['div', { class: 'empty' }]); }
         return _elems('buildFormField', [fConfg]);
     }
 }

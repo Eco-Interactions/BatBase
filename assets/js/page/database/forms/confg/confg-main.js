@@ -110,6 +110,7 @@ function setDisplayedFieldConfg(c, viewSets, vals = {}) {           /*dbug-log*/
     c.view = viewSets[c.display].map(getFieldConfgs);
 
     function getFieldConfgs(name) {                                 /*dbug-log*///console.log("getFieldConfg field[%s][%O]", name, confg.fields[name]);
+        if (name === '') { return { emptyField: true }; }
         if (_u('isObj', [name])) { return getStackedFieldConfgs(name)}
         if (Array.isArray(name)) { return name.map(getFieldConfgs); }
         const fConfg = getFieldConfg(name);                         /*dbug-log*///console.log('fieldConfg[%O]', fConfg);

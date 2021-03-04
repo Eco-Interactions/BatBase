@@ -17,7 +17,7 @@ import { _state, _elems, _panel } from '~form';
 import * as iForm from '../int-form-main.js';
 
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
-    _elems('showSuccessMsg', ['New Interaction successfully created.']);
+    _elems('toggleFormStatusMsg', ['New Interaction successfully created.']);
     resetIntFields();
     resetFormUi();
     _state('setOnFormCloseHandler', ['top', resetInteractionForm]);
@@ -29,7 +29,7 @@ export function resetInteractionForm() {                            /*dbug-log*/
  */
 function resetIntFields() {
     const vals = getPinnedFieldVals();                              /*dbug-log*///console.log("   --resetInFields = %O", vals);
-    _elems('toggleSubmitBttn', ['#top-submit', false]);
+    _elems('toggleSubmitBttn', ['top', false]);
     handleFieldDataReset(vals);
 }
 function handleFieldDataReset(vals) {
@@ -113,6 +113,6 @@ function setFieldInitVal(field, data) {
 /* ==================== RESET FORM UI ======================================= */
 function resetFormUi() {
     $('#top-cancel').val(' Close ');
-    _elems('toggleSubmitBttn', ['#top-submit', false]);
+    _elems('toggleSubmitBttn', ['top', false]);
     _state('setFormState', ['top', 'unchanged', true]);
 }

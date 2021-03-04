@@ -124,6 +124,6 @@ export function checkIntFieldsAndEnableSubmit() {
  */
 function resetIfFormWaitingOnChanges() {
     if (!_state('getFormState', ['top', 'unchanged'])) { return; }
-    _elems('exitSuccessMsg');
+    _elems('toggleFormStatusMsg', [false]);
     _state('setFormState', ['top', 'unchanged', false]);
 }

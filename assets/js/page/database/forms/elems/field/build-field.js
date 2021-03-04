@@ -135,13 +135,15 @@ function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/
 }
 /* ________________ MULTI-SELECT DATA ________________ */
 /** [setOnMultiSelectChangeListener description] */
-function setOnMultiSelectChangeListener(f) {                        /*dbug-log*///console.log('setOnMultiSelectChangeListener fConfg[%O]', f);
-    $(f.input).change(storeMultiSelectValue.bind(null, f.group, f.count, f.name));
+function setOnMultiSelectChangeListener(f) {                        /*dbug-log*///console.log('--setOnMultiSelectChangeListener [%s]fConfg[%O]', f.count, f);
+    const field = f.count > 1 ? f.input.lastChild : f.input.lastChild.lastChild;
+    const input = $(field).find('.f-input');                        /*dbug-log*///console.log('     --field[%O] input[%O]', field, input);
+    $(input).change(storeMultiSelectValue.bind(null, f.group, f.count, f.name));
 }
 /** [storeMultiSelectValue description] */
 function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('@--storeMultiSelectValue lvl[%s] cnt[%s]fName[%s], e[%O]', fLvl, cnt, fName, e);
-    const vals = _state('getFormData', [fLvl, fName]);              /*dbug-log*///console.log('   --vals[%O]', vals);
-    vals[cnt] = e.target.value || null;
+    const vals = _state('getFormData', [fLvl, fName]);
+    vals[cnt] = e.target.value || null;                             /*dbug-log*///console.log('   --vals[%O] nVal[%s]', vals, vals[cnt]);
     _state('setFieldState', [fLvl, fName, vals]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }

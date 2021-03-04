@@ -95,7 +95,7 @@ function hasChngs(data) {
     }
 }
 function showNoChangesMessage() {
-    _elems('showSuccessMsg', ['No changes detected.', 'red']);
+    _elems('toggleFormStatusMsg', ['No changes detected.', 'red']);
 }
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s])', entity, detailEntity);

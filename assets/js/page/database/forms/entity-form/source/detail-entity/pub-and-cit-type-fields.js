@@ -39,7 +39,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
 function resetOnFormTypeChange(entity, typeId, fLvl) {
     const capsType = _u('ucfirst', [entity]);
     _state('setFieldState', [fLvl, capsType+'Type', typeId]);
-    _elems('toggleSubmitBttn', [`#${fLvl}-submit`, false]);
+    _elems('toggleSubmitBttn', [fLvl, false]);
 }
 /* ----------------- GET SOURCE-TYPE ROWS ----------------------------------- */
 /**

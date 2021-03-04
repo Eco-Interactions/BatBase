@@ -21,7 +21,7 @@ import { _state, getNextFormLevel } from '../forms-main.js';
 import * as footer from './footer/form-footer.js';
 import * as row from './row/form-row-main.js';
 import * as cntnr from './container/form-container-main.js';
-import * as elemUtil from './util/form-elems-util-main.js';
+import * as eUtil from './util/form-elems-util-main.js';
 import * as panel from './detail-panel/detail-panel.js';
 import * as fields from './field/form-fields-main.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
@@ -58,7 +58,7 @@ export function getExitButton() {
     return cntnr.getExitButton();
 }
 export function toggleSubmitBttn() {
-    return elemUtil.toggleSubmitBttn(...arguments);
+    return eUtil.toggleSubmitBttn(...arguments);
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
@@ -67,16 +67,12 @@ export function ifParentFormValidEnableSubmit(fLvl) {
 }
 export function checkReqFieldsAndToggleSubmitBttn(fLvl) {
     const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
-    toggleSubmitBttn(`#${fLvl}-submit`, reqFieldsFilled);
+    toggleSubmitBttn(fLvl, reqFieldsFilled);
     return reqFieldsFilled;
 }
 /* --------------------- FORM-STATUS MESSAGES ------------------------------- */
-/** Shows a form-submit success message at the top of the interaction form. */
-export function showSuccessMsg() {
-    elemUtil.showSuccessMsg(...arguments);
-}
-export function exitSuccessMsg() {
-    elemUtil.exitSuccessMsg(...arguments);
+export function toggleFormStatusMsg() {
+    eUtil.toggleFormStatusMsg(...arguments);
 }
 /* ============================== FIELDS ==================================== */
 /* ------------------------- COMPLETE FIELDS -------------------------------- */
@@ -94,7 +90,7 @@ export function buildFormField() {
     return fields.buildFormField(...arguments);
 }
 export function onFormConfgChanged(fLvl, entity) {
-    toggleSubmitBttn(`#${fLvl}-submit`, false);
+    toggleSubmitBttn(fLvl, false);
     return fields.rebuildFieldsOnFormConfgChanged(fLvl, entity);
 }
 /* -------------------------- COMBOBOXES ------------------------------------ */

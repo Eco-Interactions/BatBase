@@ -22,7 +22,7 @@ export function initCreateForm(rank, value) {                       /*perm-log*/
 function showNewTaxonForm(val, rank) {
     _state('setTaxonProp', ['formTaxonRank', rank]);  //used for data validation/submit
     return buildTaxonForm()
-    .then(() => _elems('toggleSubmitBttn', ['#sub2-submit', true]));
+    .then(() => _elems('toggleSubmitBttn', ['sub2', true]));
 
     function buildTaxonForm() {
         const pId = '#sel-'+rank;
@@ -33,7 +33,7 @@ function showNewTaxonForm(val, rank) {
     }
     function appendTxnFormAndFinishBuild(form) {
         $(`#${rank}_f`).append(form);
-        _elems('toggleSubmitBttn', ['#sub2-submit'])
+        _elems('toggleSubmitBttn', ['sub2'])
         $('#sub2-hdr')[0].innerText += ' '+ rank;
         $('#DisplayName_f input').focus();
         updateTaxonSubmitBttn(rank);

@@ -153,7 +153,9 @@ export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*/
 /* ----------------------- DESTROY ------------------------------------------ */
 export function destroySelectizeInstance(field) {
     if (!confgs[getFieldConfgKey(field)]) { return; }
-    $(confgs[getFieldConfgKey(field)].id)[0].selectize.destroy();
+    // ERROR THROWN SOMETIMES. FRUSTRATING BUG. TODO.
+    // $(confgs[getFieldConfgKey(field)].id)[0].selectize.destroy();
+    delete confgs[getFieldConfgKey(field)];
 }
 /* -------------------- REPLACE OPTIONS ------------------------------------- */
 /**

@@ -150,7 +150,7 @@ export function initTaxonState(fLvl, groupId, subGroupId) {
             subGroups: group.subGroups,
         };
         data.groupTaxon = fState.records.taxon[group.subGroups[data.subGroupId].taxon];
-        fState.forms.taxonData = data;                        /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
+        fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
         // fState.forms[fLvl].taxonData = data;                        /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
         handleSubGroupFieldState(data.subGroupId, Object.keys(subGroups).length);
         return data;

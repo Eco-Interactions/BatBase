@@ -26,7 +26,7 @@ export function onGroupSelection(val) {                             /*temp-log*/
     if (val === '' || isNaN(parseInt(val))) { return; }
     role = $('#select-group').data('role');
     clearPreviousGroupCombos();
-    return _state('initTaxonState', [val])
+    return _state('initTaxonState', ['sub', val])
     .then(taxonData => buildAndAppendGroupRows(taxonData.groupTaxon.id));
 }
 /* ------------------- CLEAR PREVIOUS GROUP COMBOS -------------------------- */
@@ -39,7 +39,8 @@ function ifNotGroupComboRemove(i, elem) {
 /* ------------------ BUILD GROUP FIELDS ------------------------------------ */
 /** A row for each rank present in the group filled with the taxa at that rank.  */
 function buildAndAppendGroupRows(rootId) {
-    return _elems('getFormFieldRows', [role, {'Sub-Group': rootId}, 'sub'])
+    _state('setFieldState', ['sub', 'Sub-Group', rootId]);
+    return _elems('getFormFieldRows', ['sub'])
     .then(appendGroupRowsAndFinishBuild);
 }
 function appendGroupRowsAndFinishBuild(rows) {                      /*dbug-log*///console.log('appendGroupRowsAndFinishBuild = %O', rows);
@@ -47,7 +48,7 @@ function appendGroupRowsAndFinishBuild(rows) {                      /*dbug-log*/
     $(`#${role}_fields`).append(rows);
     // _state('setFieldState', ['sub', 'Group', null]);
     selectForm.initSelectFormCombos();
-    _elems('toggleSubmitBttn', ['#sub-submit', false]);
+    _elems('toggleSubmitBttn', ['sub', false]);
     bindGroupRootTaxonToSelectUnspecfiedBttn();
 }
 function bindGroupRootTaxonToSelectUnspecfiedBttn() {

@@ -14,6 +14,7 @@ function styleRowField(w, field) {                                  /*dbug-log*/
 }
 /** [getFlexValue description] */
 function getFlexValue(w, field) {
+    if ($(field).hasClass('empty')) { return `1 0 ${w}%`; }
     return isSmallField(field)?'0' : (isNoGrowField(field)?'0':'1')+` 0 ${w}%`;
 }
 function isSmallField(field) {
@@ -23,6 +24,7 @@ function isNoGrowField(field) {
     return $(getSelector(field)).hasClass('no-grow');
 }
 function getSelector(field) {
+    if ($(field).hasClass('empty')) { return }
     const f = $(field).hasClass('s-fields') ? '.s-fields' : '#'+field.id;/*dbug-log*///console.log('--getSelector .[%s] .f-input', f)
     return f + ' .f-input';
 }

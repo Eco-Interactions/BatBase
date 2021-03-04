@@ -21,7 +21,7 @@ export function initPublisherForm(value) {                          /*perm-log*/
     function appendPublFormAndFinishBuild(form) {
         const pLvl = getNextFormLevel('parent', fLvl);
         $('#Publisher_f').append(form);
-        _elems('toggleSubmitBttn', ['#'+pLvl+'-submit', false]);
+        _elems('toggleSubmitBttn', [pLvl, false]);
         $('#DisplayName_f input').focus();
         sForm.addConfirmationBeforeSubmit('publisher', fLvl);
     }

@@ -41,19 +41,17 @@ export function createEntity(entity, val) {
     return forms[entity].initCreateForm(...arguments);
 }
 export function createSubEntity(entity, fLvl, val) {                /*dbug-log*///console.log('createSubEntity [%s][%s] ?[%s]', fLvl, entity, val);
-    if (ifFormAlreadyOpenAtLevel(fLvl)) { return handleOpenSubFormAlert(entity, fLvl); }
+    if (ifFormInUse(fLvl)) { return alertInUse(fLvl, entity); }
     createEntity(entity, val);
 }
 /* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-export function ifFormAlreadyOpenAtLevel(fLvl) {
-    return fLvl ? $('#'+fLvl+'-form').length !== 0 : false;
+export function ifFormInUse(fLvl) {
+    return fLvl ? $(`#${fLvl}-form`).length !== 0 : false;
 }
-export function handleOpenSubFormAlert(entity, fLvl) {
-    return openSubFormAlert(entity, fLvl)
-}
-function openSubFormAlert(ent, fLvl) {
+export function alertInUse(fLvl, e) {
+    const ent = e ? e : _state('getFormState', [fLvl, 'name']);
     const entity = ent === 'citation' ? 'citationTitle' : ent;
-    _val('openSubFormAlert', [_u('ucfirst', [entity]), fLvl]);
+    _val('alertFormOpen', [_u('ucfirst', [entity]), fLvl]);  //TODO: REORDER PARAMS TO MATCH UPDATED METHOD
 }
 /* ------------------------- FORM COMBOS ------------------------------------ */
 export function initCombos(fLvl) {                                  /*dbug-log*///console.log('initCombos [%s]', fLvl)

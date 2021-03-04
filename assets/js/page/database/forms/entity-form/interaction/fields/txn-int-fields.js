@@ -27,7 +27,7 @@ function addRoleFocusListener(role) {
     $(`#sel-${role}`)[0].selectize.on('focus', initRoleTaxonSelect.bind(null, role));
 }
 function initRoleTaxonSelect(role) {
-    if (ifSubFormAlreadyInUse(role)) { return _val('openSubFormAlert', [role, 'sub']); }
+    if (ifSubFormAlreadyInUse(role)) { return _val('alertInUse', [role, 'sub']); }
     _form('initRoleTaxonSelect', [role]);
 }
 function getOppositeRole(role) {
@@ -35,7 +35,7 @@ function getOppositeRole(role) {
 }
 /* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
 function ifSubFormAlreadyInUse(role) {
-    return _form('ifFormAlreadyOpenAtLevel', ['sub']) ||
+    return _form('ifFormInUse', ['sub']) ||
         ifOppositeRoleFormLoading(role);
 }
 function ifOppositeRoleFormLoading(role) {

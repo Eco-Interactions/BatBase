@@ -49,6 +49,7 @@ function buildContainer() {
     const elSuffx = f.type.includes('multi') ? '_f-cntnr' : '_f';
     const attr = { class: getCntnrClass(), id: f.id+elSuffx};
     const cntnr = _el('getElem', ['div', attr]);
+    if (f.type.includes('multi')) { $(cntnr).data('cnt', 1); }
     return cntnr;
     /** Returns the style classes for the field container. */
     function getCntnrClass() {

@@ -6,7 +6,7 @@
  *
  */
 import { _elems } from '~form';
-import * as author from './author/author-form.js';
+import * as author from './author/auth-form-main.js';
 import * as publisher from './publisher/publisher-form.js';
 import * as citation from './citation/citation-form.js';
 import * as publication from './publication/publication-form.js';

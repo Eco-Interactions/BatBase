@@ -59,7 +59,7 @@ export function loadPubTypeFields(fLvl, typeId) {                   /*dbug-log*/
 /** Shows the user a note above the author and editor elems. */
 function showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl) {
     if (!isBothEditorAndAuthorFieldsAvailable(fLvl)) { return; }
-    const note =`<div class="a-mrg i g";>Note: This publication type can have either authors OR editors.</div>`;
+    const note =`<div class="i g";>Note: This publication type can have either authors OR editors.</div>`;
     $(note).insertBefore($('#Author_f-cntnr')[0].parentNode);
 }
 function isBothEditorAndAuthorFieldsAvailable(fLvl) {

@@ -80,7 +80,7 @@ function getPublicationTypeConfg() {
             },
             views: {
                 all: [
-                    ['Publisher', 'Author', 'Editor']
+                    ['Author', 'Editor', 'Publisher']
                 ]
             }
         },
@@ -91,7 +91,7 @@ function getPublicationTypeConfg() {
             },
             views: {
                 all: [
-                    ['Publisher']
+                    ['', 'Publisher']
                 ],
                 simple: [] // No fields added unless 'show all fields' selected
             }
@@ -111,7 +111,7 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Publisher', 'Author', 'Editor']
+                    ['Author', 'Editor', 'Publisher']
                 ],
             }
         },
@@ -136,7 +136,7 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Publisher', 'Author'],
+                    ['Author', 'Publisher'],
                 ]
             }
         }
