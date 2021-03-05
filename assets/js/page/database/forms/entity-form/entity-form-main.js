@@ -50,12 +50,12 @@ export function ifFormInUse(fLvl) {
 }
 export function alertInUse(fLvl, e) {
     const ent = e ? e : _state('getFormState', [fLvl, 'name']);
-    const entity = ent === 'citation' ? 'citationTitle' : ent;
-    _val('alertFormOpen', [_u('ucfirst', [entity]), fLvl]);  //TODO: REORDER PARAMS TO MATCH UPDATED METHOD
+    const entity = ent === 'Citation' ? 'CitationTitle' : ent;
+    _val('alertFormOpen', [entity, fLvl]);  //TODO: REORDER PARAMS TO MATCH UPDATED METHOD
 }
 /* ------------------------- FORM COMBOS ------------------------------------ */
-export function initCombos(fLvl) {                                  /*dbug-log*///console.log('initCombos [%s]', fLvl)
-    const entity = _state('getFormState', [fLvl, 'name']);
+export function initCombos(fLvl) {
+    const entity = _u('lcfirst', [_state('getFormState', [fLvl, 'name'])]);/*dbug-log*///console.log('initCombos [%s][%s]', fLvl, entity)
     forms[entity].initCombos(fLvl, entity);
 }
 /* -------------------------- EDIT FORMS ------------------------------------ */

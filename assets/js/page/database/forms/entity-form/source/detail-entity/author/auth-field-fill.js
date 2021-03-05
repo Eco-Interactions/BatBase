@@ -25,5 +25,5 @@ function ifFieldNotShownOrNoValToSelect(aType, authObj) {
 function selectAuthor(cnt, authId, aType, fLvl) {                   /*dbug-log*///console.log('selectAuthor. args = %O', arguments)
     if (!_state('isFieldShown', [fLvl, aType])) { return Promise.resolve(); }
     _elems('setSilentVal', [fLvl, aType+cnt, authId]);
-    return buildNewAuthorSelect(fLvl, aType, ++cnt);
+    return aForm.buildNewAuthorSelect(fLvl, aType, cnt+1);
 }

@@ -50,9 +50,9 @@ export function getBaseFormConfg(entity, fLvl) {
 }
 function getConfgName(entity) {
     const map = {
-        subject: 'group',
-        object: 'group',
-        editor: 'author'
+        Subject: 'group',
+        Object: 'group',
+        Editor: 'author'
     };
     return map[entity] ? map[entity] : _u('lcfirst', [entity]);
 }

@@ -15,11 +15,14 @@ SINCE LAST SERVER UPDATE:
                     - styled by percentage based on total "fields" in row and field size (eg, year is a "small" field)
                         - empty "spacer" fields easy as well.
         - Entity Forms
+            - Generally reordered fields to what seems like a more intuitive flow for
+                editors, prioritizing required fields and resizing where appropriate
             - Publication
                 - Author|editor
                     - note changed to "Note: This publication type can have either authors OR editors."
                     - opposite type disabled and label hidden after selection
                     - labels now show order: 1st, 2nd, etc.
+                    - reordered/resized form-fields
                     - when a blank exists in the author order, the final empty field is removed
                         to show more intuitevly the blank must be filled before continuing
 

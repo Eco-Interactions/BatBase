@@ -28,22 +28,32 @@ import * as aForm from './auth-form-main.js';
  */
 export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*///console.log('+--onAuthAndEdSelection [%s][%s] = [%s]', cnt, aType, v);
     const fLvl = getSubFormLvl('sub');
-    const ttl = $(`#${aType}_f-cntnr`).data('cnt');
-    if (v === '' || parseInt(v) === NaN) { return onFieldClear(aType, fLvl, ttl); }
+    const ttl = _state('getFormFieldData', [fLvl, aType]).count;    /*dbug-log*///console.log('       --ttl[%s]', ttl);
+    if (v === '' || parseInt(v) === NaN) { return onFieldClear(aType, fLvl, ttl, cnt); }
     if (ttl === 1) { enableOtherField(aType, fLvl, false);  }
     if (v === 'create') { return aForm.initAuthOrEdForm(cnt, aType, v); }
-    aForm.buildNewAuthorSelect(fLvl, aType, ttl);
+    if (aForm.isDynamicFieldEmpty(aType, ttl)) { return; }
+    aForm.buildNewAuthorSelect(fLvl, aType, ttl+1);
 }
 /* ======================= ON FIELD CLEARED ================================= */
 /** [onFieldClear description] */
-function onFieldClear(aType, fLvl, ttl) {
-    syncWithOtherAuthorTypeSelect(aType, fLvl, ttl);
+function onFieldClear(aType, fLvl, ttl, cnt) {
     sForm.handleCitText(fLvl);
-    aForm.removeTrailingEmptyFields(aType, ttl);
+    if (!aForm.isDynamicFieldEmpty(aType, ttl)) { return; }
+    ifNoneStillSelectedEnableOtherType(aType, fLvl, ttl);
+    aForm.removeAuthField(aType, ttl--);
+    removeExtraEmptyFields(aType, ttl, cnt);
+}
+/** [ifFinalFieldEmptyRemove description] */
+function removeExtraEmptyFields(aType, ttl) {                       /*dbug-log*///console.log('--removeExtraEmptyFields ttl[%s] cleared[%s]', ttl);
+    while (ttl > 1 && aForm.isDynamicFieldEmpty(aType, ttl)) {
+        if (ttl > 2 && aForm.isDynamicFieldEmpty(aType, ttl-1)) { return; }   /*dbug-log*///console.log('  --Removing [%s]', ttl);
+        aForm.removeAuthField(aType, ttl--);
+    }
 }
 /* ====================== SYNC AUTH-TYPE FIELDS ============================= */
-/** [syncWithOtherAuthorTypeSelect description] */
-function syncWithOtherAuthorTypeSelect(aType, fLvl, clearedCnt) {
+/** [ifNoneStillSelectedEnableOtherType description] */
+export function ifNoneStillSelectedEnableOtherType(aType, fLvl, clearedCnt) {
     if (ifTypeStillSelected(aType, fLvl, clearedCnt)) { return; }
     enableOtherField(aType, fLvl, true);
 }
@@ -52,15 +62,11 @@ function ifTypeStillSelected(aType, fLvl, clearedCnt) {
     fVals[clearedCnt] = null; //val store change event could happen after this check
     return Object.values(fVals).find(v => {console.log('val[%s]', v);return v;});
 }
-function resetClearedType(aType) {
-    aForm.removeTrailingEmptyFields(aType);
-    $(`#${aType}_f-cntnr`).data('cnt', 1);
-}
 /* -------------------- UPDATE OTHER AUTH-TYPE UI --------------------------- */
 /** [enableOtherField description] */
 export function enableOtherField(type, fLvl, enable) {              /*dbug-log*///console.log('--enableOtherField [%s][%s][%s]', type, fLvl, enable);
-    if (!_state('isFieldShown', [fLvl, type])) { return; }
     const other = type === 'Author' ? 'Editor' : 'Author';
+    if (!_state('isFieldShown', [fLvl, other])) { return; }
     _cmbx('enableFirstCombobox', [other, enable]);
     updateOtherTypeUi(other, enable);
     _state('setFieldState', [fLvl, other, enable, 'required']);

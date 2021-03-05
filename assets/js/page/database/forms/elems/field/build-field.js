@@ -39,13 +39,13 @@ function buildField(fConfg) {
  * @param  {[type]} f
  * @return {[type]}    [description]
  */
-function buildFormFieldElems(f) {                                   /*dbug-log*///console.log('+--buildFormField f[%O]', f);
+function buildFormFieldElems(f) {                                   /*dbug-log*///console.log('--buildFormFieldElems f[%O]', f);
     handleFieldChangeListeners(f);
-    const field = f.type.includes('multi') ? f.input : _el('getFieldElems', [f]);
+    const field = isDynamicInputField(f) ? f.input : _el('getFieldElems', [f]);
     addPinIfFieldDataCanPersistThroughMultipleSubmits(f, field);
     return field;
 }
-export function buildDynamicFormField(fConfg) {
+export function buildDynamicFormField(fConfg) {                     /*dbug-log*///console.log('+--buildDynamicFormField f[%O]', fConfg);
     return _el('buildMultiSelectField', [fConfg])
         .then(addChangeEventAndReturnField);
 
@@ -126,7 +126,7 @@ function ifCustomFieldStoreListener(f) {
     return f.misc && f.misc.customValueStore;
 }
 function setCustomFieldStoreListener(f) {
-    if (f.type === 'multiSelect') { return setOnMultiSelectChangeListener(f); }
+    if (isDynamicInputField(f)) { return setOnMultiSelectChangeListener(f); }
     //Otherwise, handled elsewhere
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*///console.log('   --storeFieldValue [%s][%O]', fieldName, elem);
@@ -235,4 +235,8 @@ function checkFieldPins(curPin, checkState, relField) {
         if ($('#'+relField+'_pin')[0].checked === checkState) { return; }
         $('#'+relField+'_pin')[0].checked = checkState;
     }
+}
+/* ============================ HELPERS ===================================== */
+function isDynamicInputField(f) {
+    return f.type.includes('multi');
 }

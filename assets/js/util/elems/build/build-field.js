@@ -48,9 +48,7 @@ export function getFieldElems(fConfg, field = false) {              /*dbug-log*/
 function buildContainer() {
     const elSuffx = f.type.includes('multi') ? '_f-cntnr' : '_f';
     const attr = { class: getCntnrClass(), id: f.id+elSuffx};
-    const cntnr = _el('getElem', ['div', attr]);
-    if (f.type.includes('multi')) { $(cntnr).data('cnt', 1); }
-    return cntnr;
+    return _el('getElem', ['div', attr]);
     /** Returns the style classes for the field container. */
     function getCntnrClass() {
         const groupClass = f.group ? f.group + elSuffx : null;

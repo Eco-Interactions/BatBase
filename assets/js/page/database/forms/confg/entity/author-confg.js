@@ -6,12 +6,16 @@ export default function(entity) {
         core: 'source',
         fields: {
             FirstName: {
+                class: 'sml-field',
+                label: 'First',
+                name: 'FirstName',
                 type: 'text',
-                name: 'FirstName'
             },
             MiddleName: {
+                class: 'sml-field',
+                label: 'Middle',
+                name: 'MiddleName',
                 type: 'text',
-                name: 'MiddleName'
             },
             LastName: {
                 type: 'text',
@@ -19,6 +23,7 @@ export default function(entity) {
                 required: true
             },
             Suffix: {
+                class: 'xsml-field',
                 type: 'text',
                 name: 'Suffix'
             },
@@ -29,17 +34,13 @@ export default function(entity) {
         name: entity,
         views: { //fields added will be built and displayed
             all: [
-                'FirstName',
-                'MiddleName',
                 'LastName',
-                'Suffix',
+                ['FirstName', 'MiddleName', 'Suffix'],
                 'Website',
             ],
             simple: [
-                'FirstName',
-                'MiddleName',
                 'LastName',
-                'Suffix'
+                ['FirstName', 'MiddleName', 'Suffix']
             ]
         }
     };

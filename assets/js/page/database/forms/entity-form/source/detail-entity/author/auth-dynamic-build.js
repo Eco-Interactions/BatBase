@@ -11,32 +11,50 @@
 import { _cmbx, _u } from '~util';
 import { _elems, _state } from '~form';
 import * as aForm from './auth-form-main.js';
+
+const a = {};
+
+function updateAuthData(aType, fLvl, cnt) {
+    a.cnt = cnt;
+    a.fLvl = fLvl;
+    a.type = aType;
+    updateFieldState(cnt)
+}
+/** [updateFieldState description] */
+function updateFieldState(cnt) {                                    /*dbug-log*///console.log('--updateFieldState [%s][%s][%s]', a.fLvl, a.type, cnt);
+    _state('setFieldState', [a.fLvl, a.type, cnt, 'count']);
+}
 /* ======================== BUILD FIELD ===================================== */
-export function buildNewAuthorSelect(fLvl, aType, cnt = null) {     /*dbug-log*///console.log('--buildNewAuthorSelect[%s][%s]', aType, cnt);
-    const fConfg = _u('snapshot', _state('getFormFieldData', [fLvl, aType]));
-    fConfg.count = cnt ? cnt+1 : $(`#${aType}_f-cntnr`).data('cnt')+1;
-    fConfg.required = false;                                        /*dbug-log*///console.log('   --fConfg[%O]', fConfg);
+export function buildNewAuthorSelect(fLvl, aType, cnt) {            /*dbug-log*///console.log('+--buildNewAuthorSelect[%s][%s]', aType, cnt);
+    updateAuthData(aType, fLvl, cnt);
+    const fConfg = getNextFieldConfg();                             /*dbug-log*///console.log('   --fConfg[%O]', fConfg);
     return _elems('buildDynamicFormField', [fConfg])
-        .then(f => appendNewAuthSelect(f, aType, fConfg.count));
+        .then(appendNewAuthSelect);
 }
-function appendNewAuthSelect(field, aType, cnt) {
-    $(`#${aType}_f-cntnr .cntnr`).append(field);
-    $(`#${aType}_f-cntnr`).data('cnt', cnt);
-    _cmbx('initCombobox', [getAuthSelConfg(aType, cnt)]);
+/** [getNextFieldConfg description] */
+function getNextFieldConfg() {
+    const fConfg = _u('snapshot', _state('getFormFieldData', [a.fLvl, a.type]));
+    fConfg.count = a.cnt;
+    fConfg.required = false;
+    return fConfg;
 }
-function getAuthSelConfg(aType, cnt) {
+/** [appendNewAuthSelect description] */
+function appendNewAuthSelect(field) {
+    $(`#${a.type}_f-cntnr .cntnr`).append(field);
+    _cmbx('initCombobox', [getAuthSelConfg()]);
+}
+function getAuthSelConfg() {
     return {
-        create: aForm.initAuthOrEdForm.bind(null, cnt, aType),
-        onChange: aForm.onAuthAndEdSelection.bind(null, cnt, aType),
-        id: '#sel-'+aType+cnt,
-        confgName: aType+cnt,
-        name: aType
+        create: aForm.initAuthOrEdForm.bind(null, a.cnt, a.type),
+        onChange: aForm.onAuthAndEdSelection.bind(null, a.cnt, a.type),
+        id: '#sel-'+a.type+a.cnt,
+        confgName: a.type+a.cnt,
+        name: a.type
     };
 }
 /* ======================= REMOVE FIELD ===================================== */
-export function removeAuthField(aType, cnt) {                       /*dbug-log*///console.log('--removeAuthField[%s][%s]', aType, cnt);
+export function removeAuthField(aType, cnt) {                       /*dbug-log*///console.log('+--removeAuthField[%s][%s]', aType, cnt);
     _cmbx('destroySelectizeInstance', [aType+cnt]);
-    $(`#${aType}_f-cntnr`).data('cnt', cnt-1);
     $('#'+aType+cnt+'_f').remove();
-
+    updateFieldState(--cnt);
 }

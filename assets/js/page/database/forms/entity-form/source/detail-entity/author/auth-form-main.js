@@ -35,20 +35,18 @@ export function onAuthAndEdSelection() {
     update.onAuthAndEdSelection(...arguments);
 }
 /* _____________________ INTERNAL HELPERS ___________________________________ */
-export function buildNewAuthorSelect(fLvl, aType, cnt) {
-    if (cnt > 1 && isFinalFieldEmpty(aType, cnt)) { return Promise.resolve(); }
+export function buildNewAuthorSelect() {
     return field.buildNewAuthorSelect(...arguments);
 }
-export function isFinalFieldEmpty(aType, cnt) {                     /*dbug-log*///console.log('isFinalFieldEmpty [%s][%s]', aType, cnt);
-    return !_cmbx('getSelVal', [aType+cnt]);
+export function removeAuthField() {
+    return field.removeAuthField(...arguments);
 }
-/** [ifFinalFieldEmptyRemove description] */
-export function removeTrailingEmptyFields(aType, cnt) {
-    cnt = cnt ? cnt : $(`#${aType}_f-cntnr .cntnr`)[0].childNodes.length;
-    while (cnt > 1 && isFinalFieldEmpty(aType, cnt)) {              /*dbug-log*///console.log('total remaining? [%s]', cnt);
-        field.removeAuthField(aType, cnt--);
-    }
+export function isDynamicFieldEmpty(aType, cnt) {                     /*dbug-log*///console.log('isDynamicFieldEmpty [%s][%s]', aType, cnt);
+    return !_cmbx('getSelVal', [aType+cnt]);
 }
 export function enableOtherField() {
     update.enableOtherField(...arguments);
+}
+export function ifNoneStillSelectedEnableOtherType() {
+    update.ifNoneStillSelectedEnableOtherType(...arguments);
 }

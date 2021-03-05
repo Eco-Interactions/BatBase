@@ -105,7 +105,7 @@ export function buildMultiSelectField(fConfg) {                     /*dbug-log*/
 }
 function finishFieldInput(fConfg, input) {                          /*dbug-log*///console.log('--finishFieldInput fConfg[%O] input[%O]', fConfg, input);
     const confg = getMultiInputFieldConfg(fConfg, input);
-    addCountToInputData(fConfg.count, input);
+    input.id += fConfg.count;
     return _el('getFieldElems', [confg]);
 }
 function getMultiInputFieldConfg(c, input) {
@@ -123,10 +123,6 @@ function getMultiInputFieldConfg(c, input) {
 function getCntLabel(cnt) {
     const map = { 1: '1st', 2:'2nd', 3:'3rd' };
     return cnt in map ? map[cnt] : cnt+'th';
-}
-function addCountToInputData(cnt, input) {
-    input.id += cnt;
-    $(input).data('cnt', cnt);
 }
 function buildMultiSelectCntnr(fConfg, field) {
     fConfg.input = field;

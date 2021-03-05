@@ -297,7 +297,7 @@ export function isEditForm() {
     return fState.action === 'edit';
 }
 /** [isFieldShown description] */
-export function isFieldShown(fLvl, field) {                         /*dbug-log*///console.log('isFieldShown [%s][%O]', fLvl, field);
+export function isFieldShown(fLvl, field) {                         /*dbug-log*///console.log('--isFieldShown [%s][%O]', fLvl, field);
     if (Array.isArray(field)) { return areFieldsShown(fLvl, field); }
     const fConfg =  fState.forms[fLvl].fields[field]
     return fConfg ? fConfg.shown : false;
