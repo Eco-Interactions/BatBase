@@ -7,7 +7,7 @@
  *     initPublisherForm
  *     onPublSelection
  */
-import { _elems, _val, getSubFormLvl, getNextFormLevel } from '~form';
+import { _elems, _form, _val, getSubFormLvl, getNextFormLevel } from '~form';
 import * as sForm from '../../src-form-main.js';
 
 export function initPublisherForm(value) {                          /*perm-log*/console.log('       /--initPublisherForm [%s]', value);

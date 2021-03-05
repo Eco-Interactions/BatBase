@@ -37,6 +37,7 @@ export default function(entity) {
                 'LastName',
                 ['FirstName', 'MiddleName', 'Suffix'],
                 'Website',
+                'Description',
             ],
             simple: [
                 'LastName',

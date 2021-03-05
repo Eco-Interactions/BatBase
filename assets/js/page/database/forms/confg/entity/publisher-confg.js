@@ -10,6 +10,9 @@ export default function(entity) {
                 required: true,
                 type: 'text'
             },
+            DisplayName: {
+                label: 'Name'
+            },
             Country: {
                 name: 'Country',
                 required: true,
@@ -25,8 +28,8 @@ export default function(entity) {
                 'DisplayName',
                 'City',
                 'Country',
-                'Description',
                 'Website',
+                'Description',
             ],
             simple: [
                 'DisplayName',
