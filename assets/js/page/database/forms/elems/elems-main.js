@@ -118,7 +118,7 @@ export function fillComplexFormFields() {
     return fields.fillComplexFormFields(...arguments);
 }
 export function ifFieldIsDisplayed(field, fLvl) {
-    return _state('getFieldData', [fLvl, field, 'shown']);
+    return _state('getFieldState', [fLvl, field, 'shown']);
 }
 /* -------------------- TOGGLE FORM-FIELDS ---------------------------------- */
 export function ifMutlipleDisplaysGetToggle() {

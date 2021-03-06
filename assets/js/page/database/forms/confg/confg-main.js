@@ -66,12 +66,22 @@ function initDisplayConfg(confg, action, hasSimpleView, vals) {
 }
 /* ====================== REBUILD FORM-CONFG ================================ */
 /* ------------------------ FORM-TYPE CHANGED ------------------------------- */
-export function onEntityTypeChangeUpdateConfg() {
-    cUtil.onEntityTypeChangeUpdateConfg(...arguments);
+/** [onEntityTypeChangeUpdateConfg description] */
+export function onEntityTypeChangeUpdateConfg(fLvl) {
+    const confg = _state('getFormState', [fLvl]);
+    updateConfg(confg);
 }
 /* ----------------------- FIELD-VIEW CHANGED ------------------------------- */
-export function onFieldViewChangeUpdateConfg() {
-    cUtil.onFieldViewChangeUpdateConfg(...arguments);
+/** [onFieldViewChangeUpdateConfg description] */
+export function onFieldViewChangeUpdateConfg(fLvl) {
+    const confg = _state('getFormState', [fLvl]);
+    confg.display = confg.display === 'all' ? 'simple' : 'all';
+    updateConfg(confg);
+}
+function updateConfg(c) {                                           /*dbug-log*///console.log('   --updateConfg[%s][%O]', c.name, c);
+    const vals = _state('getFieldValues', [c.group]);
+    const mConfg = getBaseConfg(c.name, c.group, c.type);
+    setDisplayedFieldConfg(c, mConfg.views, vals);
 }
 /* ====================== CONFG BUILDERS ==================================== */
 /* ----------------------- BASE CONFG --------------------------------------- */
@@ -80,25 +90,25 @@ export function getBaseConfg(entity, fLvl, type) {
     const confg = cUtil.getBaseFormConfg(entity, fLvl);
     if (confg.core) { mergeCoreEntityConfg(confg); }
     if (type) { cUtil.mergeIntoFormConfg(confg, confg.types[type]); }
-    delete confg.types;                                              /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
+    delete confg.types;                                             /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
     return confg;
 }
 /** [mergeCoreEntityConfg description] */
 function mergeCoreEntityConfg(c) {
-    const coreConfg = cUtil.getBaseFormConfg(c.core);                      /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
+    const coreConfg = cUtil.getBaseFormConfg(c.core);               /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
     cUtil.mergeIntoFormConfg(c, coreConfg);
 }
 /* ------------------------- FIELD CONFG ------------------------------------ */
 /** [setDisplayedFieldConfg description] INTERNAL USE */
-export function setDisplayedFieldConfg(c, viewSets, vals = {}) {           /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
+export function setDisplayedFieldConfg(c, viewSets, vals = {}) {    /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
     c.infoSteps = 0;
     c.view = viewSets[c.display].map(getFieldConfgs);
 
-    function getFieldConfgs(name) {                                 /*dbug-log*///console.log("getFieldConfg field[%s][%O]", name, confg.fields[name]);
+    function getFieldConfgs(name) {                                 /*dbug-log*///console.log("--getFieldConfg field[%s][%O]", name, c.fields[name]);
         if (name === '') { return { emptyField: true }; }
         if (_u('isObj', [name])) { return getStackedFieldConfgs(name)}
         if (Array.isArray(name)) { return name.map(getFieldConfgs); }
-        const fConfg = getFieldConfg(name);                         /*dbug-log*///console.log('fieldConfg[%O]', fConfg);
+        const fConfg = getFieldConfg(name);                         /*dbug-log*///console.log('---fieldConfg[%O]', fConfg);
         if (fConfg.info) { ++c.infoSteps; }
         setFieldStyleClass(fConfg, c.group);
         fConfg.group = c.group;

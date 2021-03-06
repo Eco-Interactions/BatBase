@@ -5,7 +5,6 @@ export default function(entity) {
 	return {
         fields: getInteractionFieldConfg(),
         misc: {
-            defaultTags: ['Secondary'], //Always valid and available when tags load.
         },
         name: entity,
         pinnable: true, // phrasing?
@@ -87,12 +86,14 @@ function getInteractionFieldConfg() {
             type: 'select'
         },
         InteractionTags: {
-            defaultTags: ['Secondary'], //Always valid and available when tags load.
             entity: 'Tag',
             info: {
                 tooltip: 'Tags indicate the part of the object organism in the interaction'
             },
             label: 'Tags',
+            misc: {
+                defaultTags: ['Secondary'], //Always valid and available when tags load.
+            },
             name: 'InteractionTags',
             prep: { //func: [args]
                 renameField: ['Tags'],

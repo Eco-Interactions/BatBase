@@ -88,7 +88,7 @@ function buildConfirmationModalHtml() {
     return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
 }
 function getIntTypeVerbForm() {
-    const typeId = _state('getFieldData', ['top', 'InteractionType']).value;
+    const typeId = _state('getFieldState', ['top', 'InteractionType']).value;
     const types = _state('getEntityRcrds', ['interactionType']);
     return types[typeId].activeForm;
 }

@@ -74,7 +74,7 @@ export function getSelectStoredOpts(prop, include) {
 }
 /** --------------------- FIELD DATA ---------------------------------------- */
 /** Returns and array of options for the passed field type. */
-export function getFieldOptions(fName) {                            /*dbug-log*/console.log("getSelectOpts. for [%s]", fName);
+export function getFieldOptions(fName) {                            /*dbug-log*///console.log("getSelectOpts. for [%s]", fName);
     const optMap = {
         'Author': [ getSrcOpts, 'authSrcs'],
         'CitationType': [ getCitTypeOpts, 'citTypeNames'],
@@ -150,28 +150,29 @@ function getSrcOpts(fName, prop, rcrds) {
         }[prop];
     }
 }
-export function buildSrcOpts(srcType, ids, rcrds) {                 /*dbug-log*///console.log('buildSrcTypeOpts[%s] ids? %O, rcrds? %O', srcType, ids, rcrds);
+export function buildSrcOpts(srcType, ids, rcrds) {                 /*dbug-log*///console.log('   --buildSrcTypeOpts[%s] ids? %O, rcrds? %O', srcType, ids, rcrds);
     const opts = [ { text: `Add a new ${_u('ucfirst', [srcType])}...`, value: 'create'} ];
     if (!ids.length) { return opts; }
     opts.push(...getRcrdOpts('source', ids, rcrds));
     return opts;
 }
 /** Return the citation type options available for the parent-publication's type. */
-function getCitTypeOpts(fName, prop) {
+function getCitTypeOpts(fName, prop) {                              /*dbug-log*///console.log('   --getCitTypeOpts[%s] fName[%s] prop[%s]', fName, prop);
     const fLvl = getSubFormLvl('sub');
     return _db('getData', [prop]).then(buildCitTypeOpts);
 
-    function buildCitTypeOpts(types) {
+    function buildCitTypeOpts(types) {                              /*dbug-log*///console.log('   --buildCitTypeOpts[%O]', types);
         return getOptions(types, getCitTypeNames().sort());
     }
     function getCitTypeNames() {
         const opts = {
-            'Book': ['Book', 'Chapter'], 'Journal': ['Article'],
-            'Other': ['Museum record', 'Other', 'Report'],
+            Book: ['Book', 'Chapter'],
+            Journal: ['Article'],
+            Other: ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        const pubRcrd = _state('getFormProp', [fLvl, 'rcrds']).pub;
-        return opts[pubRcrd.publicationType.displayName];
+        const data = _state('getFieldState', [fLvl, 'ParentSource', 'misc']);
+        return opts[data.pubType.displayName];
     }
 }
 /* -------------------------- TAXON ----------------------------------------- */

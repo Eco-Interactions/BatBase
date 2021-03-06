@@ -4,17 +4,17 @@
  * Export
  *
  * TOC
- *     GET CORE STATE
+ *     GET CORE-STATE
  *         ENTITY RECORDS
  *         EDIT FORM
- *    GET FORM STATE
+ *    GET FORM-STATE
  *        FIELDS
  *        TAXON
  */
 import { _db, _u } from '~util';
 import { _confg, alertFormIssue } from '~form';
 
-/* ============================ GET CORE STATE ============================== */
+/* ============================ GET CORE-STATE ====================================================================== */
 export function getStateProp(fS, prop) {                            /*dbug-log*///console.log('   --getStateProp  prop[%s], fS[%O]', prop, fS);
     return fS[prop];
 }
@@ -36,7 +36,11 @@ export function getRcrd(fS, e, id) {                                /*dbug-log*/
 export function getEditEntityId(fS, type) {
     return fS.editing[type];
 }
-/* ============================ GET FORM STATE ============================== */
+/* --------------------- STATE PREDICATES ----------------------------------- */
+export function isEditForm(fS) {
+    return fS.action === 'edit';
+}
+/* ============================ GET FORM-STATE ====================================================================== */
 export function getFormState(fState, prop = null) {                 /*dbug-log*///console.log('   --getFormState prop?[%s] [%O]', prop, fState);//console.trace();
     return prop ? fState[prop] : fState;
 }
@@ -45,7 +49,7 @@ export function getFormEntity(fState, first = 'uc') {               /*dbug-log*/
     return first === 'uc' ? fState.name : _u('lcfirst', [fState.name]);
 }
 /* -------------------------- FIELDS ---------------------------------------- */
-export function getFieldData(fState, field, prop = 'value') {       /*dbug-log*///console.log('   --getFieldData field[%s] prop[%s] [%O]', field, prop, fState);//console.trace();
+export function getFieldState(fState, field, prop = 'value') {       /*dbug-log*/console.log('   --getFieldState field[%s] prop[%s] [%O]', field, prop, fState.fields[field]);//console.trace();
     return prop ? fState.fields[field][prop] : fState.fields[field];
 }
 export function getComboFields(fState) {                            /*dbug-log*///console.log('getComboFields [%O]', fState.fields);//console.trace();
@@ -71,4 +75,13 @@ export function getTaxonProp(fState, prop) {
 }
 function getSubGroupEntity(fState) {
     return fState.misc.subGroups[fState.misc.subGroupId];
+}
+/* --------------------- STATE PREDICATES ----------------------------------- */
+/** [isFieldShown description] */
+export function isFieldShown(fState, field) {                       /*dbug-log*/console.log('   --isFieldShown [%O][%O]', field, fState);
+    if (Array.isArray(field)) { return areFieldsShown(fState, field); }
+    return fState.fields[field] || false;
+}
+export function areFieldsShown(fState, fields) {
+    return fields.map(f => isFieldShown(fState, f)).every(b=>b);
 }

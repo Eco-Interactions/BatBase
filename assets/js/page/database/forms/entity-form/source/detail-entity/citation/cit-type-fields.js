@@ -10,35 +10,35 @@
  *     SELECT DEFAULT-TYPE
  *     LOAD TYPE-FIELDS
  *     UPDATE UI FOR CITATION-TYPE
+ *     ADD PUB DATA
  */
 import { _db, _cmbx } from '~util';
 import {  _state, _elems, getSubFormLvl } from '~form';
 import * as sForm from '../../src-form-main.js';
-
-let rmvdAuthField = {};
 /* ----------------------- SELECT DEFAULT-TYPE ------------------------------ */
 export function selectDefaultCitType() {
-    rmvdAuthField = {};
     return _db('getData', ['citTypeNames'])
         .then(types => setCitType(types));
 }
-function setCitType(citTypes) {
-    const rcrds = _state('getFormState', ['sub', 'rcrds']);
-    const pubType = rcrds.pub.publicationType.displayName;
-    const defaultType = getDefaultCitType(pubType, rcrds);
-    _elems('setSilentVal', ['sub', 'CitationType', citTypes[defaultType]]);
-    return loadCitTypeFields(citTypes[defaultType], defaultType);
+function setCitType(cTypes) {
+    const fLvl = getSubFormLvl('sub');
+    const pData = _state('getFieldState', [fLvl, 'ParentSource', 'misc']);
+    const pubType = pData.pubType.displayName;
+    const defaultType = getDefaultCitType(pubType, pData);
+    _elems('setSilentVal', ['sub', 'CitationType', cTypes[defaultType]]);
+    if (!_state('isEditForm')) { addPubData(cTypes[defaultType], defaultType, fLvl); }
+    return loadCitTypeFields(cTypes[defaultType], defaultType);
 }
-function getDefaultCitType(pubType, rcrds) {
+function getDefaultCitType(pubType, pData) {
     return {
-        'Book': getBookDefault(pubType, rcrds),
+        'Book': getBookDefault(pubType, pData),
         'Journal': 'Article',
         'Other': 'Other',
         'Thesis/Dissertation': 'Ph.D. Dissertation'
     }[pubType];
 }
-function getBookDefault(pubType, rcrds) {
-    const pubAuths = rcrds.src.authors;
+function getBookDefault(pubType, pData) {
+    const pubAuths = pData.src.authors;
     return pubAuths ? 'Book' : 'Chapter';
 }
 /* -------------------------- LOAD TYPE-FIELDS ------------------------------ */
@@ -50,12 +50,10 @@ function getBookDefault(pubType, rcrds) {
 export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*///console.log('           /--loadCitTypeFields');
     const fLvl = getSubFormLvl('sub');
     const type = typeName || this.$input[0].innerText;
-    if (!_state('isEditForm')) { addPubData(typeId, type, fLvl); }
     return sForm.loadSrcTypeFields('citation', typeId, type)
         .then(finishCitTypeFields);
 
     function finishCitTypeFields() {
-        handleSpecialCaseTypeUpdates(type, fLvl);
         sForm.handleCitText(fLvl);
         _elems('setDynamicFormStyles', ['citation']);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
@@ -80,59 +78,24 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
     hndlrs[type](type, fLvl);
 
     function updateBookFields() {
-        const fS = _state('getFormState', [fLvl]);
-        const pubAuths = fS.rcrds.src.authors;
-        if (!pubAuths) { return reshowAuthorField(); }
-        removeAuthorField();
         if (type === 'Book'){ disableTitleField()} else { enableTitleField()}
-
-        function reshowAuthorField() {
-            if (!rmvdAuthField.authRow) { return; } //Field was never removed
-            $('#citation_fields').append(rmvdAuthField.authRow);
-            _state('addRequiredFieldInput', [fLvl, rmvdAuthField.authElem]);
-            _state('setFieldState', [fLvl, 'Authors', {}]);
-            delete rmvdAuthField.authRow;
-            delete rmvdAuthField.authElem;
-        }
-        function removeAuthorField() {
-            rmvdAuthField.authRow = $('#Authors_f').detach();
-
-            // _state('setFormProp', [fLvl, 'reqElems', removeAuthorElem()])
-            removeFromFieldData();
-
-            function removeAuthorElem() {
-                return fS.reqElems.filter(elem => {
-                    if (!elem.id.includes('Authors')) { return true; }
-                    rmvdAuthField.authElem = elem;
-                    return false;
-                });
-            }
-            function removeFromFieldData() {
-                const data = _state('getFormState', [fLvl, 'fieldData']);
-                delete data.Authors;
-                _state('setFormProp', [fLvl, 'fieldData', data]);
-            }
-        }
-    }
-    function disableFilledFields() {
-        $('#Title_f input').prop('disabled', true);
-        $('#Year_f input').prop('disabled', true);
-        disableAuthorField();
-    }
-    function disableAuthorField() {
-        if ($(`#Authors_f-cntnr`)[0].children.length > 1) {
-            $(`#Authors_f-cntnr`)[0].lastChild.remove();
-        }
-        _cmbx('enableComboboxes', [$(`#Authors_f-cntnr select`), false]);
-    }
-    function disableTitleField() {
-        $('#Title_f input').prop('disabled', true);
-    }
-    function enableTitleField() {
-        $('#Title_f input').prop('disabled', false);
     }
 }
-/* ---------------------------- EDIT-FORM ----------------------------------- */
+function disableFilledFields() {
+    $('#Title_f input').prop('disabled', true);
+    $('#Year_f input').prop('disabled', true);
+    disableAuthorField();
+}
+function disableAuthorField() {
+    if ($(`#Author_f-cntnr `)[0].children.length > 1) {
+        $(`#Author_f-cntnr`)[0].lastChild.remove();
+    }
+    _cmbx('enableComboboxes', [$(`#Author_f-cntnr select`), false]);
+}
+function toggleTitleField(disable = false) {
+    $('#Title_f input').prop('disabled', !disable);
+}
+/* ------------------------- ADD PUB DATA ----------------------------------- */
 /** Adds or removes publication data from the form's values, depending on type. */
 function addPubData(typeId, type, fLvl) {
     const copy = ['Book', "Master's Thesis", 'Museum record', 'Other',
@@ -142,36 +105,28 @@ function addPubData(typeId, type, fLvl) {
 }
 function addPubValues(fLvl, addValues, type) {
     const fData = _state('getFormState', [fLvl, 'fields']);
-    const rcrds = _state('getFormState', [fLvl, 'rcrds']);
-    addPubTitle(addValues, fLvl, type);
-    addPubYear(addValues, fLvl);
-    addAuthorsToCitation(addValues, fLvl, type);
-    _state('setFormProp', [fLvl, 'fieldData', fieldData]);
+    const pSrc = fData.ParentSource.misc.src;
+    addPubTitle();
+    addPubYear();
+    addAuthorsToCitation();
+    _state('setFormState', [fLvl, 'fields', fData]);
     /**
      * Adds the pub title to the citations form vals, unless the type should
-     * be skipped, ie. have it's own title. (may not actually be needed. REFACTOR and check in later)
+     * be skipped, ie. have it's own title.
+     * TODO (may not actually be needed. REFACTOR and check in later)
      */
-    function addPubTitle(addTitle, fLvl, type) {
+    function addPubTitle() {
         if (fData.Title.value) { return; }
         const skip = ['Chapter'];
-        fieldData.Title = {};
-        fieldData.Title.val = addTitle && skip.indexOf(type) === -1 ?
-            rcrds.src.displayName : '';
+        fData.Title.value = addValues && skip.indexOf(type) === -1 ?
+            pSrc.displayName : '';
     }
-    function addPubYear(addYear, fLvl) {
-        fieldData.Year = {};
-        fieldData.Year.val = addYear ? rcrds.src.year : '';
+    function addPubYear() {
+        fData.Year.value = addValues ? pSrc.year : '';
     }
-    function addAuthorsToCitation(addAuths, fLvl, type) {
-        const pubAuths = rcrds.src.authors;
-        if (addAuths && pubAuths) { return addExistingPubContribs(fLvl, pubAuths); }
-    }
-    /**
-     * If the parent publication has existing authors, they are added to the new
-     * citation form's author field(s).
-     */
-    function addExistingPubContribs(fLvl, auths) {
-        fieldData.Authors = { type: "multiSelect" };
-        fieldData.Authors.val = auths ? auths : null;
+    function addAuthorsToCitation() {
+        const pAuths = pSrc.authors;
+        if (!addValues || !pAuths) { return; }
+        fData.Authors.value = pAuths ? pAuths : null;
     }
 }

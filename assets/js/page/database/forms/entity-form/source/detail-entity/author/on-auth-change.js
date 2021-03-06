@@ -28,7 +28,7 @@ import * as aForm from './auth-form-main.js';
  */
 export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*///console.log('+--onAuthAndEdSelection [%s][%s] = [%s]', cnt, aType, v);
     const fLvl = getSubFormLvl('sub');
-    const ttl = _state('getFieldData', [fLvl, aType, 'count']);    /*dbug-log*///console.log('       --ttl[%s]', ttl);
+    const ttl = _state('getFieldState', [fLvl, aType, 'count']);    /*dbug-log*///console.log('       --ttl[%s]', ttl);
     if (v === '' || parseInt(v) === NaN) { return onFieldClear(aType, fLvl, ttl, cnt); }
     if (ttl === 1) { enableOtherField(aType, fLvl, false);  }
     if (v === 'create') { return aForm.initAuthOrEdForm(cnt, aType, v); }
@@ -58,7 +58,7 @@ export function ifNoneStillSelectedEnableOtherType(aType, fLvl, clearedCnt) {
     enableOtherField(aType, fLvl, true);
 }
 function ifTypeStillSelected(aType, fLvl, clearedCnt) {
-    const fVals = _state('getFieldData', [fLvl, aType]);             /*dbug-log*///console.log('--ifTypeStillSelected [%s][%s][%O]', fLvl, aType, fVals);
+    const fVals = _state('getFieldState', [fLvl, aType]);             /*dbug-log*///console.log('--ifTypeStillSelected [%s][%s][%O]', fLvl, aType, fVals);
     fVals[clearedCnt] = null; //val store change event could happen after this check
     return Object.values(fVals).find(v => v);
 }

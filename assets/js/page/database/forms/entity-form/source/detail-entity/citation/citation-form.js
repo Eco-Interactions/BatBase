@@ -9,10 +9,13 @@
  *     loadCitTypeFields
  *
  * TOC
- *     CITATION CREATE
+ *     CREATE FORM
+ *         INIT STATE MEMORY
+ *         ON CREATE-FORM CLOSE
+ *         BUILD FORM
  *     AUTOGENERATE CITATION
  *     HIGHTLIGHT EMPTY CITATION-FIELDS
- *     CITATION EDIT
+ *     EDIT FORM
  */
 import { _db, _cmbx } from '~util';
 import { _form, _state, _elems } from '~form';
@@ -25,45 +28,31 @@ let timeout = null; //Prevents citation text being generated multiple times.
 export function loadCitTypeFields() {
     return types.loadCitTypeFields.bind(this)(...arguments);
 }
-/* -------------------------- CITATION CREATE ------------------------------- */
+/* -============================ CREATE FORM ================================ */
 /** Shows the Citation  sub-form and disables the publication combobox. */
 export function initCitForm(v) {                                    /*perm-log*/console.log("       /--initCitForm [%s]", v);
-    const val = v === 'create' ? '' : v;
     timeout = null;
-    return _db('getData', [['author', 'publication']])
-    .then(data => initCitFormMemory(data))
-    .then(() => buildAndAppendCitForm(val));
+    initCitFormMemory(v);
+    return buildAndAppendCitForm();
 }
-function initCitFormMemory(data) {
-    addSourceDataToMemory(data);
-    _state('addEntityFormState', ['citation', 'sub', '#sel-CitationTitle', 'create']);
+/* ------------------------- INIT STATE MEMORY ------------------------------ */
+function initCitFormMemory(v) {
+    const p = ['citation', 'sub', '#sel-CitationTitle', 'create', { Title: (v === 'create' ? '' : v)}]
+    _state('addEntityFormState', p);
+    addParentPubToFormState(_cmbx('getSelVal', ['Publication']));
+    //get default cit type from pub config
     _state('setOnFormCloseHandler', ['sub', enablePubField]);
-    addPubRcrdsToMemory(data.publication);
-    return Promise.resolve();
 }
-function addSourceDataToMemory(data) {
-    const records = _state('getStateProp', ['records']);
-    if (!records) { return; } //form was closed.
-    Object.keys(data).forEach(k => records[k] = data[k]);
-    _state('setStateProp', ['records', records]);
+function addParentPubToFormState(pId) {
+    const pSrc = _state('getRcrd', ['source', pId]);                /*dbug-log*/console.log('addParentPubToFormState  [%s][%O]', pId, pSrc);
+    const pub = _state('getRcrd', ['publication', pSrc.publication]);
+    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*/console.log('addParentPubToFormState[%O]', data);
+    _state('setFieldState', ['sub', 'ParentSource', data, 'misc']);
 }
-/** When the Citation sub-form is exited, the Publication combo is reenabled. */
-function enablePubField() {
-    _cmbx('enableCombobox', ['Publication']);
-    _form('fillCitationCombo', [$('#sel-Publication').val()]);
-}
-function addPubRcrdsToMemory(pubRcrds) {
-    const pubSrc = _state('getRcrd', ['source', $('#sel-Publication').val()]);
-    const pub = pubRcrds[pubSrc.publication];
-    _state('setFormState', ['sub', 'rcrds', { pub: pub, src: pubSrc}]);
-}
-function buildAndAppendCitForm(val) {
-    return initCitSubForm(val)
-    .then(form => appendCitFormAndFinishBuild(form));
-}
-function initCitSubForm(val) {
-    return _elems('getSubForm',
-        ['sub', 'med-sub-form', {'Title': val}, '#sel-CitationTitle']);
+/* -------------------------- BUILD FORM ------------------------------------ */
+function buildAndAppendCitForm() {
+    return _elems('getSubForm', ['sub', 'med-sub-form', '#sel-CitationTitle'])
+        .then(form => appendCitFormAndFinishBuild(form));
 }
 function appendCitFormAndFinishBuild(form) {                        /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
     $('#CitationText_f textarea').attr('disabled', true);
@@ -78,7 +67,13 @@ function finishCitFormUiLoad() {
     $('#Abstract_f textarea').focus();
     _elems('setDynamicFormStyles', ['citation']);
 }
-/* ----------------------- AUTO-GENERATE CITATION --------------------------- */
+/* ---------------------- ON CREATE-FORM CLOSE ------------------------------ */
+/** When the Citation sub-form is exited, the Publication combo is reenabled. */
+function enablePubField() {
+    _cmbx('enableCombobox', ['Publication']);
+    _form('fillCitationCombo', [$('#sel-Publication').val()]);
+}
+/* ======================= AUTO-GENERATE CITATION =========================== */
 /** Note: to prevent multiple rebuilds, a timeout is used. */
 export function handleCitText(fLvl) {                               /*dbug-log*///console.log('   --handleCitText [%s] timeout? [%s]', fLvl, !!timeout);
     if (timeout) { return; }
@@ -89,7 +84,7 @@ function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*/
     .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl))
     .then(() => {timeout = null;});
 }
-/* ---------------- HIGHTLIGHT EMPTY CITATION-FIELDS ------------------------ */
+/* ================ HIGHTLIGHT EMPTY FIELDS ================================= */
 /**
  * Highlights field continer if citation field is empty once all required fields
  * are filled. Removes hightlights when filled.
@@ -99,7 +94,7 @@ function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl) {
     const empty = $('#citation_fields div.form-field').filter(hightlightIfEmpty);
     if (!empty.length && $('.warn-msg').length) { return $('.warn-msg').remove(); }
     if ($('.warn-msg').length) { return; }
-    $('#'+fLvl+'-submit').before('<div class="warn-msg warn">Please add highlighted data if available.</div>')
+    $(`#${fLvl}-submit`).before('<div class="warn-msg warn">Please add highlighted data if available.</div>')
 }
 function hightlightIfEmpty(i, el) {
     const input = el.children[1];
@@ -113,7 +108,7 @@ function ifFieldShouldBeSkipped (el, label, input) {
     if (skip && el.className.includes('warn')) { $(el).removeClass('warn'); }
     return skip;
 }
-/* ---------------- CITATION EDIT ------------------------------------------- */
+/* ========================= EDIT FORM ====================================== */
 export function finishCitationEditForm() {
     types.handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['CitationType']), 'top');
     handleCitText('top');

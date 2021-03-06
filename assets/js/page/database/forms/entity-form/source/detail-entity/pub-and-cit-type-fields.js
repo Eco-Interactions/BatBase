@@ -19,7 +19,7 @@ import * as sForm from '../src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
 export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*///console.log('+--loadSrcTypeFields [%s] id?[%s] type[%s]', entity, typeId, type);
     const fLvl = getSubFormLvl('sub');
-    resetOnFormTypeChange(entity, typeId, fLvl);
+    _elems('toggleSubmitBttn', [fLvl, false]);
     return getPubOrCitFields(entity, typeId, fLvl, type)
         .then(finishSrcTypeFormBuild);
 
@@ -32,14 +32,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
     function afterComplexFieldsFilled () {
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         $('#Title_f input').focus();
-        if (_state('getStateProp', ['action']) === 'create') { return; }
-        $('.top-pin').hide(); //edit-forms show pins after type change otherwise.
     }
-}
-function resetOnFormTypeChange(entity, typeId, fLvl) {
-    const capsType = _u('ucfirst', [entity]);
-    _state('setFieldState', [fLvl, capsType+'Type', typeId]);
-    _elems('toggleSubmitBttn', [fLvl, false]);
 }
 /* ----------------- GET SOURCE-TYPE ROWS ----------------------------------- */
 /**

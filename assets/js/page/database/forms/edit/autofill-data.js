@@ -75,7 +75,7 @@ function setTypeAndTagInitValuesAsDataFieldElems(rcrd) {
 function addTaxon(field, prop, rcrd) {
     const selApi = $('#sel-'+ field)[0].selectize;
     const taxon = _state('getRcrd', ['taxon', rcrd[prop]]);
-    _state('setTaxonProp', ['groupName', taxon.group.displayName]);
+    _state('setTaxonProp', ['top', 'groupName', taxon.group.displayName]);
     selApi.addOption({ text: taxon.displayName, value: taxon.id});
     selApi.addItem(taxon.id);
 }

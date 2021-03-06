@@ -20,7 +20,7 @@ export function initCreateForm(rank, value) {                       /*perm-log*/
     return showNewTaxonForm(val, ucRank);
 }
 function showNewTaxonForm(val, rank) {
-    _state('setTaxonProp', ['formTaxonRank', rank]);  //used for data validation/submit
+    _state('setTaxonProp', ['sub2', 'formTaxonRank', rank]);  //used for data validation/submit
     return buildTaxonForm()
     .then(() => _elems('toggleSubmitBttn', ['sub2', true]));
 

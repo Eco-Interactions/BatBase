@@ -90,6 +90,10 @@ export function getRcrd(...args) {
 export function getEditEntityId(...args) {
     return callCoreState(get, 'getEditEntityId', args);
 }
+/* --------------------- STATE PREDICATES ----------------------------------- */
+export function isEditForm(...args) {
+    return callCoreState(get, 'isEditForm', args);
+}
 /* ========================= GET FORM STATE ================================= */
 export function getFormState(...args) {
     return callFormState(get, 'getFormState', args);
@@ -98,8 +102,8 @@ export function getFormEntity(...args) {
     return callFormState(get, 'getFormEntity', args);
 }
 /* -------------------------- FIELDS ---------------------------------------- */
-export function getFieldData(...args) {
-    return callFormState(get, 'getFieldData', args);
+export function getFieldState(...args) {
+    return callFormState(get, 'getFieldState', args);
 }
 export function getComboFields(...args) {
     return callFormState(get, 'getComboFields', args);
@@ -111,6 +115,14 @@ export function getFieldValues(...args) {
 export function getTaxonProp(...args) {
     return callFormState(get, 'getTaxonProp', args);
 }
+/* --------------------- STATE PREDICATES ----------------------------------- */
+/** [isFieldShown description] */
+export function isFieldShown(...args) {
+    return callFormState(get, 'isFieldShown', args);
+}
+export function areFieldsShown(...args) {
+    return callFormState(get, 'areFieldsShown', args);
+}
 /* +++++++++ SETTERS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 /* ======================= SET CORE STATE =================================== */
 export function setStateProp(...args) {
@@ -119,8 +131,7 @@ export function setStateProp(...args) {
 export function setEntityRecords(...args) {
     return callCoreState(set, 'setStateProp', args);
 }
-/* ============================ SETTERS ===================================== */
-/* ----------------------- ENTITY FORM -------------------------------------- */
+/* ======================= SET FORM STATE =================================== */
 export function setFormState(...args) {
     return callFormState(set, 'setStateProp', args);
 }
@@ -130,30 +141,17 @@ export function setFieldState(...args) {
 export function setOnFormCloseHandler(...args) {
     return callFormState(set, 'setOnFormCloseHandler', args);
 }
+/* -------------------------- COMBOBOX -------------------------------------- */
 export function addRequiredFieldInput(...args) {
     return callFormState(set, 'addRequiredFieldInput', args);
 }
-/* _________________________ COMBOBOX _______________________________________ */
 export function removeFieldFromComboInit(...args) {
     return callFormState(set, 'removeFieldFromComboInit', args);
 }
-/* ___________________________ TAXON ________________________________________ */
+/* ---------------------------- TAXON --------------------------------------- */
 export function setTaxonProp(...args) {
     return callFormState(set, 'setTaxonProp', args);
 }
 export function setTaxonGroupData(...args) {
     return callFormState(set, 'setTaxonGroupData', args);
-}
-/* ====================== STATE PREDICATES =================================== */
-export function isEditForm() {
-    return fS.action === 'edit';
-}
-/** [isFieldShown description] */
-export function isFieldShown(fLvl, field) {                         /*dbug-log*///console.log('--isFieldShown [%s][%O]', fLvl, field);
-    if (Array.isArray(field)) { return areFieldsShown(fLvl, field); }
-    const fConfg =  fS.forms[fLvl].fields[field]
-    return fConfg ? fConfg.shown : false;
-}
-export function areFieldsShown(fLvl, fields) {
-    return fields.map(f => isFieldShown(fLvl, f)).every(b=>b);
 }
