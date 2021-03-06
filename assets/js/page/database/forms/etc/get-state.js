@@ -29,7 +29,7 @@ function buildRcrdsObj(fS, entities) {
 }
 /** Returns the record for the passed id and entity-type. */
 export function getRcrd(fS, e, id) {                                /*dbug-log*///console.log('   --getRcrd  entity[%s][%s] fS[%O]', e, id, fS);
-    const r = fS.records[entity][id];
+    const r = fS.records[e][id];
     return r ? _u('snapshot', [r]) : alertFormIssue('noRcrdFound', {id: id, entity: e });
 }
 /* ----------------------- EDIT FORM ---------------------------------------- */

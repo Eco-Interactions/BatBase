@@ -108,63 +108,42 @@ export function getFieldValues(...args) {
     return callFormState(get, 'getFieldValues', args);
 }
 /* --------------------------- TAXON ---------------------------------------- */
-// export function getGroupState(...args) {
-//     return callFormState(get, 'getGroupState', args);
-// }
 export function getTaxonProp(...args) {
     return callFormState(get, 'getTaxonProp', args);
 }
 /* +++++++++ SETTERS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 /* ======================= SET CORE STATE =================================== */
-
+export function setStateProp(...args) {
+    return callCoreState(set, 'setStateProp', args);
+}
+export function setEntityRecords(...args) {
+    return callCoreState(set, 'setStateProp', args);
+}
 /* ============================ SETTERS ===================================== */
-export function setStateProp(prop, val) {
-    fS[prop] = val;
-}
-/**
- * Edge case: After form submit, the updated data is fetched and stored here, but
- * if the form is closed before the data is stored, cancel storing the data.
- */
-export function addEntityRecords(entity, rcrds) {
-    if (!fS.records) { return; } //See comment for explanation
-    fS.records[entity] = rcrds;
-}
 /* ----------------------- ENTITY FORM -------------------------------------- */
-export function setFormState(fLvl, prop, val) {
-    fS.forms[fLvl][prop] = val;
+export function setFormState(...args) {
+    return callFormState(set, 'setStateProp', args);
 }
-export function setFieldState(fLvl, field, val, prop = 'value') {   /*dbug-log*///console.log('--setFieldState [%s][%s][%s][%O]', fLvl, field, prop, val);
-    let fData = fS.forms[fLvl].fields[field];
-    if (!prop) { return fData = val; }
-    fData[prop] = val;
+export function setFieldState(...args) {
+    return callFormState(set, 'setFieldState', args);
 }
-export function setOnFormCloseHandler(fLvl, hndlr) {
-    fS.forms[fLvl].onFormClose = hndlr;
+export function setOnFormCloseHandler(...args) {
+    return callFormState(set, 'setOnFormCloseHandler', args);
 }
-export function addRequiredFieldInput(fLvl, input) {
-    fS.forms[fLvl].reqElems.push(input);
+export function addRequiredFieldInput(...args) {
+    return callFormState(set, 'addRequiredFieldInput', args);
 }
 /* _________________________ COMBOBOX _______________________________________ */
-/* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
-export function removeFieldFromComboInit(fLvl, fieldName) {
-    const field = fS.forms[fLvl].fields[fieldName];
-    field.combo = false;
+export function removeFieldFromComboInit(...args) {
+    return callFormState(set, 'removeFieldFromComboInit', args);
 }
 /* ___________________________ TAXON ________________________________________ */
-export function setTaxonProp(prop, val) {
-    if (!fS.forms.taxonData) { fS.forms.taxonData = {}; } //Edit-forms need specific props
-    return fS.forms.taxonData[prop] = val;
+export function setTaxonProp(...args) {
+    return callFormState(set, 'setTaxonProp', args);
 }
-/** When a new taxon parent is selected in the taxon edit-form, groups data is updated. */
-export function setTaxonGroupData(taxon) {
-    const txnData = fS.forms.taxonData;
-    const group = txnData.groups[taxon.group.id];
-    txnData.groupName = group.displayName;
-    txnData.subGroupId = taxon.group.subGroup.id;
-    txnData.subGroups = group.subGroups;
-    txnData.groupTaxon = taxon;
+export function setTaxonGroupData(...args) {
+    return callFormState(set, 'setTaxonGroupData', args);
 }
-
 /* ====================== STATE PREDICATES =================================== */
 export function isEditForm() {
     return fS.action === 'edit';

@@ -154,7 +154,7 @@ function selectPrevTaxon(taxon, role) {
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
 function addTaxonOptToTaxonMemory(taxon) {
-    _state('setTaxonProp', ['prevSel', {val: taxon.id, text: taxon.displayName }]);
+    _state('setTaxonProp', ['sub', 'prevSel', {val: taxon.id, text: taxon.displayName }]);
 }
 function ifTaxonInDifferentGroup(group) {
     return group.displayName !== 'Bat' && $('#sel-Group').val() != group.id;

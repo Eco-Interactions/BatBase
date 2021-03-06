@@ -34,6 +34,8 @@ TAYLOR:
 > ____ TASKS _____
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
+    - fix year input validation
+
 
     - Show when a tag is required to be selected
     - keep default tags selected regardless of type tags

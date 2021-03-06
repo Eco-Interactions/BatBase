@@ -77,8 +77,8 @@ function updateSubGroupState() {
     const subGroupId = _cmbx('getSelVal', ['Sub-Group']);
     const subGroup =  _state('getTaxonProp', ['subGroups'])[subGroupId];
     const subGroupTaxon = _state('getRcrd', ['taxon', subGroup.taxon]);/*temp-log*/console.log('onSubGroupSelection [%s]', _cmbx('getSelTxt', ['Sub-Group']));
-    _state('setTaxonProp', ['subGroupId', subGroupId]);
-    _state('setTaxonProp', ['groupTaxon', subGroupTaxon]);
+    _state('setTaxonProp', ['sub', 'subGroupId', subGroupId]);
+    _state('setTaxonProp', ['sub', 'groupTaxon', subGroupTaxon]);
 }
 function clearPreviousSubGroupCombos() {
     const gFields = $('#Group_f, #Sub-Group_f').detach();

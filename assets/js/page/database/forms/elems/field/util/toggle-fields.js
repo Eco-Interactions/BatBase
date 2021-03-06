@@ -14,7 +14,7 @@
  *
  */
 import { _el, _u } from '~util';
-import { _elems, _form, _state, getNextFormLevel } from '~form';
+import { _confg, _elems, _form, _state, getNextFormLevel } from '~form';
 /* ================== SHOW ALL FIELDS CHECKBOX ============================== */
 export function ifMutlipleDisplaysGetToggle(entity, fLvl) {         /*dbug-log*///console.log('+--ifMutlipleDisplaysGetToggle [%s][%s]', entity, fLvl);
     if (!ifFormHasMultipleFieldDisplays(fLvl)) { return null; }

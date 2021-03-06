@@ -102,7 +102,7 @@ function addDataToStoredRcrds(entity, detailEntity) {                           
     return _db('getData', [entity]).then(addDataToMemory);
 
     function addDataToMemory(data) {
-        _state('addEntityRecords', [entity, data]);
+        _state('setEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }
