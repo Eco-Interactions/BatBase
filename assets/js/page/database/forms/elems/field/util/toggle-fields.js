@@ -61,6 +61,6 @@ function ifOpenSubForm(fLvl) {
 }
 /** [toggleFormFields description] */
 function toggleFormFields(fLvl, entity) {
-    _state('onFieldViewChangeUpdateConfg', [fLvl]);
+    _confg('onFieldViewChangeUpdateConfg', [fLvl]);
     _elems('onFormConfgChanged', [fLvl, entity]);
 }

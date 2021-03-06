@@ -119,7 +119,7 @@ function handleFormComplete(fLvl, data) {                                       
  * entity in the form's parent elem @addAndSelectEntity.
  */
 function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
-    const formParent = _state('getFormParentId', [fLvl]);
+    const formParent = _state('getFormState', [fLvl, 'pSelId']);
     _elems('exitSubForm', [fLvl]);
     if (formParent) { addAndSelectEntity(data, formParent);
     } else { clearFormMemory(); }

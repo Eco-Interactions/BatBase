@@ -142,7 +142,7 @@ function setOnMultiSelectChangeListener(f) {                        /*dbug-log*/
 }
 /** [storeMultiSelectValue description] */
 function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('@--storeMultiSelectValue lvl[%s] cnt[%s]fName[%s], e[%O]', fLvl, cnt, fName, e);
-    const vals = _state('getFormData', [fLvl, fName]);
+    const vals = _state('getFieldData', [fLvl, fName]);
     vals[cnt] = e.target.value || null;                             /*dbug-log*///console.log('   --vals[%O] nVal[%s]', vals, vals[cnt]);
     _state('setFieldState', [fLvl, fName, vals]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE

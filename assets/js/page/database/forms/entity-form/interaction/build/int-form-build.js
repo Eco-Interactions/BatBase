@@ -17,10 +17,9 @@
 import { _cmbx, _el, _modal } from '~util';
 import { _state, _elems, handleFormSubmit } from '~form';
 import * as iForm from '../int-form-main.js';
-
 /* ======================= CREATE-FORM BUILD ================================ */
 export function initCreateForm(entity) {                            /*perm-log*/console.log('   //Building New Interaction Form');
-    if (_state('getFormState')) { return; } //Form is already opened.
+    if (_state('getStateProp')) { return; } //Form is already opened.
     return _state('initFormState', ['create', 'interaction'])
     .then(() => _elems('getFormFieldRows', ['top']))
     .then(fields => _elems('buildAndAppendRootForm', [fields]))
@@ -89,7 +88,7 @@ function buildConfirmationModalHtml() {
     return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
 }
 function getIntTypeVerbForm() {
-    const typeId = _state('getFormData', ['top', 'InteractionType']);
+    const typeId = _state('getFieldData', ['top', 'InteractionType']).value;
     const types = _state('getEntityRcrds', ['interactionType']);
     return types[typeId].activeForm;
 }

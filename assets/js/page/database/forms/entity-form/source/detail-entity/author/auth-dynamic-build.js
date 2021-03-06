@@ -33,7 +33,7 @@ export function buildNewAuthorSelect(fLvl, aType, cnt) {            /*dbug-log*/
 }
 /** [getNextFieldConfg description] */
 function getNextFieldConfg() {
-    const fConfg = _u('snapshot', _state('getFormFieldData', [a.fLvl, a.type]));
+    const fConfg = _u('snapshot', _state('getFieldData', [a.fLvl, a.type, null]));
     fConfg.count = a.cnt;
     fConfg.required = false;
     return fConfg;

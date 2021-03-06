@@ -1,5 +1,6 @@
 /**
  * All form state data for the core form and any sub-forms.
+ * TODO: DOCUMENT
  *
  * Export
  *     getFormEntity
@@ -7,11 +8,7 @@
  *     addEntityFormState
  *
  * TOC
- *     INIT FORM MEMORY
- *         STATE CORE
- *         FORM DATA
- *         ENTITY FORM
- *             TAXON
+ *     INIT FORM-STATE
  *     GETTERS
  *         ENTITY RECORDS
  *         EDIT FORM
@@ -24,267 +21,143 @@
  */
 import { _db, _u } from '~util';
 import { _confg, alertFormIssue } from '~form';
+import * as get from './get-state.js';
+import * as init from './init-state.js';
+import * as set from './set-state.js';
 
-let fState = {};
+let fS = {};
 
 export function clearState() {
-    fState = {};
+    fS = {};
 }
 /* ========================= INIT FORM-STATE ================================ */
-/* ----------------------- STATE CORE --------------------------------------- */
+export function initFormState(...args) {
+    return init.initFormState(...args)
+        .then(storeAndReturnState);
+}
+function storeAndReturnState(coreState) {
+    fS = coreState;
+    return coreState;
+}
+export function addEntityFormState(...args) {
+    init.addEntityFormState(fS, ...args);
+}
+export function initTaxonState(...args) {
+    return init.initTaxonState(getFormObj(args.shift()), fS.records.taxon, ...args);
+}
+/* ============================= EXECUTORS ================================== */
 /**
- * -- Property descriptions:
- * > action - ie, Create, Edit.
- * > editing - Container for the id(s) of the record(s) being edited. (Detail
-        ids are added later). False if not editing.
- * > entity - Name of this form's entity
- * > forms - Container for form-specific params
- * > formLevels - An array of the form level names/tags/prefixes/etc.
- * > records - An object of all records, with id keys, for each of the
- *   root entities - Location, Source and Taxa, and any sub entities as needed.
- * > submit - Data used during form submission: fLvl, entity
+ * [callCoreState description]
+ * @param  {[type]} mod      [description]
+ * @param  {[type]} funcName [description]
+ * @param  {[type]} args     [...funcParams]
+ * @return {[type]}          [description]
  */
-export function initFormState(action, entity, id) {
-    const dataKeys = getDataKeysForEntityRootForm(action, entity);
-    fState.init = true; //eliminates possibility of opening form multiple times.
-    return _db('getData', [dataKeys]).then(data => {
-        initMainState(data);
-        addEntityFormState(entity, 'top', null, action);            /*perm-log*/console.log("       #### initFormState initState %O, curState %O", _u('snapshot', [fState]), fState);
-        delete fState.init;
-        return fState;
-    });
-
-    function initMainState(data) {
-        fState = {
-            action: action,//
-            editing: action === 'edit' ? { core: id || null, detail: null } : false,//
-            entity: entity,//
-            forms: {},
-            formLevels: ['top', 'sub', 'sub2'],
-            records: data,
-        };
-    }
+export function callCoreState(mod, funcName, args) {                /*dbug-log*///console.log('--callCoreState [%s][%O]', funcName, args);
+    if (!fS.records) { return false; } //Form closed
+    return mod[funcName](fS, ...args);
 }
-/* ----------------------- FORM DATA ---------------------------------------- */
-function getDataKeysForEntityRootForm(action, entity) {
-    const map = {
-        'author': {
-            'edit': ['source', 'author']
-        },
-        'citation': {
-            'edit': ['source', 'citation', 'author', 'publisher']
-        },
-        'interaction': {
-            'create': ['author', 'citation', 'interactionType', 'location', 'publication',
-                'publisher', 'source', 'tag', 'taxon', 'validInteraction'],
-            'edit': ['author', 'citation', 'interaction', 'interactionType', 'location',
-                'publication', 'publisher', 'source', 'tag', 'taxon', 'validInteraction'],
-        },
-        'location': {
-            'edit': ['location']
-        },
-        'publication': {
-            'edit': ['source', 'publication']
-        },
-        'publisher': {
-            'edit': ['source', 'publisher']
-        },
-        'taxon': {
-            'edit': ['taxon']
-        }
-    }
-    return map[entity][action];
-}
-/* ----------------------- ENTITY FORM -------------------------------------- */
 /**
- * Adds the properties and confg that will be used throughout the code for
- * generating, validating, and submitting entity sub-forms.
- *
- * -- Property descriptions:
- * > action - create || edit
- * > simple - All fields are shown unless simple default-display confg present
- * > entity - Name of this form's entity.
- * > onFormClose - Handles form exit/reset.
- * > misc - Obj to hold the various special-case props
- * > pSelId - The id of the parent select of the form.
- * > selElems - Contains all selElems until they are initialized with selectize.
- *
- * --- Entity-specific properties
- * > Citation forms:
- *         rcrds - { src: pubSrc, pub: pub } (parent publication)
- * > Interaction create form:
- *         unchanged - exists after form submit and before any changes
- *         valData - ValidInteraction data for the selected subject and object groups
- *             [{id, subjectSubGroup(id), objectSubGroup(id), interactionType(id), tags(id array)}]
- * > Location forms:
- *         geoJson - geoJson entity for this location, if it exists.
- * > Taxon forms:
- *         taxonData - added to fState.forms (see props @initTaxonParams)
+ * [callFormState description]
+ * @param  {[type]} mod      [description]
+ * @param  {[type]} funcName [description]
+ * @param  {[type]} args     [*fLvl, ...funcParams]
+ * @return {[type]}          [description]
  */
-export function addEntityFormState(entity, fLvl, pSel, action, vals) {/*dbug-log*///console.log("#### addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s] vals[%O]", entity, fLvl, pSel, action, vals);
-    fState.forms[entity] = fLvl;
-    fState.forms[fLvl] = _confg('initFormConfg', [entity, fLvl, action, vals]);
-    finishFormStateInit(pSel, action);
-
-    function finishFormStateInit(pSel, action) {
-        const p = {
-            action: action,
-            onFormClose: null,
-            pSelId: pSel,
-        };
-        Object.assign(fState.forms[fLvl], p);                       /*dbug-log*///console.log('--finishFormStateInit FINAL [%s][%O]', fLvl, fState.forms[fLvl]);
-    }
+export function callFormState(mod, funcName, args) {                /*dbug-log*///console.log('--callFormState [%s][%O]', funcName, args);
+    if (!ifStateActive(args[0])) { return false; }
+    return mod[funcName](getFormObj(args.shift()), ...args);
 }
-/* ___________________________ TAXON ________________________________________ */
-export function initTaxonState(fLvl, groupId, subGroupId) {
-    return _db('getData', [['group', 'rankNames']])
-        .then(data => setTxnState(data.group, data.rankNames));
-
-    function setTxnState(groups, ranks) {
-        const group = groups[groupId];                              /*dbug-log*///console.log('initTaxonState subGroup[%s] group[%s] = %O ', subGroupId, groupId, group);
-        const data = {
-            groupName: group.displayName,
-            groupId: groupId,
-            groups: groups, // Used in edit form if new parent in different group
-            subGroupId: subGroupId || Object.keys(group.subGroups)[0],
-            subGroups: group.subGroups,
-        };
-        data.groupTaxon = fState.records.taxon[group.subGroups[data.subGroupId].taxon];
-        fState.forms.taxonData = data;                              /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
-        // fState.forms[fLvl].taxonData = data;                        /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
-        handleSubGroupFieldState(data.subGroupId, Object.keys(subGroups).length);
-        return data;
-    }
-    function handleSubGroupFieldState(sGroupId, sGroupCnt) {
-        const shwn = sGroupCnt === 1;
-        fState.forms[fLvl].fields['Sub-group'].shown = shwn;
-        fState.forms[fLvl].fields['Sub-group'].value = shwn ? sGroupId : null;
-    }
+export function ifStateActive(fLvl) {
+    return fS.forms && getFormObj(fLvl);
 }
-/* ============================ GETTERS ===================================== */
-export function getStateProp(prop) {                                /*dbug-log*///console.log('args = %O, memory = %O', arguments, fState);
-    return fState[prop];
+/* +++++++++ GETTERS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+function getFormObj(fLvl) {
+    return fS.forms[fLvl];
 }
-export function getFormParentId(fLvl) {
-    return fState.forms[fLvl] ? fState.forms[fLvl].pSelId : false;
-}
-export function getFormComboFields(fLvl) {                          /*dbug-log*///console.log('getFormComboFields [%s]', fLvl);//console.trace();
-    return Object.values(getFormFieldData(fLvl)).filter(f => f.combo);
-}
-export function getFormEntity(fLvl) {
-    return fState.forms[fLvl] ? fState.forms[fLvl].entity : false;
-}
-export function getFormState(fLvl, prop = null) {
-    if (!fState.forms || !fState.forms[fLvl]) { return false; }      /*dbug-log*///console.log('getFormState [%s] prop?[%s] [%O]', fLvl, prop, fState.forms[fLvl]);//console.trace();
-    const fData = fState.forms[fLvl];
-    return prop ? fData[prop] : fData;
-}
-export function getFormFieldData(fLvl, field, prop) {               /*dbug-log*///console.log('getFormFieldData [%s] field?[%s] prop?[%s] [%O]', fLvl, field, prop, fState.forms[fLvl]);//console.trace();
-    if (!field) { return fState.forms[fLvl].fields; }
-    const fData = fState.forms[fLvl].fields[field];
-    return prop ? fData[prop] : fData;
-}
-export function getFormData(fLvl, field) {                          /*dbug-log*///console.log('getFormData [%s][%s] [%O]', fLvl, field, fState.forms[fLvl].fields[field]);
-    if (!fState.forms) { return; } //form closing
-    return fState.forms[fLvl].fields[field].value;
-}
-/** Returns an object with field names(k) and values(v) of all form fields*/
-export function getCurrentFormFieldVals(fLvl) {
-    const fieldData = fState.forms[fLvl].fields;
-    const vals = {};
-    for (let field in fieldData) {
-        vals[field] = fieldData[field].value;
-    }                                                               /*dbug-log*///console.log('getCurrentFormFieldVals fields[%O] vals[%O]', fieldData, vals);
-    return vals;
+/* ======================= GET CORE STATE =================================== */
+export function getStateProp(...args) {
+    return callCoreState(get, 'getStateProp', args);
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
-export function getEntityRcrds(entity) {
-    if (!fState.records) { return; } //form closing
-    return typeof entity == 'string' ? fState.records[entity] : buildRcrdsObj(entity);
+export function getEntityRcrds(...args) {
+    return callCoreState(get, 'getEntityRcrds', args);
 }
-function buildRcrdsObj(entities) {
-    const rcrds = {};
-    entities.forEach(ent => { rcrds[ent] = fState.records[ent]});
-    return rcrds;
-}
-/** Returns the record for the passed id and entity-type. */
-export function getRcrd(entity, id) {
-    if (!fState.records || !fState.records[entity]) { return; }
-    const rcrd = fState.records[entity][id] ?
-        _u('snapshot', [fState.records[entity][id]]) :
-        alertFormIssue('noRcrdFound', {id: id, entity: entity });
-    return rcrd ? rcrd : false;
+export function getRcrd(...args) {
+    return callCoreState(get, 'getRcrd', args);
 }
 /* ----------------------- EDIT FORM ---------------------------------------- */
-export function getEditEntityId(type) {
-    return fState.editing[type];
+export function getEditEntityId(...args) {
+    return callCoreState(get, 'getEditEntityId', args);
+}
+/* ========================= GET FORM STATE ================================= */
+export function getFormState(...args) {
+    return callFormState(get, 'getFormState', args);
+}
+export function getFormEntity(...args) {
+    return callFormState(get, 'getFormEntity', args);
+}
+/* -------------------------- FIELDS ---------------------------------------- */
+export function getFieldData(...args) {
+    return callFormState(get, 'getFieldData', args);
+}
+export function getComboFields(...args) {
+    return callFormState(get, 'getComboFields', args);
+}
+export function getFieldValues(...args) {
+    return callFormState(get, 'getFieldValues', args);
 }
 /* --------------------------- TAXON ---------------------------------------- */
-export function getGroupState() {
-    return fState.forms.taxonData;
+// export function getGroupState(...args) {
+//     return callFormState(get, 'getGroupState', args);
+// }
+export function getTaxonProp(...args) {
+    return callFormState(get, 'getTaxonProp', args);
 }
-export function getTaxonProp(prop) {
-    if (!fState.forms.taxonData) { return false; } //Form closed.
-    const edge = {
-        'subGroup': getSubGroupEntity
-    };
-    return prop in edge ? edge[prop]() : fState.forms.taxonData[prop];
-}
-function getSubGroupEntity() {
-    return fState.forms.taxonData.subGroups[fState.forms.taxonData.subGroupId];
-}
+/* +++++++++ SETTERS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+/* ======================= SET CORE STATE =================================== */
+
 /* ============================ SETTERS ===================================== */
 export function setStateProp(prop, val) {
-    fState[prop] = val;
+    fS[prop] = val;
 }
 /**
  * Edge case: After form submit, the updated data is fetched and stored here, but
  * if the form is closed before the data is stored, cancel storing the data.
  */
 export function addEntityRecords(entity, rcrds) {
-    if (!fState.records) { return; } //See comment for explanation
-    fState.records[entity] = rcrds;
+    if (!fS.records) { return; } //See comment for explanation
+    fS.records[entity] = rcrds;
 }
 /* ----------------------- ENTITY FORM -------------------------------------- */
 export function setFormState(fLvl, prop, val) {
-    fState.forms[fLvl][prop] = val;
+    fS.forms[fLvl][prop] = val;
 }
 export function setFieldState(fLvl, field, val, prop = 'value') {   /*dbug-log*///console.log('--setFieldState [%s][%s][%s][%O]', fLvl, field, prop, val);
-    let fData = fState.forms[fLvl].fields[field];
+    let fData = fS.forms[fLvl].fields[field];
     if (!prop) { return fData = val; }
     fData[prop] = val;
 }
 export function setOnFormCloseHandler(fLvl, hndlr) {
-    fState.forms[fLvl].onFormClose = hndlr;
+    fS.forms[fLvl].onFormClose = hndlr;
 }
 export function addRequiredFieldInput(fLvl, input) {
-    fState.forms[fLvl].reqElems.push(input);
-}
-/* ----------------- ON CHANGE UPDATE FIELD DISPLAY ------------------------- */
-/** [onEntityTypeChangeUpdateConfg description] */
-export function onEntityTypeChangeUpdateConfg(fLvl) {               /*dbug-log*///console.log('+--onTypeChangeUpdateStateConfgAndFields [%s]', fLvl);
-    const vals = getCurrentFormFieldVals(fLvl);
-    _confg('onEntityTypeChangeUpdateConfg', [fState.forms[fLvl], vals]);
-}
-/** [onFieldViewChangeUpdateConfg description] */
-export function onFieldViewChangeUpdateConfg(fLvl) {
-    const vals = getCurrentFormFieldVals(fLvl);
-    _confg('onFieldViewChangeUpdateConfg', [fState.forms[fLvl], vals]);
+    fS.forms[fLvl].reqElems.push(input);
 }
 /* _________________________ COMBOBOX _______________________________________ */
 /* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
 export function removeFieldFromComboInit(fLvl, fieldName) {
-    const field = fState.forms[fLvl].fields[fieldName];
+    const field = fS.forms[fLvl].fields[fieldName];
     field.combo = false;
 }
 /* ___________________________ TAXON ________________________________________ */
 export function setTaxonProp(prop, val) {
-    if (!fState.forms.taxonData) { fState.forms.taxonData = {}; } //Edit-forms need specific props
-    return fState.forms.taxonData[prop] = val;
+    if (!fS.forms.taxonData) { fS.forms.taxonData = {}; } //Edit-forms need specific props
+    return fS.forms.taxonData[prop] = val;
 }
 /** When a new taxon parent is selected in the taxon edit-form, groups data is updated. */
 export function setTaxonGroupData(taxon) {
-    const txnData = fState.forms.taxonData;
+    const txnData = fS.forms.taxonData;
     const group = txnData.groups[taxon.group.id];
     txnData.groupName = group.displayName;
     txnData.subGroupId = taxon.group.subGroup.id;
@@ -294,12 +167,12 @@ export function setTaxonGroupData(taxon) {
 
 /* ====================== STATE PREDICATES =================================== */
 export function isEditForm() {
-    return fState.action === 'edit';
+    return fS.action === 'edit';
 }
 /** [isFieldShown description] */
 export function isFieldShown(fLvl, field) {                         /*dbug-log*///console.log('--isFieldShown [%s][%O]', fLvl, field);
     if (Array.isArray(field)) { return areFieldsShown(fLvl, field); }
-    const fConfg =  fState.forms[fLvl].fields[field]
+    const fConfg =  fS.forms[fLvl].fields[field]
     return fConfg ? fConfg.shown : false;
 }
 export function areFieldsShown(fLvl, fields) {

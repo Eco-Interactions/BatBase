@@ -29,18 +29,15 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
         .then(() => finishTaxonSelectBuild(role, gId));
 }
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
-function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('-------------build[%s]Taxon[%s]SelectForm', role, groupId);
-    addNewFormState(role);
-    return _state('initTaxonState', [groupId])
-        .then(data => buildSelectForm(role, groupId, data));
+function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
+    addNewFormState(role, groupId);
+    return _state('initTaxonState', ['sub', groupId])
+        .then(() => _elems('getSubForm', ['sub', 'sml-sub-form', '#sel-'+role]));
 }
-function addNewFormState(role) {
+function addNewFormState(role, groupId) {
+    const vals = { Group: groupId };
     const lcRole = _u('lcfirst', [role]);
-    _state('addEntityFormState', [lcRole, 'sub', '#sel-'+role, 'create']);
-}
-function buildSelectForm(role, groupId, data) {
-    const vals = {Group: groupId, 'Sub-Group': data.groupTaxon.id};
-    return _elems('getSubForm', ['sub', 'sml-sub-form', vals, '#sel-'+role]);
+    _state('addEntityFormState', [lcRole, 'sub', '#sel-'+role, 'create', vals]);
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection

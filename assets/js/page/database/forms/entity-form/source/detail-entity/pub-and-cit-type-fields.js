@@ -14,7 +14,7 @@
  *         INPUTS
  */
 import { _cmbx, _u } from '~util';
-import { _state, _elems, getSubFormLvl } from '~form';
+import { _confg, _elems, _state, getSubFormLvl } from '~form';
 import * as sForm from '../src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
 export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*///console.log('+--loadSrcTypeFields [%s] id?[%s] type[%s]', entity, typeId, type);
@@ -71,7 +71,7 @@ function setSourceType(entity, fLvl, tId, tName) {
     };                                                               /*dbug-log*///console.log('--setSourceType[%s] = %O', typeField, val);
     _state('setFieldState', [fLvl, typeField, val]);
     _state('setFormState', [fLvl, 'type', val.text])
-    _state('onEntityTypeChangeUpdateConfg', [fLvl]);
+    _confg('onEntityTypeChangeUpdateConfg', [fLvl]);
 }
 function getSourceTypeNameFromCombo(tField) {
     return _cmbx('getSelTxt', [tField]);

@@ -51,9 +51,8 @@
  *         FIELD CONFG
  */
 import { _u } from '~util';
-import { _state } from '../forms-main.js';
-import { mergeIntoFormConfg } from './util/merge-confgs.js';
-import { getBaseFormConfg } from './util/base-confg.js';
+import { _state } from '~form';
+import * as cUtil from './util/confg-util-main.js';
 /* ====================== INIT FORM-CONFG =================================== */
 export function initFormConfg(entity, fLvl, action, vals) {         /*dbug-log*///console.log('+--initFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
     const confg = getBaseConfg(entity, fLvl);
@@ -67,45 +66,31 @@ function initDisplayConfg(confg, action, hasSimpleView, vals) {
 }
 /* ====================== REBUILD FORM-CONFG ================================ */
 /* ------------------------ FORM-TYPE CHANGED ------------------------------- */
-/**
- * On form entity-type change, entity-type confg merged with current confg.
- * @param  {[type]} c     Current form confg
- * @param  {[type]} vals Current field values.
- */
-export function onEntityTypeChangeUpdateConfg(c, vals) {            /*dbug-log*/console.log('+--onEntityTypeChangeUpdateConfg [%s][%s][%O] vals[%O]', c.name, c.type, c, vals);
-    const mConfg = getBaseConfg(c.name, c.group, c.type);
-    updateConfg(c, mConfg, vals);                                   /*dbug-log*///console.log('   --FINAL [%s] confg[%O]', c.name, c);
-}
-/** [updateConfg description] */
-function updateConfg(c, mConfg, vals) {                             /*dbug-log*///console.log('   --updateConfg confg[%O] mConfg[%O]', _u('snapshot', [c]), _u('snapshot', [mConfg]));
-    const replace = ['fields'];
-    replace.forEach(p => c[p] = mConfg[p]);
-    setDisplayedFieldConfg(c, mConfg.views, vals);
+export function onEntityTypeChangeUpdateConfg() {
+    cUtil.onEntityTypeChangeUpdateConfg(...arguments);
 }
 /* ----------------------- FIELD-VIEW CHANGED ------------------------------- */
-
-export function onFieldViewChangeUpdateConfg(c, vals) {             /*dbug-log*/console.log('+--onFieldViewChangeUpdateConfg [%s][%s][%O] vals[%O]', c.name, c.type, c, vals);
-    const mConfg = getBaseConfg(c.name, c.group, c.type);
-    c.display = c.display === 'all' ? 'simple' : 'all';
-    setDisplayedFieldConfg(c, mConfg.views, vals);                  /*dbug-log*///console.log('   --FINAL [%s] confg[%O]', c.name, c);
+export function onFieldViewChangeUpdateConfg() {
+    cUtil.onFieldViewChangeUpdateConfg(...arguments);
 }
 /* ====================== CONFG BUILDERS ==================================== */
 /* ----------------------- BASE CONFG --------------------------------------- */
-function getBaseConfg(entity, fLvl, type) {
-    const confg = getBaseFormConfg(entity, fLvl);
+/** [getBaseConfg description] INTERNAL USE */
+export function getBaseConfg(entity, fLvl, type) {
+    const confg = cUtil.getBaseFormConfg(entity, fLvl);
     if (confg.core) { mergeCoreEntityConfg(confg); }
-    if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
+    if (type) { cUtil.mergeIntoFormConfg(confg, confg.types[type]); }
     delete confg.types;                                              /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
     return confg;
 }
 /** [mergeCoreEntityConfg description] */
 function mergeCoreEntityConfg(c) {
-    const coreConfg = getBaseFormConfg(c.core);                      /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
-    mergeIntoFormConfg(c, coreConfg);
+    const coreConfg = cUtil.getBaseFormConfg(c.core);                      /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
+    cUtil.mergeIntoFormConfg(c, coreConfg);
 }
 /* ------------------------- FIELD CONFG ------------------------------------ */
-/** [setDisplayedFieldConfg description] */
-function setDisplayedFieldConfg(c, viewSets, vals = {}) {           /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
+/** [setDisplayedFieldConfg description] INTERNAL USE */
+export function setDisplayedFieldConfg(c, viewSets, vals = {}) {           /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
     c.infoSteps = 0;
     c.view = viewSets[c.display].map(getFieldConfgs);
 

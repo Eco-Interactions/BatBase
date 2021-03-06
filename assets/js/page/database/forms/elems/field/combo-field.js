@@ -19,7 +19,7 @@ import { _state } from '~form';
  * according to the 'selMap' config. Empties array after intializing.
  */
 export function initFormCombos(fLvl, cConfg) {
-    const cFields = _state('getFormComboFields', [fLvl]);           /*dbug-log*///console.log('initFormCombos [%s] cConfg[%O] cFields[%O]', fLvl, cConfg, cFields);
+    const cFields = _state('getComboFields', [fLvl]);               /*dbug-log*///console.log('initFormCombos [%s] cConfg[%O] cFields[%O]', fLvl, cConfg, cFields);
     cFields.forEach(f => selectizeElem(f, cConfg[f.id]));
 }
 function selectizeElem(fConfg, confg) {                             /*dbug-log*///console.log("   Initializing [%s] selectizeConfg[%O]", fConfg.id, confg);
@@ -56,7 +56,7 @@ export function setSilentVal(fLvl, field, val) {
  * placeholder options and, optionally, brings it into focus.
  */
 export function resetFormCombobox(fLvl, focus) {
-    const selId = _state('getFormParentId', [fLvl]);                /*dbug-log*///console.log('resetFormCombobox [%s][%s] focus?[%s]', selId, fLvl, focus);
+    const selId = _state('getFormState', [fLvl, 'pSelId']);                /*dbug-log*///console.log('resetFormCombobox [%s][%s] focus?[%s]', selId, fLvl, focus);
     if (!selId) { return; }
     const field = selId.split('sel-')[1];
     _cmbx('resetCombobox', [field]);
