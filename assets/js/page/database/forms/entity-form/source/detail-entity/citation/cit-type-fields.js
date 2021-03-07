@@ -116,9 +116,9 @@ function addPubValues(fLvl, addValues, type) {
      * TODO (may not actually be needed. REFACTOR and check in later)
      */
     function addPubTitle() {
-        if (fData.Title.value) { return; }
+        if (fData.DisplayName.value) { return; }
         const skip = ['Chapter'];
-        fData.Title.value = addValues && skip.indexOf(type) === -1 ?
+        fData.DisplayName.value = addValues && skip.indexOf(type) === -1 ?
             pSrc.displayName : '';
     }
     function addPubYear() {

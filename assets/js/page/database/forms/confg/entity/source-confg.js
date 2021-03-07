@@ -17,30 +17,29 @@ function getSourceFieldConfg() {
                 customValueStore: true
             },
             name: 'Author',
-            prop: {
-                core: 'Contributor'
+            prep: { //func: [args]
+                renameField: ['Contributor'],
             },
             type: 'multiSelect',
             value: {} //Added here so property exists as obj on init
         },
         Description: {
             name: 'Description',
-            prop: { // TODO DRY
-                core: 'Description',
-                detail: 'Description'
+            prep: {    // TODO: DRY
+                setCoreAndDetail: [],
             },
             type: 'textArea',
         },
         DisplayName: {
             name: 'DisplayName',
             prep: {    // TODO: DRY
-                setDisplayName: [],
-                setDisplayName: ['detail']
+                setCoreAndDetail: []
             },
             required: true,
             type: 'text',
         },
         Doi: {
+            label: 'DOI',
             name: 'Doi',
             type: 'doi',
         },
@@ -52,8 +51,8 @@ function getSourceFieldConfg() {
                 customValueStore: true
             },
             name: 'Editor',
-            prop: {
-                core: 'Contributor'
+            prep: { //func: [args]
+                renameField: ['Contributor'],
             },
             type: 'multiSelect',
             value: {} //Added here so property exists as obj on init

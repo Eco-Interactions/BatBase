@@ -10,8 +10,8 @@ export default function(entity) {
         types: getCitationTypeConfg(),
         views: { //fields added will be built and displayed.
             all: [  //will be merged with type.views
-                'CitationText',
-                'Abstract',
+                ['CitationText'],
+                ['Abstract'],
                 [ 'Title', 'CitationType' ]
             ],
         }
@@ -23,25 +23,20 @@ function getCitationFieldConfg() {
             name: 'Abstract',
             type: 'fullTextArea',
         },
-        ChapterTitle: {   // MERGE WITH TITLE
-            name: 'ChapterTitle',
-            prop: {    // TODO: DRY
-                core: ['DisplayName'],
-                detail: ['DisplayName', 'Title'],
-            },
-            type: 'text',
-        },
         CitationText: {
             name: 'CitationText',
+            label: 'Citation',
             required: true,
-            prop: {    // TODO: DRY
-                core: ['Description'],
-                detail: ['fullText'],
+            prep: {    // TODO: DRY
+                renameField: ['Description'],
+                renameField: ['FullText', 'detail'],
             },
             type: 'fullTextArea',
         },
         CitationType: {
+            class: 'med-field',
             entity: 'CitationType',
+            label: 'Type',
             name: 'CitationType',
             required: true,
             type: 'select',
@@ -52,23 +47,25 @@ function getCitationFieldConfg() {
             }
         },
         Edition: {
+            class: 'xsml-field',
             name: 'Edition',
-            prop: {
-                detail: 'PublicationVolume'
+            prep: {    // TODO: DRY
+                renameField: ['PublicationVolume', 'detail'],
             },
             type: 'num',
         },
         Issue: {
+            class: 'xsml-field',
             name: 'Issue',
-            prop: {
-                detail: 'PublicationIssue'
+            prep: {    // TODO: DRY
+                renameField: ['PublicationIssue', 'detail'],
             },
             type: 'num',
         },
         Pages: {
             name: 'Pages',
-            prop: {
-                detail: 'PublicationPages'
+            prep: {    // TODO: DRY
+                renameField: ['PublicationPages', 'detail'],
             },
             type: 'page',
         },
@@ -82,14 +79,8 @@ function getCitationFieldConfg() {
         SourceType: {  //MERGES WITH CORE.FIELDS. ADDS/OVERWRITES FIELD PROPS
             value: 'Citation'
         },
-        Title: {
-            name: 'Title',
-            prop: {    // TODO: DRY
-                core: ['Description'],
-                detail: ['FullText', 'Title'],
-            },
-            required: true,
-            type: 'text',
+        DisplayName: {
+            label: 'Title'
         },
         Website: {
             info: {
@@ -97,11 +88,12 @@ function getCitationFieldConfg() {
             }
         },
         Volume: {
+            class: 'xsml-field',
             name: 'Volume',
-            prop: {
-                detail: 'PublicationVolume'
+            prep: {    // TODO: DRY
+                renameField: ['PublicationVolume', 'detail'],
             },
-            type: 'num',
+            type: 'num'
         }
     };
 }
@@ -119,10 +111,17 @@ function getCitationTypeConfg() {
             },
             views: {
                 all: [
-                    ['Year', 'Pages'],
-                    ['Volume', 'Issue'],
-                    ['Doi', 'Website'],
-                    ['Author']],
+                    [
+                        'Author',
+                        {
+                            class: 'flex-grow',
+                            fields: [
+                                ['Year', 'Volume', 'Issue', 'Pages'],
+                                'Doi',
+                                'Website']
+                        }
+                    ]
+                ]
             }
         },
         Book: {
@@ -138,12 +137,15 @@ function getCitationTypeConfg() {
             views: {
                 all: [
                     ['Volume', 'Doi'],
-                    ['Website', 'Author']],
+                    ['Author', 'Website']],
             }
         },
         Chapter: {
             name: 'Chapter',
             fields: {
+                // DisplayName: {
+                //     label: 'ChapterTitle'
+                // }
                 Pages: {
                     required: true
                 },
@@ -154,7 +156,7 @@ function getCitationTypeConfg() {
             views: {
                 all: [
                     ['Pages', 'Doi'],
-                    ['Website', 'Author']],
+                    [ 'Author', 'Website']],
             }
         },
         "Master's Thesis": {
@@ -168,19 +170,18 @@ function getCitationTypeConfg() {
             name: 'Museum record',
             views: {
                 all: [
-                    ['Year', 'Pages'],
-                    ['Doi', 'Website'],
-                    ['Author']],
+                    ['Year', 'Pages', 'Doi'],
+                    ['Author', 'Website']
+                ]
             }
         },
         Other: {
             name: 'Other',
             views: {
                 all: [
-                    ['Year', 'Pages'],
-                    ['Volume', 'Issue'],
-                    ['Website'],
-                    ['Doi', 'Author']],
+                    ['Year', 'Volume', 'Issue', 'Pages'],
+                    ['Author', { fields: ['Doi', 'Website'] }]
+                ]
             }
         },
         'Ph.D. Dissertation': {
@@ -194,10 +195,9 @@ function getCitationTypeConfg() {
             name: 'Report',
             views: {
                 all: [
-                    ['Year', 'Pages'],
-                    ['Volume', 'Issue'],
-                    ['Website','Doi'],
-                    ['Doi', 'Author']],
+                    ['Year', 'Volume', 'Issue', 'Pages'],
+                    ['Author', { fields: ['Doi', 'Website'] }]
+                ]
             }
         }
     };

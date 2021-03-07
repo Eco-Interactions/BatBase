@@ -14,7 +14,7 @@ export default function(entity) {
                 ['Country-Region', 'Location'],
                 ['Subject', 'Object'],
                 ['InteractionType','InteractionTags'],
-                'Note'
+                ['Note']
             ],
         },
     };
@@ -31,7 +31,7 @@ function getInteractionFieldConfg() {
             entity: 'Source',
             name: 'CitationTitle',
             prep: { //func: [args]
-                renameField: ['Source'],
+                renameField: ['Source'],  //TODO: maybe not necessary because refernce values might be set with the entity prop
             },
             required: true,
             type: 'select'
@@ -101,6 +101,7 @@ function getInteractionFieldConfg() {
             type: 'tags'
         },
         Note: {
+            clss: 'flex-grow',
             name: 'Note',
             type: 'fullTextArea'
         },

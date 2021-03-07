@@ -63,7 +63,7 @@ function buildTextArea() {
     return _el('getElem', ['textarea', {class: f.class }]);
 }
 function buildLongTextArea() {
-    const attr = { class: 'xlrg-field '+f.class, id:'txt-'+f.id };
+    const attr = { class: f.class, id:'txt-'+f.id };
     return _el('getElem', ['textarea', attr]);
 }
 /* --------------------- SINGLE SELECT/COMBOS ------------------------------- */

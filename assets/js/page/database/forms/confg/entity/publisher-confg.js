@@ -24,18 +24,20 @@ export default function(entity) {
         },
         name: entity,
         views: {
-            all: [
-                'DisplayName',
-                'City',
-                'Country',
-                'Website',
-                'Description',
-            ],
-            simple: [
-                'DisplayName',
-                'City',
-                'Country'
-            ],
+            all: [{
+                fields: [
+                    'DisplayName',
+                    'City',
+                    'Country',
+                    'Website',
+                    'Description'
+            ]}],
+            simple:[{
+                fields: [
+                    'DisplayName',
+                    'City',
+                    'Country',
+            ]}],
         }
     };
 }

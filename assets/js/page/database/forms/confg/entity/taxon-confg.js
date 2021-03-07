@@ -28,7 +28,7 @@ export default function(entity) {
         name: entity,
         views: {
             all: [
-                'DisplayName'
+                ['DisplayName']
             ]
         }
     };

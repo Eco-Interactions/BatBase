@@ -34,13 +34,13 @@ export default function(entity) {
         name: entity,
         views: { //fields added will be built and displayed
             all: [
-                'LastName',
+                ['LastName'],
                 ['FirstName', 'MiddleName', 'Suffix'],
-                'Website',
-                'Description',
+                ['Website'],
+                ['Description'],
             ],
             simple: [
-                'LastName',
+                ['LastName'],
                 ['FirstName', 'MiddleName', 'Suffix']
             ]
         }

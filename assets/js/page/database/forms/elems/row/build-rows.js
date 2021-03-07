@@ -31,33 +31,32 @@ export function getFormFieldRows(viewConfg) {                       /*dbug-log*/
             .then(row => rows.push(row));
     }
 }
-function buildFormRow(f) {                                            /*dbug-log*///console.log("   --buildFormRow[%O]", f);
-    const row = _el('getElem', ['div', { class: 'row' }]);
-    $(row).data('field-cnt', getRowFieldCnt(f)); //used for styling
-    return Promise.all(getRowFields(f))
-        .then(appendFieldsAndReturnRow.bind(null, row));
+function buildFormRow(row) {                                        /*dbug-log*///console.log("   --buildFormRow[%O]", row);
+    const cntnr = _el('getElem', ['div', { class: 'row' }]);
+    $(cntnr).data('field-cnt', getRowFieldCnt(row)); //used for styling
+    return getRowGroup(row)
+        .then(appendFieldsAndReturnRow.bind(null, cntnr));
 }
-function appendFieldsAndReturnRow(row, elems) {                     /*dbug-log*///console.log("   --appendFieldsAndReturnRow row[%O] elems[%O]", row, elems);
-    $(row).append(...elems);
-    return row;
+function appendFieldsAndReturnRow(cntnr, elems) {                   /*dbug-log*///console.log("   --appendFieldsAndReturnRow row[%O] elems[%O]", cntnr, elems);
+    $(cntnr).append(...elems);
+    return cntnr;
 }
-function getRowFields(fs) {                                          /*dbug-log*///console.log("       @--getRowFields[%O]", fs);
-    return Array.isArray(fs) ? getMultiFieldRow(fs) : [getFormField(fs)];
-
-    function getMultiFieldRow(r) {
-        return r.map(f => f.fields ? getStackedFields(f) : getFormField(f));
-    }
-    function getStackedFields(fObj) {
-        const row = _el('getElem', ['div', { class: 'flex-col s-fields' }]);
-        const fConfgs = Object.values(fObj.fields);
-        return Promise.all(fConfgs.map(getFormField).filter(f=>f))
-            .then(appendFieldsAndReturnRow.bind(null, row));
-    }
-    function getFormField(fConfg) {                                 /*dbug-log*///console.log("           --getFormField [%s][%O]", fConfg.name, fConfg);
-        if (fConfg.shown === false) { return Promise.resolve(); }
-        if (fConfg.emptyField) { return _el('getElem', ['div', { class: 'empty' }]); }
-        return _elems('buildFormField', [fConfg]);
-    }
+function getRowGroup(hGroup) {                                      /*dbug-log*///console.log("       --getRowGroup[%O]", hGroup);
+    return Promise.all(hGroup.map(getFieldGroup));
+}
+function getFieldGroup(g) {                                         /*dbug-log*///console.log('           --getFieldGroup [%O]', g);
+    return g.dir ? buildGroup(g) : getFormField(g);
+}
+function buildGroup(g) {                                            /*dbug-log*///console.log('               --buildGroup dir[%s] fields[%O]', g.dir, g.confgs);
+    const gClass = `flex-${g.dir} g-cntnr ${g.class}`;              /*dbug-log*///console.log("                   --gClass[%s]", gClass);
+    const cntnr = _el('getElem', ['div', { class: gClass }]);
+    return Promise.all(g.confgs.map(getFieldGroup).filter(f=>f))
+        .then(appendFieldsAndReturnRow.bind(null, cntnr));
+}
+function getFormField(fConfg) {                                     /*dbug-log*///console.log("           --getFormField [%s][%O]", fConfg.name, fConfg);
+    if (fConfg.shown === false) { return Promise.resolve(); }
+    if (fConfg.emptyField) { return _el('getElem', ['div', { class: 'empty' }]); }
+    return _elems('buildFormField', [fConfg]);
 }
 function getRowFieldCnt(f) {
     return Array.isArray(f) ? f.length : 1;

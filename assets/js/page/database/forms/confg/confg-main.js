@@ -102,40 +102,53 @@ function mergeCoreEntityConfg(c) {
 /** [setDisplayedFieldConfg description] INTERNAL USE */
 export function setDisplayedFieldConfg(c, viewSets, vals = {}) {    /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
     c.infoSteps = 0;
-    c.view = viewSets[c.display].map(getFieldConfgs);
+    c.view = viewSets[c.display].map(row => getRowConfg(c, vals, row));
+}
+function getRowConfg(c, v, row) {
+    return row.map(g => getGroupConfgs(c, v, g));
+}
+function getGroupConfgs(c, v, g) {
+    if (Array.isArray(g)) { return getHorzGroup(c, v, g); }
+    if (_u('isObj', [g])) { return getVertGroup(c, v, g); }
+    return getSingleConfg(c, v, g);
+}
+function getHorzGroup(c, v, g) {
+    return {
+        class: g.class,
+        confgs: g.map(f => getGroupConfgs(c, v, f)),
+        dir: 'row'
+    };
+}
+function getVertGroup(c, v, g) {
+    return {
+        class: g.class,
+        confgs: g.fields.map(f => getGroupConfgs(c, v, f)),
+        dir: 'col'
+    };
+}
+function getSingleConfg(c, v, f) {
+    return f === '' ? { emptyField: true } : getFieldConfg(c, v, f);
+}
+function getFieldConfg(c, v, name) {                                /*dbug-log*///console.log("   --getFieldConfg [%s] [%O]", name, c.fields[name]);
+    const confg = getBaseConfg();                                   /*dbug-log*///console.log('       --fieldConfg [%O]', confg);
+    if (confg.info) { ++c.infoSteps; }
+    setFieldStyleClass(confg, c.group);
+    confg.group = c.group;
+    confg.pinnable = c.pinnable || false;
+    setFieldValue(confg, v);
+    return confg;
 
-    function getFieldConfgs(name) {                                 /*dbug-log*///console.log("--getFieldConfg field[%s][%O]", name, c.fields[name]);
-        if (name === '') { return { emptyField: true }; }
-        if (_u('isObj', [name])) { return getStackedFieldConfgs(name)}
-        if (Array.isArray(name)) { return name.map(getFieldConfgs); }
-        const fConfg = getFieldConfg(name);                         /*dbug-log*///console.log('---fieldConfg[%O]', fConfg);
-        if (fConfg.info) { ++c.infoSteps; }
-        setFieldStyleClass(fConfg, c.group);
-        fConfg.group = c.group;
-        fConfg.pinnable = c.pinnable || false;
-        setFieldValue(fConfg, vals);
-        return fConfg;
-    }
-    function getStackedFieldConfgs(fObj) {                          /*dbug-log*///console.log('getStackedFieldConfgs [%O]', fObj);
-        fObj.fields = fObj.fields.map(getFieldConfgs);
-        return fObj;
-    }
-    function getFieldConfg(name) {
+    function getBaseConfg() {
         return c.fields[name] ? c.fields[name] : getConfgByLabel(name);
     }
-    function getConfgByLabel(name) {
+    function getConfgByLabel() {
         return Object.values(c.fields).find(f => f.label === name);
     }
 }
 /** [setFieldStyleClass description] */
 function setFieldStyleClass(fConfg, fLvl) {
-    if (fConfg.class) { return; } //Style class set in form-confg
-    const dClasses = {
-        top: 'lrg-field',
-        sub: 'med-field',
-        sub2: 'med-field'
-    };                                                              /*dbug-log*///console.log('setFieldStyleClass fConfg[%O] fLvl[%s]', fConfg, fLvl);
-    fConfg.class = dClasses[fLvl];
+    if (fConfg.class) { return; } //Style class set in form-confg   /*dbug-log*///console.log('setFieldStyleClass fConfg[%O] fLvl[%s]', fConfg, fLvl);
+    fConfg.class = fLvl + '-field';
 }
 /** [setFieldValue description] */
 function setFieldValue(f, vals) {

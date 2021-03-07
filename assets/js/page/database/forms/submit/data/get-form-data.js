@@ -14,7 +14,7 @@ let lcl = {};
  */
 export function getValidatedFormData(confg) {
     lcl.confg = confg;
-    lcl.data = buildServerDataObj();                                /*dbug-log*/console.log('+--getValidatedFormData. [%s] [%O]', lcl.confg.name, lcl);
+    lcl.data = buildServerDataObj();                                /*dbug-log*///console.log('+--getValidatedFormData. [%s] [%O]', lcl.confg.name, lcl);
     return Promise.all(wrangleFormData())
         .then(() => lcl.data);
 }
@@ -23,10 +23,8 @@ function wrangleFormData() {
 }
 /**
  * [buildServerDataObj description]
- * @param  {[type]} ) {                                                console.log('   --buildServerDataObj' [description]
- * @return {[type]}   [description]
  */
-function buildServerDataObj() {                                     /*dbug-log*/console.log('   --buildServerDataObj');
+function buildServerDataObj() {                                     /*dbug-log*///console.log('   --buildServerDataObj');
     const entityData = { flat: {}, rel:{} };
     const serverData = {};
     setEntityObj('core');
@@ -44,7 +42,7 @@ function buildServerDataObj() {                                     /*dbug-log*/
  * @param {[type]} v [description]
  * @param {String} e [description]
  */
-function setServerData(g, p, v, k = 'core') {                       /*dbug-log*/console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
+function setServerData(g, p, v, k = 'core') {                       /*dbug-log*///console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
     lcl.data[k][g][p] = v;
 }
 /**
@@ -52,7 +50,7 @@ function setServerData(g, p, v, k = 'core') {                       /*dbug-log*/
  * @param  {[type]} fConfg) {                                            console.log('           --getDataForServer [%s][%O]', fConfg.name, fConfg [description]
  * @return {[type]}         [description]
  */
-function getDataForServer(fConfg) {                                 /*dbug-log*/console.log('       --getDataForServer [%s][%O]', fConfg.name, fConfg);
+function getDataForServer(fConfg) {                                 /*dbug-log*///console.log('       --getDataForServer [%s][%O]', fConfg.name, fConfg);
     const fKey = fConfg.entity ? 'rel' : 'flat';
     if (!fConfg.value) { return handleEmptyFieldData(fConfg); }
     if (fConfg.prep) { return handleDataPreparation(fKey, fConfg);  }
@@ -67,26 +65,31 @@ function handleEmptyFieldData(fConfg) {
  * @param  {[type]} fConfg
  * @return {[type]}         [description]
  */
-function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*/console.log('           --handleDataPreparation [%s][%O]', dKey, fConfg);
+function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*///console.log('           --handleDataPreparation [%s][%O]', dKey, fConfg);
     Object.keys(fConfg.prep).forEach(handleDataPrep);
 
     function handleDataPrep(handler) {
-        eval(handler)(fKey, fConfg.value, ...fConfg.prep[handler]);
+        eval(handler)(fKey, fConfg, ...fConfg.prep[handler]);
     }
 }
 /* =========================== DATA WRANGLERS =============================== */
-function renameField(g, val, name, dKey = 'core') {                 /*dbug-log*/console.log('               --renameField [%s][%s][%s] = [%s]', name, entity, g, val);
-    setServerData(g, name, val, entity);
+function renameField(g, fConfg, name, dKey = 'core') {                 /*dbug-log*///console.log('               --renameField [%s][%s][%s] = [%s]', name, entity, g, val);
+    setServerData(g, name, fConfg.value, entity);
 }
-function setCoreType(g, val, entity) {                              /*dbug-log*/console.log('               --setCoreType [%s][%s] = [%s]', g, entity, val);
+function setCoreType(g, fConfg, entity) {                              /*dbug-log*///console.log('               --setCoreType [%s][%s] = [%s]', g, entity, val);
     // body...
 }
-function setParent(g, val, entity) {                                /*dbug-log*/console.log('               --setParent [%s][%s] = [%s]', g, entity, val);
+function setParent(g, fConfg, entity) {                                /*dbug-log*///console.log('               --setParent [%s][%s] = [%s]', g, entity, val);
     // body...
 }
-
-function setDisplayName(g, val, dKey = 'core') {                    /*dbug-log*/console.log('               --setDisplayName [%s][%s] = [%s]', dKey, g, val);
-    // body...
+/**
+ * [setCoreAndDetail description]
+ * @param {[type]} g           [description]
+ * @param {[type]} fConfg      [description]
+ * @param {[type]} emptyString There are no additional params needed.
+ */
+function setCoreAndDetail(g, fConfg, emptyString) {
+    ['core', 'detail'].forEach(e => setServerData(g, fConfg.name, fConfg.value, e));
 }
 
 // function checkForErrors(entity, fVals, fLvl) {
@@ -133,7 +136,7 @@ function setDisplayName(g, val, dKey = 'core') {                    /*dbug-log*/
 //  * added @handleAdditionalEntityData.
 //  */
 // export function getValidatedFormData(entity, fLvl, submitting = false) {
-//     fS = _state('getFormState');                                    /*dbug-log*/console.log('           --getValidatedFormData. [%s] fState = %O', entity, fS);
+//     fS = _state('getFormState');                                    /*dbug-log*///console.log('           --getValidatedFormData. [%s] fState = %O', entity, fS);
 //     const elems = getFormFieldElems(entity, fLvl);
 //     const fVals = {}; //Why am i looping through elems when there is a fieldData state object?
 //     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }

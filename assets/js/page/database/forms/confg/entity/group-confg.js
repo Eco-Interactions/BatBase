@@ -31,7 +31,7 @@ function getGroupFields() {
 }
 function getRoleFields(groupFields) {
     const lvls = _state('getTaxonProp', ['subGroup']).subRanks;
-    return [...Object.keys(groupFields), ...lvls];
+    return [{ fields: [...Object.keys(groupFields), ...lvls]}];
 }
 function getCoreGroupAndRankFieldConfg() {
     return {
