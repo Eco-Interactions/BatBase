@@ -7,10 +7,10 @@ export default function(entity) {
         fields: getLocationFieldConfg(),
         views: {
             all: [
-                ['Latitude', 'Longitude'],
-                ['DisplayName', 'Description'],
-                ['Country', 'HabitatType'],
-                ['Elevation', 'ElevationMax']
+                [
+                    {fields: ['DisplayName', 'Country', 'HabitatType']},
+                    'Description'],
+                ['Latitude', 'Longitude', 'Elevation', 'ElevationMax'],
             ]
         }
     };
@@ -47,14 +47,17 @@ function getLocationFieldConfg() {
             type: 'textArea',
         },
         Elevation: {
+            class: 'w-8',
             info: {
                 tooltip: 'If an elevation range is provided, put the uppermost ' +
                     'elevation here.',
             },
+            label: 'Elevation(m)',
             name: 'Elevation',
             type: 'num',
         },
         ElevationMax: {
+            class: 'w-8',
             name: 'ElevationMax',
             type: 'num',
         },
@@ -78,6 +81,7 @@ function getLocationFieldConfg() {
             value: 'Point'
         },
         Longitude: {
+            class: 'w-8',
             info: {
                 intro: `Coordinates need to be entered in decimal degrees. Convert
                     using the <a href="https://www.fcc.gov/media/radio/dms-decimal"
@@ -91,6 +95,7 @@ function getLocationFieldConfg() {
             type: 'lng',
         },
         Latitude: {
+            class: 'w-8',
             info: {
                 intro: `Coordinates need to be entered in decimal degrees. Convert
                     using the <a href="https://www.fcc.gov/media/radio/dms-decimal"

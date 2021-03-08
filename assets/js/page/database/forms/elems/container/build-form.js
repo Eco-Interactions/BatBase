@@ -132,11 +132,10 @@ export function getSubForm(fLvl, fClasses, sId) {
 }
 function buildSubFormContainer(rows, fClasses) {
     const subFormContainer = buildSubFormCntnr(fClasses);
-    const helpBttn = getFormHelpElems();
     const hdr = buildSubFormHdr();
     const valMsg = getValMsgCntnr(fLvl);
     const footer = _elems('getFormFooter', [entity, fLvl, 'create']);
-    $(subFormContainer).append([helpBttn, hdr, valMsg, rows, footer]);
+    $(subFormContainer).append([hdr, valMsg, rows, footer]);
     $(subFormContainer).submit(e => e.preventDefault());
     return subFormContainer;
 }
@@ -145,8 +144,10 @@ function buildSubFormCntnr(fClasses) {
     return _el('getElem', ['form', attr]);
 }
 function buildSubFormHdr() {
-    const attr = { text: 'New '+_u('ucfirst', [entity]), id: fLvl+'-hdr' };
-    return _el('getElem', ['p', attr]);
+    const cntnr = _el('getElem', ['div', { id: fLvl+'-hdr', class: 'flex-row'}]);
+    const hdr = _el('getElem', ['span', { text: 'New '+_u('ucfirst', [entity]) }]);
+    $(cntnr).append([getFormHelpElems(), hdr, $('<div>')[0]]);
+    return cntnr;
 }
 function finishSubFormInit(subForm, sId) {
     _state('setFormState', [fLvl, 'pSelId', sId]);
@@ -167,7 +168,7 @@ function getFormHelpElems() {
 }
 function getFormWalkthroughBttn() {
     let infoSteps = _state('getFormState', [fLvl, 'infoSteps']);
-    if (!infoSteps) { return; }
+    if (!infoSteps) { return $('<div>')[0]; }
     const titleInfo = "Hover your mouse over any field and it's help popup will show, if it has one.";
     const bttn = buildWalkthroughButton(titleInfo);
     $(bttn).click(_modal.bind(null, 'showTutorialModal', [fLvl]));

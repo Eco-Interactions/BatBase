@@ -25,14 +25,17 @@
     font-size: .9em
 
 div[id$="-help"] //Form tutorial/guide buttons
-    width: 100%
+    // width: 100%
 
 #form-main
     padding: 5px 0 0 5px;
     overflow-x: hidden;
 
+div[id$="-hdr"]
+    justify-content: space-between
+
 div[id$="_fields"] //Contains all entity-form fields
-    min-width: 100%
+    // min-width: 100%
 
 #form-main .selectize-control
     width: -webkit-fill-available
@@ -52,18 +55,18 @@ div[id$="_fields"] //Contains all entity-form fields
 /* --- Medium Forms --- */
 .form-popup.med-form
     padding: 15px
-    width 1212px
     height 88vh
     max-height: 88vh
-    min-width: 1200px
+    // width 1212px
+    // min-width: 1200px
 
 #form-main.med-form
     height 77vh
-    flex 1 0 909px
-    width 909px
+    // flex 1 0 909px
+    // width 909px
 
-#form-main.med-form .top-row
-    width 450px
+// #form-main.med-form .top-row
+//     width 450px
 
 // #form-main.med-form label
     // flex: 0 1 100px
@@ -71,7 +74,7 @@ div[id$="_fields"] //Contains all entity-form fields
 /* --- Small Forms --- */
 .form-popup.sml-form
     padding: 15px
-    width 788px
+    // width 788px
     height 55vh
     max-height: 55vh
     min-width: unset
@@ -87,13 +90,13 @@ $sub-form-styles
 
 .med-sub-form
     @extends $sub-form-styles
-    flex: 1 1 808px
-    margin: 11px 25px
+    // flex: 1 1 808px
+    // margin: 11px 25px
 
 .sml-sub-form
     @extends $sub-form-styles
-    flex: 1 1 385px
-    margin-top: .5em
+    // flex: 1 1 385px
+    // margin-top: .5em
 /* --------- Fields -------- */
 #sub-form .sub_lbl, #sub2-form .sub2_lbl
     font-size: 1em
@@ -109,10 +112,13 @@ $sub-form-styles
     padding: 9px 0 2px 0
     flex: 0 0 5em
 
-#Group_f .med-field //group combobox class
+#location_fields #Description_f textarea
+    height: 9em
+
+#Group_f .sub-field //group combobox class
     margin-left: -2em
 
-#Sub-Group_f .med-field
+#Sub-Group_f .sub-field
     margin-left: -1em
 
 #Group_f .selectize-dropdown, #Sub-Group_f .selectize-dropdown
