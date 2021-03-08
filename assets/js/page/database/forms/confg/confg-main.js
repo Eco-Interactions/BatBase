@@ -81,7 +81,20 @@ export function onFieldViewChangeUpdateConfg(fLvl) {
 function updateConfg(c) {                                           /*dbug-log*///console.log('   --updateConfg[%s][%O]', c.name, c);
     const vals = _state('getFieldValues', [c.group]);
     const mConfg = getBaseConfg(c.name, c.group, c.type);
+    resetConfgDefaults(c);
     setDisplayedFieldConfg(c, mConfg.views, vals);
+}
+/* ---------------------- RESET VOLATILE CONFG ------------------------------ */
+function resetConfgDefaults(c) {
+    resetFieldConfgDefaults(c.fields);
+}
+function resetFieldConfgDefaults(fields) {                          /*dbug-log*///console.log('  --resetFieldConfgDefaults [%O]',fields);
+    Object.values(fields).forEach(resetFieldDefaults);
+}
+function resetFieldDefaults(fConfg) {                               /*dbug-log*///console.log('     --resetFieldDefaults [%O]', fConfg);
+    const props = [ 'combo', 'input', 'shown' ];  //handle required field reset without reseting those required in the base confgs
+    props.forEach(p => delete fConfg[p]);                           /*dbug-log*///console.log('     --after reset [%O]', fConfg);
+    if (fConfg.count) { fConfg.count = 1 }
 }
 /* ====================== CONFG BUILDERS ==================================== */
 /* ----------------------- BASE CONFG --------------------------------------- */

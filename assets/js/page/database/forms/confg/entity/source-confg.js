@@ -79,9 +79,8 @@ function getSourceFieldConfg() {
             type: 'url',
         },
         Year: {
-            class: 'xsml-field no-grow',
+            class: 'w-4 no-grow',
             name: 'Year',
-            required: true,
             type: 'year',
         },
     }

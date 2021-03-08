@@ -21,11 +21,12 @@ const lcl = {
  * @param  {[type]} mConfg Confg to merge into the form confg.
  * @return {[type]}        [description]
  */
-export function mergeIntoFormConfg(fConfg, mConfg) {                /*dbug-log*///console.log('mergeIntoFormConfg fConfg[%O] mConfg[%O]', fConfg, mConfg);
+export function mergeIntoFormConfg(fConfg, mConfg) {                /*dbug-log*///console.log('--mergeIntoFormConfg fConfg[%O] mConfg[%O]', fConfg, mConfg);
     lcl.confg = fConfg;
     Object.keys(mConfg).forEach(prop => mergeConfgData(prop, mConfg[prop]));
     return lcl.confg;
 }
+/* ======================== MERGE CONFG DATA ================================ */
 function mergeConfgData(prop, mData) {                              /*dbug-log*///console.log('mergeConfgData prop[%s][%O]', prop, mData);
     const map = {
         fields: mergeFieldConfg,

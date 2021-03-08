@@ -34,7 +34,7 @@ function getCitationFieldConfg() {
             type: 'fullTextArea',
         },
         CitationType: {
-            class: 'med-field',
+            class: 'w-12',
             entity: 'CitationType',
             label: 'Type',
             name: 'CitationType',
@@ -47,7 +47,7 @@ function getCitationFieldConfg() {
             }
         },
         Edition: {
-            class: 'xsml-field',
+            class: 'w-8',
             name: 'Edition',
             prep: {    // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],
@@ -55,7 +55,7 @@ function getCitationFieldConfg() {
             type: 'num',
         },
         Issue: {
-            class: 'xsml-field',
+            class: 'w-8',
             name: 'Issue',
             prep: {    // TODO: DRY
                 renameField: ['PublicationIssue', 'detail'],
@@ -88,12 +88,15 @@ function getCitationFieldConfg() {
             }
         },
         Volume: {
-            class: 'xsml-field',
+            class: 'w-8',
             name: 'Volume',
             prep: {    // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],
             },
-            type: 'num'
+            type: 'num',
+        },
+        Year: {
+            required: true
         }
     };
 }

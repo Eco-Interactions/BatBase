@@ -51,7 +51,7 @@ function getMainFormAndDetailPanelHtml(id, fields) {                /*dbug-log*/
 /* ----------------------- TOP CORNER EXIT BUTTON --------------------------- */
 function getExitButtonRow() {
     const  row = _el('getElem', ['div', { class: 'exit-row' }]);
-    $(row).append(getExitButton());
+    $(row).append(getFormHelpElems('top'), getExitButton());
     return row;
 }
 export function getExitButton() {
@@ -63,7 +63,11 @@ export function getExitButton() {
 /* ------------------ MAIN FORM CONTAINER ----------------------------------- */
 function buildMainForm(fields) {
     const formWin = _el('getElem', ['div', { id: 'form-main', class: action }]);
-    $(formWin).append([getFormHelpElems('top'), getHeader(), getValMsgCntnr('top'), getForm(fields)]);
+    $(formWin).append([
+        getHeader(),
+        getValMsgCntnr('top'),
+        getForm(fields)
+    ]);
     return formWin;
 }
 /* ------------------------------ HEADER ------------------------------------ */
@@ -89,12 +93,12 @@ function buildFormElem() {
     const form = document.createElement('form');
     $(form).attr({'action': '', 'method': 'POST', 'name': 'top'});
     $(form).submit(e => e.preventDefault());
-    form.className = 'flex-row';
+    form.className = 'flex-col';
     form.id = 'top-form';
     return form;
 }
 function buildEntityFieldContainer(fields) {
-    const attr = { id: entity+'_fields', class: 'flex-row flex-wrap' };
+    const attr = { id: entity+'_fields', class: 'flex-col' };
     const div = _el('getElem', ['div', attr]);
     $(div).append(fields);
     return div;

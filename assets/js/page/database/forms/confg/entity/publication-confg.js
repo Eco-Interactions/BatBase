@@ -50,6 +50,9 @@ function getPublicationFieldConfg() {
             info: {
                 tooltip: 'Copy and paste link to publication, if available',
             }
+        },
+        Year: {
+            required: true
         }
     };
 }

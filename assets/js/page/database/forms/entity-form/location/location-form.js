@@ -78,7 +78,6 @@ export function finishEditFormBuild(entity) {
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
-    $('#DisplayName-lbl, #ElevationMax-lbl').css('min-width', '106px');
     onLocFormLoadComplete();
 }
 function updateCountryChangeMethod() {
@@ -111,7 +110,8 @@ function afterMapLoads(onLoadFunc, id) {
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 export function initCombos(fLvl) {
     const events = {
-        'Country': { onChange: focusParentAndShowChildLocs.bind(null, 'create') }
+        'Country': { onChange: focusParentAndShowChildLocs.bind(null, 'create') },
+        'HabitatType': { onChange: false },
     };
     _elems('initFormCombos', [fLvl, events]);
 }

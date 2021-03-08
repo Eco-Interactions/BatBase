@@ -80,7 +80,7 @@ function getSubGroupEntity(fState) {
 /** [isFieldShown description] */
 export function isFieldShown(fState, field) {                       /*dbug-log*/console.log('   --isFieldShown [%O][%O]', field, fState);
     if (Array.isArray(field)) { return areFieldsShown(fState, field); }
-    return fState.fields[field] || false;
+    return fState.fields[field].shown || false;
 }
 export function areFieldsShown(fState, fields) {
     return fields.map(f => isFieldShown(fState, f)).every(b=>b);

@@ -16,20 +16,20 @@ function styleRowField(w, field) {                                  /*dbug-log*/
 /** [getFlexValue description] */
 function getFlexValue(w, field) {
     if ($(field).hasClass('empty')) { return `1 0 ${w}%`; }
-    return getGrow(field) + ' ' + getShrink(field) +` ${w}%`;
+    return getGrow(w, field) + ' ' + getShrink(field) +` ${w}%`;
 }
 function getShrink(field) {
     const noShrinks = ['no-shrink'];
     return ifHasClasses(field, noShrinks) ? 0 : 1;
 }
 /* -------------------------------------------------------- */
-function getGrow(field) {
+function getGrow(w, field) {
     const noGrows = ['no-grow'];
-    return ifHasClasses(field, noGrows) ? 0 : 1;
+    return w === 100 || ifHasClasses(field, noGrows) ? 0 : 1;
 }
 /** [ifHasClasses description] */
 function isNoFlexField(field) {
-    const noFlex = ['sml', 'med', 'lrg'];
+    const noFlex = ['w-'];
     return ifHasClasses(field, noFlex);
 }
 function ifHasClasses(field, classes) {                             /*dbug-log*///console.log('  --ifHasClasses [%O]', field)
@@ -38,6 +38,6 @@ function ifHasClasses(field, classes) {                             /*dbug-log*/
 }
 function getSelector(field) {
     if ($(field).hasClass('empty')) { return }
-    const f = $(field).hasClass('g-cntnr') ? '.g-cntnr' : '#'+field.id;/*dbug-log*///console.log('--getSelector .[%s] .f-input', f)
+    const f = $(field).hasClass('g-cntnr') ? '.g-cntnr' : '#'+field.id;/*dbug-log*///console.log('--getSelector [%s] .f-input', f)
     return f + ' .f-input';
 }

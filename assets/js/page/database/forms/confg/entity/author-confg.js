@@ -6,13 +6,13 @@ export default function(entity) {
         core: 'source',
         fields: {
             FirstName: {
-                class: 'sml-field',
+                class: 'w-8',
                 label: 'First',
                 name: 'FirstName',
                 type: 'text',
             },
             MiddleName: {
-                class: 'sml-field',
+                class: 'w-8',
                 label: 'Middle',
                 name: 'MiddleName',
                 type: 'text',
@@ -23,7 +23,7 @@ export default function(entity) {
                 required: true
             },
             Suffix: {
-                class: 'xsml-field',
+                class: 'w-4',
                 type: 'text',
                 name: 'Suffix'
             },

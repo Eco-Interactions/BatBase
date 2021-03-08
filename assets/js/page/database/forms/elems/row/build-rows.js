@@ -48,7 +48,7 @@ function getFieldGroup(g) {                                         /*dbug-log*/
     return g.dir ? buildGroup(g) : getFormField(g);
 }
 function buildGroup(g) {                                            /*dbug-log*///console.log('               --buildGroup dir[%s] fields[%O]', g.dir, g.confgs);
-    const gClass = `flex-${g.dir} g-cntnr ${g.class}`;              /*dbug-log*///console.log("                   --gClass[%s]", gClass);
+    const gClass = `flex-${g.dir} g-cntnr ` + (g.class ? g.class : '');/*dbug-log*///console.log("                   --gClass[%s]", gClass);
     const cntnr = _el('getElem', ['div', { class: gClass }]);
     return Promise.all(g.confgs.map(getFieldGroup).filter(f=>f))
         .then(appendFieldsAndReturnRow.bind(null, cntnr));
