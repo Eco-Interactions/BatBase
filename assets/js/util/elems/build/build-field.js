@@ -52,7 +52,7 @@ function buildContainer() {
     /** Returns the style classes for the field container. */
     function getCntnrClass() {
         const groupClass = f.group ? f.group + elSuffx : null;
-        const rowClass = null;//f.class ? f.class : null;
+        const rowClass = f.class.includes('invis') ? 'invis' : null;
         return [groupClass, rowClass].filter(c => c).join(' ');
     }
 }

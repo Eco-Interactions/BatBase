@@ -27,19 +27,22 @@ function buildLocForm(val) {
         'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#sel-Country-Region').val()
     };
-    _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create', vals]);
-    _state('setOnFormCloseHandler', ['sub', _form.bind(null, 'enableCountryRegionField')]);
-    return _elems('getSubForm', ['sub', 'med-sub-form', '#sel-Location'])
+    return _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create', vals])
+        .then(setOnLocFormClose)
+        .then(() => _elems('getSubForm', ['sub', 'med-sub-form', '#sel-Location']))
         .then(appendLocFormAndFinishBuild);
-
-    function appendLocFormAndFinishBuild(form) {
-        $('#Location_f')[0].parentNode.after(form);
-        initCombos('sub');
-        _cmbx('enableCombobox', ['Country-Region', false]);
-        _elems('setDynamicFormStyles', ['location']);
-        _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
-        $('#Latitude_f input').focus();
-    }
+}
+function setOnLocFormClose() {
+    const onClose = _form.bind(null, 'enableCountryRegionField');
+    _state('setOnFormCloseHandler', ['sub', onClose]);
+}
+function appendLocFormAndFinishBuild(form) {
+    $('#Location_f')[0].parentNode.after(form);
+    initCombos('sub');
+    _cmbx('enableCombobox', ['Country-Region', false]);
+    _elems('setDynamicFormStyles', ['location']);
+    _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
+    $('#Latitude_f input').focus();
 }
 function onCreateFormLoadComplete() {
     disableTopFormLocNote();

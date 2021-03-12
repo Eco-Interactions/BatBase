@@ -54,7 +54,7 @@ import { _u } from '~util';
 import { _state } from '~form';
 import * as cUtil from './util/confg-util-main.js';
 /* ====================== INIT FORM-CONFG =================================== */
-export function initFormConfg(entity, fLvl, action, vals) {         /*dbug-log*///console.log('+--initFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
+export function getInitFormConfg(entity, fLvl, action, vals) {         /*dbug-log*///console.log('+--getInitFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
     const confg = getBaseConfg(entity, fLvl);
     initDisplayConfg(confg, action, !!confg.views.simple, vals);
     return confg;
@@ -97,19 +97,22 @@ function resetFieldDefaults(fConfg) {                               /*dbug-log*/
     if (fConfg.count) { fConfg.count = 1 }
 }
 /* ====================== CONFG BUILDERS ==================================== */
+export function mergeIntoFormConfg(confg, mConfg) {
+    cUtil.mergeIntoFormConfg(confg, mConfg);
+}
 /* ----------------------- BASE CONFG --------------------------------------- */
 /** [getBaseConfg description] INTERNAL USE */
 export function getBaseConfg(entity, fLvl, type) {
     const confg = cUtil.getBaseFormConfg(entity, fLvl);
     if (confg.core) { mergeCoreEntityConfg(confg); }
-    if (type) { cUtil.mergeIntoFormConfg(confg, confg.types[type]); }
+    if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
     delete confg.types;                                             /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
     return confg;
 }
 /** [mergeCoreEntityConfg description] */
 function mergeCoreEntityConfg(c) {
     const coreConfg = cUtil.getBaseFormConfg(c.core);               /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
-    cUtil.mergeIntoFormConfg(c, coreConfg);
+    mergeIntoFormConfg(c, coreConfg);
 }
 /* ------------------------- FIELD CONFG ------------------------------------ */
 /** [setDisplayedFieldConfg description] INTERNAL USE */

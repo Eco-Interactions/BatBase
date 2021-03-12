@@ -37,11 +37,11 @@ function buildFormRow(row) {                                        /*dbug-log*/
     return getRowGroup(row)
         .then(appendFieldsAndReturnRow.bind(null, cntnr));
 }
-function appendFieldsAndReturnRow(cntnr, elems) {                   /*dbug-log*///console.log("   --appendFieldsAndReturnRow row[%O] elems[%O]", cntnr, elems);
+function appendFieldsAndReturnRow(cntnr, elems) {
     $(cntnr).append(...elems);
     return cntnr;
 }
-function getRowGroup(hGroup) {                                      /*dbug-log*///console.log("       --getRowGroup[%O]", hGroup);
+function getRowGroup(hGroup) {
     return Promise.all(hGroup.map(getFieldGroup));
 }
 function getFieldGroup(g) {                                         /*dbug-log*///console.log('           --getFieldGroup [%O]', g);

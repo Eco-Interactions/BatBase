@@ -32,7 +32,7 @@ function mergeConfgData(prop, mData) {                              /*dbug-log*/
         fields: mergeFieldConfg,
         views: mergeViewConfg
     };
-    if (!map[prop]) { return; }
+    if (!map[prop]) { return lcl.confg[prop] = mData; }
     map[prop](mData);
 }
 /* ---------------- MERGE ENTITY-TYPE FIELD-CONFG --------------------------- */

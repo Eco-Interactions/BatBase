@@ -44,7 +44,7 @@ function ifOppositeRoleFormLoading(role) {
 /* =================== SELECT ROLE-TAXON ==================================== */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 export function selectRoleTaxon(e, groupTaxon) {
-    const role = _u('ucfirst', [$('#select-group').data('role')]);
+    const role = $('#select-group').data('role');
     const opt = getSelectedTaxonOption(groupTaxon);
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
@@ -73,7 +73,7 @@ export function onTaxonRoleSelection(role, val) {                   /*perm-log*/
 }
 function storeRoleSelection(role, val) {
     $('#sel-'+role).data('selTaxon', val);
-    app[role] = _state('getTaxonProp', ['subGroupId']);             /*dbug-log*///console.log('storeRoleSelection [%s] -> [%s]', role, app[role]);
+    app[role] = _state('getFieldState', ['sub', 'Sub-Group']).id;   /*dbug-log*///console.log('   --storeRoleSelection [%s] -> [%s]', role, app[role]);
 }
 function ifBothRolesSelected() {
     return Object.keys(app).every(r => app[r]);

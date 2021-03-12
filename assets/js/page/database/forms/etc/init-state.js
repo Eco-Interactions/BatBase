@@ -17,30 +17,31 @@
  *
  */
 import { _db, _u } from '~util';
-import { _confg, alertFormIssue } from '~form';
+import { _confg, _state, alertFormIssue } from '~form';
 /* ========================= INIT FORM-STATE ================================ */
 /* ----------------------- STATE CORE --------------------------------------- */
-export function initFormState(action, entity, id) {                 /*dbug-log*///console.log("    #--initFormState [%s][%s][%s]", action, entity, id);
-    let fS = {}
+export function initFormState(action, entity, id) {                 /*dbug-log*///console.log("    #--initFormState action[%s] entity[%s] id?[%s]", action, entity, id);
+    const fS = getMainStateObj(entity);
     const dataKeys = getDataKeysForEntityRootForm(action, entity);
-    fS.init = true; //eliminates possibility of opening form multiple times.
-    return _db('getData', [dataKeys]).then(data => {
-        initMainState(data);
-        addEntityFormState(fS, entity, 'top', null, action);        /*perm-log*/console.log("       #### initFormState initState %O, curState %O", _u('snapshot', [fS]), fS);
-        delete fS.init;
-        return fS;
-    });
-
-    function initMainState(data) {
-        fS = {
-            action: action,//
-            editing: action === 'edit' ? { core: id || null, detail: null } : false,//
-            entity: entity,//
-            forms: {},
-            formLevels: ['top', 'sub', 'sub2'],
-            records: data,
-        };
-    }
+    return _db('getData', [dataKeys])
+        .then(data => addRecordDataToState(fS, data))
+        .then(() => addEntityFormState(fS, entity, 'top', null, action, { entity: id }))
+        .then(() => returnFinishedFormState(fS));
+}
+function getMainStateObj(entity) {
+    return {
+        entity: entity,
+        forms: {},
+        formLevels: ['top', 'sub', 'sub2'],
+        init: true, //eliminates possibility of opening form multiple times.
+    };
+}
+function addRecordDataToState(fS, data) {  console.log('addRecordDataToState')
+    fS.records = data;
+}
+function returnFinishedFormState(fS) {                              /*perm-log*/console.log("       ####initState[%O] curState[%O]", _u('snapshot', [fS]), fS);
+    delete fS.init;
+    return fS;
 }
 /* ----------------------- FORM DATA ---------------------------------------- */
 function getDataKeysForEntityRootForm(action, entity) {
@@ -52,10 +53,10 @@ function getDataKeysForEntityRootForm(action, entity) {
             'edit': ['source', 'citation', 'author', 'publisher']
         },
         'interaction': {
-            'create': ['author', 'citation', 'interactionType', 'location', 'publication',
-                'publisher', 'source', 'tag', 'taxon', 'validInteraction'],
-            'edit': ['author', 'citation', 'interaction', 'interactionType', 'location',
-                'publication', 'publisher', 'source', 'tag', 'taxon', 'validInteraction'],
+            'create': ['author', 'citation', 'group', 'interactionType', 'location', 'publication',
+                'publisher', 'rankNames', 'source', 'tag', 'taxon', 'validInteraction'],
+            'edit': ['author', 'citation', 'group', 'interaction', 'interactionType', 'location',
+                'publication', 'publisher', 'rankNames', 'source', 'tag', 'taxon', 'validInteraction'],
         },
         'location': {
             'edit': ['location']
@@ -67,7 +68,7 @@ function getDataKeysForEntityRootForm(action, entity) {
             'edit': ['source', 'publisher']
         },
         'taxon': {
-            'edit': ['taxon']
+            'edit': ['group', 'rankNames', 'taxon']
         }
     }
     return map[entity][action];
@@ -100,39 +101,43 @@ function getDataKeysForEntityRootForm(action, entity) {
  */
 export function addEntityFormState(fS, entity, fLvl, pSel, action, vals) {/*dbug-log*///console.log("    #--addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s] vals[%O] forms[%O]", entity, fLvl, pSel, action, vals, fS);
     fS.forms[entity] = fLvl;
-    fS.forms[fLvl] = _confg('initFormConfg', [entity, fLvl, action, vals]);
-    finishFormLevelInit(fS.forms[fLvl], pSel, action);              /*dbug-log*///console.log('   --finishFormLevelInit FINAL [%s][%O]', fLvl, fS);
+    fS.forms[fLvl] = getBaseFormState(pSel, action);
+    return initEntityState(fS, entity, fLvl, vals)
+        .then(() => initEntityFormConfg(fS, entity, fLvl, action, vals));
 }
-function finishFormLevelInit(fState, pSel, action) {
-    const p = {
+function getBaseFormState(pSel, action) {
+    return {
         action: action,
+        editing: action === 'edit' ? { core: vals.entity || null, detail: null } : false,
         onFormClose: null,
         pSelId: pSel,
     };
-    Object.assign(fState, p);
+}
+function initEntityState(fS, entity, fLvl, vals) {
+    const map = {
+        // Citation: addPubData,
+        Subject: initTaxonState,
+        Object: initTaxonState,
+        Taxon: initTaxonState
+    };
+    return Promise.resolve(map[entity] ? map[entity](fS, fLvl, vals) : null);
+}
+function initEntityFormConfg(fS, entity, fLvl, action, vals) {
+    let fVals = _state('getFieldValues', [fLvl]);
+    fVals = Object.keys(fVals).length ? fVals : vals;
+    const confg = _confg('getInitFormConfg', [entity, fLvl, action, fVals]);
+    _confg('mergeIntoFormConfg', [confg, fS.forms[fLvl]]);
+    fS.forms[fLvl] = confg;                                         /*dbug-log*///console.log("    #--finalEntityFormState [%O]", confg);
 }
 /* ___________________________ TAXON ________________________________________ */
-export function initTaxonState(fState, fLvl, groupId, subGroupId) {
-    return _db('getData', [['group', 'rankNames']])
-        .then(data => setTxnState(data.group, data.rankNames));
-
-    function setTxnState(groups, ranks) {
-        const group = groups[groupId];                              /*dbug-log*///console.log('   #--initTaxonState subGroup[%s] group[%s] = %O ', subGroupId, groupId, group);
-        const data = {
-            groupName: group.displayName,
-            groupId: groupId,
-            groups: groups, // Used in edit form if new parent in different group
-            subGroupId: subGroupId || Object.keys(group.subGroups)[0],
-            subGroups: group.subGroups,
-        };
-        data.groupTaxon = taxa[group.subGroups[data.subGroupId].taxon];
-        fState.misc = data;                                         /*perm-log*/console.log('       --[%s] stateData = %O', data.subGroups[data.subGroupId].name, data);
-        handleSubGroupFieldState(data.subGroupId, Object.keys(subGroups).length);
-        return data;
-    }
-    function handleSubGroupFieldState(sGroupId, sGroupCnt) {
-        const shwn = sGroupCnt === 1;
-        fState.fields['Sub-group'].shown = shwn;
-        fState.fields['Sub-group'].value = shwn ? sGroupId : null;
-    }
+export function initTaxonState(fS, fLvl, vals) {                    /*dbug-log*///console.log('   --initTaxonState fLvl[%s] vals[%O] fS[%O]', fLvl, vals, fS);
+    fS.forms[fLvl].fields = {};
+    return _state('setTaxonGroupState', [fS, fLvl, vals]);
 }
+/* ___________________________ CITATION _____________________________________ */
+// function addParentPubToFormState(pId) {
+//     const pSrc = _state('getRcrd', ['source', pId]);                /*dbug-log*///console.log('addParentPubToFormState  [%s][%O]', pId, pSrc);
+//     const pub = _state('getRcrd', ['publication', pSrc.publication]);
+//     const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*///console.log('addParentPubToFormState[%O]', data);
+//     _state('setFieldState', ['sub', 'ParentSource', data, 'misc']);
+// }

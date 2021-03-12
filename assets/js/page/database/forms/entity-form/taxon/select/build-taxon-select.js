@@ -30,14 +30,12 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
 }
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
 function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
-    addNewFormState(role, groupId);
-    return _state('initTaxonState', ['sub', groupId])
+    return addNewFormState(role, groupId)
         .then(() => _elems('getSubForm', ['sub', 'sml-sub-form', '#sel-'+role]));
 }
 function addNewFormState(role, groupId) {
     const vals = { Group: groupId };
-    const lcRole = _u('lcfirst', [role]);
-    _state('addEntityFormState', [lcRole, 'sub', '#sel-'+role, 'create', vals]);
+    return _state('addEntityFormState', [role, 'sub', '#sel-'+role, 'create', vals]);
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -62,12 +60,12 @@ function addSelectRootTaxonBttn(role) {
 }
 function buildSelectUnspecifedBttn(role) {
     const bttn = _el('getElem', ['input', getUnspecifiedBttnAttrs()]);
-    $(bttn).click(selectGroupTaxon.bind(null));
-    $(bttn).data('role', _u('lcfirst', [role]));
+    $(bttn).click(selectGroupTaxon);
+    $(bttn).data('role', role);
     return bttn;
 }
 function selectGroupTaxon() {
-    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
+    const gTaxon = _state('getFieldData', ['sub', 'Sub-Group', 'misc']).taxon;/*dbug-log*///console.log('--selectGroupTaxon gTaxon[%O]', gTaxon);
     _form('selectRoleTaxon', [null, gTaxon]);
 }
 function getUnspecifiedBttnAttrs() {
@@ -80,12 +78,13 @@ function getUnspecifiedBttnAttrs() {
 /* ------------- CUSTOMIZE ELEMS FOR TAXON SELECT-FORM ---------------------- */
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
 function customizeElemsForTaxonSelectForm(role, gId) {
-    $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
+    $('#sub-hdr span')[0].innerHTML = `Select ${role} Taxon`;
     $('#sub-hdr').append(getTaxonExitButton(role));
     $('#sub-submit')[0].value = "Select Taxon";
     $('#sub-cancel')[0].value = "Reset";
     $('#sub-submit').unbind("click").click(_form.bind(null, 'selectRoleTaxon'));
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role, gId));
+    _elems('setDynamicFormStyles', [role]);
 }
 function getTaxonExitButton(role) {
     const bttn = _elems('getExitButton');
@@ -127,7 +126,6 @@ function focusFirstRankCombobox(lcRole) {
     _cmbx('focusFirstCombobox', [`#${lcRole}_fields`]);
 }
 function appendTxnFormAndInitCombos(role, form) {
-    const lcRole = _u('lcfirst', [role]);
     $(`#${role}_f`).append(form);
     selectForm.initSelectFormCombos();
 }
@@ -148,16 +146,12 @@ function resetPrevTaxonSelection(id, role) {
     selectPrevTaxon(taxon, role);
 }
 function selectPrevTaxon(taxon, role) {
-    addTaxonOptToTaxonMemory(taxon);
     if (ifTaxonInDifferentGroup(taxon.group)) { return selectTaxonGroup(taxon); }
     _cmbx('setSelVal', [taxon.rank.displayName, taxon.id]);
     window.setTimeout(() => { deleteResetFlag(role); }, 1000);
 }
-function addTaxonOptToTaxonMemory(taxon) {
-    _state('setTaxonProp', ['sub', 'prevSel', {val: taxon.id, text: taxon.displayName }]);
-}
 function ifTaxonInDifferentGroup(group) {
-    return group.displayName !== 'Bat' && $('#sel-Group').val() != group.id;
+    return $('#sel-Group').val() != group.id;
 }
 function selectTaxonGroup(taxon) {
     _cmbx('setSelVal', ['Group', taxon.group.id]);

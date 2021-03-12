@@ -31,9 +31,6 @@ export function finishEditFormBuild() {
 export function getTaxonEditFields() {
     return edit.getTaxonEditFields(...arguments);
 }
-export function selectParentTaxon() {
-    edit.selectParentTaxon(...arguments);
-}
 /* ======================= SELECT =========================================== */
 export function initRoleTaxonSelect() {
     return select.initRoleTaxonSelect(...arguments);

@@ -4,35 +4,35 @@
 import { _state } from 'db/forms/forms-main.js';
 
 export default function(role) {
-    const groupFields = getGroupFields();
-    const fieldOrder = getRoleFields(groupFields);
     return {
         name: role,
         fields: getCoreGroupAndRankFieldConfg(),
         views: {
-            all: fieldOrder
+            all: getRoleFieldViewOrder()
         },
     };
 }
+function getRoleFieldViewOrder() {
+    const fConfg = _state('getFieldState', ['sub', 'Sub-Group', null]);
+    return [getGroupFields(fConfg), ...getSubGroupRankFields(fConfg)].filter(f => f);
+}
+/* -------------------------- GROUP FIELDS ---------------------------------- */
 /**
  * On init, all fields are built. Once a (sub)Group is selected, the rank fields
  * will get rebuilt. If the previous group had a subGroup, the field is still
  * present in the DOM.
  */
-function getGroupFields() {
-    const fields = {};
-    ['Group', 'Sub-Group'].forEach(addFieldNotPresentInDom);
-    return fields;
-
-    function addFieldNotPresentInDom(field) {
-        if ($(`#${field}_f`).length) { return; }
-        fields[field] = 'select';
-    }
+function getGroupFields(fConfg) {
+    return ifFieldAlreadyInDom('Group') ? null : ['Group', 'Sub-Group'];
 }
-function getRoleFields(groupFields) {
-    const lvls = _state('getTaxonProp', ['subGroup']).subRanks;
-    return [{ fields: [...Object.keys(groupFields), ...lvls]}];
+function ifFieldAlreadyInDom(field) {
+    return $(`#${field}_f`).length;
 }
+/* --------------------------- RANK FIELDS ---------------------------------- */
+function getSubGroupRankFields(fConfg) {
+    return fConfg.misc.subRanks.reverse().map(f => [f]);
+}
+/* ------------------------ FIELD DEFINITIONS ------------------------------- */
 function getCoreGroupAndRankFieldConfg() {
     return {
         Group: {

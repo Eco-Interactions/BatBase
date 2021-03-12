@@ -20,24 +20,18 @@ export function initCreateForm(rank, value) {                       /*perm-log*/
     return showNewTaxonForm(val, ucRank);
 }
 function showNewTaxonForm(val, rank) {
-    _state('setTaxonProp', ['sub2', 'formTaxonRank', rank]);  //used for data validation/submit
-    return buildTaxonForm()
-    .then(() => _elems('toggleSubmitBttn', ['sub2', true]));
-
-    function buildTaxonForm() {
-        const pId = '#sel-'+rank;
-        const vals = {'DisplayName': val};
-        _state('addEntityFormState', ['taxon', 'sub2', pId, 'create', vals]);
-        return _elems('getSubForm', ['sub2', 'sml-sub-form', pId])
-            .then(appendTxnFormAndFinishBuild);
-    }
-    function appendTxnFormAndFinishBuild(form) {
-        $(`#${rank}_f`).append(form);
-        _elems('toggleSubmitBttn', ['sub2'])
-        $('#sub2-hdr')[0].innerText += ' '+ rank;
-        $('#DisplayName_f input').focus();
-        updateTaxonSubmitBttn(rank);
-    }
+    const pId = '#sel-'+rank;
+    const vals = { DisplayName: val, Rank: rank };
+    return _state('addEntityFormState', ['Taxon', 'sub2', pId, 'create', vals])
+        .then(() => _elems('getSubForm', ['sub2', 'sml-sub-form', pId]))
+        .then(form => appendTxnFormAndFinishBuild(val, rank, form));
+}
+function appendTxnFormAndFinishBuild(val, rank, form) {
+    $(`#${rank}_f`).append(form);
+    _elems('toggleSubmitBttn', ['sub2'])
+    $('#sub2-hdr')[0].innerText += ' '+ rank;
+    $('#DisplayName_f input').focus();
+    updateTaxonSubmitBttn(rank);
 }
 /* ========================= SUBMIT ========================================= */
 function updateTaxonSubmitBttn(rank) {

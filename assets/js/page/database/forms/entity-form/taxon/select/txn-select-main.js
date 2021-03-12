@@ -23,7 +23,7 @@ import * as group from './group-fields.js';
 export function initSelectFormCombos(editHandlers = null) {
     const events = getSelectComboEvents();
     if (editHandlers) { replaceEditEvents(events, editHandlers); }
-    _elems('initCombos', ['sub', events]);
+    _elems('initFormCombos', ['sub', events]);
 }
 function getSelectComboEvents() {
     return {
@@ -54,7 +54,6 @@ function create(rank, val) {
 export function initRoleTaxonSelect(role, gId) {
     const groupId = gId ? gId : getGroupId(role);
     build.initTaxonSelectForm(role, groupId)
-    .then(group.ifNoSubGroupsRemoveCombo);
 }
 function getGroupId(role) {
     const prevSelectedId = $('#sel-'+role).data('selTaxon');
@@ -94,7 +93,7 @@ function isSelectedTaxon(resetRank, elem) {
     return $(elem).val();
 }
 function isRankChildOfResetRank(resetRank, elem) {
-    const allRanks = Object.keys(_state('getTaxonProp', ['ranks']));
+    const allRanks = Object.keys(_state('getFieldState', ['top', 'Sub-Group', 'misc']).subRanks);
     const rank = elem.id.split('sel-')[1];                          /*dbug-log*///console.log('is [%s] sub-rank to [%s]', rank, resetRank, allRanks.indexOf(rank) < allRanks.indexOf(resetRank));
     return allRanks.indexOf(rank) > allRanks.indexOf(resetRank);
 }

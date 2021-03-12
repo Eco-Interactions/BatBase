@@ -123,9 +123,6 @@ export function getTaxonEditFields(entity, id) {
 export function initRoleTaxonSelect() {
     return txn.initRoleTaxonSelect(...arguments);
 }
-export function selectParentTaxon(id) {
-    return txn.selectParentTaxon(id);
-}
 export function onGroupSelection() {
     return txn.onGroupSelection(...arguments);
 }

@@ -53,7 +53,7 @@ function getOptsForSelectedChildren(selTxn) {
     return Promise.resolve(getChildOpts(selTxn));
 }
 function getAllGroupRankOpts() {
-    const gTaxon = _state('getTaxonProp', ['groupTaxon']);
+    const gTaxon = _state('getFieldData', ['sub', 'Sub-Group', 'misc']).taxon;/*dbug-log*///console.log('getAllGroupRankOpts. subGroups = %O, rows = %O', subGroups, rows)
     return getAllRankAndSelectedOpts(null, gTaxon);
 }
 function getChildOpts(selTxn) {

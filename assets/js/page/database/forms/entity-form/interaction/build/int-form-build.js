@@ -21,11 +21,11 @@ import * as iForm from '../int-form-main.js';
 export function initCreateForm(entity) {                            /*perm-log*/console.log('   //Building New Interaction Form');
     if (_state('getStateProp')) { return; } //Form is already opened.
     return _state('initFormState', ['create', 'interaction'])
-    .then(() => _elems('getFormFieldRows', ['top']))
-    .then(fields => _elems('buildAndAppendRootForm', [fields]))
-    .then(finishInteractionFormBuild)
-    .then(addConfirmationBeforeSubmit)
-    .then(() => _state('setOnFormCloseHandler', ['top', iForm.resetInteractionForm]));
+        .then(() => _elems('getFormFieldRows', ['top']))
+        .then(fields => _elems('buildAndAppendRootForm', [fields]))
+        .then(finishInteractionFormBuild)
+        .then(addConfirmationBeforeSubmit)
+        .then(() => _state('setOnFormCloseHandler', ['top', iForm.resetInteractionForm]));
 }
 /* ======================= FINISH FORM DISPLAY ============================== */
 /**

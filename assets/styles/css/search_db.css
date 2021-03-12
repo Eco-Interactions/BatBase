@@ -205,8 +205,8 @@
     font-weight: bold;
 }
 #exit-sub-form {
-    position: relative;
-    left: 24%;
+/*    position: relative;
+    left: 24%;*/
     font-size: .75em !important;
 }
 #sub-hdr, #sub2-hdr {
@@ -299,7 +299,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #form-map {
     border: 1px grey solid;
     height: 366px;
-    width: 92%;
+    /*width: 92%;*/
     margin: 1em auto 0 auto;
 }
 .loc-gps-note {

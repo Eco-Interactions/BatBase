@@ -40,10 +40,10 @@ function storeAndReturnState(coreState) {
     return coreState;
 }
 export function addEntityFormState(...args) {
-    init.addEntityFormState(fS, ...args);
+    return init.addEntityFormState(fS, ...args);
 }
 export function initTaxonState(...args) {
-    return init.initTaxonState(getFormObj(args.shift()), fS.records.taxon, ...args);
+    return init.initTaxonState(fS, ...args);
 }
 /* ============================= EXECUTORS ================================== */
 /**
@@ -86,6 +86,9 @@ export function getEntityRcrds(...args) {
 export function getRcrd(...args) {
     return callCoreState(get, 'getRcrd', args);
 }
+export function getRankId(...args) {
+    return callCoreState(get, 'getRankId', args);
+}
 /* ----------------------- EDIT FORM ---------------------------------------- */
 export function getEditEntityId(...args) {
     return callCoreState(get, 'getEditEntityId', args);
@@ -110,10 +113,6 @@ export function getComboFields(...args) {
 }
 export function getFieldValues(...args) {
     return callFormState(get, 'getFieldValues', args);
-}
-/* --------------------------- TAXON ---------------------------------------- */
-export function getTaxonProp(...args) {
-    return callFormState(get, 'getTaxonProp', args);
 }
 /* --------------------- STATE PREDICATES ----------------------------------- */
 /** [isFieldShown description] */
@@ -149,9 +148,7 @@ export function removeFieldFromComboInit(...args) {
     return callFormState(set, 'removeFieldFromComboInit', args);
 }
 /* ---------------------------- TAXON --------------------------------------- */
-export function setTaxonProp(...args) {
-    return callFormState(set, 'setTaxonProp', args);
-}
-export function setTaxonGroupData(...args) {
-    return callFormState(set, 'setTaxonGroupData', args);
+export function setTaxonGroupState(formState, fLvl, vals) {
+    const state = formState ? formState : fS;
+    set.setTaxonGroupState(state, fLvl, vals);
 }

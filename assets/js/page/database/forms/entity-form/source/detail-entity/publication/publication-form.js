@@ -20,8 +20,8 @@ import * as sForm from '../../src-form-main.js';
 export function initPubForm(v) {                                    /*perm-log*/console.log('       /--initPubForm [%s]', v);
     if (_form('ifFormInUse', ['sub'])) { return _form('alertInUse', ['sub']); }
     clearCitationFormData();
-    _state('addEntityFormState', getPubInitParams(v));
-    return buildAndAppendPubForm();
+    return _state('addEntityFormState', getPubInitParams(v))
+        .then(buildAndAppendPubForm);
 }
 function getPubInitParams(v) {
     const val = { Title: v === 'create' ? '' : v };

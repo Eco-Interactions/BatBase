@@ -178,8 +178,8 @@ function getCitTypeOpts(fName, prop) {                              /*dbug-log*/
 /* -------------------------- TAXON ----------------------------------------- */
 /** Returns an array of taxonyms for the passed rank and the form's taxon group. */
 export function getTaxonOpts(fName, rank, r, g) {
-    const group = r ? r : _state('getTaxonProp', ['groupName']);
-    const subGroup = g ? g : _state('getTaxonProp', ['subGroup']).name;/*dbug-log*///console.log('        getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
+    const group = r ? r : _state('getFieldState', ['sub', 'Group']).text;
+    const subGroup = g ? g : _state('getFieldState', ['sub', 'Sub-Group']).text;/*dbug-log*///console.log('        getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
     const opts = [ { text: `Add a new ${rank}...`, value: 'create'} ];
     return getStoredOpts(null, group+subGroup+rank+'Names')
         .then(o => {
@@ -188,7 +188,7 @@ export function getTaxonOpts(fName, rank, r, g) {
         });
 }
 function getSubGroupOpts(fName, prop) {
-    const group = _state('getTaxonProp', ['groupName']);
+    const group = _state('getFieldState', ['sub', 'Group']).text;
     return getStoredOpts(null, group+'SubGroupNames');
 }
 /* -------------------------- LOCATION -------------------------------------- */

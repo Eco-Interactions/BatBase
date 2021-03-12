@@ -22,7 +22,7 @@ import { _cmbx, _el, _u } from '~util';
 import { _state, _elems, _form, _val, handleFormSubmit } from '~form';
 import * as tForm from '../txn-form-main.js';
 
-let taxonData;
+/** ======================== CORE FIELDS ==================================== */
 /**
  * Returns the elements of the edit-taxon form.
  * <div>Parent Taxon: [Rank][Display-name]</> <bttnInput>"Edit Parent"</>
@@ -30,29 +30,15 @@ let taxonData;
  *     <button>Update Taxon</> <button>Cancel</>
  */
 export function getTaxonEditFields(id) {
-    const taxa = _state('getEntityRcrds', ['taxon']);
-    const group = taxa[id].group;
-    return _state('initTaxonState', [group.id, group.subGroup.id])
-        .then(groupState => {
-            setScopeTaxonMemory(taxa, groupState);
-            return buildTaxonEditFields(taxa[id]);
-        });
-}
-function setScopeTaxonMemory(taxaRcrds, groupState) {
-    taxonData = groupState;
-    taxonData.rcrds = taxaRcrds;
-    taxonData.subGroup = _state('getTaxonProp', ['subGroup']);
-}
-/** ======================== CORE FIELDS ==================================== */
-function buildTaxonEditFields(taxon) {
-    const txnElems = getEditTaxonFields(taxon);
-    const prntElems = getPrntTaxonElems(taxon);
+    const txn = _state('getRcrd', ['taxon', id]);
+    const txnElems = getEditTaxonFields(txn);
+    const prntElems = getPrntTaxonElems(txn);
     return prntElems.concat(txnElems);
 }
 /** ----------------- NAME FIELD AND Rank COMBOBOX ------------------------- */
-function getEditTaxonFields(taxon) {                                /*dbug-log*///console.log("getEditTaxonFields for [%s]", taxon.displayName);
-    const input = buildNameInput(taxon.name);
-    const rankSel = buildRankSel(taxon);
+function getEditTaxonFields(txn) {                                  /*dbug-log*///console.log("getEditTaxonFields for [%s]", txn.displayName);
+    const input = buildNameInput(txn.name);
+    const rankSel = buildRankSel(txn);
     return [ buildTaxonEditFormRow('Taxon', [rankSel, input], 'top')];
 }
 /** ----------- NAME INPUT --------------- */
@@ -61,19 +47,18 @@ function buildNameInput(name) {
     return _el('getElem', ['input', attr]);
 }
 /** ------- RANK COMBOBOX --------------- */
-function buildRankSel(taxon) {
-    const opts = getTaxonRankOpts();
+function buildRankSel(txn) {
+    const ranks = _state('getEntityRcrds', ['rankNames']);
+    const opts = getTaxonRankOpts(ranks);
     const sel = _el('getSelect', [opts, { id: 'sel-Rank' }]);
-    $(sel).data({ 'txn': taxon.id, 'rank': getRankVal(taxon.rank.displayName) });
+    $(sel).data({ txn: txn.id, rank: ranks[txn.rank.displayName].ord });
     return sel;
 }
-function getRankVal(rank) {
-    return taxonData.ranks[rank].ord;
-}
 /** Returns an array of options for the ranks in the taxon's group. */
-function getTaxonRankOpts() {
-    return taxonData.subGroup.subRanks.reverse().map(rank => {
-        return { text: rank, value: taxonData.ranks[rank].ord};
+function getTaxonRankOpts(ranks) {
+    const subRanks = _state('getFieldState', ['top', 'Sub-Group', 'misc']).subRanks;
+    return subRanks.reverse().map(rank => {
+        return { text: rank, value: ranks[rank].ord};
     });
 }
 /** ----------------- PARENT TAXON AND AND CHANGE BUTTON -------------------- */
@@ -82,7 +67,7 @@ function getTaxonRankOpts() {
  * Button calls @showParentTaxonSelectForm.
  */
 function getPrntTaxonElems(taxon) {                                 /*dbug-log*///console.log("getPrntTaxonElems for %O", taxon);
-    const prnt = taxonData.rcrds[taxon.parent];
+    const prnt = _state('getRcrd', ['taxon', taxon.parent]);
     const elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt)];
     return [ buildTaxonEditFormRow('Parent', elems, 'top')];
 }
@@ -97,13 +82,14 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
     const div = elem || $('#txn-prnt')[0];
     const text = pText || prnt.displayName;
     div.innerHTML = '<b>Taxon Parent</b>: <span>&nbsp ' + text + '</span>';
-    $(div).data('txn', prnt.id).data('rank', getRankVal(prnt.rank.displayName));
+    $(div).data('rank', _state('getRankId', [prnt.rank.displayName]))
+        .data('txn', prnt.id);
 }
 /** ----------- CHANGE PARENT BUTTON --------------- */
 function buildEditPrntBttn(prnt) {
     const attr = { type: 'button', value: 'Change Parent', id: 'chng-prnt' };
     const bttn = _el('getElem', ['input', attr]);
-    $(bttn).click(showParentTaxonSelectForm);
+    $(bttn).click(showParentTaxonSelectForm.bind(null, prnt));
     return bttn;
 }
 /** ============= TAXON PARENT SELECT FORM ================================== */
@@ -113,14 +99,13 @@ function buildEditPrntBttn(prnt) {
  * Entering a taxon that does not already exists will open the 'create' form.
  * Current parent data is selected upon init.
  */
-function showParentTaxonSelectForm() {
-    buildParentTaxonEditElems($('#txn-prnt').data('txn'))
+function showParentTaxonSelectForm(prnt) {
+    buildParentTaxonEditElems(prnt)
     .then(appendPrntFormElems)
-    .then(finishSelectPrntFormBuild);
+    .then(() => finishSelectPrntFormBuild(prnt));
 }
 /** ------------------- RANK COMBO ELEMS ------------------------------------ */
-function buildParentTaxonEditElems(pId) {
-    const prnt = taxonData.rcrds[pId];
+function buildParentTaxonEditElems(prnt) {
     const hdr = [ buildEditParentHdr()];
     const bttns = [ _elems('getFormFooter', ['taxon', 'sub', 'edit'])];
     return getParentEditFields(prnt)
@@ -133,20 +118,8 @@ function buildEditParentHdr() {
 function getParentEditFields(prnt) {
     const group = _u('lcfirst', [prnt.group.displayName]);
     const vals = { Group: prnt.group.id, 'Sub-Group': prnt.group.subGroup.id  };
-    _state('addEntityFormState', [group, 'sub', null, 'edit']);
-    return _elems('getFormRows', ['group', vals, 'sub'])
-        .then(modifyAndReturnPrntRows);
-
-    function modifyAndReturnPrntRows(rows) {                        /*dbug-log*///console.log('modifyAndReturnPrntRows = %O', rows);
-        ifNoSubGroupsRemoveField(rows);
-        return [rows].filter(r=>r);
-    }
-}
-function ifNoSubGroupsRemoveField(rows) {
-    const subGroups = Object.keys(taxonData.subGroups);
-    if (subGroups.length > 1) { return; }
-    $(rows)[0].removeChild($(rows)[0].childNodes[1]);
-    _state('removeFieldFromComboInit', ['sub', 'Sub-Group']);
+    return _state('addEntityFormState', ['Taxon', 'sub', null, 'edit', vals])
+        .then(() => _elems('getFormRows', ['group', 'sub']));
 }
 function appendPrntFormElems(elems) {
     const attr = { class: 'sml-sub-form flex-row pTaxon', id: 'sub-form' };
@@ -159,15 +132,15 @@ function appendPrntFormElems(elems) {
  * Initializes the edit-parent form's comboboxes and selects the current parent.
  * Hides the species row. Adds styles and modifies event listeners.
  */
-function finishSelectPrntFormBuild() {
+function finishSelectPrntFormBuild(prnt) {
     const comboFuncs = {
         'Group': { onChange: onParentGroupChange, blur: true },
         'Sub-Group': { onChange: onParentSubGroupChange }
     };
     tForm.initSelectFormCombos(comboFuncs);
     setGroupDataAttr();
-    selectParentTaxon($('#txn-prnt').data('txn'));
-    finishParentSelectFormUi();
+    selectParentTaxon(prnt);
+    finishParentSelectFormUi(prnt);
 }
 /**
  * The Group field can not be left blank, as the rank combos are populates with
@@ -175,7 +148,7 @@ function finishSelectPrntFormBuild() {
  * if the field remains empty.
  */
 function setGroupDataAttr() {
-    const gId = _state('getTaxonProp', 'groupId');
+    const gId = _state('getFieldState', ['top', 'Group']).id;
     $('#sel-Group').data('field', 'Group');
     $('#sel-Group').data('val', gId);
 }
@@ -184,7 +157,6 @@ function onParentGroupChange(val) {
     _form('onGroupSelection', [val])
     .then(finishGroupChange)
     .then(() => $('#sel-Group').data('val', val));
-;
 }
 function onParentSubGroupChange(val) {
     _form('onSubGroupSelection', [val])
@@ -193,60 +165,52 @@ function onParentSubGroupChange(val) {
 /** Note: Species combo needs to stay in DOM for the combo change methods. */
 function finishGroupChange() {
     $('#Species_f').hide();
-    _elems('toggleSubmitBttn', ['#sub-submit', true]);
+    _elems('toggleSubmitBttn', ['sub', true]);
 }
-export function selectParentTaxon(pId) {
-    const pTaxon = taxonData.rcrds[pId];                            /*dbug-log*///console.log('selectParentTaxon[%s] = %O', pId, pTaxon);
+function selectParentTaxon(pTaxon) {                                /*dbug-log*///console.log('selectParentTaxon[%O]', pTaxon);
     ifSubGroupSelect(pTaxon);
     if (pTaxon.isRoot) { return; }
     const pRank = pTaxon.rank.displayName;
-    _cmbx('setSelVal', [pRank, pId]);
+    _cmbx('setSelVal', [pRank, pTaxon.id]);
 }
 function ifSubGroupSelect(pTaxon) {
     if (!$('#Sub-Group_f').length) { return; }
     _elems('setSilentVal', ['sub', 'Sub-Group', pTaxon.group.subGroup.id]);
 }
-function finishParentSelectFormUi() {
+function finishParentSelectFormUi(prnt) {
     clearAndDisableTopFormParentFields();
     $('#Species_f').hide();
-    updateSubmitBttns();
+    updateSubmitBttns(prnt);
 }
 function clearAndDisableTopFormParentFields() {
     $('#txn-prnt span').text('');
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
 }
-function updateSubmitBttns() {
+function updateSubmitBttns(prnt) {
     $('#sub-submit').attr('disabled', false).css('opacity', '1');
     $('#sub-submit').off('click').click(selectNewTaxonParent);
-    $('#sub-cancel').off('click').click(cancelPrntEdit);
-    _elems('toggleSubmitBttn', ['#top-submit', false]);
+    $('#sub-cancel').off('click').click(exitPrntEdit.bind(null, prnt));
+    _elems('toggleSubmitBttn', ['top', false]);
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function selectNewTaxonParent() {
-    const selected = _form('getSelectedTaxon');
-    const prnt = selected ? selected : _state('getTaxonProp', ['groupTaxon']);/*dbug-log*///console.log("selectNewTaxonParent called. prnt = %O", prnt);
-    if (ifInvalidParentRank(getRankVal(prnt.rank.displayName))) { return; } //Alert shown
+    const t = _form('getSelectedTaxon');
+    const prnt = t ? t : _state('getFieldData', ['sub', 'Sub-Group', 'misc']).taxon;/*dbug-log*///console.log("selectNewTaxonParent called. prnt = %O", prnt);
+    if (ifInvalidParentRank(_state('getRankId', [prnt.rank.displayName]))) { return; } //Alert shown
     updateGroupDataInFormState(prnt);
     exitPrntEdit(prnt);
 }
 function updateGroupDataInFormState(taxon) {
-    const oldSubGroup = _state('getTaxonProp', ['subGroupId']);
+    const oldSubGroup = _state('getFieldState', ['top', 'Sub-Group']).id;
     if (oldSubGroup === taxon.group.subGroup.id) { return; }
-    _state('setTaxonGroupData', [taxon]);
-}
-function cancelPrntEdit() {
-    const prnt = taxonData.rcrds[$('#txn-prnt').data('txn')];
-    exitPrntEdit(prnt);
+    _state('setFieldState', ['top', 'Parent', { text: taxon.displayName, value: taxon.id }]);
 }
 function exitPrntEdit(prnt) {
-    resetAfterEditParentClose(prnt);
-}
-function resetAfterEditParentClose(prnt) {
     clearRankAlerts('#Parent_alert', 'sub');
     $('#sub-form').remove();
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     setTaxonPrntNameElem(prnt);
-    _elems('toggleSubmitBttn', ['#top-submit', true]);
+    _elems('toggleSubmitBttn', ['top', true]);
 }
 /** ------------------------ DATA VALIDATION --------------------------------- */
 /**

@@ -32,22 +32,15 @@ export function loadCitTypeFields() {
 /** Shows the Citation  sub-form and disables the publication combobox. */
 export function initCitForm(v) {                                    /*perm-log*/console.log("       /--initCitForm [%s]", v);
     timeout = null;
-    initCitFormMemory(v);
-    return buildAndAppendCitForm();
+    return initCitFormMemory(v)
+        .then(buildAndAppendCitForm);
 }
 /* ------------------------- INIT STATE MEMORY ------------------------------ */
 function initCitFormMemory(v) {
     const p = ['citation', 'sub', '#sel-CitationTitle', 'create', { Title: (v === 'create' ? '' : v)}]
-    _state('addEntityFormState', p);
-    addParentPubToFormState(_cmbx('getSelVal', ['Publication']));
+    return _state('addEntityFormState', p)
+        .then(() => _state('setOnFormCloseHandler', ['sub', enablePubField]));
     //get default cit type from pub config
-    _state('setOnFormCloseHandler', ['sub', enablePubField]);
-}
-function addParentPubToFormState(pId) {
-    const pSrc = _state('getRcrd', ['source', pId]);                /*dbug-log*/console.log('addParentPubToFormState  [%s][%O]', pId, pSrc);
-    const pub = _state('getRcrd', ['publication', pSrc.publication]);
-    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*/console.log('addParentPubToFormState[%O]', data);
-    _state('setFieldState', ['sub', 'ParentSource', data, 'misc']);
 }
 /* -------------------------- BUILD FORM ------------------------------------ */
 function buildAndAppendCitForm() {

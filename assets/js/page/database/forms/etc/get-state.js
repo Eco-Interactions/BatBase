@@ -32,9 +32,12 @@ export function getRcrd(fS, e, id) {                                /*dbug-log*/
     const r = fS.records[e][id];
     return r ? _u('snapshot', [r]) : alertFormIssue('noRcrdFound', {id: id, entity: e });
 }
+export function getRankId(fS, name) {
+    return fS.records.rankNames[name];
+}
 /* ----------------------- EDIT FORM ---------------------------------------- */
 export function getEditEntityId(fS, type) {
-    return fS.editing[type];
+    return fS.top.editing[type];
 }
 /* --------------------- STATE PREDICATES ----------------------------------- */
 export function isEditForm(fS) {
@@ -49,7 +52,7 @@ export function getFormEntity(fState, first = 'uc') {               /*dbug-log*/
     return first === 'uc' ? fState.name : _u('lcfirst', [fState.name]);
 }
 /* -------------------------- FIELDS ---------------------------------------- */
-export function getFieldState(fState, field, prop = 'value') {       /*dbug-log*/console.log('   --getFieldState field[%s] prop[%s] [%O]', field, prop, fState.fields[field]);//console.trace();
+export function getFieldState(fState, field, prop = 'value') {       /*dbug-log*///console.log('   --getFieldState field[%s] prop[%s] fConfg[%O] fState[%O]', field, prop, fState.fields[field], fState);//console.trace();
     return prop ? fState.fields[field][prop] : fState.fields[field];
 }
 export function getComboFields(fState) {                            /*dbug-log*///console.log('getComboFields [%O]', fState.fields);//console.trace();
@@ -63,22 +66,9 @@ export function getFieldValues(fState) {
     }                                                               /*dbug-log*///console.log('   --getFieldValues fields[%O] vals[%O]', name, vals);
     return vals;
 }
-/* --------------------------- TAXON ---------------------------------------- */
-export function getGroupState(fState) {
-    return fState.misc;
-}
-export function getTaxonProp(fState, prop) {
-    const edge = {
-        'subGroup': getSubGroupEntity
-    };
-    return prop in edge ? edge[prop](fState) : fState.misc[prop];
-}
-function getSubGroupEntity(fState) {
-    return fState.misc.subGroups[fState.misc.subGroupId];
-}
 /* --------------------- STATE PREDICATES ----------------------------------- */
 /** [isFieldShown description] */
-export function isFieldShown(fState, field) {                       /*dbug-log*/console.log('   --isFieldShown [%O][%O]', field, fState);
+export function isFieldShown(fState, field) {                       /*dbug-log*///console.log('   --isFieldShown [%O][%O]', field, fState);
     if (Array.isArray(field)) { return areFieldsShown(fState, field); }
     return fState.fields[field].shown || false;
 }

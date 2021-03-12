@@ -55,8 +55,8 @@ export function setSrcEditRowStyle(entity) {
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 export function initEntitySubForm(entity, fLvl, fVals, pSel) {
-    _state('addEntityFormState', [entity, fLvl, pSel, 'create', fVals]);
-    return _elems('getSubForm', [fLvl, 'sml-sub-form', pSel]);
+    return _state('addEntityFormState', [entity, fLvl, pSel, 'create', fVals])
+        .then(() => _elems('getSubForm', [fLvl, 'sml-sub-form', pSel]));
 }
 /* ------------------- ENTITY FIELDS ---------------------------------------- */
 export function loadSrcTypeFields() {

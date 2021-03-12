@@ -34,22 +34,37 @@ export function setOnFormCloseHandler(fState, hndlr) {              /*dbug-log*/
 export function addRequiredFieldInput(fState, input) {              /*dbug-log*///console.log('    --addRequiredFieldInput input[%O] [%O]', input, fState);
     fState.reqElems.push(input);
 }
-/* _________________________ COMBOBOX _______________________________________ */
-/* Note: Sub-group sel is removed from for single-root taxon groups (no subGroups). */
-export function removeFieldFromComboInit(fState, fieldName) {       /*dbug-log*///console.log('    --removeFieldFromComboInit field[%s] [%O]', fieldName, fState);
-    const field = fState.fields[fieldName];
-    field.combo = false;
-}
 /* ___________________________ TAXON ________________________________________ */
-export function setTaxonProp(fState, prop, val) {                   /*dbug-log*///console.log('    --setTaxonProp prop[%s][%s] [%O]', prop, val, fState);
-    return fState.misc[prop] = val;
+export function setTaxonGroupState(fS, fLvl, vals) {
+    const group = getGroupEntity(fS, fLvl, vals);
+    const sGroupId = getSubGroupId(vals, group);                    /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
+    setGroupState(fS.records.taxon, fS.forms[fLvl], group);
+    setSubGroupState(fS, fS.forms[fLvl], group.subGroups, sGroupId);/*perm-log*/console.log('       --[%s] stateData = %O', group.displayName, fS.forms[fLvl]);
 }
-/** When a new taxon parent is selected in the taxon edit-form, groups data is updated. */
-export function setTaxonGroupData(fState, taxon) {                  /*dbug-log*///console.log('    --setTaxonGroupData taxon[%O] [%O]', prop, val, fState);
-    const txnData = fState.forms.taxonData;
-    const group = fState.misc.groups[taxon.group.id];
-    fState.misc.groupName = group.displayName;
-    fState.misc.subGroupId = taxon.group.subGroup.id;
-    fState.misc.subGroups = group.subGroups;
-    fState.misc.groupTaxon = taxon;
+function getGroupEntity(fS, fLvl, vals) {
+    return vals.Group ? fS.records.group[vals.Group] :
+        fS.forms[fLvl].fields.Group.misc.rcrd;
+}
+function getSubGroupId(vals, group) {
+    return vals['Sub-Group'] ? vals['Sub-Group'] : Object.keys(group.subGroups)[0];
+}
+/** [setGroupState description] */
+function setGroupState(taxa, fState, group) {                       /*dbug-log*///console.log('--setGroupState group[%O]', group);
+    if (!fState.fields['Group']) { fState.fields['Group'] = {}; }
+    fState.fields['Group'].value = { text: group.displayName, value: group.id };
+    fState.fields['Group'].misc = {
+        rcrd: group,
+        subGroups: group.subGroups
+    };
+}
+/** [setSubGroupState description] */
+function setSubGroupState(fS, fState, subGroups, sGroupId) {
+    if (!fState.fields['Sub-Group']) { fState.fields['Sub-Group'] = {}; }
+    const subGroup = subGroups[sGroupId];                           /*dbug-log*///console.log('--setSubGroupState subGroup[%O]', subGroup);
+    fState.fields['Sub-Group'].class = subGroups.length > 1 ? '' : 'invis';
+    fState.fields['Sub-Group'].value = { text: subGroup.name, value: sGroupId };
+    fState.fields['Sub-Group'].misc = {
+        subRanks: subGroup.subRanks,
+        taxon: fS.records.taxon[subGroup.taxon]
+    };
 }
