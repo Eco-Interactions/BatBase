@@ -43,19 +43,22 @@ function ifOppositeRoleFormLoading(role) {
 }
 /* =================== SELECT ROLE-TAXON ==================================== */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
-export function selectRoleTaxon(e, groupTaxon) {
+export function selectRoleTaxon() {
     const role = $('#select-group').data('role');
-    const opt = getSelectedTaxonOption(groupTaxon);
+    const opt = getSelectedTaxonOption();
     $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
     _cmbx('replaceSelOpts', [role, opt]);
     _cmbx('setSelVal', [role, opt.value]);
 }
 /** Returns an option object for the most specific taxon selected. */
-function getSelectedTaxonOption(groupTaxon) {
-    const taxon = groupTaxon || _form('getSelectedTaxon');          /*dbug-log*///console.log("selected Taxon = %O", taxon);
+function getSelectedTaxonOption() {
+    const taxon = _form('getSelectedTaxon') || getRootTaxon();      /*dbug-log*///console.log("--getSelectedTaxonOption taxon[%O]", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
     return { text: taxon.displayName, value: taxon.id};
+}
+function getRootTaxon() {
+    return _state('getFieldState', ['sub', 'Sub-Group', 'misc']).taxon;
 }
 /* =================== ON ROLE SELECTION ==================================== */
 /**

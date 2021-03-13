@@ -72,6 +72,9 @@ export function focusCombobox() {
 export function focusFirstCombobox() {
     return util.focusFirstCombobox(...arguments);
 }
+export function focusFirstComboboxInRow() {
+    return util.focusFirstComboboxInRow(...arguments);
+}
 export function triggerComboChangeReturnPromise() {
     return util.triggerComboChangeReturnPromise(...arguments);
 }

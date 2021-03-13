@@ -9,13 +9,18 @@ function handleRowStyles(i, row) {
     $(row.childNodes).each((i, f) => styleRowField(w, f));
 }
 function styleRowField(w, field) {                                  /*dbug-log*///console.log('--styleRowField[%O][%s]', field, w);
+    if (isSpacer(field)) { return setFlex(field, `1 0 ${w}%`) }
     if (isNoFlexField(field)) { return; }
-    const flex = getFlexValue(w, field);                            /*dbug-log*///console.log('     --flex[%s]', flex);
-    $(field).css({'flex': flex});
+    setFlex(field, getFlexValue(w, field));
+}
+function isSpacer(field) {
+    return $(field).hasClass('empty');
+}
+function setFlex(field, val) {                                      /*dbug-log*///console.log('     --setFlex [%s][%O]', val, field);
+    $(field).css({flex: val});
 }
 /** [getFlexValue description] */
 function getFlexValue(w, field) {
-    if ($(field).hasClass('empty')) { return `1 0 ${w}%`; }
     return getGrow(w, field) + ' ' + getShrink(field) +` ${w}%`;
 }
 function getShrink(field) {

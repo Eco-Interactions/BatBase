@@ -37,7 +37,7 @@ export function getAllRankAndSelectedOpts(selId, selTaxon = null) {
     if (!d.taxon) { return; } //issue alerted to developer and editor
     d.group = d.taxon.group.name;
     d.subGroup = d.taxon.group.subGroup.name;
-    d.ranks = _state('getFieldState', ['top', 'Sub-Group', 'misc']).subRanks;
+    d.ranks = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).subRanks;
     return buildRankTaxonOpts()
         .then(clearMemoryAndReturnOpts)
 }

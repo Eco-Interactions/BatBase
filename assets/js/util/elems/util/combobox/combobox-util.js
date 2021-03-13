@@ -129,10 +129,10 @@ export function enableCombobox(field, enable = true) {              /*dbug-log*/
 export function enableComboboxes($pElems, enable) {
     $pElems.each((i, elem) => { enableCombobox(elem.id.split('sel-')[1], enable)});
 }
-export function enableFirstCombobox(field, enable = true) {
-    const selElems = $(`#${field}_f-cntnr .selectized`).toArray();  /*dbug-log*///console.log("[%s] first elem = %O", field, selElems);
-    const firstElem = $('#'+ selElems[0].id)[0].selectize;
-    return enable ? firstElem.enable() : firstElem.disable();
+export function enableFirstCombobox(field, enable = true, sufx = '_f-cntnr') {
+    const combos = $(`#${field}${sufx} .selectized`).toArray();     /*dbug-log*///console.log("--enableFirstCombobox field[%s] sufx[%s] enable[%s] combos[%O]", field, sufx, enable, combos);
+    const first = $('#'+ combos[0].id)[0].selectize;              /*dbug-log*///console.log("     --first[%O]", first);
+    return enable ? first.enable() : first.disable();
 }
 /* ------------------------- FOCUS COMBOBOX --------------------------------- */
 export function focusCombobox(field, focus = true) {                /*dbug-log*///console.log("focusCombobox [%s] ? [%s]", field, focus);
@@ -142,6 +142,10 @@ export function focusCombobox(field, focus = true) {                /*dbug-log*/
 export function focusFirstCombobox(cntnrId, focus) {
     const selElems = $(cntnrId+' .selectized').toArray();           /*dbug-log*///console.log("focusFirstCombobox of [%s] = %O", cntnrId, selElems[0]);
     focusCombobox(selElems[0].id.split('sel-')[1], focus);
+}
+export function focusFirstComboboxInRow(entity, focus = true, row = 1) {
+    const field = $(`#${entity}_fields`)[0].childNodes[row-1].childNodes[0];/*dbug-log*///console.log("--focusFirstComboboxInRow entity[%s] field[%O]", entity, field);
+    return focusFirstCombobox('#'+field.id, focus);
 }
 /* -------------------- TRIGGER CHANGE -------------------------------------- */
 export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*///console.log('triggerComboChange [%s] = [%s]', field, val);
@@ -188,7 +192,7 @@ function getFieldConfgKey(field) {
     return field.split(' ').join('');
 }
 function getSelApi(field) {
-    field = getFieldConfgKey(field);                              /*dbug-log*/console.log('getSelApi [%s] = %O', field, _u('snapshot', [confgs]));
+    field = getFieldConfgKey(field);                              /*dbug-log*///console.log('getSelApi [%s] = %O', field, _u('snapshot', [confgs]));
     if (!confgs[field]) { return _alert('alertIssue', ['comboboxNotFound', {field: field}]); }
     //If the combo was removed
     return $(confgs[field].id).length ? $(confgs[field].id)[0].selectize : false;

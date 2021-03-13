@@ -5,11 +5,11 @@ import { _state } from 'db/forms/forms-main.js';
 
 export default function(role) {
     return {
-        name: role,
         fields: getCoreGroupAndRankFieldConfg(),
+        name: role,
         views: {
             all: getRoleFieldViewOrder()
-        },
+        }
     };
 }
 function getRoleFieldViewOrder() {

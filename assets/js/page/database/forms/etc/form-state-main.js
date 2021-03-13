@@ -144,9 +144,6 @@ export function setOnFormCloseHandler(...args) {
 export function addRequiredFieldInput(...args) {
     return callFormState(set, 'addRequiredFieldInput', args);
 }
-export function removeFieldFromComboInit(...args) {
-    return callFormState(set, 'removeFieldFromComboInit', args);
-}
 /* ---------------------------- TAXON --------------------------------------- */
 export function setTaxonGroupState(formState, fLvl, vals) {
     const state = formState ? formState : fS;

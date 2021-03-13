@@ -18,11 +18,16 @@
 [id$="_f-cntnr"]>div[id$="_f"]
     margin-bottom: .5em
 
+.g-cntnr [id$="_f"]
+    padding: .25em .5em;
+
 /* CONTAINER FOR FIELD DIV>(alertDIV, fieldDIV) */
 [id$="_f"]
     padding: .5em
     // width: 100%
     // flex-grow: 1
+[id$="_f"].invis
+    font-size: 0 //Prevents issue with field sizing
 
 /* FORM FIELD (fieldDIV>[LABEL, INPUT] ) */
 [id$="_f"] .form-field

@@ -116,14 +116,11 @@ function getTaxonym(id) {
 function selectInitTaxonOrFocusFirstCombo(role) {
     const selId = getPrevSelId(role);
     if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { _cmbx('focusCombobox', ['Species']); }
+    } else { _cmbx('focusFirstComboboxInRow', [role, true, 2]); }
 }
 function getPrevSelId(role) {
     return $('#sel-'+role).val() || $('#sel-'+role).data('reset') ?
         $('#sel-'+role).data('selTaxon') : null;
-}
-function focusFirstRankCombobox(lcRole) {
-    _cmbx('focusFirstCombobox', [`#${lcRole}_fields`]);
 }
 function appendTxnFormAndInitCombos(role, form) {
     $(`#${role}_f`).append(form);
