@@ -14,32 +14,28 @@ export default function(role) {
 }
 function getRoleFieldViewOrder() {
     const fConfg = _state('getFieldState', ['sub', 'Sub-Group', null]);
-    return [getGroupFields(fConfg), ...getSubGroupRankFields(fConfg)].filter(f => f);
-}
-/* -------------------------- GROUP FIELDS ---------------------------------- */
-/**
- * On init, all fields are built. Once a (sub)Group is selected, the rank fields
- * will get rebuilt. If the previous group had a subGroup, the field is still
- * present in the DOM.
- */
-function getGroupFields(fConfg) {
-    return ifFieldAlreadyInDom('Group') ? null : ['Group', 'Sub-Group'];
-}
-function ifFieldAlreadyInDom(field) {
-    return $(`#${field}_f`).length;
+    const gFields = [['Group'], ['Sub-Group']];
+    if (!fConfg.shown) { gFields.pop(); }
+    return [...gFields, ...getSubGroupRankFields(fConfg)].filter(f => f);
 }
 /* --------------------------- RANK FIELDS ---------------------------------- */
 function getSubGroupRankFields(fConfg) {
-    return fConfg.misc.subRanks.reverse().map(f => [f]);
+    return fConfg.misc.subRanks.map(f => [f]).reverse();
 }
 /* ------------------------ FIELD DEFINITIONS ------------------------------- */
 function getCoreGroupAndRankFieldConfg() {
     return {
         Group: {
+            misc: {
+                customValueStore: true
+            },
             name: 'Group',
             type: 'select'
         },
         'Sub-Group': {
+            misc: {
+                customValueStore: true
+            },
             name: 'Sub-Group',
             type: 'select'
         },

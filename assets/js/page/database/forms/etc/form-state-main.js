@@ -145,7 +145,9 @@ export function addRequiredFieldInput(...args) {
     return callFormState(set, 'addRequiredFieldInput', args);
 }
 /* ---------------------------- TAXON --------------------------------------- */
+export function updateTaxonGroupState(fLvl, vals) {
+    set.setTaxonGroupState(fS, fLvl, vals);
+}
 export function setTaxonGroupState(formState, fLvl, vals) {
-    const state = formState ? formState : fS;
-    set.setTaxonGroupState(state, fLvl, vals);
+    set.setTaxonGroupState(formState, fLvl, vals);
 }

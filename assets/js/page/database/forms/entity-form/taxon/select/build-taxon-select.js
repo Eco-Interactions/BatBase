@@ -35,7 +35,7 @@ function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*/
 }
 function addNewFormState(role, groupId) {
     const vals = { Group: groupId };
-    return _state('addEntityFormState', [role, 'sub', '#sel-'+role, 'create', vals]);
+    return _state('addEntityFormState', [role, 'sub', '#sel-'+role, 'select', vals]);
 }
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -60,13 +60,9 @@ function addSelectRootTaxonBttn(role) {
 }
 function buildSelectUnspecifedBttn(role) {
     const bttn = _el('getElem', ['input', getUnspecifiedBttnAttrs()]);
-    $(bttn).click(selectGroupTaxon);
+    $(bttn).click(_form.bind(null, 'selectRoleTaxon', [null, 'root']));
     $(bttn).data('role', role);
     return bttn;
-}
-function selectGroupTaxon() {
-    const gTaxon = _state('getFieldData', ['sub', 'Sub-Group', 'misc']).taxon;/*dbug-log*///console.log('--selectGroupTaxon gTaxon[%O]', gTaxon);
-    _form('selectRoleTaxon', [null, gTaxon]);
 }
 function getUnspecifiedBttnAttrs() {
     return {
@@ -79,7 +75,7 @@ function getUnspecifiedBttnAttrs() {
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
 function customizeElemsForTaxonSelectForm(role, gId) {
     $('#sub-hdr span')[0].innerHTML = `Select ${role} Taxon`;
-    $('#sub-hdr').append(getTaxonExitButton(role));
+    $('#sub-hdr span+div').append(getTaxonExitButton(role));
     $('#sub-submit')[0].value = "Select Taxon";
     $('#sub-cancel')[0].value = "Reset";
     $('#sub-submit').unbind("click").click(_form.bind(null, 'selectRoleTaxon'));
@@ -116,11 +112,16 @@ function getTaxonym(id) {
 function selectInitTaxonOrFocusFirstCombo(role) {
     const selId = getPrevSelId(role);
     if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { _cmbx('focusFirstComboboxInRow', [role, true, 2]); }
+    } else { focusFirstRankCombo(role); }
 }
 function getPrevSelId(role) {
     return $('#sel-'+role).val() || $('#sel-'+role).data('reset') ?
         $('#sel-'+role).data('selTaxon') : null;
+}
+function focusFirstRankCombo(role) {
+    const ranks = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).subRanks;
+    const rank = ranks[0];
+    _cmbx('focusCombobox', [rank]);
 }
 function appendTxnFormAndInitCombos(role, form) {
     $(`#${role}_f`).append(form);

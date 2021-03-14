@@ -91,8 +91,8 @@ function storeTaxaByGroupAndRank(taxonObj, subGroup, group) {
         db.setDataInMemory(prop, taxonObj[rank]);
     }
 }
-function storeGroupSubRootNames(group, taxonRcrds) {
-    const gIds = Object.keys(group.subGroups);
+function storeGroupSubRootNames(group, taxonRcrds) {                /*dbug-log*///console.log("--storeGroupSubRootNames group[%O] taxonRcrds[%O]", group, taxonRcrds);
+    const gIds = Object.values(group.subGroups).map(sg => sg.taxon);
     db.setDataInMemory(group.displayName+'SubGroupNames', getNameObj(gIds, taxonRcrds));
 }
 /* ========================= MODIFY GROUP DATA ============================== */

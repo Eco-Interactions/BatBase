@@ -28,7 +28,7 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {
-    const confg = _state('getFormState', ['top']);                  /*dbug-log*/console.log('refocusTableIfFormWasSubmitted. submitData = %O', submitData);
+    const confg = _state('getFormState', ['top']);                  /*dbug-log*/console.log('refocusTableIfFormWasSubmitted');
     if (!confg.submit) { return; }
     if (confg.name === 'Interaction') { return refocusAndShowUpdates(); }
     _table('reloadTableWithCurrentFilters');
