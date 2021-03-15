@@ -27,15 +27,15 @@ import * as iForm from '../int-form-main.js';
  * subject:         Subject-taxon subGroup id
  * validInts:       Valid interaction ids for the selected subject and object groups
  */
-let app = getTagFieldDefaultState();
+let md = getTagFieldDefaultState();
 
 export function resetTagState() {
-    app = getTagFieldDefaultState();
+    md = getTagFieldDefaultState();
 }
 function getTagFieldDefaultState() {
     return {
         defaultTagOpts: [],
-        requiredTag: null,
+        autoTag: null,
         validInts: {}
     };
 }
@@ -44,8 +44,8 @@ function getTagFieldDefaultState() {
 export function initTagField() {
     const tags = _state('getEntityRcrds', ['tag']);
     const defaults = _state('getFieldState', ['top', 'InteractionTags', 'misc']).defaultTags;
-    app.defaultTagOpts = Object.keys(tags).map(ifDefaultTagGetOpt).filter(o=>o);
-    loadTagOpts(app.defaultTagOpts);
+    md.defaultTagOpts = Object.keys(tags).map(ifDefaultTagGetOpt).filter(o=>o);
+    loadTagOpts(md.defaultTagOpts);
 
     function ifDefaultTagGetOpt(id) {
         if (defaults.indexOf(tags[id].displayName) === -1) { return null; }
@@ -54,8 +54,9 @@ export function initTagField() {
 }
 /* =================== CLEAR INTERACTION-TYPE TAGS ========================== */
 export function clearTypeTagData() {
-    loadTagOpts(app.defaultTagOpts);
-    app.requiredTag = null;
+    loadTagOpts(md.defaultTagOpts);
+    md.autoTag = null;
+    _state('setFieldState', ['top', 'InteractionTags', false, 'required']);
 }
 /* ==================== LOAD INTERACTION-TYPE TAGS ========================== */
 export function loadInteractionTypeTags(tags) {
@@ -65,20 +66,20 @@ export function loadInteractionTypeTags(tags) {
 /* -------------------------- REQUIRED TAG ---------------------------------- */
 /**
  * If the selected ValidInteraction has one tag, that tag is required and will be
- * filled programatically. If there is more than one, at least one is required,
- * though this will be handled through later validation.
+ * autofilled. If there is more than one, at least one is required.
  * @param  {array} typeTags  Tags for the selected ValidInteraction type
  */
 function handleRequiredTag(tagId, count) {
-    app.requiredTag = count === 1 ? tagId : null;
-    $('#sel-InteractionTags').data('req-tag', app.requiredTag);     /*dbug-log*///console.log('handleRequiredTag tag?[%s]', app.requiredTag);
+    const isRequired = !!count;
+    md.autoTag = count === 1 ? tagId : null;
+    _state('setFieldState', ['top', 'InteractionTags', isRequired, 'required']);
 }
 function addTypeTagOpts(typeTags) {                                 /*dbug-log*///console.log('addTypeTagOpts typeTags = %O', typeTags);
     loadTagOpts(buildTagOpts(typeTags));
 }
 /* ------------------------ BUILD TAG-OPTS ---------------------------------- */
 function buildTagOpts(typeTags) {
-    const opts = typeTags.map(getTagOpt).concat(app.defaultTagOpts);
+    const opts = typeTags.map(getTagOpt).concat(md.defaultTagOpts);
     return _cmbx('alphabetizeOpts', [opts]);
 }
 function getTagOpt(tag) {
@@ -91,11 +92,11 @@ function loadTagOpts(opts) {
     afterTypeTagsLoaded(selected);
 }
 function ifDefaultTag(id) {
-    return app.defaultTagOpts.some(o => o.value == id);
+    return md.defaultTagOpts.some(o => o.value == id);
 }
 /* ---------------------- AFTER TYPE-TAGS LOAD ------------------------------ */
 function afterTypeTagsLoaded(selectedDefaults) {
-    const vals = [getInitVal(), app.requiredTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('afterTypeTagsLoaded select = %O', vals);
+    const vals = [getInitVal(), md.autoTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('afterTypeTagsLoaded select = %O', vals);
     if (!vals.length) { return; }
     _cmbx('setSelVal', ['InteractionTags', vals]);
 }
@@ -113,6 +114,6 @@ export function onTagSelection(tags) {                              /*dbug-log*/
     iForm.checkIntFieldsAndEnableSubmit();
 }
 function ensureDefaultTagStaysSelected(tags) {
-    if (!app.requiredTag || tags.indexOf(app.requiredTag) !== -1 ) { return; }
-    $('#sel-InteractionTags')[0].selectize.addItem(app.requiredTag, 'silent');
+    if (!md.autoTag || tags.indexOf(md.autoTag) !== -1 ) { return; }
+    $('#sel-InteractionTags')[0].selectize.addItem(md.autoTag, 'silent');
 }

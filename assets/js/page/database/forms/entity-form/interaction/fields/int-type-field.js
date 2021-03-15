@@ -55,9 +55,9 @@ function ifGroupsMatchState(subjGroup, objGroup) {                  /*dbug-log*/
 /* ====================== BUILD VALID OPTIONS =============================== */
 function loadIntTypeOptions() {
     const vIntTypeOpts = buildValidInteractionTypeOptions();
+    loadTypeOptions(vIntTypeOpts);
     if (!vIntTypeOpts.length) { return alertNoValidInteractions(); }
     _val('clearAnyGroupAlerts');
-    loadTypeOptions(vIntTypeOpts);
     _cmbx('enableCombobox', ['InteractionType', true]);
 }
 function buildValidInteractionTypeOptions() {
@@ -90,7 +90,9 @@ function getAllValidInteractionTypes(validInteractions) {           /*dbug-log*/
 }
 /* ----------------- ALERT NO VALID INTERACTION-TYPES ----------------------- */
 function alertNoValidInteractions() {
+    onTypeClear();
     _val('showFormValAlert', ['InteractionType', 'noValidInts', 'top']);
+    _cmbx('focusCombobox', ['InteractionTags', false]);
 }
 /* ====================== LOAD OPTIONS ====================================== */
 function loadTypeOptions(opts) {                                    /*dbug-log*///console.log('loadTypeOptions = %O', opts)

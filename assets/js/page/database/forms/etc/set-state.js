@@ -23,16 +23,28 @@ export function setEntityRecords(fS, entity, rcrds) {               /*dbug-log*/
 export function setFormState(fState, prop, val) {                   /*dbug-log*///console.log('   --setFormState [%s][%s][%O]', prop, val, fState);
     fState[prop] = val;
 }
+export function setOnFormCloseHandler(fState, hndlr) {              /*dbug-log*///console.log('    --setOnFormCloseHandler hndlr[%O] [%O]', hndlr, fState);
+    fState.onFormClose = hndlr;
+}
+/* ----------------------- FIELDS ------------------------ */
 export function setFieldState(fState, field, val, prop = 'value') { /*dbug-log*///console.log('    --setFieldState fields[%s] prop[%s] val?[%O] [%O]', field, prop, val, fState);//console.trace()
     let fData = fState.fields[field];
     if (!prop) { return fData = val; }
     fData[prop] = val;
+    onFieldStateChange(fState, field, val, prop);
 }
-export function setOnFormCloseHandler(fState, hndlr) {              /*dbug-log*///console.log('    --setOnFormCloseHandler hndlr[%O] [%O]', hndlr, fState);
-    fState.onFormClose = hndlr;
+function onFieldStateChange(fState, field, val, prop) {
+    const map = {
+        required: toggleRequiredLabelClass
+    };
+    return map[prop] ? map[prop](...arguments) : null;
 }
-export function addRequiredFieldInput(fState, input) {              /*dbug-log*///console.log('    --addRequiredFieldInput input[%O] [%O]', input, fState);
-    fState.reqElems.push(input);
+function toggleRequiredLabelClass(fState, field, val, prop) {
+    if (val) {
+        $(`#${field}_lbl`).addClass('required');
+    } else {
+        $(`#${field}_lbl`).removeClass('required');
+    }
 }
 /* ___________________________ TAXON ________________________________________ */
 export function setTaxonGroupState(fS, fLvl, vals) {

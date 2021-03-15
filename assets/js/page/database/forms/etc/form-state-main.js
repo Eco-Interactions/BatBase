@@ -140,10 +140,6 @@ export function setFieldState(...args) {
 export function setOnFormCloseHandler(...args) {
     return callFormState(set, 'setOnFormCloseHandler', args);
 }
-/* -------------------------- COMBOBOX -------------------------------------- */
-export function addRequiredFieldInput(...args) {
-    return callFormState(set, 'addRequiredFieldInput', args);
-}
 /* ---------------------------- TAXON --------------------------------------- */
 export function updateTaxonGroupState(fLvl, vals) {
     set.setTaxonGroupState(fS, fLvl, vals);

@@ -104,7 +104,7 @@ export function formInitAlert(field, tag, fLvl, skipClear) {        /*perm-log*/
  * manually with the close button, or automatically by resolving the issue.
  */
 export function showFormValAlert(fieldName, tag, fLvl) {            /*perm-log*/console.log("       --show[%s]FormValAlert [%s][%s]", fLvl, fieldName, tag);
-    fS = _state('getFormState');
+    fS = _state('getStateProp');
     const handleAndGetAlertMsg = getFieldValAlertHandler(tag, 'show')
     const alertEl = getAlertElem(fieldName, fLvl);
     const alertMsg = handleAndGetAlertMsg(alertEl, tag, fLvl, fieldName);
@@ -201,9 +201,8 @@ function getServerValidationAlertMsg(elem, tag, fLvl, fieldName) {
 }
 /* ----------------- SUB-FORM ALREADY OPEN ---------------------------------- */
 function handleOpenSubFormAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    const subEntity = fS.forms[fLvl] ? fS.forms[fLvl].entity : '';
     window.setTimeout(() => clearAlert(elem, fLvl, false), 2000);
-    return '<p>Please finish the open '+ _u('ucfirst', [subEntity]) + ' form.</p>';
+    return '<p>Please finish the open sub-form.</p>';
 }
 /* ----------------- REQUIRED-FIELD EMPTY ----------------------------------- */
 function getRequiredFieldsEmptyAleryMsg(elem, tag, fLvl, fieldName) {

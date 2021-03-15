@@ -27,7 +27,7 @@ function addRoleFocusListener(role) {
     $(`#sel-${role}`)[0].selectize.on('focus', initRoleTaxonSelect.bind(null, role));
 }
 function initRoleTaxonSelect(role) {
-    if (ifSubFormAlreadyInUse(role)) { return _val('alertInUse', [role, 'sub']); }
+    if (ifSubFormAlreadyInUse(role)) { return _val('alertFormOpen', ['sub']); }
     _form('initRoleTaxonSelect', [role]);
 }
 function getOppositeRole(role) {

@@ -16,7 +16,7 @@ import { _confg, alertFormIssue } from '~form';
 
 /* ============================ GET CORE-STATE ====================================================================== */
 export function getStateProp(fS, prop) {                            /*dbug-log*///console.log('   --getStateProp  prop[%s], fS[%O]', prop, fS);
-    return fS[prop];
+    return prop ? fS[prop] : fS;
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(fS, entity) {                        /*dbug-log*///console.log('   --getEntityRcrds  entity[%O], fS[%O]', entity, fS);
