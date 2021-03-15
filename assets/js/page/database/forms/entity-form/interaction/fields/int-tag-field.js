@@ -1,11 +1,11 @@
 /**
  * Mangages the Interaction Type and Interaction Tag fields in the interaction form.
  *
- * Exports:
- *     initTypeField
+ * Export
+ *     clearTypeTagData
+ *     initTagField
+ *     loadInteractionTypeTags
  *     onTagSelection
- *     onTypeSelectionInitTagField
- *     resetTypeAndTagMemory
  *
  * TOC
  *     INTERACTION TYPE

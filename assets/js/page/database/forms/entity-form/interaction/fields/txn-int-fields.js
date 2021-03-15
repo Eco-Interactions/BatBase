@@ -77,7 +77,7 @@ export function onTaxonRoleSelection(role, val) {                   /*perm-log*/
 }
 function storeRoleSelection(role, val) {
     $('#sel-'+role).data('selTaxon', val);
-    app[role] = _state('getFieldState', ['sub', 'Sub-Group']).id;   /*dbug-log*///console.log('   --storeRoleSelection [%s] -> [%s]', role, app[role]);
+    app[role] = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).rcrd.id;   /*dbug-log*///console.log('   --storeRoleSelection [%s] -> [%s]', role, app[role]);
 }
 function ifBothRolesSelected() {
     return Object.keys(app).every(r => app[r]);

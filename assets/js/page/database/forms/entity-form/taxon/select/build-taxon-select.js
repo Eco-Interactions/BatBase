@@ -120,7 +120,7 @@ function getPrevSelId(role) {
 }
 function focusFirstRankCombo(role) {
     const ranks = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).subRanks;
-    const rank = ranks[0];
+    const rank = ranks.slice().pop();
     _cmbx('focusCombobox', [rank]);
 }
 function appendTxnFormAndInitCombos(role, form) {

@@ -37,7 +37,7 @@ export function addRequiredFieldInput(fState, input) {              /*dbug-log*/
 /* ___________________________ TAXON ________________________________________ */
 export function setTaxonGroupState(fS, fLvl, vals) {
     const group = getGroupEntity(fS, fLvl, vals);
-    const sGroupId = getSubGroupId(fS, vals, group);                    /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
+    const sGroupId = getSubGroupId(fS, vals, group);                /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
     setGroupState(fS.records.taxon, fS.forms[fLvl], group);
     setSubGroupState(fS, fS.forms[fLvl], group.subGroups, sGroupId);/*perm-log*/console.log('       --[%s] stateData = %O', group.displayName, fS.forms[fLvl]);
 }
@@ -65,6 +65,7 @@ function setSubGroupState(fS, fState, subGroups, sGroupId) {
     fState.fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
     fState.fields['Sub-Group'].value = subGroup.taxon;              /*dbug-log*///console.log('--setSubGroupState field[%O] subGroup[%O] subGroups[%O]', fState.fields['Sub-Group'].class, subGroup, subGroups);
     fState.fields['Sub-Group'].misc = {
+        rcrd: subGroup,
         subRanks: subGroup.subRanks,
         taxon: fS.records.taxon[subGroup.taxon]
     };

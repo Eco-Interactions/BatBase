@@ -8,7 +8,7 @@
  *     errUpdatingData
  *     formInitAlert
  *     formSubmitError
- *     openSubFormAlert
+ *     alertFormOpen
  *     showFormValAlert
  *
  * TOC
@@ -55,8 +55,9 @@ function isDuplicateContribution(errTxt) {
     return errTxt.includes("Duplicate entry") && errTxt.includes("contribution");
 }
 function isDuplicateAuthor(errTxt) {
-    const detailEntity = _state('getStateProp', ['submit']).detailEntity;
-    return errTxt.includes("Duplicate entry") && detailEntity === 'author';
+    //TODO. Replace
+    // const detailEntity = _state('getStateProp', ['submit']).detailEntity;
+    // return errTxt.includes("Duplicate entry") && detailEntity === 'author';
 }
 /* ===================== DATA-STORAGE ALERT ================================= */
 export function errUpdatingData(errTag) {                           /*perm-log*/console.log('           !!!errUpdatingData [%s]', errTag);
@@ -84,8 +85,9 @@ function reloadAndRedownloadData() {
 }
 /* ===================== FORM-INIT ALERT ==================================== */
 /** A sub-form is already open. */
-export function openSubFormAlert(field, fLvl, skipClear) {          /*dbug-log*///console.log("       --open[%s]FormAlert [%s]", fLvl, field)
-    return formInitAlert(field, 'openSubForm', fLvl, skipClear);
+export function alertFormOpen(fLvl, skipClear, e = null) {
+    const entity = _state('getFormState', [fLvl, 'name']);          /*dbug-log*///console.log("       --open[%s]FormAlert [%s]", fLvl, entity);
+    return formInitAlert(entity, 'openSubForm', fLvl, skipClear);
 }
 /**
  * When an issue prevents a form init, an alert is shown to the editor and the
@@ -126,6 +128,10 @@ function getFieldValAlertHandler(tag, action) {
         },
         'openSubForm': {
             show: handleOpenSubFormAndReturnAlertMsg
+        },
+        'noValidInts': {
+            show: handleNoValidIntsAndReturnAlertMsg,
+            clear: false
         },
         /* --- SOURCE --- */
         'newDupAuth': {
@@ -180,7 +186,7 @@ function getFieldValAlertHandler(tag, action) {
 }
 /* ============================= FORM ======================================= */
 function setOnFormCloseClearAlert(elem, fLvl) {
-    $('#'+fLvl+'-form').bind('destroyed', clearAlert.bind(null, elem, fLvl));
+    $(`#${fLvl}-form`).bind('destroyed', clearAlert.bind(null, elem, fLvl));
 }
 function setOnChangeClearAlert(fieldSelector, clearAlertHandler) {
     $(fieldSelector).change(clearAlertHandler);
@@ -203,6 +209,13 @@ function handleOpenSubFormAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 function getRequiredFieldsEmptyAleryMsg(elem, tag, fLvl, fieldName) {
     return `<span>Please fill required fields and submit again.</span>`;
 }
+/* =========================== INTERACTION ================================== */
+function handleNoValidIntsAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    return '<span>There are no valid interaction types</span>';
+}
+export function clearAnyGroupAlerts() {                             /*dbug-log*///console.log('clearAnyGroupAlerts')
+    clearAlert($('#InteractionType_alert')[0], 'top');
+}
 /* ============================= SOURCE ===================================== */
 /* --------------- DUPLICATE AUTHOR ----------------------------------------- */
 function handleNewDupAuthAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
@@ -223,7 +236,7 @@ function handleEdBlanksAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return '<p>Please fill the blank in the order of editors.</p>';
 }
 /** Called when the blank is filled in the author|editor order. */
-export function clrContribFieldAlert(field, fLvl) {                   /*dbug-log*///console.log('clrContribFieldAlert.')
+export function clrContribFieldAlert(field, fLvl) {                 /*dbug-log*///console.log('clrContribFieldAlert.')
     const elem = $('#'+field+'_alert')[0];
     clearAlert(elem, fLvl);
 }
@@ -282,9 +295,9 @@ function handleNoGenusAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 }
 
 function handleRankNotAvailableInNewGroupAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    const groupName = _state('getTaxonProp', ['groupName']);
-    const valid = _state('getTaxonProp', ['subGroup']).subRanks.join(', ');
-    return `<span>Valid ${groupName} ranks: \n${valid}</span>`;
+    const groupName = _state('getFieldState', [fLvl, 'Group']).text;
+    const vRanks = _state('getFieldState', [fLvl, 'Sub-Group', 'misc']).subRanks;
+    return `<span>Valid ${groupName} ranks: \n${vRanks}</span>`;
 }
 /* ===================== SHOW ALERT ========================================= */
 /** Returns the validation alert container for the passed field|form. */
@@ -297,7 +310,7 @@ function getAlertElem(fieldName, fLvl) {                            /*dbug-log*/
 function showAlert(elem, msg, tag, fLvl) {                          /*dbug-log*///console.log('showAlert. args = %O', arguments)
     elem.innerHTML = msg;
     $(elem).append(getAlertExitBttn(tag, elem, fLvl));
-    _elems('toggleSubmitBttn', ['#'+fLvl+'-submit', false]);
+    _elems('toggleSubmitBttn', [fLvl, false]);
 }
 function getAlertExitBttn(tag, elem, fLvl) {
     const onFieldClear = getFieldValAlertHandler(tag, 'clear');
@@ -331,7 +344,7 @@ function clearAlertElem(elem, fLvl) {
     $(elem).fadeTo(0, 1);
 }
 function enableSubmitIfFormReady(fLvl, enableSubmit) {
-    if (!$('#'+fLvl+'-form').length || _elems('hasOpenSubForm', [fLvl])) { return; }
+    if (!$(`#${fLvl}-form`).length || _elems('hasOpenSubForm', [fLvl])) { return; }
     if (!enableSubmit) { return; }                                  /*dbug-log*///console.log('enableSubmitIfFormReady [%s]', fLvl)
     _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }

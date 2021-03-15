@@ -3,7 +3,7 @@
  * - rankNames - an object with each rank name (k) and it's id and ordinal (v).
  * - groupNames - an object with each group name (k) and it's id.
  * - [group][subGroup][rank]Names - object with all taxa in subGroup at the rank: name (k) id (v)
- * * group - resaved with 'uiRanksShown' filled with the rank display names.
+ * - [group]SubGroupNames - object with subGroup taxa root displayNames(k) and id(v)
  *
  * Export
  *     modifyTxnDataForLocalDb
