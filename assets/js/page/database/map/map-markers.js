@@ -271,35 +271,39 @@ function bindClassContextToMethods(self) {
     }
 }
 /** ------- Shared Helpers --------- */
-function getCustomIcon(iconType) {                                              //console.log('iconType = ', iconType)
-    if (!iconType) { return getGreenCircleMarker(); }
-    return iconType.includes('edit') ? getTealPinMarker() : null;
-    /** Displays single interactions on map as a green circle to match marker-clusters. */
-    function getGreenCircleMarker() {
-        const classes = iconType || 'single-marker info';
-        return {
-            icon: L.divIcon({
-                className: 'single-marker info',
-                html: iconType === 'form-loc' ? '' : 1,
-            })
-        }
+function getCustomIcon(iconType) {                                              //console.log('--getCustomIcon iconType[%s]', iconType);
+    if (!iconType) { return getGreenCircleMarker(iconType); }
+    return isFormLoc(iconType) ? getTealPinMarker() : null;
+}
+/** Displays single interactions on map as a green circle to match marker-clusters. */
+function getGreenCircleMarker(iconType) {
+    const classes = iconType || 'single-marker info';
+    return {
+        icon: L.divIcon({
+            className: 'single-marker info',
+            html: iconType === 'form-loc' ? '' : 1,
+        })
     }
-    /** Used for the edit-location forms to display the location being edited. */
-    function getTealPinMarker() {
-        return {
-            icon:  L.icon({
-                iconUrl: require('images/icons/teal-marker-icon.png').default,
-                iconSize: [29, 43],
-                iconAnchor: [16, 42],
-                popupAnchor: [0, -39],
-                shadowUrl: require('images/icons/marker-shadow.png').default,
-                shadowSize: [33, 45],
-                shadowAnchor: [10, 44],
-                className: 'form-loc'
-            })
-        };
-    }
-} /* End getCustomIcon */
+}
+/** Used for the edit-location forms to display the location being edited. */
+function getTealPinMarker() {
+    return {
+        icon:  L.icon({
+            iconUrl: require('images/icons/teal-marker-icon.png').default,
+            iconSize: [29, 43],
+            iconAnchor: [16, 42],
+            popupAnchor: [0, -39],
+            shadowUrl: require('images/icons/marker-shadow.png').default,
+            shadowSize: [33, 45],
+            shadowAnchor: [10, 44],
+            className: 'form-loc'
+        })
+    };
+}
+function isFormLoc(iconType) {
+    const types = ['form-loc']; //iconType.includes('edit')
+    return types.indexOf(iconType) !== -1;
+}
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
 function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
     const locHtml = getLocNameHtml(intData.locs[0]);
@@ -706,7 +710,7 @@ function buildLocDetails(loc) {
 function getGeocodedLocHtml(loc) {                                              //console.log('buildingGeocodedLocationPopup. loc = %O ', loc);
     const cntnr = _el('getElem', ['div', {class: 'flex-col form-loc-popup'}]);
     const elems = getLocDataHtml(loc);
-    const bttn = loc ? getFillCoordsBttn(loc.lat, loc.lng) : null;
+    const bttn = loc ? getFillCoordsBttn(loc.lat, loc.lng, loc.cntryId) : null;
     $(cntnr).append([...elems, bttn].filter(e=>e));
     return cntnr;
 }
@@ -722,10 +726,10 @@ function getNameHtml(loc) {
     return `<div style="font-size:1.1em;">${name}</b></div>`;
 }
 /** Click event added in location-form. */
-function getFillCoordsBttn(lat, lng) {
+function getFillCoordsBttn(lat, lng, cntryId) {
     const attr = {type: 'button', id: 'fill-coords', value: 'Autofill Coordinates'};
     const bttn = _el('getElem', ['input', attr]);
-    $(bttn).click(_forms.bind(null, 'autofillCoordinateFields', [lat, lng]));
+    $(bttn).click(_forms.bind(null, 'autofillCoordinateFields', [lat, lng, cntryId]));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }

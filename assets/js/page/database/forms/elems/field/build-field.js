@@ -109,7 +109,7 @@ function handleRequiredField(f) {
  * is enabled if all of it's required fields have values and it has no open child
  * forms.
  */
-function checkRequiredFields(e) {                                   /*dbug-log*///console.log('   --checkRequiredFields e = %O', e)
+function checkRequiredFields(e) {                                   /*dbug-log*///console.log('   @--checkRequiredFields e[%O]', e)
     const fLvl = $(e.currentTarget).data('fLvl');
    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }

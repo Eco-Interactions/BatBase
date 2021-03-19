@@ -529,7 +529,7 @@ function loadCountryAndSubLocs(cntryId) {
 }
 export function addVolatileMapPin(val, type, cntryId) {                         //console.log('           --addVolatileMapPin')
     if (!val) { return removePreviousMapPin(); }
-    const latLng = getMapPinCoords();
+    const latLng = getMapPinCoords();                               /*dbug-log*///console.log('latlng[%O]', latLng);
     if (type === 'edit') { addEditFormMapData(latLng, val, cntryId);
     } else { addNewLocPinAndFillCoordFields(latLng); }
     $('#cnt-legend').html('');
@@ -595,9 +595,7 @@ function replaceMapPin(latLng, loc, zoomFlag) {
     const markerType = (zoomFlag === 'edit' ? 'edit' : '') + 'form-loc';
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
-    if (loc && zoomFlag !== 'edit') {                                           //console.log('Adding parent data for [%s] cntryId = %s', loc.name, loc.cntryId);
-        $('#sel-Country')[0].selectize.addItem(loc.cntryId, 'silent');
-        $('#location_fields #DisplayName_f input[type="text"]').change(); //Required fields handle submit button enabling
+    if (loc && zoomFlag !== 'edit') {
         addParentLocDataToMap(loc.cntryId); //, zoomFlag === 'create'
     }
     addPinToMap(latLng, marker, zoomFlag);

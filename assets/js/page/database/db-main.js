@@ -71,7 +71,7 @@ function requireCss() {
     require('styles/css/moz-styles.css');
     require('styles/pages/db/db.styl');
     require('styles/pages/db/map.styl');
-    require('styles/pages/db/forms.styl');
+    require('styles/pages/db/forms/forms.styl');
 }
 function requireJs() {
     require('leaflet-control-geocoder');

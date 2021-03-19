@@ -191,9 +191,6 @@
     text-align: right
 }
 /*------------------------------- Form Styles --------------------------------*/
-#top-form {
-    flex-wrap: wrap;
-}
 .exit-row {
     width: 100%;
     justify-content: space-between;

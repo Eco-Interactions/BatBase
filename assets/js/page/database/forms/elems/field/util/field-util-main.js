@@ -33,7 +33,7 @@ export function ifAllRequiredFieldsFilled(fLvl) {
     const fields = _state('getFormState', [fLvl, 'fields']);        /*dbug-log*///console.log("+--ifAllRequiredFieldsFilled... [%s][%O]", fLvl, fields)
     return Object.values(fields).every(isRequiredFieldFilled.bind(null, fLvl));
 }
-/** Note: checks the first input of multiSelect container elems.  */
+/** TODO: checks the first input of multiSelect container elems.  */
 function isRequiredFieldFilled(fLvl, field) {                       /*dbug-log*///console.log('       --isRequiredFieldFilled[%s] [%O]', fLvl, field);
     if (!field.required) { return true; }
     if (field.value === 'invalid') { return false; }                /*dbug-log*///console.log('       --[%s] = [%O]', field.name, field.value ? field.value : null);

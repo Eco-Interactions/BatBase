@@ -8,9 +8,8 @@ export default function(entity) {
         style: 'med-form',
         views: {
             all: [
-                [
-                    {fields: ['DisplayName', 'Country', 'HabitatType']},
-                    'Description'],
+                [   {fields: ['DisplayName', 'Country']},
+                    {fields: ['HabitatType', 'Description']}],
                 ['Latitude', 'Longitude', 'Elevation', 'ElevationMax'],
             ]
         }

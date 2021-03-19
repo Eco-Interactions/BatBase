@@ -13,14 +13,15 @@
  */
 import { _cmbx, _el } from '~util';
 import { _map } from '~db';
-import { _state, _elems, _form } from '~form';
+import { _state, _elems, _form, getSubFormLvl } from '~form';
 
 /** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
 export function initCreateForm(entity, val) {                       /*dbug-log*///console.log("       --initLocForm [%s]", val);
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
     _elems('initSubForm', [getLocFormParams(val)])
-    .then(finishLocFormInit);
+    .then(finishLocFormInit)
+    .then(onCreateFormLoadComplete);
 }
 function getLocFormParams(val) {
     return {
@@ -57,14 +58,14 @@ function scrollToLocFormWindow() {
     $('#top-form')[0].scrollTo(0, 150);
 }
 function addNotesToForm() {
-    addHowToCreateWithGpsNote($('#Latitude_f')[0].parentNode);
+    addHowToCreateWithGpsNote();
     addSelectSimilarLocationNote($('#ElevationMax_f')[0].parentNode);
 }
-function addHowToCreateWithGpsNote(pElem) {
-    const note = `<p class="loc-gps-note" style="margin-top: 5px;">Enter
-        decimal data (convert <a href="https://www.fcc.gov/media/radio/dms-decimal"
-        target="_blank">here</a>) and see the green pin’s popup for name suggestions.</p>`;
-    $(pElem).before(note);
+function addHowToCreateWithGpsNote() {
+    const note = `<div class="loc-gps-note" style="margin-top: 5px;">Enter
+        decimal data (<a href="https://www.fcc.gov/media/radio/dms-decimal"
+        target="_blank">convert</a>)<br>See the green pin’s popup for name suggestions.</div>`;
+    $('#Country_f').after(note);
 }
 function addSelectSimilarLocationNote(prevElem) {
     const note = `<p class="loc-gps-note" style="margin-top: 5px;">
@@ -114,9 +115,9 @@ function initCombos(fLvl) {
     _elems('initFormCombos', [fLvl, events]);
 }
 /* ------------------------ MAP METHODS ------------------------------------- */
-export function addMapToLocForm(type, $formElem = $('#location_fields')) {
+export function addMapToLocForm(type, $form = $('#Location_fields')) {/*dbug-log*///console.log('--addMapToLocForm type[%s] form[%O]', type, $form);
     const mapContainer = _el('getElem', ['div', { id: 'form-map' }]);
-    $formElem.after(mapContainer);
+    $form.after(mapContainer);
     initLocFormMap(type);
 }
 function initLocFormMap(type) {
@@ -130,10 +131,10 @@ export function focusParentAndShowChildLocs(type, val) {
     _map('initFormMap', [val, locRcrds, type]);
 }
 /* ----------- COORDINATE FIELD LISTENER --------------- */
-export function addListenerToGpsFields(fLvl, params = [true]) {
+export function addListenerToGpsFields(fLvl, params = [true]) {     /*dbug-log*///console.log('--addListenerToGpsFields fLvl[%s] params[%O]', fLvl, params);
     $('#Latitude_f input, #Longitude_f input').change(validateLocFields);
 
-    function validateLocFields() {
+    function validateLocFields() {                                  /*dbug-log*///console.log('   @--validateLocFields', );
         const coords = getCoordVals().filter(c=>c);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
         if (coords.length === 1) { ifEditingDisableSubmit(fLvl, coords); }
@@ -155,7 +156,14 @@ function lintCoord(prefix) {
 }
 /* ----------- AUTOFILL COORDINATES --------------- */
 
-export function autofillCoordinateFields(lat, lng) {
-    $('#Latitude_f input').val(lat);
-    $('#Longitude_f input').val(lng);
+export function autofillCoordinateFields(lat, lng, cntryId) {
+    const fLvl = getSubFormLvl('sub');
+    setCoordinateFieldData(fLvl, 'Latitude', lat.toFixed(7));
+    setCoordinateFieldData(fLvl, 'Longitude', lng.toFixed(7));
+    _elems('setSilentVal', [fLvl, 'Country', cntryId]);
+    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+}
+function setCoordinateFieldData(fLvl, field, coord) {
+    $(`#${field}_f input`).val(coord);
+    _state('setFieldState', [fLvl, field, coord]);
 }
