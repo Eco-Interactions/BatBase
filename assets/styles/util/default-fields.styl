@@ -1,8 +1,8 @@
 /* ====================== SELECTORS FOR JS ================================== */
 /** Multi-input field cntnr */
-.cntnr
+//.cntnr
 /** Applied to elem inputs. Used to grab input within field elements. */
-.f-input
+//.f-input
 /* =========================== FORMS ======================================== */
 /* CONTAINER FOR FORM-ROW */
 .row
@@ -33,7 +33,7 @@
     width: fit-content
 
 /* FIELD INPUT */
-input[class$="-field"]
+.f-input
     width: -webkit-fill-available
 
 /* FORM FOOTER */
@@ -42,7 +42,7 @@ input[class$="-field"]
 
 /* =========================== FIELDS ======================================= */
 /* CONTAINER FOR COMBOBOX GROUPS */
-.field-cntnr           /* .flex-row also on elems */
+.field-cntnr, .field-elems           /* .flex-row also on elems */
     flex: 1 0 auto
     justify-content: space-between
 
@@ -67,7 +67,7 @@ input[class$="-field"]
     width: 12em !important
 
 .w-8
-    // width: 8em !important
+    width: 8em !important
 
 .w-4
     width: 4em !important

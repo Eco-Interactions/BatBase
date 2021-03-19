@@ -1,7 +1,7 @@
 /**
  * Entry point for entity-specific code.
  *
- * Note - required form methods: initCreateForm, initCombos
+ * Note - required form methods: initCreateForm
  *
  * TOC
  *     INIT FORM
@@ -17,18 +17,23 @@
  *             CITATION
  */
 import { _u } from '~util';
-import { _state, _val } from '~form';
+import { _elems, _state, _val } from '~form';
 import * as int from './interaction/int-form-main.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/src-form-main.js';
 import * as txn from './taxon/txn-form-main.js';
 
 const forms = {
-    'interaction': int, 'object': int, 'subject': int,
-    'location': loc,
-    'author': src, 'citation': src, 'editor': src, 'publication': src, 'publisher': src,
-    'taxon': txn,'species': txn, 'genus': txn, 'family': txn, 'order': txn, 'class': txn
+    int: { ent: ['interaction', 'object', 'subject'], mod: int },
+    loc: { ent: ['location'], mod: loc },
+    src: { ent: ['author', 'citation', 'editor', 'publication', 'publisher'], mod: src },
+    txn: { ent: ['taxon', 'species', 'genus', 'family', 'order', 'class'], mod: txn }
 };
+function getEntityModule(entity) {
+    const lc = _u('lcfirst', [entity]);
+    const key = Object.keys(forms).find(m => forms[m].ent.indexOf(lc) !== -1);
+    return forms[key].mod;
+}
 export function clearEntityFormMemory(entity) {
     const map = {
         'interaction': int.clearFormMemory
@@ -38,44 +43,7 @@ export function clearEntityFormMemory(entity) {
 }
 /* =================== INIT FORM ============================================ */
 export function createEntity(entity, val) {
-    return forms[entity].initCreateForm(...arguments);
-}
-export function createSubEntity(entity, fLvl, val) {                /*dbug-log*///console.log('createSubEntity [%s][%s] ?[%s]', fLvl, entity, val);
-    if (ifFormInUse(fLvl)) { return alertInUse(fLvl, entity); }
-    createEntity(entity, val);
-}
-/* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-export function ifFormInUse(fLvl) {
-    return fLvl ? $(`#${fLvl}-form`).length !== 0 : false;
-}
-export function alertInUse(fLvl, e) {
-    const ent = e ? e : _state('getFormState', [fLvl, 'name']);
-    const entity = ent === 'Citation' ? 'CitationTitle' : ent;
-    _val('alertFormOpen', [entity, fLvl]);  //TODO: REORDER PARAMS TO MATCH UPDATED METHOD
-}
-/* ------------------------- FORM COMBOS ------------------------------------ */
-export function initCombos(fLvl) {
-    const entity = _u('lcfirst', [_state('getFormState', [fLvl, 'name'])]);/*dbug-log*///console.log('initCombos [%s][%s]', fLvl, entity)
-    forms[entity].initCombos(fLvl, entity);
-}
-/* -------------------------- EDIT FORMS ------------------------------------ */
-/**
- * [finishEditFormInit description]
- * @param  {[type]} entity [description]
- * @param  {[type]} id     [description]
- * @return {[type]}        [description]
- */
-export function finishEditFormInit(entity, id) {
-    forms[entity].initCombos('top', entity);
-    return finishCmplxFormBuilds(entity, id);
-}
-function finishCmplxFormBuilds(entity, id) {
-    const map = {
-        'citation': src.setSrcEditRowStyle.bind(null, 'citation'),
-        'publication': src.setSrcEditRowStyle.bind(null, 'publication'),
-        'location': addMapToLocationEditForm,
-    };
-    return !map[entity] ? Promise.resolve() : Promise.resolve(map[entity](id));
+    return getEntityModule(entity).initCreateForm(...arguments);
 }
 export function addSourceDataToFormState() {
     return src.addSourceDataToFormState(...arguments);
@@ -111,9 +79,6 @@ export function autofillCoordinateFields() {
     loc.autofillCoordinateFields(...arguments);
 }
 /** ------------------------ TAXON ------------------------------------------ */
-export function createTaxon(rank, val) {
-    return txn.initCreateForm(rank, val);
-}
 export function getSelectedTaxon() {
     return txn.getSelectedTaxon();
 }

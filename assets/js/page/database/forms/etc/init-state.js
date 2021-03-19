@@ -20,31 +20,36 @@ import { _db, _u } from '~util';
 import { _confg, _state, alertFormIssue } from '~form';
 /* ========================= INIT FORM-STATE ================================ */
 /* ----------------------- STATE CORE --------------------------------------- */
-export function initFormState(action, entity, id) {                 /*dbug-log*///console.log("    #--initFormState action[%s] entity[%s] id?[%s]", action, entity, id);
-    const fS = getMainStateObj(entity);
-    const dataKeys = getDataKeysForEntityRootForm(action, entity);
+/**
+ * [initFormState description]
+ * @param  {obj} p              Root-form params
+ * @param  {obj} p.action       Defaults to 'create'
+ * @param  {str} *p.entity      Entity class
+ * @param  {fnc} p.initCombos
+ * @param  {fnc} p.onFormClose
+ * @param  {fnc} p.submit
+ *
+ *
+ * @return {obj}     Root form-state
+ */
+export function initFormState(p) {                                  /*dbug-log*///console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.entity, p.id, (p.action || 'create'));
+    const fS = getMainStateObj(p.entity);
+    const dataKeys = getDataKeysForEntityRootForm(p.entity, p.action);
+    p.fLvl = 'top';
     return _db('getData', [dataKeys])
-        .then(data => addRecordDataToState(fS, data))
-        .then(() => addEntityFormState(fS, entity, 'top', null, action, { entity: id }))
-        .then(() => returnFinishedFormState(fS));
+        .then(data => fS.records = data)
+        .then(() => addEntityFormState(fS, p))
+        .then(() => fS);
 }
 function getMainStateObj(entity) {
     return {
-        entity: entity,
+        // entity: entity,
         forms: {},
         formLevels: ['top', 'sub', 'sub2'],
-        init: true, //eliminates possibility of opening form multiple times.
     };
 }
-function addRecordDataToState(fS, data) {  console.log('addRecordDataToState')
-    fS.records = data;
-}
-function returnFinishedFormState(fS) {                              /*perm-log*/console.log("       ####initState[%O] curState[%O]", _u('snapshot', [fS]), fS);
-    delete fS.init;
-    return fS;
-}
 /* ----------------------- FORM DATA ---------------------------------------- */
-function getDataKeysForEntityRootForm(action, entity) {
+function getDataKeysForEntityRootForm(entity, action = 'create') {
     const map = {
         'author': {
             'edit': ['source', 'author']
@@ -71,14 +76,14 @@ function getDataKeysForEntityRootForm(action, entity) {
             'edit': ['group', 'rankNames', 'taxon']
         }
     }
-    return map[entity][action];
+    return map[_u('lcfirst', [entity])][action];
 }
 /* ----------------------- ENTITY FORM -------------------------------------- */
 /**
  * Adds the properties and confg that will be used throughout the code for
  * generating, validating, and submitting entity sub-forms.
  *
- * -- Property descriptions:
+ * -- Property descriptions: TODO: UPDATE
  * > action - create || edit
  * > simple - All fields are shown unless simple default-display confg present
  * > entity - Name of this form's entity.
@@ -99,21 +104,23 @@ function getDataKeysForEntityRootForm(action, entity) {
  * > Taxon forms:
  *         taxonData - added to fState.forms (see props @initTaxonParams)
  */
-export function addEntityFormState(fS, entity, fLvl, pSel, action, vals) {/*dbug-log*///console.log("    #--addEntityFormState entity[%s] lvl[%s] pSel?[%s] action[%s] vals[%O] forms[%O]", entity, fLvl, pSel, action, vals, fS);
-    fS.forms[entity] = fLvl;
-    fS.forms[fLvl] = getBaseFormState(pSel, action);
-    return initEntityState(fS, entity, fLvl, vals)
-        .then(() => initEntityFormConfg(fS, entity, fLvl, action, vals));
+export function addEntityFormState(fS, p) {                         /*dbug-log*///console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", p.entity, p, fS);
+    fS.forms[p.entity] = p.fLvl;
+    fS.forms[p.fLvl] = getBaseFormState(p);
+    p.vals = p.vals ? p.vals : {};
+    return initEntityState(fS, p.entity, p.fLvl, p.vals)
+        .then(() => initEntityFormConfg(fS, p));
 }
-function getBaseFormState(pSel, action) {
+function getBaseFormState(p) {
     return {
-        action: action,
-        editing: action === 'edit' ? { core: vals.entity || null, detail: null } : false,
-        onFormClose: null,
-        pSelId: pSel,
+        action: p.action ? p.action : 'create',
+        editing: p.id ? { core: p.id, detail: null } : false,
+        onFormClose: p.onFormClose,
+        initCombos: p.initCombos,
+        pSelId: p.pSel,
     };
 }
-function initEntityState(fS, entity, fLvl, vals) {
+function initEntityState(fS, entity, fLvl, vals = {}) {
     const map = {
         // Citation: addPubData,
         Subject: initTaxonState,
@@ -122,12 +129,12 @@ function initEntityState(fS, entity, fLvl, vals) {
     };
     return Promise.resolve(map[entity] ? map[entity](fS, fLvl, vals) : null);
 }
-function initEntityFormConfg(fS, entity, fLvl, action, vals) {
-    let fVals = _state('getFieldValues', [fLvl]);
-    fVals = Object.keys(fVals).length ? fVals : vals;
-    const confg = _confg('getInitFormConfg', [entity, fLvl, action, fVals]);
-    _confg('mergeIntoFormConfg', [confg, fS.forms[fLvl]]);
-    fS.forms[fLvl] = confg;                                         /*dbug-log*///console.log("    #--finalEntityFormState [%O]", confg);
+function initEntityFormConfg(fS, p) {
+    Object.assign(p.vals, _state('getFieldValues', [p.fLvl]));
+    const confg = _confg('getInitFormConfg', [p.entity, p.fLvl, p.action, p.vals]);
+    _confg('mergeIntoFormConfg', [confg, fS.forms[p.fLvl]]);
+    fS.forms[p.fLvl] = confg;
+    return confg;
 }
 /* ___________________________ TAXON ________________________________________ */
 export function initTaxonState(fS, fLvl, vals) {                    /*dbug-log*///console.log('   --initTaxonState fLvl[%s] vals[%O] fS[%O]', fLvl, vals, fS);

@@ -43,8 +43,8 @@ export function buildDynamicFormField() {
 export function getFormFieldRows() {
     return row.getFormFieldRows(...arguments);
 }
-export function getFormRows() {
-    return row.getFormRows(...arguments);
+export function buildFormRows() {
+    return row.buildFormRows(...arguments);
 }
 /* =================== FORM-FIELD UTILITY =================================== */
 export function setDynamicFieldStyles() {

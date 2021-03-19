@@ -8,7 +8,7 @@
  *     INTERACTION TYPE
  *     TAGS
  */
-import { create } from '../int-form-main.js';
+import { _form } from '~form';
 import * as src from './src-int-fields.js';
 import * as loc from './loc-int-fields.js';
 import * as txn from './txn-int-fields.js';
@@ -17,15 +17,18 @@ import * as tag from './int-tag-field.js';
 
 export function getIntComboConfg() {
     return {
-        'CitationTitle': { onChange: src.onCitSelection, create: create('citation', 'sub') },
+        'CitationTitle': { onChange: src.onCitSelection, create: create('citation') },
         'Country-Region': { onChange: loc.onCntryRegSelection },
         'InteractionType': { onChange: type.onTypeSelection },
         'InteractionTags': { onChange: tag.onTagSelection, delimiter: ",", maxItems: null  },
-        'Location': { onChange: loc.onLocSelection, create: create('location', 'sub')},
-        'Publication': { onChange: src.onPubSelection, create: create('publication', 'sub')},
+        'Location': { onChange: loc.onLocSelection, create: create('location')},
+        'Publication': { onChange: src.onPubSelection, create: create('publication')},
         'Subject': { onChange: txn.onTaxonRoleSelection.bind(null, 'Subject') },
         'Object': { onChange: txn.onTaxonRoleSelection.bind(null, 'Object') },
     };
+}
+function create(entity) {
+    return _form.bind(null, 'createEntity', [entity]);
 }
 export function clearFormFieldModuleMemory() {
     type.resetTypeAndTagMemory();

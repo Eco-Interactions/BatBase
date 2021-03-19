@@ -43,7 +43,7 @@
 import { _u } from '~util';
 
 export function getBaseFormConfg(entity, fLvl) {
-    const cName = getConfgName(entity);                             /*dbug-log*///console.log('   +--getBaseConfg [%s] for [%s]', cName, entity);
+    const cName = getConfgName(entity);                             /*dbug-log*///console.log('   +--getBaseConfg [%s] for [%s][%s]', cName, fLvl, entity);
     const confg = getConfg(cName, entity);
     confg.group = fLvl;
     return confg;

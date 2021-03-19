@@ -8,6 +8,7 @@ export default function(entity) {
         },
         name: entity,
         pinnable: true, // phrasing?
+        style: 'lrg-form',
         views: {
             all: [
                 ['Publication', 'CitationTitle'],

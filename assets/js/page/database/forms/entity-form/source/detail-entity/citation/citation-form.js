@@ -32,26 +32,26 @@ export function loadCitTypeFields() {
 /** Shows the Citation  sub-form and disables the publication combobox. */
 export function initCitForm(v) {                                    /*perm-log*/console.log("       /--initCitForm [%s]", v);
     timeout = null;
-    return initCitFormMemory(v)
-        .then(buildAndAppendCitForm);
+    return _elems('initSubForm', [getCitFormParams(v)])
+        .then(finishCitFormInit);
 }
-/* ------------------------- INIT STATE MEMORY ------------------------------ */
-function initCitFormMemory(v) {
-    const p = ['citation', 'sub', '#sel-CitationTitle', 'create', { Title: (v === 'create' ? '' : v)}]
-    return _state('addEntityFormState', p)
-        .then(() => _state('setOnFormCloseHandler', ['sub', enablePubField]));
-    //get default cit type from pub config
+function getCitFormParams(v) {
+    return {
+        appendForm: form => $('#CitationTitle_f')[0].parentNode.after(form),
+        entity: 'Citation',
+        fLvl: 'sub',
+        initCombos: sForm.initCombos.bind(null, 'sub', 'Citation'),
+        onFormClose: enablePubField,
+        pSel: '#sel-CitationTitle',
+        style: 'med-sub-form',
+        submit: sForm.showSubmitModal.bind(null, 'sub'),
+        vals: { Title: (v === 'create' ? '' : v)}
+    };
 }
-/* -------------------------- BUILD FORM ------------------------------------ */
-function buildAndAppendCitForm() {
-    return _elems('getSubForm', ['sub', 'med-sub-form', '#sel-CitationTitle'])
-        .then(form => appendCitFormAndFinishBuild(form));
-}
-function appendCitFormAndFinishBuild(form) {                        /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
+// /* -------------------------- BUILD FORM ------------------------------------ */
+function finishCitFormInit(status) {                                /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
+    if (!status) { return; } //Error handled elsewhere
     $('#CitationText_f textarea').attr('disabled', true);
-    $('#CitationTitle_f')[0].parentNode.after(form);
-    sForm.initCombos('sub', 'citation');
-    sForm.addConfirmationBeforeSubmit('citation', 'sub');
     return types.selectDefaultCitType()
         .then(() => finishCitFormUiLoad());
 }

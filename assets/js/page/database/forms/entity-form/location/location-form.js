@@ -17,30 +17,29 @@ import { _state, _elems, _form } from '~form';
 
 /** ====================== CREATE FORM ====================================== */
 /** Inits the location form and disables the country/region combobox. */
-export function initCreateForm(entity, val) {                       /*dbug-log*/console.log("       --initLocForm [%s]", val);
+export function initCreateForm(entity, val) {                       /*dbug-log*///console.log("       --initLocForm [%s]", val);
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
-    buildLocForm(val)
-    .then(onCreateFormLoadComplete);
+    _elems('initSubForm', [getLocFormParams(val)])
+    .then(finishLocFormInit);
 }
-function buildLocForm(val) {
-    const vals = {
-        'DisplayName': val === 'create' ? '' : val, //clears form trigger value
-        'Country': $('#sel-Country-Region').val()
+function getLocFormParams(val) {
+    return {
+        appendForm: form => $('#Location_f')[0].parentNode.after(form),
+        entity: 'Location',
+        fLvl: 'sub',
+        initCombos: initCombos.bind(null, 'sub'),
+        onFormClose: _form.bind(null, 'enableCountryRegionField'),
+        pSel: '#sel-Location',
+        style: 'med-sub-form',
+        vals: {
+            'DisplayName': val === 'create' ? '' : val, //clears form trigger value
+            'Country': $('#sel-Country-Region').val()
+        }
     };
-    return _state('addEntityFormState', ['location', 'sub', '#sel-Location', 'create', vals])
-        .then(setOnLocFormClose)
-        .then(() => _elems('getSubForm', ['sub', 'med-sub-form', '#sel-Location']))
-        .then(appendLocFormAndFinishBuild);
 }
-function setOnLocFormClose() {
-    const onClose = _form.bind(null, 'enableCountryRegionField');
-    _state('setOnFormCloseHandler', ['sub', onClose]);
-}
-function appendLocFormAndFinishBuild(form) {
-    $('#Location_f')[0].parentNode.after(form);
-    initCombos('sub');
+function finishLocFormInit(status) {
+    if (!status) { return; } //Error handled elsewhere
     _cmbx('enableCombobox', ['Country-Region', false]);
-    _elems('setDynamicFormStyles', ['location']);
     _elems('checkReqFieldsAndToggleSubmitBttn', ['sub']);
     $('#Latitude_f input').focus();
 }
@@ -49,17 +48,13 @@ function onCreateFormLoadComplete() {
     addMapToLocForm('create');
     addListenerToGpsFields('sub');
     scrollToLocFormWindow();
-    onLocFormLoadComplete();
-}
-function onLocFormLoadComplete() {
     addNotesToForm();
-    $('#Elevation-lbl').text('Elevation (m)');
 }
 function disableTopFormLocNote() {
     $('#loc-note').fadeTo(400, .3);
 }
 function scrollToLocFormWindow() {
-    $('#form-main')[0].scrollTo(0, 150);
+    $('#top-form')[0].scrollTo(0, 150);
 }
 function addNotesToForm() {
     addHowToCreateWithGpsNote($('#Latitude_f')[0].parentNode);
@@ -81,7 +76,7 @@ export function finishEditFormBuild(entity) {
     updateCountryChangeMethod();
     addGpsListenerToEditForm(_state('getEditEntityId', ['core']));
     $('.all-fields-cntnr').hide();
-    onLocFormLoadComplete();
+    addNotesToForm();
 }
 function updateCountryChangeMethod() {
     $('#sel-Country')[0].selectize.off('change');
@@ -111,7 +106,7 @@ function afterMapLoads(onLoadFunc, id) {
     }
 }
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
-export function initCombos(fLvl) {
+function initCombos(fLvl) {
     const events = {
         'Country': { onChange: focusParentAndShowChildLocs.bind(null, 'create') },
         'HabitatType': { onChange: false },

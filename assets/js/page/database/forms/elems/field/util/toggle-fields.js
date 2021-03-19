@@ -30,12 +30,12 @@ function ifFormHasMultipleFieldDisplays(fLvl) {
 function buildToggleFieldsContainer() {
     return _el('getElem', ['div', {class: 'all-fields-cntnr'}]);
 }
-/* ============================= LABEL ====================================== */
+/* ----------------------------- LABEL -------------------------------------- */
 function getLabel(fLvl) {
     const attr = { for: fLvl+'-all-fields', text: 'Show all' };
     return _el('getElem', ['label', attr]);
 }
-/* =========================== CHECKBOX ===================================== */
+/*---------------------------- CHECKBOX ------------------------------------- */
 function getCheckbox(fLvl, entity) {
     const chkbx = buildChkbxInput(fLvl);
     $(chkbx).click(handleToggleFields.bind(null, fLvl, entity));
@@ -51,16 +51,7 @@ function buildChkbxInput(fLvl) {
 /* ===================== TOGGLE FIELD-DISPLAY =============================== */
 /** [handleToggleFields description] */
 function handleToggleFields(fLvl, entity) {                         /*dbug-log*///console.log('@--handleToggleFields [%s][%s]', fLvl, entity);
-    if (ifOpenSubForm(fLvl)) { return _form('alertInUse', [fLvl]); }
-    $(`#${entity}_fields`).remove();
-    toggleFormFields(fLvl, entity);
-}
-/** Returns true if the next sub-rank form exists in the dom. */
-function ifOpenSubForm(fLvl) {
-    return $(`#${getNextFormLevel('child', fLvl)}-form`).length > 0;
-}
-/** [toggleFormFields description] */
-function toggleFormFields(fLvl, entity) {
+    // if (ifOpenSubForm(fLvl)) { return _form('alertInUse', [fLvl]); } //Necessary?
     _confg('onFieldViewChangeUpdateConfg', [fLvl]);
     _elems('onFormConfgChanged', [fLvl, entity]);
 }

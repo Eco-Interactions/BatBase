@@ -27,17 +27,13 @@ function addRoleFocusListener(role) {
     $(`#sel-${role}`)[0].selectize.on('focus', initRoleTaxonSelect.bind(null, role));
 }
 function initRoleTaxonSelect(role) {
-    if (ifSubFormAlreadyInUse(role)) { return _val('alertFormOpen', ['sub']); }
+    if (ifOppositeRoleFormLoading(role)) { return _val('alertFormOpen', ['sub']); }
     _form('initRoleTaxonSelect', [role]);
 }
 function getOppositeRole(role) {
     return role === 'Subject' ? 'Object' : 'Subject';
 }
 /* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-function ifSubFormAlreadyInUse(role) {
-    return _form('ifFormInUse', ['sub']) ||
-        ifOppositeRoleFormLoading(role);
-}
 function ifOppositeRoleFormLoading(role) {
     return $('#sel-'+getOppositeRole(role)).data('loading');
 }

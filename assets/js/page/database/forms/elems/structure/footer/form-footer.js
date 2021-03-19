@@ -12,7 +12,7 @@ import { _elems, _state, exitFormLevel, handleFormSubmit } from '~form';
  * Returns row with a checkbox that will toggle optional form fields on the left
  * and the submit/cancel buttons on the right.
  */
-export function getFormFooter(entity, fLvl, action) {               /*dbug-log*/console.log("+--getFormFooter [%s][%s][%s]", entity, fLvl, action);
+export function getFormFooter(entity, fLvl, action) {               /*dbug-log*///console.log("+--getFormFooter [%s][%s][%s]", entity, fLvl, action);
     const cntnr = getFooterRowContainer();
     $(cntnr).append(...buildFooterElems(entity, fLvl, action));
     return cntnr;
@@ -23,13 +23,13 @@ function getFooterRowContainer() {
 function buildFooterElems(entity, fLvl, action) {
     const toggleFields = _elems('ifMutlipleDisplaysGetToggle', [entity, fLvl]);
     const spacer = $('<div></div>').css("flex-grow", 2);
-    const bttns = buildSubmitAndCancelBttns(fLvl, action, entity);
+    const bttns = buildSubmitAndCancelBttns(fLvl, action);
     return [toggleFields, spacer, bttns];
 }
 /* ------------------ SUBMIT AND CANCEL BUTTONS ----------------------------- */
 /** Returns the buttons with the events bound. */
-function buildSubmitAndCancelBttns(fLvl, action, entity) {
-    const events = getBttnEvents(entity, fLvl);                     /*dbug-log*///console.log("   --buildSubmitAndCancelBttns events[%O]", events);
+function buildSubmitAndCancelBttns(fLvl, action) {
+    const events = getBttnEvents(fLvl);                     /*dbug-log*///console.log("   --buildSubmitAndCancelBttns events[%O]", events);
     return [getSubmitBttn(), getCancelBttn()];
 
     function getSubmitBttn() {
@@ -39,7 +39,7 @@ function buildSubmitAndCancelBttns(fLvl, action, entity) {
     }
     function getSubmitText() {
         const text = { create: "Create", edit: "Update" };;
-        return text[action] + " " + _u('ucfirst', [entity]);
+        return text[action];
     }
     function getCancelBttn() {
         const bttn = buildFormButton('cancel', fLvl, 'Cancel');
@@ -48,16 +48,17 @@ function buildSubmitAndCancelBttns(fLvl, action, entity) {
     }
 }
 /** Submit and cancel default-events merged with any set for the entity-form. */
-function getBttnEvents(entity, fLvl) {                              /*dbug-log*///console.log("getBttnEvents [%s][%s]", fLvl, entity);
+function getBttnEvents(fLvl) {                                      /*dbug-log*///console.log("getBttnEvents [%s]", fLvl);
     return {
-        submit: getSubmitEvent(entity, fLvl),
-        cancel: getCancelFunc(entity, fLvl)
+        submit: getSubmitEvent(fLvl),
+        cancel: getCancelFunc(fLvl)
     };
 }
-function getSubmitEvent(entity, fLvl) {
-    return handleFormSubmit.bind(null, fLvl, entity);
+function getSubmitEvent(fLvl) {
+    const customSubmit = _state('getFormState', [fLvl, 'submit']);
+    return customSubmit ? customSubmit : handleFormSubmit.bind(null, fLvl);
 }
-function getCancelFunc(entity, fLvl) {
+function getCancelFunc(fLvl) {
     if (fLvl === 'top') { return _elems.bind(null, 'exitRootForm'); }
     let onExit = _state('getFormState', [fLvl, 'onFormClose']);
     onExit = onExit || Function.prototype;

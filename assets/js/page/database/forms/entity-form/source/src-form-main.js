@@ -54,10 +54,6 @@ export function setSrcEditRowStyle(entity) {
     _elems('setDynamicFormStyles', [entity]);
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
-export function initEntitySubForm(entity, fLvl, fVals, pSel) {
-    return _state('addEntityFormState', [entity, fLvl, pSel, 'create', fVals])
-        .then(() => _elems('getSubForm', [fLvl, 'sml-sub-form', pSel]));
-}
 /* ------------------- ENTITY FIELDS ---------------------------------------- */
 export function loadSrcTypeFields() {
     return entityForm.loadSrcTypeFields(...arguments);
@@ -67,7 +63,6 @@ export function handleCitText() {
 }
 export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*///console.log('finishSrcFieldLoad [%s] entity[%s]', fLvl, entity);
     if (entity === 'citation' || entity === 'publication') {
-        initCombos(fLvl, entity);
         entityForm.finishPubOrCitEditForm(entity);
     }
 }
@@ -76,12 +71,9 @@ export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*/
  * If a URL is entered in the form, a modal is shown prompting the editor to
  * double check the links work before submitting.
  */
-export function addConfirmationBeforeSubmit(entity, fLvl) {
-    $(`#${fLvl}-submit`).off('click').click(showSubmitModal.bind(null, entity, fLvl));
-}
-function showSubmitModal(entity, fLvl) {
+export function showSubmitModal(fLvl) {
     const linkHtml = buildConfirmationModalHtml(fLvl);
-    const submit = handleFormSubmit.bind(null, fLvl, entity);
+    const submit = handleFormSubmit.bind(null, fLvl);
     if (!linkHtml) { return submit(); }
     _modal('showSaveModal', [ buildModalConfg(fLvl, linkHtml, submit) ]);
     $(`#${fLvl}-submit`).css({'opacity': .5, cursor: 'not-allowed'})

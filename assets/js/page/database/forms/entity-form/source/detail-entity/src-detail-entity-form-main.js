@@ -66,7 +66,7 @@ export function initCombos(fLvl, entity) {
 }
 function getEntityComboEvents(fLvl, entity) {
     return  {
-        'citation': {
+        'Citation': {
             'CitationType': {
                 onChange: loadCitTypeFields.bind(null, fLvl) },
             'Author': {
@@ -74,7 +74,7 @@ function getEntityComboEvents(fLvl, entity) {
                 onChange: author.onAuthAndEdSelection.bind(null, 1, 'Author')
             },
         },
-        'publication': {
+        'Publication': {
             'PublicationType': {
                 onChange: loadPubTypeFields.bind(null, fLvl) },
             'Publisher': {
@@ -94,11 +94,11 @@ function getEntityComboEvents(fLvl, entity) {
 /* ************************* ENTITY FORMS *********************************** */
 export function initCreateForm(entity, name) {                      /*dbug-log*///console.log('initCreateForm [%s] name [%s]', entity, name)
     const funcs = {
-        'author': initAuthOrEdForm.bind(null, 1, 'Author'),
-        'citation': initCitForm,
-        'editor': initAuthOrEdForm.bind(null, 1, 'Editor'),
-        'publication': initPubForm,
-        'publisher': initPublisherForm
+        'Author': initAuthOrEdForm.bind(null, 1, 'Author'),
+        'Citation': initCitForm,
+        'Editor': initAuthOrEdForm.bind(null, 1, 'Editor'),
+        'Publication': initPubForm,
+        'Publisher': initPublisherForm
     };
     return funcs[entity](name);
 }

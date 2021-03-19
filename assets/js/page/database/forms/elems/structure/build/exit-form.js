@@ -28,12 +28,12 @@ function hideSearchFormPopup() {
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
 function refocusTableIfFormWasSubmitted() {
-    const confg = _state('getFormState', ['top']);                  /*dbug-log*/console.log('refocusTableIfFormWasSubmitted');
+    const confg = _state('getFormState', ['top']);                  /*dbug-log*///console.log('refocusTableIfFormWasSubmitted');
     if (!confg.submit) { return; }
     if (confg.name === 'Interaction') { return refocusAndShowUpdates(); }
     _table('reloadTableWithCurrentFilters');
 }
-function refocusAndShowUpdates() {                                  /*dbug-log*/console.log('refocusAndShowUpdates.')
+function refocusAndShowUpdates() {                                  /*dbug-log*///console.log('refocusAndShowUpdates.')
     if (_state('getFormState', ['top', 'action']) === 'create') {
         _filter('showTodaysUpdates', ['srcs']);
     } else {

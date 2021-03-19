@@ -22,12 +22,13 @@
     justify-content: space-between
     flex-direction: column
     overflow-y: scroll;
+    // overflow-x: hidden;
     font-size: .9em
 
 div[id$="-help"] //Form tutorial/guide buttons
     // width: 100%
 
-#form-main
+#top-form
     padding: 5px 0 0 5px;
     overflow-x: hidden;
 
@@ -37,7 +38,7 @@ div[id$="-hdr"]
 div[id$="_fields"] //Contains all entity-form fields
     // min-width: 100%
 
-#form-main .selectize-control
+#top-form .selectize-control
     width: -webkit-fill-available
 
 /* --- Large (Interaction) Forms --- */
@@ -47,9 +48,11 @@ div[id$="_fields"] //Contains all entity-form fields
     width: 88vw
     max-height: 88vh
     height 88vh
-    max-width 93vw;
+    // max-width 93vw;
 
-#form-main.lrg-form
+    max-width: 1200px  //FOR TESTING
+
+#top-form.lrg-form
     // height 88vh
     flex 1 0 942px
 /* --- Medium Forms --- */
@@ -60,15 +63,15 @@ div[id$="_fields"] //Contains all entity-form fields
     // width 1212px
     // min-width: 1200px
 
-#form-main.med-form
+#top-form.med-form
     height 77vh
     // flex 1 0 909px
     // width 909px
 
-// #form-main.med-form .top-row
+// #top-form.med-form .top-row
 //     width 450px
 
-// #form-main.med-form label
+// #top-form.med-form label
     // flex: 0 1 100px
 
 /* --- Small Forms --- */
@@ -79,7 +82,7 @@ div[id$="_fields"] //Contains all entity-form fields
     max-height: 55vh
     min-width: unset
 
-#form-main.sml-form
+#top-form.sml-form
     height 55vh
     flex 0 0 464px
 /* --- Sub-forms --- */
@@ -87,12 +90,17 @@ $sub-form-styles
     border: 1px solid grey
     border-radius: 5px
     padding: .5em
-    margin-top: .5em
+    margin: .25em
+    // overflow-x: hidden
+    // overflow-y: unset
 
-.med-sub-form
+#sub-form.med-form
     @extends $sub-form-styles
 
-.sml-sub-form
+#sub-form.sml-form
+    @extends $sub-form-styles
+
+#sub2-form.sml-form
     @extends $sub-form-styles
 /* --------- Fields -------- */
 #sub-form .sub_lbl, #sub2-form .sub2_lbl

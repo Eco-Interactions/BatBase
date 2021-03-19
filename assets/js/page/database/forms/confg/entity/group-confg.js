@@ -7,6 +7,7 @@ export default function(role) {
     return {
         fields: getCoreGroupAndRankFieldConfg(),
         name: role,
+        style: 'sml-form',
         views: {
             all: getRoleFieldViewOrder()
         }

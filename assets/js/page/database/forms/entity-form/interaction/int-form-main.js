@@ -19,7 +19,7 @@
  *         HELPERS
  */
 import { _cmbx, _u } from '~util';
-import { _state, _elems, _form, _val } from '~form';
+import { _state, _elems, _val } from '~form';
 import * as build from './build/int-build-main.js';
 import * as fields from './fields/int-fields-main.js';
 /** ======================= BUILD FORM ====================================== */
@@ -51,13 +51,6 @@ export function enableCountryRegionField() {
     return fields.enableCountryRegionField(...arguments);
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
-/* ==================== CREATE SUB-ENTITY =================================== */
-export function create(entity, fLvl) {
-    return createEntity.bind(null, entity, fLvl);
-}
-function createEntity(entity, fLvl, val) {
-    return _form('createSubEntity', [entity, fLvl, val]);
-}
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
     return build.resetInteractionForm();
 }

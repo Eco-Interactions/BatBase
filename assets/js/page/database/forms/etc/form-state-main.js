@@ -31,19 +31,19 @@ export function clearState() {
     fS = {};
 }
 /* ========================= INIT FORM-STATE ================================ */
-export function initFormState(...args) {
-    return init.initFormState(...args)
+export function initFormState() {
+    return init.initFormState(...arguments)
         .then(storeAndReturnState);
 }
 function storeAndReturnState(coreState) {
     fS = coreState;
     return coreState;
 }
-export function addEntityFormState(...args) {
-    return init.addEntityFormState(fS, ...args);
+export function addEntityFormState() {
+    return init.addEntityFormState(fS, ...arguments);
 }
-export function initTaxonState(...args) {
-    return init.initTaxonState(fS, ...args);
+export function initTaxonState() {
+    return init.initTaxonState(fS, ...arguments);
 }
 /* ============================= EXECUTORS ================================== */
 /**

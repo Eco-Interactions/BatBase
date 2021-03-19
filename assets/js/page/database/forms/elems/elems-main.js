@@ -18,9 +18,8 @@
  */
 import { _el, executeMethod } from '~util';
 import { _state, getNextFormLevel } from '../forms-main.js';
-import * as footer from './footer/form-footer.js';
+import * as struct from './structure/structure-main.js';
 import * as row from './row/form-row-main.js';
-import * as cntnr from './container/form-container-main.js';
 import * as eUtil from './util/form-elems-util-main.js';
 import * as panel from './detail-panel/detail-panel.js';
 import * as fields from './field/form-fields-main.js';
@@ -30,15 +29,15 @@ export function _panel(funcName, params = []) {
 }
 /* =================== STRUCTURE ============================================ */
 /* ---------------------------- ROOT-FORM ----------------------------------- */
-export function buildAndAppendRootForm() {
-    return cntnr.buildAndAppendRootForm(...arguments);
+export function initForm() {
+    return struct.initForm(...arguments);
 }
 export function exitRootForm() {
-    cntnr.exitRootForm(...arguments);
+    struct.exitRootForm(...arguments);
 }
 /* ---------------------------- SUB-FORM ------------------------------------ */
-export function getSubForm() {
-    return cntnr.getSubForm(...arguments);
+export function initSubForm(params) {
+    return struct.initSubForm(...arguments);
 }
 /** Returns true if the next sub-rank form exists in the dom. */
 export function hasOpenSubForm(fLvl) {
@@ -46,16 +45,12 @@ export function hasOpenSubForm(fLvl) {
     return $('#'+childFormLvl+'-form').length > 0;
 }
 export function exitSubForm(fLvl, focus, onExit, data) {
-    cntnr.exitSubForm(fLvl, focus, onExit, data);
+    struct.exitSubForm(fLvl, focus, onExit, data);
     ifParentFormValidEnableSubmit(fLvl);
-}
-/* ------------------------------ FOOTER ------------------------------------ */
-export function getFormFooter() {
-    return footer.getFormFooter(...arguments);
 }
 /* --------------------------- SUBMIT|EXIT BUTTON --------------------------- */
 export function getExitButton() {
-    return cntnr.getExitButton();
+    return struct.getExitButton();
 }
 export function toggleSubmitBttn() {
     return eUtil.toggleSubmitBttn(...arguments);
@@ -77,11 +72,15 @@ export function toggleFormStatusMsg() {
 /* ============================== FIELDS ==================================== */
 /* ------------------------- COMPLETE FIELDS -------------------------------- */
 export function getFormRows(entity, fLvl) {
-    const rowCntnr = cntnr.getRowContainer(entity, fLvl)
-    return row.getFormRows(fLvl, rowCntnr);
+    const rowCntnr = struct.getRowContainer(entity, fLvl)
+    return row.buildFormRows(fLvl, rowCntnr);
 }
 export function getFormFieldRows() {
     return row.getFormFieldRows(...arguments);
+}
+export function finishFieldRebuild(fLvl, entity) {
+    const initCombos = _state('getFormState', [fLvl, 'initCombos']);
+    struct.finishFormBuild(initCombos, entity);
 }
 export function setDynamicFormStyles() {
     fields.setDynamicFieldStyles(...arguments);

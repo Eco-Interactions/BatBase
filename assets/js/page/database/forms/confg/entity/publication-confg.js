@@ -6,6 +6,7 @@ export default function(entity) {
         core: 'source',
         fields: getPublicationFieldConfg(),
         name: entity,
+        style: 'med-form',
         type: null,  //Holds type confg once type selected
         types: getPublicationTypeConfg(),
         views: { //fields added will be built and displayed.

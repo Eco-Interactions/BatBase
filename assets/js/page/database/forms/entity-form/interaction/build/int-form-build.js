@@ -15,17 +15,21 @@
  *         FORM COMBOBOXES
  */
 import { _cmbx, _el, _modal } from '~util';
-import { _state, _elems, handleFormSubmit } from '~form';
+import { _state, _elems, _form, handleFormSubmit } from '~form';
 import * as iForm from '../int-form-main.js';
 /* ======================= CREATE-FORM BUILD ================================ */
 export function initCreateForm(entity) {                            /*perm-log*/console.log('   //Building New Interaction Form');
     if (_state('getStateProp')) { return; } //Form is already opened.
-    return _state('initFormState', ['create', 'interaction'])
-        .then(() => _elems('getFormFieldRows', ['top']))
-        .then(fields => _elems('buildAndAppendRootForm', [fields]))
-        .then(finishInteractionFormBuild)
-        .then(addConfirmationBeforeSubmit)
-        .then(() => _state('setOnFormCloseHandler', ['top', iForm.resetInteractionForm]));
+    return _elems('initForm', [getIntFormParams()])
+        .then(finishInteractionFormBuild);
+}
+function getIntFormParams() {
+    return {
+        entity: 'Interaction',
+        onFormClose: iForm.resetInteractionForm,
+        submit: showSubmitModal,
+        initCombos: iForm.initCombos.bind(null, 'top')
+    };
 }
 /* ======================= FINISH FORM DISPLAY ============================== */
 /**
@@ -54,7 +58,6 @@ function openReferenceGuideInNewTab() {
 }
 /* -------------------------- FORM COMBOBOXES ------------------------------- */
 function finishComboboxInit() {
-    iForm.initCombos('top');
     _cmbx('enableCombobox', ['CitationTitle', false]);
     iForm.addRoleTaxonFocusListeners();
     _cmbx('enableCombobox', ['InteractionType', false]);
@@ -66,9 +69,6 @@ function focusPubFieldIfNewRecord() {
     _cmbx('focusCombobox', ['Publication', action === 'create']);
 }
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */
-function addConfirmationBeforeSubmit() {
-    $('#top-submit').off('click').click(showSubmitModal);
-}
 function showSubmitModal() {
     const modalConfg = {
         html: buildConfirmationModalHtml(),

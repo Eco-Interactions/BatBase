@@ -26,6 +26,7 @@
  *    onInvalidInput: Fired when an input fails HTML validation  //TODO
  *    onValidInput: Fired after invalid input validates (perhaps merge with all checkReqFieldsAndToggleSubmitBttn calls?)  //TODO
  *    prep: [], //server-data handled before form-submit
+ *    *style: '', //CSS style classes: [lrg|med|sml]-form
  *    type: Type name, once selected. Only for entities with subTypes
  *    types: { //ENTITY SUB-TYPES
  *         Type name: {
@@ -54,8 +55,9 @@ import { _u } from '~util';
 import { _state } from '~form';
 import * as cUtil from './util/confg-util-main.js';
 /* ====================== INIT FORM-CONFG =================================== */
-export function getInitFormConfg(entity, fLvl, action, vals) {         /*dbug-log*///console.log('+--getInitFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
+export function getInitFormConfg(entity, fLvl, action, vals) {      /*dbug-log*///console.log('+--getInitFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
     const confg = getBaseConfg(entity, fLvl);
+    confg.group = fLvl;
     initDisplayConfg(confg, action, !!confg.views.simple, vals);
     return confg;
 }
@@ -68,7 +70,7 @@ function initDisplayConfg(confg, action, hasSimpleView, vals) {
 /* ------------------------ FORM-TYPE CHANGED ------------------------------- */
 /** [onEntityTypeChangeUpdateConfg description] */
 export function onEntityTypeChangeUpdateConfg(fLvl) {
-    const confg = _state('getFormState', [fLvl]);
+    const confg = _state('getFormState', [fLvl]);                   /*dbug-log*///console.log('--onEntityTypeChangeUpdateConfg confg[%O]', confg)
     updateConfg(confg);
 }
 /* ----------------------- FIELD-VIEW CHANGED ------------------------------- */
@@ -104,14 +106,14 @@ export function mergeIntoFormConfg(confg, mConfg) {
 /** [getBaseConfg description] INTERNAL USE */
 export function getBaseConfg(entity, fLvl, type) {
     const confg = cUtil.getBaseFormConfg(entity, fLvl);
-    if (confg.core) { mergeCoreEntityConfg(confg); }
+    if (confg.core) { mergeCoreEntityConfg(confg, fLvl); }
     if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
     delete confg.types;                                             /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
     return confg;
 }
 /** [mergeCoreEntityConfg description] */
-function mergeCoreEntityConfg(c) {
-    const coreConfg = cUtil.getBaseFormConfg(c.core);               /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
+function mergeCoreEntityConfg(c, fLvl) {
+    const coreConfg = cUtil.getBaseFormConfg(c.core, fLvl);               /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
     mergeIntoFormConfg(c, coreConfg);
 }
 /* ------------------------- FIELD CONFG ------------------------------------ */
@@ -146,7 +148,7 @@ function getSingleConfg(c, v, f) {
     return f === '' ? { emptyField: true } : getFieldConfg(c, v, f);
 }
 function getFieldConfg(c, v, name) {                                /*dbug-log*///console.log("   --getFieldConfg [%s] [%O]", name, c.fields[name]);
-    const confg = getBaseConfg();                                   /*dbug-log*///console.log('       --fieldConfg [%O]', confg);
+    const confg = getBaseFieldConfg();                              /*dbug-log*///console.log('       --fieldConfg [%O]', confg);
     if (confg.info) { ++c.infoSteps; }
     setFieldStyleClass(confg, c.group);
     confg.group = c.group;
@@ -154,7 +156,7 @@ function getFieldConfg(c, v, name) {                                /*dbug-log*/
     setFieldValue(confg, v);
     return confg;
 
-    function getBaseConfg() {
+    function getBaseFieldConfg() {
         return c.fields[name] ? c.fields[name] : getConfgByLabel(name);
     }
     function getConfgByLabel() {

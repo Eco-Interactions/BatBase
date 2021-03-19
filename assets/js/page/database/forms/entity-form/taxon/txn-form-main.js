@@ -23,7 +23,6 @@ import * as select from './select/txn-select-main.js';
 export function initCreateForm() {
     return create.initCreateForm(...arguments);
 }
-export function initCombos() {} //No combos in the create form.
 /* ========================= EDIT =========================================== */
 export function finishEditFormBuild() {
     edit.finishEditFormBuild(...arguments);

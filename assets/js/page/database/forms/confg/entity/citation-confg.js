@@ -6,6 +6,7 @@ export default function(entity) {
         core: 'source',
         fields: getCitationFieldConfg(),
         name: entity,
+        style: 'med-form',
         type: null,  //Holds type confg once type selected
         types: getCitationTypeConfg(),
         views: { //fields added will be built and displayed.

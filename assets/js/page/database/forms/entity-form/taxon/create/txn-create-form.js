@@ -6,42 +6,48 @@
  *
  * TOC
  *     INIT
- *     SUBMIT
- *         VALIDATE
+ *     VALIDATE
  */
-import { _cmbx, _el, _u } from '~util';
-import { _state, _elems, _val, handleFormSubmit } from '~form';
+import { _cmbx, _el } from '~util';
+import { _form, _state, _elems, _val, handleFormSubmit } from '~form';
 
-export function initCombos() {} //No combos in this form.
 /* ========================= INIT =========================================== */
-export function initCreateForm(rank, value) {                       /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, value);
-    const val = value === 'create' ? '' : value;
-    const ucRank = _u('ucfirst', [rank]);
-    return showNewTaxonForm(val, ucRank);
+export function initCreateForm(rank, v) {                           /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, v);
+    _elems('initSubForm', [getTxnFormParams(rank, v)])
+    .then(finishTxnFormInit);
 }
-function showNewTaxonForm(val, rank) {
-    const pId = '#sel-'+rank;
-    const vals = { DisplayName: val, Rank: rank };
-    return _state('addEntityFormState', ['Taxon', 'sub2', pId, 'create', vals])
-        .then(() => _elems('getSubForm', ['sub2', 'sml-sub-form', pId]))
-        .then(form => appendTxnFormAndFinishBuild(val, rank, form));
+function getTxnFormParams(rank, v) {
+    return {
+        appendForm: form => $(`#${rank}_f`).append(form),
+        entity: 'Taxon',
+        fLvl: 'sub2',
+        onFormClose: _form.bind(null, 'enableCountryRegionField'),
+        pSel: '#sel-'+rank,
+        style: 'sml-sub-form',
+        submit: validateAndSubmit.bind(null, rank), //form submit handler
+        vals: getTaxonCreateStateVals(val, rank)
+    }
 }
-function appendTxnFormAndFinishBuild(val, rank, form) {
+function getTaxonCreateStateVals(val, rank) {
+    return {
+        DisplayName: val,
+        Group: _state('getFieldState', ['sub', 'Group']),
+        Rank: rank,
+        'Sub-Group': _state('getFieldState', ['sub', 'Sub-Group']),
+    };
+}
+function finishTxnFormInit(val, rank, status) {
+    if (!status) { return } //Error handled elsewhere
     $(`#${rank}_f`).append(form);
     _elems('toggleSubmitBttn', ['sub2'])
     $('#sub2-hdr')[0].innerText += ' '+ rank;
     $('#DisplayName_f input').focus();
-    updateTaxonSubmitBttn(rank);
 }
-/* ========================= SUBMIT ========================================= */
-function updateTaxonSubmitBttn(rank) {
-    $('#sub2-submit').off('click').click(validateAndSubmit.bind(null, rank));
-}
-/* ------------------------- VALIDATE --------------------------------------- */
+/* ========================= VALIDATE ========================================= */
 function validateAndSubmit(rank) {
     if (ifEmptyNameField()) { return valAlert(rank, 'needsName'); }
     if (ifSpeciesValIssue(rank)) { return valAlert(rank, 'needsGenusName'); }
-    handleFormSubmit('sub2', 'taxon');
+    handleFormSubmit('sub2');
 }
 function ifEmptyNameField() {
     return !$('#DisplayName_f input').val();

@@ -24,7 +24,7 @@ function getFlexValue(w, field) {
     return getGrow(w, field) + ' ' + getShrink(field) +` ${w}%`;
 }
 function getShrink(field) {
-    const noShrinks = ['no-shrink'];
+    const noShrinks = [];
     return ifHasClasses(field, noShrinks) ? 0 : 1;
 }
 /* -------------------------------------------------------- */

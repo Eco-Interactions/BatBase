@@ -23,21 +23,20 @@ export default function(entity) {
             }
         },
         name: entity,
+        style: 'sml-form',
         views: {
-            all: [{
-                fields: [
-                    'DisplayName',
-                    'City',
-                    'Country',
-                    'Website',
-                    'Description'
-            ]}],
-            simple:[{
-                fields: [
-                    'DisplayName',
-                    'City',
-                    'Country',
-            ]}],
+            all: [
+                ['DisplayName',]
+                ['City'],
+                ['Country'],
+                ['Website'],
+                ['Description']
+            ],
+            simple:[
+                ['DisplayName'],
+                ['City'],
+                ['Country'],
+            ],
         }
     };
 }

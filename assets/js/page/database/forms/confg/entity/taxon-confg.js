@@ -5,7 +5,7 @@ export default function(entity) {
 	return {
         fields: {
             DisplayName: {
-                name: DisplayName,
+                name: 'DisplayName',
                 required: true
             },
             Name: {
@@ -26,9 +26,10 @@ export default function(entity) {
             }
         },
         name: entity,
+        style: 'sml-form',
         views: {
             all: [
-                ['DisplayName']
+                ['Name']
             ]
         }
     };

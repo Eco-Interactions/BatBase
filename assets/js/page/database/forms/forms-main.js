@@ -48,12 +48,13 @@ export function create(entity, name) {
 }
 export function initNewDataForm() {
     _ui('showPopupMsg');
-    return create('interaction')
+    return create('Interaction')
         .then(() => _ui('hidePopupMsg'));
 }
-export function edit(id, entity) {
-    state.initFormState('edit', entity, id)
-    .then(() => editEntity(id, entity));
+export function edit(entity, id, vals) {
+    return elems.initForm(entity, 'edit', id, vals);
+    // state.initFormState('edit', entity, id)
+    // .then(() => editEntity(id, entity));
 }
 export function selectIntLoc(id) {
     form.selectIntLoc(id);
@@ -79,8 +80,8 @@ export function getValidatedFormData() {
     return submit.getValidatedFormData(...arguments);
 }
 /* Vals passed in taxon edit-forms */
-export function handleFormSubmit(entity, fLvl, formVals) {
-    return submit.handleFormSubmit(entity, fLvl, formVals);
+export function handleFormSubmit() {
+    return submit.handleFormSubmit(...arguments);
 }
 /* ======================= MODULE HELPERS =================================== */
 /* Handles captures of event objects and returns wrapped in array. */
@@ -103,7 +104,7 @@ export function getNextFormLevel(next, curLvl) {
 export function getSubFormLvl(lvl) {
     const topEntity = state.getFormState('top', 'name');
     const fLvls = state.getStateProp('formLevels');
-    return topEntity === 'interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
+    return topEntity === 'Interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
 }
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
 export function getSelectedVals(cntnr, fieldName) {

@@ -27,13 +27,13 @@ export function initSelectFormCombos(editHandlers = null) {
 }
 function getSelectComboEvents() {
     return {
-        'Class': { onChange: onRankSelection, create: create.bind(null, 'class') },
-        'Family': { onChange: onRankSelection, create: create.bind(null, 'family') },
-        'Genus': { onChange: onRankSelection, create: create.bind(null, 'genus') },
-        'Order': { onChange: onRankSelection, create: create.bind(null, 'order') },
+        'Class': { onChange: onRankSelection, create: create.bind(null, 'Class') },
+        'Family': { onChange: onRankSelection, create: create.bind(null, 'Family') },
+        'Genus': { onChange: onRankSelection, create: create.bind(null, 'Genus') },
+        'Order': { onChange: onRankSelection, create: create.bind(null, 'Order') },
         'Group': { onChange: onGroupSelection },
         'Sub-Group': { onChange: onSubGroupSelection },
-        'Species': { onChange: onRankSelection, create: create.bind(null, 'species') },
+        'Species': { onChange: onRankSelection, create: create.bind(null, 'Species') },
     };
 }
 function replaceEditEvents(events, newEvents) {
@@ -48,7 +48,7 @@ function replaceEditEvents(events, newEvents) {
     }
 }
 function create(rank, val) {
-    return _form('createSubEntity', [rank, 'sub2', val]);
+    return _form('createEntity', [rank, val]);
 }
 /* ======================= INIT =========================================== */
 export function initRoleTaxonSelect(role, gId) {

@@ -20,7 +20,6 @@ export function resetInteractionForm() {                            /*dbug-log*/
     _elems('toggleFormStatusMsg', ['New Interaction successfully created.']);
     resetIntFields();
     resetFormUi();
-    _state('setOnFormCloseHandler', ['top', resetInteractionForm]);
 }
 /* ==================== RESET FIELD DATA ==================================== */
 /**

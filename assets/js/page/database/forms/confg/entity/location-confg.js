@@ -5,6 +5,7 @@ export default function(entity) {
 	return {
         name: entity,
         fields: getLocationFieldConfg(),
+        style: 'med-form',
         views: {
             all: [
                 [

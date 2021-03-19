@@ -6,13 +6,11 @@ export default function(entity) {
         core: 'source',
         fields: {
             FirstName: {
-                class: 'w-8',
                 label: 'First',
                 name: 'FirstName',
                 type: 'text',
             },
             MiddleName: {
-                class: 'w-8',
                 label: 'Middle',
                 name: 'MiddleName',
                 type: 'text',
@@ -32,16 +30,17 @@ export default function(entity) {
             }
         },
         name: entity,
+        style: 'sml-form',
         views: { //fields added will be built and displayed
             all: [
-                ['LastName'],
-                ['FirstName', 'MiddleName', 'Suffix'],
+                ['LastName', 'Suffix'],
+                ['FirstName', 'MiddleName'],
                 ['Website'],
                 ['Description'],
             ],
             simple: [
-                ['LastName'],
-                ['FirstName', 'MiddleName', 'Suffix']
+                ['LastName', 'Suffix'],
+                ['FirstName', 'MiddleName']
             ]
         }
     };

@@ -8,7 +8,7 @@
 import { _state } from '~form';
 import * as build from './build-rows.js';
 
-export function getFormRows(fLvl, cntnr) {                          /*dbug-log*///console.log('+--getFormRows [%s] cntnr[%O]', fLvl, cntnr);
+export function buildFormRows(fLvl, cntnr) {                          /*dbug-log*///console.log('+--buildFormRows [%s] cntnr[%O]', fLvl, cntnr);
     return getFormFieldRows(fLvl)
         .then(finishFormRowBuild.bind(null, cntnr));
 }

@@ -24,24 +24,28 @@ import * as selectForm from './txn-select-main.js';
 
 export function initTaxonSelectForm(role, gId) {                    /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
     $('#sel-'+role).data('loading', true);
-    return buildTaxonSelectForm(role, gId)
-        .then(form => appendTxnFormAndInitCombos(role, form))
-        .then(() => finishTaxonSelectBuild(role, gId));
+    return _elems('initSubForm', [getTxnSelectParams(role, gId)])
+        .then(status => finishTaxonSelectBuild(status, role, gId));
+}
+function getTxnSelectParams(role, groupId) {                        /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
+    return {
+        appendForm: form => $(`#${role}_f`).append(form),
+        entity: role,
+        fLvl: 'sub',
+        initCombos: selectForm.initSelectFormCombos,
+        pSel: '#sel-'+role,
+        style: 'sml-sub-form',
+        submit: _form.bind(null, 'selectRoleTaxon'),
+        vals: { Group: groupId }
+    };
 }
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
-function buildTaxonSelectForm(role, groupId) {                      /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
-    return addNewFormState(role, groupId)
-        .then(() => _elems('getSubForm', ['sub', 'sml-sub-form', '#sel-'+role]));
-}
-function addNewFormState(role, groupId) {
-    const vals = { Group: groupId };
-    return _state('addEntityFormState', [role, 'sub', '#sel-'+role, 'select', vals]);
-}
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first rank-combo into focus. Clears the [role]'s' combobox.
  */
-function finishTaxonSelectBuild(role, gId) {
+function finishTaxonSelectBuild(status, role, gId) {
+    if (!status) { return } //Error handled elsewhere
     addSelectRootTaxonBttn(role);
     customizeElemsForTaxonSelectForm(role, gId);
     selectPrevTaxonAndResetRoleField(role);
@@ -78,9 +82,7 @@ function customizeElemsForTaxonSelectForm(role, gId) {
     $('#sub-hdr span+div').append(getTaxonExitButton(role));
     $('#sub-submit')[0].value = "Select Taxon";
     $('#sub-cancel')[0].value = "Reset";
-    $('#sub-submit').unbind("click").click(_form.bind(null, 'selectRoleTaxon'));
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role, gId));
-    _elems('setDynamicFormStyles', [role]);
 }
 function getTaxonExitButton(role) {
     const bttn = _elems('getExitButton');
@@ -122,10 +124,6 @@ function focusFirstRankCombo(role) {
     const ranks = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).subRanks;
     const rank = ranks.slice().pop();
     _cmbx('focusCombobox', [rank]);
-}
-function appendTxnFormAndInitCombos(role, form) {
-    $(`#${role}_f`).append(form);
-    selectForm.initSelectFormCombos();
 }
 /* -------------- RESET SELECT-FORM TO INIT STATE --------------------------- */
 /**

@@ -4,7 +4,6 @@
  *
  * Export
  *     loadSrcTypeFields
- *     getPubOrCitFields
  *
  * TOC
  *     LOAD SOURCE-TYPE ROWS
@@ -44,7 +43,7 @@ export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*/
  * @param  {Str|Bool} type   Passed for edit-form builds
  * @return {[type]}         [description]
  */
-export function getPubOrCitFields(entity, typeId, fLvl, type = false) {/*dbug-log*///console.log('getPubOrCitFields [%s][%s] typeId[%s] type?[%s]', fLvl, entity, typeId, type);
+function getPubOrCitFields(entity, typeId, fLvl, type = false) {    /*dbug-log*///console.log('getPubOrCitFields [%s][%s] typeId[%s] type?[%s]', fLvl, entity, typeId, type);
     setSourceType(entity, fLvl, typeId, type);
     $(`#${entity}_fields`).empty();
     return _elems('getFormFieldRows', [fLvl]);

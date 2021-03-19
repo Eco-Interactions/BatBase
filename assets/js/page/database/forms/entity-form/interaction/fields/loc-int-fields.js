@@ -69,7 +69,7 @@ export function selectLoc(id) {
  * the location was cleared, the detail panel is cleared.
  */
 export function onLocSelection(val) {                               /*perm-log*/console.log('       +--onLocSelection [%s]', val);
-    if (val === 'create') { return _form('createSubEntity', ['location', 'sub']); }
+    if (val === 'create') { return _form('createEntity', ['Location', 'sub']); }
     if (ifNoLocSelected(val)) { return _panel('clearDetailPanel', ['loc']); }
     if ($('#form-map').length) { removeLocMap(); }
     const locRcrd = _state('getRcrd', ['location', val]);

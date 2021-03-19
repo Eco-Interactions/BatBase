@@ -5,26 +5,20 @@
  *     rebuildFieldsOnFormConfgChanged
  */
 import { _elems, _form } from '~form';
-const lcl = {
-    fLvl: null,
-    entity: null,
-};
+
 export function rebuildFieldsOnFormConfgChanged(fLvl, entity) {     /*dbug-log*///console.log('+--rebuildFieldsOnFormConfgChanged [%s][%s]', fLvl, entity);
-    lcl.fLvl = fLvl;
-    lcl.entity = entity;
+    $(`#${entity}_fields`).remove();
     return _elems('getFormRows', [entity, fLvl])
-        .then(appendAndFinishRebuild);
+        .then(rows => appendAndFinishRebuild(entity, fLvl, rows));
 }
-function appendAndFinishRebuild(rows) {                             /*dbug-log*///console.log('   --appendAndFinishRebuild rows[%O]', rows);
-    $(`#${lcl.fLvl}_alert`).after(rows);
-    _form('initCombos', [lcl.fLvl]);
-    return _elems('fillComplexFormFields', [lcl.fLvl])
+function appendAndFinishRebuild(entity, fLvl, rows) {               /*dbug-log*///console.log('   --appendAndFinishRebuild rows[%O]', rows);
+    $(`#${fLvl}_alert`).after(rows);
+    _elems('finishFieldRebuild', [fLvl, entity])
+    return _elems('fillComplexFormFields', [fLvl])
         .then(finishComplexForms);
 }
-function finishComplexForms() {
-    const complex = ['citation', 'publication', 'location'];
-    if (complex.indexOf(lcl.entity) === -1) { return; }
-    _elems('setDynamicFormStyles', [lcl.entity]);
-    if (lcl.entity === 'location') { return; }
-    _form('finishSrcFieldLoad', [lcl.entity, lcl.fLvl]);
+function finishComplexForms(entity, fLvl) {
+    const complex = ['citation', 'publication'];
+    if (complex.indexOf(entity) === -1) { return; }
+    _form('finishSrcFieldLoad', [entity, fLvl]);
 }

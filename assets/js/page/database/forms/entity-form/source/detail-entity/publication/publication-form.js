@@ -18,42 +18,42 @@ import { _elems, _form, _panel, _state } from '~form';
 import * as sForm from '../../src-form-main.js';
 /* -------------------------- PUBLICATION CREATE ---------------------------- */
 export function initPubForm(v) {                                    /*perm-log*/console.log('       /--initPubForm [%s]', v);
-    if (_form('ifFormInUse', ['sub'])) { return _form('alertInUse', ['sub']); }
     clearCitationFormData();
-    return _state('addEntityFormState', getPubInitParams(v))
-        .then(buildAndAppendPubForm);
+    return _elems('initSubForm', getPubFormParams(v))
+        .then(finishPubFormInit);
 }
-function getPubInitParams(v) {
-    const val = { Title: v === 'create' ? '' : v };
-    return ['publication', 'sub', '#sel-Publication', 'create', val];
+function getPubFormParams(v) {
+    return {
+        appendForm: form => $('#CitationTitle_f')[0].parentNode.after(form),
+        entity: 'Publication',
+        fLvl: 'sub',
+        initCombos: sForm.initCombos.bind(null, 'sub', 'Publication'),
+        pSel: '#sel-Publication',
+        style: 'med-sub-form',
+        submit: sForm.showSubmitModal.bind(null, 'sub'),
+        vals: { Title: v === 'create' ? '' : v }
+    };
 }
 function clearCitationFormData() {
     _cmbx('resetCombobox', ['CitationTitle']);
     _panel('clearFieldDetails', ['CitationTitle']);
 }
-function buildAndAppendPubForm() {
-    return _elems('getSubForm', ['sub', 'med-sub-form', '#sel-Publication'])
-        .then(form => appendPubFormAndFinishBuild(form));
-}
-function appendPubFormAndFinishBuild(form) {
-    $('#CitationTitle_f')[0].parentNode.after(form);
-    sForm.initCombos('sub', 'publication');
-    sForm.addConfirmationBeforeSubmit('publication', 'sub');
+function finishPubFormInit(status) {
+    if (!status) { return; } //Error handled elsewhere
     $('#Title_f input').focus();
-    _elems('setDynamicFormStyles', ['publication']);
 }
 /* --------------------- PUBLICATION-TYPE FIELDS ---------------------------- */
 /**
  * Loads the deafult fields for the selected Publication Type. Clears any
  * previous type-fields and initializes the selectized dropdowns.
  */
-export function loadPubTypeFields(fLvl, typeId) {                   /*dbug-log*/console.log('   @--loadPubTypeFields [%s] tId[%s]', fLvl, typeId);
-    return sForm.loadSrcTypeFields('publication', typeId)
+export function loadPubTypeFields(fLvl, typeId) {                   /*dbug-log*///console.log('   @--loadPubTypeFields [%s] tId[%s]', fLvl, typeId);
+    return sForm.loadSrcTypeFields('Publication', typeId)
         .then(finishPubTypeFields);
 
     function finishPubTypeFields() {
         showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl);
-        _elems('setDynamicFormStyles', ['publication']);
+        _elems('setDynamicFormStyles', ['Publication']);
     }
 }
 /** Shows the user a note above the author and editor elems. */

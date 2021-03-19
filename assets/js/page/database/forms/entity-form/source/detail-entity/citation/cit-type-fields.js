@@ -50,12 +50,12 @@ function getBookDefault(pubType, pData) {
 export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*///console.log('           /--loadCitTypeFields');
     const fLvl = getSubFormLvl('sub');
     const type = typeName || this.$input[0].innerText;
-    return sForm.loadSrcTypeFields('citation', typeId, type)
+    return sForm.loadSrcTypeFields('Citation', typeId, type)
         .then(finishCitTypeFields);
 
     function finishCitTypeFields() {
         sForm.handleCitText(fLvl);
-        _elems('setDynamicFormStyles', ['citation']);
+        _elems('setDynamicFormStyles', ['Citation']);
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
     }
 }
