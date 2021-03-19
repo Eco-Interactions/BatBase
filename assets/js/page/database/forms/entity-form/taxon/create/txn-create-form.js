@@ -22,7 +22,7 @@ function getTxnFormParams(rank, v) {
         entity: 'Taxon',
         fLvl: 'sub2',
         onFormClose: _form.bind(null, 'enableCountryRegionField'),
-        pSel: '#sel-'+rank,
+        combo: rank,
         style: 'sml-sub-form',
         submit: validateAndSubmit.bind(null, rank), //form submit handler
         vals: getTaxonCreateStateVals(val, rank)

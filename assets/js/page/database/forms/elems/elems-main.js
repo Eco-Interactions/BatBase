@@ -18,10 +18,10 @@
  */
 import { _el, executeMethod } from '~util';
 import { _state, getNextFormLevel } from '../forms-main.js';
-import * as struct from './structure/structure-main.js';
+import * as core from './core/elems-core-main.js';
 import * as row from './row/form-row-main.js';
 import * as eUtil from './util/form-elems-util-main.js';
-import * as panel from './detail-panel/detail-panel.js';
+import * as panel from './core/detail-panel/detail-panel.js';
 import * as fields from './field/form-fields-main.js';
 /* -------------------- SUB-EXECUTOR ---------------------------------------- */
 export function _panel(funcName, params = []) {
@@ -30,14 +30,14 @@ export function _panel(funcName, params = []) {
 /* =================== STRUCTURE ============================================ */
 /* ---------------------------- ROOT-FORM ----------------------------------- */
 export function initForm() {
-    return struct.initForm(...arguments);
+    return core.initForm(...arguments);
 }
 export function exitRootForm() {
-    struct.exitRootForm(...arguments);
+    core.exitRootForm(...arguments);
 }
 /* ---------------------------- SUB-FORM ------------------------------------ */
 export function initSubForm(params) {
-    return struct.initSubForm(...arguments);
+    return core.initSubForm(...arguments);
 }
 /** Returns true if the next sub-rank form exists in the dom. */
 export function hasOpenSubForm(fLvl) {
@@ -45,12 +45,12 @@ export function hasOpenSubForm(fLvl) {
     return $('#'+childFormLvl+'-form').length > 0;
 }
 export function exitSubForm(fLvl, focus, onExit, data) {
-    struct.exitSubForm(fLvl, focus, onExit, data);
+    core.exitSubForm(fLvl, focus, onExit, data);
     ifParentFormValidEnableSubmit(fLvl);
 }
 /* --------------------------- SUBMIT|EXIT BUTTON --------------------------- */
 export function getExitButton() {
-    return struct.getExitButton();
+    return core.getExitButton();
 }
 export function toggleSubmitBttn() {
     return eUtil.toggleSubmitBttn(...arguments);
@@ -72,15 +72,14 @@ export function toggleFormStatusMsg() {
 /* ============================== FIELDS ==================================== */
 /* ------------------------- COMPLETE FIELDS -------------------------------- */
 export function getFormRows(entity, fLvl) {
-    const rowCntnr = struct.getRowContainer(entity, fLvl)
-    return row.buildFormRows(fLvl, rowCntnr);
+    return row.buildFormRows(entity, fLvl);
 }
 export function getFormFieldRows() {
     return row.getFormFieldRows(...arguments);
 }
 export function finishFieldRebuild(fLvl, entity) {
     const initCombos = _state('getFormState', [fLvl, 'initCombos']);
-    struct.finishFormBuild(initCombos, entity);
+    core.finishFormBuild(initCombos, entity);
 }
 export function setDynamicFormStyles() {
     fields.setDynamicFieldStyles(...arguments);

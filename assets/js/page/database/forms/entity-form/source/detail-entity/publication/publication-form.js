@@ -28,7 +28,7 @@ function getPubFormParams(v) {
         entity: 'Publication',
         fLvl: 'sub',
         initCombos: sForm.initCombos.bind(null, 'sub', 'Publication'),
-        pSel: '#sel-Publication',
+        combo: 'Publication',
         style: 'med-sub-form',
         submit: sForm.showSubmitModal.bind(null, 'sub'),
         vals: { Title: v === 'create' ? '' : v }

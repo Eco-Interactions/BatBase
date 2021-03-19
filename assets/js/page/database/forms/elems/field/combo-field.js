@@ -56,9 +56,8 @@ export function setSilentVal(fLvl, field, val) {
  * placeholder options and, optionally, brings it into focus.
  */
 export function resetFormCombobox(fLvl, focus) {
-    const selId = _state('getFormState', [fLvl, 'pSelId']);                /*dbug-log*///console.log('resetFormCombobox [%s][%s] focus?[%s]', selId, fLvl, focus);
-    if (!selId) { return; }
-    const field = selId.split('sel-')[1];
+    const field = _state('getFormState', [fLvl, 'combo']);          /*dbug-log*///console.log('resetFormCombobox [%s] field[%s] focus?[%s]', fLvl, field, focus);
+    if (!field) { return; }
     _cmbx('resetCombobox', [field]);
     _cmbx('enableCombobox', [field]);
     _cmbx('focusCombobox', [field, focus]);

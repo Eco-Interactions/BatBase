@@ -42,7 +42,7 @@ function getCitFormParams(v) {
         fLvl: 'sub',
         initCombos: sForm.initCombos.bind(null, 'sub', 'Citation'),
         onFormClose: enablePubField,
-        pSel: '#sel-CitationTitle',
+        combo: 'CitationTitle',
         style: 'med-sub-form',
         submit: sForm.showSubmitModal.bind(null, 'sub'),
         vals: { Title: (v === 'create' ? '' : v)}

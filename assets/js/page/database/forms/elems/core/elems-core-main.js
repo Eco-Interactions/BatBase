@@ -4,10 +4,9 @@
  *     BUILD FORM
  *     EXIT FORM
  */
-import { _el } from '~util';
+import { _cmbx, _el } from '~util';
 import { _elems, _state } from '~form';
 import * as build from './build/form-build-main.js';
-import * as row from './row/form-row-container.js';
 import * as bttn from './buttons/form-buttons.js';
 import * as footer from './footer/form-footer.js';
 
@@ -21,7 +20,8 @@ export function initSubForm(p) {                                    /*dbug-log*/
     p.action = p.action ? p.action : 'create';
     return _state('addEntityFormState', [p])
         .then(fState => buildAndAppendForm(fState, p.appendForm))
-        .then(() => finishFormBuild(p.initCombos, p.entity));
+        .then(() => finishFormBuild(p.initCombos, p.entity))
+        .then(() => _cmbx('enableCombobox', [p.combo, false]));
 }
 export function getExitButton() {
     return bttn.getExitButton(...arguments);
@@ -37,10 +37,6 @@ export function ifFormInUse(fLvl) {
 }
 export function alertInUse(fLvl) {
     _val('alertFormOpen', [fLvl]);
-}
-/* =============================== ROW ====================================== */
-export function getRowContainer() {
-    return row.getRowContainer(...arguments);
 }
 /* ============================== EXIT FORM ================================= */
 /**

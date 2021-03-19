@@ -173,6 +173,10 @@ export function replaceSelOpts(field, opts, changeHndlr, name) {    /*dbug-log*/
     selApi.refreshOptions(false); //Don't trigger options-dropdown
     updatePlaceholder(selApi, field, confgs[getFieldConfgKey(field)].name, opts.length);
 }
+export function addOpt(field, opt) {
+    const selApi = getSelApi(field);
+    selApi.addOption(opt, 'silent');
+}
 export function removeOpt(field, val) {
     const selApi = getSelApi(field);
     selApi.removeOption(val, 'silent');

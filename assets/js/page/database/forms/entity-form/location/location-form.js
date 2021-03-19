@@ -30,7 +30,7 @@ function getLocFormParams(val) {
         fLvl: 'sub',
         initCombos: initCombos.bind(null, 'sub'),
         onFormClose: _form.bind(null, 'enableCountryRegionField'),
-        pSel: '#sel-Location',
+        combo: 'Location',
         style: 'med-sub-form',
         vals: {
             'DisplayName': val === 'create' ? '' : val, //clears form trigger value

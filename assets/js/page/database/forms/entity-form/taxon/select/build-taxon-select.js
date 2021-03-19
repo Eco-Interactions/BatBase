@@ -33,7 +33,7 @@ function getTxnSelectParams(role, groupId) {                        /*dbug-log*/
         entity: role,
         fLvl: 'sub',
         initCombos: selectForm.initSelectFormCombos,
-        pSel: '#sel-'+role,
+        combo: role,
         style: 'sml-sub-form',
         submit: _form.bind(null, 'selectRoleTaxon'),
         vals: { Group: groupId }

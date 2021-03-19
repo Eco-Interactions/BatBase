@@ -20,7 +20,7 @@ function getPublFormParams(fLvl, v) {
         appendForm: form => $('#Publisher_f').append(form),
         entity: 'Publisher',
         fLvl: fLvl,
-        pSel: '#sel-Publisher',
+        combo: 'Publisher',
         style: 'sml-sub-form',
         submit: sForm.showSubmitModal.bind(null, fLvl),
         vals: { DisplayName: v === 'create' ? '' : v }

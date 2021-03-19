@@ -89,7 +89,7 @@ function getDataKeysForEntityRootForm(entity, action = 'create') {
  * > entity - Name of this form's entity.
  * > onFormClose - Handles form exit/reset.
  * > misc - Obj to hold the various special-case props
- * > pSelId - The id of the parent select of the form.
+ * > combo - The field name of the form parent-combo.
  * > selElems - Contains all selElems until they are initialized with selectize.
  *
  * --- Entity-specific properties
@@ -117,7 +117,7 @@ function getBaseFormState(p) {
         editing: p.id ? { core: p.id, detail: null } : false,
         onFormClose: p.onFormClose,
         initCombos: p.initCombos,
-        pSelId: p.pSel,
+        combo: p.combo,
     };
 }
 function initEntityState(fS, entity, fLvl, vals = {}) {
@@ -133,7 +133,7 @@ function initEntityFormConfg(fS, p) {
     Object.assign(p.vals, _state('getFieldValues', [p.fLvl]));
     const confg = _confg('getInitFormConfg', [p.entity, p.fLvl, p.action, p.vals]);
     _confg('mergeIntoFormConfg', [confg, fS.forms[p.fLvl]]);
-    fS.forms[p.fLvl] = confg;
+    fS.forms[p.fLvl] = confg;                                       /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', p.entity, confg);
     return confg;
 }
 /* ___________________________ TAXON ________________________________________ */

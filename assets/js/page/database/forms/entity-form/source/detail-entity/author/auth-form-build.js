@@ -34,7 +34,7 @@ function getFormParams(fLvl, cnt, aType, v) {
         entity: aType,
         fLvl: fLvl,
         onFormClose: resetOnCreateFormCancel,
-        pSel: '#sel-'+aType+cnt,
+        combo: aType+cnt,
         style: 'sml-sub-form',
         submit: sForm.showSubmitModal.bind(null, fLvl),
         vals: { 'LastName': (v === 'create' ? '' : v) }

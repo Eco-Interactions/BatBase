@@ -119,18 +119,16 @@ function handleFormComplete(fLvl, data) {                                       
  * entity in the form's parent elem @addAndSelectEntity.
  */
 function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
-    const formParent = _state('getFormState', [fLvl, 'pSelId']);
+    const comboField = _state('getFormState', [fLvl, 'combo']);
     _elems('exitSubForm', [fLvl]);
-    if (formParent) { addAndSelectEntity(data, formParent);
+    if (comboField) { addAndSelectEntity(data.coreEntity, comboField);
     } else { clearFormMemory(); }
 }
 /** Adds and option for the new entity to the form's parent elem, and selects it. */
-function addAndSelectEntity(data, formParent) {
-    const selApi = $(formParent)[0].selectize;
-    selApi.addOption({
-        'value': data.coreEntity.id, 'text': data.coreEntity.displayName
-    });
-    selApi.addItem(data.coreEntity.id);
+function addAndSelectEntity(entity, comboField) {
+    const newOpt = { text: entity.displayName, value: entity.id };
+    _cmbx('addOpt', [comboField, newOpt]);
+    _cmbx('setSelVal', [entity.id]);
 }
 /* ------------------- WAIT OVERLAY ----------------------------------------- */
  function toggleWaitOverlay(waiting) {
