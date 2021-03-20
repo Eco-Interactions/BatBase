@@ -1,6 +1,74 @@
+/**
+ * * TODO: ENSURE ALL STYLES ARE RELEVANT TO THE CURRENT STRUCTURE
 
+ *
+ */
+
+
+#map
+    height: 100%
+ /* ======================= MAP LEGEND ====================================== */
+.info
+    padding: 6px 8px
+    font: 14px/16px Arial, Helvetica, sans-serif
+    color: #555
+    background: white
+    background: rgba(255,255,255,0.7)
+    box-shadow: 0 0 15px rgba(0,0,0,0.2)
+    border-radius: 5px
+
+.info h4
+    margin: 0 0 5px 5px !important
+    color: #777
+
+.legend
+    line-height: 18px
+
+#int-legend span
+    padding-left: 16px
+
+.legend i
+    border-radius: 50%
+    width: 18px
+    height: 18px
+    float: left
+    margin: 2px 8px 2px 8px
+    padding-right: 3px
+    opacity: 0.8
+
+#filter-in-tbl-msg
+    position: absolute
+    top: 101px
+    left: 810px
+ /* ===================== HOVER TOOLTIP ===================================== */
+.info-tooltip
+    font-size:1.2em
+
+.info-tooltip div.tip
+    display: none
+    background: white
+    color: #333
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4)
+    text-align: left
+    border-radius: 12px
+    padding: 13px 19px
+    line-height: 1.4
+    z-index: 50
+
+.info-tooltip:hover
+    position:relative
+    cursor: pointer
+
+.info-tooltip:hover div.tip
+    position:absolute
+    top: 18px
+    left: 22px
+    display:block
+    width: 333px
+
+.popup-bttn
+    font-size: 14px !important
 /* ======================= MAP ICONS ======================================== */
-/* --- Custom Map Icons --- */
 #form-map .custom-icon
     height: 34px
     width: 34px
@@ -17,7 +85,6 @@
 #form-map .active-icon
     background-color: rgba(40, 143, 235, .4)
     border-color: #288feb
-
 /* --- Marker Drag Elem --- */
 .leaflet-control-drag-icon
     background-image: url('../../../images/icons/arrows-alt.svg') !important

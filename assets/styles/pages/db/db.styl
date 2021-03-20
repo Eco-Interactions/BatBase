@@ -4,6 +4,7 @@
  *
  * Note: Fully refactoring from css -> stylus has not been prioritized. Moving
  * pieces over as they get worked on
+ * * TODO: ENSURE ALL STYLES ARE RELEVANT TO THE CURRENT STRUCTURE
  *
  * CODE SECTIONS:
  *     ROOT ELEM STYLES
@@ -14,7 +15,14 @@
  *         TIPS POPUP
  */
  /* ====================== PAGE STYLES ====================================== */
+@import './forms/*'
+@import './panels/*'
+@import './table/*'
 @import './toolbars/*'
+@import 'map'
+@import './panels/*'
+
+
 
 #content-detail
     margin-top 0

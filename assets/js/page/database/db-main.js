@@ -67,11 +67,7 @@ function requireCss() {
     require('styles/css/lib/ag-grid.css');
     require('styles/css/lib/theme-fresh.css');
     require('styles/css/lib/selectize.default.css');
-    require('styles/css/search_db.css');
-    require('styles/css/moz-styles.css');
     require('styles/pages/db/db.styl');
-    require('styles/pages/db/map.styl');
-    require('styles/pages/db/forms/forms.styl');
 }
 function requireJs() {
     require('leaflet-control-geocoder');
