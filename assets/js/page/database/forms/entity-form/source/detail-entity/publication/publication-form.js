@@ -40,7 +40,7 @@ function clearCitationFormData() {
 }
 function finishPubFormInit(status) {
     if (!status) { return; } //Error handled elsewhere
-    $('#Title_f input').focus();
+    $('#DisplayName_f .f-input').focus();
 }
 /* --------------------- PUBLICATION-TYPE FIELDS ---------------------------- */
 /**

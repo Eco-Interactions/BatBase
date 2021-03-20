@@ -66,7 +66,7 @@ function initDisplayConfg(confg, action, hasSimpleView, vals) {
     cUtil.buildViewConfg(confg, confg.views, vals);
     delete confg.views;
 }
-/* ====================== REBUILD FORM-CONFG ================================ */
+/* ====================== ON FORM-CONFG CHANGE ============================== */
 /* ------------------------ FORM-TYPE CHANGED ------------------------------- */
 /** [onEntityTypeChangeUpdateConfg description] */
 export function onEntityTypeChangeUpdateConfg(fLvl) {
@@ -80,12 +80,14 @@ export function onFieldViewChangeUpdateConfg(fLvl) {
     confg.display = confg.display === 'all' ? 'simple' : 'all';
     updateConfg(confg);
 }
+/* ====================== REBUILD FORM-CONFG ================================ */
 function updateConfg(c) {                                           /*dbug-log*///console.log('   --updateConfg[%s][%O]', c.name, c);
     const vals = _state('getFieldValues', [c.group]);
     const mConfg = getBaseConfg(c.name, c.group, c.type);
     resetConfgDefaults(c);
     cUtil.mergeFieldConfg(c.fields, mConfg.fields, 'finalMerge');
     cUtil.buildViewConfg(c, mConfg.views, vals);
+    updateActiveFieldFlags(c.fields);
 }
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
 function resetConfgDefaults(c) {
@@ -96,9 +98,16 @@ function resetFieldConfgDefaults(fields) {                          /*dbug-log*/
     Object.values(fields).forEach(resetFieldDefaults);
 }
 function resetFieldDefaults(fConfg) {                               /*dbug-log*///console.log('     --resetFieldDefaults [%O]', fConfg);
-    const props = [ 'combo', 'input', 'shown' ];  //handle required field reset without reseting those required in the base confgs
+    const props = [ 'active', 'combo', 'input', 'shown' ];
     props.forEach(p => delete fConfg[p]);                           /*dbug-log*///console.log('     --after reset [%O]', fConfg);
     if (fConfg.count) { fConfg.count = 1 }
+}
+function updateActiveFieldFlags(fields) {
+    Object.values(fields).forEach(setActiveFlag);
+}
+function setActiveFlag(field) {
+    field.active = field.current || false;
+    delete field.current;
 }
 /* ====================== CONFG BUILDERS ==================================== */
 export function mergeIntoFormConfg(confg, mConfg) {

@@ -39,29 +39,18 @@ function mergeConfgData(prop, mData, fConfg) {                      /*dbug-log*/
  */
 export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-log*///console.log('<<<<<<<<<<<<<<<<<<--mergeFieldConfg cFields[%O] mFields[%O] finalMerge?[%s]', _u('snapshot', [cFields]), _u('snapshot', [mFields]), finalMerge);
     Object.keys(mFields).forEach(f => mergeFieldConfgs(f, mFields[f]));
-    // if (!finalMerge) { return; }
-    // setActiveFieldStatus(cFields);
 
     function mergeFieldConfgs(field, confg) {                        /*dbug-log*///console.log('--mergeFieldConfg field[%s] = [%O]', field, confg);
         Object.keys(confg).forEach(k => mergeFieldConfgData(field, k, confg[k]));
+        if (!finalMerge) { return; }
         cFields[field].required = mFields[field].required;
     }
     function mergeFieldConfgData(field, prop, val) {                /*dbug-log*///console.log('--mergeFieldConfgData field[%s] prop[%s] = [%O] [%O]', field, prop, val, cFields);
         if (!cFields[field]) { cFields[field] = {}; }
         cFields[field][prop] = val;
-        // if (!finalMerge) { return; }
-        // cFields[field].current = true;
+        cFields[field].current = true;
     }
 }
-// function setActiveFieldStatus(cFields) {
-//     Object.values(cFields).forEach(setActiveFieldState);
-// }
-// function setActiveFieldState(field) {                               /*dbug-log*///console.log('--setActiveFieldStatus field[%O]', _u('snapshot', [field]));
-//     const isActive = field.current || false;
-//     field.active = isActive;
-//     if (!isActive) { delete field.required;  console.log('  --deleted "required"'); }
-//     delete field.current;
-// }
 /* ----------------- MERGE ENTITY-TYPE VIEW-CONFG --------------------------- */
 /**
  * [mergeViewConfg description]

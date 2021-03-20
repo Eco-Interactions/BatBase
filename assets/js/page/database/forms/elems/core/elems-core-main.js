@@ -21,7 +21,8 @@ export function initSubForm(p) {                                    /*dbug-log*/
     return _state('addEntityFormState', [p])
         .then(fState => buildAndAppendForm(fState, p.appendForm))
         .then(() => finishFormBuild(p.initCombos, p.entity))
-        .then(() => _cmbx('enableCombobox', [p.combo, false]));
+        .then(() => _cmbx('enableCombobox', [p.combo, false]))
+        .then(() => 'success');
 }
 export function getExitButton() {
     return bttn.getExitButton(...arguments);
