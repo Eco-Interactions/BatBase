@@ -24,7 +24,7 @@ import { _u } from '~util';
  * @param  {Object} vals     [description]
  * @return {[type]}          [description]
  */
-export function buildViewConfg(c, viewSets, vals = {}) {    /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
+export function buildViewConfg(c, viewSets, vals = {}) {            /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
     c.infoSteps = 0;
     c.view = viewSets[c.display].map(row => getRowConfg(c, vals, row));
 }
@@ -75,7 +75,7 @@ function getFieldConfg(c, v, name) {                                /*dbug-log*/
 function trackFieldData(fConfg, c) {
     if (fConfg.info) { ++c.infoSteps; }
 }
-function buildFieldConfg(fConfg, c, v) {                            /*dbug-log*/console.log('--buildFieldConfg fConfg[%O] c[%O] v?[%O]', fConfg, c, v);
+function buildFieldConfg(fConfg, c, v) {                            /*dbug-log*///console.log('--buildFieldConfg fConfg[%O] c[%O] v?[%O]', fConfg, c, v);
     setFieldStyleClass(fConfg, c.group);
     copyFormState(fConfg, c);
     setFieldValue(fConfg, v);

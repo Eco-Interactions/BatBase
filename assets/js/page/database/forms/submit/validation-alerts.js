@@ -37,12 +37,28 @@
 import { _cmbx, _db, _el, _u } from '~util';
 import { _state, _elems, _form, getNextFormLevel } from '~form';
 let fS;
+/* ====================== DATA-PREP ALERT =================================== */
+export function dataPrepFailure(fails) {                            /*perm-log*/console.log('           !!!dataPrepFailure [%s]', JSON.stringify(fails));
+    diableFormButtons();
+    const cntnr = _el('getElem', ['div', { class: 'flex-col', id:'data_alert' }]);
+    $(cntnr).append([getDataPrepFailAlert(fails), buildResetButton(reloadPage)]);
+    $('#top-hdr').after(cntnr);
+}
+function getDataPrepFailAlert(fails) {
+    return `<span>An error occured and the developer has been notified.
+        <br>The page will be reloaded. If this error persists, please create a new
+        Bug Report and include the following info:</span><br>
+        <span><center>[${JSON.stringify(data.fails)}]</center></span>`;
+}
+function reloadPage() {
+    location.reload(true);
+}
 /* ====================== FORM-SUBMIT ALERT ================================= */
 /**
  * Shows server-validation message to editor for duplicated authors or editors,
  * non-unique display names, or general form-error message.
  */
-export function formSubmitError(fLvl, jqXHR, textStatus) {                /*perm-log*/console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
+export function formSubmitError(fLvl, jqXHR, textStatus) {          /*perm-log*/console.log("   !!!ajaxError. jqXHR: %O, responseText = [%O], textStatus = [%s]", jqXHR, jqXHR.responseText, textStatus);
     const tag = getFormAlertTag(jqXHR.responseText);
     showFormValAlert(fLvl, tag, fLvl);
 }
@@ -61,23 +77,26 @@ function isDuplicateAuthor(errTxt) {
 }
 /* ===================== DATA-STORAGE ALERT ================================= */
 export function errUpdatingData(errTag) {                           /*perm-log*/console.log('           !!!errUpdatingData [%s]', errTag);
+    diableFormButtons();
     const cntnr = _el('getElem', ['div', { class: 'flex-col', id:'data_alert' }]);
-    $(cntnr).append([buildAlertMsg(), buildResetDataButton()]);
+    $(cntnr).append([buildAlertMsg(), buildResetButton(reloadAndRedownloadData)]);
     $('#top-hdr').after(cntnr);
-    $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
-        .fadeTo('400', 0.5);
 }
 function buildAlertMsg() {
     return `<span>An error occured and the developer has been notified.
         <br>All stored data will be redownloaded.</span>`;
 }
-function buildResetDataButton() {
+function buildResetButton() {
     const confirm = _el('getElem', ['span', { class: 'flex-row',
             'text': `Please click "OK" to continue.` }]);
     const bttn = _el('getElem', ['input', { type: 'button', value: 'OK', class: 'exit-bttn' }]);
     $(bttn).click(reloadAndRedownloadData);
     $(confirm).append(bttn);
     return confirm;
+}
+function diableFormButtons() {
+    $('#top-submit, #top-cancel, #exit-form').off('click').css('disabled', 'disabled')
+        .fadeTo('400', 0.5);
 }
 function reloadAndRedownloadData() {
     _elems('exitRootForm', [null, 'skipTableReset']);

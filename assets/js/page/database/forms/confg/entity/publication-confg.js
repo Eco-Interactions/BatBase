@@ -45,16 +45,12 @@ function getPublicationFieldConfg() {
         },
         DisplayName: { //Source field
             label: 'Title',
-            // type: 'text',
         },
         Website: {//Source field
             info: {
                 tooltip: 'Copy and paste link to publication, if available',
             }
         },
-        Year: {
-            required: true
-        }
     };
 }
 
@@ -100,23 +96,15 @@ function getPublicationTypeConfg() {
                 simple: [] // No fields added unless 'show all fields' selected
             }
         },
-        Other: {
+        Other: { //Most broad options available
             name: 'Other',
-            fields: {
-                Author: {
-                    required: true
-                },
-                Year: {
-                    required: true
-                }
-            },
             misc: {
                 defaultCitType: 'Other'
             },
             views:  {
                 all: [
                     ['Author', 'Editor', 'Publisher']
-                ],
+                ]
             }
         },
         'Thesis/Dissertation': {
@@ -140,7 +128,7 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Author', 'Publisher'],
+                    ['Author', 'Editor', 'Publisher']
                 ]
             }
         }

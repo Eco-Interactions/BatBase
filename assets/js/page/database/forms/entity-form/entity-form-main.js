@@ -45,9 +45,6 @@ export function clearEntityFormMemory(entity) {
 export function createEntity(entity, val) {
     return getEntityModule(entity).initCreateForm(...arguments);
 }
-export function addSourceDataToFormState() {
-    return src.addSourceDataToFormState(...arguments);
-}
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationCombo() {

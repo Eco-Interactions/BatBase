@@ -45,7 +45,10 @@ function getCitFormParams(v) {
         combo: 'CitationTitle',
         style: 'med-sub-form',
         submit: sForm.showSubmitModal.bind(null, 'sub'),
-        vals: { Title: (v === 'create' ? '' : v)}
+        vals: {
+            ParentSource: _cmbx('getSelVal', ['Publication']),
+            Title: (v === 'create' ? '' : v),
+        }
     };
 }
 // /* -------------------------- BUILD FORM ------------------------------------ */

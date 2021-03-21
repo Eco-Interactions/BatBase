@@ -22,6 +22,7 @@ export function reportErr(e) {
  * IssueTags {errDataKeys}:
  *     invalidDataKeyType {key, type}
  *     dataSyncFailure {fails} (no browser alert)
+ *     dataPrepFail {fails} (Alert shown in form w/ page-reload button)
  *     facadeErr {module, caller, called, error(toString), errMsg}
  *     feedback { route, topic, feedback } (no browser alert)
  *     editorReport {summary, steps, etc, screenshots} (no browser alert)
@@ -88,6 +89,7 @@ class SentryError extends Error {
  * IssueTags: alertHandler
  *     alertNoRcrdFound: noRcrdFoundInForms
  *     comboboxNotFound: showGeneralAlert
+ *     dataPrepFail: (handled in form validation code)
  *     dataSyncFailure: (handled in form validation code)
  *     editorReport: (handled in bug report form)
  *     expectedDataNotFound: showGeneralAlert
@@ -100,7 +102,7 @@ class SentryError extends Error {
  * TEMP ISSUE TAGS FOR BUG TRACKING
  */
 function handleUserAlert(tag) {
-    const silent = ['dataSyncFailure', '', 'noRcrdFound', 'TestIssue', 'editorReport'];
+    const silent = ['dataPrepFail', 'dataSyncFailure', '', 'noRcrdFound', 'TestIssue', 'editorReport'];
     if (silent.indexOf(tag) !== -1) { return; }
     const map = {
         alertNoRcrdFound: noRcrdFoundInForms,

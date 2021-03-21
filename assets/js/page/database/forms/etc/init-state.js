@@ -118,15 +118,18 @@ function getBaseFormState(p) {
         onFormClose: p.onFormClose,
         initCombos: p.initCombos,
         combo: p.combo,
+        name: p.entity
     };
 }
 function initEntityState(fS, entity, fLvl, vals = {}) {
     const map = {
-        // Citation: addPubData,
+        Citation: storeSourceData,
+        Publication: storeSourceData,
         Subject: initTaxonState,
         Object: initTaxonState,
         Taxon: initTaxonState
     };
+    fS.forms[fLvl].fields = {};
     return Promise.resolve(map[entity] ? map[entity](fS, fLvl, vals) : null);
 }
 function initEntityFormConfg(fS, p) {
@@ -138,13 +141,27 @@ function initEntityFormConfg(fS, p) {
 }
 /* ___________________________ TAXON ________________________________________ */
 export function initTaxonState(fS, fLvl, vals) {                    /*dbug-log*///console.log('   --initTaxonState fLvl[%s] vals[%O] fS[%O]', fLvl, vals, fS);
-    fS.forms[fLvl].fields = {};
     return _state('setTaxonGroupState', [fS, fLvl, vals]);
 }
-/* ___________________________ CITATION _____________________________________ */
-// function addParentPubToFormState(pId) {
-//     const pSrc = _state('getRcrd', ['source', pId]);                /*dbug-log*///console.log('addParentPubToFormState  [%s][%O]', pId, pSrc);
-//     const pub = _state('getRcrd', ['publication', pSrc.publication]);
-//     const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*///console.log('addParentPubToFormState[%O]', data);
-//     _state('setFieldState', ['sub', 'ParentSource', data, 'misc']);
-// }
+/* ____________________________ SOURCE ______________________________________ */
+function storeSourceData(fS, fLvl, vals) {
+    if (!fS.forms[fLvl].misc) { fS.forms[fLvl].misc = {}; }
+    return _db('getData', ['srcTypeNames'])
+        .then(srcTypes => fS.records.coreTypes = srcTypes)
+        .then(() => ifCitationAddParentPublicationData(...arguments));
+}
+function ifCitationAddParentPublicationData(fS, fLvl, vals) {       /*dbug-log*///console.log('--storeSourceData [%s] vals?[%O] fS[%O]', fLvl, vals, fS);
+    if (fS.forms[fLvl].name !== 'Citation') { return; }
+    initParentSourceFieldObj(fS.forms[fLvl].fields);
+    addPubDataToParentSourceField(fS, fLvl, vals.ParentSource);
+}
+function initParentSourceFieldObj(fields) {
+    fields['ParentSource'] = {};
+    fields['ParentSource'].misc = {};
+}
+function addPubDataToParentSourceField(fS, fLvl, pId) {
+    const pSrc = fS.records.source[pId];                            /*dbug-log*///console.log('--addPubDataToParentSourceField [%s][%O]', pId, pSrc);
+    const pub = fS.records.publication[pSrc.publication];
+    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*///console.log('--pubData[%O]', data);
+    fS.forms[fLvl].fields.ParentSource.misc = data;
+}

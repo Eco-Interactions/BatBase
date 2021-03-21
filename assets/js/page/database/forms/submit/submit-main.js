@@ -45,10 +45,11 @@ function addEntityDataToFormData(data, confg) {
     }
 }
 /* ------------------------- SUBMIT FORM ------------------------------------ */
-function submitFormData(data, fLvl, action) {                       /*dbug-log*///console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
-    addEntityDataToFormData(data);
+function submitFormData(data, fLvl, confg) {                        /*dbug-log*///console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
+    if (data.fails) { return val.errUpdatingData('dataPrepFail', data.fails); }
+    addEntityDataToFormData(data, confg);
     toggleWaitOverlay(true);
-    submitForm(data, fLvl, action);
+    submitForm(data, fLvl, confg.action);
 }
 function submitForm(data, fLvl, action) {
     const url = `crud/entity/${action}`;
@@ -68,7 +69,7 @@ function onSuccess(fLvl, data, textStatus, jqXHR) {                             
 function onDataSynced(fLvl, data) {                                             console.log('       --onDataSynced.');
     if (!_state('getFormState', [fLvl, 'submit'])) { return; } //form closed.
     toggleWaitOverlay(false);
-    if (data.fails) { return val.errUpdatingData('dataSyncFailures'); }
+    if (data.fails) { return val.errUpdatingData('dataSyncFailures', data.fails); }
     if (noDataChanges()) { return showNoChangesMessage(); }
     addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, fLvl, data));
