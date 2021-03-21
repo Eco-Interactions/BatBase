@@ -18,7 +18,6 @@ export function modifySrcDataForLocalDb(data) {                     /*dbug-log*/
     db.setDataInMemory('citSrcs', citSrcs);
     db.setDataInMemory('pubSrcs', pubSrcs);
     db.setDataInMemory('publSrcs', publSrcs);
-    db.setDataInMemory('srcTypeNames', getTypeObj(data.sourceType));
     db.setDataInMemory('citTypeNames', getTypeObj(data.citationType));
     db.setDataInMemory('pubTypeNames', getTypeObj(data.publicationType));
     ['citationType', 'publicationType', 'sourceType'].forEach(k => db.deleteMmryData(k));

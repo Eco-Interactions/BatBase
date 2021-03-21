@@ -13,7 +13,7 @@
  *             TOP-FORM
  *             SUB-ENTITY
  */
-import { _db, _el, _u, executeMethod } from '~util';
+import { _cmbx, _db, _el, _u, executeMethod } from '~util';
 import { _state, _elems, clearFormMemory } from '~form';
 import * as val from './validation-alerts.js';
 import * as prep from './data/submit-data-main.js';
@@ -33,21 +33,9 @@ export function handleFormSubmit(fLvl) {
     .then(data => submitFormData(data, fLvl, confg))
     .then(() => _state('setFormState', [fLvl, 'submit', true]));
 }
-function addEntityDataToFormData(data, confg) {
-    addEntityNames(confg.core);
-    if (confg.group !== 'top') { return; }
-    const editingIds = _state('getStateProp', ['editing']);
-    if (editingIds) { data.ids = editingIds; }
-
-    function addEntityNames(core) {
-        data.coreEntity = core ? core : confg.name;
-        if (core) { data.detailEntity =  confg.name; }
-    }
-}
 /* ------------------------- SUBMIT FORM ------------------------------------ */
 function submitFormData(data, fLvl, confg) {                        /*dbug-log*///console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
     if (data.fails) { return val.errUpdatingData('dataPrepFail', data.fails); }
-    addEntityDataToFormData(data, confg);
     toggleWaitOverlay(true);
     submitForm(data, fLvl, confg.action);
 }
@@ -66,7 +54,7 @@ function onSuccess(fLvl, data, textStatus, jqXHR) {                             
     _db('afterServerDataUpdateSyncLocalDatabase', [data.results])
     .then(data => onDataSynced(fLvl, data));
 }
-function onDataSynced(fLvl, data) {                                             console.log('       --onDataSynced.');
+function onDataSynced(fLvl, data) {                                 /*temp-log*/console.log('       --onDataSynced [%s][%O]', fLvl, data);
     if (!_state('getFormState', [fLvl, 'submit'])) { return; } //form closed.
     toggleWaitOverlay(false);
     if (data.fails) { return val.errUpdatingData('dataSyncFailures', data.fails); }
@@ -99,18 +87,18 @@ function showNoChangesMessage() {
     _elems('toggleFormStatusMsg', ['No changes detected.', 'red']);
 }
 /** Updates the core records in the global form params object. */
-function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s])', entity, detailEntity);
+function addDataToStoredRcrds(entity, detailEntity) {               /*dbug-log*///console.log('--addDataToStoredRcrds. [%s] (detail ? [%s])', entity, detailEntity);
     return _db('getData', [entity]).then(addDataToMemory);
 
-    function addDataToMemory(data) {
+    function addDataToMemory(data) {                                /*dbug-log*///console.log('   --addDataToMemory data[%O]', data);
         _state('setEntityRecords', [entity, data]);
         if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     }
 }
 /*----------- Top-Form Success Methods ------------*/
-function handleFormComplete(fLvl, data) {                                       console.log('handleFormComplete fLvl = ', fLvl);
+function handleFormComplete(fLvl, data) {                           /*dbug-log*///console.log('--handleFormComplete fLvl = ', fLvl);
     if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data, fLvl); }
-    const onClose = _state('getFormState', ['top', 'onFormClose']);              console.log('onClose = %O', onClose);
+    const onClose = _state('getFormState', ['top', 'onFormClose']); /*dbug-log*///console.log('   --onClose = %O', onClose);
     if (onClose) { onClose(data);
     } else { _elems('exitRootForm'); }
 }
@@ -119,7 +107,7 @@ function handleFormComplete(fLvl, data) {                                       
  * Exits the successfully submitted form @exitForm. Adds and selects the new
  * entity in the form's parent elem @addAndSelectEntity.
  */
-function exitFormAndSelectNewEntity(data, fLvl) {                               console.log('           --exitFormAndSelectNewEntity.');
+function exitFormAndSelectNewEntity(data, fLvl) {                    /*dbug-log*///console.log('           --exitFormAndSelectNewEntity.');
     const comboField = _state('getFormState', [fLvl, 'combo']);
     _elems('exitSubForm', [fLvl]);
     if (comboField) { addAndSelectEntity(data.coreEntity, comboField);
@@ -129,7 +117,7 @@ function exitFormAndSelectNewEntity(data, fLvl) {                               
 function addAndSelectEntity(entity, comboField) {
     const newOpt = { text: entity.displayName, value: entity.id };
     _cmbx('addOpt', [comboField, newOpt]);
-    _cmbx('setSelVal', [entity.id]);
+    _cmbx('setSelVal', [comboField, entity.id]);
 }
 /* ------------------- WAIT OVERLAY ----------------------------------------- */
  function toggleWaitOverlay(waiting) {

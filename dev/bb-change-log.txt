@@ -9,6 +9,9 @@ SINCE LAST SERVER UPDATE:
     - FORMS
         - Configuration
             - all form-field configuration centralized
+            - ~80% of the code needed for edit forms is no longer needed!
+                - This greatly reflexts the general increase of flexibility when
+                    reusing the forms with differnt configuration
             - Views
                 - Fields can be stacked in the same row (eg, doi and website)
                 - arbitrary number of fields in row

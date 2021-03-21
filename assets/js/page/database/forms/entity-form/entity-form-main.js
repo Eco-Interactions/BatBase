@@ -31,7 +31,7 @@ const forms = {
 };
 function getEntityModule(entity) {
     const lc = _u('lcfirst', [entity]);
-    const key = Object.keys(forms).find(m => forms[m].ent.indexOf(lc) !== -1);
+    const key = Object.keys(forms).find(m => forms[m].ent.indexOf(lc) !== -1);/*dbug-log*///console.log('--getEntityModule entity[%s] key[%s]', entity, key);
     return forms[key].mod;
 }
 export function clearEntityFormMemory(entity) {

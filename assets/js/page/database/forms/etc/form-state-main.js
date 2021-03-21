@@ -86,13 +86,6 @@ export function getEntityRcrds(...args) {
 export function getRcrd(...args) {
     return callCoreState(get, 'getRcrd', args);
 }
-export function getRankId(...args) {
-    return callCoreState(get, 'getRankId', args);
-}
-/* ----------------------- EDIT FORM ---------------------------------------- */
-export function getEditEntityId(...args) {
-    return callCoreState(get, 'getEditEntityId', args);
-}
 /* --------------------- STATE PREDICATES ----------------------------------- */
 export function isEditForm(...args) {
     return callCoreState(get, 'isEditForm', args);
@@ -128,17 +121,14 @@ export function setStateProp(...args) {
     return callCoreState(set, 'setStateProp', args);
 }
 export function setEntityRecords(...args) {
-    return callCoreState(set, 'setStateProp', args);
+    return callCoreState(set, 'setEntityRecords', args);
 }
 /* ======================= SET FORM STATE =================================== */
 export function setFormState(...args) {
-    return callFormState(set, 'setStateProp', args);
+    return callFormState(set, 'setFormState', args);
 }
 export function setFieldState(...args) {
     return callFormState(set, 'setFieldState', args);
-}
-export function setOnFormCloseHandler(...args) {
-    return callFormState(set, 'setOnFormCloseHandler', args);
 }
 /* ---------------------------- TAXON --------------------------------------- */
 export function updateTaxonGroupState(fLvl, vals) {

@@ -29,11 +29,8 @@ function buildRcrdsObj(fS, entities) {
 }
 /** Returns the record for the passed id and entity-type. */
 export function getRcrd(fS, e, id) {                                /*dbug-log*///console.log('   --getRcrd  entity[%s][%s] fS[%O]', e, id, fS);
-    const r = fS.records[e][id];
+    const r = fS.records[e][id];                                     /*dbug-log*///console.log('   --getRcrd  rcrd%O]', r);
     return r ? _u('snapshot', [r]) : alertFormIssue('noRcrdFound', {id: id, entity: e });
-}
-export function getRankId(fS, name) {
-    return fS.records.rankNames[name];
 }
 /* ----------------------- EDIT FORM ---------------------------------------- */
 export function getEditEntityId(fS, type) {

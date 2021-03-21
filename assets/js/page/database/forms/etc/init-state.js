@@ -144,14 +144,9 @@ export function initTaxonState(fS, fLvl, vals) {                    /*dbug-log*/
     return _state('setTaxonGroupState', [fS, fLvl, vals]);
 }
 /* ____________________________ SOURCE ______________________________________ */
-function storeSourceData(fS, fLvl, vals) {
-    if (!fS.forms[fLvl].misc) { fS.forms[fLvl].misc = {}; }
-    return _db('getData', ['srcTypeNames'])
-        .then(srcTypes => fS.records.coreTypes = srcTypes)
-        .then(() => ifCitationAddParentPublicationData(...arguments));
-}
-function ifCitationAddParentPublicationData(fS, fLvl, vals) {       /*dbug-log*///console.log('--storeSourceData [%s] vals?[%O] fS[%O]', fLvl, vals, fS);
+function storeSourceData(fS, fLvl, vals) {                          /*dbug-log*///console.log('--storeSourceData [%s] vals?[%O] fS[%O]', fLvl, vals, fS);
     if (fS.forms[fLvl].name !== 'Citation') { return; }
+    if (!fS.forms[fLvl].misc) { fS.forms[fLvl].misc = {}; }
     initParentSourceFieldObj(fS.forms[fLvl].fields);
     addPubDataToParentSourceField(fS, fLvl, vals.ParentSource);
 }

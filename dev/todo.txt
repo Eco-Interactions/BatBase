@@ -35,6 +35,7 @@ TAYLOR:
 rest is radical, joy is radical, laughter is radical, sleeping is radical
 CURRENT:
     - fix year input validation
+    - hardcode 'territory' countries
 
 
     - Show when a tag is required to be selected

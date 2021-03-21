@@ -84,6 +84,9 @@ export function destroySelectizeInstance() {
 export function replaceSelOpts() {
     return util.replaceSelOpts(...arguments);
 }
+export function addOpt() {
+    return util.addOpt(...arguments);
+}
 export function removeOpt() {
     return util.removeOpt(...arguments);
 }

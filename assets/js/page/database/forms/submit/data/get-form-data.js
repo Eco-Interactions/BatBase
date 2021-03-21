@@ -1,5 +1,6 @@
 /**
  * Returns an object with (k) the form field and (v) value.
+ * TODO: DOCUMENT
  *
  * Export
  *     getValidatedFormData
@@ -14,7 +15,14 @@ export function getValidatedFormData(confg) {
     md.data = buildServerDataObj();                                 /*dbug-log*///console.log('+--getValidatedFormData. [%s] [%O]', md.confg.name, md);
     return Promise.all(wrangleFormData())
         .then(alertIfFailures)
-        .then(() => md.data);
+        .then(addEntityDataToFormData)
+        .then(returnServerData);
+}
+
+function returnServerData() {
+    const sData = JSON.parse(JSON.stringify(md.data));
+    md = {};
+    return sData;
 }
 function wrangleFormData() {
     return Object.values(md.confg.fields).map(getDataForServer);
@@ -79,14 +87,19 @@ function renameField(g, fConfg, name, dKey = 'core') {              /*dbug-log*/
     setServerData(g, name, getFieldValue(fConfg), dKey);
 }
 function setCoreType(g, fConfg) {                                   /*dbug-log*///console.log('               --setCoreType [%s] fConfg[%O]', g, fConfg);
-    const prop = _u('ucfirst', [md.confg.core]) + 'Type';
-    const val = _state('getRcrd', ['coreTypes', fConfg.value]);
-    setServerData(g, prop, val);
+    if (typeof fConfg.value !== 'string') { return trackFailure(fConfg.name, fConfg.value); }
+    setServerData(g, fConfg.entity, fConfg.value);  //String type name
 }
 function setParent(g, fConfg, entity) {                             /*dbug-log*///console.log('               --setParent [%s]entity[%s] fConfg[%O]', g, entity, fConfg);
     const prop = 'Parent' + entity;
-    if (isNaN(fConfg.value)) { return trackFailure(prop, fConfg.value); }
-    setServerData(g, prop, fConfg.value); //Value
+    const val = getFieldValue(fConfg);
+    if (isNaN(val)) { return trackFailure(prop, val); }
+    setServerData(g, prop, val); //Value
+}
+function setDetail(g, fConfg) {
+    const val = getFieldValue(fConfg);
+    if (isNaN(val)) { return trackFailure(fConfg.name, val); }
+    setServerData(g, fConfg.name, val, 'detail'); //Value
 }
 /**
  * [setCoreAndDetail description]
@@ -98,11 +111,22 @@ function setCoreAndDetail(g, fConfg, emptyString) {
     ['core', 'detail'].forEach(e => setServerData(g, fConfg.name, fConfg.value, e));
 }
 /* =========================== TRACK FAILUTES =============================== */
-function trackFailure(preop, value) {
+function trackFailure(prop, value) {
     if (!md.data.fails) { md.data.fails = {}; }
     md.data.fails[prop] = value;
 }
 function alertIfFailures() {
-    if (!md.data.fails) { return; }
-    _alert('alertIssue', ['dataPrepFail', JSON.stringify(data.fails) ]);
+    if (!md.data.fails) { return; }                                 /*dbug-log*///console.log('--alertIfFailures [%O]', md.data);
+    _alert('alertIssue', ['dataPrepFail', JSON.stringify(md.data.fails) ]);
+}
+/* ========================= FINISH SERVER DATA ============================= */
+function addEntityDataToFormData() {
+    addEntityNames(md.confg.core);
+    if (md.confg.group !== 'top') { return; }
+    if (md.confg.editing) { md.data.ids = md.confg.editing; }
+
+    function addEntityNames(core) {
+        md.data.coreEntity = core ? core : md.confg.name;
+        if (core) { md.data.detailEntity =  md.confg.name; }
+    }
 }

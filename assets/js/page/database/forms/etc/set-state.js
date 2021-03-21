@@ -15,16 +15,12 @@ export function setStateProp(fS, prop, val) {                       /*dbug-log*/
  * Edge case: After form submit, the updated data is fetched and stored here, but
  * if the form is closed before the data is stored, cancel storing the data.
  */
-export function setEntityRecords(fS, entity, rcrds) {               /*dbug-log*///console.log('   --setEntityRecords [%s][%O][%O]', entity, records, fS);
+export function setEntityRecords(fS, entity, rcrds) {               /*dbug-log*///console.log('   --setEntityRecords entity[%s] rcrds[%O] fS[%O]', entity, rcrds, fS);
     fS.records[entity] = rcrds;
 }
-/* ============================ SETTERS ===================================== */
-/* ----------------------- ENTITY FORM -------------------------------------- */
+/* ====================== SET FORM STATE ==================================== */
 export function setFormState(fState, prop, val) {                   /*dbug-log*///console.log('   --setFormState [%s][%s][%O]', prop, val, fState);
     fState[prop] = val;
-}
-export function setOnFormCloseHandler(fState, hndlr) {              /*dbug-log*///console.log('    --setOnFormCloseHandler hndlr[%O] [%O]', hndlr, fState);
-    fState.onFormClose = hndlr;
 }
 /* ----------------------- FIELDS ------------------------ */
 export function setFieldState(fState, field, val, prop = 'value') { /*dbug-log*///console.log('    --setFieldState fields[%s] prop[%s] val?[%O] [%O]', field, prop, val, fState);//console.trace()
@@ -51,7 +47,7 @@ export function setTaxonGroupState(fS, fLvl, vals) {
     const group = getGroupEntity(fS, fLvl, vals);
     const sGroupId = getSubGroupId(fS, vals, group);                /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
     setGroupState(fS.records.taxon, fS.forms[fLvl], group);
-    setSubGroupState(fS, fS.forms[fLvl], group.subGroups, sGroupId);/*perm-log*/console.log('       --[%s] stateData = %O', group.displayName, fS.forms[fLvl]);
+    setSubGroupState(fS, fS.forms[fLvl], group.subGroups, sGroupId);
 }
 function getGroupEntity(fS, fLvl, vals) {
     return vals.Group ? fS.records.group[vals.Group] :

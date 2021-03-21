@@ -32,6 +32,9 @@ function getPublicationFieldConfg() {
             entity: 'PublicationType',
             label: 'Type',
             name: 'PublicationType',
+            prep: {
+                setDetail: []
+            },
             type: 'select',
             required: true
         },
@@ -41,7 +44,7 @@ function getPublicationFieldConfg() {
             type: 'select',
         },
         SourceType: {//Source field
-            value: 'Publisher'
+            value: 'Publication'
         },
         DisplayName: { //Source field
             label: 'Title',

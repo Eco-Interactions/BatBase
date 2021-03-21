@@ -75,7 +75,7 @@ function addSelectSimilarLocationNote(prevElem) {
 /** ======================= EDIT FORM ======================================= */
 export function finishEditFormBuild(entity) {
     updateCountryChangeMethod();
-    addGpsListenerToEditForm(_state('getEditEntityId', ['core']));
+    addGpsListenerToEditForm(_state('getFormState', ['top', 'editing']).core);
     $('.all-fields-cntnr').hide();
     addNotesToForm();
 }

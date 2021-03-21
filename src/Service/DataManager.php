@@ -52,8 +52,7 @@ class DataManager
      */
     public function createEntity($coreName, $data)
     {
-        $coreClass = 'App\\Entity\\'. $coreName;                               //print("\ncoreClass = ". $coreClass);
-        // $coreClass = 'App\\Entity\\'. ucfirst($coreName);                       print("\ncoreClass = ". $coreClass);
+        $coreClass = 'App\\Entity\\'. ucfirst($coreName);                       //print("\ncoreClass = ". $coreClass);
 
         $coreEntity = new $coreClass();
         $coreData = $data->core;
@@ -154,8 +153,8 @@ class DataManager
      */
     private function setDetailEntityData($cData, $data, &$returnData)
     {
-        $dName = property_exists($cData->rel, "sourceType") ?
-            lcfirst($cData->rel->sourceType) : 'geoJson';                            //print('detail name = '.$dName);
+        $dName = property_exists($cData->rel, "SourceType") ?
+            lcfirst($cData->rel->SourceType) : 'geoJson';                            //print('detail name = '.$dName);
         $returnData->detail = $dName;
         if (!property_exists($data, 'detail')) { return false; }
         // if (!property_exists($cData, 'hasDetail')) { return false; }
@@ -336,7 +335,7 @@ class DataManager
     private function addContribEdits(&$edits, $action, $ary)
     {
         if (count($ary)) {
-            if (!property_exists($edits, 'contributor')) { $edits->contributor = []; }
+            if (!property_exists($edits, 'Contributor')) { $edits->contributor = []; }
             $edits->contributor[$action] = $ary;
         }
     }
@@ -351,7 +350,7 @@ class DataManager
     private function removeFromCollection($field, $coll, $ary, &$entity, &$edits)
     {
         $removed = [];
-        $removeField = 'remove'.ucfirst($field);
+        $removeField = 'remove'.$field;
         foreach ($coll as $id) {
             if (in_array($id, $ary)) { continue; }
             $collEnt = $this->getEntity($field, $id);
@@ -364,7 +363,7 @@ class DataManager
     private function addToCollection($field, $coll, $ary, &$entity, &$edits)
     {
         $added = [];
-        $addField = 'add'.ucfirst($field);
+        $addField = 'add'.$field;
         foreach ($ary as $id) {
             if (in_array($id, $coll)) { continue; }
             array_push($added, intval($id));
