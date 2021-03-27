@@ -27,7 +27,7 @@ export function loadLocFilters(tblState) {                          /*perm-log*/
 function updateLocSelOptions(tblState) {
     const opts = buildLocSelectOpts(tblState);
     Object.keys(opts).forEach(locType => {
-        _cmbx('replaceSelOpts', [locType+'Filter', opts[locType], null, locType]);
+        _cmbx('replaceSelOpts', [locType+'Filter', opts[locType]]);
     });
     setSelectedLocVals(tblState.selectedOpts);
 }

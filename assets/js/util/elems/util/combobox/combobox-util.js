@@ -150,6 +150,13 @@ export function focusFirstComboboxInRow(entity, focus = true, row = 1) {
     const field = $(`#${entity}_fields`)[0].childNodes[row-1].childNodes[0];/*dbug-log*///console.log("--focusFirstComboboxInRow entity[%s] field[%O]", entity, field);
     return focusFirstCombobox('#'+field.id, focus);
 }
+/* -------------------- REPLACE ON CHANGE ----------------------------------- */
+export function updateComboChangeEvent(field, onChange) {           /*dbug-log*///console.log('--updateComboChangeEvent field[%s] onChange[%s]', field, onChange);
+    const selApi = getSelApi(field);
+    confgs[getFieldConfgKey(field)].onChange = onChange;
+    selApi.off('change');
+    selApi.on('change', onChange);
+}
 /* -------------------- TRIGGER CHANGE -------------------------------------- */
 export function triggerComboChangeReturnPromise(field, val) {       /*dbug-log*///console.log('triggerComboChange [%s] = [%s]', field, val);
     const selApi = getSelApi(field);
@@ -165,16 +172,13 @@ export function destroySelectizeInstance(field) {
     delete confgs[getFieldConfgKey(field)];
 }
 /* -------------------- REPLACE OPTIONS ------------------------------------- */
-/**
- * Note: Change event is fired when options are replaced, so the event is removed
- *  and restored after the options are updated.
- */
-export function replaceSelOpts(field, opts, changeHndlr, name) {    /*dbug-log*///console.log('replaceSelOpts [%s] opts = %O, args = %O', field, opts,  arguments)
+export function replaceSelOpts(field, opts) {                       /*dbug-log*///console.log('--replaceSelOpts field[%s] opts[%O]', field, opts)
     const selApi = getSelApi(field);
     clearCombobox(selApi);
     selApi.addOption(opts);
     selApi.refreshOptions(false); //Don't trigger options-dropdown
-    updatePlaceholder(selApi, field, confgs[getFieldConfgKey(field)].name, opts.length);
+    const name = confgs[getFieldConfgKey(field)].name.split(' Filter')[0];
+    updatePlaceholder(selApi, field, name, opts.length);
 }
 export function addOpt(field, opt) {
     const selApi = getSelApi(field);

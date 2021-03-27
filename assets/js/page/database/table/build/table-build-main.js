@@ -28,6 +28,7 @@ import * as txn from './taxon/txn-table-main.js';
 /* ======================== ENTITY TABLE ==================================== */
 /* -------------------------- LOCATION -------------------------------------- */
 export function buildLocTable() {
+    _cmbx('updateComboChangeEvent', ['View', onLocViewChange]);
     return loc.buildLocTable(...arguments);
 }
 export function onLocViewChange() {
@@ -44,6 +45,7 @@ export function onSrcViewChange() {
     return src.onSrcViewChange(...arguments);
 }
 export function buildSrcTable() {
+    _cmbx('updateComboChangeEvent', ['View', onSrcViewChange]);
     return src.buildSrcTable(...arguments);
 }
 /* ----------------------------- TAXON -------------------------------------- */
@@ -51,6 +53,7 @@ export function onTxnViewChange() {
     return txn.onTxnViewChange(...arguments);
 }
 export function buildTxnTable() {
+    _cmbx('updateComboChangeEvent', ['View', onTxnViewChange]);
     return txn.buildTxnTable(...arguments);
 }
 export function rebuildTxnTable() {

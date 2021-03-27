@@ -33,7 +33,7 @@ function getTxnDataAndBuildTable(view) {
         .then(beginTaxonLoad.bind(null, view));
 }
 function beginTaxonLoad(groupId, data) {
-    updateTaxonTableState(data);                                                //console.log('Building Taxon Table. data = %O', _u('snapshot', [(data)]));
+    updateTaxonTableState(data);                                    /*dbug-log*///console.log('--Building Taxon Table groupId[%s] data[%O]', groupId, _u('snapshot', [(data)]));
     const groupRoots = storeGroupAndReturnRootTaxa(groupId);
     _ui('initTxnViewOpts', [groupId, data.taxon, data.group]);
     return startTxnTableBuildChain(groupRoots, true);
@@ -98,8 +98,8 @@ function storeGroupAndReturnRootTaxa(val) {
     updateGroupTableState(groupId, group);
     return Object.values(group.subGroups).map(getRootTaxonRcrd);
 }
-function getRootTaxonRcrd(root) {
-    return getDetachedRcrd(root.id, tState().get('rcrdsById'), 'taxon');
+function getRootTaxonRcrd(root) {                                   /*dbug-log*///console.log('--getRootTaxonRcrd root[%O]', root)
+    return getDetachedRcrd(root.taxon, tState().get('rcrdsById'), 'taxon');
 }
 function updateGroupTableState(groupId, group) {
     _db('setData', ['curView', groupId]);

@@ -23,7 +23,8 @@ export function initLocViewOpts(view) {                             /*perm-log*/
 function loadLocationViewOpts() {
     if ($('#sel-View').data('focus') === 'locs') { return; }
     const opts = [{ text: 'Map Data', value: 'map'}, { text: 'Table Data', value: 'tree'}];
-    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onLocViewChange')]);
+    _cmbx('replaceSelOpts', ['View', opts]);
+    _cmbx('updateComboChangeEvent', [field, onChange]);
     $('#sel-View').data('focus', 'locs');
 }
 function setLocView(view) {
@@ -41,7 +42,7 @@ export function initSrcViewOpts(view) {                             /*perm-log*/
 function loadSourceViewOpts() {
     if ($('#sel-View').data('focus') === 'srcs') { return ; }
     const opts = getSrcViewopts();
-    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onSrcViewChange')]);
+    _cmbx('replaceSelOpts', ['View', opts]);
     $('#sel-View').data('focus', 'srcs');
 }
 function getSrcViewopts() {
@@ -58,7 +59,7 @@ function setSrcView(view) {
 }
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTxnViewOpts(view, taxa, groups) {
+export function initTxnViewOpts(view, taxa, groups) {               /*dbug-log*///console.log('--initTxnViewOpts view[%s] taxa[%O] groups[%O]', view, taxa, groups);
     loadTxnViewOpts(getViewOpts(taxa, groups));
     setTaxonView(view);
 }
@@ -81,7 +82,7 @@ function getViewOpts(taxa, groups) {
     }
 }
 function loadTxnViewOpts(opts) {
-    _cmbx('replaceSelOpts', ['View', opts, _table.bind(null, 'onTxnViewChange')]);
+    _cmbx('replaceSelOpts', ['View', opts]);
     $('#sel-View').data('focus', 'taxa');
 }
 /** Restores stored group from previous session or sets the default 'Bats'. */

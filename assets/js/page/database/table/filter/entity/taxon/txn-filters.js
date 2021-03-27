@@ -133,16 +133,19 @@ function getRankFilter(rank, opts) {
     return fM.getFilterField(rank, sel);
 }
 function initRankComboboxes(groupRanks) {
-    const confg = {};
     groupRanks.forEach(initRankCombo);
 }
 function initRankCombo(rank) {
-    const confg = { id: `#sel-${rank}Filter`, name: rank + ' Filter', onChange: applyTxnFilter }
+    const confg = {
+        id: `#sel-${rank}Filter`,
+        name: rank + ' Filter',
+        onChange: applyTxnFilter
+    };
     _cmbx('initCombobox', [confg, true]);
 }
 function updateTaxonSelOptions(rOpts, ranks, tblState) {            /*dbug-log*///console.log("updateTaxonSelOptions. rankObj = %O, ranks = %O, tblState = %O", rOpts, ranks, tblState)
     ranks.forEach(rank => {
-        _cmbx('replaceSelOpts', [rank+'Filter', rOpts[rank], null, rank]);
+        _cmbx('replaceSelOpts', [rank+'Filter', rOpts[rank]]);
     });
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
