@@ -61,6 +61,9 @@ function getLocationFieldConfg() {
             name: 'ElevationMax',
             type: 'num',
         },
+        GeoJson: {
+            // misc: { rcrd: geoJsonRcrd } used in edit form
+        },
         HabitatType: {
             entity: 'HabitatType',
             info: {
@@ -106,6 +109,10 @@ function getLocationFieldConfg() {
                    'Then see the green pin’s popup for name suggestions',
             },
             name: 'Latitude',
+            prep: {
+                setGeoJsonData: [],
+                setCoreData: []
+            },
             type: 'lat',  //merge with lng type?
         }
     };

@@ -33,7 +33,7 @@ function getPublicationFieldConfg() {
             label: 'Type',
             name: 'PublicationType',
             prep: {
-                setDetail: []
+                setDetailEntity: []
             },
             type: 'select',
             required: true

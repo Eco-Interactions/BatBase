@@ -45,10 +45,24 @@ export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-lo
         if (!finalMerge) { return; }
         cFields[field].required = mFields[field].required;
     }
+    /** [mergeFieldConfgData description] */
     function mergeFieldConfgData(field, prop, val) {                /*dbug-log*///console.log('--mergeFieldConfgData field[%s] prop[%s] = [%O] [%O]', field, prop, val, cFields);
         if (!cFields[field]) { cFields[field] = {}; }
-        cFields[field][prop] = val;
+        mergeFieldProps(field, prop, val);
         cFields[field].current = true;
+    }
+    /** [mergeFieldProps description] */
+    function mergeFieldProps(field, prop, val) {
+        const edge = {
+            prep: mergeObjectConfgs,
+            misc: mergeObjectConfgs,
+        };
+        const data = prop in edge ? edge[prop](prop, field, val) : val;
+        cFields[field][prop] = data;
+    }
+    function mergeObjectConfgs(prop, field, val) {                       /*dbug-log*///console.log('--getMergedPrepConfg field[%s] val[%O] [%O]', field, val, cFields);
+        if (!cFields[field][prop]) { cFields[field][prop] = {}; }
+        return {...cFields[field][prop], ...val};
     }
 }
 /* ----------------- MERGE ENTITY-TYPE VIEW-CONFG --------------------------- */

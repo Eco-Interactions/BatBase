@@ -35,7 +35,11 @@ export function ifAllRequiredFieldsFilled(fLvl) {
 }
 /** TODO: checks the first input of multiSelect container elems.  */
 function isRequiredFieldFilled(fLvl, field) {                       /*dbug-log*///console.log('       --isRequiredFieldFilled[%s] [%O]', fLvl, field);
-    if (!field.required) { return true; }
+    if (!field.required || !field.type) { return true; }
     if (field.value === 'invalid') { return false; }                /*dbug-log*///console.log('       --[%s] = [%O]', field.name, field.value ? field.value : null);
+    if (field.type === 'multiSelect') { return getMultiSelectValues(field.value); }
     return field.value;
+}
+function getMultiSelectValues(values) {
+    return Object.keys(values).length ? values : null ;
 }

@@ -18,8 +18,8 @@ import { _alert, _u } from '~util';
  */
 let d = {};
 /** Generates the citation text for the passed citation type. */
-export function generateCitationText(params) {                      /*dbug-log*///console.log('generateCitationText. params = %O', params);
-    d = params;
+export function generateCitationText(data) {                        /*dbug-log*///console.log('+--generateCitationText data[%O]', data);
+    d = data;
     d.type = d.cit.citationType.displayName;                        /*dbug-log*///console.log("type = ", d.type);
     const buildCitationText = getTypeCitationGenerator(d.type)
     return buildCitationText(d.type);

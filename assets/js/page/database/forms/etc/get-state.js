@@ -59,6 +59,7 @@ export function getComboFields(fState) {                            /*dbug-log*/
 export function getFieldValues(fState) {
     const vals = {};
     for (let name in fState.fields) {
+        if (!fState.fields[name].value) { continue; }
         vals[name] = fState.fields[name].value;
     }                                                               /*dbug-log*///console.log('   --getFieldValues fields[%O] vals[%O]', name, vals);
     return vals;

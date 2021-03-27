@@ -24,7 +24,7 @@ import { _u } from '~util';
  * @param  {Object} vals     [description]
  * @return {[type]}          [description]
  */
-export function buildViewConfg(c, viewSets, vals = {}) {            /*dbug-log*///console.log("setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
+export function buildViewConfg(c, viewSets, vals = {}) {            /*dbug-log*///console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
     c.infoSteps = 0;
     c.view = viewSets[c.display].map(row => getRowConfg(c, vals, row));
 }
@@ -78,7 +78,6 @@ function trackFieldData(fConfg, c) {
 function buildFieldConfg(fConfg, c, v) {                            /*dbug-log*///console.log('--buildFieldConfg fConfg[%O] c[%O] v?[%O]', fConfg, c, v);
     setFieldStyleClass(fConfg, c.group);
     copyFormState(fConfg, c);
-    setFieldValue(fConfg, v);
     fConfg.current = true; //Field available in at least one of the views
     return fConfg;
 }
@@ -94,9 +93,3 @@ function copyFormState(fConfg, c) {
     fConfg.pinnable = c.pinnable || false;
 }
 /* ----------------------- SET FIELD-VALUE ---------------------------------- */
-/** [setFieldValue description] */
-function setFieldValue(f, vals) {
-    const val = vals[f.label] ? vals[f.label] : vals[f.name];
-    if (!val) { return; }
-    f.value = val;
-}

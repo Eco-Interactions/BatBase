@@ -6,7 +6,7 @@
  * TOC
  *
  */
-
+import { _u } from '~util';
 /* ======================= SET CORE STATE =================================== */
 export function setStateProp(fS, prop, val) {                       /*dbug-log*///console.log('   --setStateProp [%s][%s][%O]', prop, val, fS);
     fS[prop] = val;
@@ -59,19 +59,19 @@ function getSubGroupId(fS, vals, group) {
 }
 /** [setGroupState description] */
 function setGroupState(taxa, fState, group) {                       /*dbug-log*///console.log('--setGroupState group[%O]', group);
-    if (!fState.fields['Group']) { fState.fields['Group'] = {}; }
-    fState.fields['Group'].value = group.id;
-    fState.fields['Group'].misc = {
+    if (!fState.fields.Group) { fState.fields.Group = {}; }
+    fState.fields.Group.value = group.id;
+    fState.fields.Group.misc = {
         rcrd: group,
         subGroups: group.subGroups
-    };
+    };   /*dbug-log*///console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
 }
 /** [setSubGroupState description] */
 function setSubGroupState(fS, fState, subGroups, sGroupId) {
     if (!fState.fields['Sub-Group']) { fState.fields['Sub-Group'] = {}; }
     const subGroup = subGroups[sGroupId];
     fState.fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
-    fState.fields['Sub-Group'].value = subGroup.taxon;              /*dbug-log*///console.log('--setSubGroupState field[%O] subGroup[%O] subGroups[%O]', fState.fields['Sub-Group'].class, subGroup, subGroups);
+    fState.fields['Sub-Group'].value = subGroup.taxon;              /*dbug-log*///console.log('--setSubGroupState fieldClass?[%O] subGroup[%O] subGroups[%O]', fState.fields['Sub-Group'].class, subGroup, subGroups);
     fState.fields['Sub-Group'].misc = {
         rcrd: subGroup,
         subRanks: subGroup.subRanks,

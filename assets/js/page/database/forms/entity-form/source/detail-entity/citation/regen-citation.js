@@ -11,14 +11,14 @@
  *     UPDATE FIELD
  */
 import { _cmbx, _u } from '~util';
-import { _state, _elems, getNextFormLevel, getValidatedFormData } from '~form';
+import { _state, _elems, getNextFormLevel } from '~form';
 
-export function buildCitTextAndUpdateField(fLvl) {
+export function buildCitTextAndUpdateField(fLvl) {                  /*dbug-log*///console.log('--buildCitTextAndUpdateField [%s]', fLvl);
     const $elem = $('#CitationText_f textarea');
     if (!$elem.val()) { initializeCitField($elem); }
 
     return getCitationFieldText($elem, fLvl)
-        .then(citText => updateCitField(citText, $elem))
+        .then(citText => updateCitField(fLvl, citText, $elem))
 }
 function initializeCitField($elem) {
     $elem.prop('disabled', true).unbind('change').css({height: '6.6em'});
@@ -39,35 +39,39 @@ function getCitationFieldText($elem, fLvl) {
 function ifNoChildFormOpen(fLvl) {
    return $('#'+getNextFormLevel('child', fLvl)+'-form').length == 0;
 }
-function buildCitationText(fLvl) {
-    return getValidatedFormData('citation', fLvl, null)
-        .then(fData => _u('generateCitationText', [getDataForCitation(fData, fLvl), true]));
+function buildCitationText(fLvl) {                                  /*dbug-log*///console.log('--buildCitationText [%s]', fLvl);
+    return _u('generateCitationText', [getDataForCitation(fLvl), true]);
 }
 /* -------------------- GET ALL DATA FOR CITATION --------------------------- */
-function getDataForCitation(fData, fLvl) {                          /*dbug-log*///console.log('getDataForCitation [%s] fData = %O', fLvl, fData)
+function getDataForCitation(fLvl) {                                 /*dbug-log*///console.log('--getDataForCitation [%s]', fLvl);
+    const fields = _state('getFormState', [fLvl, 'fields']);        /*dbug-log*///console.log('      --fields[%O]', fields);
     const data = {
-        pubSrc: _state('getFormState', [fLvl, 'rcrds']).src,
-        citSrc: { authors: fData.authors, year: fData.year },
-        cit: buildCitData(fData),
+        pubSrc: fields.ParentSource.misc.src,
+        citSrc: { authors: fields.Author.value, year: fields.Year.value },
+        cit: buildCitData(fields),
         showWarnings: true
-    };
-    return Object.assign(data, addEntityRecords());
+    };                                                              /*dbug-log*///console.log('       --data[%O]', data);
+    return { ...data, ...addEntityRecords() };
 }
-function buildCitData(fData) {
+function buildCitData(fields) {                                     /*dbug-log*///console.log('--buildCitData [%O]', fields);
     return {
-        citationType: { displayName: _cmbx('getSelTxt', ['CitationType']) },
-        title: fData.title ? fData.title : fData.chapterTitle,
-        publicationPages: fData.pages,
-        publicationIssue: fData.issue,
-        publicationVolume: fData.volume ? fData.volume : fData.edition,
+        citationType: { displayName: fields.CitationType.value.text },
+        title: fields.DisplayName.value,
+        publicationPages: fields.Pages.value,
+        publicationIssue: fields.Issue.value,
+        publicationVolume: getVolumeOrEdition(fields.Volume, fields.Edition),
     };
+}
+function getVolumeOrEdition(vol, ed) {
+    return vol.value ? vol.value : ed.value;
 }
 function addEntityRecords() {
     const entities = ['author', 'citation', 'publisher', 'source'];
     return { rcrds: _state('getEntityRcrds', [entities])};
 }
 /* --------------------------- UPDATE FIELD --------------------------------- */
-function updateCitField(citText, $elem) {
+function updateCitField(fLvl, citText, $elem) {
     if (!citText) { return; }
-    $elem.val(citText).change();
+    $elem.val(citText); //.change(); Why was this needed
+    _state('setFieldState', [fLvl, 'CitationText', citText]);
 }

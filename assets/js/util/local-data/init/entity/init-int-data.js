@@ -1,6 +1,7 @@
 /**
  * Modifies interaction-data for local storage:
  * - [entity]Names - an object with each entity's displayName(k) and id.
+ * - SubjectGroups - Array of valid subject taxon-group ids.
  * * interaction - Adds the Object Group to each interaction record to filter Bat
  *     records by object group.
  *
@@ -14,6 +15,7 @@ export function modifyIntDataForLocalDb(data) {                     /*dbug-log*/
     db.setDataInMemory('intTypeNames', getTypeObj(data.interactionType));
     db.setDataInMemory('tagNames', getNameObj(Object.keys(data.tag), data.tag));
     addObjGroupIdProp(data.interaction);
+    addValidSubjectGroups(data.validInteraction);
 }
 function addObjGroupIdProp(ints) {
     const taxa = db.getMmryData('taxon');
@@ -22,5 +24,24 @@ function addObjGroupIdProp(ints) {
 
     function addObjectGroupId(int) {
         int.objGroup = taxa[int.object].group.id.toString();
+    }
+}
+function addValidSubjectGroups(vInts) {
+    db.setDataInMemory('subjectNames', getSubjectGroupNames(vInts));
+}
+function getSubjectGroupNames(vInts) {
+    const names = {};
+    const groups = db.getMmryData('group');
+    const subjects = Object.values(vInts).map(v => v.subjectSubGroup);
+    Object.values(groups).forEach(addIfValidInteractionSubject);
+    return names;
+
+    function addIfValidInteractionSubject(group) {                  /*dbug-log*///console.log('--addIfValidInteractionSubject group[%O]', group);
+        const isValid = Object.keys(group.subGroups).find(ifValidSubject);
+        if (!isValid) { return; }
+        names[group.displayName] = group.id;
+    }
+    function ifValidSubject(id) {
+        return subjects.indexOf(parseInt(id)) !== -1;
     }
 }

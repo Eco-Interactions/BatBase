@@ -77,10 +77,10 @@ export function getFilterStateKey(key, fGroup = 'direct') {
     return key ? fS.filters[fGroup][key] : fS.filters[fGroup];
 }
 export function getFilterState() {
-    return Object.assign(
-        { table: getActiveTableFilterObj()},
-        getPanelFilters(_u('snapshot', [fS.filters]))
-    );
+    return {
+        ...{ table: getActiveTableFilterObj() },
+        ...getPanelFilters(_u('snapshot', [fS.filters]))
+    };
 }
 function getPanelFilters(filters) {
     filters.direct = getRowDataFilters(filters.direct)

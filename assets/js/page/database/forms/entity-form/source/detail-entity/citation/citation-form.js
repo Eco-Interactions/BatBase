@@ -17,7 +17,7 @@
  *     HIGHTLIGHT EMPTY CITATION-FIELDS
  *     EDIT FORM
  */
-import { _db, _cmbx } from '~util';
+import { _db, _cmbx, _u } from '~util';
 import { _form, _state, _elems } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as types from './cit-type-fields.js';
@@ -47,7 +47,7 @@ function getCitFormParams(v) {
         submit: sForm.showSubmitModal.bind(null, 'sub'),
         vals: {
             ParentSource: _cmbx('getSelVal', ['Publication']),
-            Title: (v === 'create' ? '' : v),
+            DisplayName: (v === 'create' ? '' : v),
         }
     };
 }

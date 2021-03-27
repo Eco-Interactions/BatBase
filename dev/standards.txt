@@ -1,5 +1,15 @@
 # BEI Code Standards
 
+## MODULE
+  - local data stored in data obj (ld), declared at the top with a comments for each
+    > Example
+    > (imports)
+    > /**
+    >  * {str} prop  Description
+    >  * /
+    >  const ld = {};
+
+
 ## HTML
     -
 ### Elem Attributes

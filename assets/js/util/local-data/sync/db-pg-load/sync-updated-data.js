@@ -30,7 +30,7 @@ export function downloadAndStoreUpdatedData(entities) {             /*perm-log*/
 function hasInteractionUpdates(entities) {
     for (let i = entities.length - 1; i >= 0; i--) {
         if (entities[i].name == 'Interaction') {
-            const intObj = Object.assign({}, entities[i]);
+            const intObj = { ...entities[i] };
             entities.splice(i, 1);
             return intObj;
         }

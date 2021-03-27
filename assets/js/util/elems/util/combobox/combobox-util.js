@@ -23,14 +23,17 @@ export function initCombobox(confg, onBlur = false) {
     addToComboConfgMemory(confg, options);
 }
 function buildComboboxOptions(confg, onBlur) {
-    const comboOpts = Object.assign({
-        id: confg.id ? confg.id : '#sel-'+confg.name.split(' ').join(''),
-        onItemAdd: workAroundSelectizeEvent
-    }, confg);
+    const comboOpts = { ...getBaseComboConfg(confg), ...confg };
     comboOpts.create = getComboCreateFunc(confg.create);
     comboOpts.placeholder = getPlaceholer(comboOpts.id, confg.name, true);
     comboOpts.onBlur = onBlur || confg.blur ? saveOrRestoreSelection : false;
     return comboOpts;
+}
+function getBaseComboConfg(confg) {
+    return {
+        id: confg.id ? confg.id : '#sel-'+confg.name.split(' ').join(''),
+        onItemAdd: workAroundSelectizeEvent
+    };
 }
 /**
  * When replacing or adding new options to a combobox, this event was causing the

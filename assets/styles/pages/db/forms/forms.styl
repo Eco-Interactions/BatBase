@@ -232,27 +232,31 @@ div[id$="_fields"] //Contains all entity-form fields
     background-color: rgba(255, 255, 0, .3)
 
 /* ======================= FORM SPECIFIC ==================================== */
+/**--- Taxon Form ---*/
+#Subject_fields, #Object_fields
+    padding-left: 1em
+
+#Group_f, #Sub-Group_f
+    margin-left: -1em
 
 
+// .pTaxon#sub-form
+//     flex-wrap: wrap
+//     justify-content: space-around
+//     border: 1px solid grey
+//     border-radius: 5px
+//     margin: .5em
+//     padding: .5em
 
-/**--- Taxon Edit-Form ---*/
-.pTaxon#sub-form
-    flex-wrap: wrap
-    justify-content: space-around
-    border: 1px solid grey
-    border-radius: 5px
-    margin: .5em
-    padding: .5em
+// .pTaxon #sub2-form
+//     left: -.5em
+//     position: relative
 
-.pTaxon #sub2-form
-    left: -.5em
-    position: relative
+// .group-row
+//     justify-content: flex-start !important
 
-.group-row
-    justify-content: flex-start !important
-
-#sel-Rank + div
-    width: 150px
+// #sel-Rank + div
+//     width: 150px
 
 /*------------- Loc Map Styles ----------------*/
 #loc-note .map-link

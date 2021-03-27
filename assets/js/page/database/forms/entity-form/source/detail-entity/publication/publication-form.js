@@ -31,7 +31,7 @@ function getPubFormParams(v) {
         combo: 'Publication',
         style: 'med-sub-form',
         submit: sForm.showSubmitModal.bind(null, 'sub'),
-        vals: { Title: v === 'create' ? '' : v }
+        vals: { DisplayName: v === 'create' ? '' : v }
     };
 }
 function clearCitationFormData() {

@@ -43,7 +43,6 @@ export function initFormState(p) {                                  /*dbug-log*/
 }
 function getMainStateObj(entity) {
     return {
-        // entity: entity,
         forms: {},
         formLevels: ['top', 'sub', 'sub2'],
     };
@@ -114,11 +113,12 @@ export function addEntityFormState(fS, p) {                         /*dbug-log*/
 function getBaseFormState(p) {
     return {
         action: p.action ? p.action : 'create',
-        editing: p.id ? { core: p.id, detail: null } : false,
-        onFormClose: p.onFormClose,
-        initCombos: p.initCombos,
         combo: p.combo,
-        name: p.entity
+        editing: p.id ? { core: p.id, detail: null } : false,
+        initCombos: p.initCombos,
+        name: p.entity,
+        onFormClose: p.onFormClose,
+        submit: p.submit
     };
 }
 function initEntityState(fS, entity, fLvl, vals = {}) {
@@ -133,7 +133,7 @@ function initEntityState(fS, entity, fLvl, vals = {}) {
     return Promise.resolve(map[entity] ? map[entity](fS, fLvl, vals) : null);
 }
 function initEntityFormConfg(fS, p) {
-    Object.assign(p.vals, _state('getFieldValues', [p.fLvl]));
+    p.vals = { ...p.vals, ..._state('getFieldValues', [p.fLvl]) };
     const confg = _confg('getInitFormConfg', [p.entity, p.fLvl, p.action, p.vals]);
     _confg('mergeIntoFormConfg', [confg, fS.forms[p.fLvl]]);
     fS.forms[p.fLvl] = confg;                                       /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', p.entity, confg);

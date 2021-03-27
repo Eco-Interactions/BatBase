@@ -6,7 +6,7 @@
  *     getValidatedFormData
  */
 import { _alert, _cmbx, _db, _u } from '~util';
-import { _state, getSelectedVals } from '~form';
+import { _state } from '~form';
 
 let md = {};
 
@@ -31,12 +31,16 @@ function wrangleFormData() {
 function buildServerDataObj() {                                     /*dbug-log*///console.log('   --buildServerDataObj');
     const serverData = {};
     setEntityObj('core');
-    if (md.confg.core) { setEntityObj('detail'); }
-    return serverData;
+    return md.confg.core ? addDetailData() : serverData;
 
     function setEntityObj(dKey) {
         serverData[dKey] = { flat: {}, rel:{} };
     }
+    function addDetailData() {
+        setEntityObj('detail');
+        serverData.detailEntity = md.confg.core == 'source' ? md.confg.name : 'GeoJson'
+        return serverData;
+     }
 }
 /**
  * [setServerData description]
@@ -46,7 +50,7 @@ function buildServerDataObj() {                                     /*dbug-log*/
  * @param {String} e [description]
  */
 function setServerData(g, p, v, k = 'core') {
-    if (!v && md.confg.action !== 'edit') { return; }             /*dbug-log*///console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
+    if (!v && md.confg.action !== 'edit') { return; }               /*dbug-log*///console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
     md.data[k][g][p] = v;
 }
 /** [getDataForServer description] */
@@ -56,7 +60,8 @@ function getDataForServer(fConfg) {                                 /*dbug-log*/
     if (fConfg.value === undefined) { return handleEmptyFieldData(fConfg); } //Field never set
     if (!getFieldValue(fConfg)) { handleEmptyFieldData(fConfg); }
     if (fConfg.prep) { return handleDataPreparation(fKey, fConfg);  }
-    setServerData(fKey, fConfg.name, getFieldValue(fConfg));
+    const prop = fKey === 'rel' ? fConfg.entity : fConfg.name;
+    setServerData(fKey, prop, getFieldValue(fConfg));
 }
 function handleEmptyFieldData(fConfg) {
     if (!fConfg.required) { return; }
@@ -75,20 +80,51 @@ function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*/
     }
 }
 function getFieldValue(fConfg) {
-    if (fConfg.type === 'multiSelect') { return returnMultiSelectValue(fConfg.value); }
+    if (fConfg.type === 'multiSelect') { return returnMultiSelectValue(fConfg); }
     if (!_u('isObj', [fConfg.value])) { return fConfg.value; }
     return fConfg.value.value; //combos
 }
-function returnMultiSelectValue(values) {                           /*dbug-log*///console.log('               --returnMultiSelectValue [%O]', values);
-    return Object.keys(values).length ? values : null ;
+function returnMultiSelectValue(fConfg) {                           /*dbug-log*///console.log('               --returnMultiSelectValue fConfg[%O]', fConfg);
+    const map = {
+        'Author': getContributorData,
+        'Editor': getContributorData
+    };
+    return map[fConfg.name](fConfg);
 }
 /* =========================== DATA WRANGLERS =============================== */
+/* ----------------------- GET DATA ----------------------------------------- */
+function getContributorData(fConfg) {                               /*dbug-log*///console.log('           --getContributorData [%O]', fConfg);
+    const data = {};
+    Object.keys(fConfg.value).forEach(buildContributorData);
+    return data;
+
+    function buildContributorData(ord) {
+        const contrib = {
+            ord: ord,
+            isEditor: fConfg.name === 'Editor'
+        };
+        data[fConfg.value[ord]] = contrib;
+
+    }
+}
+/* ----------------------- SET DATA ----------------------------------------- */
+/* ___________________________________ GENERAL ______________________________ */
+function setCoreData(g, fConfg) {                                   /*dbug-log*///console.log('               --setCoreData [%s] fConfg[%O]', g, fConfg);
+    const val = getFieldValue(fConfg);
+    setServerData(g, fConfg.name, val); //Value
+}
+function setDetailData(g, fConfg) {                                 /*dbug-log*///console.log('               --setDetailData [%s] fConfg[%O]', g, fConfg);
+    const val = getFieldValue(fConfg);
+    setServerData(g, fConfg.name, val, 'detail'); //Value
+}
+/* ___________________________________ SPECIFIC _____________________________ */
 function renameField(g, fConfg, name, dKey = 'core') {              /*dbug-log*///console.log('               --renameField [%s]entity[%s] fConfg[%O]', name, dKey, g, fConfg);
     setServerData(g, name, getFieldValue(fConfg), dKey);
 }
 function setCoreType(g, fConfg) {                                   /*dbug-log*///console.log('               --setCoreType [%s] fConfg[%O]', g, fConfg);
     if (typeof fConfg.value !== 'string') { return trackFailure(fConfg.name, fConfg.value); }
     setServerData(g, fConfg.entity, fConfg.value);  //String type name
+    // setServerData('flat', 'hasDetail', true);  //String type name
 }
 function setParent(g, fConfg, entity) {                             /*dbug-log*///console.log('               --setParent [%s]entity[%s] fConfg[%O]', g, entity, fConfg);
     const prop = 'Parent' + entity;
@@ -96,7 +132,7 @@ function setParent(g, fConfg, entity) {                             /*dbug-log*/
     if (isNaN(val)) { return trackFailure(prop, val); }
     setServerData(g, prop, val); //Value
 }
-function setDetail(g, fConfg) {
+function setDetailEntity(g, fConfg) {                               /*dbug-log*///console.log('               --setDetailEntity [%s] fConfg[%O]', g, fConfg);
     const val = getFieldValue(fConfg);
     if (isNaN(val)) { return trackFailure(fConfg.name, val); }
     setServerData(g, fConfg.name, val, 'detail'); //Value
@@ -110,8 +146,28 @@ function setDetail(g, fConfg) {
 function setCoreAndDetail(g, fConfg, emptyString) {
     ['core', 'detail'].forEach(e => setServerData(g, fConfg.name, fConfg.value, e));
 }
+/* ______________________________________ ENTITY ____________________________ */
+    /* ----------- LOCATION/GEOJSON ----------------------------------------- */
+function setGeoJsonData(g, fConfg) {                              /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
+    const displayPoint = buildDisplayCoordinates(fConfg.value, md.confg.fields.Longitude.value);
+    setServerData('flat', 'DisplayPoint', displayPoint, 'detail');
+    setServerData('flat', 'Type', 'Point', 'detail');
+    setServerData('flat', 'Coordinates', getCoordValue(displayPoint), 'detail');
+}
+function getDisplayCoordinates(lat, lng) {
+    return JSON.stringify([ lng, lat ]);
+}
+function getCoordValue(displayPoint) {
+    const geoJson = _state('getFormState', ['top', 'geoJson']);
+    return geoJson ? geoJson.coordinates : displayPoint;
+
+}
+    /* ----------------------- AUTHOR --------------------------------------- */
+function handleAuthorNames(argument) {
+    // Build display name and full name
+}
 /* =========================== TRACK FAILUTES =============================== */
-function trackFailure(prop, value) {
+function trackFailure(prop, value) {                                 /*dbug-log*///console.log('--trackFailure prop[%s] val[%O]', prop, value);
     if (!md.data.fails) { md.data.fails = {}; }
     md.data.fails[prop] = value;
 }

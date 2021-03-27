@@ -11,15 +11,12 @@ function getSourceFieldConfg() {
     return {   //MERGED AND OVERWRITTEN WITH DETAIL.FIELDS
         Author: {  // handle merging this and editor and their field trans
             count: 1,
-            entity: 'Contribution',
+            entity: 'Contributor',
             label: false,
             misc: {
                 customValueStore: true
             },
             name: 'Author',
-            prep: { //func: [args]
-                renameField: ['Contributor'],
-            },
             type: 'multiSelect',
             value: {} //Added here so property exists as obj on init
         },
@@ -33,7 +30,7 @@ function getSourceFieldConfg() {
         DisplayName: {
             name: 'DisplayName',
             prep: {    // TODO: DRY
-                setCoreAndDetail: []
+                setCoreData: []
             },
             required: true,
             type: 'text',
@@ -45,21 +42,21 @@ function getSourceFieldConfg() {
         },
         Editor: {
             count: 1,
-            entity: 'Contribution',
+            entity: 'Contributor',
             label: false,
             misc: {
                 customValueStore: true
             },
             name: 'Editor',
-            prep: { //func: [args]
-                renameField: ['Contributor'],
-            },
             type: 'multiSelect',
             value: {} //Added here so property exists as obj on init
         },
         ParentSource: {
             entity: 'Source',
             name: 'ParentSource',
+            prep: {
+                setParent: ['Source']
+            },
             type: 'text',
         },
         SourceType: {

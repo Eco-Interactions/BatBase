@@ -33,14 +33,16 @@ export default function(entity) {
         style: 'sml-form',
         views: { //fields added will be built and displayed
             all: [
-                ['LastName', 'Suffix'],
-                ['FirstName', 'MiddleName'],
+                ['LastName'],
+                ['FirstName'],
+                ['MiddleName', 'Suffix']
                 ['Website'],
                 ['Description'],
             ],
             simple: [
-                ['LastName', 'Suffix'],
-                ['FirstName', 'MiddleName']
+                ['LastName'],
+                ['FirstName'],
+                ['MiddleName', 'Suffix']
             ]
         }
     };

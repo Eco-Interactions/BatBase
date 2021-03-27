@@ -57,9 +57,16 @@ import * as cUtil from './util/confg-util-main.js';
 /* ====================== INIT FORM-CONFG =================================== */
 export function getInitFormConfg(entity, fLvl, action, vals) {      /*dbug-log*///console.log('+--getInitFormConfg [%s][%s][%s] vals?[%O]', action, fLvl, entity, vals);
     const confg = getBaseConfg(entity, fLvl);
-    confg.group = fLvl;
+    setFieldInitValues(confg, vals);
     initDisplayConfg(confg, action, !!confg.views.simple, vals);
     return confg;
+}
+function setFieldInitValues(confg, vals) {                          /*dbug-log*///console.log('--setFieldInitValues confg[%O] vals?[%O]', confg, vals);
+    Object.keys(vals).forEach(setFieldInitValue);
+
+    function setFieldInitValue(fName) {
+        confg.fields[fName].value = vals[fName];
+    }
 }
 function initDisplayConfg(confg, action, hasSimpleView, vals) {
     confg.display = action === 'create' && hasSimpleView ? 'simple' : 'all';
@@ -117,6 +124,7 @@ export function mergeIntoFormConfg(confg, mConfg) {
 /** [getBaseConfg description] INTERNAL USE */
 export function getBaseConfg(entity, fLvl, type) {
     const confg = cUtil.getBaseFormConfg(entity, fLvl);
+    confg.group = fLvl;
     if (confg.core) { mergeCoreEntityConfg(confg, fLvl); }
     if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
     delete confg.types;                                             /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));

@@ -22,6 +22,9 @@ function getCitationFieldConfg() {
     return {
         Abstract: {
             name: 'Abstract',
+            prep: {
+                setDetailData: []
+            },
             type: 'fullTextArea',
         },
         CitationText: {
@@ -39,8 +42,18 @@ function getCitationFieldConfg() {
             entity: 'CitationType',
             label: 'Type',
             name: 'CitationType',
+            prep: {
+                setDetailEntity: []
+            },
             required: true,
             type: 'select',
+        },
+        DisplayName: {
+            label: 'Title',
+            prep: {
+                renameField: ['Title', 'detail'],
+                setDetailData: []
+            }
         },
         Doi: {
             info: {
@@ -48,15 +61,15 @@ function getCitationFieldConfg() {
             }
         },
         Edition: {
-            class: 'w-8',
             name: 'Edition',
+            class: 'w-4 no-grow',
             prep: {    // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],
             },
             type: 'num',
         },
         Issue: {
-            class: 'w-8',
+            class: 'w-4 no-grow',
             name: 'Issue',
             prep: {    // TODO: DRY
                 renameField: ['PublicationIssue', 'detail'],
@@ -64,6 +77,7 @@ function getCitationFieldConfg() {
             type: 'num',
         },
         Pages: {
+            class: 'w-8 no-grow',
             name: 'Pages',
             prep: {    // TODO: DRY
                 renameField: ['PublicationPages', 'detail'],
@@ -71,17 +85,10 @@ function getCitationFieldConfg() {
             type: 'page',
         },
         ParentSource: {
-            prep: {
-                setParent: ['Source']
-            },
-            required: true,
-            value: 'Publication'
+            required: true
         },
         SourceType: {  //MERGES WITH CORE.FIELDS. ADDS/OVERWRITES FIELD PROPS
             value: 'Citation'
-        },
-        DisplayName: {
-            label: 'Title'
         },
         Website: {
             info: {
@@ -89,7 +96,7 @@ function getCitationFieldConfg() {
             }
         },
         Volume: {
-            class: 'w-8',
+            class: 'w-4 no-grow',
             name: 'Volume',
             prep: {    // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],

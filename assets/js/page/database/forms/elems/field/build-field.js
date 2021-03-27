@@ -23,9 +23,12 @@
  *             MULTI-SELECT DATA
  */
 import { _el, _u } from '~util';
-import { _elems, _state } from '~form';
+import { _elems, _form, _state } from '~form';
+
+let entity;
 /* ====================== BUILD FIELD ======================================= */
-export function buildFormField(fConfg) {
+export function buildFormField(fConfg, ent) {                       /*dbug-log*///console.log('--buildFormField fConfg[%O] entity[%s]', fConfg, ent);
+    entity = ent;
     return _el('getFieldInput', [fConfg])
         .then(buildField.bind(null, fConfg));
 }
@@ -79,7 +82,7 @@ function updateFormFieldState(f) {                                  /*dbug-log*/
 }
 /* =========================== ON FIELD CHANGE ============================== */
 /** [handleFieldChangeListeners description] */
-function handleFieldChangeListeners(f) {                             /*dbug-log*///console.log('   --handleFieldChangeListeners',);
+function handleFieldChangeListeners(f) {                            /*dbug-log*///console.log('   --handleFieldChangeListeners',);
     ifCitationFormAutoGenerateCitationOnChange(f);
     onChangeStoreFieldValue(f);
     if (f.required) { handleRequiredField(f); }
@@ -90,7 +93,7 @@ function handleFieldChangeListeners(f) {                             /*dbug-log*
  * @return {[type]} [description]
  */
 function ifCitationFormAutoGenerateCitationOnChange(f) {
-    if (f.name === 'citation'){
+    if (entity === 'Citation'){                                     /*dbug-log*///console.log('     --setAutoGenerateCitationOnChange');
         $(f.input).change(_form.bind(null, 'handleCitText', [f.group]));
     }
 }
@@ -101,8 +104,13 @@ function ifCitationFormAutoGenerateCitationOnChange(f) {
  * disabling the submit button and a form-level data property.
  */
 function handleRequiredField(f) {
+    const input = getFieldInput(f.input, f.input.className);
     $(f.input).change(checkRequiredFields);
     $(f.input).data('fLvl', f.group);
+}
+function getFieldInput(input, classes) {
+    if (input.className.includes('f-input')) { return input; }
+    return input.lastChild.lastChild.lastChild.lastChild;
 }
 /**
  * On a required field's change event, the submit button for the element's form
@@ -110,6 +118,7 @@ function handleRequiredField(f) {
  * forms.
  */
 function checkRequiredFields(e) {                                   /*dbug-log*///console.log('   @--checkRequiredFields e[%O]', e)
+    if (e.currentTarget.className.includes('f-cntnr')) { return; }
     const fLvl = $(e.currentTarget).data('fLvl');
    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }

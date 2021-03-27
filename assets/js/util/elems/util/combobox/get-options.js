@@ -85,7 +85,7 @@ export function getFieldOptions(fName) {                            /*dbug-log*/
         'Editor': [ getSrcOpts, 'authSrcs'],
         'Family': [ getTaxonOpts, 'Family' ],
         'Genus': [ getTaxonOpts, 'Genus' ],
-        'Group': [ getStoredOpts, 'groupNames' ],
+        'Group': [ getRoleTaxonGroups, 'groupNames' ],
         'HabitatType': [ getStoredOpts, 'habTypeNames'],
         'Location': [ getRcrdOpts, null ],
         'Order': [ getTaxonOpts, 'Order' ],
@@ -195,6 +195,11 @@ function getGroupName() {
 }
 function getSubGroupName() {
     return _state('getFieldState', ['sub', 'Sub-Group', 'misc']).taxon.name;
+}
+function getRoleTaxonGroups(fName, p) {
+    const role = _state('getFormState', ['sub', 'name']);
+    const prop = role === 'Subject' ? 'subjectNames' : p;
+    return getStoredOpts(null, prop);
 }
 /* -------------------------- LOCATION -------------------------------------- */
 /** Returns options for each country and region. */

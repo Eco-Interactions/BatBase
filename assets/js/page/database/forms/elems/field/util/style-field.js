@@ -6,6 +6,7 @@ export function setDynamicFieldStyles(entity) {                     /*dbug-log*/
 }
 function handleRowStyles(i, row) {
     const w = 100 / $(row).data('field-cnt');                       /*dbug-log*///console.log('--handleRowStyles row[%O] fieldW[%s]', row, w);
+    if (w === 100) { return setFlex(row.firstChild, `1 0 ${w}%`); }
     $(row.childNodes).each((i, f) => styleRowField(w, f));
 }
 function styleRowField(w, field) {                                  /*dbug-log*///console.log('--styleRowField[%O][%s]', field, w);

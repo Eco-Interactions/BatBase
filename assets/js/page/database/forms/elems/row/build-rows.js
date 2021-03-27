@@ -11,13 +11,15 @@
 import { _el, _u } from '~util';
 import { _elems } from '~form';
 
+let entity;
 /**
  * Returns rows for the entity form fields. If the form is a source-type,
  * the type-entity form config is used.
  * NOTE: FIRST METHOD IN INTERACTION FORM FIELD-ROW BUILD CHAIN.
  */
 /** @return {ary} Rows for each field in the entity field obj. */
-export function getFormFieldRows(viewConfg) {                       /*dbug-log*///console.log("+--getFormFieldRows [%O]",viewConfg);
+export function getFormFieldRows(viewConfg, ent) {                       /*dbug-log*///console.log("+--getFormFieldRows [%O]",viewConfg);
+    entity = ent;
     const rows = [];
     return handleRowBuildChain(viewConfg)
         .then(() => rows);
@@ -56,7 +58,7 @@ function buildGroup(g) {                                            /*dbug-log*/
 function getFormField(fConfg) {                                     /*dbug-log*///console.log("           --getFormField [%s][%O]", fConfg.name, fConfg);
     if (fConfg.shown === false) { return Promise.resolve(); }
     if (fConfg.emptyField) { return _el('getElem', ['div', { class: 'empty' }]); }
-    return _elems('buildFormField', [fConfg]);
+    return _elems('buildFormField', [fConfg, entity]);
 }
 function getRowFieldCnt(f) {
     return Array.isArray(f) ? f.length : 1;

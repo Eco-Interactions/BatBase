@@ -17,22 +17,30 @@ use Doctrine\ORM\EntityManagerInterface;
  *     editEntity
  *
  * TOC
- *     CREATE ENTITY
- *     EDIT ENTITY
- *     HELPERS
- *         RETURN-DATA BUILDER
- *     MODIFY ENTITY-DATA
+ *     ACTIONS
+ *         CREATE ENTITY
+ *         EDIT ENTITY
+ *     SET DATA AND TRACK EDITS
  *         DETAIL-ENTITY
- *         SET DATA AND TRACK EDITS
- *         FLUSH DATA
- *     TRACK ENTITY-UPDATE
+ *         FLAT DATA
+ *         RELATIONAL DATA
+ *             SPECIALIZED
+ *                 CONTRIBUTIONS
+ *                 TAGS
+ *                 INTERACTION SOURCE
+ *             GENERAL
+ *     FLUSH DATA
+ *         TRACK ENTITY-UPDATE
+ *     HELPERS
+ *         GET ENTITY
+ *         RETURN-DATA BUILDER
  */
 class DataManager
 {
     private $em;
     private $logger;
     private $tracker;
-/* ========================= CONSTRUCT ====================================== */
+
     public function __construct(EntityManagerInterface $em, LogError $logger,
         TrackEntityUpdate $tracker)
     {
@@ -41,7 +49,8 @@ class DataManager
         $this->tracker = $tracker;
     }
 
-/* ======================== CREATE ENTITY =================================== */
+/* ============================ ACTIONS ===================================== */
+/* ------------------------ CREATE ENTITY ----------------------------------- */
     /**
      * Create new entity.
      * @param  String  $coreName        Core-Entity class name.
@@ -74,7 +83,7 @@ class DataManager
         $this->attemptFlushAndLogErrors($returnData);
         return $returnData;
     }
-/* ========================== EDIT ENTITY =================================== */
+/* -------------------------- EDIT ENTITY ----------------------------------- */
     /**
      * Create new entity.
      * @param  String  $coreName        Core-Entity class name.
@@ -106,41 +115,7 @@ class DataManager
         $this->attemptFlushAndLogErrors($returnData);
         return $returnData;
     }
-
-/* ============================ HELPERS ===================================== */
-    private function returnEntity($class, $val, $prop = 'id')
-    {
-        return $this->em->getRepository("App:".$class)
-            ->findOneBy([$prop => $val]);
-    }
-/* ------------------- RETURN-DATA BUILDER ---------------------------------- */
-    private function buildReturnDataObj($coreName, $coreEntity, $formData)
-    { //print("buildReturnDataObj");
-        $data = new \stdClass;
-        $data->core = lcfirst($coreName);
-        $data->coreId = $coreEntity->getId();  //Created entities have ids added before returning
-        $data->coreEntity = $coreEntity;
-        $data->coreEdits = $this->getEditsObj($formData, 'core');
-        $data->detailEdits = $this->getEditsObj($formData, 'detail');
-        return $data;
-    }
-    /**
-     * Builds and returns an object that will track any edits made to the entity.
-     * The editing prop holds the id of the entity being edited, or false if creating.
-     */
-    private function getEditsObj($data, $type)
-    {
-        $edits = new \stdClass;
-        $edits->editing = property_exists($data, 'ids') ?
-            $data->ids->$type : false;
-        return $edits;
-    }
-    private function removeEditingFlag($coreObj, $detailObj)
-    {
-        unset($coreObj->editing);
-        unset($detailObj->editing);
-    }
-/* ==================== MODIFY ENTITY-DATA ================================== */
+/* ====================== SET DATA AND TRACK EDITS ========================== */
 /* ----------------------- DETAIL-ENTITY ------------------------------------ */
     /** If the core-entity is 'Source', process any detail-entity data. */
     private function handleDetailEntity($cData, $data, &$returnData)
@@ -154,7 +129,7 @@ class DataManager
     private function setDetailEntityData($cData, $data, &$returnData)
     {
         $dName = property_exists($cData->rel, "SourceType") ?
-            lcfirst($cData->rel->SourceType) : 'geoJson';                            //print('detail name = '.$dName);
+            lcfirst($cData->rel->SourceType) : 'geoJson';                       //print('detail name = '.$dName);
         $returnData->detail = $dName;
         if (!property_exists($data, 'detail')) { return false; }
         // if (!property_exists($cData, 'hasDetail')) { return false; }
@@ -174,8 +149,7 @@ class DataManager
     }
     private function setCoreEntity($coreName, &$coreEntity, &$dEntity)
     {
-        $setCore = 'set'.$coreName;
-        // $setCore = 'set'.ucfirst($coreName);
+        $setCore = 'set'.ucfirst($coreName);
         $dEntity->$setCore($coreEntity);
     }
     /** Returns either a newly created entity or an existing entity to edit. */
@@ -185,19 +159,16 @@ class DataManager
             $curDetail = $this->getEntity(ucfirst($dName), $edits->editing);
             if ($curDetail) { return $curDetail; }
         }
-        $dClass = 'App\\Entity\\'. $dName;
-        // $dClass = 'App\\Entity\\'. ucfirst($dName);
+        $dClass = 'App\\Entity\\'. ucfirst($dName);
         return new $dClass();
     }
     /** Adds the detail entity to the core entity. Eg, A Publication to it's Source record. */
     private function addDetailToCoreEntity(&$coreEntity, &$dEntity, $dName)
     {
-        $setMethod = 'set'. $dName;
-        // $setMethod = 'set'. ucfirst($dName);
+        $setMethod = 'set'. ucfirst($dName);
         $coreEntity->$setMethod($dEntity);
         $this->em->persist($coreEntity);
     }
-/* ---------------------- SET DATA AND TRACK EDITS -------------------------- */
     /**
      * Calls the set method for both types of entity data, flat and relational,
      * and persists the entity.
@@ -208,6 +179,7 @@ class DataManager
         $this->setRelatedEntityData($data->rel, $entity, $edits);
         $this->em->persist($entity);
     }
+/* ============================ FLAT DATA =================================== */
     /** Sets all scalar data. */
     private function setFlatData($data, &$entity, &$edits)
     {
@@ -215,6 +187,22 @@ class DataManager
             $this->setFlatDataAndTrackEdits($entity, $field, $val, $edits);
         }
     }
+    /**
+     * Checks whether current value is equal to the passed value. If not, the
+     * entity is updated with the new value and the field is added to the edits obj.
+     */
+    private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits)
+    {
+        $setField = 'set'. $field;  //CamelCase
+        $getField = 'get'. $field;
+
+        $curVal = $entity->$getField();
+        if ($curVal === $newVal) { return; }
+
+        if ($edits->editing) { $edits->$field = [ "old" => $curVal, "new" => $newVal]; }
+        $entity->$setField($newVal);
+    }
+/* ========================= RELATIONAL DATA ================================ */
     /** Sets all realtional data. */
     private function setRelatedEntityData($data, &$entity, &$edits)
     {
@@ -235,27 +223,8 @@ class DataManager
             }
         }
     }
-    /** Returns the entity. */
-    private function getEntity($relField, $val)
-    {
-        $relClass = $this->getEntityClass($relField);
-        $prop = is_numeric($val) ? 'id'  : 'displayName';//print("prop [$prop]");
-        return $this->returnEntity($relClass, $val, $prop);
-    }
-    /** Handles field name to class name translations. */
-    private function getEntityClass($relField)
-    {
-        $classMap = [
-            "ParentSource" => "Source",
-            "ParentLoc" => "Location",
-            "ParentTaxon" => "Taxon",
-            "Subject" => "Taxon",
-            "Object" => "Taxon"
-        ];
-        return array_key_exists($relField, $classMap) ?
-            $classMap[$relField] : $relField;
-            // $classMap[$relField] : ucfirst($relField);
-    }
+/* ---------------------- SPECIALIZED --------------------------------------- */
+/* __________________________ CONTRIBUTIONS _________________________________ */
     private function handleContributors($ary, &$entity, &$edits)
     {
         $this->removeContributors($ary, $entity, $edits);
@@ -339,12 +308,13 @@ class DataManager
             $edits->contributor[$action] = $ary;
         }
     }
+/* ___________________________ TAGS _________________________________________ */
     /** Handles adding and removing tags from the entity. */
     private function handleTags($ary, &$entity, &$edits)
     {
         $curTags = $entity->getTagIds();
-        $this->removeFromCollection('tag', $curTags, $ary, $entity, $edits);
-        $this->addToCollection('tag', $curTags, $ary, $entity, $edits);
+        $this->removeFromCollection('Tag', $curTags, $ary, $entity, $edits);
+        $this->addToCollection('Tag', $curTags, $ary, $entity, $edits);
     }
     /** Removes any entities currently in the $coll(ection) that are not in $ary.  */
     private function removeFromCollection($field, $coll, $ary, &$entity, &$edits)
@@ -375,6 +345,7 @@ class DataManager
                 array_merge($edits->$field, ['added' => $added]) : ['added' => $added];
         }
     }
+/* _______________________ INTERACTION SOURCE _______________________________ */
     /** If adding an interaction to a source, ensures it's 'isDirect' flag to true. */
     private function addInteractionToSource($id, $entity, &$edits)
     {
@@ -386,24 +357,7 @@ class DataManager
             $this->em->persist($relEntity);
         }
     }
-    /**
-     * Checks whether current value is equal to the passed value. If not, the
-     * entity is updated with the new value and the field is added to the edits obj.
-     */
-    private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits)
-    {
-        $setField = 'set'. $field;
-        $getField = 'get'. $field;
-
-        // $setField = 'set'. ucfirst($field);
-        // $getField = 'get'. ucfirst($field);
-
-        $curVal = $entity->$getField();
-        if ($curVal === $newVal) { return; }
-
-        if ($edits->editing) { $edits->$field = [ "old" => $curVal, "new" => $newVal]; }
-        $entity->$setField($newVal);
-    }
+/* --------------------------- GENERAL -------------------------------------- */
     /**
      * Checks whether current value is equal to the passed value. If not, the
      * entity is updated with the new value and the field is added to the edits obj.
@@ -429,7 +383,7 @@ class DataManager
         if ($oldEntity !== null) { $this->em->persist($oldEntity); }
 
     }
-/* -------------------------- FLUSH DATA ------------------------------------ */
+/* =========================== FLUSH DATA =================================== */
     /**
      * Attempts to flush all persisted data. If there are no errors, the created/updated
      * data is sent back to the crud form; otherise, an error message is sent back.
@@ -459,7 +413,7 @@ class DataManager
         return !strpos($e->getMessage(), 'Duplicate entry') ||
             !strpos($e->getTraceAsString(), 'Duplicate entry');
     }
-/* ===================== TRACK ENTITY-UPDATE ================================ */
+/* --------------------- TRACK ENTITY-UPDATE -------------------------------- */
     /**
      * Sets the updatedAt timestamp for modified entities. This will be used to
      * ensure local data stays updated with any changes.
@@ -470,5 +424,60 @@ class DataManager
         if (property_exists($entityData, 'detailEntity')) {
             $this->tracker->trackEntityUpdate($entityData->detail);
         }
+    }
+/* ============================ HELPERS ===================================== */
+/* --------------------------- GET ENTITY ----------------------------------- */
+    /** Returns the entity. */
+    private function getEntity($relField, $val)
+    {
+        $relClass = $this->getEntityClass($relField);
+        $prop = is_numeric($val) ? 'id'  : 'displayName';//print("prop [$prop]");
+        return $this->returnEntity($relClass, $val, $prop);
+    }
+    /** Handles field name to class name translations. */
+    private function getEntityClass($relField)
+    {
+        $classMap = [
+            "ParentSource" => "Source",
+            "ParentLoc" => "Location",
+            "ParentTaxon" => "Taxon",
+            "Subject" => "Taxon",
+            "Object" => "Taxon"
+        ];
+        return array_key_exists($relField, $classMap) ?
+            $classMap[$relField] : $relField;
+    }
+
+    private function returnEntity($class, $val, $prop = 'id')
+    {
+        return $this->em->getRepository("App:".$class)
+            ->findOneBy([$prop => $val]);
+    }
+/* ------------------- RETURN-DATA BUILDER ---------------------------------- */
+    private function buildReturnDataObj($coreName, $coreEntity, $formData)
+    { //print("buildReturnDataObj");
+        $data = new \stdClass;
+        $data->core = lcfirst($coreName);
+        $data->coreId = $coreEntity->getId();  //Created entities have ids added before returning
+        $data->coreEntity = $coreEntity;
+        $data->coreEdits = $this->getEditsObj($formData, 'core');
+        $data->detailEdits = $this->getEditsObj($formData, 'detail');
+        return $data;
+    }
+    /**
+     * Builds and returns an object that will track any edits made to the entity.
+     * The editing prop holds the id of the entity being edited, or false if creating.
+     */
+    private function getEditsObj($data, $type)
+    {
+        $edits = new \stdClass;
+        $edits->editing = property_exists($data, 'ids') ?
+            $data->ids->$type : false;
+        return $edits;
+    }
+    private function removeEditingFlag($coreObj, $detailObj)
+    {
+        unset($coreObj->editing);
+        unset($detailObj->editing);
     }
 }
