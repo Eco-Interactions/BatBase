@@ -45,7 +45,7 @@ function appendNewAuthSelect(field) {
 }
 function getAuthSelConfg() {
     return {
-        create: aForm.initAuthOrEdForm.bind(null, a.cnt, a.type),
+        create: aForm.initCreateForm.bind(null, a.cnt, a.type),
         onChange: aForm.onAuthAndEdSelection.bind(null, a.cnt, a.type),
         id: '#sel-'+a.type+a.cnt,
         confgName: a.type+a.cnt,

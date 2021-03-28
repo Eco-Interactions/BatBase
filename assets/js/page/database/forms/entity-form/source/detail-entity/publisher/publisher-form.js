@@ -4,34 +4,63 @@
  * and appended to the field's row.
  *
  * Export
- *     initPublisherForm
+ *     initCreateForm
  *     onPublSelection
+ *
+ * TOC
+ *     ON SELECTION
+ *     INIT FORM
+ *         CREATE
+ *         EDIT
+ *         SHARED
+ *     FINISH BUILD
  */
-import { _elems, _form, _val, getSubFormLvl, getNextFormLevel } from '~form';
+import { _elems, _form, _val, getSubFormLvl } from '~form';
 import * as sForm from '../../src-form-main.js';
-
-export function initPublisherForm(v) {                              /*perm-log*/console.log('       /--initPublisherForm [%s]', v);
-    const fLvl = getSubFormLvl('sub2');
-    return _elems('initSubForm', [getPublFormParams(fLvl, v)])
-        .then(status => appendPublFormAndFinishBuild(fLvl, status));
+/* ======================= ON SELECTION ===================================== */
+export function onPublSelection(val) {
+    if (val === 'create') { return initCreateForm(val); }
 }
-function getPublFormParams(fLvl, v) {
-    return {
+/* ======================= INIT FORM ======================================== */
+/* --------------------------- CREATE --------------------------------------- */
+export function initCreateForm(v) {                                 /*perm-log*/console.log('       /--initCreateForm [%s]', v);
+    const p = getCreateFormParams(v);
+    return _elems('initSubForm', [p])
+        .then(status => finishFormInit(p, status));
+}
+function getCreateFormParams(v) {
+    const cParams = {
         appendForm: form => $('#Publisher_f').append(form),
-        entity: 'Publisher',
-        fLvl: fLvl,
         combo: 'Publisher',
+        fLvl: getSubFormLvl('sub2'),
         style: 'sml-sub-form',
-        submit: sForm.showSubmitModal.bind(null, fLvl),
         vals: { DisplayName: v === 'create' ? '' : v }
     };
+    return { ...cParams, ...getFormParams(cParams.fLvl) };
 }
-function appendPublFormAndFinishBuild(fLvl, status) {
+/* ---------------------------- EDIT ---------------------------------------- */
+export function initEditForm(entity, id) {
+   const p = getEditFormParams(id);                                 /*dbug-log*///console.log('   --params[%O]', p);
+    return _elems('initForm', [p])
+        .then(status => finishFormInit(p, status));
+}
+function getEditFormParams(id) {
+    const eParams = {
+        id: id,
+        style: 'sml-form',
+    };
+    return { ...eParams, ...getFormParams('top') };
+}
+/* ---------------------------- SHARED -------------------------------------- */
+function getFormParams(fLvl) {
+    return {
+        entity: 'Publisher',
+        fLvl: fLvl,
+        submit: sForm.showSubmitModal.bind(null, fLvl),
+    };
+}
+/* ======================== FINISH BUILD ==================================== */
+function finishFormInit(p, status) {
     if (!status) { return; } //Error handled elsewhere
-    const pLvl = getNextFormLevel('parent', fLvl);
-    _elems('toggleSubmitBttn', [pLvl, false]);
     $('#DisplayName_f input').focus();
-}
-export function onPublSelection(val) {
-    if (val === 'create') { return initPublisherForm(val); }
 }

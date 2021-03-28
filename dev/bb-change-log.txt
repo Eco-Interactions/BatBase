@@ -28,6 +28,20 @@ SINCE LAST SERVER UPDATE:
                     - reordered/resized form-fields
                     - when a blank exists in the author order, the final empty field is removed
                         to show more intuitevly the blank must be filled before continuing
+                - "OTHER" type
+                    - seems like it should be as broad as possible?
+                        - removed "year" requirement? Added the ability to add "editors"?
+                        - 'all' fields shown always, to encourage as much data as possible
+
+                - "Journal"
+                    - removed 'year' requirement?
+
+        - Subject
+            - Only groups with valid subject roles are added
+        - Object
+            - auto select bats if anything other than bats are selected as the subject
+
+
 
 
 SINCE LAST USER UPDATE:

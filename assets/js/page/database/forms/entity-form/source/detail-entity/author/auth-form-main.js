@@ -5,7 +5,7 @@
  * is initialized underneath the last author combobox, unless the last is empty.
  *
  * Export (External use)
- *     initAuthOrEdForm
+ *     initCreateForm
  *     onAuthAndEdSelection
  *     selectExistingAuthsOrEds
  *
@@ -22,8 +22,11 @@ import * as update from './on-auth-change.js';
 import * as fill from './auth-field-fill.js';
 import * as field from './auth-dynamic-build.js';
 /* ========================= BUILD FORM ===================================== */
-export function initAuthOrEdForm() {
-    return build.initAuthOrEdForm(...arguments);
+export function initCreateForm() {
+    return build.initCreateForm(...arguments);
+}
+export function initEditForm() {
+    return build.initEditForm(...arguments);
 }
 /* =================== SELECT AUTHORS|EDITORS =============================== */
 /** Loops through author object and adds each author/editor to the form. */

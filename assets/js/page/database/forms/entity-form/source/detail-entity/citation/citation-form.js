@@ -1,21 +1,24 @@
 /**
  * Citation-form code.
- * When a user enters a new citation into the combobox, the create form is built
- * and appended to the field's row.
  *
  * Export
- *     initCitForm
+ *     finishFieldLoad
  *     handleCitText
+ *     initCreateForm
+ *     initEditForm
  *     loadCitTypeFields
  *
  * TOC
- *     CREATE FORM
- *         INIT STATE MEMORY
- *         ON CREATE-FORM CLOSE
- *         BUILD FORM
+ *     ON SELECTION
+ *     INIT FORM
+ *         CREATE
+ *             ON CLOSE
+ *         EDIT
+ *         SHARED
+ *     FINISH BUILD
+ *         FINISH REBUILD
  *     AUTOGENERATE CITATION
  *     HIGHTLIGHT EMPTY CITATION-FIELDS
- *     EDIT FORM
  */
 import { _db, _cmbx, _u } from '~util';
 import { _form, _state, _elems } from '~form';
@@ -26,48 +29,71 @@ import * as cite from './regen-citation.js';
 let timeout = null; //Prevents citation text being generated multiple times.
 
 export function loadCitTypeFields() {
-    return types.loadCitTypeFields.bind(this)(...arguments);
+    return types.loadCitTypeFields(...arguments);
 }
-/* -============================ CREATE FORM ================================ */
-/** Shows the Citation  sub-form and disables the publication combobox. */
-export function initCitForm(v) {                                    /*perm-log*/console.log("       /--initCitForm [%s]", v);
+/* ========================= INIT FORM ====================================== */
+/* --------------------------- CREATE --------------------------------------- */
+/** Init form when a new citation title is entered into the combobox. */
+export function initCreateForm(v) {                                 /*perm-log*/console.log("       /--initCreateForm [%s]", v);
     timeout = null;
-    return _elems('initSubForm', [getCitFormParams(v)])
-        .then(finishCitFormInit);
+    return _elems('initSubForm', [getCreateFormParams(v)])
+        .then(() => _cmbx('enableCombobox', ['Publication', false]))
+        .then(() => finishCitFormInit('success'));
 }
-function getCitFormParams(v) {
-    return {
+function getCreateFormParams(v) {
+    const createParams = {
         appendForm: form => $('#CitationTitle_f')[0].parentNode.after(form),
-        entity: 'Citation',
         fLvl: 'sub',
-        initCombos: sForm.initCombos.bind(null, 'sub', 'Citation'),
         onFormClose: enablePubField,
         combo: 'CitationTitle',
         style: 'med-sub-form',
-        submit: sForm.showSubmitModal.bind(null, 'sub'),
         vals: {
             ParentSource: _cmbx('getSelVal', ['Publication']),
             DisplayName: (v === 'create' ? '' : v),
         }
     };
+    return { ...createParams, ...getFormParams('sub') };
 }
-// /* -------------------------- BUILD FORM ------------------------------------ */
-function finishCitFormInit(status) {                                /*dbug-log*///console.log('           --appendCitFormAndFinishBuild');
-    if (!status) { return; } //Error handled elsewhere
-    $('#CitationText_f textarea').attr('disabled', true);
-    return types.selectDefaultCitType()
-        .then(() => finishCitFormUiLoad());
-}
-function finishCitFormUiLoad() {
-    _cmbx('enableCombobox', ['Publication', false]);
-    $('#Abstract_f textarea').focus();
-    _elems('setDynamicFormStyles', ['citation']);
-}
-/* ---------------------- ON CREATE-FORM CLOSE ------------------------------ */
+/* ______________________ ON CLOSE __________________________________________ */
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
 function enablePubField() {
     _cmbx('enableCombobox', ['Publication']);
     _form('fillCitationCombo', [$('#sel-Publication').val()]);
+}
+/* ---------------------------- EDIT ---------------------------------------- */
+/** Shows the Citation  sub-form and disables the publication combobox. */
+export function initEditForm(id) {                                  /*perm-log*/console.log("       /--initCit EDIT Form [%s]", id);
+    timeout = null;
+    return _elems('initForm', [getEditFormParams(id)])
+        .then(finishCitFormInit);
+}
+function getEditFormParams(id) {
+    const editParams = {
+        id: id,
+        fLvl: 'top',
+        style: 'med-form'
+    };
+    return { ...editParams, ...getFormParams('top') };
+}
+/* --------------------------- SHARED --------------------------------------- */
+function getFormParams(fLvl) {
+    return {
+        entity: 'Citation',
+        initCombos: sForm.initCombos.bind(null, fLvl, 'Citation'),
+        submit: sForm.showSubmitModal.bind(null, fLvl),
+    }
+}
+/* ======================== FINISH BUILD ==================================== */
+function finishCitFormInit(status) {                                /*dbug-log*///console.log('           --finishCitFormInit status[%s]', status);
+    if (!status) { return; } //Error handled elsewhere
+    $('#CitationText_f textarea').attr('disabled', true);
+    return types.selectDefaultCitType()
+        .then(() => $('#Abstract_f textarea').focus());
+}
+/* --------------------- FINISH REBUILD ------------------------------------- */
+export function finishFieldLoad(fLvl) {
+    types.handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['CitationType']), fLvl);
+    handleCitText(fLvl);
 }
 /* ======================= AUTO-GENERATE CITATION =========================== */
 /** Note: to prevent multiple rebuilds, a timeout is used. */
@@ -103,9 +129,4 @@ function ifFieldShouldBeSkipped (el, label, input) {
     const skip = $(input).val() || ignore.indexOf(label.id.split('-')[0]) !== -1;
     if (skip && el.className.includes('warn')) { $(el).removeClass('warn'); }
     return skip;
-}
-/* ========================= EDIT FORM ====================================== */
-export function finishCitationEditForm() {
-    types.handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['CitationType']), 'top');
-    handleCitText('top');
 }

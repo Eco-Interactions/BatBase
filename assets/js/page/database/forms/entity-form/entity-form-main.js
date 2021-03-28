@@ -1,7 +1,7 @@
 /**
  * Entry point for entity-specific code.
  *
- * Note - required form methods: initCreateForm
+ * Note - required form methods: initCreateForm, initEditForm
  *
  * TOC
  *     INIT FORM
@@ -44,6 +44,9 @@ export function clearEntityFormMemory(entity) {
 /* =================== INIT FORM ============================================ */
 export function createEntity(entity, val) {
     return getEntityModule(entity).initCreateForm(...arguments);
+}
+export function editEntity(entity, id) {
+    return getEntityModule(entity).initEditForm(...arguments);
 }
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */

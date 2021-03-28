@@ -27,7 +27,8 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
     return _elems('initSubForm', [getTxnSelectParams(role, gId)])
         .then(status => finishTaxonSelectBuild(status, role, gId));
 }
-function getTxnSelectParams(role, groupId) {                        /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
+function getTxnSelectParams(role, gId) {                            /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
+    const groupId = role === 'Subject' ? gId : getObjectInitGroup(gId);
     return {
         appendForm: form => $(`#${role}_f`).append(form),
         entity: role,
@@ -38,6 +39,10 @@ function getTxnSelectParams(role, groupId) {                        /*dbug-log*/
         submit: _form.bind(null, 'selectRoleTaxon'),
         vals: { Group: groupId }
     };
+}
+function getObjectInitGroup(gId) {
+    const misc = _state('getFieldState', ['top', 'Subject', 'misc']);
+    return !misc || misc.id === 1 ? gId : 1; //Bat
 }
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
 /**

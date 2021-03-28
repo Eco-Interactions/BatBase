@@ -46,15 +46,16 @@ export function _form(funcName, params = []) {                                  
 export function create(entity, name) {
     return form.createEntity(entity, name);
 }
-export function initNewDataForm() {
-    _ui('showPopupMsg');
-    return create('Interaction')
-        .then(() => _ui('hidePopupMsg'));
+export function edit(entity, id) {
+    return initNewDataForm(entity, id, form.editEntity);
 }
-export function edit(entity, id, vals) {
-    return elems.initForm(entity, 'edit', id, vals);
-    // state.initFormState('edit', entity, id)
-    // .then(() => editEntity(id, entity));
+export function initNewDataForm() {
+    return initDataEntryForm('Interaction', null, create);
+}
+function initDataEntryForm(entity, val, initFunc) {
+    _ui('showPopupMsg');
+    return initFunc(entity)
+        .then(() => _ui('hidePopupMsg'));
 }
 export function selectIntLoc(id) {
     form.selectIntLoc(id);

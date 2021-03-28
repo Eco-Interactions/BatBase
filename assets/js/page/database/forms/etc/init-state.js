@@ -132,7 +132,7 @@ function initEntityState(fS, entity, fLvl, vals = {}) {
     fS.forms[fLvl].fields = {};
     return Promise.resolve(map[entity] ? map[entity](fS, fLvl, vals) : null);
 }
-function initEntityFormConfg(fS, p) {
+function initEntityFormConfg(fS, p) {                               /*dbug-log*///console.log("    --initEntityFormConfg entity[%s] params[%O] forms[%O]", p.entity, p, fS);
     p.vals = { ...p.vals, ..._state('getFieldValues', [p.fLvl]) };
     const confg = _confg('getInitFormConfg', [p.entity, p.fLvl, p.action, p.vals]);
     _confg('mergeIntoFormConfg', [confg, fS.forms[p.fLvl]]);

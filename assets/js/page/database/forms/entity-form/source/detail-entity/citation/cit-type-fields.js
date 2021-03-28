@@ -16,7 +16,7 @@ import { _db, _cmbx } from '~util';
 import {  _state, _elems, getSubFormLvl } from '~form';
 import * as sForm from '../../src-form-main.js';
 /* ----------------------- SELECT DEFAULT-TYPE ------------------------------ */
-export function selectDefaultCitType() {
+export function selectDefaultCitType() {                            /*dbug-log*///console.log('           /--selectDefaultCitType');
     return _db('getData', ['citTypeNames'])
         .then(types => setCitType(types));
 }
@@ -25,15 +25,15 @@ function setCitType(cTypes) {
     const pData = _state('getFieldState', [fLvl, 'ParentSource', 'misc']);
     const pubType = pData.pubType.displayName;
     const defaultType = getDefaultCitType(pubType, pData);
-    _elems('setSilentVal', ['sub', 'CitationType', cTypes[defaultType]]);
+    _cmbx('setSelVal', ['CitationType', cTypes[defaultType], 'silent']);
     if (!_state('isEditForm')) { addPubData(cTypes[defaultType], defaultType, fLvl); }
     return loadCitTypeFields(cTypes[defaultType], defaultType);
 }
 function getDefaultCitType(pubType, pData) {
     return {
-        'Book': getBookDefault(pubType, pData),
-        'Journal': 'Article',
-        'Other': 'Other',
+        Book: getBookDefault(pubType, pData),
+        Journal: 'Article',
+        Other: 'Other',
         'Thesis/Dissertation': 'Ph.D. Dissertation'
     }[pubType];
 }
@@ -51,13 +51,7 @@ export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*/
     const fLvl = getSubFormLvl('sub');
     const type = typeName || this.$input[0].innerText;
     return sForm.loadSrcTypeFields('Citation', typeId, type)
-        .then(finishCitTypeFields);
-
-    function finishCitTypeFields() {
-        sForm.handleCitText(fLvl);
-        _elems('setDynamicFormStyles', ['Citation']);
-        _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
-    }
+        .then(() => sForm.handleCitText(fLvl));
 }
 /* ------------------- UPDATE UI FOR CITATION-TYPE -------------------------- */
 /**
@@ -82,7 +76,7 @@ export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*/
     }
 }
 function disableFilledFields() {
-    $('#Title_f input').prop('disabled', true);
+    $('#DisplayName_f input').prop('disabled', true);
     $('#Year_f input').prop('disabled', true);
     disableAuthorField();
 }
@@ -93,7 +87,7 @@ function disableAuthorField() {
     _cmbx('enableComboboxes', [$(`#Author_f-cntnr select`), false]);
 }
 function toggleTitleField(disable = false) {
-    $('#Title_f input').prop('disabled', !disable);
+    $('#DisplayName_f input').prop('disabled', !disable);
 }
 /* ------------------------- ADD PUB DATA ----------------------------------- */
 /** Adds or removes publication data from the form's values, depending on type. */

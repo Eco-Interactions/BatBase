@@ -6,32 +6,48 @@
  *
  * Export
  *     initCreateForm
+ *     initEditForm
  *     finishInteractionFormBuild
  *
  * TOC
- *     CREATE-FORM BUILD
- *     FINISH FORM DISPLAY
+ *     INIT FORM
+ *         CREATE
+ *         EDIT
+ *         SHARED
+ *     FINISH BUILD
  *         REFERENCE-GUIDE BUTTON
  *         FORM COMBOBOXES
+ *         ON-SUBMIT CONFIRMATION MODAL
  */
 import { _cmbx, _el, _modal } from '~util';
 import { _state, _elems, _form, handleFormSubmit } from '~form';
 import * as iForm from '../int-form-main.js';
-/* ======================= CREATE-FORM BUILD ================================ */
+/* ======================= INIT FORM ======================================== */
+/* --------------------------- CREATE --------------------------------------- */
 export function initCreateForm(entity) {                            /*perm-log*/console.log('   //Building New Interaction Form');
     if (_state('getStateProp')) { return; } //Form is already opened.
-    return _elems('initForm', [getIntFormParams()])
+    return _elems('initForm', [getIntFormParams('create')])
         .then(finishInteractionFormBuild);
 }
-function getIntFormParams() {
+/* ---------------------------- EDIT ---------------------------------------- */
+export function initEditForm(entity) {                              /*perm-log*/console.log('   //Building EDIT Interaction Form');
+    if (_state('getStateProp')) { return; } //Form is already opened.
+    return _elems('initForm', [getIntFormParams('edit', id)])
+        .then(finishInteractionFormBuild);
+}
+/* --------------------------- SHARED --------------------------------------- */
+function getIntFormParams(action, id) {
+    const onClose = action === 'create' ? iForm.resetInteractionForm : null;
     return {
+        action: action,
         entity: 'Interaction',
-        onFormClose: iForm.resetInteractionForm,
+        id: id,
+        initCombos: iForm.initCombos.bind(null, 'top'),
+        onFormClose: onClose,
         submit: showSubmitModal,
-        initCombos: iForm.initCombos.bind(null, 'top')
     };
 }
-/* ======================= FINISH FORM DISPLAY ============================== */
+/* ======================= FINISH BUILD ===================================== */
 /**
  * Inits the selectize comboboxes, adds/modifies event listeners, and adds
  * required field elems to the form's config object.

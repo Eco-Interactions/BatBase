@@ -43,10 +43,10 @@ function getTypeDefaultState() {
  * @param  {int} subjGroup  Taxon sub-group id
  * @param  {int} objGroup   Taxon sub-group id
  */
-export function initTypeField(subjGroup, objGroup) {                /*perm-log*/console.log(        '+--initTypeField subjGroup[%s] -> objGroup[%s]', subjGroup, objGroup);
-    if (ifGroupsMatchState(subjGroup, objGroup)) { return; }
-    md.subject = subjGroup;
-    md.object = objGroup;
+export function initTypeField(ids) {                                /*perm-log*/console.log(        '+--initTypeField subjGroup[%s] -> objGroup[%s]', ids[0], ids[1]);
+    if (ifGroupsMatchState(...ids)) { return; }
+    md.subject = ids[0];
+    md.object = ids[1];
     loadIntTypeOptions();
 }
 function ifGroupsMatchState(subjGroup, objGroup) {                  /*dbug-log*///console.log('ifGroupsMatchState subj[%s][%s] obj[%s][%s]', subjGroup, md.subject, objGroup, md.object);
@@ -78,7 +78,7 @@ function buildValidInteractionTypeOptions() {
 function getAllValidInteractionTypes(validInteractions) {           /*dbug-log*///console.log('-getAllValidInteractionTypes = %O', validInteractions);
     const types = [];
     Object.keys(validInteractions).forEach(ifValidAddData);
-    _state('setFormState', ['top', 'valData', md.validInts]);
+    // _state('setFormState', ['top', 'valData', md.validInts]); //Not needed yet.
     return types;
 
     function ifValidAddData(id) {
@@ -120,8 +120,9 @@ export function onTypeSelection(val) {
     if (!val) { return onTypeClear(); }
     const validInt = md.validInts[val];                             /*dbug-log*///console.log('onTypeSelection validInt[%O]', validInt)
     setInteractionTypeFieldData(validInt.interactionType);
-    iForm.loadInteractionTypeTags(validInt.tags);
     iForm.focusPinAndEnableSubmitIfFormValid('InteractionType');
+    if (!validInt.tags.length) { return; }
+    iForm.loadInteractionTypeTags(validInt.tags);
 }
 function onTypeClear() {
     iForm.clearTypeTagData();

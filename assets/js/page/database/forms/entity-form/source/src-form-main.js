@@ -40,7 +40,7 @@ export function handleCitText() {
 }
 export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*///console.log('finishSrcFieldLoad [%s] entity[%s]', fLvl, entity);
     if (entity === 'citation' || entity === 'publication') {
-        entityForm.finishPubOrCitEditForm(entity);
+        entityForm.finishFieldLoad(entity, fLvl);
     }
 }
 /* -------------------- SUBMIT CONFIRMATION-MODAL --------------------------- */

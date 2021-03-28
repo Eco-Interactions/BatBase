@@ -11,8 +11,6 @@
 import { _cmbx, _u } from '~util';
 import {  _elems, _form, _state, _val, getSubFormLvl } from '~form';
 import * as iForm from '../int-form-main.js';
-
-const app = { Object: null, Subject: null };
 /* ======================= ENABLE FIELDS ==================================== */
 export function enableRoleTaxonFieldCombos() {
     _cmbx('enableCombobox', ['Subject']);
@@ -50,12 +48,12 @@ export function selectRoleTaxon(e, selectRoot = false) {            /*dbug-log*/
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(selectRoot) {
     const selected = _form('getSelectedTaxon');
-    const taxon = selectRoot || !selected ? getRootTaxon() : selected;/*dbug-log*///console.log("--getSelectedTaxonOption taxon[%O]", taxon);
+    const taxon = selectRoot || !selected ? getRoot().taxon : selected;/*dbug-log*///console.log("--getSelectedTaxonOption taxon[%O]", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
     return { text: taxon.displayName, value: taxon.id};
 }
-function getRootTaxon() {
-    return _state('getFieldState', ['sub', 'Sub-Group', 'misc']).taxon;
+function getRoot() {
+    return _state('getFieldState', ['sub', 'Sub-Group', 'misc']);
 }
 /* =================== ON ROLE SELECTION ==================================== */
 /**
@@ -69,12 +67,20 @@ export function onTaxonRoleSelection(role, val) {                   /*perm-log*/
     storeRoleSelection(role, val);
     iForm.enableRoleTaxonFieldCombos();
     iForm.focusPinAndEnableSubmitIfFormValid(role);
-    if (ifBothRolesSelected()) { iForm.initTypeField(app.Subject, app.Object); }
+    initTypeFieldIfBothTaxonRolesFilled();
 }
 function storeRoleSelection(role, val) {
+    const subGroup = { id: getRoot().rcrd.id };
     $('#sel-'+role).data('selTaxon', val);
-    app[role] = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).rcrd.id;   /*dbug-log*///console.log('   --storeRoleSelection [%s] -> [%s]', role, app[role]);
+    _state('setFieldState', ['top', role, subGroup, 'misc' ]);      /*dbug-log*///console.log('   --storeRoleSelection role[%s] subGroup[%O]', role, subGroup);
 }
-function ifBothRolesSelected() {
-    return Object.keys(app).every(r => app[r]);
+
+function initTypeFieldIfBothTaxonRolesFilled() {
+    const roleGroups = ['Su', 'O'].map(getRoleRootId);
+    if (!roleGroups.every(i => i)) { return; }
+    iForm.initTypeField(roleGroups);
+}
+function getRoleRootId(pref) {
+    const root = _state('getFieldState', ['top', pref+'bject', 'misc']);/*dbug-log*///console.log('--getRoleRootId root[%O]', root);
+    return root ? root.id : false;
 }

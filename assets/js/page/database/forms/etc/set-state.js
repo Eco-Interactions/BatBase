@@ -64,7 +64,7 @@ function setGroupState(taxa, fState, group) {                       /*dbug-log*/
     fState.fields.Group.misc = {
         rcrd: group,
         subGroups: group.subGroups
-    };   /*dbug-log*///console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
+    };                                                              /*dbug-log*///console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
 }
 /** [setSubGroupState description] */
 function setSubGroupState(fS, fState, subGroups, sGroupId) {

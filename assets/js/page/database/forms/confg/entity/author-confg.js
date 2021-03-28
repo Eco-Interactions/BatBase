@@ -5,6 +5,13 @@ export default function(entity) {
 	return {
         core: 'source',
         fields: {
+            DisplayName: {
+                prep: {
+                    handleAuthorNames: [],
+                },
+                required: null,
+                type: null,
+            },
             FirstName: {
                 label: 'First',
                 name: 'FirstName',

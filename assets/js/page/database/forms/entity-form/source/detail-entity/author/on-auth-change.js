@@ -31,7 +31,7 @@ export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*/
     const ttl = _state('getFieldState', [fLvl, aType, 'count']);    /*dbug-log*///console.log('       --ttl[%s]', ttl);
     if (v === '' || parseInt(v) === NaN) { return onFieldClear(aType, fLvl, ttl, cnt); }
     if (ttl === 1) { enableOtherField(aType, fLvl, false);  }
-    if (v === 'create') { return aForm.initAuthOrEdForm(cnt, aType, v); }
+    if (v === 'create') { return aForm.initCreateForm(cnt, aType, v); }
     if (aForm.isDynamicFieldEmpty(aType, ttl)) { return; }
     aForm.buildNewAuthorSelect(fLvl, aType, ttl+1);
 }

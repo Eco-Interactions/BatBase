@@ -7,10 +7,7 @@
  *
  * TOC
  *     LOAD SOURCE-TYPE ROWS
- *     GET SOURCE-TYPE ROWS
- *     UPDATE SOURCE-TYPE FIELDS
- *         LABELS
- *         INPUTS
+ *     SET SOURCE DETAIL-TYPE
  */
 import { _cmbx, _u } from '~util';
 import { _confg, _elems, _state, getSubFormLvl } from '~form';
@@ -18,36 +15,16 @@ import * as sForm from '../src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
 export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*///console.log('+--loadSrcTypeFields [%s] id?[%s] type[%s]', entity, typeId, type);
     const fLvl = getSubFormLvl('sub');
-    _elems('toggleSubmitBttn', [fLvl, false]);
-    return getPubOrCitFields(entity, typeId, fLvl, type)
+    setSourceDetailType(entity, fLvl, typeId, type);
+    return _elems('onFormConfgChanged', [fLvl, entity])
         .then(finishSrcTypeFormBuild);
 
-    function finishSrcTypeFormBuild(rows) {                         /*dbug-log*///console.log('   --finishSrcTypeFormBuild rows[%O]', rows)
-        $(`#${entity}_fields`).append(rows);
-        sForm.initCombos(fLvl, entity);
-        return _elems('fillComplexFormFields', [fLvl])
-            .then(afterComplexFieldsFilled);
-    }
-    function afterComplexFieldsFilled () {
+    function finishSrcTypeFormBuild () {
         _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
-        $('#Title_f input').focus();
+        $('#DisplayName_f input').focus();
     }
 }
-/* ----------------- GET SOURCE-TYPE ROWS ----------------------------------- */
-/**
- * Builds and return the form-field rows for the selected source type.
- * @return {ary} Form-field rows ordered according to the form config.
- * @param  {[type]}  entity [description]
- * @param  {[type]}  typeId [description]
- * @param  {[type]}  fLvl   [description]
- * @param  {Str|Bool} type   Passed for edit-form builds
- * @return {[type]}         [description]
- */
-function getPubOrCitFields(entity, typeId, fLvl, type = false) {    /*dbug-log*///console.log('getPubOrCitFields [%s][%s] typeId[%s] type?[%s]', fLvl, entity, typeId, type);
-    setSourceType(entity, fLvl, typeId, type);
-    $(`#${entity}_fields`).empty();
-    return _elems('getFormFieldRows', [fLvl]);
-}
+/* ----------------- SET SOURCE DETAIL-TYPE --------------------------------- */
 /**
  * Update form state for the selected source type.
  * @param {str} entity Source-type entity
@@ -55,8 +32,8 @@ function getPubOrCitFields(entity, typeId, fLvl, type = false) {    /*dbug-log*/
  * @param {str} tId    Entity-type id
  * @param {str} tName    Entity-type name
  */
-function setSourceType(entity, fLvl, tId, tName) {
-    const typeField = _u('ucfirst', [entity])+'Type';
+function setSourceDetailType(entity, fLvl, tId, tName) {
+    const typeField = entity+'Type';
     const val = {
         text: tName ? tName : getSourceTypeNameFromCombo(typeField),
         value: tId ? tId : getSourceTypeIdFromCombo(typeField)

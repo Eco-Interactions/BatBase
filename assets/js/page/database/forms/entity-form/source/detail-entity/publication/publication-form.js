@@ -5,44 +5,70 @@
  *
  * Export
  *     finishPublicationEditForm
- *     initPubForm
+ *     initCreateForm
+ *     initEditForm
  *     loadPubTypeFields
  *
  * TOC
- *     PUBLICATION CREATE
+ *     INIT FORM
+ *         CREATE
+ *         EDIT
+ *         SHARED
  *     PUBLICATION-TYPE FIELDS
- *     FINISH EDIT-FORM
+ *         SHOW NOTE
+ *     FINISH BUILD
  */
 import { _cmbx, _el } from '~util';
 import { _elems, _form, _panel, _state } from '~form';
 import * as sForm from '../../src-form-main.js';
-/* -------------------------- PUBLICATION CREATE ---------------------------- */
-export function initPubForm(v) {                                    /*perm-log*/console.log('       /--initPubForm [%s]', v);
+/* ========================= INIT FORM ====================================== */
+/* --------------------------- CREATE --------------------------------------- */
+export function initCreateForm(v) {                                 /*perm-log*/console.log('       /--initCreateForm [%s]', v);
     clearCitationFormData();
-    return _elems('initSubForm', getPubFormParams(v))
+    return _elems('initSubForm', [getCreateFormParams(v)])
         .then(finishPubFormInit);
 }
-function getPubFormParams(v) {
-    return {
+function getCreateFormParams(v) {
+    const createParams = {
         appendForm: form => $('#CitationTitle_f')[0].parentNode.after(form),
-        entity: 'Publication',
-        fLvl: 'sub',
-        initCombos: sForm.initCombos.bind(null, 'sub', 'Publication'),
         combo: 'Publication',
+        fLvl: 'sub',
         style: 'med-sub-form',
-        submit: sForm.showSubmitModal.bind(null, 'sub'),
         vals: { DisplayName: v === 'create' ? '' : v }
     };
+    return { ...createParams, ...getFormParams('sub') };
 }
 function clearCitationFormData() {
     _cmbx('resetCombobox', ['CitationTitle']);
     _panel('clearFieldDetails', ['CitationTitle']);
 }
+/* ---------------------------- EDIT ---------------------------------------- */
+export function initEditForm(entity, id) {
+    return _elems('initForm', [getEditFormParams(id)])
+        .then(finishPubFormInit);
+}
+function getEditFormParams(id) {
+    const editParams = {
+        id: id,
+        fLvl: 'top',
+        style: 'med-form'
+    };
+    return { ...editParams, ...getFormParams('top') };
+}
+/* --------------------------- SHARED --------------------------------------- */
+function getFormParams(fLvl) {
+    return {
+        entity: 'Publication',
+        submit: sForm.showSubmitModal.bind(null, fLvl),
+        initCombos: sForm.initCombos.bind(null, fLvl, 'Publication'),
+    };
+}
+/* ======================= FINISH BUILD ===================================== */
 function finishPubFormInit(status) {
     if (!status) { return; } //Error handled elsewhere
     $('#DisplayName_f .f-input').focus();
 }
-/* --------------------- PUBLICATION-TYPE FIELDS ---------------------------- */
+/* ===================== PUBLICATION-TYPE FIELDS ============================ */
 /**
  * Loads the deafult fields for the selected Publication Type. Clears any
  * previous type-fields and initializes the selectized dropdowns.
@@ -56,6 +82,10 @@ export function loadPubTypeFields(fLvl, typeId) {                   /*dbug-log*/
         _elems('setDynamicFormStyles', ['Publication']);
     }
 }
+/* -------------------------- SHOW NOTE ------------------------------------- */
+export function finishFieldLoad(fLvl) {
+    showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl);
+}
 /** Shows the user a note above the author and editor elems. */
 function showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl) {
     if (!isBothEditorAndAuthorFieldsAvailable(fLvl)) { return; }
@@ -64,8 +94,4 @@ function showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl) {
 }
 function isBothEditorAndAuthorFieldsAvailable(fLvl) {
      return _state('areFieldsShown', [fLvl, ['Author', 'Editor']]);
-}
-/* --------------------- FINISH EDIT-FORM ----------------------------------- */
-export function finishPublicationEditForm() {
-    showNoteIfBothEditorAndAuthorFieldsAvailable('top');
 }

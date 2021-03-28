@@ -5,7 +5,7 @@
  *     EXIT FORM
  */
 import { _cmbx, _el } from '~util';
-import { _elems, _state } from '~form';
+import { _elems, _state, getNextFormLevel } from '~form';
 import * as build from './build/form-build-main.js';
 import * as bttn from './buttons/form-buttons.js';
 import * as footer from './footer/form-footer.js';
@@ -21,8 +21,13 @@ export function initSubForm(p) {                                    /*dbug-log*/
     return _state('addEntityFormState', [p])
         .then(fState => buildAndAppendForm(fState, p.appendForm))
         .then(() => finishFormBuild(p.initCombos, p.entity))
-        .then(() => _cmbx('enableCombobox', [p.combo, false]))
+        .then(() => updateParentForm(p))
         .then(() => 'success');
+}
+function updateParentForm(p) {                                      /*dbug-log*///console.log('--updateParentForm');
+    const pLvl = getNextFormLevel('parent', p.fLvl);
+    _elems('toggleSubmitBttn', [pLvl, false]);
+    _cmbx('enableCombobox', [p.combo, false])
 }
 export function getExitButton() {
     return bttn.getExitButton(...arguments);
@@ -53,7 +58,7 @@ export function exitRootForm() {
     build.exitRootForm(...arguments);
 }
 /* ============================= BUILD FORM ================================= */
-function buildAndAppendForm(fState, appendForm) {                   /*dbug-log*///console.log('buildAndAppendForm fState[%O] appendFunc[%O]', fState, appendForm);
+function buildAndAppendForm(fState, appendForm) {                   /*dbug-log*///console.log('--buildAndAppendForm fState[%O] appendFunc[%O]', fState, appendForm);
     return getFormPieces(fState)
         .then(elems => assembleAndAppend(elems, fState, appendForm));
 }

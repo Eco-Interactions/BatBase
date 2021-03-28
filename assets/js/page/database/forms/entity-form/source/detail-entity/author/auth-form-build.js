@@ -1,52 +1,72 @@
 /**
- * When a user enters a new author|editor into the combobox, a create form is built
- * and appended to the field's row.
- *
+ * Author form-build.
  *
  * Export
- *     initAuthOrEdForm
+ *     initCreateForm
+ *     initEditForm
  *
  * TOC
- *     BUILD CREATE FORM
+ *     INIT FORM
+ *         CREATE
+ *         EDIT
+ *         SHARED
+ *     FINISH BUILD
  */
 import { _cmbx } from '~util';
 import { _elems, _form, getSubFormLvl } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as aForm from './auth-form-main.js';
+/* ======================= INIT FORM ======================================== */
+/* --------------------------- CREATE --------------------------------------- */
+/** Init form when a new author|editor name is entered into the combobox. */
+export function initCreateForm(cnt, aType, v) {                     /*perm-log*/console.log('           >--init [%s][%s] Form - [%s]', cnt, aType, v);
+    const p = getCreateFormParams();                                /*dbug-log*///console.log('--params[%O]', p);
+    return _elems('initSubForm', [p])
+        .then(status => finishFormInit(status, p));
 
-const a = {};
+    function getCreateFormParams() {
+        const fLvl = getSubFormLvl('sub2');
+        return {
+            appendForm: form => $('#'+aType+cnt+'_f')[0].append(form),
+            combo: aType+cnt,
+            cnt: cnt,
+            entity: aType,
+            fLvl: fLvl,
+            onFormClose: resetOnCreateFormCancel.bind(null, fLvl, aType, cnt),
+            style: 'sml-sub-form',
+            submit: getSubmitFunc(fLvl),
+            vals: { 'LastName': (v === 'create' ? '' : v) }
+        };
+    }
+}
+function resetOnCreateFormCancel(fLvl, type, cnt) {                 /*dbug-log*///console.log('--resetOnCreateFormCancel [%s][%s][%s]', fLvl, type, cnt);
+    _elems('ifParentFormValidEnableSubmit', [fLvl]);
+    aForm.ifNoneStillSelectedEnableOtherType(type, getSubFormLvl('sub'), cnt);
+    _cmbx('resetCombobox', [type + cnt]);
+}
+/* ---------------------------- EDIT ---------------------------------------- */
+export function initEditForm(entity, id) {                          /*perm-log*/console.log('           >--Author EDIT Form id[%s]', id);
+   const p = getEditFormParams();                                   /*dbug-log*///console.log('   --params[%O]', p);
+    return _elems('initForm', [p])
+        .then(status => finishFormInit(status, p));
 
-function setLclAuthData(aType, cnt, fLvl) {
-    a.type = aType;
-    a.cnt = cnt;
-    a.fLvl = fLvl;
+    function getEditFormParams() {
+        const fLvl = getSubFormLvl('sub2');
+        return {
+            fLvl: 'top',
+            id: id,
+            style: 'sml-form',
+            submit: getSubmitFunc('top')
+        }
+    }
 }
-/* ======================== BUILD CREATE FORM =============================== */
-export function initAuthOrEdForm(cnt, aType, v) {                   /*perm-log*/console.log('           /--init [%s][%s] Form - [%s]', cnt, aType, v);
-    const fLvl = getSubFormLvl('sub2');
-    setLclAuthData(aType, cnt, fLvl);
-    return _elems('initSubForm', [getFormParams(fLvl, cnt, aType, v)])
-        .then(finishAuthFormInit);
+/* ------------------------ SHARED ------------------------------------------ */
+function getSubmitFunc(fLvl) {
+    return sForm.showSubmitModal.bind(null, fLvl);
 }
-function getFormParams(fLvl, cnt, aType, v) {
-    return {
-        appendForm: form => $('#'+a.type+a.cnt+'_f')[0].append(form),
-        entity: aType,
-        fLvl: fLvl,
-        onFormClose: resetOnCreateFormCancel,
-        combo: aType+cnt,
-        style: 'sml-sub-form',
-        submit: sForm.showSubmitModal.bind(null, fLvl),
-        vals: { 'LastName': (v === 'create' ? '' : v) }
-    };
-}
-function finishAuthFormInit(status) {                              /*dbug-log*///console.log('--appendAuthFormAndFinishBuild [%s][%s][%s]form[%O]', a.fLvl, a.type, a.cnt, form);
-    if (!status) { return; } //Error handled elsewhere
-    _elems('toggleSubmitBttn', [a.fLvl]);
+/* ======================= FINISH BUILD ===================================== */
+function finishFormInit(status, p) {                                /*dbug-log*///console.log('-finishFormInit status[%s] p[%O]', status, p);
+    if (!p.status) { return; } //Error handled elsewhere
+    _elems('toggleSubmitBttn', [p.fLvl]);
     $('#LastName_f input').focus();
-}
-function resetOnCreateFormCancel() {                                /*dbug-log*///console.log('--resetOnCreateFormCancel [%s][%s][%s]', a.fLvl, a.type, a.cnt);
-    _elems('ifParentFormValidEnableSubmit', [a.fLvl]);
-    aForm.ifNoneStillSelectedEnableOtherType(a.type, getSubFormLvl('sub'), a.cnt);
-    _cmbx('resetCombobox', [a.type+a.cnt]);
 }
