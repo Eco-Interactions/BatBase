@@ -81,3 +81,12 @@ export function initCreateForm(entity, name) {                      /*dbug-log*/
     };
     return funcs[entity](name);
 }
+export function initEditForm(entity, id) {                          /*dbug-log*///console.log('initEditForm entity[%s] id[%s]', entity, id);
+    const funcs = {
+        Author: author.initEditForm,
+        Citation: citation.initEditForm,
+        Publication: publication.initEditForm,
+        Publisher: publisher.initEditForm
+    };
+    return funcs[entity](id);
+}

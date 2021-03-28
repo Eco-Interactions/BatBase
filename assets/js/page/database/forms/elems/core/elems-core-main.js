@@ -17,7 +17,6 @@ export function initForm(p) {                                       /*dbug-log*/
 }
 export function initSubForm(p) {                                    /*dbug-log*///console.log('+--initSubForm params[%O]', p);
     if (ifFormInUse(p.fLvl)) { return alertInUse(p.fLvl); }
-    p.action = p.action ? p.action : 'create';
     return _state('addEntityFormState', [p])
         .then(fState => buildAndAppendForm(fState, p.appendForm))
         .then(() => finishFormBuild(p.initCombos, p.entity))

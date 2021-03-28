@@ -30,6 +30,7 @@ export function initTaxonSelectForm(role, gId) {                    /*perm-log*/
 function getTxnSelectParams(role, gId) {                            /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
     const groupId = role === 'Subject' ? gId : getObjectInitGroup(gId);
     return {
+        action: 'select',
         appendForm: form => $(`#${role}_f`).append(form),
         entity: role,
         fLvl: 'sub',

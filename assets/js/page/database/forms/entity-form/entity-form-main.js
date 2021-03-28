@@ -36,7 +36,7 @@ function getEntityModule(entity) {
 }
 export function clearEntityFormMemory(entity) {
     const map = {
-        'interaction': int.clearFormMemory
+        interaction: int.clearFormMemory
     };
     if (!map[entity]) { return; }
     map[entity]();
@@ -66,9 +66,6 @@ export function enableRoleTaxonFieldCombos() {
     return int.enableRoleTaxonFieldCombos(...arguments);
 }
 /** --------------------------- LOCATION ------------------------------------ */
-export function addMapToLocationEditForm() {
-    return loc.addMapToLocationEditForm(...arguments);
-}
 export function addMapToLocForm(elem, mapType) {
     return loc.addMapToLocForm(elem, mapType);
 }

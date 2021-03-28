@@ -32,11 +32,10 @@ function getCreateFormParams(v) {
     const createParams = {
         appendForm: form => $('#CitationTitle_f')[0].parentNode.after(form),
         combo: 'Publication',
-        fLvl: 'sub',
         style: 'med-sub-form',
         vals: { DisplayName: v === 'create' ? '' : v }
     };
-    return { ...createParams, ...getFormParams('sub') };
+    return { ...createParams, ...getFormParams('sub', 'create') };
 }
 function clearCitationFormData() {
     _cmbx('resetCombobox', ['CitationTitle']);
@@ -50,15 +49,16 @@ export function initEditForm(entity, id) {
 function getEditFormParams(id) {
     const editParams = {
         id: id,
-        fLvl: 'top',
-        style: 'med-form'
+        // style: 'med-form'
     };
-    return { ...editParams, ...getFormParams('top') };
+    return { ...editParams, ...getFormParams('top', 'edit') };
 }
 /* --------------------------- SHARED --------------------------------------- */
-function getFormParams(fLvl) {
+function getFormParams(fLvl, action) {
     return {
+        action: action,
         entity: 'Publication',
+        fLvl: fLvl,
         submit: sForm.showSubmitModal.bind(null, fLvl),
         initCombos: sForm.initCombos.bind(null, fLvl, 'Publication'),
     };

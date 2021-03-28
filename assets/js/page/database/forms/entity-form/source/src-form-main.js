@@ -25,10 +25,9 @@ export function selectExistingAuthsOrEds() {
     return entityForm.selectExistingAuthsOrEds(...arguments);
 }
 /* =========================== EDIT FORMS =================================== */
-/* ----------------- PUBLICATION|CITATION FINISH BUILD ---------------------- */
-/** Note: Only citation & publication forms use this. */
-export function finishEditFormBuild(entity) {                       /*dbug-log*///console.log('---finishEditFormBuild')
-    finishSrcFieldLoad(entity, 'top');
+
+export function initEditForm() {
+    return entityForm.initEditForm(...arguments);
 }
 /* *********************** MODULE INTERNAL-USAGE **************************** */
 /* ------------------- ENTITY FIELDS ---------------------------------------- */

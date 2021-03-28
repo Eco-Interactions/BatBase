@@ -32,11 +32,10 @@ function getCreateFormParams(v) {
     const cParams = {
         appendForm: form => $('#Publisher_f').append(form),
         combo: 'Publisher',
-        fLvl: getSubFormLvl('sub2'),
         style: 'sml-sub-form',
         vals: { DisplayName: v === 'create' ? '' : v }
     };
-    return { ...cParams, ...getFormParams(cParams.fLvl) };
+    return { ...cParams, ...getFormParams(getSubFormLvl('sub2'), 'create') };
 }
 /* ---------------------------- EDIT ---------------------------------------- */
 export function initEditForm(entity, id) {
@@ -47,13 +46,14 @@ export function initEditForm(entity, id) {
 function getEditFormParams(id) {
     const eParams = {
         id: id,
-        style: 'sml-form',
+        // style: 'sml-form',
     };
-    return { ...eParams, ...getFormParams('top') };
+    return { ...eParams, ...getFormParams('top', 'edit') };
 }
 /* ---------------------------- SHARED -------------------------------------- */
-function getFormParams(fLvl) {
+function getFormParams(fLvl, action) {
     return {
+        action: action,
         entity: 'Publisher',
         fLvl: fLvl,
         submit: sForm.showSubmitModal.bind(null, fLvl),

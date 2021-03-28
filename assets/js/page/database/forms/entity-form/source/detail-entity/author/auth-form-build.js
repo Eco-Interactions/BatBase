@@ -27,6 +27,7 @@ export function initCreateForm(cnt, aType, v) {                     /*perm-log*/
     function getCreateFormParams() {
         const fLvl = getSubFormLvl('sub2');
         return {
+            action: 'create',
             appendForm: form => $('#'+aType+cnt+'_f')[0].append(form),
             combo: aType+cnt,
             cnt: cnt,
@@ -53,9 +54,10 @@ export function initEditForm(entity, id) {                          /*perm-log*/
     function getEditFormParams() {
         const fLvl = getSubFormLvl('sub2');
         return {
+            action: 'edit',
             fLvl: 'top',
             id: id,
-            style: 'sml-form',
+            // style: 'sml-form',
             submit: getSubmitFunc('top')
         }
     }

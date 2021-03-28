@@ -43,7 +43,6 @@ export function initCreateForm(v) {                                 /*perm-log*/
 function getCreateFormParams(v) {
     const createParams = {
         appendForm: form => $('#CitationTitle_f')[0].parentNode.after(form),
-        fLvl: 'sub',
         onFormClose: enablePubField,
         combo: 'CitationTitle',
         style: 'med-sub-form',
@@ -52,7 +51,7 @@ function getCreateFormParams(v) {
             DisplayName: (v === 'create' ? '' : v),
         }
     };
-    return { ...createParams, ...getFormParams('sub') };
+    return { ...createParams, ...getFormParams('sub', 'create') };
 }
 /* ______________________ ON CLOSE __________________________________________ */
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
@@ -70,15 +69,16 @@ export function initEditForm(id) {                                  /*perm-log*/
 function getEditFormParams(id) {
     const editParams = {
         id: id,
-        fLvl: 'top',
-        style: 'med-form'
+        // style: 'med-form'
     };
-    return { ...editParams, ...getFormParams('top') };
+    return { ...editParams, ...getFormParams('top', 'edit') };
 }
 /* --------------------------- SHARED --------------------------------------- */
-function getFormParams(fLvl) {
+function getFormParams(fLvl, action) {
     return {
+        action: action,
         entity: 'Citation',
+        fLvl: fLvl,
         initCombos: sForm.initCombos.bind(null, fLvl, 'Citation'),
         submit: sForm.showSubmitModal.bind(null, fLvl),
     }
