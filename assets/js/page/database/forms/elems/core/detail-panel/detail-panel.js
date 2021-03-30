@@ -28,14 +28,14 @@ import { _state } from '~form';
 
 /* ===================== INIT DETAIL PANEL ================================== */
 export function getDetailPanelElems(entity, id, action) {                       console.log("getDetailPanelElems action[%s] entity[%s] id?[%s]", action, entity, id);
-    const cntnr = _el('getElem', ['div', { 'id': 'form-details' }]);
+    const cntnr = _el('getElem', ['div', { id: 'form-details', class: _u('lcfirst', [entity]) }]);
     $(cntnr).append(buildPanelHeader(entity));
     $(cntnr).append(getDetailElems(entity, action));
     $(cntnr).append(getEntityIdFooter(id));
     return cntnr;
 }
 function buildPanelHeader(entity) {
-    const txt = _u('ucfirst', [entity]) + ' Details';
+    const txt = entity + ' Details';
     return _el('getElem', ['h3', { 'text':  txt}]);
 }
 function getEntityIdFooter(id) {
@@ -43,7 +43,7 @@ function getEntityIdFooter(id) {
     return _el('getElem', ['p', { id: 'ent-id',  'text': intIdStr }]);
 }
 function getDetailElems(entity, action) {
-    const builder = action === 'edit' && entity !== 'interaction' ?
+    const builder = action === 'edit' && entity !== 'Interaction' ?
         getSubEntityEditDetailElems : getInteractionDetailElems;
     return builder(entity);
 }
@@ -76,10 +76,12 @@ function getSubEntityEditDetailElems(entity) {                                  
 }
 function getCountElemForEachReferencedEntityType(entity) {
     const referencedEntities = {
-        'author': [ 'cit', 'int' ],     'citation': [ 'int' ],
-        'location': [ 'int' ],          'publication': ['cit', 'int' ],
-        'taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],
-        'publisher': [ 'pub', 'int']
+        Author: [ 'cit', 'int' ],
+        Citation: [ 'int' ],
+        Location: [ 'int' ],
+        Publication: ['cit', 'int' ],
+        Publisher: [ 'pub', 'int'],
+        Taxon: [ 'ord', 'fam', 'gen', 'spc', 'int' ],
     };
     return referencedEntities[entity].map(initCountDiv);
 }
@@ -106,9 +108,12 @@ function getEntityNameElem(ent) {
 /* ================== EDIT FORM RELATIONAL DETAILS ========================== */
 export function fillRelationalDataInPanel(entity, rcrd) {
     const map = {
-        'author': fillSrcDetailData,        'citation': fillSrcDetailData,
-        'location': fillLocDetailData,      'publication': fillSrcDetailData,
-        'publisher': fillSrcDetailData,     'taxon': fillTxnDetailData
+        Author: fillSrcDetailData,
+        Citation: fillSrcDetailData,
+        Location: fillLocDetailData,
+        Publication: fillSrcDetailData,
+        Publisher: fillSrcDetailData,
+        Taxon: fillTxnDetailData
     };
     map[entity](entity, rcrd);
 }
@@ -124,13 +129,13 @@ function fillSrcDetailData(entity, srcRcrd) {                                   
     addCntToEditFormDetailPanel(refObj);
 
     function addAddtionalRefs() {
-        if (entity === 'citation') { return; }
-        const ref = entity === 'publisher' ? 'pub' : 'cit';
+        if (entity === 'Citation') { return; }
+        const ref = entity === 'Publisher' ? 'pub' : 'cit';
         refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
     }
 }
 function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
-    return entity === 'citation' ?
+    return entity === 'Citation' ?
         rcrd.interactions.length : getAllSourceInts(rcrd);
 }
 function getAllSourceInts(rcrd) {
@@ -320,7 +325,8 @@ export function updateSrcDetails(entity) {                                      
             data.Abstract = cit.abstract;
         }
         function getSrcType(rcrd, entity) {
-            return rcrd[entity+'Type'] ? rcrd[entity+'Type'].displayName : false;
+            const lc = _u('lcfirst', [entity]);
+            return rcrd[lc+'Type'] ? rcrd[lc+'Type'].displayName : false;
         }
     } /* End buildSourceData */
     /** Returns a comma seperated sting of all authors attributed to the source. */

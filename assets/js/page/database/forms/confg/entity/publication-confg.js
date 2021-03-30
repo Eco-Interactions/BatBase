@@ -6,13 +6,13 @@ export default function(entity) {
         core: 'source',
         fields: getPublicationFieldConfg(),
         name: entity,
-        style: 'med-form',
+        style: 'lrg-form',
         type: null,  //Holds type confg once type selected
         types: getPublicationTypeConfg(),
         views: { //fields added will be built and displayed.
             all: [  //will be merged with type.views  //merge here rather than later?
                 ['Title', 'Year', 'PublicationType'],
-                [ 'Description', { fields: ['Doi', 'Website'] }],
+                [ { fields: ['Doi', 'Website'] }, 'Description'],
             ],
             simple: [
                 ['Title', 'Year', 'PublicationType']
@@ -28,7 +28,7 @@ function getPublicationFieldConfg() {
             }
         },
         PublicationType: {
-            class: 'no-grow',
+            class: 'no-grow mx-w-20',
             entity: 'PublicationType',
             label: 'Type',
             name: 'PublicationType',

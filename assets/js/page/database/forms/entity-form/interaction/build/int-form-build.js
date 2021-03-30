@@ -30,7 +30,7 @@ export function initCreateForm(entity) {                            /*perm-log*/
         .then(finishInteractionFormBuild);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
-export function initEditForm(entity) {                              /*perm-log*/console.log('   //Building EDIT Interaction Form');
+export function initEditForm(id) {                                  /*perm-log*/console.log('   //Building EDIT Interaction Form id[%s]', id);
     if (_state('getStateProp')) { return; } //Form is already opened.
     return _elems('initForm', [getIntFormParams('edit', id)])
         .then(finishInteractionFormBuild);

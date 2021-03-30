@@ -51,11 +51,12 @@ function formSubmitError() {
 }
 /* ----------------- ON SUBMIT SUCCESS ---------------------------- */
 function onSuccess(fLvl, data, textStatus, jqXHR) {                             _u('logAjaxData', [data, arguments]);
+    _state('setFormState', [fLvl, 'submitted', true]);
     _db('afterServerDataUpdateSyncLocalDatabase', [data.results])
     .then(data => onDataSynced(fLvl, data));
 }
 function onDataSynced(fLvl, data) {                                 /*temp-log*/console.log('       --onDataSynced [%s][%O]', fLvl, data);
-    if (!_state('getFormState', [fLvl, 'submit'])) { return; } //form closed.
+    if (!_state('getFormState', [fLvl, 'submitted'])) { return; } //form closed.
     toggleWaitOverlay(false);
     if (data.fails) { return val.errUpdatingData('dataSyncFailures', data.fails); }
     if (noDataChanges()) { return showNoChangesMessage(); }

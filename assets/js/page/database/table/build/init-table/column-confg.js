@@ -186,7 +186,7 @@ function getPencilHtml(id, entity) {
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
     $('#search-tbl').on('click', '#edit'+entity+id,
-        _forms.bind(null, 'edit', [id, _u('lcfirst', [entity])]));
+        _forms.bind(null, 'edit', [entity, id]));
     return editPencil;
 }
 /** -------- Map Column ---------- */

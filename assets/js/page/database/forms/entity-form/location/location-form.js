@@ -63,7 +63,7 @@ function scrollToLocFormWindow() {
     $('#top-form')[0].scrollTo(0, 150);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
-export function initEditForm(entity, id) {                          /*perm-log*/console.log('           >--Author EDIT Form id[%s]', id);
+export function initEditForm(id) {                                  /*perm-log*/console.log('           >--Author EDIT Form id[%s]', id);
    const p = getEditFormParams(id);                                 /*dbug-log*///console.log('   --params[%O]', p);
     return _elems('initForm', [p])
         .then(status => finishFormInit(status, p))

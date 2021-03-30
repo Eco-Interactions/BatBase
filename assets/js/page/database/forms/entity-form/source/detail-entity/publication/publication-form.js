@@ -42,7 +42,7 @@ function clearCitationFormData() {
     _panel('clearFieldDetails', ['CitationTitle']);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
-export function initEditForm(entity, id) {
+export function initEditForm(id) {
     return _elems('initForm', [getEditFormParams(id)])
         .then(finishPubFormInit);
 }

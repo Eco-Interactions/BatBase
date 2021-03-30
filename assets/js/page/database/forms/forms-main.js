@@ -40,21 +40,21 @@ export function clearFormMemory() {
     state.clearState();
 }
 /* ----------------- ENTITY FORMS ------------------------------------------- */
-export function _form(funcName, params = []) {                                  //console.log('entity func = %O', arguments);//entity form interface
+export function _form(funcName, params = []) {                      /*dbug-log*///console.log('entity func = %O', arguments);//entity form interface
     return moduleMethod(funcName, form, 'form', getParams(params));
 }
 export function create(entity, name) {
     return form.createEntity(entity, name);
 }
 export function edit(entity, id) {
-    return initNewDataForm(entity, id, form.editEntity);
+    return initDataEntryForm(entity, id, form.editEntity);
 }
 export function initNewDataForm() {
     return initDataEntryForm('Interaction', null, create);
 }
-function initDataEntryForm(entity, val, initFunc) {
+function initDataEntryForm(entity, val, initFunc) {                 /*dbug-log*/console.log('--initDataEntryForm entity[%s] val[%s] initFunc[%O]', entity, val, initFunc);
     _ui('showPopupMsg');
-    return initFunc(entity)
+    return initFunc(entity, val)
         .then(() => _ui('hidePopupMsg'));
 }
 export function selectIntLoc(id) {

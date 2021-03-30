@@ -38,7 +38,7 @@ function getCreateFormParams(v) {
     return { ...cParams, ...getFormParams(getSubFormLvl('sub2'), 'create') };
 }
 /* ---------------------------- EDIT ---------------------------------------- */
-export function initEditForm(entity, id) {
+export function initEditForm(id) {
    const p = getEditFormParams(id);                                 /*dbug-log*///console.log('   --params[%O]', p);
     return _elems('initForm', [p])
         .then(status => finishFormInit(p, status));

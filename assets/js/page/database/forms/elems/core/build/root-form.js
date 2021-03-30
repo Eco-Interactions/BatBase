@@ -31,7 +31,7 @@ function assembleFormAndPanel(fState, form) {                        /*dbug-log*
 }
 /* --------------------------- PANEL ---------------------------------------- */
 function getPanel(f) {
-    const id = f.editing ? f.editing : null;
+    const id = f.editing ? f.editing.core : null;
     return _panel('getDetailPanelElems', [f.name, id, f.action]);
 }
 /* ----------------------- POPUP-EXIT ROW ----------------------------------- */

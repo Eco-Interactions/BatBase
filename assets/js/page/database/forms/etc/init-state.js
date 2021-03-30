@@ -111,15 +111,26 @@ export function addEntityFormState(fS, p) {                         /*dbug-log*/
         .then(() => initEntityFormConfg(fS, p));
 }
 function getBaseFormState(p) {
-    return {
-        action: p.action ? p.action : 'create',
-        combo: p.combo,
-        editing: p.id ? { core: p.id, detail: null } : false,
-        initCombos: p.initCombos,
+    const base = {
+        action: p.action,
         name: p.entity,
-        onFormClose: p.onFormClose,
-        submit: p.submit
     };
+    return { ...base, ...copyParamsData(p) };
+}
+function copyParamsData(p) {
+    const data = {};
+    copyToState(data, p);
+    if (p.id) { data.editing = { core: p.id, detail: null }; }
+    return data;
+}
+function copyToState(data, p) {
+    const copy = ['combo', 'initCombos', 'onFormClose', 'submit'];
+    copy.forEach(addStateData);
+
+    function addStateData(prop) {
+        if (!p.hasOwnProperty(prop)) { return; }
+        data[prop] = p[prop];
+    }
 }
 function initEntityState(fS, entity, fLvl, vals = {}) {
     const map = {

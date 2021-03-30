@@ -29,7 +29,7 @@ function hideSearchFormPopup() {
  */
 function refocusTableIfFormWasSubmitted() {
     const confg = _state('getFormState', ['top']);                  /*dbug-log*///console.log('refocusTableIfFormWasSubmitted');
-    if (!confg.submit) { return; }
+    if (!confg.submitted) { return; }
     if (confg.name === 'Interaction') { return refocusAndShowUpdates(); }
     _table('reloadTableWithCurrentFilters');
 }
