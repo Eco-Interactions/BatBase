@@ -12,12 +12,10 @@
  */
 import { _alert, executeMethod } from '~util';
 import { _map, _ui } from '~db';
-import * as confg from './confg/confg-main.js';
-import * as form from './entity-form/entity-form-main.js';
+import * as form from './entity/entity-form-main.js';
 import * as state from './etc/form-state-main.js';
 import * as submit from './submit/submit-main.js';
 import * as elems from './elems/elems-main.js';
-import editEntity from './edit/edit-forms-main.js';
 
 export function alertFormIssue() {
     if (!state.getFormState()) { return; } //form closed
@@ -28,7 +26,7 @@ function moduleMethod(funcName, mod, modName, params) {
     return executeMethod(funcName, mod, modName, 'forms-main', params);
 }
 export function _confg(funcName, params = []) {
-    return moduleMethod(funcName, confg, 'confg', params);
+    return form._confg(funcName, params);
 }
 /** ------------------- FORM STATE / MEMORY --------------------------------- */
 export function _state(funcName, params = []) {

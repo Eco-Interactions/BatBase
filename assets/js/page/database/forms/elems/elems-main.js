@@ -72,7 +72,7 @@ export function toggleFormStatusMsg() {
 /* ============================== FIELDS ==================================== */
 /* ------------------------- COMPLETE FIELDS -------------------------------- */
 export function getFormRows(entity, fLvl) {
-    return row.buildFormRows(entity, fLvl);
+    return row.getFormRows(entity, fLvl);
 }
 export function getFormFieldRows() {
     return row.getFormFieldRows(...arguments);

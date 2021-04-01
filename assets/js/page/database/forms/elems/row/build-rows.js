@@ -18,7 +18,7 @@ let entity;
  * NOTE: FIRST METHOD IN INTERACTION FORM FIELD-ROW BUILD CHAIN.
  */
 /** @return {ary} Rows for each field in the entity field obj. */
-export function getFormFieldRows(viewConfg, ent) {                       /*dbug-log*///console.log("+--getFormFieldRows [%O]",viewConfg);
+export function getFormFieldRows(viewConfg, ent) {                  /*dbug-log*/console.log("+--getFormFieldRows [%O]",viewConfg);
     entity = ent;
     const rows = [];
     return handleRowBuildChain(viewConfg)

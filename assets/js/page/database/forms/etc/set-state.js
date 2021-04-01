@@ -43,18 +43,17 @@ function toggleRequiredLabelClass(fState, field, val, prop) {
     }
 }
 /* ___________________________ TAXON ________________________________________ */
-export function setTaxonGroupState(fS, fLvl, vals) {
-    const group = getGroupEntity(fS, fLvl, vals);
-    const sGroupId = getSubGroupId(fS, vals, group);                /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
-    setGroupState(fS.records.taxon, fS.forms[fLvl], group);
-    setSubGroupState(fS, fS.forms[fLvl], group.subGroups, sGroupId);
+export function setTaxonGroupState(rcrds, f) {
+    const group = getGroupEntity(rcrds, f);
+    const sGroupId = getSubGroupId(rcrds, f, group);                /*dbug-log*/console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
+    setGroupState(rcrds.taxon, f, group);
+    setSubGroupState(f.fields, group.subGroups, sGroupId);
 }
-function getGroupEntity(fS, fLvl, vals) {
-    return vals.Group ? fS.records.group[vals.Group] :
-        fS.forms[fLvl].fields.Group.misc.rcrd;
+function getGroupEntity(rcrds, f) {
+    return f.vals.Group ? rcrds.group[f.vals.Group] : f.fields.Group.misc.rcrd;
 }
-function getSubGroupId(fS, vals, group) {
-    if (vals['Sub-Group']) { return fS.records.taxon[vals['Sub-Group']].group.subGroup.id; }
+function getSubGroupId(rcrds, f, group) {
+    if (f.vals['Sub-Group']) { return rcrds.taxon[f.vals['Sub-Group']].group.subGroup.id; }
     return Object.keys(group.subGroups)[0];
 }
 /** [setGroupState description] */
@@ -67,14 +66,14 @@ function setGroupState(taxa, fState, group) {                       /*dbug-log*/
     };                                                              /*dbug-log*///console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
 }
 /** [setSubGroupState description] */
-function setSubGroupState(fS, fState, subGroups, sGroupId) {
-    if (!fState.fields['Sub-Group']) { fState.fields['Sub-Group'] = {}; }
+function setSubGroupState(fields, subGroups, sGroupId) {
+    if (!fields['Sub-Group']) { fields['Sub-Group'] = {}; }
     const subGroup = subGroups[sGroupId];
-    fState.fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
-    fState.fields['Sub-Group'].value = subGroup.taxon;              /*dbug-log*///console.log('--setSubGroupState fieldClass?[%O] subGroup[%O] subGroups[%O]', fState.fields['Sub-Group'].class, subGroup, subGroups);
-    fState.fields['Sub-Group'].misc = {
+    fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
+    fields['Sub-Group'].value = subGroup.taxon;                     /*dbug-log*/console.log('--setSubGroupState fieldClass?[%O] subGroup[%O] subGroups[%O]', fields['Sub-Group'].class, subGroup, subGroups);
+    fields['Sub-Group'].misc = {
         rcrd: subGroup,
         subRanks: subGroup.subRanks,
-        taxon: fS.records.taxon[subGroup.taxon]
+        taxon: rcrds.taxon[subGroup.taxon]
     };
 }

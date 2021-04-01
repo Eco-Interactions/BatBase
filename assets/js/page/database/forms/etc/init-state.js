@@ -17,14 +17,15 @@
  *
  */
 import { _db, _u } from '~util';
-import { _confg, _state, alertFormIssue } from '~form';
+import { _confg, _form, _state, alertFormIssue } from '~form';
 /* ========================= INIT FORM-STATE ================================ */
 /* ----------------------- STATE CORE --------------------------------------- */
 /**
  * [initFormState description]
  * @param  {obj} p              Root-form params
- * @param  {obj} p.action       Defaults to 'create'
- * @param  {str} *p.entity      Entity class
+ * @param  {str} p.action       Defaults to 'create'
+ *
+ * @param  {str} *p.name      Entity class
  * @param  {fnc} p.initCombos
  * @param  {fnc} p.onFormClose
  * @param  {fnc} p.submit
@@ -32,13 +33,12 @@ import { _confg, _state, alertFormIssue } from '~form';
  *
  * @return {obj}     Root form-state
  */
-export function initFormState(p) {                                  /*dbug-log*///console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.entity, p.id, (p.action || 'create'));
-    const fS = getMainStateObj(p.entity);
-    const dataKeys = getDataKeysForEntityRootForm(p.entity, p.action);
-    p.fLvl = 'top';
-    return _db('getData', [dataKeys])
-        .then(data => fS.records = data)
-        .then(() => addEntityFormState(fS, p))
+export function initFormState(p) {                                  /*dbug-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, (p.action || 'create'));
+    const fS = getMainStateObj(p.name);
+    p.confg = getEntityBaseConfg(p);
+    return _db('getData', [p.confg.data[p.action]])
+        .then(data => addRecordData(fS, data, p))
+        .then(() => buildNewFormState(fS, p))
         .then(() => fS);
 }
 function getMainStateObj(entity) {
@@ -47,35 +47,34 @@ function getMainStateObj(entity) {
         formLevels: ['top', 'sub', 'sub2'],
     };
 }
-/* ----------------------- FORM DATA ---------------------------------------- */
-function getDataKeysForEntityRootForm(entity, action = 'create') {
-    const map = {
-        'author': {
-            'edit': ['source', 'author']
-        },
-        'citation': {
-            'edit': ['source', 'citation', 'author', 'publisher']
-        },
-        'interaction': {
-            'create': ['author', 'citation', 'group', 'interactionType', 'location', 'publication',
-                'publisher', 'rankNames', 'source', 'tag', 'taxon', 'validInteraction'],
-            'edit': ['author', 'citation', 'group', 'interaction', 'interactionType', 'location',
-                'publication', 'publisher', 'rankNames', 'source', 'tag', 'taxon', 'validInteraction'],
-        },
-        'location': {
-            'edit': ['location']
-        },
-        'publication': {
-            'edit': ['source', 'publication']
-        },
-        'publisher': {
-            'edit': ['source', 'publisher']
-        },
-        'taxon': {
-            'edit': ['group', 'rankNames', 'taxon']
-        }
-    }
-    return map[_u('lcfirst', [entity])][action];
+function addRecordData(fS, data, p) {
+    fS.records = data;
+    delete p.confg.data;
+}
+/* ======================= BUILD STATE ====================================== */
+/* ----------------------- INIT --------------------------------------------- */
+export function buildNewFormState(fS, p) {
+    fS.forms[p.name] = p.group;
+    fS.forms[p.group] = getBaseFormState(fS, p);
+    return addEntityFormState(fS, fS.forms[p.group]);
+}
+function getBaseFormState(fS, p) {
+    if (p.id) { data.editing = { core: p.id, detail: null }; }
+    p.vals = p.id ? getEntityVals(fS, p) : (p.vals ? p.vals : {});
+    return { ...p, ...getEntityBaseConfg(p) };
+}
+function getEntityBaseConfg(p) {
+    if (!p.confg) { return _confg('getBaseConfg', [p.name, p.type]); }
+    const confg = { ...p.confg };
+    delete p.confg;
+    return confg;
+}
+/* ------------------------ EDIT FORM VALUES -------------------------------- */
+function getEntityVals(fS, p) {
+    return _form('getEditFieldValues', [fS.records, p.name, p.id, p.core]);
+}
+function getEntityData(data, name, id, cName) {
+    const formEntity = cName ? cName : name
 }
 /* ----------------------- ENTITY FORM -------------------------------------- */
 /**
@@ -101,38 +100,13 @@ function getDataKeysForEntityRootForm(entity, action = 'create') {
  * > Location forms:
  *         geoJson - geoJson entity for this location, if it exists.
  * > Taxon forms:
- *         taxonData - added to fState.forms (see props @initTaxonParams)
+ *     todo...
  */
-export function addEntityFormState(fS, p) {                         /*dbug-log*///console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", p.entity, p, fS);
-    fS.forms[p.entity] = p.fLvl;
-    fS.forms[p.fLvl] = getBaseFormState(p);
-    p.vals = p.vals ? p.vals : {};
-    return initEntityState(fS, p.entity, p.fLvl, p.vals)
-        .then(() => initEntityFormConfg(fS, p));
+function addEntityFormState(fS, f) {                                /*dbug-log*/console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, f, fS);
+    return initEntityState(fS, f)
+        .then(() => finishEntityFormStateInit(fS, f));
 }
-function getBaseFormState(p) {
-    const base = {
-        action: p.action,
-        name: p.entity,
-    };
-    return { ...base, ...copyParamsData(p) };
-}
-function copyParamsData(p) {
-    const data = {};
-    copyToState(data, p);
-    if (p.id) { data.editing = { core: p.id, detail: null }; }
-    return data;
-}
-function copyToState(data, p) {
-    const copy = ['combo', 'initCombos', 'onFormClose', 'submit'];
-    copy.forEach(addStateData);
-
-    function addStateData(prop) {
-        if (!p.hasOwnProperty(prop)) { return; }
-        data[prop] = p[prop];
-    }
-}
-function initEntityState(fS, entity, fLvl, vals = {}) {
+function initEntityState(fS, f) {
     const map = {
         Citation: storeSourceData,
         Publication: storeSourceData,
@@ -140,34 +114,35 @@ function initEntityState(fS, entity, fLvl, vals = {}) {
         Object: initTaxonState,
         Taxon: initTaxonState
     };
-    fS.forms[fLvl].fields = {};
-    return Promise.resolve(map[entity] ? map[entity](fS, fLvl, vals) : null);
+    if (!map[f.name]) { return Promise.resolve(); }
+    return Promise.resolve(map[f.name](fS.records, f));
 }
-function initEntityFormConfg(fS, p) {                               /*dbug-log*///console.log("    --initEntityFormConfg entity[%s] params[%O] forms[%O]", p.entity, p, fS);
-    p.vals = { ...p.vals, ..._state('getFieldValues', [p.fLvl]) };
-    const confg = _confg('getInitFormConfg', [p.entity, p.fLvl, p.action, p.vals]);
-    _confg('mergeIntoFormConfg', [confg, fS.forms[p.fLvl]]);
-    fS.forms[p.fLvl] = confg;                                       /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', p.entity, confg);
-    return confg;
+function finishEntityFormStateInit(fS, f) {                         /*dbug-log*/console.log("    --finishEntityFormStateInit form[%O]", f);
+    f.vals = { ...f.vals, ..._state('getFieldValues', [f.group]) };
+    const confg = _confg('buildInitConfg', [f]);
+    _confg('mergeIntoFormConfg', [confg, f]);
+    f = confg;                                                      /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, f);
+    delete f.confg;
+    return f;
 }
 /* ___________________________ TAXON ________________________________________ */
-export function initTaxonState(fS, fLvl, vals) {                    /*dbug-log*///console.log('   --initTaxonState fLvl[%s] vals[%O] fS[%O]', fLvl, vals, fS);
-    return _state('setTaxonGroupState', [fS, fLvl, vals]);
+export function initTaxonState(rcrds, f) {                          /*dbug-log*/console.log('   --initTaxonState rcrds[%O] f[%O]', rcrds, f);
+    return _state('setTaxonGroupState', [rcrds, f]);
 }
 /* ____________________________ SOURCE ______________________________________ */
-function storeSourceData(fS, fLvl, vals) {                          /*dbug-log*///console.log('--storeSourceData [%s] vals?[%O] fS[%O]', fLvl, vals, fS);
-    if (fS.forms[fLvl].name !== 'Citation') { return; }
-    if (!fS.forms[fLvl].misc) { fS.forms[fLvl].misc = {}; }
-    initParentSourceFieldObj(fS.forms[fLvl].fields);
-    addPubDataToParentSourceField(fS, fLvl, vals.ParentSource);
+function storeSourceData(rcrds, f) {                                /*dbug-log*/console.log('--storeSourceData rcrds[%O] f[%O]', rcrds, f);
+    if (f.name !== 'Citation') { return; }
+    if (!f.misc) { f.misc = {}; }
+    initParentSourceFieldObj(f.fields);
+    addPubDataToParentSourceField(rcrds, f, vals.ParentSource);
 }
 function initParentSourceFieldObj(fields) {
-    fields['ParentSource'] = {};
-    fields['ParentSource'].misc = {};
+    fields.ParentSource = {};
+    fields.ParentSource.misc = {};
 }
-function addPubDataToParentSourceField(fS, fLvl, pId) {
-    const pSrc = fS.records.source[pId];                            /*dbug-log*///console.log('--addPubDataToParentSourceField [%s][%O]', pId, pSrc);
-    const pub = fS.records.publication[pSrc.publication];
-    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*///console.log('--pubData[%O]', data);
-    fS.forms[fLvl].fields.ParentSource.misc = data;
+function addPubDataToParentSourceField(rcrds, f, pId) {
+    const pSrc = rcrds.source[pId];                                 /*dbug-log*/console.log('--addPubDataToParentSourceField [%s][%O]', pId, pSrc);
+    const pub = rcrds.publication[pSrc.publication];
+    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*/console.log('--pubData[%O]', data);
+    f.fields.ParentSource.misc = data;
 }

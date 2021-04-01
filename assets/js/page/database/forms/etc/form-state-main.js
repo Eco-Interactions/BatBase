@@ -39,8 +39,8 @@ function storeAndReturnState(coreState) {
     fS = coreState;
     return coreState;
 }
-export function addEntityFormState() {
-    return init.addEntityFormState(fS, ...arguments);
+export function buildNewFormState() {
+    return init.buildNewFormState(fS, ...arguments);
 }
 export function initTaxonState() {
     return init.initTaxonState(fS, ...arguments);

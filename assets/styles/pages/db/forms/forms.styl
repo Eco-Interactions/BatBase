@@ -37,12 +37,16 @@
     // overflow-x: hidden
     font-size: .9em
 
+.form-popup>div.flex-row
+    height: 95%
+
 /* --- Large (Interaction) Forms --- */
 .form-popup.lrg-form
     padding: 15px
     min-width: 1200px
     width: 88vw
     max-width: 100em
+    min-width: 1200px
     height 88vh
     max-height 88em
     // max-width 93vw
@@ -53,13 +57,13 @@
     padding: 15px
     height 88vh
     max-height: 88vh
+    width 77em
+    min-width: 1000px
     // width 1212px
-    // min-width: 1200px
 
 /* --- SMALL FORM --- */
 .form-popup.sml-form
     padding: 15px
-    // width 788px
     height 55vh
     max-height: 55vh
     min-width: unset
@@ -69,25 +73,27 @@
     justify-content: space-between
     display: flex
 
-div[id$="-help"] //Form tutorial/guide buttons
+// div[id$="-help"] //Form tutorial/guide buttons
     // width: 100%
 /* ------------------------ FORM CONTAINER ----------------------------------- */
 #top-form
     padding: 5px 0 0 5px
+    height: 100%
+    width: -webkit-fill-available
     // overflow-x: hidden
 
-#top-form.lrg-form
-    width: 66em
+// #top-form.lrg-form
+    // width: 66em
 /* --- Medium Forms --- */
-#top-form.med-form
-    height 77vh
+// #top-form.med-form
+//     height 77vh
     // flex 1 0 909px
     // width 909px
 
 /* --- SMALL FORM --- */
-#top-form.sml-form
-    height 55vh
-    flex 0 0 464px
+// #top-form.sml-form
+//     height 55vh
+//     flex 0 0 464px
 /* -------------------------- HEADER ---------------------------------------- */
 #top-hdr
     font-size: 1.3em
