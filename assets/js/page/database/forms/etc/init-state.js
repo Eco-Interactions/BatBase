@@ -33,7 +33,7 @@ import { _confg, _form, _state, alertFormIssue } from '~form';
  *
  * @return {obj}     Root form-state
  */
-export function initFormState(p) {                                  /*dbug-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, (p.action || 'create'));
+export function initFormState(p) {                                  /*dbug-log*///console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, (p.action || 'create'));
     const fS = getMainStateObj(p.name);
     p.confg = getEntityBaseConfg(p);
     return _db('getData', [p.confg.data[p.action]])
@@ -49,7 +49,6 @@ function getMainStateObj(entity) {
 }
 function addRecordData(fS, data, p) {
     fS.records = data;
-    delete p.confg.data;
 }
 /* ======================= BUILD STATE ====================================== */
 /* ----------------------- INIT --------------------------------------------- */
@@ -65,6 +64,7 @@ function getBaseFormState(fS, p) {
 }
 function getEntityBaseConfg(p) {
     if (!p.confg) { return _confg('getBaseConfg', [p.name, p.type]); }
+    delete p.confg.data;
     const confg = { ...p.confg };
     delete p.confg;
     return confg;
@@ -102,7 +102,7 @@ function getEntityData(data, name, id, cName) {
  * > Taxon forms:
  *     todo...
  */
-function addEntityFormState(fS, f) {                                /*dbug-log*/console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, f, fS);
+function addEntityFormState(fS, f) {                                /*dbug-log*///console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, f, fS);
     return initEntityState(fS, f)
         .then(() => finishEntityFormStateInit(fS, f));
 }
@@ -117,32 +117,32 @@ function initEntityState(fS, f) {
     if (!map[f.name]) { return Promise.resolve(); }
     return Promise.resolve(map[f.name](fS.records, f));
 }
-function finishEntityFormStateInit(fS, f) {                         /*dbug-log*/console.log("    --finishEntityFormStateInit form[%O]", f);
+function finishEntityFormStateInit(fS, f) {                         /*dbug-log*///console.log("    --finishEntityFormStateInit form[%O]", f);
     f.vals = { ...f.vals, ..._state('getFieldValues', [f.group]) };
     const confg = _confg('buildInitConfg', [f]);
+    delete f.vals;
     _confg('mergeIntoFormConfg', [confg, f]);
     f = confg;                                                      /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, f);
-    delete f.confg;
     return f;
 }
 /* ___________________________ TAXON ________________________________________ */
-export function initTaxonState(rcrds, f) {                          /*dbug-log*/console.log('   --initTaxonState rcrds[%O] f[%O]', rcrds, f);
-    return _state('setTaxonGroupState', [rcrds, f]);
+export function initTaxonState(rcrds, f) {                          /*dbug-log*///console.log('   --initTaxonState rcrds[%O] f[%O]', rcrds, f);
+    _state('setTaxonGroupState', [rcrds, f]);
 }
 /* ____________________________ SOURCE ______________________________________ */
-function storeSourceData(rcrds, f) {                                /*dbug-log*/console.log('--storeSourceData rcrds[%O] f[%O]', rcrds, f);
+function storeSourceData(rcrds, f) {                                /*dbug-log*///console.log('--storeSourceData rcrds[%O] f[%O]', rcrds, f);
     if (f.name !== 'Citation') { return; }
     if (!f.misc) { f.misc = {}; }
     initParentSourceFieldObj(f.fields);
-    addPubDataToParentSourceField(rcrds, f, vals.ParentSource);
+    addPubDataToParentSourceField(rcrds, f, f.vals.ParentSource);
 }
 function initParentSourceFieldObj(fields) {
     fields.ParentSource = {};
     fields.ParentSource.misc = {};
 }
 function addPubDataToParentSourceField(rcrds, f, pId) {
-    const pSrc = rcrds.source[pId];                                 /*dbug-log*/console.log('--addPubDataToParentSourceField [%s][%O]', pId, pSrc);
+    const pSrc = rcrds.source[pId];                                 /*dbug-log*///console.log('--addPubDataToParentSourceField [%s][%O]', pId, pSrc);
     const pub = rcrds.publication[pSrc.publication];
-    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*/console.log('--pubData[%O]', data);
+    const data = { pub: pub, pubType: pub.publicationType, src: pSrc };/*dbug-log*///console.log('--pubData[%O]', data);
     f.fields.ParentSource.misc = data;
 }

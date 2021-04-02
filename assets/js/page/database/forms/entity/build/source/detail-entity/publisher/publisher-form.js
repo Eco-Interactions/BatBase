@@ -46,7 +46,7 @@ export function initEditForm(id) {
 function getEditFormParams(id) {
     const eParams = {
         id: id,
-        // style: 'sml-form',
+        style: 'sml-form',
     };
     return { ...eParams, ...getFormParams('top', 'edit') };
 }

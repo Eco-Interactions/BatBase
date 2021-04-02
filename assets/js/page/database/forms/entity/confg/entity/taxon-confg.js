@@ -29,7 +29,6 @@ export default function(entity) {
             }
         },
         name: entity,
-        style: 'sml-form',
         views: {
             all: [
                 ['Name']

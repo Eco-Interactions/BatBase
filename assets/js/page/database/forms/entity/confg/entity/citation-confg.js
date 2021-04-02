@@ -9,7 +9,6 @@ export default function(entity) {
         },
         fields: getCitationFieldConfg(),
         name: entity,
-        style: 'lrg-form',
         type: null,  //Holds type confg once type selected
         types: getCitationTypeConfg(),
         views: { //fields added will be built and displayed.

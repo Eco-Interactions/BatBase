@@ -132,8 +132,11 @@ export function setFieldState(...args) {
 }
 /* ---------------------------- TAXON --------------------------------------- */
 export function updateTaxonGroupState(fLvl, vals) {
-    set.setTaxonGroupState(fS, fLvl, vals);
+    const fState = fS.forms[fLvl];
+    fState.vals = vals;
+    set.setTaxonGroupState(fS.records, fState);
+    _confg('buildViewConfg', [fState]);
 }
-export function setTaxonGroupState(formState, fLvl, vals) {
-    set.setTaxonGroupState(formState, fLvl, vals);
+export function setTaxonGroupState(rcrds, fState) {
+    set.setTaxonGroupState(rcrds, fState);
 }

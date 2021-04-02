@@ -9,7 +9,6 @@ export default function(entity) {
         },
         fields: getPublicationFieldConfg(),
         name: entity,
-        style: 'lrg-form',
         type: null,  //Holds type confg once type selected
         types: getPublicationTypeConfg(),
         views: { //fields added will be built and displayed.
@@ -31,7 +30,7 @@ function getPublicationFieldConfg() {
             }
         },
         PublicationType: {
-            class: 'no-grow mx-w-20',
+            class: 'no-grow w-12',
             entity: 'PublicationType',
             label: 'Type',
             name: 'PublicationType',

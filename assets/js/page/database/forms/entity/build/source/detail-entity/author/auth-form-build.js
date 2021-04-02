@@ -46,7 +46,7 @@ function resetOnCreateFormCancel(fLvl, type, cnt) {                 /*dbug-log*/
     _cmbx('resetCombobox', [type + cnt]);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
-export function initEditForm(id) {                          /*perm-log*/console.log('           >--Author EDIT Form id[%s]', id);
+export function initEditForm(id) {                                  /*perm-log*/console.log('           >--Author EDIT Form id[%s]', id);
    const p = getEditFormParams();                                   /*dbug-log*///console.log('   --params[%O]', p);
     return _elems('initForm', [p])
         .then(status => finishFormInit(status, p));
@@ -57,7 +57,7 @@ export function initEditForm(id) {                          /*perm-log*/console.
             action: 'edit',
             group: 'top',
             id: id,
-            // style: 'sml-form',
+            style: 'sml-form',
             submit: getSubmitFunc('top')
         }
     }

@@ -40,7 +40,6 @@ export default function(entity) {
             }
         },
         name: entity,
-        style: 'sml-form',
         views: { //fields added will be built and displayed
             all: [
                 ['LastName'],

@@ -8,7 +8,6 @@ export default function(entity) {
         },
         fields: getLocationFieldConfg(),
         name: entity,
-        style: 'med-form',
         views: {
             all: [
                 [   {fields: ['DisplayName', 'Country']},

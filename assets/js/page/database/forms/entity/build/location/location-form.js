@@ -72,7 +72,7 @@ export function initEditForm(id) {                                  /*perm-log*/
 function getEditFormParams(id) {
     const editParams = {
         id: id,
-        // style: 'sml-form',
+        style: 'lrg-form',
     };
     return { ...editParams, ...getFormParams('top', 'edit') };
 }

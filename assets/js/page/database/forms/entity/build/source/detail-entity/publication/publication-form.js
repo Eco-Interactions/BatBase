@@ -49,7 +49,7 @@ export function initEditForm(id) {
 function getEditFormParams(id) {
     const editParams = {
         id: id,
-        // style: 'med-form'
+        style: 'lrg-form'
     };
     return { ...editParams, ...getFormParams('top', 'edit') };
 }

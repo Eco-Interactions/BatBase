@@ -10,21 +10,17 @@ export default function(role) {
         },
         fields: getCoreGroupAndRankFieldConfg(),
         name: role,
-        style: 'sml-form',
-        views: {
-            all: getRoleFieldViewOrder()
-        }
+        views: {}
     };
 }
-function getRoleFieldViewOrder() {
-    const fConfg = _state('getFieldState', ['sub', 'Sub-Group', null]);
+export function getRoleFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getRoleFieldViewOrder sGroupField[%O]', sGroupField);
     const gFields = [['Group'], ['Sub-Group']];
-    if (!fConfg.shown) { gFields.pop(); }
-    return [...gFields, ...getSubGroupRankFields(fConfg)].filter(f => f);
+    if (!sGroupField.shown) { gFields.pop(); }
+    return [...gFields, ...getSubGroupRankFields(sGroupField)];
 }
 /* --------------------------- RANK FIELDS ---------------------------------- */
-function getSubGroupRankFields(fConfg) {
-    return fConfg.misc.subRanks.map(f => [f]).reverse();
+function getSubGroupRankFields(sGroupField) {
+    return sGroupField.misc.subRanks.map(f => [f]).reverse();
 }
 /* ------------------------ FIELD DEFINITIONS ------------------------------- */
 function getCoreGroupAndRankFieldConfg() {
