@@ -1075,7 +1075,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-2:
         displayName: 'Central America-Shrubland'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-4'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1084,7 +1084,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-3:
         displayName: 'Central America-Captivity'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-5'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1093,7 +1093,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-4:
         displayName: 'Central America-Grassland'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-7'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1102,7 +1102,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-5:
         displayName: 'Central America-Wetlands'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1111,7 +1111,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-6:
         displayName: 'Central America-Rocky Areas'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-9'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1120,7 +1120,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-7:
         displayName: 'Central America-Caves and Subterranean Areas'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-10'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1129,7 +1129,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-8:
         displayName: 'Central America-Artificial Landscape'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-6'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1138,7 +1138,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-9:
         displayName: 'Central America-Desert'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-3'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1147,7 +1147,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-10:
         displayName: 'Central America-Forest'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-1'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1156,7 +1156,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-11:
         displayName: 'Central America-Savanna'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-2'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1166,7 +1166,7 @@ App\Entity\Location:
     Location-12:
         displayName: Panama
         isoCode: 'PA'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         childLocs: ['@Location-13', '@Location-14', '@Location-15', '@Location-16', '@Location-17', '@Location-18', '@Location-19', '@Location-20', '@Location-21', '@Location-22', '@Location-23']
         locationType: '@LocationType-4'
         geoJson: '@GeoJson-2'
@@ -1177,7 +1177,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-13:
         displayName: 'Panama-Shrubland'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-4'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1186,7 +1186,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-14:
         displayName: 'Panama-Captivity'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-5'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1195,7 +1195,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-15:
         displayName: 'Panama-Grassland'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-7'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1204,7 +1204,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-16:
         displayName: 'Panama-Wetlands'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1213,7 +1213,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-17:
         displayName: 'Panama-Rocky Areas'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-9'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1222,7 +1222,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-18:
         displayName: 'Panama-Caves and Subterranean Areas'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-10'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1231,7 +1231,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-19:
         displayName: 'Panama-Artificial Landscape'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-6'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1240,7 +1240,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-20:
         displayName: 'Panama-Desert'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-3'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1249,7 +1249,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-21:
         displayName: 'Panama-Forest'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-1'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1258,7 +1258,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-22:
         displayName: 'Panama-Savanna'
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-2'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1271,7 +1271,7 @@ App\Entity\Location:
         latitude: '9.06500000000000'
         longitude: '-79.64600000000000'
         interactions: ['@Interaction-3']
-        parentLoc: '@Location-12'
+        parentLocation: '@Location-12'
         geoJson: '@GeoJson-3'
         locationType: '@LocationType-1'
         habitatType: '@HabitatType-1'
@@ -1282,7 +1282,7 @@ App\Entity\Location:
     Location-24:
         displayName: 'Costa Rica'
         isoCode: 'CR'
-        parentLoc: '@Location-1'
+        parentLocation: '@Location-1'
         childLocs: ['@Location-25', '@Location-26', '@Location-27', '@Location-28', '@Location-29', '@Location-30', '@Location-31', '@Location-32', '@Location-33', '@Location-34', '@Location-35']
         locationType: '@LocationType-4'
         interactions: ['@Interaction-4']
@@ -1293,7 +1293,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-25:
         displayName: 'Costa Rica-Shrubland'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-4'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1302,7 +1302,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-26:
         displayName: 'Costa Rica-Captivity'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-5'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1311,7 +1311,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-27:
         displayName: 'Costa Rica-Grassland'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-7'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1320,7 +1320,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-28:
         displayName: 'Costa Rica-Wetlands'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1329,7 +1329,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-29:
         displayName: 'Costa Rica-Rocky Areas'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-9'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1338,7 +1338,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-30:
         displayName: 'Costa Rica-Caves and Subterranean Areas'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-10'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1347,7 +1347,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-31:
         displayName: 'Costa Rica-Artificial Landscape'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-6'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1356,7 +1356,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-32:
         displayName: 'Costa Rica-Desert'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-3'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1365,7 +1365,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-33:
         displayName: 'Costa Rica-Forest'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-1'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1374,7 +1374,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-34:
         displayName: 'Costa Rica-Savanna'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-2'
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1383,7 +1383,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-35:
         displayName: 'Santa Ana-Forest'
-        parentLoc: '@Location-24'
+        parentLocation: '@Location-24'
         locationType: '@LocationType-2'
         interactions: ['@Interaction-5']
         habitatType: '@HabitatType-1'
@@ -1401,7 +1401,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-37: #82
         displayName: 'South America-Shrubland'
-        parentLoc: '@Location-36' #7
+        parentLocation: '@Location-36' #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-4' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1410,7 +1410,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-38:  #93
         displayName: 'South America-Captivity'
-        parentLoc: '@Location-36' #7
+        parentLocation: '@Location-36' #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-5' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1419,7 +1419,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-39:  #117
         displayName: 'South America-Grassland'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-7' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1428,7 +1428,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-40:  #138
         displayName: 'South America-Wetlands'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-8' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1437,7 +1437,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-41: #161
         displayName: 'South America-Rocky Areas'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-9' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1446,7 +1446,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-42:  #184
         displayName: 'South America-Caves and Subterranean Areas'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-10' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1455,7 +1455,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-43:  #2946
         displayName: 'South America-Artificial Landscape'
-        parentLoc: '@Location-36' #7
+        parentLocation: '@Location-36' #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-6' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1464,7 +1464,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-44:  #3023
         displayName: 'South America-Desert'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-3' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1473,7 +1473,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-45:  #3061
         displayName: 'South America-Forest'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-1' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1482,7 +1482,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-46:  #3073
         displayName: 'South America-Savanna'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-2' #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1491,7 +1491,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-47: #50
         displayName: 'French Guiana'
-        parentLoc: '@Location-36'  #7
+        parentLocation: '@Location-36'  #7
         childLocs: ['@Location-48', '@Location-49', '@Location-50', '@Location-51', '@Location-52', '@Location-53', '@Location-54', '@Location-55', '@Location-56', '@Location-57', '@Location-58']
         locationType: '@LocationType-4'  #
         created: '<(new \DateTime("2016-11-18 01:38:19", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1500,7 +1500,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-48:  #49
         displayName: 'French Guiana-Forest'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-1'  #
         created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1509,7 +1509,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-49:  #2862
         displayName: 'French Guiana-Caves and Subterranean Areas'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-10' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1518,7 +1518,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-50:  #2885
         displayName: 'French Guiana-Rocky Areas'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-9' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1527,7 +1527,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-51:  #2914
         displayName: 'French Guiana-Wetlands'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-8' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1536,7 +1536,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-52:  #2940
         displayName: 'French Guiana-Grassland'
-        parentLoc: '@Location-47'  #
+        parentLocation: '@Location-47'  #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-7' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1545,7 +1545,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-53:  #2969
         displayName: 'French Guiana-Artificial Landscape'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-6' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1554,7 +1554,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-54:  #2990
         displayName: 'French Guiana-Captivity'
-        parentLoc: '@Location-47'  #
+        parentLocation: '@Location-47'  #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-5' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1563,7 +1563,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-55:  #3009
         displayName: 'French Guiana-Shrubland'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-4' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1572,7 +1572,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-56:  #3039
         displayName: 'French Guiana-Desert'
-        parentLoc: '@Location-47' #
+        parentLocation: '@Location-47' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-3' #
         created: '<(new \DateTime("2017-07-13 17:42:37", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1581,7 +1581,7 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-57:  #3073
         displayName: 'French Guiana-Savanna'
-        parentLoc: '@Location-47'  #
+        parentLocation: '@Location-47'  #
         locationType: '@LocationType-3'  #
         habitatType: '@HabitatType-2'  #
         created: '<(new \DateTime("2017-07-13 17:42:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1594,7 +1594,7 @@ App\Entity\Location:
         elevationMax: 100
         latitude: '4.83333330000000'
         longitude: '-52.70000000000000'
-        parentLoc: '@Location-47'  #50
+        parentLocation: '@Location-47'  #50
         locationType: '@LocationType-1' #
         interactions: ['@Interaction-6'] #
         habitatType: '@HabitatType-1' #
@@ -1612,7 +1612,7 @@ App\Entity\Location:
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-60:
         displayName: Captivity
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         interactions: ['@Interaction-9'] #
         habitatType: '@HabitatType-5' #
@@ -1622,63 +1622,63 @@ App\Entity\Location:
         updatedBy: '@User-1'
     Location-61:
         displayName: Forest
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-1' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-62:
         displayName: Savanna
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-2' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-63:
         displayName: Desert
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-3' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-64:
         displayName: Shrubland
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-4' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-65:
         displayName: 'Artificial Landscape'
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-6' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-66:
         displayName: Grassland
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-7' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-67:
         displayName: Wetlands
-        parentLoc: '@Location-59'
+        parentLocation: '@Location-59'
         locationType: '@LocationType-3'
         habitatType: '@HabitatType-8' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-68:
         displayName: 'Rocky Areas'
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-9' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
     Location-69:
         displayName: 'Caves and Subterranean Areas'
-        parentLoc: '@Location-59' #
+        parentLocation: '@Location-59' #
         locationType: '@LocationType-3' #
         habitatType: '@HabitatType-10' #
         created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'

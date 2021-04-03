@@ -124,12 +124,12 @@ class Location
      * @ORM\ManyToOne(targetEntity="App\Entity\Location", inversedBy="childLocs")
      * @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id", onDelete="SET NULL")
      */
-    private $parentLoc;
+    private $parentLocation;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Location", mappedBy="parentLoc", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="App\Entity\Location", mappedBy="parentLocation", fetch="EXTRA_LAZY")
      * @ORM\OrderBy({
      *     "description"="ASC"
      * })
@@ -477,27 +477,27 @@ class Location
     }
 
     /**
-     * Set parentLoc.
+     * Set parentLocation.
      *
-     * @param \App\Entity\Location $parentLoc
+     * @param \App\Entity\Location $parentLocation
      *
      * @return Location
      */
-    public function setParentLoc(\App\Entity\Location $parentLoc = null)
+    public function setParentLocation(\App\Entity\Location $parentLocation = null)
     {
-        $this->parentLoc = $parentLoc;
+        $this->parentLocation = $parentLocation;
 
         return $this;
     }
 
     /**
-     * Get parentLoc.
+     * Get parentLocation.
      *
      * @return \App\Entity\Location
      */
-    public function getParentLoc()
+    public function getParentLocation()
     {
-        return $this->parentLoc;
+        return $this->parentLocation;
     }
 
     /**
@@ -506,9 +506,9 @@ class Location
      * @JMS\SerializedName("parent")
      * @Groups({"normalized"})
      */
-    public function getParentLocId()
+    public function getParentLocationId()
     {
-        return $this->parentLoc ? $this->parentLoc->getId() : null;
+        return $this->parentLocation ? $this->parentLocation->getId() : null;
     }
 
     /**
@@ -521,7 +521,7 @@ class Location
     public function addChildLoc(\App\Entity\Location $childLoc)
     {
         $this->childLocs[] = $childLoc;
-        $childLoc->setParentLoc($this);
+        $childLoc->setParentLocation($this);
 
         return $this;
     }
@@ -631,7 +631,7 @@ class Location
     /** Get the parent location of the passed type, region or country, if it exists. */
     private function findParentLocType($loc, $typeSlug)
     {
-        $parent = $loc->getParentLoc();
+        $parent = $loc->getParentLocation();
         if (!$parent) { return null; }
         if ($typeSlug=='country' && $this->hasRegionParent($parent)) {return null;}
         if ($parent->getLocationType()->getSlug() === $typeSlug) {
@@ -693,7 +693,7 @@ class Location
     {
         $geoJson = $this->geoJson ? $this->geoJson->getId() : null;
         if (!$geoJson && $this->isHabitat()) {
-            $geoJson = $this->parentLoc->getGeoJsonId();
+            $geoJson = $this->parentLocation->getGeoJsonId();
         }
         return $geoJson;
     }
@@ -701,7 +701,7 @@ class Location
     private function isHabitat()
     {
         if ($this->locationType->getDisplayName() !== 'Habitat') { return false;}
-        $pName = $this->parentLoc->getDisplayName();
+        $pName = $this->parentLocation->getDisplayName();
         $habitat = $this->getHabitatType()->getDisplayName();
         return $this->getDisplayName() == $pName.'-'.$habitat;
     }

@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Moves all interactions and data from one entity to another and removes the first. 
+ * Moves all interactions and data from one entity to another and removes the first.
  */
 class Version002MergeEntities extends AbstractMigration implements ContainerAwareInterface
 {
@@ -19,7 +19,7 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
-    } 
+    }
 
     private function getEntity($className, $val, $prop = 'id')
     {
@@ -60,7 +60,7 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
 
         if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
         if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
-        
+
         $this->persistEntity($rmv);
         $this->em->remove($rmv);
     }
@@ -68,7 +68,7 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
     private function transferData($coreClass, $addId, $rmv)
     {
         $add = $this->getEntity($coreClass, $addId);
-        // $this->mergeMiscData($rmv, $add); 
+        // $this->mergeMiscData($rmv, $add);
         $this->transferChildren($rmv, $add, $coreClass);
         $this->transferInts($rmv, $add, $coreClass);
         $this->persistEntity($add, true);
@@ -87,7 +87,7 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
     private function transferChildren($oldPrnt, $newPrnt, $type)
     {
         $map = [
-            'Location' => [ 'ChildLocs', 'ParentLoc' ],
+            'Location' => [ 'ChildLocs', 'parentLocation' ],
             'Source' =>   [ 'ChildSources', 'ParentSource' ],
             'Taxon' =>    [ 'ChildTaxa', 'ParentTaxon' ]
         ];
@@ -95,7 +95,7 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
         $setFunc = 'set'.$map[$type][1];
         $children = $oldPrnt->$getFunc();
         if (!count($children)) { return; }                                      print("\nCHILDREN FOUND = ".count($children));
-        
+
         foreach ($children as $child) {
             $child->$setFunc($newPrnt);
             $this->persistEntity($child);

@@ -4,57 +4,70 @@
  *
  * Export
  *     getValidatedFormData
+ *
+ * TOC
+ *     SERVER-DATA OBJ
+ *         INIT
+ *         RETURN
+ *     WRANGLE DATA
+ *         WRANGLE FIELD
+ *         GET DATA
+ *         SET DATA
+ *             GENERAL
+ *             SPECIFIC
+ *             ENTITY
+ *                 LOCATION/GEOJSON
+ *                 AUTHOR
+ *     TRACK FAILURES
  */
 import { _alert, _cmbx, _db, _u } from '~util';
 import { _state } from '~form';
-
-let md = {};
-
+/**
+ * [ld description]
+ * @type {Object}
+ */
+let ld = {
+    data: {}
+};
 export function getValidatedFormData(confg) {
-    md.confg = confg;
-    md.data = buildServerDataObj();                                 /*temp-log*/console.log('+--getValidatedFormData. [%s] [%O]', md.confg.name, md);
+    if (confg.editing) { ld.data.ids = confg.editing; }
+    ld.confg = confg;
+    initServerDataObj(confg);                                       /*temp-log*/console.log('+--getValidatedFormData. name[%s] ld[%O]', confg.name, ld);
     return Promise.all(wrangleFormData())
         .then(alertIfFailures)
-        .then(addEntityDataToFormData)
         .then(returnServerData);
 }
-
+/* =================== SERVER-DATA OBJ ====================================== */
+/** [buildServerDataObj description] */
+function initServerDataObj(c) {                                     /*dbug-log*/console.log('   --initServerDataObj c[%O]', c);
+    const entity = c.core ? c.core : c.name;
+    initEntityDataObj('core', entity);
+    if (!c.core) { return; }
+    initDetailDataObj(c.name);
+}
+/* ------------------------- INIT ------------------------------------------- */
+function initEntityDataObj(dKey, name) {
+    if (ld.data[dKey]) { return; }
+    ld.data[dKey] = { flat: {}, rel:{} };
+    ld.data[dKey+'Entity'] = _u('lcfirst', [name]);
+}
+function initDetailDataObj(name) {
+    const entity = name ? name : 'GeoJson';
+    initEntityDataObj('detail', entity);
+}
+/* ------------------------- RETURN ----------------------------------------- */
 function returnServerData() {
-    const sData = JSON.parse(JSON.stringify(md.data));
-    md = {};
+    const sData = _u('snapshot', [ld.data]);
+    ld = { data:{} };
     return sData;
 }
+/* ========================= WRANGLE DATA =================================== */
 function wrangleFormData() {
-    return Object.values(md.confg.fields).map(getDataForServer);
+    return Object.values(ld.confg.fields).map(wrangleField);
 }
-/** [buildServerDataObj description] */
-function buildServerDataObj() {                                     /*dbug-log*///console.log('   --buildServerDataObj');
-    const serverData = {};
-    setEntityObj('core');
-    return md.confg.core ? addDetailData() : serverData;
-
-    function setEntityObj(dKey) {
-        serverData[dKey] = { flat: {}, rel:{} };
-    }
-    function addDetailData() {
-        setEntityObj('detail');
-        serverData.detailEntity = md.confg.core == 'Source' ? md.confg.name : 'GeoJson'
-        return serverData;
-     }
-}
-/**
- * [setServerData description]
- * @param {[type]} g [description]
- * @param {[type]} p [description]
- * @param {[type]} v [description]
- * @param {String} e [description]
- */
-function setServerData(g, p, v, k = 'core') {
-    if (!v && md.confg.action !== 'edit') { return; }               /*dbug-log*///console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
-    md.data[k][g][p] = v;
-}
-/** [getDataForServer description] */
-function getDataForServer(fConfg) {                                 /*dbug-log*///console.log('       --getDataForServer [%s][%O]', fConfg.name, fConfg);
+/* ------------------------- WRANGLE FIELD ---------------------------------- */
+/** [wrangleField description] */
+function wrangleField(fConfg) {                                     /*dbug-log*///console.log('       --wrangleField [%s][%O]', fConfg.name, fConfg);
     const fKey = fConfg.entity ? 'rel' : 'flat';
     if (!fConfg.active) { return; }  //Field not active. TODO: if field had data before edit began, set field "null" here
     if (fConfg.value === undefined) { return handleEmptyFieldData(fConfg); } //Field never set
@@ -79,6 +92,7 @@ function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*/
         eval(handler)(fKey, fConfg, ...fConfg.prep[handler]);
     }
 }
+/* ----------------------- GET DATA ----------------------------------------- */
 function getFieldValue(fConfg) {
     if (fConfg.type === 'multiSelect') { return returnMultiSelectValue(fConfg); }
     if (!_u('isObj', [fConfg.value])) { return fConfg.value; }
@@ -91,8 +105,6 @@ function returnMultiSelectValue(fConfg) {                           /*dbug-log*/
     };
     return map[fConfg.name](fConfg);
 }
-/* =========================== DATA WRANGLERS =============================== */
-/* ----------------------- GET DATA ----------------------------------------- */
 function getContributorData(fConfg) {                               /*dbug-log*///console.log('           --getContributorData [%O]', fConfg);
     const data = {};
     Object.keys(fConfg.value).forEach(buildContributorData);
@@ -108,6 +120,18 @@ function getContributorData(fConfg) {                               /*dbug-log*/
     }
 }
 /* ----------------------- SET DATA ----------------------------------------- */
+/**
+ * [setServerData description]
+ * @param {[type]} g [description]
+ * @param {[type]} p [description]
+ * @param {[type]} v [description]
+ * @param {String} e [description]
+ */
+function setServerData(g, p, v, k = 'core') {
+    if (!ld.data[k]) { initDetailDataObj(); }
+    if (!v && ld.confg.action !== 'edit') { return; }               /*dbug-log*///console.log('           --setServerData [%s][%s][%s] = [%O]', k, g, p, v);
+    ld.data[k][g][p] = v;
+}
 /* ___________________________________ GENERAL ______________________________ */
 function setCoreData(g, fConfg) {                                   /*dbug-log*///console.log('               --setCoreData [%s] fConfg[%O]', g, fConfg);
     const val = getFieldValue(fConfg);
@@ -149,7 +173,7 @@ function setCoreAndDetail(g, fConfg, emptyString) {
 /* ______________________________________ ENTITY ____________________________ */
     /* ----------- LOCATION/GEOJSON ----------------------------------------- */
 function setGeoJsonData(g, fConfg) {                              /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
-    const displayPoint = buildDisplayCoordinates(fConfg.value, md.confg.fields.Longitude.value);
+    const displayPoint = getDisplayCoordinates(fConfg.value, ld.confg.fields.Longitude.value);
     setServerData('flat', 'DisplayPoint', displayPoint, 'detail');
     setServerData('flat', 'Type', 'Point', 'detail');
     setServerData('flat', 'Coordinates', getCoordValue(displayPoint), 'detail');
@@ -168,21 +192,10 @@ function handleAuthorNames(argument) {
 }
 /* =========================== TRACK FAILUTES =============================== */
 function trackFailure(prop, value) {                                 /*dbug-log*///console.log('--trackFailure prop[%s] val[%O]', prop, value);
-    if (!md.data.fails) { md.data.fails = {}; }
-    md.data.fails[prop] = value;
+    if (!ld.data.fails) { ld.data.fails = {}; }
+    ld.data.fails[prop] = value;
 }
 function alertIfFailures() {
-    if (!md.data.fails) { return; }                                 /*dbug-log*///console.log('--alertIfFailures [%O]', md.data);
-    _alert('alertIssue', ['dataPrepFail', JSON.stringify(md.data.fails) ]);
-}
-/* ========================= FINISH SERVER DATA ============================= */
-function addEntityDataToFormData() {
-    addEntityNames(md.confg.core);
-    if (md.confg.group !== 'top') { return; }
-    if (md.confg.editing) { md.data.ids = md.confg.editing; }
-
-    function addEntityNames(core) {
-        md.data.coreEntity = _u('lcfirst', [core ? core : md.confg.name]);
-        if (core) { md.data.detailEntity =  _u('lcfirst', [md.confg.name]); }
-    }
+    if (!ld.data.fails) { return; }                                 /*dbug-log*///console.log('--alertIfFailures [%O]', ld.data);
+    _alert('alertIssue', ['dataPrepFail', JSON.stringify(ld.data.fails) ]);
 }

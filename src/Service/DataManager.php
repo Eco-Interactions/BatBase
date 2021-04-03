@@ -439,8 +439,8 @@ class DataManager
     private function getEntityClass($relField)
     {
         $classMap = [
+            "ParentLocation" => "Location",
             "ParentSource" => "Source",
-            "ParentLoc" => "Location",
             "ParentTaxon" => "Taxon",
             "Subject" => "Taxon",
             "Object" => "Taxon"

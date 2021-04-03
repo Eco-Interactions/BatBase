@@ -53,7 +53,7 @@ function getRmvDataPropHndlrs(entity) {
             'object': r.rmvIntFromTaxon,/* 'interactionType': rmvFromTypeProp,*/ /* 'tag': rmvFromTagProp */
         },
         'location': {
-            'parentLoc': r.rmvFromParent, /*'locationType': rmvFromTypeProp*/
+            'parentLocation': r.rmvFromParent, /*'locationType': rmvFromTypeProp*/
         },
         'publication': {},  //'publicationType': rmvFromTypeProp
         'publisher': {},

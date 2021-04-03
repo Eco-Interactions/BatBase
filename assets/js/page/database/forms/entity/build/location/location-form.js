@@ -5,6 +5,7 @@
  *     addMapToLocForm
  *     autofillCoordinateFields
  *     focusParentAndShowChildLocs
+ *     finishEditFormBuild
  *     initCreateForm
  *     initEditForm
  *
@@ -63,7 +64,7 @@ function scrollToLocFormWindow() {
     $('#top-form')[0].scrollTo(0, 150);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
-export function initEditForm(id) {                                  /*perm-log*/console.log('           >--Author EDIT Form id[%s]', id);
+export function initEditForm(entity, id) {                          /*perm-log*/console.log('           >--LOCATION EDIT entity[%s] id[%s]', entity, id);
    const p = getEditFormParams(id);                                 /*dbug-log*///console.log('   --params[%O]', p);
     return _elems('initForm', [p])
         .then(status => finishFormInit(status, p))
@@ -103,7 +104,7 @@ function initCombos(fLvl, action) {
     _elems('initFormCombos', [fLvl, events]);
 }
 /* _______________________ FINISH BUILD _____________________________________ */
-function finishFormInit(status, p) {
+function finishFormInit(status, p) {                                /*dbug-log*///console.log('           --finishFormInit status[%s] params[%O]', status, p);
     if (!status) { return; } //Error handled elsewhere
     _elems('checkReqFieldsAndToggleSubmitBttn', [p.group]);
     $('#Latitude_f input').focus();

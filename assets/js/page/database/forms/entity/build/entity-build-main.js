@@ -49,14 +49,9 @@ export function createEntity(entity, val) {
 export function editEntity(entity, id) {
     const mod = getEntityModule(entity);
     return mod.initEditForm(...arguments)
+        .then(() =>_panel('fillEditEntityDetailPanel', [id]))
         .then(() => _elems('fillComplexFormFields', ['top']))
-        .then(() => finishEditFormBuild(entity, id, mod))
         .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']));
-}
-function finishEditFormBuild(entity, id, mod) {
-     _panel('fillEditEntityDetailPanel', [id]);
-    if (!mod.finishEditFormBuild) { return; }
-     mod.finishEditFormBuild(entity);
 }
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */

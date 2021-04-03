@@ -4,7 +4,7 @@
 export default function(entity) {
 	return {
         data: {
-            edit: ['location']
+            edit: ['geoJson', 'location']
         },
         fields: getLocationFieldConfg(),
         name: entity,
@@ -25,6 +25,9 @@ function getLocationFieldConfg() {
             prep: {
                 setParent: ['Location']
             },
+            prop: {
+                core: 'parent'
+            },
             required: true,
             type: 'select',
         },
@@ -41,11 +44,17 @@ function getLocationFieldConfg() {
                     '[Province or State]',
             },
             name: 'DisplayName',
+            prop: {
+                core: 'displayName'
+            },
             required: true,
             type: 'text',
         },
         Description: {
             name: 'Description',
+            prop: {
+                core: 'descriptione'
+            },
             type: 'textArea',
         },
         Elevation: {
@@ -56,15 +65,21 @@ function getLocationFieldConfg() {
             },
             label: 'Elevation(m)',
             name: 'Elevation',
+            prop: {
+                core: 'elevation'
+            },
             type: 'num',
         },
         ElevationMax: {
             class: 'w-8',
             name: 'ElevationMax',
+            prop: {
+                core: 'elevationMax'
+            },
             type: 'num',
         },
         GeoJson: {
-            // misc: { rcrd: geoJsonRcrd } used in edit form
+            misc: {} // rcrd: geoJsonRcrd used in edit form
         },
         HabitatType: {
             entity: 'HabitatType',
@@ -74,6 +89,9 @@ function getLocationFieldConfg() {
                 tooltip: 'See Habitat Type Definitions under About in the site menu.'
             },
             name: 'HabitatType',
+            prop: {
+                core: 'habitatType'
+            },
             type: 'select',
         },
         LocationType: {
@@ -97,6 +115,9 @@ function getLocationFieldConfg() {
                    'Then see the green pin’s popup for name suggestions',
             },
             name: 'Longitude',
+            prop: {
+                core: 'longitude'
+            },
             type: 'lng',
         },
         Latitude: {
@@ -114,6 +135,9 @@ function getLocationFieldConfg() {
             prep: {
                 setGeoJsonData: [],
                 setCoreData: []
+            },
+            prop: {
+                core: 'latitude'
             },
             type: 'lat',  //merge with lng type?
         }

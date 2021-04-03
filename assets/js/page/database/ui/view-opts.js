@@ -24,7 +24,6 @@ function loadLocationViewOpts() {
     if ($('#sel-View').data('focus') === 'locs') { return; }
     const opts = [{ text: 'Map Data', value: 'map'}, { text: 'Table Data', value: 'tree'}];
     _cmbx('replaceSelOpts', ['View', opts]);
-    _cmbx('updateComboChangeEvent', [field, onChange]);
     $('#sel-View').data('focus', 'locs');
 }
 function setLocView(view) {

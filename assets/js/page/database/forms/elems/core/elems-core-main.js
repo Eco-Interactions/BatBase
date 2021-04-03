@@ -14,7 +14,8 @@ export function initForm(p) {                                       /*dbug-log*/
     p.group = 'top';
     return _state('initFormState', [p])
         .then(fS => buildAndAppendForm(fS.forms.top, p.appendForm))
-        .then(() => finishFormBuild(p.initCombos, p.name));
+        .then(() => finishFormBuild(p.initCombos, p.name))
+        .then(() => 'success');
 }
 export function initSubForm(p) {                                    /*dbug-log*///console.log('+--initSubForm params[%O]', p);
     if (ifFormInUse(p.group)) { return alertInUse(p.group); }
