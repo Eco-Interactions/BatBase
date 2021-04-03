@@ -6,7 +6,7 @@
  * Exports:
  *     clearDetailPanel
  *     clearFieldDetails
- *     fillRelationalDataInPanel
+ *     fillEditEntityDetailPanel
  *     fillLocDataInDetailPanel
  *     getDetailPanelElems
  *     updateSrcDetails
@@ -27,7 +27,7 @@ import { _el, _u } from '~util';
 import { _state } from '~form';
 
 /* ===================== INIT DETAIL PANEL ================================== */
-export function getDetailPanelElems(entity, id, action) {                       console.log("getDetailPanelElems action[%s] entity[%s] id?[%s]", action, entity, id);
+export function getDetailPanelElems(entity, id, action) {           /*temp-log*/console.log("getDetailPanelElems action[%s] entity[%s] id?[%s]", action, entity, id);
     const cntnr = _el('getElem', ['div', { id: 'form-details', class: _u('lcfirst', [entity]) }]);
     $(cntnr).append(buildPanelHeader(entity));
     $(cntnr).append(getDetailElems(entity, action));
@@ -68,7 +68,7 @@ function getInitDetailData() {
     return _el('getElem', ['div', { 'text': 'None selected.' }]);
 }
 /** Returns the elems that will display the count of references to the entity. */
-function getSubEntityEditDetailElems(entity) {                                  //console.log("getSubEntityEditDetailElems for [%s]", entity);
+function getSubEntityEditDetailElems(entity) {                      /*dbug-log*///console.log("--getSubEntityEditDetailElems for entity[%s]", entity);
     const div = _el('getElem', ['div', { 'id': 'det-cnt-cntnr' }]);
     $(div).append(_el('getElem', ['span']));
     $(div).append(getCountElemForEachReferencedEntityType(entity));
@@ -106,26 +106,29 @@ function getEntityNameElem(ent) {
     return _el('getElem', ['span', {'text': entities[ent] }]);
 }
 /* ================== EDIT FORM RELATIONAL DETAILS ========================== */
-export function fillRelationalDataInPanel(entity, rcrd) {
+export function fillEditEntityDetailPanel(id) {                     /*dbug-log*///console.log('+--fillEditEntityDetailPanel id[%s]', id);
+    const entity = getFormEntity();
+    const rcrd = _state('getRcrd', [_u('lcfirst', [entity]), id]);
     const map = {
-        Author: fillSrcDetailData,
-        Citation: fillSrcDetailData,
         Location: fillLocDetailData,
-        Publication: fillSrcDetailData,
-        Publisher: fillSrcDetailData,
+        Source: fillSrcDetailData,
         Taxon: fillTxnDetailData
     };
-    map[entity](entity, rcrd);
+    map[entity](_state('getFormState', ['top', 'name']), rcrd);
+}
+function getFormEntity() {
+    const fState = _state('getFormState', ['top']);
+    return fState.core ? fState.core : fState.name;
 }
 /* ----------- LOCATION --------- */
 function fillLocDetailData(entity, rcrd) {
-    addCntToEditFormDetailPanel({ 'int': rcrd.interactions.length });
+    addCntToEditFormDetailPanel({ int: rcrd.interactions.length });
 }
 /* ----------- SOURCE --------- */
 /** Adds a count of all refences to the entity to the form's detail-panel. */
-function fillSrcDetailData(entity, srcRcrd) {                                   //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
-    const refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
-    addAddtionalRefs();                                                         //console.log('refObj = %O', refObj);
+function fillSrcDetailData(entity, srcRcrd) {                       /*dbug-log*///console.log('--fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
+    const refObj = { int: getSrcIntCnt(entity, srcRcrd) };
+    addAddtionalRefs();                                             /*dbug-log*///console.log('   --refObj = %O', refObj);
     addCntToEditFormDetailPanel(refObj);
 
     function addAddtionalRefs() {
@@ -134,7 +137,7 @@ function fillSrcDetailData(entity, srcRcrd) {                                   
         refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
     }
 }
-function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
+function getSrcIntCnt(entity, rcrd) {                               /*dbug-log*///console.log('--getSrcIntCnt. entity[%s] rcrd[%O]', entity, rcrd);
     return entity === 'Citation' ?
         rcrd.interactions.length : getAllSourceInts(rcrd);
 }
@@ -189,7 +192,7 @@ function addCntToEditFormDetailPanel(refObj) {
         $('#'+ent+'-det div')[0].innerText = refObj[ent];
     }
 }
-function getTtlIntCnt(rcrd, intProp, entityRcrds) {                             //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
+function getTtlIntCnt(rcrd, intProp, entityRcrds) {                 /*dbug-log*///console.log('       --getTtlIntCnt prop[%s] rcrd[%O]', intProp, rcrd);
     let ints = rcrd[intProp].length;
     if (rcrd.children.length) { ints += getChildIntCnt(rcrd.children);}
     if (rcrd.contributions) { ints += getChildIntCnt(rcrd.contributions);}
@@ -210,7 +213,7 @@ function getTtlIntCnt(rcrd, intProp, entityRcrds) {                             
  * is added se the side detail panel of the form. For other entity edit-forms:
  * the total number of referencing records is added.
  */
-function addDataToIntDetailPanel(ent, propObj) {                                //console.log('ent = [%s], propObj = %O', ent, propObj);
+function addDataToIntDetailPanel(ent, propObj) {                    /*dbug-log*///console.log('addDataToIntDetailPanel ent[%s], propObj[%O]', ent, propObj);
     const html = getDataHtmlString(propObj);
     clearDetailPanel(ent, true, html)
 }

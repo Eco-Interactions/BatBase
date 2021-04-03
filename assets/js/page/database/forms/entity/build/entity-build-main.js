@@ -17,7 +17,7 @@
  *             CITATION
  */
 import { _u } from '~util';
-import { _elems, _state, _val } from '~form';
+import { _elems, _panel, _state, _val } from '~form';
 import * as int from './interaction/int-form-main.js';
 import * as loc from './location/location-form.js';
 import * as src from './source/src-form-main.js';
@@ -50,10 +50,11 @@ export function editEntity(entity, id) {
     const mod = getEntityModule(entity);
     return mod.initEditForm(...arguments)
         .then(() => _elems('fillComplexFormFields', ['top']))
-        .then(() => finishEditFormBuild(entity, mod))
+        .then(() => finishEditFormBuild(entity, id, mod))
         .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']));
 }
-function finishEditFormBuild(entity, mod) {
+function finishEditFormBuild(entity, id, mod) {
+     _panel('fillEditEntityDetailPanel', [id]);
     if (!mod.finishEditFormBuild) { return; }
      mod.finishEditFormBuild(entity);
 }

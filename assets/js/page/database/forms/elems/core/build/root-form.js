@@ -24,7 +24,7 @@ export function finishAndAppendRootForm(form, fState, el) {         /*dbug-log*/
 function buildRootForm(fState, form, el) {                          /*dbug-log*///console.log('--buildRootForm  form[%O] elems[%O] fState[%O]', form, el, fState);
     return [getExitButtonRow(el), assembleFormAndPanel(fState, form)];
 }
-function assembleFormAndPanel(fState, form) {                        /*dbug-log*///console.log('--assembleFormAndPanel form[%O] fState[%O]', form, fState);
+function assembleFormAndPanel(fState, form) {                       /*dbug-log*///console.log('--assembleFormAndPanel form[%O] fState[%O]', form, fState);
     const cntnr = _el('getElem', ['div', { class: 'flex-row' }]);
     $(cntnr).append([form, getPanel(fState)]);
     return cntnr;
