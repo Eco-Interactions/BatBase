@@ -56,14 +56,14 @@ export function getComboFields(fState) {                            /*dbug-log*/
     return Object.values(fState.fields).filter(f => f.combo);
 }
 /** Returns an object with field names(k) and values(v) of all form fields*/
-export function getFieldValues(fState) {
-    const vals = {};
-    for (let name in fState.fields) {
-        if (!fState.fields[name].value) { continue; }
-        vals[name] = fState.fields[name].value;
-    }                                                               /*dbug-log*///console.log('   --getFieldValues fields[%O] vals[%O]', name, vals);
-    return vals;
-}
+// export function getFieldValues(fState) {
+//     const vals = {};
+//     for (let name in fState.fields) {
+//         if (!fState.fields[name].value) { continue; }
+//         vals[name] = fState.fields[name].value;
+//     }                                                               /*dbug-log*///console.log('   --getFieldValues fields[%O] vals[%O]', name, vals);
+//     return vals;
+// }
 /* --------------------- STATE PREDICATES ----------------------------------- */
 /** [isFieldShown description] */
 export function isFieldShown(fState, field) {                       /*dbug-log*///console.log('   --isFieldShown [%O][%O]', field, fState);

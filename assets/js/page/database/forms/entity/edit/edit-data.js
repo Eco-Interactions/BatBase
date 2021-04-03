@@ -42,15 +42,16 @@ function setSrcData(data, fState) {                                 /*dbug-log*/
     Object.values(fState.fields).forEach(setSrcFieldValue);
     fState.editing.detail = e.detail.id;
 
-    function setSrcFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setSrcFieldValue fConfg[%O]', fConfg);
+    function setSrcFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setSrcFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
         const v = Object.keys(fConfg.prop).map(ent => e[ent][fConfg.prop[ent]])[0];
-        if (!v) { return; }                                         /*dbug-log*/console.log('  --v[%O]', v);
-        fConfg.value =  v.id ? v.id : v;
+        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
+        if (fConfg.name === fState.name+'Type') { fState.type = v.displayName; }
+        fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
     }
 }
 function getSrcEntity(data, src) {
-    const name = _u('lcfirst', [src.sourceType.displayName]);                             /*dbug-log*/console.log('  --getSrcEntity src[%O] name[%s]', src, name);
+    const name = _u('lcfirst', [src.sourceType.displayName]);       /*dbug-log*///console.log('  --getSrcEntity src[%O] name[%s]', src, name);
     return data[name][src[name]];
 }
 /* ========================== TAXON =================================== */

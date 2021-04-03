@@ -104,9 +104,9 @@ export function getFieldState(...args) {
 export function getComboFields(...args) {
     return callFormState(get, 'getComboFields', args);
 }
-export function getFieldValues(...args) {
-    return callFormState(get, 'getFieldValues', args);
-}
+// export function getFieldValues(...args) {
+//     return callFormState(get, 'getFieldValues', args);
+// }
 /* --------------------- STATE PREDICATES ----------------------------------- */
 /** [isFieldShown description] */
 export function isFieldShown(...args) {

@@ -24,45 +24,45 @@ import { _u } from '~util';
  * @param  {Object} vals     [description]
  * @return {[type]}          [description]
  */
-export function buildViewConfg(c, viewSets, vals = {}) {            /*dbug-log*///console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O] vals[%O]", c, viewSets, vals);
+export function buildViewConfg(c, viewSets) {                       /*dbug-log*///console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O]", c, viewSets);
     c.infoSteps = 0;
-    c.view = viewSets[c.display].map(row => getRowConfg(c, vals, row));
+    c.view = viewSets[c.display].map(row => getRowConfg(c, row));
 }
 /* ======================== PROCESS ROW-FIELDS ============================== */
-function getRowConfg(c, v, row) {
-    return row.map(g => getGroupConfgs(c, v, g));
+function getRowConfg(c, row) {
+    return row.map(g => getGroupConfgs(c, g));
 }
 /** Note: "group" == <td> */
-function getGroupConfgs(c, v, g) {
-    if (Array.isArray(g)) { return getHorzGroup(c, v, g); }
-    if (_u('isObj', [g])) { return getVertGroup(c, v, g); }
-    return getSingleConfg(c, v, g);
+function getGroupConfgs(c, g) {
+    if (Array.isArray(g)) { return getHorzGroup(c, g); }
+    if (_u('isObj', [g])) { return getVertGroup(c, g); }
+    return getSingleConfg(c, g);
 }
 /* -------------------- HORIZONTAL GROUP ------------------------------------ */
-function getHorzGroup(c, v, g) {
+function getHorzGroup(c, g) {
     return {
         class: g.class,
-        confgs: g.map(f => getGroupConfgs(c, v, f)),
+        confgs: g.map(f => getGroupConfgs(c, f)),
         dir: 'row'
     };
 }
 /* -------------------- STACKED GROUP --------------------------------------- */
-function getVertGroup(c, v, g) {
+function getVertGroup(c, g) {
     return {
         class: g.class,
-        confgs: g.fields.map(f => getGroupConfgs(c, v, f)),
+        confgs: g.fields.map(f => getGroupConfgs(c, f)),
         dir: 'col'
     };
 }
 /* ======================== BUILD FIELD-CONFG =============================== */
-function getSingleConfg(c, v, f) {
-    return f === '' ? { emptyField: true } : getFieldConfg(c, v, f);
+function getSingleConfg(c, f) {
+    return f === '' ? { emptyField: true } : getFieldConfg(c, f);
 }
 /* ------------------------- BUILDER ---------------------------------------- */
-function getFieldConfg(c, v, name) {                                /*dbug-log*///console.log("   --getFieldConfg [%s] [%O]", name, c.fields[name]);
+function getFieldConfg(c, name) {                                /*dbug-log*///console.log("   --getFieldConfg [%s] [%O]", name, c.fields[name]);
     const fConfg = getBaseFieldConfg();                             /*dbug-log*///console.log('       --fieldConfg [%O]', fConfg);
     trackFieldData(fConfg, c);
-    return buildFieldConfg(fConfg, c, v);
+    return buildFieldConfg(fConfg, c);
 
     function getBaseFieldConfg() {
         return c.fields[name] ? c.fields[name] : getConfgByLabel(name);
@@ -75,7 +75,7 @@ function getFieldConfg(c, v, name) {                                /*dbug-log*/
 function trackFieldData(fConfg, c) {
     if (fConfg.info) { ++c.infoSteps; }
 }
-function buildFieldConfg(fConfg, c, v) {                            /*dbug-log*///console.log('--buildFieldConfg fConfg[%O] c[%O] v?[%O]', fConfg, c, v);
+function buildFieldConfg(fConfg, c) {                            /*dbug-log*///console.log('--buildFieldConfg fConfg[%O] c[%O]', fConfg, c);
     setFieldStyleClass(fConfg, c.group);
     copyFormState(fConfg, c);
     fConfg.current = true; //Field available in at least one of the views

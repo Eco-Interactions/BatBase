@@ -5,7 +5,7 @@ export default function(entity) {
 	return {
         core: 'Source',
         data: {
-            edit: ['source', 'citation', 'author', 'publisher']
+            edit: ['source', 'citation', 'author', 'publication', 'publisher']
         },
         fields: getCitationFieldConfg(),
         name: entity,
@@ -27,6 +27,9 @@ function getCitationFieldConfg() {
             prep: {
                 setDetailData: []
             },
+            prop: {
+                detail: 'abstract'
+            },
             type: 'fullTextArea',
         },
         CitationText: {
@@ -36,6 +39,9 @@ function getCitationFieldConfg() {
             prep: {    // TODO: DRY
                 renameField: ['Description'],
                 renameField: ['FullText', 'detail'],
+            },
+            prop: {
+                detail: 'fullText'
             },
             type: 'fullTextArea',
         },
@@ -47,6 +53,9 @@ function getCitationFieldConfg() {
             prep: {
                 setDetailEntity: []
             },
+            prop: {
+                detail: 'citationType'
+            },
             required: true,
             type: 'select',
         },
@@ -55,7 +64,10 @@ function getCitationFieldConfg() {
             prep: {
                 renameField: ['Title', 'detail'],
                 setDetailData: []
-            }
+            },
+            prop: {
+                detail: 'displayName'
+            },
         },
         Doi: {
             info: {
@@ -68,6 +80,9 @@ function getCitationFieldConfg() {
             prep: {    // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],
             },
+            prop: {
+                detail: 'publicationVolume'
+            },
             type: 'num',
         },
         Issue: {
@@ -76,6 +91,9 @@ function getCitationFieldConfg() {
             prep: {    // TODO: DRY
                 renameField: ['PublicationIssue', 'detail'],
             },
+            prop: {
+                detail: 'publicationIssue'
+            },
             type: 'num',
         },
         Pages: {
@@ -83,6 +101,9 @@ function getCitationFieldConfg() {
             name: 'Pages',
             prep: {    // TODO: DRY
                 renameField: ['PublicationPages', 'detail'],
+            },
+            prop: {
+                detail: 'publicationPages'
             },
             type: 'page',
         },
@@ -102,6 +123,9 @@ function getCitationFieldConfg() {
             name: 'Volume',
             prep: {    // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],
+            },
+            prop: {
+                detail: 'publicationVolume'
             },
             type: 'num',
         },

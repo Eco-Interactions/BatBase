@@ -20,8 +20,7 @@ function getSourceFieldConfg() {
                 core: 'authors'
             },
             name: 'Author',
-            type: 'multiSelect',
-            value: {} //Added here so property exists as obj on init
+            type: 'multiSelect'
         },
         Description: {
             name: 'Description',
@@ -63,8 +62,7 @@ function getSourceFieldConfg() {
             prop: {
                 core: 'editors'
             },
-            type: 'multiSelect',
-            value: {} //Added here so property exists as obj on init
+            type: 'multiSelect'
         },
         ParentSource: {
             entity: 'Source',

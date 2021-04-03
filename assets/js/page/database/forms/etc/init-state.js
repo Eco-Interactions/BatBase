@@ -33,7 +33,7 @@ import { _confg, _form, _state, alertFormIssue } from '~form';
  *
  * @return {obj}     Root form-state
  */
-export function initFormState(p) {                                  /*dbug-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, p.action);
+export function initFormState(p) {                                  /*temp-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, p.action);
     const fS = getMainStateObj(p.name);
     p.confg = getEntityBaseConfg(p);
     return _db('getData', [p.confg.data[p.action]])
@@ -52,10 +52,10 @@ function addRecordData(fS, data, p) {
 }
 /* ======================= BUILD STATE ====================================== */
 /* ----------------------- INIT --------------------------------------------- */
-export function buildNewFormState(fS, p) {                          /*dbug-log*/console.log("    #--buildNewFormState fS[%O] params[%O]", fS, p);
+export function buildNewFormState(fS, p) {                          /*temp-log*/console.log("    #--buildNewFormState fS[%O] params[%O]", fS, p);
     fS.forms[p.name] = p.group;
     fS.forms[p.group] = getBaseFormState(fS, p);
-    fS.forms[p.group].vals = buildFormVals(fS.records, fS.forms[p.group]);
+    setFieldInitValues(fS.records, fS.forms[p.group]);
     return addEntityFormState(fS, fS.forms[p.group]);
 }
 function getBaseFormState(fS, p) {
@@ -70,9 +70,18 @@ function getEntityBaseConfg(p) {
     return confg;
 }
 /* ------------------------ FORM VALUES ------------------------------------- */
-function buildFormVals(data, f) {
-    if (f.id) { _form('setEditFieldValues', [data, f]); }
-    return f.vals ? f.vals : {};
+function setFieldInitValues(data, f) {
+    if (f.id) { return _form('setEditFieldValues', [data, f]); }
+    if (!f.vals) { return; }
+    setInitValues(f.fields, f.vals);
+    delete f.vals;
+}
+function setInitValues(fields, vals) {                              /*dbug-log*///console.log('--setFieldInitValues fields[%O] vals?[%O]', fields, vals);
+    Object.keys(vals).forEach(setFieldInitValue);
+
+    function setFieldInitValue(fName) {
+        fields[fName].value = vals[fName];
+    }
 }
 /* ----------------------- ENTITY FORM -------------------------------------- */
 /**
@@ -100,7 +109,7 @@ function buildFormVals(data, f) {
  * > Taxon forms:
  *     todo...
  */
-function addEntityFormState(fS, f) {                                /*dbug-log*///console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, f, fS);
+function addEntityFormState(fS, f) {                                /*temp-log*/console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, f, fS);
     return initEntityState(fS, f)
         .then(() => finishEntityFormStateInit(fS, f));
 }
@@ -116,11 +125,7 @@ function initEntityState(fS, f) {
     return Promise.resolve(map[f.name](fS.records, f));
 }
 function finishEntityFormStateInit(fS, f) {                         /*dbug-log*///console.log("    --finishEntityFormStateInit form[%O]", f);
-    f.vals = { ...f.vals, ..._state('getFieldValues', [f.group]) };
-    const confg = _confg('buildInitConfg', [f]);
-    delete f.vals;
-    _confg('mergeIntoFormConfg', [confg, f]);
-    f = confg;                                                      /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, f);
+    _confg('finishFormStateInit', [f]);                             /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, f);
     return f;
 }
 /* ___________________________ TAXON ________________________________________ */
@@ -131,7 +136,7 @@ export function initTaxonState(rcrds, f) {                          /*dbug-log*/
 function storeSourceData(rcrds, f) {                                /*dbug-log*///console.log('--storeSourceData rcrds[%O] f[%O]', rcrds, f);
     if (f.name !== 'Citation') { return; }
     initParentSourceFieldObj(f.fields);
-    addPubDataToParentSourceField(rcrds, f, f.vals.ParentSource);
+    addPubDataToParentSourceField(rcrds, f, f.fields.ParentSource.value);
 }
 function initParentSourceFieldObj(fields) {
     if (!fields.ParentSource) { fields.ParentSource = {}; }

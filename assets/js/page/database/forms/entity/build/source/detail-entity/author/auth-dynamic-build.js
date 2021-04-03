@@ -39,7 +39,7 @@ function getNextFieldConfg() {
     return fConfg;
 }
 /** [appendNewAuthSelect description] */
-function appendNewAuthSelect(field) {
+function appendNewAuthSelect(field) {                               /*dbug-log*///console.log('--appendNewAuthSelect [%O]', field);
     $(`#${a.type}_f-cntnr .cntnr`).append(field);
     _cmbx('initCombobox', [getAuthSelConfg()]);
 }

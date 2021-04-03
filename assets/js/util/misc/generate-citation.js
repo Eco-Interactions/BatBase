@@ -20,18 +20,18 @@ let d = {};
 /** Generates the citation text for the passed citation type. */
 export function generateCitationText(data) {                        /*dbug-log*///console.log('+--generateCitationText data[%O]', data);
     d = data;
-    d.type = d.cit.citationType.displayName;                        /*dbug-log*///console.log("type = ", d.type);
+    d.type = d.cit.citationType.displayName;                        /*dbug-log*///console.log("   --type[%s]", d.type);
     const buildCitationText = getTypeCitationGenerator(d.type)
     return buildCitationText(d.type);
 }
 function getTypeCitationGenerator(type) {
     const map = {
-        'Article': buildArticleCite,
-        'Book': buildBookCite,
-        'Chapter': buildChapterCite,
+        Article: buildArticleCite,
+        Book: buildBookCite,
+        Chapter: buildChapterCite,
         'Ph.D. Dissertation': buildDissertThesisCite,
-        'Other': buildOtherCite,
-        'Report': buildOtherCite,
+        Other: buildOtherCite,
+        Report: buildOtherCite,
         "Master's Thesis": buildDissertThesisCite,
         'Museum record': buildOtherCite
     };

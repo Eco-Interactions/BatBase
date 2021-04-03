@@ -55,12 +55,15 @@ function getDataForCitation(fLvl) {                                 /*dbug-log*/
 }
 function buildCitData(fields) {                                     /*dbug-log*///console.log('--buildCitData [%O]', fields);
     return {
-        citationType: { displayName: fields.CitationType.value.text },
+        citationType: { displayName: getCitationType(fields.CitationType.value) },
         title: fields.DisplayName.value,
         publicationPages: fields.Pages.value,
         publicationIssue: fields.Issue.value,
         publicationVolume: getVolumeOrEdition(fields.Volume, fields.Edition),
     };
+}
+function getCitationType(val) {
+    return val.text ? val.text : _cmbx('getSelTxt', ['CitationType']);
 }
 function getVolumeOrEdition(vol, ed) {
     return vol.value ? vol.value : ed.value;

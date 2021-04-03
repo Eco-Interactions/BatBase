@@ -58,22 +58,9 @@ import { _u } from '~util';
 import { _state } from '~form';
 import * as cUtil from './util/confg-util-main.js';
 /* ====================== INIT FORM-CONFG =================================== */
-export function buildInitConfg(c) {                                 /*dbug-log*///console.log('+--buildInitConfg confg[%O]', c);
-    setFieldInitValues(c.fields, c.vals);
-    initDisplayConfg(c, c.action, !!c.views.simple, c.vals);
-    return c;
-}
-function setFieldInitValues(fields, vals) {                         /*dbug-log*///console.log('--setFieldInitValues fields[%O] vals?[%O]', fields, vals);
-    Object.keys(vals).forEach(setFieldInitValue);
-
-    function setFieldInitValue(fName) {
-        fields[fName].value = vals[fName];
-    }
-}
-function initDisplayConfg(confg, action, hasSimpleView, vals) {
-    confg.display = action === 'create' && hasSimpleView ? 'simple' : 'all';
-    cUtil.buildViewConfg(confg, confg.views, vals);
-    delete confg.views;
+export function finishFormStateInit(c) {                            /*temp-log*/console.log('+--finishFormStateInit confg[%O]', c);
+    c.display = c.action === 'create' && c.views.simple ? 'simple' : 'all';
+    updateConfg(c);
 }
 export function getRoleFieldViewOrder() {
     return require(`./entity/group-confg.js`).getRoleFieldViewOrder(...arguments);
@@ -93,12 +80,11 @@ export function onFieldViewChangeUpdateConfg(fLvl) {
     updateConfg(confg);
 }
 /* ====================== REBUILD FORM-CONFG ================================ */
-function updateConfg(c) {                                           /*dbug-log*///console.log('   --updateConfg[%s][%O]', c.name, c);
-    const vals = _state('getFieldValues', [c.group]);
+function updateConfg(c) {                                           /*temp-log*/console.log('   --updateConfg[%s][%O]', c.name, c);
     const mConfg = getBaseConfg(c.name, c.type);
     resetConfgDefaults(c);
     cUtil.mergeFieldConfg(c.fields, mConfg.fields, 'finalMerge');
-    cUtil.buildViewConfg(c, mConfg.views, vals);
+    cUtil.buildViewConfg(c, mConfg.views);
     updateActiveFieldFlags(c.fields);
 }
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
@@ -117,7 +103,7 @@ function resetFieldDefaults(fConfg) {                               /*dbug-log*/
 function updateActiveFieldFlags(fields) {
     Object.values(fields).forEach(setActiveFlag);
 }
-function setActiveFlag(field) {
+function setActiveFlag(field) {                                     /*dbug-log*///console.log('  --setActiveFlag fields[%O]', field);
     field.active = field.current || false;
     delete field.current;
 }
@@ -134,7 +120,7 @@ export function getBaseConfg(entity, type) {                        /*dbug-log*/
     const confg = cUtil.getBaseFormConfg(entity);
     if (confg.core) { mergeCoreEntityConfg(confg); }
     if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
-    delete confg.types;                                             /*dbug-log*///console.log('   --getBaseConfg[%O]', confg.name, _u('snapshot', [confg]));
+    delete confg.types;                                             /*dbug-log*///console.log('   --[%s] = [%O]', confg.name, _u('snapshot', [confg]));
     return confg;
 }
 /** [mergeCoreEntityConfg description] */

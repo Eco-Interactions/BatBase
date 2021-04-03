@@ -45,12 +45,18 @@ export function clearEntityFormMemory(entity) {
 export function createEntity(entity, val) {
     return getEntityModule(entity).initCreateForm(...arguments);
 }
+/* ------------------------- EDIT FORM -------------------------------------- */
 export function editEntity(entity, id) {
-    return getEntityModule(entity).initEditForm(...arguments)
+    const mod = getEntityModule(entity);
+    return mod.initEditForm(...arguments)
+        .then(() => _elems('fillComplexFormFields', ['top']))
+        .then(() => finishEditFormBuild(entity, mod))
         .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']));
 }
-/* ------------------------- EDIT FORM -------------------------------------- */
-
+function finishEditFormBuild(entity, mod) {
+    if (!mod.finishEditFormBuild) { return; }
+     mod.finishEditFormBuild(entity);
+}
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */
 export function fillCitationCombo() {

@@ -12,7 +12,7 @@ let md = {};
 
 export function getValidatedFormData(confg) {
     md.confg = confg;
-    md.data = buildServerDataObj();                                 /*dbug-log*///console.log('+--getValidatedFormData. [%s] [%O]', md.confg.name, md);
+    md.data = buildServerDataObj();                                 /*temp-log*/console.log('+--getValidatedFormData. [%s] [%O]', md.confg.name, md);
     return Promise.all(wrangleFormData())
         .then(alertIfFailures)
         .then(addEntityDataToFormData)
@@ -56,7 +56,7 @@ function setServerData(g, p, v, k = 'core') {
 /** [getDataForServer description] */
 function getDataForServer(fConfg) {                                 /*dbug-log*///console.log('       --getDataForServer [%s][%O]', fConfg.name, fConfg);
     const fKey = fConfg.entity ? 'rel' : 'flat';
-    if (!fConfg.current) { return; }  //Field not active. TODO: if field had data before edit began, set field "null" here
+    if (!fConfg.active) { return; }  //Field not active. TODO: if field had data before edit began, set field "null" here
     if (fConfg.value === undefined) { return handleEmptyFieldData(fConfg); } //Field never set
     if (!getFieldValue(fConfg)) { handleEmptyFieldData(fConfg); }
     if (fConfg.prep) { return handleDataPreparation(fKey, fConfg);  }
