@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
  * public
  *     createEntity
  *     editEntity
+ *     attemptFlushAndLogErrors
  *
  * TOC
  *     ACTIONS
@@ -94,7 +95,7 @@ class DataManager
      */
     public function editEntity($coreName, $data)
     {
-        $coreData = $data->$coreName;
+        $coreData = $data->core;
         $coreEntity = $this->em->getRepository('App:'.ucfirst($coreName))
             ->findOneBy(['id' => $data->ids->core ]);
 
@@ -102,7 +103,7 @@ class DataManager
 
         $this->setEntityData($coreData, $coreEntity, $returnData->coreEdits);
 
-        if ($coreName !== 'interaction') {
+        if (method_exists($coreEntity, 'getDisplayName')) {
             $returnData->name = $coreEntity->getDisplayName();
         }
 
@@ -388,7 +389,7 @@ class DataManager
      * Attempts to flush all persisted data. If there are no errors, the created/updated
      * data is sent back to the crud form; otherise, an error message is sent back.
      */
-    private function attemptFlushAndLogErrors(&$returnData)
+    public function attemptFlushAndLogErrors(&$returnData)
     {
         try {
             $this->em->flush();

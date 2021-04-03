@@ -3,7 +3,7 @@
  */
 export default function(entity) {
 	return {
-        core: 'source',
+        core: 'Source',
         data: {
             edit: ['source', 'publication', 'author', 'publisher']
         },
@@ -37,12 +37,21 @@ function getPublicationFieldConfg() {
             prep: {
                 setDetailEntity: []
             },
+            prop: {
+                detail: 'publicationType'
+            },
             type: 'select',
             required: true
         },
         Publisher: {
             entity: 'Source',
             name: 'Publisher',
+            prep: {
+                setParent: ['Source']
+            },
+            prop: {
+                core: 'parent'
+            },
             type: 'select',
         },
         SourceType: {//Source field
@@ -74,9 +83,6 @@ function getPublicationTypeConfg() {
                     required: true
                 },
                 Publisher: {
-                    prep: {
-                        setParent: ['Source']
-                    },
                     required: true
                 }
             },
@@ -119,9 +125,6 @@ function getPublicationTypeConfg() {
                     required: true
                 },
                 Publisher: {
-                    prep: {
-                        setParent: ['Source']
-                    },
                     required: true
                 },
                 Year: {

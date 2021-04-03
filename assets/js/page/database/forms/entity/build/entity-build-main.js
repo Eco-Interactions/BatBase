@@ -46,7 +46,8 @@ export function createEntity(entity, val) {
     return getEntityModule(entity).initCreateForm(...arguments);
 }
 export function editEntity(entity, id) {
-    return getEntityModule(entity).initEditForm(...arguments);
+    return getEntityModule(entity).initEditForm(...arguments)
+        .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']));
 }
 /* ------------------------- EDIT FORM -------------------------------------- */
 

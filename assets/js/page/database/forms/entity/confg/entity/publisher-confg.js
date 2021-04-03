@@ -3,7 +3,7 @@
  */
 export default function(entity) {
 	return {
-        core: 'source',
+        core: 'Source',
         data: {
             edit: ['source', 'publisher']
         },

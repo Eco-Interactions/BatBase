@@ -15,6 +15,7 @@
  *            label: Field label text (Name-prop used if absent)
  *            *name: FieldName,  [REQUIRED]
  *            prep: funcNameString //prep data for server when different than exactly formEntity:FieldName
+ *            prop: { core||detail: serverPropString } //used to set edit data
  *            required: true, //Set if true
  *            *type: "", null if field-data auto-derived [REQUIRED]
  *        }, ...

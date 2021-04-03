@@ -89,7 +89,7 @@ function showNoChangesMessage() {
 }
 /** Updates the core records in the global form params object. */
 function addDataToStoredRcrds(entity, detailEntity) {               /*dbug-log*///console.log('--addDataToStoredRcrds. [%s] (detail ? [%s])', entity, detailEntity);
-    return _db('getData', [entity]).then(addDataToMemory);
+    return _db('getData', [_u('lcfirst', [entity])]).then(addDataToMemory);
 
     function addDataToMemory(data) {                                /*dbug-log*///console.log('   --addDataToMemory data[%O]', data);
         _state('setEntityRecords', [entity, data]);

@@ -33,7 +33,7 @@ import { _confg, _form, _state, alertFormIssue } from '~form';
  *
  * @return {obj}     Root form-state
  */
-export function initFormState(p) {                                  /*dbug-log*///console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, (p.action || 'create'));
+export function initFormState(p) {                                  /*dbug-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, p.action);
     const fS = getMainStateObj(p.name);
     p.confg = getEntityBaseConfg(p);
     return _db('getData', [p.confg.data[p.action]])
@@ -52,14 +52,14 @@ function addRecordData(fS, data, p) {
 }
 /* ======================= BUILD STATE ====================================== */
 /* ----------------------- INIT --------------------------------------------- */
-export function buildNewFormState(fS, p) {
+export function buildNewFormState(fS, p) {                          /*dbug-log*/console.log("    #--buildNewFormState fS[%O] params[%O]", fS, p);
     fS.forms[p.name] = p.group;
     fS.forms[p.group] = getBaseFormState(fS, p);
+    fS.forms[p.group].vals = buildFormVals(fS.records, fS.forms[p.group]);
     return addEntityFormState(fS, fS.forms[p.group]);
 }
 function getBaseFormState(fS, p) {
-    if (p.id) { data.editing = { core: p.id, detail: null }; }
-    p.vals = p.id ? getEntityVals(fS, p) : (p.vals ? p.vals : {});
+    if (p.id) { p.editing = { core: p.id, detail: null }; }
     return { ...p, ...getEntityBaseConfg(p) };
 }
 function getEntityBaseConfg(p) {
@@ -69,12 +69,10 @@ function getEntityBaseConfg(p) {
     delete p.confg;
     return confg;
 }
-/* ------------------------ EDIT FORM VALUES -------------------------------- */
-function getEntityVals(fS, p) {
-    return _form('getEditFieldValues', [fS.records, p.name, p.id, p.core]);
-}
-function getEntityData(data, name, id, cName) {
-    const formEntity = cName ? cName : name
+/* ------------------------ FORM VALUES ------------------------------------- */
+function buildFormVals(data, f) {
+    if (f.id) { _form('setEditFieldValues', [data, f]); }
+    return f.vals ? f.vals : {};
 }
 /* ----------------------- ENTITY FORM -------------------------------------- */
 /**
@@ -132,12 +130,11 @@ export function initTaxonState(rcrds, f) {                          /*dbug-log*/
 /* ____________________________ SOURCE ______________________________________ */
 function storeSourceData(rcrds, f) {                                /*dbug-log*///console.log('--storeSourceData rcrds[%O] f[%O]', rcrds, f);
     if (f.name !== 'Citation') { return; }
-    if (!f.misc) { f.misc = {}; }
     initParentSourceFieldObj(f.fields);
     addPubDataToParentSourceField(rcrds, f, f.vals.ParentSource);
 }
 function initParentSourceFieldObj(fields) {
-    fields.ParentSource = {};
+    if (!fields.ParentSource) { fields.ParentSource = {}; }
     fields.ParentSource.misc = {};
 }
 function addPubDataToParentSourceField(rcrds, f, pId) {

@@ -170,6 +170,7 @@ class DataEntryController extends AbstractController
         $returnData->detail = 'citation';
         $returnData->detailEntity = $cit;
 
-        return $this->attemptFlushAndSendResponse($returnData);
+        $this->dataManager->attemptFlushAndLogErrors($returnData);
+        return $this->sendDataAndResponse($returnData);
     }
 }

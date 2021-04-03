@@ -38,7 +38,7 @@ function buildServerDataObj() {                                     /*dbug-log*/
     }
     function addDetailData() {
         setEntityObj('detail');
-        serverData.detailEntity = md.confg.core == 'source' ? md.confg.name : 'GeoJson'
+        serverData.detailEntity = md.confg.core == 'Source' ? md.confg.name : 'GeoJson'
         return serverData;
      }
 }
@@ -56,7 +56,7 @@ function setServerData(g, p, v, k = 'core') {
 /** [getDataForServer description] */
 function getDataForServer(fConfg) {                                 /*dbug-log*///console.log('       --getDataForServer [%s][%O]', fConfg.name, fConfg);
     const fKey = fConfg.entity ? 'rel' : 'flat';
-    if (!fConfg.active) { return; }  //Field not active. TODO: if field had data before edit began, set field "null" here
+    if (!fConfg.current) { return; }  //Field not active. TODO: if field had data before edit began, set field "null" here
     if (fConfg.value === undefined) { return handleEmptyFieldData(fConfg); } //Field never set
     if (!getFieldValue(fConfg)) { handleEmptyFieldData(fConfg); }
     if (fConfg.prep) { return handleDataPreparation(fKey, fConfg);  }
@@ -182,7 +182,7 @@ function addEntityDataToFormData() {
     if (md.confg.editing) { md.data.ids = md.confg.editing; }
 
     function addEntityNames(core) {
-        md.data.coreEntity = core ? core : md.confg.name;
-        if (core) { md.data.detailEntity =  md.confg.name; }
+        md.data.coreEntity = _u('lcfirst', [core ? core : md.confg.name]);
+        if (core) { md.data.detailEntity =  _u('lcfirst', [md.confg.name]); }
     }
 }

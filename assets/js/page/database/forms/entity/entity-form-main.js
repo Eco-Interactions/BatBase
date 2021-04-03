@@ -33,8 +33,8 @@ export function createEntity() {
 export function editEntity() {
     return build.editEntity(...arguments);
 }
-export function getEditFieldValues() {
-    return edit.getEditFieldValues(...arguments);
+export function setEditFieldValues() {
+    return edit.setEditFieldValues(...arguments);
 }
 /* =================== ENTITY FACADE ======================================== */
 export function clearEntityFormMemory() {

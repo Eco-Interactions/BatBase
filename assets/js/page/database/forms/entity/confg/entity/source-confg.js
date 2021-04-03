@@ -16,6 +16,9 @@ function getSourceFieldConfg() {
             misc: {
                 customValueStore: true
             },
+            prop: {
+                core: 'authors'
+            },
             name: 'Author',
             type: 'multiSelect',
             value: {} //Added here so property exists as obj on init
@@ -25,6 +28,9 @@ function getSourceFieldConfg() {
             prep: {    // TODO: DRY
                 setCoreAndDetail: [],
             },
+            prop: {
+                detail: 'description'
+            },
             type: 'textArea',
         },
         DisplayName: {
@@ -32,12 +38,18 @@ function getSourceFieldConfg() {
             prep: {    // TODO: DRY
                 setCoreData: []
             },
+            prop: {
+                core: 'displayName'
+            },
             required: true,
             type: 'text',
         },
         Doi: {
             label: 'DOI',
             name: 'Doi',
+            prop: {
+                core: 'doi'
+            },
             type: 'doi',
         },
         Editor: {
@@ -48,6 +60,9 @@ function getSourceFieldConfg() {
                 customValueStore: true
             },
             name: 'Editor',
+            prop: {
+                core: 'editors'
+            },
             type: 'multiSelect',
             value: {} //Added here so property exists as obj on init
         },
@@ -56,6 +71,9 @@ function getSourceFieldConfg() {
             name: 'ParentSource',
             prep: {
                 setParent: ['Source']
+            },
+            prop: {
+                core: 'parent'
             },
             type: 'text',
         },
@@ -73,11 +91,17 @@ function getSourceFieldConfg() {
             prep: { //func: [args]
                 renameField: ['LinkUrl'],
             },
+            prop: {
+                core: 'linkUrl'
+            },
             type: 'url',
         },
         Year: {
             class: 'w-4 no-grow',
             name: 'Year',
+            prop: {
+                core: 'year'
+            },
             type: 'year',
         },
     }

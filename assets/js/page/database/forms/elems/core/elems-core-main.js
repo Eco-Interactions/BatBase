@@ -10,7 +10,7 @@ import * as build from './build/form-build-main.js';
 import * as bttn from './buttons/form-buttons.js';
 import * as footer from './footer/form-footer.js';
 
-export function initForm(p) {                                       /*dbug-log*/console.log('+--initForm params[%O]', p);
+export function initForm(p) {                                       /*dbug-log*///console.log('+--initForm params[%O]', p);
     p.group = 'top';
     return _state('initFormState', [p])
         .then(fS => buildAndAppendForm(fS.forms.top, p.appendForm))
@@ -58,7 +58,7 @@ export function exitRootForm() {
     build.exitRootForm(...arguments);
 }
 /* ============================= BUILD FORM ================================= */
-function buildAndAppendForm(fState, appendForm) {                   /*dbug-log*/console.log('--buildAndAppendForm fState[%O] appendFunc[%O]', fState, appendForm);
+function buildAndAppendForm(fState, appendForm) {                   /*dbug-log*///console.log('--buildAndAppendForm fState[%O] appendFunc[%O]', fState, appendForm);
     return getFormPieces(fState)
         .then(elems => assembleAndAppend(elems, fState, appendForm));
 }
