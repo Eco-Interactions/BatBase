@@ -67,7 +67,7 @@ function wrangleFormData() {
 }
 /* ------------------------- WRANGLE FIELD ---------------------------------- */
 /** [wrangleField description] */
-function wrangleField(fConfg) {                                     /*dbug-log*///console.log('       --wrangleField [%s][%O]', fConfg.name, fConfg);
+function wrangleField(fConfg) {                                     /*dbug-log*/console.log('       --wrangleField [%s][%O]', fConfg.name, fConfg);
     const fKey = fConfg.entity ? 'rel' : 'flat';
     if (!fConfg.active) { return; }  //Field not active. TODO: if field had data before edit began, set field "null" here
     if (fConfg.value === undefined) { return handleEmptyFieldData(fConfg); } //Field never set
@@ -85,7 +85,7 @@ function handleEmptyFieldData(fConfg) {
  * @param  {[type]} fConfg
  * @return {[type]}         [description]
  */
-function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*///console.log('           --handleDataPreparation [%s][%O]', fKey, fConfg);
+function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*/console.log('           --handleDataPreparation [%s][%O]', fKey, fConfg);
     Object.keys(fConfg.prep).forEach(handleDataPrep);
 
     function handleDataPrep(handler) {

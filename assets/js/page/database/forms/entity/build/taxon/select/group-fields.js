@@ -18,15 +18,20 @@ import { _elems, _state } from '~form';
  */
 export function onGroupSelection(val) {                             /*temp-log*/console.log("               +--onGroupSelection. [%s]", val);
     if (val === '' || isNaN(parseInt(val))) { return; }
-    return rebuildTaxonSelectForm({ Group: val });
+    updateFieldValues({ Group: val, 'Sub-Group': null });
+    return rebuildTaxonSelectForm();
+}
+function updateFieldValues(vals) {
+    Object.keys(vals).forEach(f => _state('setFieldState', ['sub', f, vals[f]]));
 }
 /* ------------------ SELECT SUB-GROUP -------------------------------------- */
 export function onSubGroupSelection(val) {                          /*temp-log*/console.log("               +--onSubGroupSelection. [%s]", val)
-    return rebuildTaxonSelectForm({ 'Sub-Group': val });
+    updateFieldValues({ 'Sub-Group': val });
+    return rebuildTaxonSelectForm();
 }
 /* ================== BUILD (SUB)GROUP FIELDS =============================== */
-function rebuildTaxonSelectForm(vals) {
-    const role = $('#select-group').data('role');
-    _state('updateTaxonGroupState', ['sub', vals]);
-    _elems('onFormConfgChanged', ['sub', role]);
+function rebuildTaxonSelectForm() {
+    const field = $('#select-group').data('field');
+    _state('updateTaxonGroupState', ['sub']);
+    _elems('onFormConfgChanged', ['sub', field]);
 }

@@ -34,7 +34,7 @@ export function handleFormSubmit(fLvl) {
     .then(() => _state('setFormState', [fLvl, 'submit', true]));
 }
 /* ------------------------- SUBMIT FORM ------------------------------------ */
-function submitFormData(data, fLvl, confg) {                        /*dbug-log*///console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
+function submitFormData(data, fLvl, confg) {                        /*dbug-log*/console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
     if (data.fails) { return val.errUpdatingData('dataPrepFail', data.fails); }
     toggleWaitOverlay(true);
     submitForm(data, fLvl, confg.action);

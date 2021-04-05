@@ -136,7 +136,12 @@ function finishInputBuild(fConfg, input) {                          /*dbug-log*/
 }
 /* --------------------------- SET VALUE ------------------------------------ */
 function setFieldValue(fConfg) {
-    if (!fConfg.value || fConfg.type === 'multiSelect') { return; }
+    if (fConfg.type === 'multiSelect') { return handleMultiFieldInitVal(fConfg); }
+    if (!fConfg.value) { return; }
     const val = _u('isObj', fConfg.value) ? fConfg.value.value : fConfg.value;
     $(fConfg.input).val(val);
+}
+function handleMultiFieldInitVal(fConfg) {
+    if (fConfg.value && _u('isObj', [fConfg.value])) { return; }
+    fConfg.value = {};
 }

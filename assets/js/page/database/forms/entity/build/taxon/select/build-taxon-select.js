@@ -29,7 +29,7 @@ export function initTaxonSelectForm(field, gId, sgId, onSubmit) {   /*perm-log*/
     return _elems('initSubForm', [getTxnSelectParams(field, gId)])
         .then(status => finishTaxonSelectBuild(status, field, gId));
 }
-function getTxnSelectParams(field, gId, sgId, onSubmit) {           /*dbug-log*/console.log('build[%s]Taxon[%s]SelectForm onSubmit?[%O]', field, groupId, onSubmit);
+function getTxnSelectParams(field, gId, sgId, onSubmit) {           /*dbug-log*/console.log('--getTxnSelectParams field[%s] gId?[%s sId?[%s] onSubmit?[%O]', field, gId, sgId, onSubmit);
     const groupId = field === 'Object' ? getObjectInitGroup(gId) : gId;
     return {
         action: 'select',
@@ -52,14 +52,14 @@ function getObjectInitGroup(gId) {
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first rank-combo into focus. Clears the [field]'s' combobox.
  */
-function finishTaxonSelectBuild(status, field, gId) {
+function finishTaxonSelectBuild(status, field, gId) {                     /*dbug-log*/console.log('finishTaxonSelectBuild field[%O]', field)
     if (!status) { return } //Error handled elsewhere
     addSelectRootTaxonBttn(field);
     customizeElemsForTaxonSelectForm(field, gId);
     selectPrevTaxonAndResetField(field);
 }
 /** Called after group-selection builds rank rows. */
-function selectPrevTaxonAndResetField(field) {                      /*dbug-log*/console.log('selectPrevTaxonAndResetField [%s]', field)
+function selectPrevTaxonAndResetField(field) {                      /*dbug-log*/console.log('selectPrevTaxonAndResetField [%O]', field)
     selectInitTaxonOrFocusFirstCombo(field);
     _cmbx('replaceSelOpts', [field, []]);
     $('#sel-'+field).data('loading', false);

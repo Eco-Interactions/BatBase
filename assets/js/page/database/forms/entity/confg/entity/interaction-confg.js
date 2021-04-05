@@ -53,7 +53,7 @@ function getInteractionFieldConfg() {
             type: 'select'
         },
         Location: {
-            entity: 'Publication',
+            entity: 'Location',
             name: 'Location',
             prop: {
                 core: 'location'

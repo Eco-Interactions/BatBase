@@ -88,7 +88,7 @@ function handleCurrentFieldView(c, mViews) {
     const views = c.action === 'select' ? getGroupFieldView(c) : mViews;
     cUtil.buildViewConfg(c, views);
 }
-function getGroupFieldView(c) {
+function getGroupFieldView(c) {                                     /*dbug-log*/console.log('--getGroupFieldView c[%O]', c)
     const views = {};
     views.all = require(`./entity/group-confg.js`).getGroupFieldViewOrder(c.fields['Sub-Group']);
     return views;
@@ -96,6 +96,7 @@ function getGroupFieldView(c) {
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
 function resetConfgDefaults(c) {
     resetFieldConfgDefaults(c.fields);
+    delete c.view
 }
 function resetFieldConfgDefaults(fields) {                          /*dbug-log*///console.log('  --resetFieldConfgDefaults [%O]',fields);
     Object.values(fields).forEach(resetFieldDefaults);

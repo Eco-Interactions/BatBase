@@ -11,7 +11,7 @@ import { _cmbx } from '~util';
 import { _elems, _state } from '~form';
 import * as aForm from './auth-form-main.js';
 /* ======================= SELECT AUTHORS|EDITORS =========================== */
-export function selectExistingAuthsOrEds(aType, authObj, fLvl) {    /*dbug-log*///console.log('--selectExistingAuthsOrEds. args = %O', arguments);
+export function selectExistingAuthsOrEds(aType, authObj, fLvl) {    /*dbug-log*/console.log('--selectExistingAuthsOrEds. args = %O', arguments);
     if (ifFieldNotShownOrNoValToSelect(aType, authObj)) { return Promise.resolve(); }
     aForm.enableOtherField(aType, fLvl, false);
     return Object.keys(authObj).reduce((p, ord) => { //p(romise), (author-)ord(er)

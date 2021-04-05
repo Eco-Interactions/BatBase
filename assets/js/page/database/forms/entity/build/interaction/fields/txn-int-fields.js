@@ -62,10 +62,10 @@ function getRoot() {
  * In the interaction form, when both roles are selected, the valid interaction
  * types for the taxon groups, in their respective roles, load.
  */
-export function onTaxonFieldSelection(role, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", role, val);
+export function onTaxonFieldSelection(field, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", field, val);
     if (val === "" || isNaN(parseInt(val))) { return; }
     $('#'+getSubFormLvl('sub')+'-form').remove();
-    storeFieldSelection(role, val);
+    storeFieldSelection(field, val);
     if (field === 'Parent') { return; } //taxon edit-form
     iForm.enableTaxonFieldCombos();
     iForm.focusPinAndEnableSubmitIfFormValid(field);

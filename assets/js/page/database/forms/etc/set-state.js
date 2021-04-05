@@ -66,10 +66,10 @@ function setGroupState(taxa, fState, group) {                       /*dbug-log*/
     };                                                              /*dbug-log*/console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
 }
 /** [setSubGroupState description] */
-function setSubGroupState(rcrds, fields, subGroups, sGroupId) {
+function setSubGroupState(rcrds, fields, subGroups, sGroupId) {     /*dbug-log*/console.log('--setSubGroupState rcrds[%O], fields[%O], subGroups[%O], sGroupId[%s]', rcrds, fields, subGroups, sGroupId);
     const subGroup = subGroups[sGroupId];
     fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
-    fields['Sub-Group'].value = subGroup.taxon;                     /*dbug-log*/console.log('--setSubGroupState fieldClass?[%O] subGroup[%O] subGroups[%O]', fields['Sub-Group'].class, subGroup, subGroups);
+    fields['Sub-Group'].value = subGroup.id;                     /*dbug-log*/console.log('--setSubGroupState fieldClass?[%O] subGroup[%O] subGroups[%O]', fields['Sub-Group'].class, subGroup, subGroups);
     fields['Sub-Group'].misc = {
         rcrd: subGroup,
         subRanks: subGroup.subRanks,

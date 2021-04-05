@@ -90,7 +90,7 @@ class WeeklyDigestManager
     }
     private function addLogoToMessage(&$data, &$message)
     {
-        $logoPath = $this->rootPath."/public/build/images/BatLogo_Horizontal_Color.jpg";
+        $logoPath = $this->rootPath."/public_html/build/images/BatLogo_Horizontal_Color.jpg";
         $data['logo'] = $message->embed(\Swift_Image::fromPath($logoPath));
     }
     /**
@@ -101,7 +101,7 @@ class WeeklyDigestManager
     private function attachNewPDFs($pdfs, &$message)
     {
         foreach ($pdfs as $pdf) {
-            $pdfPath = $this->rootPath.'/public/'.$pdf['path'];
+            $pdfPath = $this->rootPath.'/public_html/'.$pdf['path'];
             $message->attach(\Swift_Attachment::fromPath($pdfPath));
         }
     }

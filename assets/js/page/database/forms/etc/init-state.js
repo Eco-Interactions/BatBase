@@ -23,7 +23,7 @@ import { _confg, _form, _state, alertFormIssue } from '~form';
 /**
  * [initFormState description]
  * @param  {obj} p              Root-form params
- * @param  {str} p.action       Defaults to 'create'
+ * @param  {str} p.action
  *
  * @param  {str} *p.name      Entity class
  * @param  {fnc} p.initCombos

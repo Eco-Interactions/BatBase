@@ -3,8 +3,9 @@
  */
 import { _state } from '~form';
 
-export default function(field) {
+export default function(action, field) {
     return {
+        action: action,
         data: {
             edit: ['group', 'rankNames', 'taxon']
         },
@@ -13,7 +14,7 @@ export default function(field) {
         views: {}
     };
 }
-export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getGroupFieldViewOrder sGroupField[%O]', sGroupField);
+export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*/console.log('getGroupFieldViewOrder sGroupField[%O]', sGroupField);
     const gFields = [['Group'], ['Sub-Group']];
     if (!sGroupField.shown) { gFields.pop(); }
     return [...gFields, ...getSubGroupRankFields(sGroupField)];
