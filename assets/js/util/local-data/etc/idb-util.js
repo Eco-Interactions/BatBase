@@ -16,7 +16,7 @@ import { _alert } from '~util';
 import { initStoredData, syncLocalDbWithServer } from '../local-data-main.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear, Store
 
-const db_v = '.56'; //prod: .56
+const db_v = '.57'; //prod: .56
 /** ----------------------- INIT -------------------------------------------- */
 /**
  * Checks whether the dataKey exists in indexDB cache and downloads full DB if not.

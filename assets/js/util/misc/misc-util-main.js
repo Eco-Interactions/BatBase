@@ -51,7 +51,7 @@ export function snapshot(obj) {                                     /*dbug-log*/
     return JSON.parse(JSON.stringify(obj));
 }
 export function isObj(v) {
-    return v.constructor.name === 'Object';
+    return v && v.constructor && v.constructor.name === 'Object';
 }
 /* ========================= ELEM =========================================== */
 export function addEnterKeypressClick(elem) {

@@ -42,9 +42,9 @@
  */
 import { _u } from '~util';
 
-export function getBaseFormConfg(entity) {
+export function getBaseFormConfg(action, entity) {
     const cName = getConfgName(entity);                             /*dbug-log*///console.log('   +--getBaseConfg [%s] for [%s]', cName, entity);
-    const confg = getConfg(cName, entity);
+    const confg = getConfg(action, cName, entity);
     return confg;
 }
 function getConfgName(entity) {
@@ -56,6 +56,6 @@ function getConfgName(entity) {
     };
     return map[entity] ? map[entity] : _u('lcfirst', [entity]);
 }
-function getConfg(name, entity) {                                   /*dbug-log*///console.log('getConfg [%s] for [%s]', name, entity);
-    return require(`../entity/${name}-confg.js`).default(entity);
+function getConfg(action, name, entity) {                                   /*dbug-log*///console.log('getConfg [%s] for [%s]', name, entity);
+    return require(`../entity/${name}-confg.js`).default(action, entity);
 }

@@ -3,8 +3,9 @@
  *
  * Two form "types": create (name field), edit (name, rank, parent fields)
  */
-export default function(entity) {
+export default function(action, entity) {
 	return {
+        action: action,
         data: {
             edit: ['group', 'rankNames', 'taxon']
         },

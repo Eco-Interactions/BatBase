@@ -78,7 +78,7 @@ export function onFieldViewChangeUpdateConfg(fLvl) {
 }
 /* ====================== REBUILD FORM-CONFG ================================ */
 function updateConfg(c) {                                           /*temp-log*/console.log('   --updateConfg[%s][%O]', c.name, c);
-    const mConfg = getBaseConfg(c.name, c.type);
+    const mConfg = getBaseConfg(c.action, c.name, c.type);
     resetConfgDefaults(c);
     cUtil.mergeFieldConfg(c.fields, mConfg.fields, 'finalMerge');
     handleCurrentFieldView(c, mConfg.views);
@@ -96,7 +96,6 @@ function getGroupFieldView(c) {
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
 function resetConfgDefaults(c) {
     resetFieldConfgDefaults(c.fields);
-    delete c.views;
 }
 function resetFieldConfgDefaults(fields) {                          /*dbug-log*///console.log('  --resetFieldConfgDefaults [%O]',fields);
     Object.values(fields).forEach(resetFieldDefaults);
@@ -122,8 +121,8 @@ export function buildViewConfg(c) {
 }
 /* ----------------------- BASE CONFG --------------------------------------- */
 /** [getBaseConfg description] INTERNAL USE */
-export function getBaseConfg(entity, type) {                        /*dbug-log*///console.log('   --getBaseConfg entity[%s] type?[%O]', entity, type);
-    const confg = cUtil.getBaseFormConfg(entity);
+export function getBaseConfg(action, entity, type) {                /*dbug-log*/console.log('   --getBaseConfg action[%s] entity[%s] type?[%O]', action, entity, type);
+    const confg = cUtil.getBaseFormConfg(action, entity);
     if (confg.core) { mergeCoreEntityConfg(confg); }
     if (type) { mergeIntoFormConfg(confg, confg.types[type]); }
     delete confg.types;                                             /*dbug-log*///console.log('   --[%s] = [%O]', confg.name, _u('snapshot', [confg]));
@@ -131,17 +130,6 @@ export function getBaseConfg(entity, type) {                        /*dbug-log*/
 }
 /** [mergeCoreEntityConfg description] */
 function mergeCoreEntityConfg(c) {
-    const coreConfg = cUtil.getBaseFormConfg(c.core);               /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
+    const coreConfg = cUtil.getBaseFormConfg(c.action, c.core);     /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
     mergeIntoFormConfg(c, coreConfg);
 }
-/* ====================== GET DEFAULT-CONFG ================================= */
-// export function getDefaultConfgData(entity, params) {
-//     const confg = getBaseConfg(entity, null);
-//     const map = {
-//         publication: getDefaultCitationType
-//     };
-//     return map[entity] ? map[entity](confg, ...arguments) : false;
-// }
-// function getDefaultCitationType(confg, e, pType) {
-//     return confg.types[pType.displayName].misc.defaultCitType;
-// }

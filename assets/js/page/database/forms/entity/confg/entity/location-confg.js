@@ -1,8 +1,9 @@
 /**
  * Location form configuration.
  */
-export default function(entity) {
+export default function(action, entity) {
 	return {
+        action: action,
         data: {
             edit: ['geoJson', 'location']
         },

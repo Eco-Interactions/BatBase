@@ -43,7 +43,12 @@ export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-lo
     function mergeFieldConfgs(field, confg) {                        /*dbug-log*///console.log('--mergeFieldConfg field[%s] = [%O]', field, confg);
         Object.keys(confg).forEach(k => mergeFieldConfgData(field, k, confg[k]));
         if (!finalMerge) { return; }
-        cFields[field].required = mFields[field].required;
+        const required = mFields[field].required
+        if (required === undefined) { return removePrevReq(cFields[field]); }
+        cFields[field].required = required;
+    }
+    function removePrevReq(field) {
+        delete field.required;
     }
     /** [mergeFieldConfgData description] */
     function mergeFieldConfgData(field, prop, val) {                /*dbug-log*///console.log('--mergeFieldConfgData field[%s] prop[%s] = [%O] [%O]', field, prop, val, cFields);

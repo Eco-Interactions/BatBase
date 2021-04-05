@@ -1,8 +1,9 @@
 /**
  * Publication form configuration.
  */
-export default function(entity) {
+export default function(action, entity) {
 	return {
+        action: action,
         core: 'Source',
         data: {
             edit: ['source', 'publication', 'author', 'publisher']

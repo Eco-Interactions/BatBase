@@ -63,7 +63,7 @@ function getBaseFormState(fS, p) {
     return { ...p, ...getEntityBaseConfg(p) };
 }
 function getEntityBaseConfg(p) {
-    if (!p.confg) { return _confg('getBaseConfg', [p.name, p.type]); }
+    if (!p.confg) { return _confg('getBaseConfg', [p.action, p.name, p.type]); }
     delete p.confg.data;
     const confg = { ...p.confg };
     delete p.confg;

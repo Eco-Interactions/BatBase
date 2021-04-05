@@ -26,8 +26,8 @@ import * as fields from './fields/int-fields-main.js';
 export function initCreateForm(entity) {
     return build.initCreateForm();
 }
-export function finishEditFormBuild(entity) {
-    build.finishInteractionFormBuild();
+export function initEditForm(entity, id) {
+    return build.initEditForm(...arguments);
 }
 export function clearFormMemory() {
     fields.clearFormFieldModuleMemory();

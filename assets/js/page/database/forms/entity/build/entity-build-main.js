@@ -49,9 +49,13 @@ export function createEntity(entity, val) {
 export function editEntity(entity, id) {
     const mod = getEntityModule(entity);
     return mod.initEditForm(...arguments)
-        .then(() =>_panel('fillEditEntityDetailPanel', [id]))
+        .then(() => fillEntityDetailPanel(entity, id))
         .then(() => _elems('fillComplexFormFields', ['top']))
         .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']));
+}
+function fillEntityDetailPanel(entity, id) {
+    if (entity === 'Interaction') { return; }
+    _panel('fillEditEntityDetailPanel', [id]);
 }
 /* =================== ENTITY FACADE ======================================== */
 /** ------------------------ INTERACTION ------------------------------------ */

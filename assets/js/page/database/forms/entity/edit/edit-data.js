@@ -25,7 +25,18 @@ function setFieldValues(data, fState, entity) {
 /* ========================== INTERACTION =================================== */
 function setIntData(data, fState) {                                 /*dbug-log*/console.log('--setIntData data[%O] fState[%O]', data, fState);
     const int = data.interaction[fState.id];                        /*dbug-log*/console.log('  --int[%O]', int);
-    return {};
+    Object.values(fState.fields).forEach(setIntFieldValue);
+
+    function setIntFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setIntFieldValue fConfg[%O]', fConfg);
+        if (!fConfg.prop) { return; }
+        const v = getFieldValue(fConfg, int);
+        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
+        fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
+
+    }
+    function setComplexIntValues() {
+        //citation, country, subject, object, interactionType, tags
+    }
 }
 
 /* ============================ LOCATION ==================================== */

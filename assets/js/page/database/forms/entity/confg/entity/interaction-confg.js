@@ -1,8 +1,9 @@
 /**
  * Interaction form configuration.
  */
-export default function(entity) {
+export default function(action, entity) {
 	return {
+        action: action,
         fields: getInteractionFieldConfg(),
         data: {
             create: ['author', 'citation', 'group', 'interactionType', 'location', 'publication',
@@ -11,7 +12,7 @@ export default function(entity) {
                 'publication', 'publisher', 'rankNames', 'source', 'tag', 'taxon', 'validInteraction'],
         },
         name: entity,
-        pinnable: true, // phrasing?
+        pinnable: action === 'create', // phrasing?
         style: 'lrg-form',
         views: {
             all: [
@@ -30,6 +31,9 @@ function getInteractionFieldConfg() {
             entity: 'Publication',
             name: 'Publication',
             prep: {},
+            prop: {
+                core: 'source'
+            },
             type: 'select'
         },
         CitationTitle: {
@@ -51,7 +55,10 @@ function getInteractionFieldConfg() {
         Location: {
             entity: 'Publication',
             name: 'Location',
-            type: 'select'
+            prop: {
+                core: 'location'
+            },
+            type: 'select',
         },
         Subject: {
             entity: 'Taxon',
@@ -87,6 +94,9 @@ function getInteractionFieldConfg() {
                 customValueStore: true
             },
             name: 'InteractionType',
+            prop: {
+                core: 'interactionType'
+            },
             required: true,
             type: 'select'
         },
@@ -103,11 +113,17 @@ function getInteractionFieldConfg() {
             prep: { //func: [args]
                 renameField: ['Tags'],
             },
+            prop: {
+                core: 'tags'
+            },
             type: 'tags'
         },
         Note: {
             clss: 'flex-grow',
             name: 'Note',
+            prop: {
+                core: 'note'
+            },
             type: 'fullTextArea'
         },
     };
