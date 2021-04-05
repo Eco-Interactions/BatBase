@@ -100,8 +100,8 @@ function getFieldValue(fConfg) {
 }
 function returnMultiSelectValue(fConfg) {                           /*dbug-log*///console.log('               --returnMultiSelectValue fConfg[%O]', fConfg);
     const map = {
-        'Author': getContributorData,
-        'Editor': getContributorData
+        Author: getContributorData,
+        Editor: getContributorData
     };
     return map[fConfg.name](fConfg);
 }
@@ -116,7 +116,6 @@ function getContributorData(fConfg) {                               /*dbug-log*/
             isEditor: fConfg.name === 'Editor'
         };
         data[fConfg.value[ord]] = contrib;
-
     }
 }
 /* ----------------------- SET DATA ----------------------------------------- */

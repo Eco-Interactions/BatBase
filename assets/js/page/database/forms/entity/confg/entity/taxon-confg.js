@@ -1,5 +1,7 @@
 /**
  * Taxon form configuration.
+ *
+ * Two form "types": create (name field), edit (name, rank, parent fields)
  */
 export default function(entity) {
 	return {
@@ -8,31 +10,75 @@ export default function(entity) {
         },
         fields: {
             DisplayName: {
+                label: 'Name',
                 name: 'DisplayName',
-                required: true
-            },
-            Name: {
-                name: 'Name',
+                prep: {
+                    renameField: ['Name'],
+                    setCoreData: []
+                },
+                prop: {
+                    core: 'name'
+                },
                 required: true,
                 type: 'text',
-
             },
-            ParentTaxon: {
+            Parent: {
+                entity: 'Taxon',
+                name: 'Parent',
                 prep: {
                     setParent: ['Taxon']
                 },
-                required: true
+                prop: {
+                    core: 'parent'
+                },
+                required: true,
+                type: 'select'
+            },
+            Group: {
+                name: 'Group',
+                prep: {},
+                prop: {
+                    core: 'group'
+                }
+            },
+            'Sub-Group': {
+                name: 'Sub-Group',
+                prep: {},
             },
             Rank: {
                 entity: 'Rank',
-                required: true
+                name: 'Rank',
+                prep: {
+                    setParent: ['Taxon']
+                },
+                prop: {
+                    core: 'rank'
+                },
+                required: true,
+                type: 'select'
             }
         },
         name: entity,
+        types: {
+            create: {
+                views: {
+                    all: [
+                        ['Name']
+                    ]
+                }
+            },
+            edit: {
+                views: {
+                    all: [
+                        ['Parent'],
+                        ['Rank'],
+                        ['Name']
+                    ]
+                }
+            }
+        },
         views: {
-            all: [
-                ['Name']
-            ]
+            all: []
         }
     };
 }

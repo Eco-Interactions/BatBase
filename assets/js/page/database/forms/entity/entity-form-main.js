@@ -50,12 +50,6 @@ export function selectIntLoc(id) {
 export function enableCountryRegionField() {
     build.enableCountryRegionField();
 }
-export function selectRoleTaxon() {
-    return build.selectRoleTaxon(...arguments);
-}
-export function enableRoleTaxonFieldCombos() {
-    return build.enableRoleTaxonFieldCombos(...arguments);
-}
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocForm(elem, mapType) {
     return build.addMapToLocForm(elem, mapType);
@@ -67,20 +61,17 @@ export function autofillCoordinateFields() {
     build.autofillCoordinateFields(...arguments);
 }
 /** ------------------------ TAXON ------------------------------------------ */
+export function selectFieldTaxon() {
+    return build.selectFieldTaxon(...arguments);
+}
+export function enableTaxonFieldCombos() {
+    return build.enableTaxonFieldCombos(...arguments);
+}
 export function getSelectedTaxon() {
     return build.getSelectedTaxon();
 }
-export function getTaxonEditFields(entity, id) {
-    return build.getTaxonEditFields(id);
-}
-export function initRoleTaxonSelect() {
-    return build.initRoleTaxonSelect(...arguments);
-}
-export function onGroupSelection() {
-    return build.onGroupSelection(...arguments);
-}
-export function onSubGroupSelection() {
-    return build.onSubGroupSelection(...arguments);
+export function initFieldTaxonSelect() {
+    return build.initFieldTaxonSelect(...arguments);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {

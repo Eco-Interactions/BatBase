@@ -1,19 +1,19 @@
 /**
- * Interaction subject/object role-selection form configuration.
+ * Interaction subject/object role- or Taxon parent-selection form configuration.
  */
 import { _state } from '~form';
 
-export default function(role) {
+export default function(field) {
     return {
         data: {
             edit: ['group', 'rankNames', 'taxon']
         },
         fields: getCoreGroupAndRankFieldConfg(),
-        name: role,
+        name: field,
         views: {}
     };
 }
-export function getRoleFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getRoleFieldViewOrder sGroupField[%O]', sGroupField);
+export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getGroupFieldViewOrder sGroupField[%O]', sGroupField);
     const gFields = [['Group'], ['Sub-Group']];
     if (!sGroupField.shown) { gFields.pop(); }
     return [...gFields, ...getSubGroupRankFields(sGroupField)];

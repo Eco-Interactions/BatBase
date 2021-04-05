@@ -37,7 +37,7 @@ function setLocData(data, fState) {                                 /*dbug-log*/
 
     function setLocFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setLocFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
-        const v = Object.values(fConfg.prop).map(prop => loc[prop])[0];
+        const v = getFieldValue(fConfg, loc);
         if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
         fConfg.value =  v.id ? v.id : v;
     }
@@ -56,10 +56,13 @@ function setSrcData(data, fState) {                                 /*dbug-log*/
 
     function setSrcFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setSrcFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
-        const v = (fConfg);
+        const v = getSrcFieldValue(fConfg);
         if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
         if (fConfg.name === fState.name+'Type') { fState.type = v.displayName; }
         fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
+    }
+    function getSrcFieldValue(fConfg) {
+        return Object.keys(fConfg.prop).map(ent => e[ent][fConfg.prop[ent]])[0];
     }
 }
 function getSrcEntity(data, src) {
@@ -69,7 +72,17 @@ function getSrcEntity(data, src) {
 /* ========================== TAXON =================================== */
 function setTxnData(data, fState) {                                 /*dbug-log*/console.log('--setTxnData data[%O] fState[%O]', data, fState);
     const txn = data.taxon[fState.id];                              /*dbug-log*/console.log('  --txn[%O]', txn);
-    return {};
+    Object.values(fState.fields).forEach(setTxnFieldValue);
+    fState.fields['Sub-Group'].value = txn.group.subGroup.id;
+
+    function setTxnFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setTxnFieldValue fConfg[%O]', fConfg);
+        if (!fConfg.prop) { return; }
+        const v = getFieldValue(fConfg, txn);
+        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
+        // if (fConfg.name === ) { fState.type = v.displayName; }
+        fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
+
+    }
 }
 
 
@@ -77,8 +90,8 @@ function setTxnData(data, fState) {                                 /*dbug-log*/
 
 
 /* ============================ HELPERS ===================================== */
-function getFieldValue(fConfg) {                                    /*dbug-log*/console.log('  --getFieldValue fConfg[%O]', fConfg);
-
+function getFieldValue(fConfg, entity) {                            /*dbug-log*/console.log('  --getFieldValue fConfg[%O]', fConfg);
+    return Object.values(fConfg.prop).map(prop => entity[prop])[0];
 }
 function setFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setSrcFieldValue fConfg[%O]', fConfg);
     if (!fConfg.prop) { return; }

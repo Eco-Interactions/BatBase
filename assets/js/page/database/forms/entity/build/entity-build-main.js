@@ -64,12 +64,6 @@ export function selectIntLoc(id) {
 export function enableCountryRegionField() {
     int.enableCountryRegionField();
 }
-export function selectRoleTaxon() {
-    return int.selectRoleTaxon(...arguments);
-}
-export function enableRoleTaxonFieldCombos() {
-    return int.enableRoleTaxonFieldCombos(...arguments);
-}
 /** --------------------------- LOCATION ------------------------------------ */
 export function addMapToLocForm(elem, mapType) {
     return loc.addMapToLocForm(elem, mapType);
@@ -81,27 +75,23 @@ export function autofillCoordinateFields() {
     loc.autofillCoordinateFields(...arguments);
 }
 /** ------------------------ TAXON ------------------------------------------ */
+export function initFieldTaxonSelect() {
+    return txn.initFieldTaxonSelect(...arguments);
+}
+export function selectFieldTaxon() {
+    return int.selectFieldTaxon(...arguments);
+}
+export function enableTaxonFieldCombos() {
+    return int.enableTaxonFieldCombos(...arguments);
+}
 export function getSelectedTaxon() {
     return txn.getSelectedTaxon();
-}
-export function getTaxonEditFields(entity, id) {
-    return txn.getTaxonEditFields(id);
-}
-export function initRoleTaxonSelect() {
-    return txn.initRoleTaxonSelect(...arguments);
-}
-export function onGroupSelection() {
-    return txn.onGroupSelection(...arguments);
-}
-export function onSubGroupSelection() {
-    return txn.onSubGroupSelection(...arguments);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {
     src.finishSrcFieldLoad(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
-/* edit-form, form-ui */
 export function selectExistingAuthsOrEds() {
     return src.selectExistingAuthsOrEds(...arguments);
 }

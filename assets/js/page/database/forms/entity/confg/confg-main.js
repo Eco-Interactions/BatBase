@@ -62,9 +62,6 @@ export function finishFormStateInit(c) {                            /*temp-log*/
     c.display = c.action === 'create' && c.views.simple ? 'simple' : 'all';
     updateConfg(c);
 }
-export function getRoleFieldViewOrder() {
-    return require(`./entity/group-confg.js`).getRoleFieldViewOrder(...arguments);
-}
 /* ====================== ON FORM-CONFG CHANGE ============================== */
 /* ------------------------ FORM-TYPE CHANGED ------------------------------- */
 /** [onEntityTypeChangeUpdateConfg description] */
@@ -84,8 +81,17 @@ function updateConfg(c) {                                           /*temp-log*/
     const mConfg = getBaseConfg(c.name, c.type);
     resetConfgDefaults(c);
     cUtil.mergeFieldConfg(c.fields, mConfg.fields, 'finalMerge');
-    cUtil.buildViewConfg(c, mConfg.views);
+    handleCurrentFieldView(c, mConfg.views);
     updateActiveFieldFlags(c.fields);
+}
+function handleCurrentFieldView(c, mViews) {
+    const views = c.action === 'select' ? getGroupFieldView(c) : mViews;
+    cUtil.buildViewConfg(c, views);
+}
+function getGroupFieldView(c) {
+    const views = {};
+    views.all = require(`./entity/group-confg.js`).getGroupFieldViewOrder(c.fields['Sub-Group']);
+    return views;
 }
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
 function resetConfgDefaults(c) {

@@ -31,8 +31,8 @@ function getSelectComboEvents() {
         'Family': { onChange: onRankSelection, create: create.bind(null, 'Family') },
         'Genus': { onChange: onRankSelection, create: create.bind(null, 'Genus') },
         'Order': { onChange: onRankSelection, create: create.bind(null, 'Order') },
-        'Group': { onChange: onGroupSelection },
-        'Sub-Group': { onChange: onSubGroupSelection },
+        'Group': { onChange: group.onGroupSelection },
+        'Sub-Group': { onChange: group.onSubGroupSelection },
         'Species': { onChange: onRankSelection, create: create.bind(null, 'Species') },
     };
 }
@@ -51,21 +51,14 @@ function create(rank, val) {
     return _form('createEntity', [rank, val]);
 }
 /* ======================= INIT =========================================== */
-export function initRoleTaxonSelect(role, gId) {
-    const groupId = gId ? gId : getGroupId(role);
-    build.initTaxonSelectForm(role, groupId);
+export function initFieldTaxonSelect(field, gId) {
+    const groupId = gId ? gId : getGroupId(field);
+    build.initTaxonSelectForm(field, groupId);
 }
-function getGroupId(role) {
-    const prevSelectedId = $('#sel-'+role).data('selTaxon');
-    if (!prevSelectedId) { return role === 'Subject' ? 1 : 2; } //defaults: Bats (1), Plants (2)
+function getGroupId(field) {
+    const prevSelectedId = $('#sel-'+field).data('selTaxon');
+    if (!prevSelectedId) { return field === 'Subject' ? 1 : 2; } //defaults: Bats (1), Plants (2)
     return _state('getRcrd', ['taxon', prevSelectedId]).group.id;
-}
-/* ======================= GROUPS =========================================== */
-export function onGroupSelection() {
-    return group.onGroupSelection(...arguments);
-}
-export function onSubGroupSelection() {
-    return group.onSubGroupSelection(...arguments);
 }
 /* ======================== RANKS =========================================== */
 export function onRankSelection(val) {

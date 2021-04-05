@@ -23,8 +23,8 @@ export function getIntComboConfg() {
         'InteractionTags': { onChange: tag.onTagSelection, delimiter: ",", maxItems: null  },
         'Location': { onChange: loc.onLocSelection, create: create('location')},
         'Publication': { onChange: src.onPubSelection, create: create('publication')},
-        'Subject': { onChange: txn.onTaxonRoleSelection.bind(null, 'Subject') },
-        'Object': { onChange: txn.onTaxonRoleSelection.bind(null, 'Object') },
+        'Subject': { onChange: txn.onTaxonFieldSelection.bind(null, 'Subject') },
+        'Object': { onChange: txn.onTaxonFieldSelection.bind(null, 'Object') },
     };
 }
 function create(entity) {
@@ -66,17 +66,17 @@ export function addLocationSelectionMethodsNote() {
     return loc.addLocationSelectionMethodsNote(...arguments);
 }
 /* -------------------- TAXON ROLES ----------------------------------------- */
-export function selectRoleTaxon() {
-    return txn.selectRoleTaxon(...arguments);
+export function selectFieldTaxon() {
+    return txn.selectFieldTaxon(...arguments);
 }
-export function onTaxonRoleSelection() {
-    return txn.onTaxonRoleSelection(...arguments);
+export function onTaxonFieldSelection() {
+    return txn.onTaxonFieldSelection(...arguments);
 }
 export function addRoleTaxonFocusListeners() {
     return txn.addRoleTaxonFocusListeners(...arguments);
 }
-export function enableRoleTaxonFieldCombos() {
-    return txn.enableRoleTaxonFieldCombos(...arguments);
+export function enableTaxonFieldCombos() {
+    return txn.enableTaxonFieldCombos(...arguments);
 }
 /* ----------------- INTERACTION TYPE --------------------------------------- */
 export function initTypeField() {

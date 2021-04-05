@@ -1,14 +1,16 @@
 /**
- * Shows a sub-form to 'Select <Role>' of the interaction with a combobox for
+ * Shows a sub-form to 'Select <Field>' of the interaction with a combobox for
  * the taxon group, sub-groups (if group has multiple taxon roots), and one for
  * each rank present in the group, (eg: Bat - Family, Genus, and Species), filled
  * with the taxa at that rank. When one is selected, the remaining boxes
  * are repopulated with related taxa and the 'select' button is enabled. A 'Select
  * Unspecified' button allows selection of a (sub)group's root taxon.
  *
+ * TODO: UPDATE DOCUMENTATION. SELECT FORM USED TO EDIT PARENT TAXON TOO.
+ *
  * Export
  *     initTaxonSelectForm
- *     selectPrevTaxonAndResetRoleField
+ *     selectPrevTaxonAndResetField
  *
  * TOC
  *     IF OPEN SUB-FORM ISSUE
@@ -22,23 +24,23 @@ import { _cmbx, _el, _u } from '~util';
 import { _form, _elems, _state } from '~form';
 import * as selectForm from './txn-select-main.js';
 
-export function initTaxonSelectForm(role, gId) {                    /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', role, $(`#${role}-sel`).val());
-    $('#sel-'+role).data('loading', true);
-    return _elems('initSubForm', [getTxnSelectParams(role, gId)])
-        .then(status => finishTaxonSelectBuild(status, role, gId));
+export function initTaxonSelectForm(field, gId, sgId, onSubmit) {   /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', field, $(`#sel-${field}`).val());
+    $('#sel-'+field).data('loading', true);
+    return _elems('initSubForm', [getTxnSelectParams(field, gId)])
+        .then(status => finishTaxonSelectBuild(status, field, gId));
 }
-function getTxnSelectParams(role, gId) {                            /*dbug-log*///console.log('build[%s]Taxon[%s]SelectForm', role, groupId);
-    const groupId = role === 'Subject' ? gId : getObjectInitGroup(gId);
+function getTxnSelectParams(field, gId, sgId, onSubmit) {           /*dbug-log*/console.log('build[%s]Taxon[%s]SelectForm onSubmit?[%O]', field, groupId, onSubmit);
+    const groupId = field === 'Object' ? getObjectInitGroup(gId) : gId;
     return {
         action: 'select',
-        appendForm: form => $(`#${role}_f`).append(form),
-        name: role,
+        appendForm: form => $(`#${field}_f`).append(form),
+        name: field,
         group: 'sub',
         initCombos: selectForm.initSelectFormCombos,
-        combo: role,
+        combo: field,
         style: 'sml-sub-form',
-        submit: _form.bind(null, 'selectRoleTaxon'),
-        vals: { Group: groupId }
+        submit: onSubmit ? onSubmit : _form.bind(null, 'selectFieldTaxon'),
+        vals: { Group: groupId, 'Sub-Group': sgId  }
     };
 }
 function getObjectInitGroup(gId) {
@@ -48,30 +50,29 @@ function getObjectInitGroup(gId) {
 /* -------------------- BUILD FORM-FIELDS ----------------------------------- */
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
- * or brings the first rank-combo into focus. Clears the [role]'s' combobox.
+ * or brings the first rank-combo into focus. Clears the [field]'s' combobox.
  */
-function finishTaxonSelectBuild(status, role, gId) {
+function finishTaxonSelectBuild(status, field, gId) {
     if (!status) { return } //Error handled elsewhere
-    addSelectRootTaxonBttn(role);
-    customizeElemsForTaxonSelectForm(role, gId);
-    selectPrevTaxonAndResetRoleField(role);
+    addSelectRootTaxonBttn(field);
+    customizeElemsForTaxonSelectForm(field, gId);
+    selectPrevTaxonAndResetField(field);
 }
 /** Called after group-selection builds rank rows. */
-export function selectPrevTaxonAndResetRoleField(role) {            /*dbug-log*///console.log('selectPrevTaxonAndResetRoleField [%s]', role)
-    selectInitTaxonOrFocusFirstCombo(role);
-    _cmbx('replaceSelOpts', [role, []]);
-    $('#sel-'+role).data('loading', false);
-    return Promise.resolve();
+function selectPrevTaxonAndResetField(field) {                      /*dbug-log*/console.log('selectPrevTaxonAndResetField [%s]', field)
+    selectInitTaxonOrFocusFirstCombo(field);
+    _cmbx('replaceSelOpts', [field, []]);
+    $('#sel-'+field).data('loading', false);
 }
 /* ----------------- SELECT UNSPECIFIED - ROOT TAXON  ----------------------- */
-function addSelectRootTaxonBttn(role) {
-    const bttn = buildSelectUnspecifedBttn(role);
+function addSelectRootTaxonBttn(field) {
+    const bttn = buildSelectUnspecifedBttn(field);
     $('#sub-form .bttn-cntnr').prepend(bttn);
 }
-function buildSelectUnspecifedBttn(role) {
+function buildSelectUnspecifedBttn(field) {
     const bttn = _el('getElem', ['input', getUnspecifiedBttnAttrs()]);
-    $(bttn).click(_form.bind(null, 'selectRoleTaxon', [null, 'root']));
-    $(bttn).data('role', role);
+    $(bttn).click(_form.bind(null, 'selectFieldTaxon', [null, 'root']));
+    $(bttn).data('field', field);
     return bttn;
 }
 function getUnspecifiedBttnAttrs() {
@@ -83,30 +84,30 @@ function getUnspecifiedBttnAttrs() {
 }
 /* ------------- CUSTOMIZE ELEMS FOR TAXON SELECT-FORM ---------------------- */
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
-function customizeElemsForTaxonSelectForm(role, gId) {
-    $('#sub-hdr span')[0].innerHTML = `Select ${role} Taxon`;
-    $('#sub-hdr span+div').append(getTaxonExitButton(role));
+function customizeElemsForTaxonSelectForm(field, gId) {
+    $('#sub-hdr span')[0].innerHTML = `Select ${field} Taxon`;
+    $('#sub-hdr span+div').append(getTaxonExitButton(field));
     $('#sub-submit')[0].value = "Select Taxon";
     $('#sub-cancel')[0].value = "Reset";
-    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, role, gId));
+    $('#sub-cancel').unbind("click").click(resetTaxonSelectForm.bind(null, field, gId));
 }
-function getTaxonExitButton(role) {
+function getTaxonExitButton(field) {
     const bttn = _elems('getExitButton');
     bttn.id = 'exit-sub-form';
-    $(bttn).unbind('click').click(exitTaxonSelectForm.bind(null, role));
+    $(bttn).unbind('click').click(exitTaxonSelectForm.bind(null, field));
     return bttn;
 }
 /** Exits sub form and restores any previous taxon selection. */
-function exitTaxonSelectForm(role) {
-    _elems('exitSubForm', ['sub', false, _form.bind(null, 'enableRoleTaxonFieldCombos')]);
-    const prevTaxonId = $('#sel-'+role).data('selTaxon');
+function exitTaxonSelectForm(field) {
+    _elems('exitSubForm', ['sub', false, _form.bind(null, 'enableTaxonFieldCombos')]);
+    const prevTaxonId = $('#sel-'+field).data('selTaxon');
     if (!prevTaxonId) { return; }
-    resetTaxonCombobox(role, prevTaxonId);
+    resetTaxonCombobox(field, prevTaxonId);
 }
-function resetTaxonCombobox(role, prevTaxonId) {
+function resetTaxonCombobox(field, prevTaxonId) {
     const opt = { text: getTaxonym(prevTaxonId), value: prevTaxonId};
-    _cmbx('replaceSelOpts', [role, opt]);
-    _cmbx('setSelVal', [role, prevTaxonId]);
+    _cmbx('replaceSelOpts', [field, opt]);
+    _cmbx('setSelVal', [field, prevTaxonId]);
 }
 function getTaxonym(id) {
     return _state('getRcrd', ['taxon', id]).displayName;
@@ -117,40 +118,40 @@ function getTaxonym(id) {
  * form. When the select form loads without a previous selection or when the group
  * is changed by the user, the first combobox of the group is brought into focus.
  */
-function selectInitTaxonOrFocusFirstCombo(role) {
-    const selId = getPrevSelId(role);
-    if (selId) { resetPrevTaxonSelection(selId, role);
-    } else { focusFirstRankCombo(role); }
+function selectInitTaxonOrFocusFirstCombo(field) {
+    const selId = getPrevSelId(field);
+    if (selId) { resetPrevTaxonSelection(selId, field);
+    } else { focusFirstRankCombo(field); }
 }
-function getPrevSelId(role) {
-    return $('#sel-'+role).val() || $('#sel-'+role).data('reset') ?
-        $('#sel-'+role).data('selTaxon') : null;
+function getPrevSelId(field) {
+    return $('#sel-'+field).val() || $('#sel-'+field).data('reset') ?
+        $('#sel-'+field).data('selTaxon') : null;
 }
-function focusFirstRankCombo(role) {
+function focusFirstRankCombo(field) {
     const ranks = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).subRanks;
     const rank = ranks.slice().pop();
     _cmbx('focusCombobox', [rank]);
 }
 /* -------------- RESET SELECT-FORM TO INIT STATE --------------------------- */
 /**
- * Reinitializes the taxon select-form to the role-taxon previously selected or
- * to the default taxon-group for the role.
+ * Reinitializes the taxon select-form to the field-taxon previously selected or
+ * to the default taxon-group for the field.
  */
-function resetTaxonSelectForm(role, gId) {
-    $('#sel-'+role).data('reset', true);
+function resetTaxonSelectForm(field, gId) {
+    $('#sel-'+field).data('reset', true);
     $('#sub-form').remove();
-    selectForm.initRoleTaxonSelect(role, gId);
+    selectForm.initFieldTaxonSelect(field, gId);
 }
 /** Resets the taxon to the one previously selected in the interaction form.  */
-function resetPrevTaxonSelection(id, role) {
+function resetPrevTaxonSelection(id, field) {
     const taxon = _state('getRcrd', ['taxon', id]);
-    if (taxon.isRoot) { return; }                                   /*dbug-log*///console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', role, id, taxon);
-    selectPrevTaxon(taxon, role);
+    if (taxon.isRoot) { return; }                                   /*dbug-log*///console.log('           --resetPrevTaxonSelection [%s] [%s] = %O', field, id, taxon);
+    selectPrevTaxon(taxon, field);
 }
-function selectPrevTaxon(taxon, role) {
+function selectPrevTaxon(taxon, field) {
     if (ifTaxonInDifferentGroup(taxon.group)) { return selectTaxonGroup(taxon); }
     _cmbx('setSelVal', [taxon.rank.displayName, taxon.id]);
-    window.setTimeout(() => { deleteResetFlag(role); }, 1000);
+    window.setTimeout(() => { deleteResetFlag(field); }, 1000);
 }
 function ifTaxonInDifferentGroup(group) {
     return $('#sel-Group').val() != group.id;
@@ -158,6 +159,6 @@ function ifTaxonInDifferentGroup(group) {
 function selectTaxonGroup(taxon) {
     _cmbx('setSelVal', ['Group', taxon.group.id]);
 }
-function deleteResetFlag(role) {
-    $('#sel-'+role).removeData('reset');
+function deleteResetFlag(field) {
+    $('#sel-'+field).removeData('reset');
 }

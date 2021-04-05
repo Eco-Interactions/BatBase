@@ -67,17 +67,17 @@ export function addLocationSelectionMethodsNote() {
     return fields.addLocationSelectionMethodsNote(...arguments);
 }
 /* --------------------- SUBJECT|OBJECT ------------------------------------- */
-export function selectRoleTaxon() {
-    return fields.selectRoleTaxon(...arguments);
+export function selectFieldTaxon() {
+    return fields.selectFieldTaxon(...arguments);
 }
-export function onTaxonRoleSelection() {
-    return fields.onTaxonRoleSelection(...arguments);
+export function onTaxonFieldSelection() {
+    return fields.onTaxonFieldSelection(...arguments);
 }
 export function addRoleTaxonFocusListeners() {
     return fields.addRoleTaxonFocusListeners(...arguments);
 }
-export function enableRoleTaxonFieldCombos() {
-    return fields.enableRoleTaxonFieldCombos(...arguments);
+export function enableTaxonFieldCombos() {
+    return fields.enableTaxonFieldCombos(...arguments);
 }
 /* --------------------- INTERACTION TYPE ----------------------------------- */
 export function initTypeField() {

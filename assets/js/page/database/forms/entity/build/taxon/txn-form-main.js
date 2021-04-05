@@ -24,24 +24,15 @@ export function initCreateForm() {
     return create.initCreateForm(...arguments);
 }
 /* ========================= EDIT =========================================== */
-export function finishEditFormBuild() {
-    edit.finishEditFormBuild(...arguments);
-}
-export function getTaxonEditFields() {
-    return edit.getTaxonEditFields(...arguments);
+export function initEditForm() {
+    return edit.initEditForm(...arguments);
 }
 /* ======================= SELECT =========================================== */
-export function initRoleTaxonSelect() {
-    return select.initRoleTaxonSelect(...arguments);
+export function initFieldTaxonSelect() {
+    return select.initFieldTaxonSelect(...arguments);
 }
 export function initSelectFormCombos() {
     return select.initSelectFormCombos(...arguments);
-}
-export function onGroupSelection() {
-    return select.onGroupSelection(...arguments);
-}
-export function onSubGroupSelection() {
-    return select.onSubGroupSelection(...arguments);
 }
 export function getSelectedTaxon() {
     return select.getSelectedTaxon(...arguments);

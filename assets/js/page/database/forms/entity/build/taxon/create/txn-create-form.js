@@ -19,12 +19,13 @@ export function initCreateForm(rank, v) {                           /*perm-log*/
 function getTxnFormParams(rank, v) {
     return {
         appendForm: form => $(`#${rank}_f`).append(form),
-        name: 'Taxon',
-        group: 'sub2',
-        onFormClose: _form.bind(null, 'enableCountryRegionField'),
         combo: rank,
+        group: 'sub2',
+        name: 'Taxon',
+        onFormClose: _form.bind(null, 'enableCountryRegionField'),
         style: 'sml-sub-form',
         submit: validateAndSubmit.bind(null, rank), //form submit handler
+        type: 'create',
         vals: getTaxonCreateStateVals(val, rank)
     }
 }

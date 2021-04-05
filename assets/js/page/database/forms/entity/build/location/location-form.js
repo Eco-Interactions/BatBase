@@ -5,7 +5,6 @@
  *     addMapToLocForm
  *     autofillCoordinateFields
  *     focusParentAndShowChildLocs
- *     finishEditFormBuild
  *     initCreateForm
  *     initEditForm
  *
@@ -98,8 +97,8 @@ function getFormParams(fLvl, action) {
 }
 function initCombos(fLvl, action) {
     const events = {
-        'Country': { onChange: focusParentAndShowChildLocs.bind(null, action) },
-        'HabitatType': { onChange: false },
+        Country: { onChange: focusParentAndShowChildLocs.bind(null, action) },
+        HabitatType: { onChange: false },
     };
     _elems('initFormCombos', [fLvl, events]);
 }
