@@ -11,14 +11,23 @@ export default function(action, entity) {
         fields: {
             City: {
                 name: 'City',
+                prop: {
+                    detail: 'city'
+                },
                 required: true,
                 type: 'text'
             },
             DisplayName: {
-                label: 'Name'
+                label: 'Name',
+                prop: {
+                    core: 'displayName'
+                },
             },
             Country: {
                 name: 'Country',
+                prop: {
+                    detail: 'country'
+                },
                 required: true,
                 type: 'text'
             },
@@ -29,7 +38,7 @@ export default function(action, entity) {
         name: entity,
         views: {
             all: [
-                ['DisplayName',]
+                ['DisplayName'],
                 ['City'],
                 ['Country'],
                 ['Website'],
