@@ -3,7 +3,6 @@
  *
  * Export
  *     _validation
- *     getValidatedFormData
  *     valAndSubmitFormData
  *
  * TOC
@@ -15,21 +14,17 @@
  */
 import { _cmbx, _db, _el, _u, executeMethod } from '~util';
 import { _state, _elems, clearFormMemory } from '~form';
-import * as val from './validation-alerts.js';
-import * as prep from './data/submit-data-main.js';
+import * as val from './validation/validation-alerts.js';
+import getValidatedFormData from './data/get-form-data.js';
 
 export function _validation(funcName, params = []) {
     return executeMethod(funcName, val, 'val', 'submit-main', params);
 }
 /** ----------------------- DATA PREPARATION -------------------------------- */
-export function getValidatedFormData(entity, fLvl, submitting) {    /*dbug-log*///console.log(' !!!!!!!!!!!!!  getValidatedFormData')
-    // return handleFormSubmit(entity, fLvl);
-}
-/* used by edit-form */
 export function handleFormSubmit(fLvl) {
     $(`#${fLvl}-submit`).attr('disabled', true).fadeTo('fast', .6);
     const confg = _state('getFormState', [fLvl]);
-    prep.prepareDataForServer(confg)
+    getValidatedFormData(confg)
     .then(data => submitFormData(data, fLvl, confg))
     .then(() => _state('setFormState', [fLvl, 'submit', true]));
 }

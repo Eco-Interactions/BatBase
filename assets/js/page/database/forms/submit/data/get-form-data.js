@@ -29,7 +29,7 @@ import { _state } from '~form';
 let ld = {
     data: {}
 };
-export function getValidatedFormData(confg) {
+export default function getValidatedFormData(confg) {
     if (confg.editing) { ld.data.ids = confg.editing; }
     ld.confg = confg;
     initServerDataObj(confg);                                       /*temp-log*/console.log('+--getValidatedFormData. name[%s] ld[%O]', confg.name, ld);

@@ -75,9 +75,6 @@ export function exitFormLevel() {
 export function _val(funcName, params = []) {
     return submit._validation(funcName, params);
 }
-export function getValidatedFormData() {
-    return submit.getValidatedFormData(...arguments);
-}
 /* Vals passed in taxon edit-forms */
 export function handleFormSubmit() {
     return submit.handleFormSubmit(...arguments);
