@@ -13,28 +13,43 @@ export default function(action, entity) {
                 prep: {
                     handleAuthorNames: [],
                 },
+                prop: {
+                    core: 'displayName'
+                },
                 required: null,
                 type: null,
             },
             FirstName: {
                 label: 'First',
                 name: 'FirstName',
+                prop: {
+                    detail: 'firstName'
+                },
                 type: 'text',
             },
             MiddleName: {
                 label: 'Middle',
                 name: 'MiddleName',
+                prop: {
+                    detail: 'middleName'
+                },
                 type: 'text',
             },
             LastName: {
                 type: 'text',
                 name: 'LastName',
+                prop: {
+                    detail: 'lastName'
+                },
                 required: true
             },
             Suffix: {
                 class: 'w-4',
                 type: 'text',
-                name: 'Suffix'
+                name: 'Suffix',
+                prop: {
+                    detail: 'suffix'
+                },
             },
             SourceType: {
                 value: 'Author'
@@ -45,7 +60,7 @@ export default function(action, entity) {
             all: [
                 ['LastName'],
                 ['FirstName'],
-                ['MiddleName', 'Suffix']
+                ['MiddleName', 'Suffix'],
                 ['Website'],
                 ['Description'],
             ],

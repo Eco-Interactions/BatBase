@@ -18,6 +18,21 @@ import { _confg, alertFormIssue } from '~form';
 export function getStateProp(fS, prop) {                            /*dbug-log*///console.log('   --getStateProp  prop[%s], fS[%O]', prop, fS);
     return prop ? fS[prop] : fS;
 }
+
+/** Returns the 'next' form level- either the parent or child. */
+export function getFormLevel(fS, next, current) {                   /*dbug-log*/console.log('   --getFormLevel next[%s] current[%s]', next, current);
+    const curIdx = fS.levels.indexOf(current);
+    return next === 'parent' ? fS.levels[curIdx-1] : fS.levels[curIdx+1];
+}
+/**
+ * Returns the sub form's lvl. If the top form is not the interaction form,
+ * the passed form lvl is reduced by one and returned.
+ * TODO: REPLAVE WITH (GETFORMSTATE, ENTITY)
+ */
+export function getSubFormLvl(fS, lvl) {
+    if (fS.forms.top.name === 'Interaction') { return lvl; }
+    return fS.levels.indexOf(lvl)-1;
+}
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(fS, entity) {                        /*dbug-log*///console.log('   --getEntityRcrds  entity[%O], fS[%O]', entity, fS);
     return typeof entity == 'string' ? fS.records[entity] : buildRcrdsObj(fS, entity);

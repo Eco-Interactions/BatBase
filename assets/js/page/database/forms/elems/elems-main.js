@@ -17,7 +17,7 @@
  *         TOGGLE FORM-FIELDS
  */
 import { _el, executeMethod } from '~util';
-import { _state, getNextFormLevel } from '../forms-main.js';
+import { _state } from '../forms-main.js';
 import * as core from './core/elems-core-main.js';
 import * as row from './row/form-row-main.js';
 import * as eUtil from './util/form-elems-util-main.js';
@@ -41,7 +41,7 @@ export function initSubForm(params) {
 }
 /** Returns true if the next sub-rank form exists in the dom. */
 export function hasOpenSubForm(fLvl) {
-    const childFormLvl = getNextFormLevel('child', fLvl);
+    const childFormLvl = _state('getFormLevel', ['child', fLvl]);
     return $('#'+childFormLvl+'-form').length > 0;
 }
 export function exitSubForm(fLvl, focus, onExit, data) {
@@ -57,7 +57,7 @@ export function toggleSubmitBttn() {
 }
 /** Enables the parent form's submit button if all required fields have values. */
 export function ifParentFormValidEnableSubmit(fLvl) {
-    const parentLvl = getNextFormLevel('parent', fLvl);
+    const parentLvl = _state('getFormLevel', ['parent', fLvl]);
     checkReqFieldsAndToggleSubmitBttn(parentLvl);
 }
 export function checkReqFieldsAndToggleSubmitBttn(fLvl) {           /*dbug-log*///console.log('--checkReqFieldsAndToggleSubmitBttn fLvl[%s]', fLvl);

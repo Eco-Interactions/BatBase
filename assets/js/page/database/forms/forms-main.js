@@ -87,32 +87,3 @@ export function handleFormSubmit() {
 function getParams(params) {
     return Array.isArray(params) ? params : [params];
 }
-/** Returns the 'next' form level- either the parent or child. */
-export function getNextFormLevel(next, curLvl) {
-    const fLvls = state.getStateProp('formLevels');
-    const nextLvl = next === 'parent' ?
-        fLvls[fLvls.indexOf(curLvl) - 1] :
-        fLvls[fLvls.indexOf(curLvl) + 1] ;
-    return nextLvl;
-}
-/**
- * Returns the sub form's lvl. If the top form is not the interaction form,
- * the passed form lvl is reduced by one and returned.
- * TODO: REPLAVE WITH (GETFORMSTATE, ENTITY)
- */
-export function getSubFormLvl(lvl) {
-    const topEntity = state.getFormState('top', 'name');
-    const fLvls = state.getStateProp('formLevels');
-    return topEntity === 'Interaction' ? lvl : fLvls[fLvls.indexOf(lvl) - 1];
-}
-/** Returns an obj with the order (k) of the values (v) inside of the container. */
-export function getSelectedVals(cntnr, fieldName) {
-    let vals = {};
-    $.each(cntnr.children, (i, elem) => getCntnrFieldValue(i+1, elem.children));
-    return vals;
-
-    function getCntnrFieldValue(cnt, subElems) {
-        $.each(subElems, (i, subEl) => {
-            if (subEl.value) { vals[cnt] = subEl.value; }});
-    }
-}

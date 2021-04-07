@@ -19,12 +19,12 @@
  *     FILL RANK COMBOS WITH RELATED TAXA
  */
 import { _cmbx } from '~util';
-import { _elems, _state, _val, getSubFormLvl } from '~form';
+import { _elems, _state, _val } from '~form';
 import { getSelectedTaxon } from '../txn-select-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
 
 export function onRankSelection(val, elem) {                       /*dbug-log*///console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
     repopulateCombosWithRelatedTaxa(val, fLvl);

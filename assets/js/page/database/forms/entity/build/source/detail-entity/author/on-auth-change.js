@@ -16,7 +16,7 @@
  *             FIELD LABEL
  */
 import { _cmbx } from '~util';
-import { _state, getSubFormLvl } from '~form';
+import { _state } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as aForm from './auth-form-main.js';
 /* ======================= ON AUTHOR|EDITOR SELECTION ======================= */
@@ -27,7 +27,7 @@ import * as aForm from './auth-form-main.js';
  * @param  {num} v        ID of selected entity
  */
 export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*///console.log('+--onAuthAndEdSelection [%s][%s] = [%s]', cnt, aType, v);
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     const ttl = _state('getFieldState', [fLvl, aType, 'count']);    /*dbug-log*///console.log('       --ttl[%s]', ttl);
     if (v === '' || parseInt(v) === NaN) { return onFieldClear(aType, fLvl, ttl, cnt); }
     if (ttl === 1) { enableOtherField(aType, fLvl, false);  }

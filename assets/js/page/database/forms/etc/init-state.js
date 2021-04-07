@@ -5,7 +5,7 @@
         ids are added later). False if not editing.
  * > entity - Name of this form's entity
  * > forms - Container for form-specific params
- * > formLevels - An array of the form level names/tags/prefixes/etc.
+ * > levels - An array of the form level names/tags/prefixes/etc.
  * > records - An object of all records, with id keys, for each of the
  *   root entities - Location, Source and Taxa, and any sub entities as needed.
  * > submit - Data used during form submission: fLvl, entity
@@ -44,7 +44,7 @@ export function initFormState(p) {                                  /*temp-log*/
 function getMainStateObj(entity) {
     return {
         forms: {},
-        formLevels: ['top', 'sub', 'sub2'],
+        levels: ['top', 'sub', 'sub2'],
     };
 }
 function addRecordData(fS, data, p) {

@@ -15,7 +15,7 @@
  *         SHARED
  *     FINISH BUILD
  */
-import { _elems, _form, _val, getSubFormLvl } from '~form';
+import { _elems, _form, _val } from '~form';
 import * as sForm from '../../src-form-main.js';
 /* ======================= ON SELECTION ===================================== */
 export function onPublSelection(val) {
@@ -35,7 +35,7 @@ function getCreateFormParams(v) {
         style: 'sml-sub-form',
         vals: { DisplayName: v === 'create' ? '' : v }
     };
-    return { ...cParams, ...getFormParams(getSubFormLvl('sub2'), 'create') };
+    return { ...cParams, ...getFormParams(_state('getSubFormLvl', ['sub2']), 'create') };
 }
 /* ---------------------------- EDIT ---------------------------------------- */
 export function initEditForm(id) {

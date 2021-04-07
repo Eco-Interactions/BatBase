@@ -9,7 +9,7 @@
  *     ON ROLE SELECTION
  */
 import { _cmbx, _u } from '~util';
-import {  _elems, _form, _state, _val, getSubFormLvl } from '~form';
+import {  _elems, _form, _state, _val } from '~form';
 import * as iForm from '../int-form-main.js';
 /* ======================= ENABLE FIELDS ==================================== */
 export function enableTaxonFieldCombos() {
@@ -64,7 +64,7 @@ function getRoot() {
  */
 export function onTaxonFieldSelection(field, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", field, val);
     if (val === "" || isNaN(parseInt(val))) { return; }
-    $('#'+getSubFormLvl('sub')+'-form').remove();
+    $('#'+_state('getSubFormLvl', ['sub'])+'-form').remove();
     storeFieldSelection(field, val);
     if (field === 'Parent') { return; } //taxon edit-form
     iForm.enableTaxonFieldCombos();

@@ -17,7 +17,7 @@
  *    HELPERS
  */
 import { _db, _u } from '~util';
-import { _state, getSubFormLvl } from '~form';
+import { _state } from '~form';
 /* =========================== GET OPTIONS ================================== */
 /**
  * Builds options out of the entity-name  object. Name (k) ID (v). If an option
@@ -158,7 +158,7 @@ export function buildSrcOpts(srcType, ids, rcrds) {                 /*dbug-log*/
 }
 /** Return the citation type options available for the parent-publication's type. */
 function getCitTypeOpts(fName, prop) {                              /*dbug-log*///console.log('   --getCitTypeOpts[%s] fName[%s] prop[%s]', fName, prop);
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     return _db('getData', [prop]).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {                              /*dbug-log*///console.log('   --buildCitTypeOpts[%O]', types);

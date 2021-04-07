@@ -26,7 +26,7 @@
  */
 import { _cmbx, _el } from '~util';
 import { _map } from '~db';
-import { _state, _elems, _form, getSubFormLvl } from '~form';
+import { _elems, _form, _state } from '~form';
 /* ========================= INIT FORM ====================================== */
 /* --------------------------- CREATE --------------------------------------- */
 export function initCreateForm(entity, val) {                       /*dbug-log*///console.log("       --initLocForm [%s]", val);
@@ -175,7 +175,7 @@ function lintCoord(prefix) {
 }
 /* -------------------------------- AUTOFILL -------------------------------- */
 export function autofillCoordinateFields(lat, lng, cntryId) {
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     setCoordinateFieldData(fLvl, 'Latitude', lat.toFixed(7));
     setCoordinateFieldData(fLvl, 'Longitude', lng.toFixed(7));
     _elems('setSilentVal', [fLvl, 'Country', cntryId]);

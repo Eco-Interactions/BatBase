@@ -5,7 +5,7 @@
  *     EXIT FORM
  */
 import { _cmbx, _el } from '~util';
-import { _elems, _state, getNextFormLevel } from '~form';
+import { _elems, _state } from '~form';
 import * as build from './build/form-build-main.js';
 import * as bttn from './buttons/form-buttons.js';
 import * as footer from './footer/form-footer.js';
@@ -26,7 +26,7 @@ export function initSubForm(p) {                                    /*dbug-log*/
         .then(() => 'success');
 }
 function updateParentForm(p) {                                      /*dbug-log*///console.log('--updateParentForm');
-    const pLvl = getNextFormLevel('parent', p.group);
+    const pLvl = _state('getFormLevel', ['parent', p.group]);
     _elems('toggleSubmitBttn', [pLvl, false]);
     _cmbx('enableCombobox', [p.combo, false])
 }

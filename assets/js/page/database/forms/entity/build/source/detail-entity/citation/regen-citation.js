@@ -11,7 +11,7 @@
  *     UPDATE FIELD
  */
 import { _cmbx, _u } from '~util';
-import { _state, _elems, getNextFormLevel } from '~form';
+import { _elems, _state } from '~form';
 
 export function buildCitTextAndUpdateField(fLvl) {                  /*dbug-log*///console.log('--buildCitTextAndUpdateField [%s]', fLvl);
     const $elem = $('#CitationText_f textarea');
@@ -26,8 +26,7 @@ function initializeCitField($elem) {
 /* ------------------------ GET CITATION TEXT ------------------------------- */
 /** Returns the citation field text or false if there are no updates. */
 function getCitationFieldText($elem, fLvl) {
-    const dfault = 'The citation will display here once all required fields '+
-        'are filled.';
+    const dfault = 'The citation will display here once all required fields are filled.';
     return Promise.resolve(getCitationText());
 
     function getCitationText() {
@@ -37,7 +36,8 @@ function getCitationFieldText($elem, fLvl) {
     }
 }
 function ifNoChildFormOpen(fLvl) {
-   return $('#'+getNextFormLevel('child', fLvl)+'-form').length == 0;
+    const child = _state('getFormLevel', ['child', fLvl]);
+   return $(`#${child}form`).length == 0;
 }
 function buildCitationText(fLvl) {                                  /*dbug-log*///console.log('--buildCitationText [%s]', fLvl);
     return _u('generateCitationText', [getDataForCitation(fLvl), true]);

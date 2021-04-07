@@ -79,6 +79,12 @@ function getFormObj(fLvl) {
 export function getStateProp(...args) {
     return callCoreState(get, 'getStateProp', args);
 }
+export function getFormLevel(...args) {
+    return callCoreState(get, 'getFormLevel', args);
+}
+export function getSubFormLvl(...args) {
+    return callCoreState(get, 'getSubFormLvl', args);
+}
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(...args) {
     return callCoreState(get, 'getEntityRcrds', args);

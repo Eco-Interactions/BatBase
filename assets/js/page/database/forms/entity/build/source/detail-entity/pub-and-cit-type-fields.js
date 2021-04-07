@@ -10,11 +10,11 @@
  *     SET SOURCE DETAIL-TYPE
  */
 import { _cmbx, _u } from '~util';
-import { _confg, _elems, _state, getSubFormLvl } from '~form';
+import { _confg, _elems, _state } from '~form';
 import * as sForm from '../src-form-main.js';
 /* ----------------- LOAD SOURCE-TYPE ROWS ---------------------------------- */
 export function loadSrcTypeFields(entity, typeId, type) {           /*dbug-log*///console.log('+--loadSrcTypeFields [%s] id?[%s] type[%s]', entity, typeId, type);
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     setSourceDetailType(entity, fLvl, typeId, type);
     return _elems('onFormConfgChanged', [fLvl, entity])
         .then(finishSrcTypeFormBuild);

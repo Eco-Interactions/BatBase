@@ -13,7 +13,7 @@
  *     FINISH BUILD
  */
 import { _cmbx } from '~util';
-import { _elems, _form, getSubFormLvl } from '~form';
+import { _elems, _form, _state } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as aForm from './auth-form-main.js';
 /* ======================= INIT FORM ======================================== */
@@ -25,7 +25,7 @@ export function initCreateForm(cnt, aType, v) {                     /*perm-log*/
         .then(status => finishFormInit(status, p));
 
     function getCreateFormParams() {
-        const fLvl = getSubFormLvl('sub2');
+        const fLvl = _state('getSubFormLvl', ['sub2']);
         return {
             action: 'create',
             appendForm: form => $('#'+aType+cnt+'_f')[0].append(form),
@@ -42,7 +42,7 @@ export function initCreateForm(cnt, aType, v) {                     /*perm-log*/
 }
 function resetOnCreateFormCancel(fLvl, type, cnt) {                 /*dbug-log*///console.log('--resetOnCreateFormCancel [%s][%s][%s]', fLvl, type, cnt);
     _elems('ifParentFormValidEnableSubmit', [fLvl]);
-    aForm.ifNoneStillSelectedEnableOtherType(type, getSubFormLvl('sub'), cnt);
+    aForm.ifNoneStillSelectedEnableOtherType(type, _state('getSubFormLvl', ['sub']), cnt);
     _cmbx('resetCombobox', [type + cnt]);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
@@ -52,14 +52,15 @@ export function initEditForm(id) {                                  /*perm-log*/
         .then(status => finishFormInit(status, p));
 
     function getEditFormParams() {
-        const fLvl = getSubFormLvl('sub2');
+        const fLvl = _state('getSubFormLvl', ['sub2']);
         return {
             action: 'edit',
             group: 'top',
             id: id,
+            name: 'Author',
             style: 'sml-form',
             submit: getSubmitFunc('top')
-        }
+        };
     }
 }
 /* ------------------------ SHARED ------------------------------------------ */

@@ -12,8 +12,8 @@
  *     UPDATE UI FOR CITATION-TYPE
  *     ADD PUB DATA
  */
-import { _db, _cmbx } from '~util';
-import {  _state, _elems, getSubFormLvl } from '~form';
+import { _cmbx, _db } from '~util';
+import {  _elems, _state } from '~form';
 import * as sForm from '../../src-form-main.js';
 /* ----------------------- SELECT DEFAULT-TYPE ------------------------------ */
 export function selectDefaultCitType() {                            /*dbug-log*///console.log('           /--selectDefaultCitType');
@@ -21,7 +21,7 @@ export function selectDefaultCitType() {                            /*dbug-log*/
         .then(types => setCitType(types));
 }
 function setCitType(cTypes) {
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     const pData = _state('getFieldState', [fLvl, 'ParentSource', 'misc']);
     const pubType = pData.pubType.displayName;
     const defaultType = getDefaultCitType(pubType, pData);
@@ -48,7 +48,7 @@ function getBookDefault(pubType, pData) {
  * edit form, skip loading pub data...
  */
 export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*///console.log('           /--loadCitTypeFields');
-    const fLvl = getSubFormLvl('sub');
+    const fLvl = _state('getSubFormLvl', ['sub']);
     const type = typeName || this.$input[0].innerText;
     return sForm.loadSrcTypeFields('Citation', typeId, type)
         .then(() => sForm.handleCitText(fLvl));
