@@ -15,8 +15,8 @@
  */
 import { _cmbx, _el } from '~util';
 let input;
-export function handleInputValidation(type, input) {                /*dbug-log*///console.log("+--handleInputValidation [%s][%O]", type, input);
-    input = input;
+export function handleInputValidation(type, el) {                   /*dbug-log*///console.log("+--handleInputValidation [%s][%O]", type, el);
+    input = el;
     setInputValidation(type);
     return input;
 }
@@ -33,7 +33,7 @@ function setInputValidation(type) {
     if (!map[type]) { return; }
     map[type]();
 }
-function addAttrAndValidation(attrs, msg) {
+function addAttrAndValidation(attrs, msg) {                         /*dbug-log*///console.log('--addAttrAndValidation input[%O] attrs[%O] msg[%s]', input, attrs, msg);
     $(input).attr(attrs).change(validateInput.bind(null, msg));
 }
 /* ----------------------- COORDINATES -------------------------------------- */
@@ -73,20 +73,20 @@ function setYearCharLength() {
     addAttrAndValidation({ min: 1000, max: 3000 }, msg);
 }
 /* ========================== VALIDATE ====================================== */
-function validateInput(msg, e) {                                    /*dbug-log*///console.log('validateInput. e = %O, msg = [%s]', e, msg);
-    const valid = e.currentTarget.checkValidity();                  /*dbug-log*///console.log('valid ? ', valid)
+function validateInput(msg, e) {                                    /*dbug-log*/console.log('validateInput. e = %O, msg = [%s]', e, msg);
+    const valid = e.currentTarget.checkValidity();                  /*dbug-log*/console.log('valid ? ', valid)
     if (valid) { return; }
     if (msg) { setCustomInvalidMsg(e.currentTarget, msg); }
     e.currentTarget.reportValidity();
     // _elems('toggleSubmitBttn', [fLvl, false])   //replace
 }
-function setCustomInvalidMsg(elem, msg) {                          /*dbug-log*///console.log('setCustomInvalidMsg [%s] for [%O]', msg, elem);
+function setCustomInvalidMsg(elem, msg) {                          /*dbug-log*/console.log('setCustomInvalidMsg [%s] for [%O]', msg, elem);
     elem.setCustomValidity(msg);
     elem.oninput = resetValidityMsg.bind(null);
 }
 /* HTML5 validation always fails if a custom validity message is set. */
 function resetValidityMsg(e) {
-    const elem = e.currentTarget;                                  /*dbug-log*///console.log('resetValidityMsg. isValid ? %s = %O', elem.validity.valid, elem)
+    const elem = e.currentTarget;                                  /*dbug-log*/console.log('resetValidityMsg. isValid ? %s = %O', elem.validity.valid, elem)
     elem.setCustomValidity('');
     elem.oninput = null;
     // _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);  //replace

@@ -37,4 +37,3 @@ export function getFieldInput(f) {
 export function buildMultiSelectField() {
     return input.buildMultiSelectField(...arguments);
 }
-/* ---------------------- FORM-ROW ------------------------------------------- */
