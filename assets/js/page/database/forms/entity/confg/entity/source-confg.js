@@ -34,9 +34,6 @@ function getSourceFieldConfg() {
         },
         DisplayName: {
             name: 'DisplayName',
-            prep: {    // TODO: DRY
-                setCoreData: []
-            },
             prop: {
                 core: 'displayName'
             },

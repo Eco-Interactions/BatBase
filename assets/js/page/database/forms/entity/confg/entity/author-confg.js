@@ -22,6 +22,9 @@ export default function(action, entity) {
             FirstName: {
                 label: 'First',
                 name: 'FirstName',
+                prep: {
+                    setDetailData: []
+                },
                 prop: {
                     detail: 'firstName'
                 },
@@ -30,6 +33,9 @@ export default function(action, entity) {
             MiddleName: {
                 label: 'Middle',
                 name: 'MiddleName',
+                prep: {
+                    setDetailData: []
+                },
                 prop: {
                     detail: 'middleName'
                 },
@@ -38,6 +44,9 @@ export default function(action, entity) {
             LastName: {
                 type: 'text',
                 name: 'LastName',
+                prep: {
+                    setDetailData: []
+                },
                 prop: {
                     detail: 'lastName'
                 },
@@ -47,6 +56,9 @@ export default function(action, entity) {
                 class: 'w-4',
                 type: 'text',
                 name: 'Suffix',
+                prep: {
+                    setSuffix: []
+                },
                 prop: {
                     detail: 'suffix'
                 },

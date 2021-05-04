@@ -19,6 +19,9 @@ export default function(action, entity) {
             },
             DisplayName: {
                 label: 'Name',
+                prep: {
+                    setCoreData: []
+                },
                 prop: {
                     core: 'displayName'
                 },

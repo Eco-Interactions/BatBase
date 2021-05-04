@@ -28,7 +28,8 @@ function getPublicationFieldConfg() {
         DisplayName: { //Source field
             label: 'Title',
             prep: {
-                setDetailData: []
+                setDetailData: [],
+                setCoreData: []
             }
         },
         Doi: {//Source field

@@ -64,7 +64,8 @@ function getCitationFieldConfg() {
             label: 'Title',
             prep: {
                 renameField: ['Title', 'detail'],
-                setDetailData: []
+                setDetailData: [],
+                setCoreData: []
             },
             prop: {
                 detail: 'displayName'
