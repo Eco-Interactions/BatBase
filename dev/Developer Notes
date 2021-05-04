@@ -75,10 +75,6 @@ SERVER UPDATES:
         - delete the previous prod backup
 
 ##------------------------- Server Stuff -------------------------------------##
-
-> SSH
-    ssh user@batbase.org -p18765
-
 >.htaccess rewrite for batbase.org
     RewriteEngine on
     RewriteCond %{HTTP_HOST} ^batbase.org$ [NC,OR]

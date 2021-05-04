@@ -25,6 +25,12 @@ export default function(action, entity) {
 }
 function getPublicationFieldConfg() {
     return {
+        DisplayName: { //Source field
+            label: 'Title',
+            prep: {
+                setDetailData: []
+            }
+        },
         Doi: {//Source field
             info: {
                 tooltip: 'Digital Object Identifier provided by the Publisher',
@@ -57,9 +63,6 @@ function getPublicationFieldConfg() {
         },
         SourceType: {//Source field
             value: 'Publication'
-        },
-        DisplayName: { //Source field
-            label: 'Title',
         },
         Website: {//Source field
             info: {

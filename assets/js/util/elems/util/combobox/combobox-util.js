@@ -9,7 +9,6 @@
 import { _alert, _u } from '~util';
 /** Active Selectize configuration objects. Field name (k): confg (v)  */
 const confgs = {};
-
 /**
  * Inits the combobox, using 'selectize', according to the passed config.
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
@@ -170,6 +169,11 @@ export function destroySelectizeInstance(field) {
     // ERROR THROWN SOMETIMES. FRUSTRATING BUG. TODO.
     // $(confgs[getFieldConfgKey(field)].id)[0].selectize.destroy();
     delete confgs[getFieldConfgKey(field)];
+}
+/* -------------------- REPLACE OPTIONS ------------------------------------- */
+export function getOptionTotal(field) {
+    const selApi = getSelApi(field);
+    return Object.keys(selApi.options).length;
 }
 /* -------------------- REPLACE OPTIONS ------------------------------------- */
 export function replaceSelOpts(field, opts) {                       /*dbug-log*///console.log('--replaceSelOpts field[%s] opts[%O]', field, opts)

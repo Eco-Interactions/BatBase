@@ -57,8 +57,8 @@ function setDoiPattern() {
 }
 /* ------------------------------ PAGE -------------------------------------- */
 function setPageRange() {
-    const attrs = { pattern: '^[\\d-]+$', placeholder: 'Ex: ###-###' };
-    const msg = 'Please enter page range with no spaces: ###-####';
+    const attrs = { pattern: '^[\\d-]+$', placeholder: 'Ex: ##-###' };
+    const msg = 'Please enter page range with no spaces: ##-###';
     addAttrAndValidation(attrs, msg);
 }
 /* ---------------------------- URL ----------------------------------------- */

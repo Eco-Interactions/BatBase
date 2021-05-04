@@ -6,6 +6,8 @@
 ### __________________________ CURRENT _____________________________________ ###
 
 SINCE LAST SERVER UPDATE:
+    - TABLE
+        - @ Hiding entities with '[DELETE]' from the DATABASE TABLE
     - FORMS
         - Configuration
             - all form-field configuration centralized
@@ -13,6 +15,8 @@ SINCE LAST SERVER UPDATE:
                 - This greatly reflexts the general increase of flexibility when
                     reusing the forms with differnt configuration
             - Views
+                - 'simple' and 'all views'
+                - Taxon has a 'create' and 'edit' view
                 - Fields can be stacked in the same row (eg, doi and website)
                 - arbitrary number of fields in row
                     - styled by percentage based on total "fields" in row and field size (eg, year is a "small" field)
@@ -40,6 +44,11 @@ SINCE LAST SERVER UPDATE:
             - Only groups with valid subject roles are added
         - Object
             - auto select bats if anything other than bats are selected as the subject
+
+
+    - Todos
+        - FORMS
+            - EDIT: Reorder fields to use the space better
 
 
 

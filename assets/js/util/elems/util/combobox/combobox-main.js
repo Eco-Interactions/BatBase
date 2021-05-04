@@ -84,6 +84,9 @@ export function triggerComboChangeReturnPromise() {
 export function destroySelectizeInstance() {
     return util.destroySelectizeInstance(...arguments);
 }
+export function getOptionTotal() {
+    return util.getOptionTotal(...arguments);
+}
 export function replaceSelOpts() {
     return util.replaceSelOpts(...arguments);
 }

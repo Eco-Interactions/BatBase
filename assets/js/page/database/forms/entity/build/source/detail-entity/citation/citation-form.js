@@ -88,7 +88,13 @@ function finishCitFormInit(status) {                                /*dbug-log*/
     if (!status) { return; } //Error handled elsewhere
     $('#CitationText_f textarea').attr('disabled', true);
     return types.selectDefaultCitType()
+        .then(disableCitationTypeFieldIfOnlyOneTypeAvailable)
         .then(() => $('#Abstract_f textarea').focus());
+}
+function disableCitationTypeFieldIfOnlyOneTypeAvailable() {
+    const typeCnt = _cmbx('getOptionTotal', ['CitationType']);
+    if (typeCnt > 1) { return; }
+    _cmbx('enableCombobox', ['CitationType', false]);
 }
 /* --------------------- FINISH REBUILD ------------------------------------- */
 export function finishFieldLoad(fLvl) {
@@ -113,20 +119,20 @@ function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*/
  */
 function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl) {
     if (!_elems('ifAllRequiredFieldsFilled', [fLvl])) { return; }
-    const empty = $('#citation_fields div.form-field').filter(hightlightIfEmpty);
+    const empty = $('#Citation_fields div.sub_f').filter(hightlightIfEmpty);
     if (!empty.length && $('.warn-msg').length) { return $('.warn-msg').remove(); }
     if ($('.warn-msg').length) { return; }
     $(`#${fLvl}-submit`).before('<div class="warn-msg warn">Please add highlighted data if available.</div>')
 }
-function hightlightIfEmpty(i, el) {
-    const input = el.children[1];
-    if (ifFieldShouldBeSkipped(el, ...el.children)) { return false; }
-    $(el).addClass('warn');
+function hightlightIfEmpty(i, fContainer) {
+    const field = fContainer.children[1];
+    if (ifFieldShouldBeSkipped(field, ...field.children)) { return false; }
+    $(field).addClass('warn');
     return true;
 }
 function ifFieldShouldBeSkipped (el, label, input) {
     const ignore = ['Author'];
-    const skip = $(input).val() || ignore.indexOf(label.id.split('-')[0]) !== -1;
+    const skip = $(input).val() || ignore.find(f => label.innerText.indexOf(f) !== -1);
     if (skip && el.className.includes('warn')) { $(el).removeClass('warn'); }
     return skip;
 }
