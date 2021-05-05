@@ -117,9 +117,9 @@ function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*/
  * Highlights field continer if citation field is empty once all required fields
  * are filled. Removes hightlights when filled.
  */
-function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl) {
+function ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl) {           /*dbug-log*///console.log('   --ifReqFieldsFilledHighlightEmptyAndPrompt fLvl[%s]', fLvl);
     if (!_elems('ifAllRequiredFieldsFilled', [fLvl])) { return; }
-    const empty = $('#Citation_fields div.sub_f').filter(hightlightIfEmpty);
+    const empty = $(`#Citation_fields div.${fLvl}_f`).filter(hightlightIfEmpty);/*dbug-log*///console.log('    --empty? [%O]', empty);
     if (!empty.length && $('.warn-msg').length) { return $('.warn-msg').remove(); }
     if ($('.warn-msg').length) { return; }
     $(`#${fLvl}-submit`).before('<div class="warn-msg warn">Please add highlighted data if available.</div>')

@@ -92,10 +92,6 @@ export function getEntityRcrds(...args) {
 export function getRcrd(...args) {
     return callCoreState(get, 'getRcrd', args);
 }
-/* --------------------- STATE PREDICATES ----------------------------------- */
-export function isEditForm(...args) {
-    return callCoreState(get, 'isEditForm', args);
-}
 /* ========================= GET FORM STATE ================================= */
 export function getFormState(...args) {
     return callFormState(get, 'getFormState', args);
@@ -114,6 +110,9 @@ export function getComboFields(...args) {
 //     return callFormState(get, 'getFieldValues', args);
 // }
 /* --------------------- STATE PREDICATES ----------------------------------- */
+export function isEditForm(...args) {
+    return callFormState(get, 'isEditForm', args);
+}
 /** [isFieldShown description] */
 export function isFieldShown(...args) {
     return callFormState(get, 'isFieldShown', args);

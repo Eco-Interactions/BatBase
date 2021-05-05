@@ -20,8 +20,9 @@ import { handleInputValidation } from './val-input.js';
 /* ======================= INPUT BUIDLERS =================================== */
 export function getFieldInput(fConfg) {                             /*dbug-log*///console.log('+--getFieldInput [%O]', fConfg);
     return Promise.resolve(getInput(fConfg))
-        .then(handleInputValidation.bind(null, fConfg.type))
-        .then(finishInputBuild.bind(null, fConfg));
+        .then(input => setFieldValue(fConfg, input))
+        .then(input => handleInputValidation(fConfg.type, input))
+        .then(input => finishInputBuild(fConfg, input));  //returns fConfg with the input elem added.
 }
 function getInput(f) {
     return {
@@ -121,20 +122,26 @@ function buildMultiSelectCntnr(f, field) {
     f.input = field;
     return _el('getFieldElems', [f]);
 }
-/* ========================== FINISH BUILD ================================== */
-function finishInputBuild(f, input) {                               /*dbug-log*///console.log('   --finishInputBuild f[%O] input[%O]', f, input);
-    f.input = input;
-    setFieldValue(f);
-    return f;
-}
 /* --------------------------- SET VALUE ------------------------------------ */
-function setFieldValue(f) {
-    if (f.type === 'multiSelect') { return handleMultiFieldInitVal(f); }
-    if (!f.value) { return; }
-    const val = _u('isObj', f.value) ? f.value.value : f.value;
-    $(f.input).val(val);
+function setFieldValue(f, input) {                                  /*dbug-log*///console.log('--setFieldValue [%s][%O]', f.name, _u('snapshot', [f]))
+    if (f.type === 'multiSelect') {
+        handleMultiFieldInitVal(f);
+    } else {
+        setInputVal(f.value, input);
+    }
+    return input;
+}
+function setInputVal(fVal, input) {
+    if (!fVal) { return; }
+    const val = _u('isObj', fVal) ? fVal.value : fVal;
+    $(input).val(val);
 }
 function handleMultiFieldInitVal(f) {
     if (f.value && _u('isObj', [f.value])) { return; }
     f.value = {};
+}
+/* ========================== FINISH BUILD ================================== */
+function finishInputBuild(f, input) {                               /*dbug-log*///console.log('   --finishInputBuild f[%O] input[%O]', f, input);
+    f.input = input;
+    return f;
 }

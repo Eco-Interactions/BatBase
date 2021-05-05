@@ -33,7 +33,7 @@ import { _confg, _form, _state, alertFormIssue } from '~form';
  *
  * @return {obj}     Root form-state
  */
-export function initFormState(p) {                                  /*temp-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", p, p.name, p.id, p.action);
+export function initFormState(p) {                                  /*temp-log*/console.log("    #--initFormState params[%O] entity[%s] id?[%s] action[%s] ", _u('snapshot', [p]), p.name, p.id, p.action);
     const fS = getMainStateObj(p.name);
     p.confg = getEntityBaseConfg(p);
     return _db('getData', [p.confg.data[p.action]])
@@ -52,7 +52,7 @@ function addRecordData(fS, data, p) {
 }
 /* ======================= BUILD STATE ====================================== */
 /* ----------------------- INIT --------------------------------------------- */
-export function buildNewFormState(fS, p) {                          /*temp-log*/console.log("    #--buildNewFormState fS[%O] params[%O]", fS, p);
+export function buildNewFormState(fS, p) {                          /*temp-log*/console.log("    #--buildNewFormState fS[%O] params[%O]", fS, _u('snapshot', [p]));
     fS.forms[p.name] = p.group;
     fS.forms[p.group] = getBaseFormState(fS, p);
     setFieldInitValues(fS.records, fS.forms[p.group]);
@@ -109,7 +109,7 @@ function setInitValues(fields, vals) {                              /*dbug-log*/
  * > Taxon forms:
  *     todo...
  */
-function addEntityFormState(fS, f) {                                /*temp-log*/console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, f, fS);
+function addEntityFormState(fS, f) {                                /*temp-log*/console.log("    #--addEntityFormState entity[%s] params[%O] forms[%O]", f.name, _u('snapshot', [f]), fS);
     return initEntityState(fS, f)
         .then(() => finishEntityFormStateInit(fS, f));
 }
@@ -124,8 +124,8 @@ function initEntityState(fS, f) {
     if (!map[f.name]) { return Promise.resolve(); }
     return Promise.resolve(map[f.name](fS.records, f));
 }
-function finishEntityFormStateInit(fS, f) {                         /*dbug-log*///console.log("    --finishEntityFormStateInit form[%O]", f);
-    _confg('finishFormStateInit', [f]);                             /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, f);
+function finishEntityFormStateInit(fS, f) {                         /*dbug-log*/console.log("    --finishEntityFormStateInit form[%O]", _u('snapshot', [f]));
+    _confg('finishFormStateInit', [f]);                             /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, _u('snapshot', [f]));
     return f;
 }
 /* ___________________________ TAXON ________________________________________ */

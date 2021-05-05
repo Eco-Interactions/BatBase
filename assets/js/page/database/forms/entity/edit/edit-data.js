@@ -50,7 +50,7 @@ function setLocData(data, fState) {                                 /*dbug-log*/
         if (!fConfg.prop) { return; }
         const v = getFieldValue(fConfg, loc);
         if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
-        fConfg.value =  v.id ? v.id : v;
+        setFieldValue(fConfg, v);
     }
 }
 function setGeoJsonData(geoJsonField, geoJsonRcrd) {                /*dbug-log*/console.log('  --setGeoJsonData geoJsonField[%O] geoJsonRcrd[%O]', geoJsonField, geoJsonRcrd);
@@ -70,7 +70,7 @@ function setSrcData(data, fState) {                                 /*dbug-log*/
         const v = getSrcFieldValue(fConfg);
         if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
         if (fConfg.name === fState.name+'Type') { fState.type = v.displayName; }
-        fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
+        setFieldValue(fConfg, v);
     }
     function getSrcFieldValue(fConfg) {
         return Object.keys(fConfg.prop).map(ent => e[ent][fConfg.prop[ent]])[0];
@@ -91,8 +91,7 @@ function setTxnData(data, fState) {                                 /*dbug-log*/
         const v = getFieldValue(fConfg, txn);
         if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
         // if (fConfg.name === ) { fState.type = v.displayName; }
-        fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
-
+        setFieldValue(fConfg, v);
     }
 }
 
@@ -104,12 +103,8 @@ function setTxnData(data, fState) {                                 /*dbug-log*/
 function getFieldValue(fConfg, entity) {                            /*dbug-log*/console.log('  --getFieldValue fConfg[%O]', fConfg);
     return Object.values(fConfg.prop).map(prop => entity[prop])[0];
 }
-function setFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setSrcFieldValue fConfg[%O]', fConfg);
-    if (!fConfg.prop) { return; }
-    const v = Object.keys(fConfg.prop).map(ent => e[ent][fConfg.prop[ent]])[0];
-    if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
-    if (fConfg.name === fState.name+'Type') { fState.type = v.displayName; }
-    fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
+function setFieldValue(fConfg, v) {                                 /*dbug-log*/console.log('  --setFieldValue fConfg[%O]', fConfg);
+    fConfg.value =  v.id ? v.id : ( isNaN(v) ? v : parseInt(v));    /*dbug-log*/console.log('       --fConfg after [%O]', _u('snapshot', [fConfg]));
 }
 // function setIntData(data, fState) {
 //     // body...

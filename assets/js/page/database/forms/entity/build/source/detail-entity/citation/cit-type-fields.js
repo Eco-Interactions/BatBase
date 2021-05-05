@@ -26,7 +26,7 @@ function setCitType(cTypes) {
     const pubType = pData.pubType.displayName;
     const defaultType = getDefaultCitType(pubType, pData);
     _cmbx('setSelVal', ['CitationType', cTypes[defaultType], 'silent']);
-    if (!_state('isEditForm')) { addPubData(cTypes[defaultType], defaultType, fLvl); }
+    addPubData(cTypes[defaultType], defaultType, fLvl);
     return loadCitTypeFields(cTypes[defaultType], defaultType);
 }
 function getDefaultCitType(pubType, pData) {
@@ -91,7 +91,7 @@ function toggleTitleField(disable = false) {
 }
 /* ------------------------- ADD PUB DATA ----------------------------------- */
 /** Adds or removes publication data from the form's values, depending on type. */
-function addPubData(typeId, type, fLvl) {
+function addPubData(typeId, type, fLvl) {                           /*dbug-log*///console.log('--addPubData')
     const copy = ['Book', "Master's Thesis", 'Museum record', 'Other',
         'Ph.D. Dissertation', 'Report', 'Chapter' ];
     const addSameData = copy.indexOf(type) !== -1;
@@ -116,11 +116,13 @@ function addPubValues(fLvl, addValues, type) {
             pSrc.displayName : '';
     }
     function addPubYear() {
+        if (fData.Year.value) { return; }
         fData.Year.value = addValues ? pSrc.year : '';
     }
     function addAuthorsToCitation() {
+        if (Object.keys(fData.Author.value).length) { return; }
         const pAuths = pSrc.authors;
         if (!addValues || !pAuths) { return; }
-        fData.Authors.value = pAuths ? pAuths : null;
+        fData.Author.value = pAuths ? pAuths : null;
     }
 }

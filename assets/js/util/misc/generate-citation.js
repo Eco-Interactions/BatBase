@@ -46,7 +46,7 @@ function getTypeCitationGenerator(type) {
  */
 function  buildArticleCite(type) {
     const athrs = getCitAuthors();
-    const year = _u('stripString', [d.citSrc.year]);
+    const year = d.citSrc.year;
     const title = _u('stripString', [d.cit.title]);
     const pub = _u('stripString', [d.pubSrc.displayName]);
     const vip = getCiteVolumeIssueAndPages();
@@ -109,7 +109,7 @@ function buildDissertThesisCite(type) {
  */
 function buildOtherCite(type) {
     const athrs = getCitAuthors() || getPubSrcAuthors();
-    const year = d.citSrc.year ? _u('stripString', [d.citSrc.year]) : d.pubSrc.year;
+    const year = d.citSrc.year ? d.citSrc.year : d.pubSrc.year;
     const title = _u('stripString', [d.cit.title]);
     const vip = getCiteVolumeIssueAndPages();
     const publ = buildPublString(d.pubSrc);

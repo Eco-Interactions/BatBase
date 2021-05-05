@@ -31,7 +31,7 @@ export function getFormLevel(fS, next, current) {                   /*dbug-log*/
  */
 export function getSubFormLvl(fS, lvl) {
     if (fS.forms.top.name === 'Interaction') { return lvl; }
-    return fS.levels.indexOf(lvl)-1;
+    return fS.levels[fS.levels.indexOf(lvl)-1];
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(fS, entity) {                        /*dbug-log*///console.log('   --getEntityRcrds  entity[%O], fS[%O]', entity, fS);
@@ -50,10 +50,6 @@ export function getRcrd(fS, e, id) {                                /*dbug-log*/
 /* ----------------------- EDIT FORM ---------------------------------------- */
 export function getEditEntityId(fS, type) {
     return fS.top.editing[type];
-}
-/* --------------------- STATE PREDICATES ----------------------------------- */
-export function isEditForm(fS) {
-    return fS.action === 'edit';
 }
 /* ============================ GET FORM-STATE ====================================================================== */
 export function getFormState(fState, prop = null) {                 /*dbug-log*///console.log('   --getFormState prop?[%s] [%O]', prop, fState);//console.trace();
@@ -80,6 +76,9 @@ export function getComboFields(fState) {                            /*dbug-log*/
 //     return vals;
 // }
 /* --------------------- STATE PREDICATES ----------------------------------- */
+export function isEditForm(fState) {
+    return fState.action === 'edit';
+}
 /** [isFieldShown description] */
 export function isFieldShown(fState, field) {                       /*dbug-log*///console.log('   --isFieldShown [%O][%O]', field, fState);
     if (Array.isArray(field)) { return areFieldsShown(fState, field); }

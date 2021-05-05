@@ -24,7 +24,7 @@ import { _u } from '~util';
  * @param  {Object} vals     [description]
  * @return {[type]}          [description]
  */
-export function buildViewConfg(c, viewSets) {                       /*dbug-log*/console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O]", c, viewSets);
+export function buildViewConfg(c, viewSets) {                       /*dbug-log*///console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O]", c, viewSets);
     c.infoSteps = 0;
     c.view = viewSets[c.display].map(row => getRowConfg(c, row));
 }
@@ -59,8 +59,8 @@ function getSingleConfg(c, f) {
     return f === '' ? { emptyField: true } : getFieldConfg(c, f);
 }
 /* ------------------------- BUILDER ---------------------------------------- */
-function getFieldConfg(c, name) {                                   /*dbug-log*/console.log("   --getFieldConfg [%s] [%O]", name, c.fields[name]);
-    const fConfg = getBaseFieldConfg();                             /*dbug-log*/console.log('       --fieldConfg [%O]', fConfg);
+function getFieldConfg(c, name) {                                   /*dbug-log*///console.log("   --getFieldConfg [%s] [%O]", name, c.fields[name]);
+    const fConfg = getBaseFieldConfg();                             /*dbug-log*///console.log('       --fieldConfg [%O]', fConfg);
     trackFieldData(fConfg, c);
     return buildFieldConfg(fConfg, c);
 

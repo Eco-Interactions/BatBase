@@ -78,7 +78,8 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(f, field) {/*dbug-log
  */
 function updateFormFieldState(f) {                                  /*dbug-log*///console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
     f.shown = true;
-    _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data
+    delete f.input;
+    // _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data
 }
 /* =========================== ON FIELD CHANGE ============================== */
 /** [handleFieldChangeListeners description] */

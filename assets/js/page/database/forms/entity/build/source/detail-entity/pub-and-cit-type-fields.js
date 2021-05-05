@@ -39,7 +39,7 @@ function setSourceDetailType(entity, fLvl, tId, tName) {
         value: tId ? tId : getSourceTypeIdFromCombo(typeField)
     };                                                               /*dbug-log*///console.log('--setSourceType[%s] = %O', typeField, val);
     _state('setFieldState', [fLvl, typeField, val]);
-    _state('setFormState', [fLvl, 'type', val.text])
+    _state('setFormState', [fLvl, 'type', val.text]);
     _confg('onEntityTypeChangeUpdateConfg', [fLvl]);
 }
 function getSourceTypeNameFromCombo(tField) {
