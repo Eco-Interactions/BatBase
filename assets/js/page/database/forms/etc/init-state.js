@@ -124,8 +124,8 @@ function initEntityState(fS, f) {
     if (!map[f.name]) { return Promise.resolve(); }
     return Promise.resolve(map[f.name](fS.records, f));
 }
-function finishEntityFormStateInit(fS, f) {                         /*dbug-log*/console.log("    --finishEntityFormStateInit form[%O]", _u('snapshot', [f]));
-    _confg('finishFormStateInit', [f]);                             /*perm-log*/console.log('   >>> NEW FORM entity[%s][%O]', f.name, _u('snapshot', [f]));
+function finishEntityFormStateInit(fS, f) {                         /*dbug-log*///console.log("    --finishEntityFormStateInit form[%O]", _u('snapshot', [f]));
+    _confg('finishFormStateInit', [f]);                             /*perm-log*/console.log('   >>> NEW FORM entity[%s] initConfg[%O] curConfg[%O]', f.name, _u('snapshot', [f]), f);
     return f;
 }
 /* ___________________________ TAXON ________________________________________ */

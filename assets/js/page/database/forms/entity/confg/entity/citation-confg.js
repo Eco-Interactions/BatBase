@@ -36,7 +36,6 @@ function getCitationFieldConfg() {
         CitationText: {
             name: 'CitationText',
             label: 'Citation',
-            required: true,
             prep: {    // TODO: DRY
                 renameField: ['Description'],
                 renameField: ['FullText', 'detail'],
@@ -63,9 +62,7 @@ function getCitationFieldConfg() {
         DisplayName: {
             label: 'Title',
             prep: {
-                renameField: ['Title', 'detail'],
-                setDetailData: [],
-                setCoreData: []
+                setCitationTitle: []
             },
             prop: {
                 detail: 'displayName'

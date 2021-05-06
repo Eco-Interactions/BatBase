@@ -42,8 +42,9 @@ export function clearEntityFormMemory(entity) {
     map[entity]();
 }
 /* =================== INIT FORM ============================================ */
-export function createEntity(entity, val) {
-    return getEntityModule(entity).initCreateForm(...arguments);
+export function createEntity(entity, val) {                         /*dbug-log*///console.log('--createEntity  entity[%s] text?[%s]', entity, val);
+    return getEntityModule(entity).initCreateForm(...arguments)
+        // .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', [null, entity]));
 }
 /* ------------------------- EDIT FORM -------------------------------------- */
 export function editEntity(entity, id) {

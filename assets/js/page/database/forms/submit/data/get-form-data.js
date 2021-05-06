@@ -22,6 +22,7 @@
  */
 import { _alert, _cmbx, _db, _u } from '~util';
 import { _state } from '~form';
+// import * as eData from './entity-data.js';
 /**
  * [ld description]
  * @type {Object}
@@ -170,8 +171,19 @@ function setCoreAndDetail(g, fConfg, emptyString) {
     ['core', 'detail'].forEach(e => setServerData(g, fConfg.name, fConfg.value, e));
 }
 /* ______________________________________ ENTITY ____________________________ */
+    /* ----------- CITATION ------------------------------------------------- */
+function setCitationTitle(g, fConfg) {
+    const title = fConfg.value;
+    setServerData('flat', 'Title', title, 'detail');
+    setServerData('flat', 'DisplayName', getUniqueCitationName(title), 'detail');
+    setServerData('flat', 'DisplayName', getUniqueCitationName(title));
+}
+function getUniqueCitationName(citationTitle) {
+    const pubTitle = ld.confg.fields.ParentSource.misc.pub.displayName;
+    return pubTitle == citationTitle ? citationTitle + '(citation)' : citationTitle;
+}
     /* ----------- LOCATION/GEOJSON ----------------------------------------- */
-function setGeoJsonData(g, fConfg) {                              /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
+function setGeoJsonData(g, fConfg) {                                /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
     const displayPoint = getDisplayCoordinates(fConfg.value, ld.confg.fields.Longitude.value);
     setServerData('flat', 'DisplayPoint', displayPoint, 'detail');
     setServerData('flat', 'Type', 'Point', 'detail');

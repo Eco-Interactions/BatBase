@@ -32,7 +32,7 @@ function buildToggleFieldsContainer() {
 }
 /* ----------------------------- LABEL -------------------------------------- */
 function getLabel(fLvl) {
-    const attr = { for: fLvl+'-all-fields', text: 'Show all' };
+    const attr = { for: fLvl+'-all-fields', text: 'Show all fields' };
     return _el('getElem', ['label', attr]);
 }
 /*---------------------------- CHECKBOX ------------------------------------- */

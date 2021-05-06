@@ -85,6 +85,9 @@ export function getFormLevel(...args) {
 export function getSubFormLvl(...args) {
     return callCoreState(get, 'getSubFormLvl', args);
 }
+export function getEntityFormLevel(...args) {
+    return callCoreState(get, 'getEntityFormLevel', args);
+}
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(...args) {
     return callCoreState(get, 'getEntityRcrds', args);

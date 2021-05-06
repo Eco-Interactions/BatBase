@@ -141,7 +141,7 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Author', 'Editor', 'Publisher']
+                    ['Author', 'Publisher']
                 ]
             }
         }

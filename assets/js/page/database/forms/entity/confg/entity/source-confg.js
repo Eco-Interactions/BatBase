@@ -20,7 +20,8 @@ function getSourceFieldConfg() {
                 core: 'authors'
             },
             name: 'Author',
-            type: 'multiSelect'
+            type: 'multiSelect',
+            value: {}  //Necessary for multi-select fields
         },
         Description: {
             name: 'Description',
@@ -59,7 +60,8 @@ function getSourceFieldConfg() {
             prop: {
                 core: 'editors'
             },
-            type: 'multiSelect'
+            type: 'multiSelect',
+            value: {}  //Necessary for multi-select fields
         },
         ParentSource: {
             entity: 'Source',

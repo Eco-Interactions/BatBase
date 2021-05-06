@@ -20,7 +20,7 @@ export function getStateProp(fS, prop) {                            /*dbug-log*/
 }
 
 /** Returns the 'next' form level- either the parent or child. */
-export function getFormLevel(fS, next, current) {                   /*dbug-log*/console.log('   --getFormLevel next[%s] current[%s]', next, current);
+export function getFormLevel(fS, next, current) {                   /*dbug-log*///console.log('   --getFormLevel next[%s] current[%s]', next, current);
     const curIdx = fS.levels.indexOf(current);
     return next === 'parent' ? fS.levels[curIdx-1] : fS.levels[curIdx+1];
 }
@@ -32,6 +32,9 @@ export function getFormLevel(fS, next, current) {                   /*dbug-log*/
 export function getSubFormLvl(fS, lvl) {
     if (fS.forms.top.name === 'Interaction') { return lvl; }
     return fS.levels[fS.levels.indexOf(lvl)-1];
+}
+export function getEntityFormLevel(fS, entity) {
+    return fS.forms[entity];
 }
 /* ----------------------- ENTITY RECORDS------------------------------------ */
 export function getEntityRcrds(fS, entity) {                        /*dbug-log*///console.log('   --getEntityRcrds  entity[%O], fS[%O]', entity, fS);

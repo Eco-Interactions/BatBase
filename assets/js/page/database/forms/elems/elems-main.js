@@ -60,7 +60,8 @@ export function ifParentFormValidEnableSubmit(fLvl) {
     const parentLvl = _state('getFormLevel', ['parent', fLvl]);
     checkReqFieldsAndToggleSubmitBttn(parentLvl);
 }
-export function checkReqFieldsAndToggleSubmitBttn(fLvl) {           /*dbug-log*///console.log('--checkReqFieldsAndToggleSubmitBttn fLvl[%s]', fLvl);
+export function checkReqFieldsAndToggleSubmitBttn(fLvl, entity) {   /*dbug-log*///console.log('--checkReqFieldsAndToggleSubmitBttn fLvl?[%s] entity?[%s]', fLvl, entity);
+    if (!fLvl) { fLvl = _state('getEntityFormLevel', [entity]); }
     const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
     toggleSubmitBttn(fLvl, reqFieldsFilled);
     return reqFieldsFilled;

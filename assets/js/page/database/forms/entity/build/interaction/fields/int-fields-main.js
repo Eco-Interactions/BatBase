@@ -17,18 +17,18 @@ import * as tag from './int-tag-field.js';
 
 export function getIntComboConfg() {
     return {
-        'CitationTitle': { onChange: src.onCitSelection, create: create('citation') },
+        'CitationTitle': { onChange: src.onCitSelection, create: create.bind(null, 'Citation') },
         'Country-Region': { onChange: loc.onCntryRegSelection },
         'InteractionType': { onChange: type.onTypeSelection },
         'InteractionTags': { onChange: tag.onTagSelection, delimiter: ",", maxItems: null  },
-        'Location': { onChange: loc.onLocSelection, create: create('location')},
-        'Publication': { onChange: src.onPubSelection, create: create('publication')},
+        'Location': { onChange: loc.onLocSelection, create: create.bind(null, 'Location')},
+        'Publication': { onChange: src.onPubSelection, create: create.bind(null, 'Publication')},
         'Subject': { onChange: txn.onTaxonFieldSelection.bind(null, 'Subject') },
         'Object': { onChange: txn.onTaxonFieldSelection.bind(null, 'Object') },
     };
 }
-function create(entity) {
-    return _form.bind(null, 'createEntity', [entity]);
+function create(entity, val) {
+    return _form('createEntity', [entity, val]);
 }
 export function clearFormFieldModuleMemory() {
     type.resetTypeAndTagMemory();

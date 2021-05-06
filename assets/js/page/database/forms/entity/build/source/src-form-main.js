@@ -12,7 +12,7 @@
  */
 import { _db, _modal } from '~util';
 import { _state, _elems, handleFormSubmit } from '~form';
-import * as entityForm from './detail-entity/src-detail-entity-form-main.js';
+import * as entityForm from './detail-entity/src-detail-entity-main.js';
 /* ------------------- FORM INIT -------------------------------------------- */
 /** Inits comboboxes for the source forms. */
 export function initCombos() {

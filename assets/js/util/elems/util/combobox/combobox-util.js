@@ -23,7 +23,7 @@ export function initCombobox(confg, onBlur = false) {
 }
 function buildComboboxOptions(confg, onBlur) {
     const comboOpts = { ...getBaseComboConfg(confg), ...confg };
-    comboOpts.create = getComboCreateFunc(confg.create);
+    comboOpts.create = getComboCreateFunc(confg.create, confg.name);
     comboOpts.placeholder = getPlaceholer(comboOpts.id, confg.name, true);
     comboOpts.onBlur = onBlur || confg.blur ? saveOrRestoreSelection : false;
     return comboOpts;
@@ -44,12 +44,13 @@ function workAroundSelectizeEvent(val) {
     this.addItem(val);
     this._events['item_add'] = e;
 }
-function getComboCreateFunc(createFunc) {  console.log
-    return createFunc ? onComboCreate.bind(null, createFunc) : false;
+function getComboCreateFunc(createFunc, name) {
+    const entity = name.split(' ')[0];
+    return createFunc ? onComboCreate.bind(null, createFunc, entity) : false;
 }
-function onComboCreate(createFunc, val) {
+function onComboCreate(createFunc, entity, val) {                   /*dbug-log*///console.log('--onComboCreate text?[%s]', val);
     createFunc(val);
-    return { text: `Creating...`, value: 'new' };
+    return { text: `Add a new ${_u('ucfirst', [entity])}...`, value: '' };
 }
 /** For multiple combos in a container, their order number is appended to the field. */
 function addToComboConfgMemory(confg, options) {

@@ -47,7 +47,7 @@ function getEntityComboEvents(fLvl, entity) {
     return  {
         'Citation': {
             'CitationType': {
-                onChange: citation.loadCitTypeFields.bind(null, fLvl) },
+                onChange: citation.loadCitTypeFields },
             'Author': {
                 create: author.initCreateForm.bind(null, 1, 'Author'),
                 onChange: author.onAuthAndEdSelection.bind(null, 1, 'Author')
@@ -55,7 +55,7 @@ function getEntityComboEvents(fLvl, entity) {
         },
         'Publication': {
             'PublicationType': {
-                onChange: publication.loadPubTypeFields.bind(null, fLvl) },
+                onChange: publication.loadPubTypeFields },
             'Publisher': {
                 create: initCreateForm,
                 onChange: onPublSelection },
@@ -71,7 +71,7 @@ function getEntityComboEvents(fLvl, entity) {
     }[entity];
 }
 /* ************************* ENTITY FORMS *********************************** */
-export function initCreateForm(entity, name) {                      /*dbug-log*///console.log('initCreateForm [%s] name [%s]', entity, name)
+export function initCreateForm(entity, name) {                      /*dbug-log*///console.log('--initCreateForm entity[%s] text?[%s]', entity, name)
     const funcs = {
         Author: author.initCreateForm.bind(null, 1, 'Author'),
         Citation: citation.initCreateForm,

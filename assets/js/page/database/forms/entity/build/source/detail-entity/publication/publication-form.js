@@ -73,7 +73,8 @@ function finishPubFormInit(status) {
  * Loads the deafult fields for the selected Publication Type. Clears any
  * previous type-fields and initializes the selectized dropdowns.
  */
-export function loadPubTypeFields(fLvl, typeId) {                   /*dbug-log*///console.log('   @--loadPubTypeFields [%s] tId[%s]', fLvl, typeId);
+export function loadPubTypeFields(typeId) {                         /*dbug-log*///console.log('   @--loadPubTypeFields tId[%s]', typeId);
+    const fLvl = _state('getSubFormLvl', ['sub']);
     return sForm.loadSrcTypeFields('Publication', typeId)
         .then(finishPubTypeFields);
 

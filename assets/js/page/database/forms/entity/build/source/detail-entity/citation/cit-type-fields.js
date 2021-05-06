@@ -47,9 +47,9 @@ function getBookDefault(pubType, pData) {
  * loading the default fields for the selected Citation Type. If this is an
  * edit form, skip loading pub data...
  */
-export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*///console.log('           /--loadCitTypeFields');
+export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*///console.log('           /--loadCitTypeFields id[%s] type[%s]', typeId, typeName);
     const fLvl = _state('getSubFormLvl', ['sub']);
-    const type = typeName || this.$input[0].innerText;
+    const type = typeName ? typeName : _cmbx('getSelTxt', ['CitationType']);
     return sForm.loadSrcTypeFields('Citation', typeId, type)
         .then(() => sForm.handleCitText(fLvl));
 }
@@ -98,7 +98,8 @@ function addPubData(typeId, type, fLvl) {                           /*dbug-log*/
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    const fData = _state('getFormState', [fLvl, 'fields']);
+    if (_state('getFormState', ['top', 'action']) == 'edit') { return; }
+    const fData = _state('getFormState', [fLvl, 'fields']);         /*dbug-log*///console.log('--addPubValues fData[%O]', fData)
     const pSrc = fData.ParentSource.misc.src;
     addPubTitle();
     addPubYear();
@@ -116,7 +117,6 @@ function addPubValues(fLvl, addValues, type) {
             pSrc.displayName : '';
     }
     function addPubYear() {
-        if (fData.Year.value) { return; }
         fData.Year.value = addValues ? pSrc.year : '';
     }
     function addAuthorsToCitation() {

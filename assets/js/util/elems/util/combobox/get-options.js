@@ -104,6 +104,9 @@ export function getFieldOptions(fName) {                            /*dbug-log*/
     return Promise.resolve(getOpts(fName, fieldKey));
 }
 /* ----------------------- BASIC ENTITY-OPTIONS ----------------------------- */
+function initRcrdOpts(entity) {
+    return [ { text: `Add a new ${_u('ucfirst', [entity])}`, value: 'create'} ];
+}
 /**
  * Builds options out of the passed ids and their entity records.
  * @param  {Object}     data [description]
@@ -114,7 +117,7 @@ export function getFieldOptions(fName) {                            /*dbug-log*/
 export function getRcrdOpts(entity, ids = false, rcrds = false) {   /*dbug-log*///console.log('getRcrdOpts [%s] ids %O, rcrds %O', entity, ids, rcrds);
     rcrds = rcrds ? rcrds : _state('getEntityRcrds', [_u('lcfirst', [entity])]);
     ids = ids ? ids : Object.keys(rcrds);
-    const opts = [ { text: `Add a new ${_u('ucfirst', [entity])}...`, value: 'create'} ];
+    const opts = initRcrdOpts(entity);
     opts.push(...alphabetizeOpts(buildEntityOptions(ids, rcrds)));
     return opts;
 }
@@ -151,7 +154,7 @@ function getSrcOpts(fName, prop, rcrds) {
     }
 }
 export function buildSrcOpts(srcType, ids, rcrds) {                 /*dbug-log*///console.log('   --buildSrcTypeOpts[%s] ids? %O, rcrds? %O', srcType, ids, rcrds);
-    const opts = [ { text: `Add a new ${_u('ucfirst', [srcType])}...`, value: 'create'} ];
+    const opts = initRcrdOpts(srcType);
     if (!ids.length) { return opts; }
     opts.push(...getRcrdOpts('source', ids, rcrds));
     return opts;
@@ -180,7 +183,7 @@ function getCitTypeOpts(fName, prop) {                              /*dbug-log*/
 export function getTaxonOpts(fName, rank, r, g) {
     const group = r ? r : getGroupName();
     const subGroup = g ? g : getSubGroupName();                     /*dbug-log*///console.log('        getTaxonOpts [%s][%s][%s]Names', group, subGroup, rank)
-    const opts = [ { text: `Add a new ${rank}...`, value: 'create'} ];
+    const opts = initRcrdOpts(rank);
     return getStoredOpts(null, group+subGroup+rank+'Names')
         .then(o => {
             opts.push(...alphabetizeOpts(o));
