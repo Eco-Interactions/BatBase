@@ -35,7 +35,7 @@ export function selectExistingAuthsOrEds() {
 }
 /* ========================= ON FIELD CHANGE ================================ */
 export function onAuthAndEdSelection() {
-    update.onAuthAndEdSelection(...arguments);
+    return update.onAuthAndEdSelection(...arguments);
 }
 /* _____________________ INTERNAL HELPERS ___________________________________ */
 export function buildNewAuthorSelect() {

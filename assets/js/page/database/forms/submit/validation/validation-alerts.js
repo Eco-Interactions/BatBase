@@ -63,18 +63,15 @@ export function formSubmitError(fLvl, jqXHR, textStatus) {          /*perm-log*/
     showFormValAlert(fLvl, tag, fLvl);
 }
 function getFormAlertTag(errTxt) {                                    /*dbug-log*///console.log("errTxt = %O", errTxt)
-    return isDuplicateContribution(errTxt) ? 'dupContrib' :
-        isDuplicateAuthor(errTxt) ? 'newDupAuth' :
-            errTxt.includes("Duplicate entry") ? 'dupEnt'  : 'genSubmitErr';
+    return errTxt.includes("Duplicate entry") ? 'dupEnt'  : 'genSubmitErr';
 }
-function isDuplicateContribution(errTxt) {
-    return errTxt.includes("Duplicate entry") && errTxt.includes("contribution");
-}
-function isDuplicateAuthor(errTxt) {
-    //TODO. Replace
-    // const detailEntity = _state('getStateProp', ['submit']).detailEntity;
-    // return errTxt.includes("Duplicate entry") && detailEntity === 'author';
-}
+// function isDuplicateContribution(errTxt) {  //PREVENTED ELSEWHERE
+//     return errTxt.includes("Duplicate entry") && errTxt.includes("contribution");
+// }
+// function isDuplicateAuthor(errTxt) {  //PREVENTED ELSEWHERE
+//     // const detailEntity = _state('getStateProp', ['submit']).detailEntity;
+//     // return errTxt.includes("Duplicate entry") && detailEntity === 'author';
+// }
 /* ===================== DATA-STORAGE ALERT ================================= */
 export function errUpdatingData(errTag) {                           /*perm-log*/console.log('           !!!errUpdatingData [%s]', errTag);
     diableFormButtons();

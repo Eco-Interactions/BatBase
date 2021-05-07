@@ -16,7 +16,7 @@
  *             FIELD LABEL
  */
 import { _cmbx } from '~util';
-import { _state } from '~form';
+import { _state, _val } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as aForm from './auth-form-main.js';
 /* ======================= ON AUTHOR|EDITOR SELECTION ======================= */
@@ -34,22 +34,62 @@ export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*/
     if (v === 'create') { return aForm.initCreateForm(cnt, aType, v); }
     if (aForm.isDynamicFieldEmpty(aType, ttl)) { return; }
     aForm.buildNewAuthorSelect(fLvl, aType, ttl+1);
+    ifPreviousAlertClearIt(aType, fLvl);
 }
 /* ======================= ON FIELD CLEARED ================================= */
 /** [onFieldClear description] */
-function onFieldClear(aType, fLvl, ttl, cnt) {
+function onFieldClear(aType, fLvl, ttl, cnt) {                      /*dbug-log*///console.log('--onFieldClear [%s] cleared[%s] ttl[%s]', aType, cnt, ttl);
     sForm.handleCitText(fLvl);
-    if (!aForm.isDynamicFieldEmpty(aType, ttl)) { return; }
+    if (!aForm.isDynamicFieldEmpty(aType, ttl)) { return handleBlanks(aType, fLvl); }
     ifNoneStillSelectedEnableOtherType(aType, fLvl, ttl);
     aForm.removeAuthField(aType, ttl--);
+    handleEmptyFields(aType, fLvl, ttl, cnt);
+}
+function handleEmptyFields(aType, fLvl, ttl, cnt) {
     removeExtraEmptyFields(aType, ttl, cnt);
+    handleBlanks(aType, cnt, fLvl);
 }
 /** [ifFinalFieldEmptyRemove description] */
 function removeExtraEmptyFields(aType, ttl) {                       /*dbug-log*///console.log('--removeExtraEmptyFields ttl[%s] cleared[%s]', ttl);
     while (ttl > 1 && aForm.isDynamicFieldEmpty(aType, ttl)) {
-        if (ttl > 2 && aForm.isDynamicFieldEmpty(aType, ttl-1)) { return; }   /*dbug-log*///console.log('  --Removing [%s]', ttl);
+        if (ttl > 2 && aForm.isDynamicFieldEmpty(aType, ttl-1)) { return; }/*dbug-log*///console.log('  --Removing [%s]', ttl);
         aForm.removeAuthField(aType, ttl--);
     }
+}
+/* ------------------ HANDLE BLANKS IN ORDER -------------------------------- */
+/**
+ * Author/editor fields must have all fields filled continuously. There can
+ * be no blanks in the selected order. If found, an alert is shown to the user.
+ */
+function handleBlanks(aType, cnt, fLvl) {
+    const vals = _state('getFieldState', [fLvl, aType]);            /*dbug-log*///console.log('--handleBlanks [%s][%O]', aType, vals);
+    let blank = checkForBlanks(vals, cnt);
+    if (blank !== 'found') { return; }
+    alertBlank(aType, fLvl);
+    return true;
+}
+function checkForBlanks(vals, cleared) {
+    let blanks = false;
+    checkValsForBlanks();
+    return blanks;
+
+    function checkValsForBlanks() {
+        for (let ord in vals) {                                     /*dbug-log*///console.log('    --ord[%s] val[%s] blanks[%s]?', ord, vals[ord], blanks)
+            if (vals[ord] === null || ord == cleared) {
+                blanks = blanks ? 'found' : 'maybe';
+            } else {
+                if (blanks) { blanks = 'found'; }
+            }
+        }
+    }
+}
+function alertBlank(aType, fLvl) {
+    const alertTags = { Author: 'fillAuthBlanks', Editor: 'fillEdBlanks' };
+     _val('showFormValAlert', [aType, alertTags[aType], fLvl]);
+}
+function ifPreviousAlertClearIt(aType, fLvl) {
+    if (!$('#'+aType+'_alert.'+fLvl+'-active-alert')) { return; }
+    _val('clrContribFieldAlert', [aType, fLvl]);
 }
 /* ====================== SYNC AUTH-TYPE FIELDS ============================= */
 /** [ifNoneStillSelectedEnableOtherType description] */

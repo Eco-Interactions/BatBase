@@ -161,55 +161,7 @@ function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*/
         vals[cnt] = v;
     }
     _state('setFieldState', [fLvl, fName, vals]);
-    // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }
-/* ---------------- AUTH|EDITOR VALIDATION ---------------------------------- */
-//TODO
-function checkForAuthValIssues(vals, fName, fLvl) {
-    const issues = [
-        checkForBlanksInOrder(vals, fName, fLvl),
-        checkForDuplicates(vals, fName, fLvl)
-    ].filter(i => i);
-    if (issues.length) { return; }
-    ifPreviousAlertClearIt(fName, fLvl);
-}
-function ifPreviousAlertClearIt(fName, fLvl) {
-    if (!$('#'+fName+'_alert.'+fLvl+'-active-alert')) { return; }
-    _val('clrContribFieldAlert', [fName, fLvl]);
-}
-/**
- * Author/editor fields must have all fields filled continuously. There can
- * be no blanks in the selected order. If found, an alert is shown to the user.
- */
-function checkForBlanksInOrder(vals, fName, fLvl) {                 /*dbug-log*///console.log('checkForBlanksInOrder. [%s] vals = %O', fName, vals);
-    let blank = checkForBlanks(vals);
-    if (blank !== 'found') { return; }
-    alertBlank(fName, fLvl);
-    return true;
-}
-function checkForBlanks(vals) {
-    let blanks = false;
-    checkValsForBlanks();
-    return blanks;
-
-    function checkValsForBlanks() {
-        for (let ord in vals) {
-            blanks = vals[ord] && blanks ? 'found' :
-                !vals[ord] && !blanks ? 'maybe' : blanks;
-        }
-    }
-}
-function alertBlank(fName, fLvl) {
-    const alertTags = { Author: 'fillAuthBlanks', Editor: 'fillEdBlanks' };
-     _val('showFormValAlert', [fName, alertTags[fName], fLvl]);
-}
-function checkForDuplicates(vals, fName, fLvl) {                    /*dbug-log*///console.log('checkForDuplicates. [%s] vals = %O', fName, vals);
-    const dups = Object.values(vals).filter((v, i, self) => self.indexOf(v) !== i);
-    if (!dups.length) { return; }
-    _val('showFormValAlert', [fName, 'dupAuth', fLvl]);
-    return true;
-}
-
 /* ============================== FIELD PIN ================================= */
 /**
  * [getPinElem description]

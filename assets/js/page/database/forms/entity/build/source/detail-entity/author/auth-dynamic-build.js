@@ -39,9 +39,11 @@ function getNextFieldConfg() {
     return fConfg;
 }
 /** [appendNewAuthSelect description] */
-function appendNewAuthSelect(field) {                               /*dbug-log*///console.log('--appendNewAuthSelect [%O]', field);
+function appendNewAuthSelect(field) {                               /*dbug-log*///console.log('--appendNewAuthSelect field[%O]', field);
     $(`#${a.type}_f-cntnr .cntnr`).append(field);
-    _cmbx('initCombobox', [getAuthSelConfg()]);
+    const confg = getAuthSelConfg();
+    _cmbx('initCombobox', [confg]);
+    removeSelectedOptions(confg.confgName);
 }
 function getAuthSelConfg() {
     return {
@@ -51,6 +53,11 @@ function getAuthSelConfg() {
         confgName: a.type+a.cnt,
         name: a.type
     };
+}
+function removeSelectedOptions(field) {
+    if (_state('isEditForm', [a.group])) { return; }
+    const vals = _state('getFieldState', [a.group, a.type]);        /*dbug-log*///console.log('--removeSelectedOptions field[%s] vals[%O]', field, vals);
+    _cmbx('removeOptions', [field, Object.values(vals)]);
 }
 /* ======================= REMOVE FIELD ===================================== */
 export function removeAuthField(aType, cnt) {                       /*dbug-log*///console.log('+--removeAuthField[%s][%s]', aType, cnt);

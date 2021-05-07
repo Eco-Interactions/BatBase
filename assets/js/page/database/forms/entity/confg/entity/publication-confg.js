@@ -25,6 +25,9 @@ export default function(action, entity) {
 }
 function getPublicationFieldConfg() {
     return {
+        Author: {
+            required: true
+        },
         DisplayName: { //Source field
             label: 'Title',
             prep: {
@@ -70,6 +73,9 @@ function getPublicationFieldConfg() {
                 tooltip: 'Copy and paste link to publication, if available',
             }
         },
+        Year: {
+            required: true
+        }
     };
 }
 
@@ -78,12 +84,6 @@ function getPublicationTypeConfg() {
         Book: {
             name: 'Book',
             fields: {
-                Author: {
-                    required: true
-                },
-                Year: {
-                    required: true
-                },
                 Editor: {
                     required: true
                 },
@@ -126,15 +126,9 @@ function getPublicationTypeConfg() {
         'Thesis/Dissertation': {
             name: 'Thesis/Dissertation',
             fields:{
-                Author: {
-                    required: true
-                },
                 Publisher: {
                     required: true
                 },
-                Year: {
-                    required: true
-                }
             },
             misc: {
                 defaultCitType: 'Ph.D. Dissertation'

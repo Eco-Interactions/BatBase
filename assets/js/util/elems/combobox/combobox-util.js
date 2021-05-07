@@ -171,12 +171,16 @@ export function destroySelectizeInstance(field) {
     // $(confgs[getFieldConfgKey(field)].id)[0].selectize.destroy();
     delete confgs[getFieldConfgKey(field)];
 }
-/* -------------------- REPLACE OPTIONS ------------------------------------- */
+/* -------------------------- OPTIONS --------------------------------------- */
 export function getOptionTotal(field) {
     const selApi = getSelApi(field);
     return Object.keys(selApi.options).length;
 }
-/* -------------------- REPLACE OPTIONS ------------------------------------- */
+export function removeOptions(field, vals) {
+    const selApi = getSelApi(field);
+    vals.forEach(v => selApi.removeOption(v, 'silent'));
+    /*dbug-log*///vals.forEach(v => { selApi.removeOption(v, 'silent'); console.log('removing[%s]', v); });
+}
 export function replaceSelOpts(field, opts) {                       /*dbug-log*///console.log('--replaceSelOpts field[%s] opts[%O]', field, opts)
     const selApi = getSelApi(field);
     clearCombobox(selApi);

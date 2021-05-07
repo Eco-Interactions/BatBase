@@ -97,7 +97,7 @@ export function buildMultiSelectField(f) {                          /*dbug-log*/
     return buildSelect(f)
         .then(finishFieldInput.bind(null, f));
 }
-function finishFieldInput(f, input) {                               /*dbug-log*///console.log('--finishFieldInput fConfg[%O] input[%O]', f, input);
+function finishFieldInput(f, input) {                               /*dbug-log*///console.log('--finishFieldInput fConfg[%O] input[%O]', _u('snapshot', [f]), input);
     const confg = getMultiInputFieldConfg(f, input);
     input.id += f.count;
     return _el('getFieldElems', [confg]);
