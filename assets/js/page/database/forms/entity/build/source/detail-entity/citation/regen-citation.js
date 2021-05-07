@@ -14,6 +14,7 @@ import { _cmbx, _u } from '~util';
 import { _elems, _state } from '~form';
 
 export function buildCitTextAndUpdateField(fLvl) {                  /*dbug-log*///console.log('--buildCitTextAndUpdateField [%s]', fLvl);
+    if (!_state('ifStateActive', ['top'])) { return; }
     const $elem = $('#CitationText_f textarea');
     if (!$elem.val()) { initializeCitField($elem); }
 

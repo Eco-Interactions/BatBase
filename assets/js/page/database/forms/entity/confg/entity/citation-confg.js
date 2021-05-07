@@ -65,7 +65,7 @@ function getCitationFieldConfg() {
                 setCitationTitle: []
             },
             prop: {
-                detail: 'displayName'
+                detail: 'title'
             },
         },
         Doi: {

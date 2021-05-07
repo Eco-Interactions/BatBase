@@ -76,12 +76,7 @@ function finishPubFormInit(status) {
 export function loadPubTypeFields(typeId) {                         /*dbug-log*///console.log('   @--loadPubTypeFields tId[%s]', typeId);
     const fLvl = _state('getSubFormLvl', ['sub']);
     return sForm.loadSrcTypeFields('Publication', typeId)
-        .then(finishPubTypeFields);
-
-    function finishPubTypeFields() {
-        showNoteIfBothEditorAndAuthorFieldsAvailable(fLvl);
-        _elems('setDynamicFormStyles', ['Publication']);
-    }
+        .then(() => finishFieldLoad(fLvl));
 }
 /* -------------------------- SHOW NOTE ------------------------------------- */
 export function finishFieldLoad(fLvl) {

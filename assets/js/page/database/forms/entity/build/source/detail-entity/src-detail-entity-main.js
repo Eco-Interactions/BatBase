@@ -5,7 +5,7 @@
  *     AUTHOR
  *
  */
-import { _elems } from '~form';
+import { _elems, _state } from '~form';
 import * as author from './author/auth-form-main.js';
 import * as publisher from './publisher/publisher-form.js';
 import * as citation from './citation/citation-form.js';
@@ -25,7 +25,8 @@ export function onPublSelection() {
 }
 /* ------------------------- PUBLICATION ------------------------------------ */
 /* ------------------------- CITATION --------------------------------------- */
-export function handleCitText() {
+export function handleCitText(fLvl) {
+    if (_state('getFormState', [fLvl, 'name']) == 'Publication') { return; }
     return citation.handleCitText(...arguments);
 }
 /* --------------------- PUBLICATION AND CITATION --------------------------- */

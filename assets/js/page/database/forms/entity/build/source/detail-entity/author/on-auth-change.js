@@ -58,8 +58,8 @@ export function ifNoneStillSelectedEnableOtherType(aType, fLvl, clearedCnt) {
     enableOtherField(aType, fLvl, true);
 }
 function ifTypeStillSelected(aType, fLvl, clearedCnt) {
-    const fVals = _state('getFieldState', [fLvl, aType]);             /*dbug-log*///console.log('--ifTypeStillSelected [%s][%s][%O]', fLvl, aType, fVals);
-    fVals[clearedCnt] = null; //val store change event could happen after this check
+    const fVals = _state('getFieldState', [fLvl, aType]);             /*dbug-log*///console.log('--ifTypeStillSelected lvl[%s] type[%s] vals[%O]', fLvl, aType, fVals);
+    if (fVals[clearedCnt]) { fVals[clearedCnt] = null; } //val store change event could happen after this check
     return Object.values(fVals).find(v => v);
 }
 /* -------------------- UPDATE OTHER AUTH-TYPE UI --------------------------- */

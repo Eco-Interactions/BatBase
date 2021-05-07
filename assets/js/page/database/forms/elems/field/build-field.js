@@ -149,11 +149,17 @@ function setOnMultiSelectChangeListener(f) {                        /*dbug-log*/
     const field = f.count > 1 ? f.input.lastChild : f.input.lastChild.lastChild;
     const input = $(field).find('.f-input');                        /*dbug-log*///console.log('     --field[%O] input[%O]', field, input);
     $(input).change(storeMultiSelectValue.bind(null, f.group, f.count, f.name));
+    if (!f.value) { f.value = {}; }
 }
 /** [storeMultiSelectValue description] */
 function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('@--storeMultiSelectValue lvl[%s] cnt[%s]fName[%s], e[%O]', fLvl, cnt, fName, e);
     const vals = _state('getFieldState', [fLvl, fName]);
-    vals[cnt] = e.target.value || null;                             /*dbug-log*///console.log('   --vals[%O] nVal[%s]', vals, vals[cnt]);
+    const v = e.target.value ? e.target.value : null;               /*dbug-log*///console.log('   --prev[%O] cur[%O]', _u('snapshot', [vals]), vals);
+    if (!v && Object.keys(vals).length == cnt) {
+        delete vals[cnt];
+    } else {
+        vals[cnt] = v;
+    }
     _state('setFieldState', [fLvl, fName, vals]);
     // checkForAuthValIssues(valueObj, fName, fLvl); //MOVE TO AUTHOR CODE
 }

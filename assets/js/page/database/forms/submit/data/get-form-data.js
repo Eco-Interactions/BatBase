@@ -179,7 +179,7 @@ function setCitationTitle(g, fConfg) {
     setServerData('flat', 'DisplayName', getUniqueCitationName(title));
 }
 function getUniqueCitationName(citationTitle) {
-    const pubTitle = ld.confg.fields.ParentSource.misc.pub.displayName;
+    const pubTitle = ld.confg.fields.ParentSource.misc.pub.displayName;/*dbug-log*///console.log('--getUniqueCitationName citationTitle[%s] pubTitle[%s]', citationTitle, pubTitle)
     return pubTitle == citationTitle ? citationTitle + '(citation)' : citationTitle;
 }
     /* ----------- LOCATION/GEOJSON ----------------------------------------- */

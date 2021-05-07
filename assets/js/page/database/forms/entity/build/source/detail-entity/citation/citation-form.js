@@ -38,6 +38,7 @@ export function initCreateForm(v) {                                 /*perm-log*/
     timeout = null;
     return _elems('initSubForm', [getCreateFormParams(v)])
         .then(() => _cmbx('enableCombobox', ['Publication', false]))
+        .then(types.selectDefaultCitType)
         .then(() => finishCitFormInit('success'));
 }
 function getCreateFormParams(v) {
@@ -87,9 +88,8 @@ function getFormParams(fLvl, action) {
 function finishCitFormInit(status) {                                /*dbug-log*///console.log('           --finishCitFormInit status[%s]', status);
     if (!status) { return; } //Error handled elsewhere
     $('#CitationText_f textarea').attr('disabled', true);
-    return types.selectDefaultCitType()
-        .then(disableCitationTypeFieldIfOnlyOneTypeAvailable)
-        .then(() => $('#Abstract_f textarea').focus());
+    disableCitationTypeFieldIfOnlyOneTypeAvailable();
+    $('#Abstract_f textarea').focus();
 }
 function disableCitationTypeFieldIfOnlyOneTypeAvailable() {
     const typeCnt = _cmbx('getOptionTotal', ['CitationType']);

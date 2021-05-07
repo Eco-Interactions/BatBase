@@ -57,18 +57,18 @@ function setGeoJsonData(geoJsonField, geoJsonRcrd) {                /*dbug-log*/
     geoJsonField.misc.rcrd = geoJsonRcrd;
 }
 /* ============================ SOURCE ====================================== */
-function setSrcData(data, fState) {                                 /*dbug-log*/console.log('--setSrcData data[%O] fState[%O]', data, fState);
+function setSrcData(data, fState) {                                 /*dbug-log*///console.log('--setSrcData data[%O] fState[%O]', data, fState);
     const e = {
         core: data.source[fState.id],
         detail: getSrcEntity(data, data.source[fState.id])
-    };                                                              /*dbug-log*/console.log('  --entities[%O]', e);
+    };                                                              /*dbug-log*///console.log('  --entities[%O]', e);
     Object.values(fState.fields).forEach(setSrcFieldValue);
     fState.editing.detail = e.detail.id;
 
     function setSrcFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setSrcFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
         const v = getSrcFieldValue(fConfg);
-        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
+        if (!v) { return; }                                         /*dbug-log*///console.log('  --field[%s] v[%O]', fConfg.name, v);
         if (fConfg.name === fState.name+'Type') { fState.type = v.displayName; }
         setFieldValue(fConfg, v);
     }
