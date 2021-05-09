@@ -12,7 +12,7 @@
  *     UPDATE UI FOR CITATION-TYPE
  *     ADD PUB DATA
  */
-import { _cmbx, _db } from '~util';
+import { _cmbx, _db, _u } from '~util';
 import {  _elems, _state } from '~form';
 import * as sForm from '../../src-form-main.js';
 /* ----------------------- SELECT DEFAULT-TYPE ------------------------------ */
@@ -58,48 +58,50 @@ export function loadCitTypeFields(typeId, typeName) {               /*dbug-log*/
  * Shows/hides the author field depending on whether the publication has authors
  * already. Disables title field for citations that don't allow sub-titles.
  */
-export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*///console.log('handleSpecialCaseTypeUpdates [%s]', type)
+export function handleSpecialCaseTypeUpdates(type, fLvl) {          /*dbug-log*///console.log('handleSpecialCaseTypeUpdates [%s][%s]', fLvl, type)
     const hndlrs = {
-        'Book': updateBookFields,
-        'Chapter': updateBookFields,
-        "Master's Thesis": toggleTitleField,
+        Book: updateTitleField,
+        Chapter: updateTitleField,
+        "Master's Thesis": updateTitleField,
         'Museum record': disableFilledFields,
-        'Other': disableFilledFields,
-        'Ph.D. Dissertation': disableTitleField,
-        'Report': disableFilledFields
+        Other: disableFilledFields,
+        'Ph.D. Dissertation': updateTitleField,
+        Report: disableFilledFields
     };
     if (Object.keys(hndlrs).indexOf(type) === -1) { return; }
     hndlrs[type](type, fLvl);
-
-    function updateBookFields() {
-        if (type === 'Book'){ disableTitleField()} else { enableTitleField()}
+}
+function updateTitleField(type) {
+    if (type === 'Chapter'){
+        toggleTitleField();
+    } else {
+        toggleTitleField('disable');
     }
 }
-function disableFilledFields() {
+function disableFilledFields(type, fLvl) {                          /*dbug-log*///console.log('disableFilledFields');
     $('#DisplayName_f input').prop('disabled', true);
     $('#Year_f input').prop('disabled', true);
-    disableAuthorField();
+    disableAuthorField(fLvl);
 }
-function disableAuthorField() {
-    if ($(`#Author_f-cntnr `)[0].children.length > 1) {
-        $(`#Author_f-cntnr`)[0].lastChild.remove();
-    }
+function disableAuthorField(fLvl) {
     _cmbx('enableComboboxes', [$(`#Author_f-cntnr select`), false]);
+    const cnt = _state('getFieldState', [fLvl, 'Author', 'count']); /*dbug-log*///console.log('--disableAuthorField [%s] cnt[%s]', fLvl, cnt);
+    sForm.removeAuthField('Author', cnt);
 }
-function toggleTitleField(disable = false) {
+function toggleTitleField(disable = false) {                        /*dbug-log*///console.log('toggleTitleField disable?[%s]', disable);
     $('#DisplayName_f input').prop('disabled', !disable);
 }
 /* ------------------------- ADD PUB DATA ----------------------------------- */
 /** Adds or removes publication data from the form's values, depending on type. */
-function addPubData(typeId, type, fLvl) {                           /*dbug-log*///console.log('--addPubData')
+function addPubData(typeId, type, fLvl) {                           /*dbug-log*///console.log('--addPubData[%s] type[%s][%s]', fLvl, type, typeId);
     const copy = ['Book', "Master's Thesis", 'Museum record', 'Other',
         'Ph.D. Dissertation', 'Report', 'Chapter' ];
     const addSameData = copy.indexOf(type) !== -1;
     addPubValues(fLvl, addSameData, type);
 }
 function addPubValues(fLvl, addValues, type) {
-    if (_state('getFormState', ['top', 'action']) == 'edit') { return; }
-    const fData = _state('getFormState', [fLvl, 'fields']);         /*dbug-log*///console.log('--addPubValues fData[%O]', fData)
+    if (_state('isEditForm', ['top'])) { return; }
+    const fData = _state('getFormState', [fLvl, 'fields']);         /*dbug-log*///console.log('--addPubValues fData[%O]', _u('snapshot', [fData]))
     const pSrc = fData.ParentSource.misc.src;
     addPubTitle();
     addPubYear();
@@ -119,9 +121,10 @@ function addPubValues(fLvl, addValues, type) {
     function addPubYear() {
         fData.Year.value = addValues ? pSrc.year : '';
     }
-    function addAuthorsToCitation() {
+    function addAuthorsToCitation() {                               /*dbug-log*///console.log('--addAuthorsToCitation');
+        if (!fData.Author.value) { fData.Author.value = {}; }
         if (Object.keys(fData.Author.value).length) { return; }
-        const pAuths = pSrc.authors;
+        const pAuths = pSrc.authors;                                /*dbug-log*///console.log('    --pAuths?[%O]', pAuths);
         if (!addValues || !pAuths) { return; }
         fData.Author.value = pAuths ? pAuths : null;
     }

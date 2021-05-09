@@ -94,7 +94,7 @@ export function getSelectedTaxon() {
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {
-    src.finishSrcFieldLoad(...arguments);
+    return src.finishSrcFieldLoad(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 export function selectExistingAuthsOrEds() {

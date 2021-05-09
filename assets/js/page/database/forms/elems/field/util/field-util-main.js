@@ -40,6 +40,6 @@ function isRequiredFieldFilled(fLvl, field) {                       /*dbug-log*/
     if (field.type === 'multiSelect') { return getMultiSelectValues(field.value); }
     return field.value;
 }
-function getMultiSelectValues(values) {
+function getMultiSelectValues(values = {}) {
     return Object.keys(values).length ? values : null ;
 }

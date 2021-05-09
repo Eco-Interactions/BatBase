@@ -12,15 +12,13 @@ import { _elems, _state } from '~form';
 import * as aForm from './auth-form-main.js';
 /* ======================= SELECT AUTHORS|EDITORS =========================== */
 export function selectExistingAuthsOrEds(aType, authObj, fLvl) {    /*dbug-log*///console.log('--selectExistingAuthsOrEds. args = %O', arguments);
-    if (ifFieldNotShownOrNoValToSelect(aType, authObj)) { return Promise.resolve(); }
     aForm.enableOtherField(aType, fLvl, false);
-    return Object.keys(authObj).reduce((p, ord) => { //p(romise), (author-)ord(er)
-        const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], aType, fLvl);
-        return p.then(selNextAuth);
-    }, Promise.resolve());
+    return selectAuthors(aType, authObj, fLvl);
 }
-function ifFieldNotShownOrNoValToSelect(aType, authObj) {
-    return !Object.keys(authObj).length || !$(`#${aType}_f-cntnr`).length;
+function selectAuthors(aType, authObj, fLvl) {
+    return Object.keys(authObj).reduce((p, ord) => { //p(romise), (author-)ord(er)
+        return p.then(() => selectAuthor(ord, authObj[ord], aType, fLvl));
+    }, Promise.resolve());
 }
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, aType, fLvl) {

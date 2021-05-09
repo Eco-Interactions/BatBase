@@ -294,7 +294,7 @@ export function updateSrcDetails(entity) {                                      
         } /* End addPubTitleData */
         function addCitTitleData() {
             const subTitle = getCitTitle();
-            if (!subTitle) { return; }
+            if (!subTitle || subTitle.includes('(citation)')) { return; }
             const citTitleField = citType && citType !== 'Other' ?
                 citType + ' Title' : 'Citation Title';
             data[citTitleField] = subTitle;

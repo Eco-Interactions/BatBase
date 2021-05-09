@@ -172,7 +172,7 @@ function getCitationTypeConfg() {
             },
             views: {
                 all: [
-                    ['Volume', 'Doi'],
+                    ['Edition', 'Doi'],
                     ['Author', 'Website']],
             }
         },
@@ -206,17 +206,38 @@ function getCitationTypeConfg() {
             name: 'Museum record',
             views: {
                 all: [
-                    ['Year', 'Pages', 'Doi'],
-                    ['Author', 'Website']
+                    [
+                        'Author',
+                        {
+                            class: 'flex-grow',
+                            fields: [
+                                ['Year', 'Pages'],
+                                'Doi',
+                                'Website']
+                        }
+                    ]
                 ]
             }
         },
         Other: {
+            fields: {
+                'Edition': {
+                    label: 'Edition/Volume'
+                }
+            },
             name: 'Other',
             views: {
                 all: [
-                    ['Year', 'Volume', 'Issue', 'Pages'],
-                    ['Author', { fields: ['Doi', 'Website'] }]
+                    [
+                        'Author',
+                        {
+                            class: 'flex-grow',
+                            fields: [
+                                ['Year', 'Edition', 'Issue', 'Pages'],
+                                'Doi',
+                                'Website']
+                        }
+                    ]
                 ]
             }
         },
@@ -224,15 +245,32 @@ function getCitationTypeConfg() {
             name: 'Ph.D. Dissertation',
             views: {
                 all: [
-                    ['Website','Doi']],
+                    [
+                        'Author',
+                        {
+                            class: 'flex-grow',
+                            fields: [
+                                'Doi',
+                                'Website']
+                        }
+                    ]
+                ]
             }
         },
         Report: {
             name: 'Report',
             views: {
                 all: [
-                    ['Year', 'Volume', 'Issue', 'Pages'],
-                    ['Author', { fields: ['Doi', 'Website'] }]
+                    [
+                        'Author',
+                        {
+                            class: 'flex-grow',
+                            fields: [
+                                ['Year', 'Pages'],
+                                'Doi',
+                                'Website']
+                        }
+                    ]
                 ]
             }
         }

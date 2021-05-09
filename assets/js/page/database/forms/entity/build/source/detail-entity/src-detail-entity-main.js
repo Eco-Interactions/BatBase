@@ -19,6 +19,9 @@ export function selectExistingAuthsOrEds() {
 export function onAuthAndEdSelection() {
     return author.onAuthAndEdSelection(...arguments);
 }
+export function removeAuthField() {
+    return author.removeAuthField(...arguments);
+}
 /* ------------------------ PUBLISHER --------------------------------------- */
 export function onPublSelection() {
     return publisher.onPublSelection(...arguments);
@@ -31,7 +34,7 @@ export function handleCitText(fLvl) {
 }
 /* --------------------- PUBLICATION AND CITATION --------------------------- */
 export function finishFieldLoad(entity, fLvl) {
-    if (entity === 'citation') { return citation.finishFieldLoad(); }
+    if (entity === 'Citation') { return citation.finishFieldLoad(fLvl); }
     publication.finishFieldLoad(fLvl);
 }
 export function loadSrcTypeFields() {

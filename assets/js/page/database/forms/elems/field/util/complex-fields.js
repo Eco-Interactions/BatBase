@@ -15,11 +15,12 @@ export function fillComplexFormFields(fLvl) {                       /*dbug-log*/
     const fields = Object.keys(fieldData).filter(f => fieldData[f].type in fieldHndlrs);
     return fields.reduce(fillAllComplexFieldsWithData, Promise.resolve());
 
-    function fillAllComplexFieldsWithData(p, field) {               /*dbug-log*///console.log('  --fillAllComplexFieldsWithData field[%O]', fieldData[field]);
-        if (!fieldData[field].shown) { return Promise.resolve(); }
+    function fillAllComplexFieldsWithData(p, field) {               /*dbug-log*///console.log('  --fillAllComplexFieldsWithData p[%O] field[%O]', p, fieldData[field]);
+        if (!fieldData[field].shown) { return p; }
         const type = fieldData[field].type;
         const val = fieldData[field].value;
-        return p.then(() => fieldHndlrs[type]([field, val, fLvl]));
+        const handler = fieldHndlrs[type].bind(null, [field, val, fLvl]);
+        return p.then(handler);
     }
 }
 function getMultiSelectHandler() {

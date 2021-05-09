@@ -56,6 +56,7 @@ function getSourceFieldConfg() {
                 customValueStore: true
             },
             name: 'Editor',
+            prep: {},
             prop: {
                 core: 'editors'
             },

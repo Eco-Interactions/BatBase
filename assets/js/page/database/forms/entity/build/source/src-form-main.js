@@ -38,9 +38,12 @@ export function handleCitText() {
     entityForm.handleCitText(...arguments);
 }
 export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*///console.log('finishSrcFieldLoad [%s] entity[%s]', fLvl, entity);
-    if (entity === 'citation' || entity === 'publication') {
-        entityForm.finishFieldLoad(entity, fLvl);
+    if (entity === 'Citation' || entity === 'Publication') {
+        return entityForm.finishFieldLoad(entity, fLvl);
     }
+}
+export function removeAuthField() {
+    return entityForm.removeAuthField(...arguments);
 }
 /* -------------------- SUBMIT CONFIRMATION-MODAL --------------------------- */
 /**

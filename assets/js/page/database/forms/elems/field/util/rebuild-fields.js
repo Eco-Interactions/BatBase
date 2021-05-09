@@ -16,10 +16,10 @@ function appendAndFinishRebuild(entity, fLvl, rows) {               /*dbug-log*/
     $(`#${fLvl}_alert`).after(rows);
     _elems('finishFieldRebuild', [fLvl, entity])
     return _elems('fillComplexFormFields', [fLvl])
-        .then(finishComplexForms);
+        .then(() => finishComplexForms(entity, fLvl));
 }
 function finishComplexForms(entity, fLvl) {
-    const complex = ['citation', 'publication'];
+    const complex = ['Citation', 'Publication'];
     if (complex.indexOf(entity) === -1) { return; }
-    _form('finishSrcFieldLoad', [entity, fLvl]);
+    return _form('finishSrcFieldLoad', [entity, fLvl]);
 }

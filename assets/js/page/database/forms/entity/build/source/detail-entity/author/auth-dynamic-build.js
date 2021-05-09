@@ -29,7 +29,8 @@ export function buildNewAuthorSelect(fLvl, aType, cnt) {            /*dbug-log*/
     updateAuthData(aType, fLvl, cnt);
     const fConfg = getNextFieldConfg();                             /*dbug-log*///console.log('   --fConfg[%O]', fConfg);
     return _elems('buildDynamicFormField', [fConfg])
-        .then(appendNewAuthSelect);
+        .then(appendNewAuthSelect)
+        .then(() => Promise.resolve());
 }
 /** [getNextFieldConfg description] */
 function getNextFieldConfg() {
@@ -54,10 +55,10 @@ function getAuthSelConfg() {
         name: a.type
     };
 }
-function removeSelectedOptions(field) {
-    if (_state('isEditForm', [a.group])) { return; }
-    const vals = _state('getFieldState', [a.group, a.type]);        /*dbug-log*///console.log('--removeSelectedOptions field[%s] vals[%O]', field, vals);
-    _cmbx('removeOptions', [field, Object.values(vals)]);
+function removeSelectedOptions(fName) {
+    if (_state('isEditForm', [a.group]) || a.cnt == 1) { return; }
+    const vals = _state('getFieldState', [a.group, a.type]);        /*dbug-log*///console.log('--removeSelectedOptions field[%s] vals[%O]', fName, vals);
+    _cmbx('removeOptions', [fName, Object.values(vals)]);
 }
 /* ======================= REMOVE FIELD ===================================== */
 export function removeAuthField(aType, cnt) {                       /*dbug-log*///console.log('+--removeAuthField[%s][%s]', aType, cnt);

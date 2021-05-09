@@ -74,7 +74,7 @@ export function initFieldTaxonSelect() {
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {
-    build.finishSrcFieldLoad(...arguments);
+    return build.finishSrcFieldLoad(...arguments);
 }
 /** ---------------- AUTHOR ------------------- */
 /* edit-form, form-ui */
