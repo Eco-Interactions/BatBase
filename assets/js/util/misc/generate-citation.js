@@ -172,7 +172,7 @@ function buildPublString(pubSrc) {
     const name = publ.displayName;
     const city = publ.city ? publ.city : ifWarning('[ADD CITY]');
     const cntry = publ.country ? publ.country : ifWarning('[ADD COUNTRY]');
-    return [name, city, cntry].join(', ');
+    return [name, city, cntry].filter(p => p).join(', ');
 
     function getPublisher(pubSrc) {
         if (!pubSrc.parent) { return false; }
@@ -233,5 +233,5 @@ function addPunc(data) {
     return /[.!?,;:]$/.test(data) ? data : data+'.';
 }
 function ifWarning(warningTxt) {
-    return d.showWarnings ? warningTxt : '';
+    return d.showWarnings ? warningTxt : null;
 }

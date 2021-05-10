@@ -16,6 +16,9 @@ function getSourceFieldConfg() {
             misc: {
                 customValueStore: true
             },
+            prep: {
+                setContributors: []
+            },
             prop: {
                 core: 'authors'
             },
@@ -34,9 +37,6 @@ function getSourceFieldConfg() {
         },
         DisplayName: {
             name: 'DisplayName',
-            prop: {
-                core: 'displayName'
-            },
             required: true,
             type: 'text',
         },

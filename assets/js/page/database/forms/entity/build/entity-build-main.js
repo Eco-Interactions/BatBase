@@ -52,7 +52,8 @@ export function editEntity(entity, id) {
     return mod.initEditForm(...arguments)
         .then(() => fillEntityDetailPanel(entity, id))
         .then(() => _elems('fillComplexFormFields', ['top']))
-        .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']));
+        .then(() => _elems('checkReqFieldsAndToggleSubmitBttn', ['top']))
+        .then(() => finishSrcFieldLoad(entity, 'top'));
 }
 function fillEntityDetailPanel(entity, id) {
     if (entity === 'Interaction') { return; }

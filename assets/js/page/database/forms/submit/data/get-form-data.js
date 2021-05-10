@@ -95,29 +95,9 @@ function handleDataPreparation(fKey, fConfg) {                      /*dbug-log*/
 }
 /* ----------------------- GET DATA ----------------------------------------- */
 function getFieldValue(fConfg) {
-    if (fConfg.type === 'multiSelect') { return returnMultiSelectValue(fConfg); }
+    if (fConfg.type === 'multiSelect') { return !!Object.keys(fConfg.value).length; }
     if (!_u('isObj', [fConfg.value])) { return fConfg.value; }
     return fConfg.value.value; //combos
-}
-function returnMultiSelectValue(fConfg) {                           /*dbug-log*///console.log('               --returnMultiSelectValue fConfg[%O]', fConfg);
-    const map = {
-        Author: getContributorData,
-        Editor: getContributorData
-    };
-    return map[fConfg.name](fConfg);
-}
-function getContributorData(fConfg) {                               /*dbug-log*///console.log('           --getContributorData [%O]', fConfg);
-    const data = {};
-    Object.keys(fConfg.value).forEach(buildContributorData);
-    return data;
-
-    function buildContributorData(ord) {
-        const contrib = {
-            ord: ord,
-            isEditor: fConfg.name === 'Editor'
-        };
-        data[fConfg.value[ord]] = contrib;
-    }
 }
 /* ----------------------- SET DATA ----------------------------------------- */
 /**
@@ -171,6 +151,24 @@ function setCoreAndDetail(g, fConfg, emptyString) {
     ['core', 'detail'].forEach(e => setServerData(g, fConfg.name, fConfg.value, e));
 }
 /* ______________________________________ ENTITY ____________________________ */
+function setContributors(g, fConfg) {
+    const data = Object.keys(fConfg.value).length ?
+        getContribs(fConfg.value) : getContribs(ld.confg.fields.Editor.value, true);
+    setServerData(g, 'Contributor', data);
+}
+function getContribs(vals, isEditor = false) {                      /*dbug-log*///console.log('           --getContributorData editors?[%s] vals[%O]', isEditor, vals);
+    const data = {};
+    Object.keys(vals).forEach(buildContributorData);
+    return data;
+
+    function buildContributorData(ord) {
+        const contrib = {
+            ord: ord,
+            isEditor: isEditor
+        };                                                          /*dbug-log*///console.log('               --buildContributorData [%O]', contrib);
+        data[vals[ord]] = contrib;
+    }
+}
     /* ----------- CITATION ------------------------------------------------- */
 function setCitationTitle(g, fConfg) {
     const title = fConfg.value;

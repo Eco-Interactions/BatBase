@@ -33,7 +33,10 @@ function getPublicationFieldConfg() {
             prep: {
                 setDetailData: [],
                 setCoreData: []
-            }
+            },
+            prop: {
+                core: 'displayName'
+            },
         },
         Doi: {//Source field
             info: {
@@ -107,7 +110,7 @@ function getPublicationTypeConfg() {
             },
             views: {
                 all: [
-                    ['', 'Publisher']
+                    ['Publisher', '']
                 ],
                 simple: [] // No fields added unless 'show all fields' selected
             }
@@ -119,7 +122,7 @@ function getPublicationTypeConfg() {
             },
             views:  {
                 all: [
-                    ['Author', 'Editor', 'Publisher']
+                    ['Author', 'Publisher']
                 ]
             }
         },

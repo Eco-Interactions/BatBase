@@ -15,7 +15,7 @@
  *             FIELD WIDTH
  *             FIELD LABEL
  */
-import { _cmbx } from '~util';
+import { _cmbx, _u } from '~util';
 import { _state, _val } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as aForm from './auth-form-main.js';
@@ -41,7 +41,7 @@ export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*/
 function onFieldClear(aType, fLvl, ttl, cnt) {                      /*dbug-log*///console.log('--onFieldClear [%s] cleared[%s] ttl[%s]', aType, cnt, ttl);
     sForm.handleCitText(fLvl);
     if (!aForm.isDynamicFieldEmpty(aType, ttl)) { return handleBlanks(aType, fLvl); }
-    ifNoneStillSelectedEnableOtherType(aType, fLvl, ttl);
+    ifNoneStillSelectedEnableOtherType(aType, fLvl, cnt);
     aForm.removeAuthField(aType, ttl--);
     handleEmptyFields(aType, fLvl, ttl, cnt);
 }
@@ -93,12 +93,12 @@ function ifPreviousAlertClearIt(aType, fLvl) {
 }
 /* ====================== SYNC AUTH-TYPE FIELDS ============================= */
 /** [ifNoneStillSelectedEnableOtherType description] */
-export function ifNoneStillSelectedEnableOtherType(aType, fLvl, clearedCnt) {
+export function ifNoneStillSelectedEnableOtherType(aType, fLvl, clearedCnt) {/*dbug-log*///console.log('--ifNoneStillSelectedEnableOtherType lvl[%s] type[%s] cleared[%s]', fLvl, aType, clearedCnt);
     if (ifTypeStillSelected(aType, fLvl, clearedCnt)) { return; }
     enableOtherField(aType, fLvl, true);
 }
 function ifTypeStillSelected(aType, fLvl, clearedCnt) {
-    const fVals = _state('getFieldState', [fLvl, aType]);             /*dbug-log*///console.log('--ifTypeStillSelected lvl[%s] type[%s] vals[%O]', fLvl, aType, fVals);
+    const fVals = _state('getFieldState', [fLvl, aType]);           /*dbug-log*///console.log('--ifTypeStillSelected lvl[%s] type[%s] vals[%O]', fLvl, aType, _u('snapshot', [fVals]));
     if (fVals[clearedCnt]) { fVals[clearedCnt] = null; } //val store change event could happen after this check
     return Object.values(fVals).find(v => v);
 }

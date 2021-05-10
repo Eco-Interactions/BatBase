@@ -19,8 +19,8 @@ export function selectExistingAuthsOrEds() {
 export function onAuthAndEdSelection() {
     return author.onAuthAndEdSelection(...arguments);
 }
-export function removeAuthField() {
-    return author.removeAuthField(...arguments);
+export function removeAuthorComboIfEmpty() {
+    return author.removeAuthorComboIfEmpty(...arguments);
 }
 /* ------------------------ PUBLISHER --------------------------------------- */
 export function onPublSelection() {

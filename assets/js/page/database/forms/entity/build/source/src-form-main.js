@@ -38,12 +38,13 @@ export function handleCitText() {
     entityForm.handleCitText(...arguments);
 }
 export function finishSrcFieldLoad(entity, fLvl) {                  /*dbug-log*///console.log('finishSrcFieldLoad [%s] entity[%s]', fLvl, entity);
+    if (!entity) { entity = _state('getFormState', [fLvl, 'name']); }
     if (entity === 'Citation' || entity === 'Publication') {
         return entityForm.finishFieldLoad(entity, fLvl);
     }
 }
-export function removeAuthField() {
-    return entityForm.removeAuthField(...arguments);
+export function removeAuthorComboIfEmpty() {
+    return entityForm.removeAuthorComboIfEmpty(...arguments);
 }
 /* -------------------- SUBMIT CONFIRMATION-MODAL --------------------------- */
 /**

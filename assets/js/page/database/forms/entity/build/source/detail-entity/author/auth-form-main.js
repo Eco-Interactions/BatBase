@@ -17,6 +17,7 @@
  *     INTERNAL HELPERS
  */
 import { _cmbx } from '~util';
+import { _state } from '~form';
 import * as build from './auth-form-build.js';
 import * as update from './on-auth-change.js';
 import * as fill from './auth-field-fill.js';
@@ -36,6 +37,11 @@ export function selectExistingAuthsOrEds() {
 /* ========================= ON FIELD CHANGE ================================ */
 export function onAuthAndEdSelection() {
     return update.onAuthAndEdSelection(...arguments);
+}
+export function removeAuthorComboIfEmpty(aType, fLvl) {
+    const cnt = _state('getFieldState', [fLvl, 'Author', 'count']); /*dbug-log*///console.log('--removeAuthorComboIfEmpty [%s][%s] cnt[%s]', fLvl, aType, cnt);
+    if (!isDynamicFieldEmpty(aType, cnt)) { return; }
+    removeAuthField(aType, cnt);
 }
 /* _____________________ INTERNAL HELPERS ___________________________________ */
 export function buildNewAuthorSelect() {

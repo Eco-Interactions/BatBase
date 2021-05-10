@@ -85,8 +85,7 @@ function disableFilledFields(type, fLvl) {                          /*dbug-log*/
 }
 function disableAuthorField(fLvl) {
     _cmbx('enableComboboxes', [$(`#Author_f-cntnr select`), false]);
-    const cnt = _state('getFieldState', [fLvl, 'Author', 'count']); /*dbug-log*///console.log('--disableAuthorField [%s] cnt[%s]', fLvl, cnt);
-    sForm.removeAuthField('Author', cnt);
+    sForm.removeAuthorComboIfEmpty('Author', fLvl);
 }
 function toggleTitleField(disable = false) {                        /*dbug-log*///console.log('toggleTitleField disable?[%s]', disable);
     $('#DisplayName_f input').prop('disabled', !disable);

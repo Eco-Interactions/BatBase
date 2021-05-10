@@ -75,8 +75,7 @@ function finishPubFormInit(status) {
  */
 export function loadPubTypeFields(typeId) {                         /*dbug-log*///console.log('   @--loadPubTypeFields tId[%s]', typeId);
     const fLvl = _state('getSubFormLvl', ['sub']);
-    return sForm.loadSrcTypeFields('Publication', typeId)
-        .then(() => finishFieldLoad(fLvl));
+    return sForm.loadSrcTypeFields('Publication', typeId);
 }
 /* -------------------------- SHOW NOTE ------------------------------------- */
 export function finishFieldLoad(fLvl) {

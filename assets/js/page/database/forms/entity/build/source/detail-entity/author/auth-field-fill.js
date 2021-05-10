@@ -12,6 +12,7 @@ import { _elems, _state } from '~form';
 import * as aForm from './auth-form-main.js';
 /* ======================= SELECT AUTHORS|EDITORS =========================== */
 export function selectExistingAuthsOrEds(aType, authObj, fLvl) {    /*dbug-log*///console.log('--selectExistingAuthsOrEds. args = %O', arguments);
+    if (!Object.keys(authObj).length) { return Promise.resolve(); }
     aForm.enableOtherField(aType, fLvl, false);
     return selectAuthors(aType, authObj, fLvl);
 }
