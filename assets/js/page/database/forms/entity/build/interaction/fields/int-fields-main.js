@@ -69,6 +69,9 @@ export function addLocationSelectionMethodsNote() {
 export function selectFieldTaxon() {
     return txn.selectFieldTaxon(...arguments);
 }
+export function buildOptAndUpdateCombo() {
+    return txn.buildOptAndUpdateCombo(...arguments);
+}
 export function onTaxonFieldSelection() {
     return txn.onTaxonFieldSelection(...arguments);
 }
@@ -78,9 +81,15 @@ export function addRoleTaxonFocusListeners() {
 export function enableTaxonFieldCombos() {
     return txn.enableTaxonFieldCombos(...arguments);
 }
+export function initTypeFieldIfBothTaxonRolesFilled() {
+    return txn.initTypeFieldIfBothTaxonRolesFilled();
+}
 /* ----------------- INTERACTION TYPE --------------------------------------- */
 export function initTypeField() {
     return type.initTypeField(...arguments);
+}
+export function setTypeEditVal() {
+    return type.setTypeEditVal(...arguments);
 }
 /* ----------------------- TAGS --------------------------------------------- */
 export function initTagField() {

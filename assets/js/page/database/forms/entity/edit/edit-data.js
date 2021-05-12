@@ -26,34 +26,58 @@ function setFieldValues(data, fState, entity) {
 function setIntData(data, fState) {                                 /*dbug-log*/console.log('--setIntData data[%O] fState[%O]', data, fState);
     const int = data.interaction[fState.id];                        /*dbug-log*/console.log('  --int[%O]', int);
     Object.values(fState.fields).forEach(setIntFieldValue);
+    setComplexIntValues();
 
     function setIntFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setIntFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
         const v = getFieldValue(fConfg, int);
         if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
         fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
-
     }
+    /** Note: Interaction type handled after form load. */
     function setComplexIntValues() {
-        //citation, country, subject, object, interactionType, tags
+        setSourceFields(fState.fields.CitationTitle.value);
+        setLocationFields(fState.fields.Location.value);
+        setTaxonFields(fState.fields.Subject, fState.fields.Object);
+        setTagsField(fState.fields.InteractionTags);
+    }
+    function setSourceFields(citId) {
+        const cSrc = data.source[citId];
+        const pSrc = data.source[cSrc.parent];
+        fState.fields.Publication.value = pSrc.id;
+    }
+    function setLocationFields(locId) {
+        const loc = data.location[locId];
+        const parentId = loc.country ? loc.country.id : loc.region.id;
+        fState.fields['Country-Region'].value = parentId;
+    }
+    function setTagsField(tField) {
+        tField.value = tField.value.map(t => t.id);
+    }
+    function setTaxonFields(subjField, objField) {
+        setTaxonData(subjField, data.taxon[subjField.value]);
+        setTaxonData(objField, data.taxon[objField.value]);
+    }
+    function setTaxonData(field, taxon) {
+        field.misc = { id: taxon.group.subGroup.id };
     }
 }
 
 /* ============================ LOCATION ==================================== */
-function setLocData(data, fState) {                                 /*dbug-log*/console.log('--setLocData data[%O] fState[%O]', data, fState);
-    const loc = data.location[fState.id];                           /*dbug-log*/console.log('  --loc[%O]', loc);
+function setLocData(data, fState) {                                 /*dbug-log*///console.log('--setLocData data[%O] fState[%O]', data, fState);
+    const loc = data.location[fState.id];                           /*dbug-log*///console.log('  --loc[%O]', loc);
     Object.values(fState.fields).forEach(setLocFieldValue);
     setGeoJsonData(fState.fields.GeoJson, data.geoJson[loc.geoJsonId])
     fState.editing.detail = loc.geoJsonId;
 
-    function setLocFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setLocFieldValue fConfg[%O]', fConfg);
+    function setLocFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setLocFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
         const v = getFieldValue(fConfg, loc);
-        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
+        if (!v) { return; }                                         /*dbug-log*///console.log('  --field[%s] v[%O]', fConfg.name, v);
         setFieldValue(fConfg, v);
     }
 }
-function setGeoJsonData(geoJsonField, geoJsonRcrd) {                /*dbug-log*/console.log('  --setGeoJsonData geoJsonField[%O] geoJsonRcrd[%O]', geoJsonField, geoJsonRcrd);
+function setGeoJsonData(geoJsonField, geoJsonRcrd) {                /*dbug-log*///console.log('  --setGeoJsonData geoJsonField[%O] geoJsonRcrd[%O]', geoJsonField, geoJsonRcrd);
     geoJsonField.misc.rcrd = geoJsonRcrd;
 }
 /* ============================ SOURCE ====================================== */

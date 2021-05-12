@@ -54,7 +54,7 @@ function getLocationFieldConfg() {
         Description: {
             name: 'Description',
             prop: {
-                core: 'descriptione'
+                core: 'description'
             },
             type: 'textArea',
         },

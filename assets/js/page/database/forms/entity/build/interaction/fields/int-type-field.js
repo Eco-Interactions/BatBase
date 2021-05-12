@@ -115,6 +115,16 @@ function selectTypeInitVal(prevType, typeOpts) {
         _cmbx('focusCombobox', ['InteractionType']);
     }
 }
+/* -------------------- FIELD INIT-VAL -------------------------------------- */
+export function setTypeEditVal(tId) {
+    const vId = Object.keys(md.validInts).find(ifTypeMatches);   /*dbug-log*///console.log('--setTypeEditVal vId[%s]', vId)
+    _cmbx('setSelVal', ['InteractionType', vId]);
+
+    function ifTypeMatches(id) {
+        return md.validInts[id].interactionType === tId;
+    }
+
+}
 /* ======================== ON TYPE SELECTION =============================== */
 export function onTypeSelection(val) {
     if (!val) { return onTypeClear(); }

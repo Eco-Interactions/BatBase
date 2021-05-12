@@ -44,6 +44,9 @@ function toggleRequiredLabelClass(fState, field, val, prop) {
     }
 }
 /* ___________________________ TAXON ________________________________________ */
+/**
+ * Note: Group init-value required.
+ */
 export function setTaxonGroupState(rcrds, f) {                      /*dbug-log*/console.log('--setTaxonGroupState rcrds[%O] f[%O]', rcrds, f);
     const group = getGroupEntity(rcrds, f);
     const sGroupId = getSubGroupId(rcrds, f, group);                /*dbug-log*/console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);

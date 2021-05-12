@@ -31,9 +31,6 @@ function getInteractionFieldConfg() {
             entity: 'Publication',
             name: 'Publication',
             prep: {},
-            prop: {
-                core: 'source'
-            },
             type: 'select'
         },
         CitationTitle: {
@@ -41,6 +38,9 @@ function getInteractionFieldConfg() {
             name: 'CitationTitle',
             prep: { //func: [args]
                 renameField: ['Source'],  //TODO: maybe not necessary because refernce values might be set with the entity prop
+            },
+            prop: {
+                core: 'source'
             },
             required: true,
             type: 'select'
@@ -73,12 +73,24 @@ function getInteractionFieldConfg() {
                 'accepted name and note the name used in the publication in the Notes Field.',
             },
             name: 'Subject',
+            prep: {
+                renameField: ['Subject']
+            },
+            prop: {
+                core: 'subject'
+            },
             required: true,
             type: 'select'
         },
         Object: {
             entity: 'Taxon',
             name: 'Object',
+            prep: {
+                renameField: ['Object']
+            },
+            prop: {
+                core: 'object'
+            },
             required: true,
             type: 'select'
         },

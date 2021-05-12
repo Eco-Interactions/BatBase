@@ -106,7 +106,7 @@ function initCombos(fLvl, action) {
 function finishFormInit(status, p) {                                /*dbug-log*///console.log('           --finishFormInit status[%s] params[%O]', status, p);
     if (!status) { return; } //Error handled elsewhere
     _elems('checkReqFieldsAndToggleSubmitBttn', [p.group]);
-    $('#Latitude_f input').focus();
+    $('#DisplayName_f input').focus();
     addMapToLocForm(p.action);
     addNotesToForm();
 }

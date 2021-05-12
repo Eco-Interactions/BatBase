@@ -37,13 +37,12 @@ function ifOppositeRoleFormLoading(role) {
 }
 /* =================== SELECT FIELD-TAXON =================================== */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
-export function selectFieldTaxon(e, selectRoot = false) {           /*dbug-log*/console.log('@--selectFieldTaxon selectRoot?[%s]', selectRoot);
+export function selectFieldTaxon(e, selectRoot = false) {           /*dbug-log*///console.log('@--selectFieldTaxon selectRoot?[%s]', selectRoot);
+    $('#sub-form').remove();
     const field = $('#select-group').data('field');
     const opt = getSelectedTaxonOption(selectRoot);
-    $('#sub-form').remove();
     if (!opt) { return; } //issue alerted to developer and editor
-    _cmbx('replaceSelOpts', [field, opt]);
-    _cmbx('setSelVal', [field, opt.value]);
+    buildOptAndUpdateCombo(field, opt);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(selectRoot) {
@@ -55,6 +54,10 @@ function getSelectedTaxonOption(selectRoot) {
 function getRoot() {
     return _state('getFieldState', ['sub', 'Sub-Group', 'misc']);
 }
+export function buildOptAndUpdateCombo(field, opt) {                /*dbug-log*///console.log("--buildOptAndUpdateCombo field[%a] opt[%O]", field, opt);
+    _cmbx('replaceSelOpts', [field, opt]);
+    _cmbx('setSelVal', [field, opt.value]);
+}
 /* =================== ON ROLE SELECTION ==================================== */
 /**
  * When complete, the select form is removed and the most specific taxon is displayed
@@ -62,7 +65,7 @@ function getRoot() {
  * In the interaction form, when both roles are selected, the valid interaction
  * types for the taxon groups, in their respective roles, load.
  */
-export function onTaxonFieldSelection(field, val) {                   /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", field, val);
+export function onTaxonFieldSelection(field, val) {                 /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", field, val);
     if (val === "" || isNaN(parseInt(val))) { return; }
     $('#'+_state('getSubFormLvl', ['sub'])+'-form').remove();
     storeFieldSelection(field, val);
@@ -72,12 +75,13 @@ export function onTaxonFieldSelection(field, val) {                   /*perm-log
     initTypeFieldIfBothTaxonRolesFilled();
 }
 function storeFieldSelection(field, val) {
-    const subGroup = { id: getRoot().rcrd.id };
     $('#sel-'+field).data('selTaxon', val);
-    _state('setFieldState', ['top', field, subGroup, 'misc' ]);      /*dbug-log*///console.log('   --storeFieldSelection field[%s] subGroup[%O]', field, subGroup);
+    if (_state('isEditForm', ['top'])) { return; }
+    const subGroup = { id: getRoot().rcrd.id };
+    _state('setFieldState', ['top', field, subGroup, 'misc' ]);     /*dbug-log*///console.log('   --storeFieldSelection field[%s] subGroup[%O]', field, subGroup);
 }
 /* ---------------------- INTERACTION FORMS ONLY ---------------------------- */
-function initTypeFieldIfBothTaxonRolesFilled() {
+export function initTypeFieldIfBothTaxonRolesFilled() {
     const roleGroups = ['Su', 'O'].map(getRoleRootId);
     if (!roleGroups.every(i => i)) { return; }
     iForm.initTypeField(roleGroups);

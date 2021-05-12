@@ -20,7 +20,7 @@
  *         ON-SUBMIT CONFIRMATION MODAL
  */
 import { _cmbx, _el, _modal } from '~util';
-import { _state, _elems, _form, handleFormSubmit } from '~form';
+import { _state, _elems, _form, _panel, handleFormSubmit } from '~form';
 import * as iForm from '../int-form-main.js';
 /* ======================= INIT FORM ======================================== */
 /* --------------------------- CREATE --------------------------------------- */
@@ -32,7 +32,8 @@ export function initCreateForm(entity) {                            /*perm-log*/
 /* ---------------------------- EDIT ---------------------------------------- */
 export function initEditForm(entity, id) {                          /*perm-log*/console.log('   //Building EDIT Interaction Form id[%s]', id);
     return _elems('initForm', [getIntFormParams('edit', id)])
-        .then(finishInteractionFormBuild);
+        .then(finishInteractionFormBuild)
+        .then(finishFieldFill);
 }
 /* --------------------------- SHARED --------------------------------------- */
 function getIntFormParams(action, id) {
@@ -106,4 +107,34 @@ function getIntTypeVerbForm() {
     const typeId = _state('getFieldState', ['top', 'InteractionType']);
     const types = _state('getEntityRcrds', ['interactionType']);  /*dbug-log*///console.log('--getIntTypeVerbForm typeId[%s] types[%O]', typeId, types);
     return types[typeId].activeForm;
+}
+
+/* ======================= FINISH BUILD ===================================== */
+function finishFieldFill() {
+    const fields = _state('getFormState', ['top', 'fields']);       /*dbug-log*///console.log('--finishFieldFill [%O]', fields);
+    setSourceFields(fields.Publication, fields.CitationTitle);
+    setLocationDetailPanel(fields.Location.value);
+    setTaxonFields(fields.Subject.value, fields.Object.value);
+    setTypeAndTagFields(fields.InteractionType, fields.InteractionTags);
+}
+function setLocationDetailPanel(id) {
+    const locRcrd = _state('getRcrd', ['location', id]);
+    _panel('fillLocDataInDetailPanel', [locRcrd]);
+}
+function setSourceFields(pubField, citField) {                      /*dbug-log*///console.log('--setSourceFields pub[%O] cit[%O]', pubField, citField);
+    iForm.fillCitationCombo(pubField.value);
+    _cmbx('setSelVal', ['CitationTitle', citField.value]);
+}
+function setTaxonFields(subId, objId) {
+    const taxa = _state('getEntityRcrds', ['taxon']);
+    iForm.buildOptAndUpdateCombo('Subject', buildTaxonOpt(taxa[subId]));
+    iForm.buildOptAndUpdateCombo('Object', buildTaxonOpt(taxa[objId]));
+}
+function buildTaxonOpt(taxon) {
+    return { text: taxon.displayName, value: taxon.id };
+}
+function setTypeAndTagFields(typeField, tagsField) {
+    iForm.initTypeFieldIfBothTaxonRolesFilled();
+    iForm.setTypeEditVal(typeField.value);
+    _cmbx('setSelVal', ['InteractionTags', tagsField.value]);
 }
