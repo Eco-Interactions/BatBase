@@ -53,7 +53,7 @@ function validateAndSubmit(rank) {
 function ifEmptyNameField() {
     return !$('#DisplayName_f input').val();
 }
-function ifSpeciesValIssue(rank) {
+export function ifSpeciesValIssue(rank) {
     return rank === 'Species' && !hasCorrectBinomialNomenclature();
 
     function hasCorrectBinomialNomenclature() {

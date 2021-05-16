@@ -23,42 +23,40 @@ import { _elems, _state, _val } from '~form';
 import { getSelectedTaxon } from '../txn-select-main.js';
 import { getAllRankAndSelectedOpts, getChildRankOpts } from './get-rank-opts.js';
 
-export function onRankSelection(val, elem) {                       /*dbug-log*///console.log("           --onRankSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
-    const fLvl = _state('getSubFormLvl', ['sub']);
-    if (val === 'create') { return openTaxonCreateForm(elem, fLvl); }
-    if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(elem); }
+export function onRankSelection(rank, val, fLvl = 'sub') {          /*dbug-log*///console.log("   +--onRankSelection rank[%s] val[%s] isNaN? [%s]", rank, val);
+    if (val === 'create') { return openTaxonCreateForm(rank, fLvl); }
+    if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(rank); }
     repopulateCombosWithRelatedTaxa(val, fLvl);
     _elems('toggleSubmitBttn', [fLvl, true]);
 }
  /* ----------------------- VALIDATE AND CREATE ----------------------------- */
-function openTaxonCreateForm(selElem, fLvl) {
-    const rank = selElem.id.split('sel-')[1];
+function openTaxonCreateForm(rank, fLvl) {
     if (rank === 'Species' && !$('#sel-Genus').val()) {
         return _val('formInitAlert', [rank, 'noGenus', fLvl]);
     } else if (rank === 'Genus' && !$('#sel-Family').val()) {
         return _val('formInitAlert', [rank, 'noFamily', fLvl]);
     }
-    selElem.selectize.createItem('create');
+    $(`#sel-${rank}`)[0].selectize.createItem('create');
 }
  /* ----------------------- RESET CHILD-RANK COMBOS ------------------------- */
-function syncTaxonCombos(elem) {
-    resetChildRankCombos(getSelectedTaxon(elem.id.split('sel-')[1]));
+function syncTaxonCombos(rank) {
+    resetChildRankCombos(getSelectedTaxon(rank));
 }
-function resetChildRankCombos(selTxn) {
-    getOptsForSelectedChildren(selTxn)
+function resetChildRankCombos(txn) {
+    getOptsForSelectedChildren(txn)
     .then(optData => repopulateRankCombos(optData.opts, optData.selected));
 }
-function getOptsForSelectedChildren(selTxn) {
-    if (!selTxn) { return getAllGroupRankOpts() }
-    return Promise.resolve(getChildOpts(selTxn));
+function getOptsForSelectedChildren(txn) {
+    if (!txn) { return getAllGroupRankOpts() }
+    return Promise.resolve(getChildOpts(txn));
 }
 function getAllGroupRankOpts() {
-    const gTaxon = _state('getFieldData', ['sub', 'Sub-Group', 'misc']).taxon;/*dbug-log*///console.log('getAllGroupRankOpts. subGroups = %O, rows = %O', subGroups, rows)
-    return getAllRankAndSelectedOpts(null, gTaxon);
+    const subGroup = _state('getFieldData', ['sub', 'Sub-Group', 'misc']).taxon;/*dbug-log*///console.log('--getAllGroupRankOpts subGroup[%O]', subGroup);
+    return getAllRankAndSelectedOpts(null, subGroup.taxon);
 }
-function getChildOpts(selTxn) {
-    if (selTxn.rank.displayName === 'Species') { return false; }
-    return getChildRankOpts(selTxn.rank.displayName, selTxn.children)
+function getChildOpts(txn) {
+    if (txn.rank.displayName === 'Species') { return false; }
+    return getChildRankOpts(txn.rank.displayName, txn.children)
 }
  /* ------------- FILL RANK COMBOS WITH RELATED TAXA ------------------------ */
 /**

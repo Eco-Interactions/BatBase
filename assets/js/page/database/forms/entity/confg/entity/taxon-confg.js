@@ -7,7 +7,7 @@ export default function(action, entity) {
 	return {
         action: action,
         data: {
-            edit: ['group', 'rankNames', 'taxon']
+            edit: ['group', 'orderedRanks', 'rankNames', 'taxon']
         },
         fields: {
             DisplayName: {
@@ -71,9 +71,9 @@ export default function(action, entity) {
             edit: {
                 views: {
                     all: [
-                        ['Parent'],
+                        ['Name'],
                         ['Rank'],
-                        ['Name']
+                        ['Parent'],
                     ]
                 }
             }

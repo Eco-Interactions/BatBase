@@ -19,22 +19,23 @@ import * as build from './build-taxon-select.js';
 import * as rank from './rank/txn-rank-main.js';
 import * as group from './group-fields.js';
 
-
-export function initSelectFormCombos(editHandlers = null) {
+export function initSelectFormCombos(fLvl = 'sub') {
     const events = getSelectComboEvents();
-    if (editHandlers) { replaceEditEvents(events, editHandlers); }
-    _elems('initFormCombos', ['sub', events]);
+    _elems('initFormCombos', [fLvl, events]);
 }
 function getSelectComboEvents() {
     return {
-        'Class': { onChange: onRankSelection, create: create.bind(null, 'Class') },
-        'Family': { onChange: onRankSelection, create: create.bind(null, 'Family') },
-        'Genus': { onChange: onRankSelection, create: create.bind(null, 'Genus') },
-        'Order': { onChange: onRankSelection, create: create.bind(null, 'Order') },
+        'Class': { onChange: onRankChange('Class'), create: create.bind(null, 'Class') },
+        'Family': { onChange: onRankChange('Family'), create: create.bind(null, 'Family') },
+        'Genus': { onChange: onRankChange('Genus'), create: create.bind(null, 'Genus') },
+        'Order': { onChange: onRankChange('Order'), create: create.bind(null, 'Order') },
         'Group': { onChange: group.onGroupSelection },
         'Sub-Group': { onChange: group.onSubGroupSelection },
-        'Species': { onChange: onRankSelection, create: create.bind(null, 'Species') },
+        'Species': { onChange: onRankChange('Species'), create: create.bind(null, 'Species') },
     };
+}
+function onRankChange(rank) {
+    return onRankSelection.bind(null, rank);
 }
 function replaceEditEvents(events, newEvents) {
     Object.keys(newEvents).forEach(updateEvents);
@@ -51,9 +52,10 @@ function create(rank, val) {
     return _form('createEntity', [rank, val]);
 }
 /* ======================= INIT =========================================== */
-export function initFieldTaxonSelect(field, gId) {
+export function initFieldTaxonSelect(field, gId, sgId, onSubmit, fLvl) {/*dbug-log*///console.log('--initFieldTaxonSelect field[%s] gId?[%s sId?[%s] onSubmit?[%O]', field, gId, sgId, onSubmit);
     const groupId = gId ? gId : getGroupId(field);
-    build.initTaxonSelectForm(field, groupId);
+    build.initTaxonSelectForm(field, groupId, sgId, onSubmit, fLvl)
+    .then(() => group.ifParentSelectRemoveSpecies(field));
 }
 function getGroupId(field) {
     const prevSelectedId = $('#sel-'+field).data('selTaxon');
@@ -61,26 +63,25 @@ function getGroupId(field) {
     return _state('getRcrd', ['taxon', prevSelectedId]).group.id;
 }
 /* ======================== RANKS =========================================== */
-export function onRankSelection(val) {
+export function onRankSelection(rankName, val) {                    /*dbug-log*///console.log('--onRankSelection rank[%s] val[%s]', rankName, val);
     if (val === 'new') { return; } // New taxon being created.
-    rank.onRankSelection(val, this.$input[0]);
+    rank.onRankSelection(rankName, val);
 }
 /* ======================== SELECTED ======================================== */
 /** Finds the most specific rank with a selection and returns that taxon record. */
 export function getSelectedTaxon(aboveRank) {
     const selElems = $('#sub-form .selectized').toArray();
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon-parent edit-form.
-    const selected = selElems.find(isSelectedTaxon.bind(null, aboveRank));/*dbug-log*///console.log("getSelectedTaxon above [%s]. selElems = %O selected = %O", aboveRank, selElems, _state('getRcrd', ['taxon', $(selected).val()]));
+    const selected = selElems.find(el => isSelectedTaxon(aboveRank, el));/*dbug-log*///console.log("--getSelectedTaxon above [%s]. selElems = %O selected = %O", aboveRank, selElems, _state('getRcrd', ['taxon', $(selected).val()]));
     return !selected ? false : _state('getRcrd', ['taxon', $(selected).val()]);
-
-    function ifEditingTaxon() {
-        const action = _state('getFormState', ['top', 'action']);
-        const entity = _state('getFormState', ['top', 'entity']);
-        return action == 'edit' && entity == 'taxon';
-    }
+}
+function ifEditingTaxon() {
+    const action = _state('getFormState', ['top', 'action']);
+    const entity = _state('getFormState', ['top', 'name']);
+    return action === 'edit' && entity === 'Taxon';
 }
 /** Note: On combo reset, the most specific taxon above the resetRank is selected. */
-function isSelectedTaxon(resetRank, elem) {
+function isSelectedTaxon(resetRank, elem) {                         /*dbug-log*///console.log('--isSelectedTaxon [%s] id[%s]', $(elem)[0].id, $(elem).val())
     if (!ifIsRankComboElem(elem)) { return false; }
     if (resetRank && isRankChildOfResetRank(resetRank, elem)) { return false; }
     return $(elem).val();

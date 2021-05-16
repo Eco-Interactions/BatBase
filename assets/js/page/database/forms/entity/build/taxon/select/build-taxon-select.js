@@ -26,10 +26,10 @@ import * as selectForm from './txn-select-main.js';
 
 export function initTaxonSelectForm(field, gId, sgId, onSubmit) {   /*perm-log*/console.log('       +--init[%s]Select (selected ? [%s])', field, $(`#sel-${field}`).val());
     $('#sel-'+field).data('loading', true);
-    return _elems('initSubForm', [getTxnSelectParams(field, gId)])
+    return _elems('initSubForm', [getTxnSelectParams(field, gId, sgId, onSubmit)])
         .then(status => finishTaxonSelectBuild(status, field, gId));
 }
-function getTxnSelectParams(field, gId, sgId, onSubmit) {           /*dbug-log*/console.log('--getTxnSelectParams field[%s] gId?[%s sId?[%s] onSubmit?[%O]', field, gId, sgId, onSubmit);
+function getTxnSelectParams(field, gId, sgId, onSubmit) {           /*dbug-log*///console.log('--getTxnSelectParams field[%s] gId?[%s sId?[%s] onSubmit?[%O]', field, gId, sgId, onSubmit);
     const groupId = field === 'Object' ? getObjectInitGroup(gId) : gId;
     return {
         action: 'select',
@@ -52,14 +52,14 @@ function getObjectInitGroup(gId) {
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first rank-combo into focus. Clears the [field]'s' combobox.
  */
-function finishTaxonSelectBuild(status, field, gId) {                     /*dbug-log*/console.log('finishTaxonSelectBuild field[%O]', field)
+function finishTaxonSelectBuild(status, field, gId) {               /*dbug-log*///console.log('+--finishTaxonSelectBuild field[%s] gId[%s]', field, gId);
     if (!status) { return } //Error handled elsewhere
     addSelectRootTaxonBttn(field);
     customizeElemsForTaxonSelectForm(field, gId);
     selectPrevTaxonAndResetField(field);
 }
 /** Called after group-selection builds rank rows. */
-function selectPrevTaxonAndResetField(field) {                      /*dbug-log*/console.log('selectPrevTaxonAndResetField [%O]', field)
+function selectPrevTaxonAndResetField(field) {                      /*dbug-log*///console.log('--selectPrevTaxonAndResetField [%O]', field)
     selectInitTaxonOrFocusFirstCombo(field);
     _cmbx('replaceSelOpts', [field, []]);
     $('#sel-'+field).data('loading', false);
@@ -99,10 +99,13 @@ function getTaxonExitButton(field) {
 }
 /** Exits sub form and restores any previous taxon selection. */
 function exitTaxonSelectForm(field) {
-    _elems('exitSubForm', ['sub', false, _form.bind(null, 'enableTaxonFieldCombos')]);
+    _elems('exitSubForm', ['sub', false, exitSelectForm.bind(null, field)]);
     const prevTaxonId = $('#sel-'+field).data('selTaxon');
     if (!prevTaxonId) { return; }
     resetTaxonCombobox(field, prevTaxonId);
+}
+function exitSelectForm(field) {
+    return _form('enableTaxonFieldCombos', [field]);
 }
 function resetTaxonCombobox(field, prevTaxonId) {
     const opt = { text: getTaxonym(prevTaxonId), value: prevTaxonId};
@@ -119,7 +122,7 @@ function getTaxonym(id) {
  * is changed by the user, the first combobox of the group is brought into focus.
  */
 function selectInitTaxonOrFocusFirstCombo(field) {
-    const selId = getPrevSelId(field);
+    const selId = getPrevSelId(field);                              /*dbug-log*///console.log("--selectInitTaxonOrFocusFirstCombo field[%s] id?[%s]", field, selId);
     if (selId) { resetPrevTaxonSelection(selId, field);
     } else { focusFirstRankCombo(field); }
 }

@@ -37,3 +37,7 @@ export function initSelectFormCombos() {
 export function getSelectedTaxon() {
     return select.getSelectedTaxon(...arguments);
 }
+/* ======================= VALIDATION ======================================= */
+export function ifSpeciesValIssue() {
+    return create.ifSpeciesValIssue(...arguments);
+}

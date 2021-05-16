@@ -72,6 +72,12 @@ export function getSelectedTaxon() {
 export function initFieldTaxonSelect() {
     return build.initFieldTaxonSelect(...arguments);
 }
+export function buildOptAndUpdateCombo() {
+    return build.buildOptAndUpdateCombo(...arguments);
+}
+export function onTaxonFieldSelection() {
+    return build.onTaxonFieldSelection(...arguments);
+}
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {
     return build.finishSrcFieldLoad(...arguments);

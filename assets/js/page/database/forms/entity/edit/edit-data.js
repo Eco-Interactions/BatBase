@@ -9,7 +9,7 @@
  */
 import { _u } from '~util';
 
-export function setEditFieldValues(data, fState) {                  /*dbug-log*/console.log('--setEditFieldValues data[%O] fState[%O]', data, fState);
+export function setEditFieldValues(data, fState) {                  /*dbug-log*///console.log('--setEditFieldValues data[%O] fState[%O]', data, fState);
     const entity = fState.core ? fState.core : fState.name;
     return setFieldValues(data, fState, entity);
 }
@@ -23,15 +23,15 @@ function setFieldValues(data, fState, entity) {
     return map[entity](data, fState);
 }
 /* ========================== INTERACTION =================================== */
-function setIntData(data, fState) {                                 /*dbug-log*/console.log('--setIntData data[%O] fState[%O]', data, fState);
-    const int = data.interaction[fState.id];                        /*dbug-log*/console.log('  --int[%O]', int);
+function setIntData(data, fState) {                                 /*dbug-log*///console.log('--setIntData data[%O] fState[%O]', data, fState);
+    const int = data.interaction[fState.id];                        /*dbug-log*///console.log('  --int[%O]', int);
     Object.values(fState.fields).forEach(setIntFieldValue);
     setComplexIntValues();
 
-    function setIntFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setIntFieldValue fConfg[%O]', fConfg);
+    function setIntFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setIntFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
         const v = getFieldValue(fConfg, int);
-        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
+        if (!v) { return; }                                         /*dbug-log*///console.log('  --field[%s] v[%O]', fConfg.name, v);
         fConfg.value =  v.id ? v.id : v;                                        //console.log('fConfg after [%O]', _u('snapshot', [fConfg]));
     }
     /** Note: Interaction type handled after form load. */
@@ -105,16 +105,17 @@ function getSrcEntity(data, src) {
     return data[name][src[name]];
 }
 /* ========================== TAXON =================================== */
-function setTxnData(data, fState) {                                 /*dbug-log*/console.log('--setTxnData data[%O] fState[%O]', data, fState);
-    const txn = data.taxon[fState.id];                              /*dbug-log*/console.log('  --txn[%O]', txn);
+function setTxnData(data, fState) {                                 /*dbug-log*///console.log('--setTxnData data[%O] fState[%O]', data, fState);
+    const txn = data.taxon[fState.id];                              /*dbug-log*///console.log('  --txn[%O]', txn);
     Object.values(fState.fields).forEach(setTxnFieldValue);
     fState.fields['Sub-Group'].value = txn.group.subGroup.id;
+    fState.fields.Group.value = txn.group.id;
+    fState.entity = txn;
 
-    function setTxnFieldValue(fConfg) {                             /*dbug-log*/console.log('  --setTxnFieldValue fConfg[%O]', fConfg);
+    function setTxnFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setTxnFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }
         const v = getFieldValue(fConfg, txn);
-        if (!v) { return; }                                         /*dbug-log*/console.log('  --field[%s] v[%O]', fConfg.name, v);
-        // if (fConfg.name === ) { fState.type = v.displayName; }
+        if (!v) { return; }                                         /*dbug-log*///console.log('  --field[%s] v[%O]', fConfg.name, v);
         setFieldValue(fConfg, v);
     }
 }
@@ -124,16 +125,9 @@ function setTxnData(data, fState) {                                 /*dbug-log*/
 
 
 /* ============================ HELPERS ===================================== */
-function getFieldValue(fConfg, entity) {                            /*dbug-log*/console.log('  --getFieldValue fConfg[%O]', fConfg);
+function getFieldValue(fConfg, entity) {                            /*dbug-log*///console.log('  --getFieldValue fConfg[%O]', fConfg);
     return Object.values(fConfg.prop).map(prop => entity[prop])[0];
 }
-function setFieldValue(fConfg, v) {                                 /*dbug-log*/console.log('  --setFieldValue fConfg[%O]', fConfg);
-    fConfg.value =  v.id ? v.id : ( isNaN(v) ? v : parseInt(v));    /*dbug-log*/console.log('       --fConfg after [%O]', _u('snapshot', [fConfg]));
+function setFieldValue(fConfg, v) {                                 /*dbug-log*///console.log('  --setFieldValue [%s] fConfg[%O]', fConfg.name, fConfg);
+    fConfg.value =  v.id ? v.id : v;                                /*dbug-log*///console.log('       --fConfg after [%O]', _u('snapshot', [fConfg]));
 }
-// function setIntData(data, fState) {
-//     // body...
-// }
-/* ========================== INTERACTION =================================== */
-// function setIntData(data, fState) {
-//     // body...
-// }

@@ -93,6 +93,7 @@ export function getFieldOptions(fName) {                            /*dbug-log*/
         'Publication': [ getSrcOpts, 'pubSrcs'],
         'PublicationType': [ getStoredOpts, 'pubTypeNames'],
         'Publisher': [ getSrcOpts, 'publSrcs'],
+        'Rank': [ getRankOpts, null ],
         'Region': [ getStoredOpts, 'regionNames' ],
         'Sub-Group': [ getSubGroupOpts, null ],
         'Species': [ getTaxonOpts, 'Species' ],
@@ -179,6 +180,17 @@ function getCitTypeOpts(fName, prop) {                              /*dbug-log*/
     }
 }
 /* -------------------------- TAXON ----------------------------------------- */
+function getRankOpts(fName, prop) {
+    return _db('getData', [['orderedRanks', 'rankNames']])
+        .then(data => buildRankOpts(data.orderedRanks, data.rankNames));
+}
+function buildRankOpts(order, ranks) {                              /*dbug-log*///console.log('--buildRankOpts order[%O], ranks[%O]', order, ranks);
+    order.splice(order.indexOf('Phylum')); //Removes levels unused in UI
+    return order.map(r => buildRankOpt(r, ranks[r].id));
+}
+function buildRankOpt(rank, id) {
+    return { text: rank, value: id };
+}
 /** Returns an array of taxonyms for the passed rank and the form's taxon group. */
 export function getTaxonOpts(fName, rank, r, g) {
     const group = r ? r : getGroupName();

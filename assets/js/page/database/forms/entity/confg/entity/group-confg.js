@@ -4,17 +4,20 @@
 import { _state } from '~form';
 
 export default function(action, field) {
+    const fields = getCoreGroupAndRankFieldConfg();
     return {
         action: action,
         data: {
             edit: ['group', 'rankNames', 'taxon']
         },
-        fields: getCoreGroupAndRankFieldConfg(),
+        fields: fields,
         name: field,
-        views: {}
+        views: {
+            all: fields
+        }
     };
 }
-export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*/console.log('getGroupFieldViewOrder sGroupField[%O]', sGroupField);
+export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getGroupFieldViewOrder sGroupField[%O]', sGroupField);
     const gFields = [['Group'], ['Sub-Group']];
     if (!sGroupField.shown) { gFields.pop(); }
     return [...gFields, ...getSubGroupRankFields(sGroupField)];

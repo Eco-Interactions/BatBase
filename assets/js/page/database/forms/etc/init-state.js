@@ -91,7 +91,8 @@ function setInitValues(fields, vals) {                              /*dbug-log*/
  * -- Property descriptions: TODO: UPDATE
  * > action - create || edit
  * > simple - All fields are shown unless simple default-display confg present
- * > entity - Name of this form's entity.
+ * > entity - Edit-form entity record (only used for taxon edit currently)
+ * > name - Name of this form's entity.
  * > onFormClose - Handles form exit/reset.
  * > misc - Obj to hold the various special-case props
  * > combo - The field name of the form parent-combo.
@@ -119,7 +120,7 @@ function initEntityState(fS, f) {
         Publication: storeSourceData,
         Subject: initTaxonState,
         Object: initTaxonState,
-        Taxon: initTaxonState
+        Parent: initTaxonState
     };
     if (!map[f.name]) { return Promise.resolve(); }
     return Promise.resolve(map[f.name](fS.records, f));

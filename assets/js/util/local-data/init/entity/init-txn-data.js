@@ -26,14 +26,15 @@ export function modifyTxnDataForLocalDb(data) {                     /*dbug-log*/
 /* ========================= RANKS ========================================== */
 function storeRankData(rankData) {
     const ranks = {};
-    const order = Object.keys(rankData).sort(orderRanks);
+    let order = Object.keys(rankData).sort(orderRanks);             /*dbug-log*///console.log('--storeRankData order[%O]', order);
     $(order).each(addRankData);
     db.setDataInMemory('rankNames', ranks);
+    db.setDataInMemory('orderedRanks', order.map(i => rankData[i].displayName));
 
     function orderRanks(a, b) {
         const x = rankData[a].ordinal;
         const y = rankData[b].ordinal;
-        return x<y ? -1 : x>y ? 1 : 0;
+        return x<y ? 1 : x>y ? -1 : 0;
     }
     function addRankData(i, id) {
         return ranks[rankData[id].displayName] = {id: id, ord: i+1};

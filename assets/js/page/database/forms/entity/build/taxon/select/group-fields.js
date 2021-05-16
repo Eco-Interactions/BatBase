@@ -33,5 +33,10 @@ export function onSubGroupSelection(val) {                          /*temp-log*/
 function rebuildTaxonSelectForm() {
     const field = $('#select-group').data('field');
     _state('updateTaxonGroupState', ['sub']);
-    _elems('onFormConfgChanged', ['sub', field]);
+    _elems('onFormConfgChanged', ['sub', field])
+    .then(() => ifParentSelectRemoveSpecies(field));
+}
+export function ifParentSelectRemoveSpecies(field) {                /*dbug-log*///console.log("--ifParentSelectRemoveSpecies field[%s]", field);
+    if (field !== 'Parent') { return; }
+    $('#Species_f').hide();
 }

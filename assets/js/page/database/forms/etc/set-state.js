@@ -47,9 +47,9 @@ function toggleRequiredLabelClass(fState, field, val, prop) {
 /**
  * Note: Group init-value required.
  */
-export function setTaxonGroupState(rcrds, f) {                      /*dbug-log*/console.log('--setTaxonGroupState rcrds[%O] f[%O]', rcrds, f);
+export function setTaxonGroupState(rcrds, f) {                      /*dbug-log*///console.log('--setTaxonGroupState rcrds[%O] f[%O]', rcrds, f);
     const group = getGroupEntity(rcrds, f);
-    const sGroupId = getSubGroupId(rcrds, f, group);                /*dbug-log*/console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
+    const sGroupId = getSubGroupId(rcrds, f, group);                /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
     setGroupState(rcrds.taxon, f, group);
     setSubGroupState(rcrds.taxon, f.fields, group.subGroups, sGroupId);
 }
@@ -61,18 +61,18 @@ function getSubGroupId(rcrds, f, group) {
     return Object.keys(group.subGroups)[0];
 }
 /** [setGroupState description] */
-function setGroupState(taxa, fState, group) {                       /*dbug-log*/console.log('--setGroupState group[%O]', group);
+function setGroupState(taxa, fState, group) {                       /*dbug-log*///console.log('--setGroupState group[%O]', group);
     fState.fields.Group.value = group.id;
     fState.fields.Group.misc = {
         rcrd: group,
         subGroups: group.subGroups
-    };                                                              /*dbug-log*/console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
+    };                                                              /*dbug-log*///console.log('   --updated state[%O]', _u('snapshot', [fState.fields.Group.misc]));
 }
 /** [setSubGroupState description] */
-function setSubGroupState(rcrds, fields, subGroups, sGroupId) {     /*dbug-log*/console.log('--setSubGroupState rcrds[%O], fields[%O], subGroups[%O], sGroupId[%s]', rcrds, fields, subGroups, sGroupId);
+function setSubGroupState(rcrds, fields, subGroups, sGroupId) {     /*dbug-log*///console.log('--setSubGroupState rcrds[%O], fields[%O], subGroups[%O], sGroupId[%s]', rcrds, fields, subGroups, sGroupId);
     const subGroup = subGroups[sGroupId];
     fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
-    fields['Sub-Group'].value = subGroup.id;                     /*dbug-log*/console.log('--setSubGroupState fieldClass?[%O] subGroup[%O] subGroups[%O]', fields['Sub-Group'].class, subGroup, subGroups);
+    fields['Sub-Group'].value = subGroup.id;                        /*dbug-log*///console.log('--setSubGroupState field[%O] subGroup[%O] subGroups[%O]', fields['Sub-Group'], subGroup, subGroups);
     fields['Sub-Group'].misc = {
         rcrd: subGroup,
         subRanks: subGroup.subRanks,

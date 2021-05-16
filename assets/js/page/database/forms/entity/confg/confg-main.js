@@ -57,6 +57,7 @@
 import { _u } from '~util';
 import { _state } from '~form';
 import * as cUtil from './util/confg-util-main.js';
+import { getGroupFieldViewOrder } from './entity/group-confg.js';
 /* ====================== INIT FORM-CONFG =================================== */
 export function finishFormStateInit(c) {                            /*temp-log*/console.log('+--finishFormStateInit confg[%O]', c);
     c.display = c.action === 'create' && c.views.simple ? 'simple' : 'all';
@@ -85,13 +86,13 @@ function updateConfg(c) {                                           /*temp-log*/
     updateActiveFieldFlags(c.fields);
 }
 function handleCurrentFieldView(c, mViews) {
-    const views = c.action === 'select' ? getGroupFieldView(c) : mViews;
+    const views = c.action === 'select' ? getGroupFieldView(c) : mViews;/*dbug-log*///console.log(' views[%O]', views);
     cUtil.buildViewConfg(c, views);
 }
-function getGroupFieldView(c) {                                     /*dbug-log*/console.log('--getGroupFieldView c[%O]', c)
-    const views = {};
-    views.all = require(`./entity/group-confg.js`).getGroupFieldViewOrder(c.fields['Sub-Group']);
-    return views;
+function getGroupFieldView(c) {                                     /*dbug-log*///console.log('--getGroupFieldView c[%O]', c)
+    return {
+        all: getGroupFieldViewOrder(c.fields['Sub-Group'])
+    };
 }
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
 function resetConfgDefaults(c) {
@@ -122,7 +123,7 @@ export function buildViewConfg(c) {
 }
 /* ----------------------- BASE CONFG --------------------------------------- */
 /** [getBaseConfg description] INTERNAL USE */
-export function getBaseConfg(action, entity, type) {                /*dbug-log*/console.log('   --getBaseConfg action[%s] entity[%s] type?[%O]', action, entity, type);
+export function getBaseConfg(action, entity, type) {                /*dbug-log*///console.log('   --getBaseConfg action[%s] entity[%s] type?[%O]', action, entity, type);
     const confg = cUtil.getBaseFormConfg(action, entity);
     if (confg.core) { mergeCoreEntityConfg(confg); }
     if (type) { mergeIntoFormConfg(confg, confg.types[type]); }

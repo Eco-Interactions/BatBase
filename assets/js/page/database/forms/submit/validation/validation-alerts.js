@@ -168,7 +168,7 @@ function getFieldValAlertHandler(tag, action) {
         /* --- TAXON --- */
         'isGenusPrnt': {
             show: handleIsGenusPrntAndReturnAlertMsg,
-            clear: clrIsGenusPrnt
+            clear: clrTaxonRankAlert
         },
         'needsGenusName': {
             show: handleNeedsGenusNameAndReturnAlertMsg
@@ -181,7 +181,7 @@ function getFieldValAlertHandler(tag, action) {
         },
         'needsHigherRank': {
             show: handleNeedsHigherRankAndReturnAlertMsg,
-            clear: clrNeedsHigherRank
+            clear: clrTaxonRankAlert
         },
         'needsName': {
             show: getRequiredFieldsEmptyAleryMsg
@@ -261,7 +261,7 @@ function handleIsGenusPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return "<span>Genus' with species children must remain at genus.</span>";
 }
 function clrIsGenusPrnt(elem, fLvl, e) {
-    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
+    _cmbx('setSelVal', ['Rank', _state('getFormState', ['top', 'entity']).rank.id]);
 }
 /* ------------- INCORRECT BINOMIAL ----------------------------------------- */
 function handleNeedsGenusNameAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
@@ -274,8 +274,10 @@ function handleNeedsGenusNameAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 function handleNeedsGenusParentAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return '<span>Please select a genus parent for the species taxon.</span>';
 }
-function clrNeedsGenusPrntAlert(elem, fLvl, e) {
-    _cmbx('setSelVal', ['Rank', $('#sel-Rank').data('rank')]);
+export function clrTaxonParentAlert(elem, fLvl, e) {
+    const pId = _state('getFormState', ['top', 'entity']).parent;
+    $('#sub-form').remove();
+    _form('buildOptAndUpdateCombo', ['Parent', pId, 'silent']);
 }
 /* -------------- PARENT MUST BE HIGHER RANK -------------------------------- */
 function handleNeedsHigherRankPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
@@ -283,20 +285,13 @@ function handleNeedsHigherRankPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) 
 }
 /* -------------- TAXON MUST BE HIGHER RANK -------------------------------- */
 function handleNeedsHigherRankAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
-    $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     return '<div>Taxon rank must be higher than that of child taxa.</div>';
 }
 /** Resets the taxon's rank. */
-export function clrNeedsHigherRank(elem, fLvl, e, taxonRank) {
-    const txnRank = taxonRank || $('#sel-Rank').data('rank');
-    _elems('setSilentVal', ['top', 'Rank', $('#sel-Rank').data('rank')]);
-    clearAlert($('#Taxon_alert')[0], fLvl);
-    enableChngPrntBtttn();
-}
-/** Enables the button if the change-parent form isn't already open. */
-function enableChngPrntBtttn() {
-    if ($('#sub-form').length ) { return; }
-    $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
+export function clrTaxonRankAlert(elem, fLvl, e) {
+    const txnRank = _state('getFormState', ['top', 'entity']).rank.id;
+    _elems('setSilentVal', ['top', 'Rank', txnRank]);
+    clearAlert(elem, fLvl);
 }
 /* ------------------- NEEDS FAMILY ----------------------------------------- */
 function handleNoFamilyAndReturnAlertMsg(elem, tag, fLvl, fieldName) {

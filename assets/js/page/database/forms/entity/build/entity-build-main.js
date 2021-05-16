@@ -84,14 +84,20 @@ export function autofillCoordinateFields() {
 export function initFieldTaxonSelect() {
     return txn.initFieldTaxonSelect(...arguments);
 }
+export function getSelectedTaxon() {
+    return txn.getSelectedTaxon();
+}
 export function selectFieldTaxon() {
     return int.selectFieldTaxon(...arguments);
+}
+export function onTaxonFieldSelection() {
+    return int.onTaxonFieldSelection(...arguments);
 }
 export function enableTaxonFieldCombos() {
     return int.enableTaxonFieldCombos(...arguments);
 }
-export function getSelectedTaxon() {
-    return txn.getSelectedTaxon();
+export function buildOptAndUpdateCombo() {
+    return int.buildOptAndUpdateCombo(...arguments);
 }
 /** ------------------------ SOURCE TYPES ----------------------------------- */
 export function finishSrcFieldLoad() {

@@ -12,9 +12,9 @@ import { _cmbx, _u } from '~util';
 import {  _elems, _form, _state, _val } from '~form';
 import * as iForm from '../int-form-main.js';
 /* ======================= ENABLE FIELDS ==================================== */
-export function enableTaxonFieldCombos() {
-    _cmbx('enableCombobox', ['Subject']);
-    _cmbx('enableCombobox', ['Object']);
+export function enableTaxonFieldCombos(field) {                     /*dbug-log*///console.log('--enableTaxonFieldCombos field?[%s]', field);
+    const fields = field === 'Parent' ? [field] : ['Subject', 'Object'];
+    fields.forEach(f => _cmbx('enableCombobox', [f]));
 }
 /* ====================== FIELD FOCUS-LISTENERS ============================= */
 /** Displays the [Role] Taxon select form when the field gains focus. */
@@ -22,9 +22,9 @@ export function addRoleTaxonFocusListeners() {
     ['Subject', 'Object'].forEach(addRoleFocusListener);
 }
 function addRoleFocusListener(role) {
-    $(`#sel-${role}`)[0].selectize.on('focus', initFieldTaxonSelect.bind(null, role));
+    $(`#sel-${role}`)[0].selectize.on('focus', loadFieldTaxonSelect.bind(null, role));
 }
-function initFieldTaxonSelect(role) {
+function loadFieldTaxonSelect(role) {
     if (ifOppositeRoleFormLoading(role)) { return _val('alertFormOpen', ['sub']); }
     _form('initFieldTaxonSelect', [role]);
 }
@@ -38,25 +38,33 @@ function ifOppositeRoleFormLoading(role) {
 /* =================== SELECT FIELD-TAXON =================================== */
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 export function selectFieldTaxon(e, selectRoot = false) {           /*dbug-log*///console.log('@--selectFieldTaxon selectRoot?[%s]', selectRoot);
-    $('#sub-form').remove();
     const field = $('#select-group').data('field');
     const opt = getSelectedTaxonOption(selectRoot);
-    if (!opt) { return; } //issue alerted to developer and editor
-    buildOptAndUpdateCombo(field, opt);
+    // $('#sub-form').remove(); Not needed?
+    updateCombo(field, opt);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(selectRoot) {
     const selected = _form('getSelectedTaxon');
     const taxon = selectRoot || !selected ? getRoot().taxon : selected;/*dbug-log*///console.log("--getSelectedTaxonOption taxon[%O]", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
+    return buildTxnOpt(taxon);
+}
+function buildTxnOpt(taxon) {
     return { text: taxon.displayName, value: taxon.id};
 }
 function getRoot() {
     return _state('getFieldState', ['sub', 'Sub-Group', 'misc']);
 }
-export function buildOptAndUpdateCombo(field, opt) {                /*dbug-log*///console.log("--buildOptAndUpdateCombo field[%a] opt[%O]", field, opt);
+export function buildOptAndUpdateCombo(field, id, silent = false) {/*dbug-log*///console.log("--buildOptAndUpdateCombo field[%a] opt[%O]", field, opt);
+    const taxon = _state('getEntityRcrds', ['taxon'])[id];
+    updateCombo(field, buildTxnOpt(taxon), silent);
+    _cmbx('enableCombobox', [field]);
+}
+function updateCombo(field, opt, silent) {
     _cmbx('replaceSelOpts', [field, opt]);
-    _cmbx('setSelVal', [field, opt.value]);
+    _cmbx('setSelVal', [field, opt.value, silent]);
+
 }
 /* =================== ON ROLE SELECTION ==================================== */
 /**
@@ -67,10 +75,10 @@ export function buildOptAndUpdateCombo(field, opt) {                /*dbug-log*/
  */
 export function onTaxonFieldSelection(field, val) {                 /*perm-log*/console.log("       +--onTaxon[%s]Selection [%s]", field, val);
     if (val === "" || isNaN(parseInt(val))) { return; }
-    $('#'+_state('getSubFormLvl', ['sub'])+'-form').remove();
+    $('#sub-form').remove();
     storeFieldSelection(field, val);
+    iForm.enableTaxonFieldCombos(field);
     if (field === 'Parent') { return; } //taxon edit-form
-    iForm.enableTaxonFieldCombos();
     iForm.focusPinAndEnableSubmitIfFormValid(field);
     initTypeFieldIfBothTaxonRolesFilled();
 }
