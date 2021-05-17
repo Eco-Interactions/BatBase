@@ -183,6 +183,10 @@ function getFieldValAlertHandler(tag, action) {
             show: handleNeedsHigherRankAndReturnAlertMsg,
             clear: clrTaxonRankAlert
         },
+        'needsLowerRank': {
+            show: handleNeedsLowerRankAndReturnAlertMsg,
+            clear: clrTaxonRankAlert
+        },
         'needsName': {
             show: getRequiredFieldsEmptyAleryMsg
         },
@@ -283,9 +287,13 @@ export function clrTaxonParentAlert(elem, fLvl, e) {
 function handleNeedsHigherRankPrntAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return '<span>The parent taxon must be at a higher taxonomic rank.</span>';
 }
-/* -------------- TAXON MUST BE HIGHER RANK -------------------------------- */
+
+/* -------------- TAXON MUST BE DIFFERENT RANK ------------------------------ */
 function handleNeedsHigherRankAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
     return '<div>Taxon rank must be higher than that of child taxa.</div>';
+}
+function handleNeedsLowerRankAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    return "<div>Taxon rank must be lower than the parent rank.</div>";
 }
 /** Resets the taxon's rank. */
 export function clrTaxonRankAlert(elem, fLvl, e) {

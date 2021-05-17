@@ -52,7 +52,7 @@ function create(rank, val) {
     return _form('createEntity', [rank, val]);
 }
 /* ======================= INIT =========================================== */
-export function initFieldTaxonSelect(field, gId, sgId, onSubmit, fLvl) {/*dbug-log*///console.log('--initFieldTaxonSelect field[%s] gId?[%s sId?[%s] onSubmit?[%O]', field, gId, sgId, onSubmit);
+export function initFieldTaxonSelect(field, gId, sgId, onSubmit, fLvl = 'sub') {/*dbug-log*///console.log('--initFieldTaxonSelect field[%s] gId?[%s sId?[%s] onSubmit?[%O]', field, gId, sgId, onSubmit);
     const groupId = gId ? gId : getGroupId(field);
     build.initTaxonSelectForm(field, groupId, sgId, onSubmit, fLvl)
     .then(() => group.ifParentSelectRemoveSpecies(field));
@@ -73,7 +73,8 @@ export function getSelectedTaxon(aboveRank) {
     const selElems = $('#sub-form .selectized').toArray();
     if (ifEditingTaxon()) { selElems.reverse(); } //Taxon-parent edit-form.
     const selected = selElems.find(el => isSelectedTaxon(aboveRank, el));/*dbug-log*///console.log("--getSelectedTaxon above [%s]. selElems = %O selected = %O", aboveRank, selElems, _state('getRcrd', ['taxon', $(selected).val()]));
-    return !selected ? false : _state('getRcrd', ['taxon', $(selected).val()]);
+    const id = !selected ? getRoot() : $(selected).val();
+    return _state('getRcrd', ['taxon', id]);
 }
 function ifEditingTaxon() {
     const action = _state('getFormState', ['top', 'action']);
@@ -93,4 +94,7 @@ function isRankChildOfResetRank(resetRank, elem) {
 }
 function ifIsRankComboElem(elem) {
     return elem.id.includes('sel') && !elem.id.includes('Group');
+ }
+ function getRoot() {
+     return _state('getFieldState', ['sub', 'Sub-Group', 'misc']).rcrd.taxon;
  }

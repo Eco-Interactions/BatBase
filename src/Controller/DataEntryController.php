@@ -26,6 +26,12 @@ class DataEntryController extends AbstractController
         $this->serialize = $serialize;
         $this->dataManager = $dataManager;
     }
+        /** Returns the entity. */
+    private function getEntity($class, $val, $prop = 'id')
+    {
+        return $this->em->getRepository("App:".$class)
+            ->findOneBy([$prop => $val]);
+    }
 /* ========================== EDIT ENTITY =================================== */
     /**
      * Creates a new Entity, and any new detail-entities, from the form data.
@@ -57,6 +63,7 @@ class DataEntryController extends AbstractController
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }                                                                       //print("\nCreating Source.\n");
+        $this->em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
         $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
         $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
@@ -82,23 +89,23 @@ class DataEntryController extends AbstractController
     }
     private function checkForTaxonGroupEdit(&$edits)
     {
-        if (!property_exists($edits, 'parentTaxon')) { return; }
-        $old = $this->getEntity('Taxon', $edits->parentTaxon['old']);
-        $new = $this->getEntity('Taxon', $edits->parentTaxon['new']);
+        if (!property_exists($edits, 'ParentTaxon')) { return; }
+        $old = $this->getEntity('Taxon', $edits->ParentTaxon['old']);
+        $new = $this->getEntity('Taxon', $edits->ParentTaxon['new']);
         $this->checkForGroupEdits($new, $old, $edits);
         $this->checkForSubGroupEdits($new, $old, $edits);
     }
     private function checkForGroupEdits($new, $old, &$edits)
     {
-        $oldGroup = $old->getGroup()->getDisplayName();
-        $newGroup = $new->getGroup()->getId();
-        $this->trackEditsToData('group', $newGroup, $oldGroup, $edits);
+        $oldGroup = $old->getTaxonGroup()->getDisplayName();
+        $newGroup = $new->getTaxonGroup()->getDisplayName();
+        $this->trackEditsToData('Group', $newGroup, $oldGroup, $edits);
     }
     private function checkForSubGroupEdits($new, $old, &$edits)
     {
         $oldGroup = $old->getSubGroup();
         $newGroup = $new->getSubGroup();
-        $this->trackEditsToData('subGroup', $newGroup, $oldGroup, $edits);
+        $this->trackEditsToData('SubGroup', $newGroup, $oldGroup, $edits);
     }
     private function trackEditsToData($field, $newVal, $oldVal, &$edits)
     {

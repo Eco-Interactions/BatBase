@@ -40,13 +40,12 @@ function ifOppositeRoleFormLoading(role) {
 export function selectFieldTaxon(e, selectRoot = false) {           /*dbug-log*///console.log('@--selectFieldTaxon selectRoot?[%s]', selectRoot);
     const field = $('#select-group').data('field');
     const opt = getSelectedTaxonOption(selectRoot);
-    // $('#sub-form').remove(); Not needed?
     updateCombo(field, opt);
+    $('#sub-form').remove(); //Used with edit-forms and 'select unspecified'
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption(selectRoot) {
-    const selected = _form('getSelectedTaxon');
-    const taxon = selectRoot || !selected ? getRoot().taxon : selected;/*dbug-log*///console.log("--getSelectedTaxonOption taxon[%O]", taxon);
+    const taxon = selectRoot ? getRoot().taxon : _form('getSelectedTaxon');/*dbug-log*///console.log("--getSelectedTaxonOption taxon[%O]", taxon);
     if (!taxon) { return; } //issue alerted to developer and editor
     return buildTxnOpt(taxon);
 }

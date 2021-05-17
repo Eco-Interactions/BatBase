@@ -151,6 +151,35 @@ function setCoreAndDetail(g, fConfg, emptyString) {
     ['core', 'detail'].forEach(e => setServerData(g, fConfg.name, fConfg.value, e));
 }
 /* ______________________________________ ENTITY ____________________________ */
+    /* ----------------------- AUTHOR --------------------------------------- */
+function handleAuthorNames(g, fConfg) {
+    const names = getAuthNameValues(ld.confg.fields);
+    setServerData('flat', 'DisplayName', buildAuthDisplayName(names));
+    setServerData('flat', 'DisplayName', buildAuthDisplayName(names), 'detail');
+    setServerData('flat', 'FullName', buildAuthFullName(names), 'detail');
+}
+function getAuthNameValues(fields) {                                /*dbug-log*///console.log('--getAuthNameValues fields[%O]', fields);
+    const sufx = fields.Suffix.value;
+    return {
+        first: fields.FirstName.value,
+        middle: fields.MiddleName.value,
+        last: fields.LastName.value,
+        suffix: sufx && sufx[sufx.length-1] !== '.' ? sufx+'.' : sufx
+    };
+}
+function buildAuthDisplayName(names) {                              /*dbug-log*///console.log('--buildAuthDisplayName names[%O]', names);
+    if (!names.first) { return names.last; }
+    const name = [names.last+',', names.first, names.middle, names.suffix];
+    return name.filter(n => n).join(' ');
+}
+function buildAuthFullName(names) {                                 /*dbug-log*///console.log('--buildAuthFullName names[%O]', names);
+    return Object.values(names).filter(n => n).join(' ');
+}
+function setSuffix(g, fConfg) {
+    const v = fConfg.value;
+    const sufx = v && v[v.length-1] == '.' ? v.slice(0, -1) : v;
+    setServerData('flat', 'Suffix', sufx, 'detail');
+}
 function setContributors(g, fConfg) {
     const data = Object.keys(fConfg.value).length ?
         getContribs(fConfg.value) : getContribs(ld.confg.fields.Editor.value, true);
@@ -195,34 +224,11 @@ function getCoordValue(displayPoint) {
     return geoJson ? geoJson.coordinates : displayPoint;
 
 }
-    /* ----------------------- AUTHOR --------------------------------------- */
-function handleAuthorNames(g, fConfg) {
-    const names = getAuthNameValues(ld.confg.fields);
-    setServerData('flat', 'DisplayName', buildAuthDisplayName(names));
-    setServerData('flat', 'DisplayName', buildAuthDisplayName(names), 'detail');
-    setServerData('flat', 'FullName', buildAuthFullName(names), 'detail');
-}
-function getAuthNameValues(fields) {                                /*dbug-log*///console.log('--getAuthNameValues fields[%O]', fields);
-    const sufx = fields.Suffix.value;
-    return {
-        first: fields.FirstName.value,
-        middle: fields.MiddleName.value,
-        last: fields.LastName.value,
-        suffix: sufx && sufx[sufx.length-1] !== '.' ? sufx+'.' : sufx
-    };
-}
-function buildAuthDisplayName(names) {                              /*dbug-log*///console.log('--buildAuthDisplayName names[%O]', names);
-    if (!names.first) { return names.last; }
-    const name = [names.last+',', names.first, names.middle, names.suffix];
-    return name.filter(n => n).join(' ');
-}
-function buildAuthFullName(names) {                                 /*dbug-log*///console.log('--buildAuthFullName names[%O]', names);
-    return Object.values(names).filter(n => n).join(' ');
-}
-function setSuffix(g, fConfg) {
-    const v = fConfg.value;
-    const sufx = v && v[v.length-1] == '.' ? v.slice(0, -1) : v;
-    setServerData('flat', 'Suffix', sufx, 'detail');
+    /* ----------------------- TAXON ---------------------------------------- */
+function buildTaxonDisplayName(g, fConfg) {
+    const rank = _cmbx('getSelTxt', ['Rank']);
+    const dName = rank === 'Species' ? fConfg.value : rank +' '+ fConfg.value;/*dbug-log*/console.log('--buildTaxonDisplayName rank[%s] name[%s]', rank, dName);
+    setServerData('flat', 'DisplayName', dName);
 }
 /* =========================== TRACK FAILUTES =============================== */
 function trackFailure(prop, value) {                                 /*dbug-log*///console.log('--trackFailure prop[%s] val[%O]', prop, value);

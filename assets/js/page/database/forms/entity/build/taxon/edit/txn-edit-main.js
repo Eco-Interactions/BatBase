@@ -54,6 +54,56 @@ function finishFormInit(status) {                                   /*dbug-log*/
     const fields = _state('getFormState', ['top', 'fields']);
     handleParentTaxonInit(fields.Parent.value);
 }
+/** ======================= RANK ============================================ */
+/**
+ * Ensures that the new taxon-rank is higher than its children, and that a
+ * species taxon being edited has a genus parent selected.
+ */
+function onRankChangeValidate(rId) {                                /*dbug-log*///console.log("--onRankChangeValidate rId[%s]", rId);
+    const valData = buildRankValData();
+    validateRank(valData);
+}
+/* ---------------- BUILD RANK VALIDATION DATA ------------------------------ */
+function buildRankValData() {
+    const data = _state('getEntityRcrds', [['taxon', 'orderedRanks']]);/*dbug-log*///console.log('    --buildRankValData data[%O]', data);
+    data.entity = _state('getFormState', ['top', 'entity']);
+    data.newRank = _cmbx('getSelTxt', ['Rank']);
+    data.childRank = getHighestChildRank(data.entity, data.taxon, data.orderedRanks);
+    data.parentRank = getParentRank(data.entity);
+    return data;
+
+    function getParentRank(rcrd) {
+        const newRank = _state('getFieldState', ['top', 'Parent', 'misc']);
+        return newRank ? newRank : data.taxon[rcrd.parent].rank.displayName;
+    }
+}
+function getHighestChildRank(taxon, taxa, ranks) {
+    let high = ranks.indexOf('Species');
+    taxon.children.forEach(checkChildRank);
+    return ranks[high];
+
+    function checkChildRank(id) {
+        const childIdx = ranks.indexOf(taxa[id].rank.displayName);
+        if (childIdx <= high) { return; }
+        high = childIdx;
+    }
+}
+/* -------------------------- RANK VALIDATION ------------------------------- */
+function validateRank(data) {                                       /*dbug-log*/console.log("--validateRank data[%O]", data);
+    const issues = {
+        isGenusPrnt: data.childRank === 'Species',
+        needsHigherRank: ifRankTooLow(data.newRank, data.childRank, data.orderedRanks),
+        needsLowerRank: ifRankTooLow(data.newRank, data.parentRank, data.orderedRanks)
+    };                                                              /*dbug-log*///console.log('   --issues[%O]', issues);
+    for (let tag in issues) {
+        if (issues[tag]) { return shwTxnValAlert(tag, 'Rank', 'top'); }
+    }
+    clearActiveAlert('clearTaxonRankAlert');
+}
+/* -------- NEEDS HIGHER RANK -------------------- */
+function ifRankTooLow(newRank, childRank, ranks) {                  /*dbug-log*///console.log('  --ifRankTooLow? txn[%s] >= child[%s]', newRank, childRank);
+    return ranks.indexOf(newRank) <= ranks.indexOf(childRank);
+}
 /** ======================= PARENT TAXON ==================================== */
 /* -------------------------- INIT ------------------------------------------ */
 function handleParentTaxonInit(pId) {                               /*dbug-log*///console.log('--handleParentTaxonInit');
@@ -64,22 +114,32 @@ function handleParentTaxonInit(pId) {                               /*dbug-log*/
 function loadParentSelectForm() {
     const gId = _state('getFieldState', ['top', 'Group']);
     const sgId = _state('getFieldState', ['top', 'Sub-Group']);     /*dbug-log*///console.log('--loadParentTaonxSelectForm g[%s] sg[%s]', gId, sgId);
-    _form('initFieldTaxonSelect', ['Parent', gId, sgId, onParentChange, 'sub']);
+    _form('initFieldTaxonSelect', ['Parent', gId, sgId, onParentChange]);
 }
 /* -------------------------- ON CHANGE ------------------------------------- */
 // Check for group changes
 function onParentChange(e) {
-    const pTxn = _form('getSelectedTaxon');                         /*dbug-log*///console.log("--onParentChange pTxn[%O]", pTxn);
+    const pTxn = _form('getSelectedTaxon');                         /*dbug-log*/console.log("--onParentChange pTxn[%O]", pTxn);
     const valData = buildParentValData(pTxn);
     if (!validateParent(valData)) { return; } //Issue alert shown
+    _form('buildOptAndUpdateCombo', ['Parent', pTxn.id, 'silent']);
     _form('onTaxonFieldSelection', ['Parent', pTxn.id]);
+    updateGroupState(pTxn);
+    _elems('checkReqFieldsAndToggleSubmitBttn', ['top']);
+}
+function updateGroupState(pTxn) {
+    _state('setFieldState', ['top', 'Parent', pTxn.id ]);
+    _state('setFieldState', ['top', 'Parent', pTxn.rank.displayName, 'misc' ]);
+    _state('setFieldState', ['top', 'Group', pTxn.group.id ]);
+    _state('setFieldState', ['top', 'Sub-Group', pTxn.group.subGroup.id ]);
 }
 /* ------------------------ PARENT VALIDATION ------------------------------- */
 function buildParentValData(pTxn) {
-    const data = _state('getEntityRcrds', [['orderedRanks']]);        /*dbug-log*///console.log('    --buildParentValData data[%O]', data);
+    const data = _state('getEntityRcrds', [['orderedRanks']]);      /*dbug-log*/console.log('    --buildParentValData data[%O]', data);
     data.entity = pTxn;
     data.newRank = pTxn.rank.displayName;
     data.childRank = _cmbx('getSelTxt', ['Rank']);
+    data.parent
     return data;
 }
 function validateParent(data) {                                     /*dbug-log*///console.log("--validateParent data[%O]", data);
@@ -98,50 +158,6 @@ function ifInvalidGroupRank(txnRank) {
     const sgField = _state('getFieldState', ['sub', 'Sub-Group', 'misc']);/*dbug-log*///console.log('--ifInvalidGroupRank? sgField[%O]', sgField);
     return sgField.subRanks.indexOf(txnRank) === -1;
 }
-/** ======================= RANK ============================================ */
-/**
- * Ensures that the new taxon-rank is higher than its children, and that a
- * species taxon being edited has a genus parent selected.
- */
-function onRankChangeValidate(rId) {                                /*dbug-log*///console.log("--onRankChangeValidate rId[%s]", rId);
-    const valData = buildRankValData();
-    validateRank(valData);
-}
-/* ---------------- BUILD RANK VALIDATION DATA ------------------------------ */
-function buildRankValData() {
-    const data = _state('getEntityRcrds', [['taxon', 'orderedRanks']]);/*dbug-log*///console.log('    --buildRankValData data[%O]', data);
-    data.entity = _state('getFormState', ['top', 'entity']);
-    data.newRank = _cmbx('getSelTxt', ['Rank']);
-    data.childRank = getHighestChildRank(data.entity, data.taxon, data.orderedRanks);
-    data.parentRank = data.taxon[data.entity.parent].rank.displayName;
-    return data;
-}
-function getHighestChildRank(taxon, taxa, ranks) {
-    let high = ranks.indexOf('Species');
-    taxon.children.forEach(checkChildRank);
-    return ranks[high];
-
-    function checkChildRank(id) {
-        const childIdx = ranks.indexOf(taxa[id].rank.displayName);
-        if (childIdx <= high) { return; }
-        high = childIdx;
-    }
-}
-/* -------------------------- RANK VALIDATION ------------------------------- */
-function validateRank(data) {                                       /*dbug-log*///console.log("--validateRank data[%O]", data);
-    const issues = {
-        isGenusPrnt: data.childRank === 'Species',
-        needsHigherRank: ifRankTooLow(data.newRank, data.childRank, data.orderedRanks)
-    };                                                              /*dbug-log*///console.log('   --issues[%O]', issues);
-    for (let tag in issues) {
-        if (issues[tag]) { return shwTxnValAlert(tag, 'Rank', 'top'); }
-    }
-    clearActiveAlert('clearTaxonRankAlert');
-}
-/* -------- NEEDS HIGHER RANK -------------------- */
-function ifRankTooLow(newRank, childRank, ranks) {                  /*dbug-log*///console.log('  --ifRankTooLow? txn[%s] >= child[%s]', newRank, childRank);
-    return ranks.indexOf(newRank) <= ranks.indexOf(childRank);
-}
 /* ------------------------- ALERTS ----------------------------------------- */
 function clearActiveAlert(clearAlertTag) {
     if (!$('.top-active-alert').length) { return; }
@@ -152,8 +168,6 @@ function shwTxnValAlert(tag, field) {
     _elems('toggleSubmitBttn', ['top', false]);
     return false;
 }
-
-
 /* ============================ SUBMIT ====================================== */
 function validateFormAndSubmit() {                                  /*dbug-log*///console.log('--validateFormAndSubmit');
     // if (!isTaxonEditFormValid(vals)) { return; } //Alert shown

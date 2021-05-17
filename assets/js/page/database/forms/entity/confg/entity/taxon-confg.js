@@ -15,7 +15,7 @@ export default function(action, entity) {
                 name: 'DisplayName',
                 prep: {
                     renameField: ['Name'],
-                    setCoreData: []
+                    buildTaxonDisplayName: []
                 },
                 prop: {
                     core: 'name'
@@ -49,9 +49,6 @@ export default function(action, entity) {
             Rank: {
                 entity: 'Rank',
                 name: 'Rank',
-                prep: {
-                    setParent: ['Taxon']
-                },
                 prop: {
                     core: 'rank'
                 },

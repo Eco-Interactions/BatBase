@@ -47,26 +47,26 @@ function getRmvDataPropHndlrs(entity) {
         'citation': {}, // 'citationType': rmvFromTypeProp,
         'geoJson': {},
         'interaction': {
-            'location': r.rmvIntAndAdjustTotalCnts,
-            'source': r.rmvIntFromEntity,
-            'subject': r.rmvIntFromTaxon,
-            'object': r.rmvIntFromTaxon,/* 'interactionType': rmvFromTypeProp,*/ /* 'tag': rmvFromTagProp */
+            'Location': r.rmvIntAndAdjustTotalCnts,
+            'Source': r.rmvIntFromEntity,
+            'Subject': r.rmvIntFromTaxon,
+            'Object': r.rmvIntFromTaxon,/* 'interactionType': rmvFromTypeProp,*/ /* 'tag': rmvFromTagProp */
         },
         'location': {
-            'parentLocation': r.rmvFromParent, /*'locationType': rmvFromTypeProp*/
+            'ParentLocation': r.rmvFromParent, /*'locationType': rmvFromTypeProp*/
         },
         'publication': {},  //'publicationType': rmvFromTypeProp
         'publisher': {},
         'source': {
-            'contributor': r.rmvContrib,
-            'parentSource': r.rmvFromParent,/* 'tag': rmvFromTagProp */
+            'Contributor': r.rmvContrib,
+            'ParentSource': r.rmvFromParent,/* 'tag': rmvFromTagProp */
         },
         'taxon': {
-            'displayName': r.rmvFromNameProp,
-            'group': r.rmvFromNameProp,
-            'parentTaxon': r.rmvFromParent,
-            'subGroup': r.rmvFromNameProp,
-            'rank': r.rmvFromNameProp,
+            'DisplayName': r.rmvFromNameProp,
+            'Group': r.rmvFromNameProp,
+            'ParentTaxon': r.rmvFromParent,
+            'SubGroup': r.rmvFromNameProp,
+            'Rank': r.rmvFromNameProp,
         }
     }[entity];
 }
