@@ -3,6 +3,12 @@
  * - [entity]Names - an object with each entity's displayName(k) and id.
  * * location - resaved locations with an additional data point for countries.
  *
+ * TOC
+ *     REGION
+ *     COUNTRY
+ *     TYPES
+ *     MODIFY RECORDS
+ *
  * Export
  *     modifyLocDataForLocalDb
  */
@@ -10,16 +16,30 @@ import * as db from '../../local-data-main.js';
 import { getRcrds, getNameObj, getTypeObj, getType } from '../init-helpers.js';
 
 export function modifyLocDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyLocDataForLocalDb called. data = %O", data);
-    const regns = getType(data.locationType, 'region', 'locations');
-    const cntries = getType(data.locationType, 'country', 'locations');/*dbug-log*///console.log('reg = %O, cntry = %O', regns, cntries);
-    db.setDataInMemory('countryNames', getNameObj(cntries, data.location));
-    db.setDataInMemory('countryCodes', getCodeNameDataObj(cntries, data.location));
-    db.setDataInMemory('regionNames', getNameObj(regns, data.location));
-    db.setDataInMemory('topRegionNames', getTopRegionNameData(data, regns));
-    db.setDataInMemory('habTypeNames', getTypeObj(data.habitatType));
-    db.setDataInMemory('locTypeNames', getTypeObj(data.locationType));
-    db.setDataInMemory('location', addInteractionTotalsToLocs(data.location));
-    ['locationType', 'habitatType'].forEach(k => db.deleteMmryData(k));
+    handleRegionData(data.location, data.locationType);
+    handleCountryData(data.location, data.locationType);
+    handleTypeData(data.habitatType, data.locationType);
+    modifyLocationRecords(data.location);
+}
+/* =================== REGION =============================================== */
+function handleRegionData(locs, locTypes) {
+    const regns = getType(locTypes, 'region', 'locations');         /*dbug-log*///console.log('--handleRegionData[%O]', regns);
+    db.setDataInMemory('regionNames', getNameObj(regns, locs));
+    db.setDataInMemory('topRegionNames', getTopRegionNameData(locs, regns));
+}
+function getTopRegionNameData(locs, regns) {
+    const data = {};
+    const rcrds = getRcrds(regns, locs);
+    for (const id in rcrds) {
+        if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
+    }
+    return data;
+}
+/* ================== COUNTRY =============================================== */
+function handleCountryData(locs, locTypes) {
+    const cntrys = getType(locTypes, 'country', 'locations');       /*dbug-log*///console.log('--handleCountryData[%O]', cntrys);
+    db.setDataInMemory('countryNames', getNameObj(cntrys, locs));
+    db.setDataInMemory('countryCodes', getCodeNameDataObj(cntrys, locs));
 }
 /** Return an obj with the 2-letter ISO-country-code (k) and the country id (v).*/
 function getCodeNameDataObj(ids, rcrds) {
@@ -27,13 +47,15 @@ function getCodeNameDataObj(ids, rcrds) {
     ids.forEach(id => data[rcrds[id].isoCode] = id);
     return data;
 }
-function getTopRegionNameData(locData, regns) {
-    const data = {};
-    const rcrds = getRcrds(regns, locData.location);
-    for (const id in rcrds) {
-        if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
-    }
-    return data;
+/* ==================== TYPES =============================================== */
+function handleTypeData(habTypes, locTypes) {
+    db.setDataInMemory('habTypeNames', getTypeObj(habTypes));
+    db.setDataInMemory('locTypeNames', getTypeObj(locTypes));
+    ['locationType', 'habitatType'].forEach(k => db.deleteMmryData(k));
+}
+/* ==================== MODIFY RECORDS ====================================== */
+function modifyLocationRecords(locations) {
+    db.setDataInMemory('location', addInteractionTotalsToLocs(locations));
 }
 /** Adds the total interaction count of the location and it's children. */
 function addInteractionTotalsToLocs(locs) {

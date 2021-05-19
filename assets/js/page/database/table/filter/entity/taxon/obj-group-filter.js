@@ -8,14 +8,14 @@
  * 		INIT COMBOBOX
  * 		APPLY FILTER
  */
-import { _cmbx } from '~util';
+import { _cmbx, _opts } from '~util';
 import { _ui } from '~db';
 import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initObjectGroupCombobox() {
-    return _cmbx('getOptsFromStoredData', ['groupNames'])
+    return _opts('getOptsFromStoredData', ['groupNames'])
     .then(buildObjectGroupFilter)
     .then(finishGroupComboInit);
 }

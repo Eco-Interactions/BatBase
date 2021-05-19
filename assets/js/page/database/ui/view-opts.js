@@ -7,7 +7,7 @@
  *     initSrcViewOpts
  *     initTxnViewOpts
  */
-import { _cmbx, _db } from '~util';
+import { _cmbx, _db, _opts } from '~util';
 import { _table } from '~db';
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
@@ -65,7 +65,7 @@ export function initTxnViewOpts(view, taxa, groups) {               /*dbug-log*/
 function getViewOpts(taxa, groups) {
     const opts = [];
     Object.keys(groups).forEach(buildGroupOpt);
-    return _cmbx('alphabetizeOpts', [opts]);
+    return _opts('alphabetizeOpts', [opts]);
 
     function buildGroupOpt(id) {
         if (!ifGroupHasInts(groups[id].subGroups)) { return; }

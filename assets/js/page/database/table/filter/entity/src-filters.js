@@ -12,7 +12,7 @@
  *          PUBLICATION
  *      FILTER
  */
-import { _cmbx, _el } from '~util';
+import { _cmbx, _opts, _el } from '~util';
 import { _ui } from '~db';
 import * as fM from '../filter-main.js';
 /* ========================= UI ============================================ */
@@ -38,7 +38,7 @@ function loadNameSearchHtml(entity, fWidth = false) {
 }
 /* ----------------------- PUBLICATION -------------------------------------- */
 function loadPubSearchHtml() {
-    return _cmbx('getOptsFromStoredData', ['pubTypeNames'])
+    return _opts('getOptsFromStoredData', ['pubTypeNames'])
         .then(loadPubSearchElems);
 }
 function loadPubSearchElems(pubTypeOpts) {

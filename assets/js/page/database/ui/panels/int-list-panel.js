@@ -23,7 +23,7 @@
  *             Reset & Enable/Disable UI
  *             Table Methods
  */
-import { _cmbx, _db, _el, _u } from '~util';
+import { _cmbx, _db, _el, _opts, _u } from '~util';
 import { _filter, _table, _ui } from '~db';
 import * as pM from './panels-main.js';
 
@@ -418,7 +418,7 @@ function updateDetailHdr(type) {
     $('#list-details>span').html(type + ' List Details');
 }
 function updateListComboboxOptions() {
-    return Promise.resolve(_cmbx('getOptsFromStoredData', ['dataListNames']).then(
+    return Promise.resolve(_opts('getOptsFromStoredData', ['dataListNames']).then(
         opts => {
             opts.unshift({value: 'create', text: '...Add New Interaction List'});
             _cmbx('replaceSelOpts', ['InteractionList', opts]);

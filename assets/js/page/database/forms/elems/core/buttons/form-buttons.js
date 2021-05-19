@@ -7,7 +7,7 @@
  * TOC
  *
  */
-import { _cmbx, _el, _modal, _u } from '~util';
+import { _el, _modal, _u } from '~util';
 import { _confg, _elems, _panel, _state } from '~form';
 
 export function getExitButton(onExit) {

@@ -89,11 +89,11 @@ function getHighestChildRank(taxon, taxa, ranks) {
     }
 }
 /* -------------------------- RANK VALIDATION ------------------------------- */
-function validateRank(data) {                                       /*dbug-log*/console.log("--validateRank data[%O]", data);
+function validateRank(data) {                                       /*dbug-log*///console.log("--validateRank data[%O]", data);
     const issues = {
         isGenusPrnt: data.childRank === 'Species',
         needsHigherRank: ifRankTooLow(data.newRank, data.childRank, data.orderedRanks),
-        needsLowerRank: ifRankTooLow(data.newRank, data.parentRank, data.orderedRanks)
+        needsLowerRank: ifRankTooLow(data.parentRank, data.newRank, data.orderedRanks)
     };                                                              /*dbug-log*///console.log('   --issues[%O]', issues);
     for (let tag in issues) {
         if (issues[tag]) { return shwTxnValAlert(tag, 'Rank', 'top'); }
@@ -101,8 +101,8 @@ function validateRank(data) {                                       /*dbug-log*/
     clearActiveAlert('clearTaxonRankAlert');
 }
 /* -------- NEEDS HIGHER RANK -------------------- */
-function ifRankTooLow(newRank, childRank, ranks) {                  /*dbug-log*///console.log('  --ifRankTooLow? txn[%s] >= child[%s]', newRank, childRank);
-    return ranks.indexOf(newRank) <= ranks.indexOf(childRank);
+function ifRankTooLow(highRank, lowRank, ranks) {                    /*dbug-log*///console.log('  --ifRankTooLow? high[%s] <= low[%s]', highRank, lowRank);
+    return ranks.indexOf(highRank) <= ranks.indexOf(lowRank);
 }
 /** ======================= PARENT TAXON ==================================== */
 /* -------------------------- INIT ------------------------------------------ */
@@ -119,7 +119,7 @@ function loadParentSelectForm() {
 /* -------------------------- ON CHANGE ------------------------------------- */
 // Check for group changes
 function onParentChange(e) {
-    const pTxn = _form('getSelectedTaxon');                         /*dbug-log*/console.log("--onParentChange pTxn[%O]", pTxn);
+    const pTxn = _form('getSelectedTaxon');                         /*dbug-log*///console.log("--onParentChange pTxn[%O]", pTxn);
     const valData = buildParentValData(pTxn);
     if (!validateParent(valData)) { return; } //Issue alert shown
     _form('buildOptAndUpdateCombo', ['Parent', pTxn.id, 'silent']);
@@ -135,7 +135,7 @@ function updateGroupState(pTxn) {
 }
 /* ------------------------ PARENT VALIDATION ------------------------------- */
 function buildParentValData(pTxn) {
-    const data = _state('getEntityRcrds', [['orderedRanks']]);      /*dbug-log*/console.log('    --buildParentValData data[%O]', data);
+    const data = _state('getEntityRcrds', [['orderedRanks']]);      /*dbug-log*///console.log('    --buildParentValData data[%O]', data);
     data.entity = pTxn;
     data.newRank = pTxn.rank.displayName;
     data.childRank = _cmbx('getSelTxt', ['Rank']);

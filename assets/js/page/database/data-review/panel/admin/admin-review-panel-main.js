@@ -11,12 +11,12 @@
  *     TOGGLE
  */
 import { _table } from '~db';
-import { _cmbx, _db, _lib } from '~util';
+import { _cmbx, _db, _lib, _opts } from '~util';
 const app = { cal: false };
 /* ============================ INIT ======================================== */
 /* --------------------------- COMBOBOXES ----------------------------------- */
 export function initAdminDataReviewPanel() {
-    _cmbx('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
+    _opts('getOptsFromStoredData', ['editorNames']).then(initEditorCombobox);
     initStatusCombobox();
     initDateRangeCalendar();
     $('#rvw-cntrl-bttn').click(toggleAdminDataReview);

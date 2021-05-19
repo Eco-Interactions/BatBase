@@ -13,7 +13,7 @@
  *         FILL COMBOBOX
  *         SELECT CITATION
  */
-import { _cmbx } from '~util';
+import { _cmbx, _opts } from '~util';
 import { _form, _panel, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 
@@ -50,7 +50,7 @@ export function fillCitationCombo(pubId) {
 /** Returns an array of option objects with citations for this publication.  */
 function getPubCitationOpts(pubId) {
     const pubRcrd = _state('getRcrd', ['source', pubId]);
-    return _cmbx('buildSrcOpts', ['citation', pubRcrd.children]);
+    return _opts('buildSrcOpts', ['citation', pubRcrd.children]);
 }
 /* ---------------------- SELECT CITATION ----------------------------------- */
 /**

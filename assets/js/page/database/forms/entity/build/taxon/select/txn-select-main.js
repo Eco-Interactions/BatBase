@@ -13,7 +13,6 @@
  *     RANKS
  *     SELECTED
  */
-import { _cmbx } from '~util';
 import { _elems, _form, _state, _val } from '~form';
 import * as build from './build-taxon-select.js';
 import * as rank from './rank/txn-rank-main.js';

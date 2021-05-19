@@ -17,10 +17,9 @@
  *     WAYS TO SELECT LOCATION NOTE
  */
 
-import { _cmbx, _el } from '~util';
-import { _elems, _form, _panel, _state } from '~form';
+import { _cmbx, _el, _opts } from '~util';
+import { _confg, _elems, _form, _panel, _state } from '~form';
 import * as iForm from '../int-form-main.js';
-
 /* ======================= COUNTRY/REGION =================================== */
 /**
  * When a country or region is selected, the location dropdown is repopulated
@@ -52,9 +51,23 @@ export function enableCountryRegionField() {
  * repopulated with all locations.
  */
 export function fillLocCombo(loc) {
-    const subSet = loc ? loc.children : false;
-    const opts = _cmbx('getRcrdOpts', ['location', subSet]);
+    const subSet = loc ? getLocComboIds(loc) : false;               /*dbug-log*///console.log('--fillLocCombo subSet[%O]', subSet);
+    const opts = _opts('getRcrdOpts', ['location', subSet]);
     _cmbx('replaceSelOpts', ['Location', opts]);
+}
+function getLocComboIds(loc) {
+    const tData = _confg('getConfgData', ['Location', 'misc']).territories;
+    const tNames = tData[loc.displayName];
+    if (!tNames) { return loc.children; }
+    return getChildAndTerritoryLocIds(loc, _state('getEntityRcrds', ['location']));
+
+    function getChildAndTerritoryLocIds(loc, rcrds) {
+        const tIds = Object.keys(rcrds).filter(i => ifTerritory(rcrds[i], tNames));
+        return loc.children.concat(...tIds.map(i => rcrds[i].children));
+    }
+    function ifTerritory(loc, territories) {
+        return territories.indexOf(loc.displayName) !== -1;
+    }
 }
 /* ---------------------- SELECT LOCATION ----------------------------------- */
 export function selectLoc(id) {

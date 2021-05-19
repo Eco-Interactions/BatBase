@@ -20,7 +20,7 @@
  *          SUBMIT & SUCCESS METHODS
  *          RESET & ENABLE/DISABLE UI
  */
-import { _cmbx, _db, _modal, _u } from '~util';
+import { _cmbx, _db, _modal, _opts, _u } from '~util';
 import { _filter, _table, _ui } from '~db';
 /* Holds selected filter data and table state. */
 let app = {};
@@ -29,7 +29,7 @@ const tState = _table.bind(null, 'tableState');
 /* ============================= INIT UI ==================================== */
 export function initFilterSetsFeature() {
     setFilterSetEventListeners();
-    _cmbx('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
+    _opts('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
     disableFilterSetInputs();
 }
 function setFilterSetEventListeners() {
@@ -296,7 +296,7 @@ function onFilterSubmitComplete(action, results) {
     .then(onUpdateSuccessUpdateFilterUi.bind(null, app.fltr.id));
 }
 function onUpdateSuccessUpdateFilterUi(id) {
-    _cmbx('getOptsFromStoredData', ['savedFilterNames'])
+    _opts('getOptsFromStoredData', ['savedFilterNames'])
     .then(updateFilterSetSel)
     .then(() => {
         $('#sel-FilterSet')[0].selectize.addItem(id);
@@ -323,7 +323,7 @@ function onFilterDeleteComplete(results) {                          /*dbug-log*/
 }
 function onDeleteSuccessUpdateFilterUi() {
     resetFilterUi();
-    _cmbx('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
+    _opts('getOptsFromStoredData', ['savedFilterNames']).then(updateFilterSetSel);
     $('#sel-FilterSet')[0].selectize.open();
 }
 function showSavedMsg() {

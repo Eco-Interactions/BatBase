@@ -53,6 +53,7 @@
  *     CONFG BUILDERS
  *         BASE CONFG
  *         FIELD CONFG
+ *     GET CONFG DATA
  */
 import { _u } from '~util';
 import { _state } from '~form';
@@ -134,4 +135,9 @@ export function getBaseConfg(action, entity, type) {                /*dbug-log*/
 function mergeCoreEntityConfg(c) {
     const coreConfg = cUtil.getBaseFormConfg(c.action, c.core);     /*dbug-log*///console.log('   --mergeCoreEntityConfg confg[%O], coreConfg[%O]', c, coreConfg);
     mergeIntoFormConfg(c, coreConfg);
+}
+/* ====================== GET CONFG DATA ==================================== */
+export function getConfgData(entity, prop) {
+    const cfg = getBaseConfg(null, entity);
+    return cfg[prop];
 }

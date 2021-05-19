@@ -10,7 +10,7 @@
  *      UI
  *      FILTER
  */
-import { _cmbx, _el, _u } from '~util';
+import { _cmbx, _el, _opts, _u } from '~util';
 import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../filter-main.js';
 
@@ -125,7 +125,7 @@ function buildLocSelectOpts(tblState, data) {
     /** Alphabetizes the options. */
     function sortLocOpts() {
         for (let type in opts) {
-            opts[type] = _cmbx('alphabetizeOpts', [opts[type]]);
+            opts[type] = _opts('alphabetizeOpts', [opts[type]]);
         }
     }
     function addAllOption() {

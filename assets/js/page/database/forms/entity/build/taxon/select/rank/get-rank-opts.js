@@ -13,7 +13,7 @@
  *     ANCESTOR RANKS
  *     CREATE OPTION
  */
-import { _cmbx } from '~util';
+import { _opts } from '~util';
 import { _state } from '~form';
 /**
  * All data needed to build the rank options.
@@ -89,7 +89,7 @@ function addEmptyChildRankOptAry(rank) {
 function getSiblingOpts(taxon) {
     if (taxon.isRoot) { return Promise.resolve(); }
     const rank = taxon.rank.displayName;
-    return _cmbx('getTaxonOpts', [null, rank, d.group, d.subGroup])
+    return _opts('getTaxonOpts', [null, rank, d.group, d.subGroup])
         .then(o => {                                                /*dbug-log*///console.log('getSiblingOpts = %O. taxon = %O ', o, taxon);
             d.opts[taxon.rank.displayName] = o;
             d.selected[taxon.rank.displayName] = taxon.id;
@@ -105,7 +105,7 @@ function getAncestorOpts(pId) {
 }
 function buildAncestorOpts(pTaxon) {
     const rank = pTaxon.rank.displayName;
-    return _cmbx('getTaxonOpts', [null, rank, d.group, d.subGroup])
+    return _opts('getTaxonOpts', [null, rank, d.group, d.subGroup])
         .then(o => {                                                /*dbug-log*///console.log("--getAncestorOpts - setting rank = ", pTaxon.rank)
             d.opts[pTaxon.rank.displayName] = o;
             return getAncestorOpts(pTaxon.parent);
@@ -128,7 +128,7 @@ function buildOptsForEmptyRanks() {
         });
     }
     function buildAncestorOpts(rank) {
-        proms.push(_cmbx('getTaxonOpts', [null, rank, d.group, d.subGroup])
+        proms.push(_opts('getTaxonOpts', [null, rank, d.group, d.subGroup])
             .then(o => d.opts[rank] = o ));
     }
 }

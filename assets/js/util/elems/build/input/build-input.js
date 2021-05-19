@@ -14,7 +14,7 @@
  *         CHANGE HANDLER
  *         REQUIRED FIELDS
  */
-import { _cmbx, _el, _u } from '~util';
+import { _el, _opts, _u } from '~util';
 import { handleInputValidation } from './val-input.js';
 
 /* ======================= INPUT BUIDLERS =================================== */
@@ -69,7 +69,7 @@ function buildLongTextArea(f) {
  * init the 'selectize' combobox.
  */
 function buildSelect(f) {                                           /*dbug-log*///console.log("       --buildSelect [%O]", f);
-    return _cmbx('getFieldOptions', [f.name])
+    return _opts('getFieldOptions', [f.name])
         .then(finishSelectBuild.bind(null, f));
 }
 function finishSelectBuild(f, opts) {                               /*dbug-log*///console.log('           --finishSelectBuild fConfg[%O] opts[%O]', f, opts);

@@ -9,6 +9,39 @@ export default function(action, entity) {
         },
         fields: getLocationFieldConfg(),
         name: entity,
+        misc: {
+            territories: {
+                Australia: [
+                    "Christmas Island",
+                    "Cocos (Keeling) Islands",
+                    "Norfolk Island"    ],
+                France: [
+                    "French Polynesia [includes the island groups of the Marquesas, Society, Tuamotu and Tubai]",
+                    "French Southern and Antarctic Lands",
+                    "Guadeloupe",
+                    "Martinique",
+                    "Mayotte",
+                    "New Caledonia",
+                    "Réunion",
+                    "Saint Pierre and Miquelon",
+                    "Wallis and Futuna" ],
+                Netherlands: [
+                    "Aruba",
+                    "Curacao",
+                    "Sint Maarten"  ],
+                Norway: [
+                    "Jan Mayen Island",
+                    "Svalbard"  ],
+                "United States": [
+                    "Guam",
+                    "United States Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, US Line and Wake island groups]",
+                    // "United States Minor Outlying Islands (Johnston Atoll, Midway, Wake Islands, Navassa Island, etc.)",
+                    "Northern Mariana Islands",
+                    "Puerto Rico",
+                    "Virgin Islands, U.S."
+                ]
+            }
+        },
         views: {
             all: [
                 [   {fields: ['DisplayName', 'Country']},
