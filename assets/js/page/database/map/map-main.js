@@ -130,7 +130,7 @@ function showCoordPopup(e) {
 function geocodeAndShowPopup(type, e) {
     $('#form-map').css('cursor', 'progress');
     app.geoCoder.reverse(
-        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null);
+        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type, true), null);
 }
 function getMapBounds() {
     const southWest = L.latLng(-100, 200);
@@ -143,7 +143,7 @@ function addMapTiles(mapId) {
         minZoom: mapId === 'form-map' ? 1 : 3, //Don't zoom out passed
         maxZoom: 16,
         tileSize: 512,
-        id: 'mapbox/satellite-streets-v11',
+        id: 'mapbox/outdoors-v11',
         zoomOffset: -1,
         accessToken: 'pk.eyJ1IjoieXF1ZXNlcmFzYXJhaCIsImEiOiJja2ZteWVxMXAxazZ3MnNvMGluZ283aWp3In0.X0eZqTze66E9PI5y8FBmmg',
         // accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
@@ -194,7 +194,7 @@ function getGeocoderOptions() {
         geocoder: app.geoCoder
     };
 }
-function drawPolygonAndUpdateUi(mapId, e) {                                     console.log("       --geocoding results = %O", e);
+function drawPolygonAndUpdateUi(mapId, e) {                                     console.log("--geocoding results = %O", e);
     drawPolygon(e.geocode.bbox, e.geocode.properties.address);
     if (mapId == 'form-map') {
         showNearbyLocationsAndUpdateForm(e.geocode.properties);
@@ -514,16 +514,15 @@ function addMarkerForEachInteraction(intCnt, latLng, loc) {                     
 }
 /*===================== Location Form Methods ================================*/
 /** Shows all location in containing country and selects the country in the form. */
-function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);
+function showNearbyLocationsAndUpdateForm(results) {                /*dbug-log*/console.log('showNearbyLocationsAndUpdateForm = %O', results);
     if (!results) { return; }
-    const cntryCode = results.address.country_code ?
-        results.address.country_code.toUpperCase() : null;
-    if (!cntryCode) { return; } //console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code);
-    _db('getData', ['countryCodes']).then(codes => loadCountryAndSubLocs(codes[cntryCode]));
+    _db('getData', ['countryCodes'])
+    .then(cntrys => loadCountryAndSubLocs(cntrys, results.address));
 }
-function loadCountryAndSubLocs(cntryId) {
+function loadCountryAndSubLocs(cntrys, address) {
+    const cntryId = getCountryId(cntrys, address);
     app.volatile.prnt = cntryId;
-    if (app.map._container.id === 'map') { return addParentLocDataToMap(cntryId, null, 'map'); }
+    if (app.map._container.id === 'map') { return addParentLocDataToMap(cntryId, 'noZoom', 'map'); }
     $('#sel-Country-Region')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, app.volatile.poly);
 }
@@ -545,11 +544,11 @@ function addEditFormMapData(latLng, locId, cntryId) {
 }
 function geocodeCoordinates(latLng) {
     app.geoCoder.reverse(
-        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, 'edit'), null);
+        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, 'edit', false), null);
 }
 function addNewLocPinAndFillCoordFields(latLng) {
     app.geoCoder.reverse(
-        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, false), null);
+        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, false, false), null);
     fillCoordFields(latLng);
 }
 function fillCoordFields(latLng) {                                              //console.log('fillCoordFields latLng = %O', latLng);
@@ -561,44 +560,71 @@ function fillCoordFields(latLng) {                                              
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates.
  */
-function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('           --updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+function updateUiAfterFormGeocode(latLng, zoomFlag, skipZoom, results) {/*dbug-log*/console.log('--updateUiAfterFormGeocode. zoomFlag?[%s] skipZoom?[%s] point = %O results = %O', zoomFlag, skipZoom, latLng, results);
     if (!app.map) { return; } //form cloesd before geocode results returned.
-    if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
-    updateMapPin(latLng, results[0], zoomFlag)
+    if (!results.length) { return updateMapPin(latLng, null, zoomFlag, skipZoom); }
+    updateMapPin(latLng, results[0], zoomFlag, skipZoom)
     .then(() => app.volatile.marker.openPopup());
 }
-function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
-    if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
+function updateMapPin(latLng, results, zoomFlag, skipZoom) {        /*dbug-log*/console.log('--updateMapPin. zoomFlag?[%s] skipZoom?[%s] point = %O results = %O', zoomFlag, skipZoom, latLng, results);
+    if (!results) { return replaceMapPin(latLng, null, zoomFlag, skipZoom); }
     return _db('getData', ['countryCodes']).then(cntrys => {
         const loc = results ? buildLocData(latLng, results, cntrys) : null;
-        replaceMapPin(latLng, loc, zoomFlag);
+        replaceMapPin(latLng, loc, zoomFlag, skipZoom);
         $('#'+app.map._container.id).css('cursor', 'default');
         if (zoomFlag === 'edit') { $('#'+app.map._container.id).data('loaded'); }
     });
 }
-function buildLocData(latLng, results, cntrys) {                                //console.log('buildLocData. latLng = %O results = %O', latLng, results);
+/* =================== GEOCODE LOC DATA ===================================== */
+function buildLocData(latLng, results, cntrys) {                                console.log('--buildLocData. latLng = %O results = %O', latLng, results);
+    const query = results.target ? results.target._lastGeocode : false;
     return {
-        cntryId: getCountryId(cntrys, results.properties.address),
+        cntryId: getCountryId(cntrys, results.properties.address, query),
         lat: latLng.lat,
         lng: latLng.lng,
         name: results.name,
     };
 }
-function getCountryId(cntrys, address) {
-    if (address.state === 'French Guiana') { return 210; }
-    if (!address.country_code) { return null; }
-    return cntrys[address.country_code.toUpperCase()];
+function getCountryId(cntrys, address, query) {
+    const tData = app.formConfg ? app.formConfg.territories : null;/*dbug-log*/console.log('--getCountryId cntrys[%O] territories?[%O] address[%O]', cntrys, tData, address);
+    if (tData[address.country]) { return getTerritoryId(cntrys, tData, address, query); }
+    return getCntryFromCode(cntrys, address.country_code);
 }
+function getCntryFromCode(cntrys, ntryCode) {
+    if (!cntryCode) { return null; }
+    return cntrys[cntryCode.toUpperCase()];
+}
+function getTerritoryId(cntrys, tData, address, query) {
+    const tNames = tData[address.country];                          /*dbug-log*/console.log('--getTerritoryId tNames[%O]', tNames);
+    let id = false;
+    tNames.find(getIdIfLocTerrirory);
+    return id ? id : getCntryFromCode(cntrys, address.country_code);
+
+    function getIdIfLocTerrirory(tName) {                           /*dbug-log*/console.log('--getIdIfLocTerrirory tName[%s]', tName);
+        // const skip = ['Island', 'Islands', 'and', 'the', 'of', 'includes', 'groups'];
+        return ifStateTerritory(tName) ? getTerrId(tName, address.country) : null;
+    }
+    function ifStateTerritory(tName) {
+        const props = ['territory', 'state', 'region', 'village', 'county'];
+        return props.find(p => tName.indexOf(address[p]) !== -1);
+    }
+    function getTerrId(tName, cName) {                                  /*dbug-log*/console.log('--getTerrId territory[%s] country[%s]', tName, cName);
+        id = Object.keys(app.data.locs).find(l => {
+            return app.data.locs[l].displayName === tName});
+        return id;
+    }
+}
+/* =================== REPLACE MAP PIN ====================================== */
 /** Note: MarkerType triggers the marker's popup build method.  */
-function replaceMapPin(latLng, loc, zoomFlag) {
+function replaceMapPin(latLng, loc, zoomFlag, skipZoom) {
     const params = { latLng: latLng, loc: loc, rcrds: app.data };
     const markerType = (zoomFlag === 'edit' ? 'edit' : '') + 'form-loc';
     const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {
-        addParentLocDataToMap(loc.cntryId); //, zoomFlag === 'create'
+        addParentLocDataToMap(loc.cntryId, skipZoom);
     }
-    addPinToMap(latLng, marker, zoomFlag);
+    addPinToMap(latLng, marker, zoomFlag, skipZoom);
 }
 function removePreviousMapPin(loc) {
     if (!app.volatile.pin) { return app.volatile.loc = loc; }
@@ -609,20 +635,24 @@ function resetPinLoc(loc) {
     app.volatile.prevLoc = app.volatile.loc;
     app.volatile.loc = loc;
 }
-function addPinToMap(latLng, marker, zoomFlag) {
+function addPinToMap(latLng, marker, zoomFlag, skipZoom) {
     const zoom = zoomFlag ? app.map.getZoom() : 8;
     app.volatile.marker = marker;
     app.volatile.pin = marker.layer;
     app.map.addLayer(marker.layer);
+    if (skipZoom) { return; }
     app.map.setView(latLng, zoom, {animate:true});
 }
+/* ====================== INIT FORM MAP ===================================== */
 /**
  * Types: create, edit, int
  */
-export function initFormMap(parent, rcrds, type) {                              console.log('           /--initFormMap type = [%s]', type);
-    app.data.locs = app.data.locs || rcrds;
+export function initFormMap(data) {                                 /*dbug-log*/console.log('+--initFormMap data[%O]', data);
+    app.data.locs = app.data.locs || data.locRcrds;
+    app.formConfg = data.formConfg;
     // if (!type && app.volatile.prnt && parent == app.volatile.prnt) { return; }
-    downloadDataAndBuildMap(finishFormMap.bind(null, parent, type), 'form-map', type);
+    const finishMap = finishFormMap.bind(null, data.pId, data.type);
+    downloadDataAndBuildMap(finishMap, 'form-map', data.type);
 }
 function finishFormMap(parentId, type) {                                        //console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
     mapEl.addLocCountLegend(app.map);
@@ -637,7 +667,7 @@ function finishFormMap(parentId, type) {                                        
  * Draws containing country polygon on map and displays all locations within.
  * If editing location, locId will be passed to skip the child loc's marker.
  */
-function addParentLocDataToMap(id, skipZoom, type, locId) {
+function addParentLocDataToMap(id, skipZoom, type, locId) {         /*dbug-log*/console.log('--addParentLocDataToMap skipZoom[%s]', skipZoom);
     const loc = app.data.locs[id];
     if (!loc) { return console.log('No country data matched in geocode results'); }
     const geoJson = loc.geoJsonId ? app.data.geo[loc.geoJsonId] : false;
@@ -666,7 +696,7 @@ function removePolyLayer() {
  * If editing location, locId will be passed to skip the child loc's marker.
  */
 function showChildLocs(pId, zoomLvl, type, locId) {
-    const prnt = app.data.locs[pId];
+    const prnt = app.data.locs[pId];                                /*dbug-log*/console.log('--showChildLocs prnt[%O] zoom?[%O]', prnt, zoomLvl);
     const prntLatLng = getCenterCoordsOfLoc(prnt, prnt.geoJsonId);
     clearPreviousMarkers();
     addChildLocsToMap(prnt, prntLatLng, type, locId);

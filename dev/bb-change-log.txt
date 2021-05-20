@@ -8,6 +8,7 @@
 SINCE LAST SERVER UPDATE:
     - TABLE
         - @ Hiding entities with '[DELETE]' from the DATABASE TABLE
+        - @ Merged [Location-HabType] with '[Location-Unspecified]' in the DATABASE TABLE
     - FORMS
         - Configuration
             - all form-field configuration centralized
@@ -39,11 +40,13 @@ SINCE LAST SERVER UPDATE:
 
                 - "Journal"
                     - removed 'year' requirement?
-
-        - Subject
-            - Only groups with valid subject roles are added
-        - Object
-            - auto select bats if anything other than bats are selected as the subject
+            - Location
+                - @ Territories are identified and they are selected as Country
+                    - Also added to the possesing country's combo to prevent duplicates
+            - Subject
+                - Only groups with valid subject roles are added
+            - Object
+                - auto select bats if anything other than bats are selected as the subject
 
 
     - Todos

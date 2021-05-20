@@ -17,21 +17,21 @@ export default function(action, entity) {
                     "Norfolk Island"    ],
                 France: [
                     "French Polynesia [includes the island groups of the Marquesas, Society, Tuamotu and Tubai]",
-                    "French Southern and Antarctic Lands",
+                    "French Southern and Antarctic Lands",// (new)
                     "Guadeloupe",
                     "Martinique",
                     "Mayotte",
                     "New Caledonia",
                     "Réunion",
-                    "Saint Pierre and Miquelon",
+                    "Saint Pierre and Miquelon", //Not found?
                     "Wallis and Futuna" ],
                 Netherlands: [
-                    "Aruba",
+                    "Aruba",  //edge case
                     "Curacao",
                     "Sint Maarten"  ],
                 Norway: [
                     "Jan Mayen Island",
-                    "Svalbard"  ],
+                    "Svalbard"  ], //paused
                 "United States": [
                     "Guam",
                     "United States Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, US Line and Wake island groups]",

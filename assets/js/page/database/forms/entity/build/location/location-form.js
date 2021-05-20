@@ -26,7 +26,7 @@
  */
 import { _cmbx, _el } from '~util';
 import { _map } from '~db';
-import { _elems, _form, _state } from '~form';
+import { _confg, _elems, _form, _state } from '~form';
 /* ========================= INIT FORM ====================================== */
 /* --------------------------- CREATE --------------------------------------- */
 export function initCreateForm(entity, val) {                       /*dbug-log*///console.log("       --initLocForm [%s]", val);
@@ -43,8 +43,8 @@ function getCreateFormParams(val) {
         combo: 'Location',
         style: 'med-sub-form',
         vals: {
-            'DisplayName': val === 'create' ? '' : val, //clears form trigger value
-            'Country': $('#sel-Country-Region').val()
+            DisplayName: val === 'create' ? '' : val, //clears form trigger value
+            Country: $('#sel-Country-Region').val()
         }
     };
     return { ...createParams, ...getFormParams('sub', 'create') };
@@ -128,14 +128,18 @@ function addSelectSimilarLocationNote(prevElem) {
 /** ========================= MAPS ========================================== */
 /* -------------------------- ADD MAP TO FORM ------------------------------- */
 export function addMapToLocForm(type, $form = $('#Location_fields')) {/*dbug-log*///console.log('--addMapToLocForm type[%s] form[%O]', type, $form);
-    const mapContainer = _el('getElem', ['div', { id: 'form-map' }]);
-    $form.after(mapContainer);
-    initLocFormMap(type);
+    const pId = $('#sel-Country-Region').val() || $('#sel-Country').val();
+    $form.after(_el('getElem', ['div', { id: 'form-map' }]));
+    initLocFormMap(type, pId);
 }
-function initLocFormMap(type) {
-    const prntId = $('#sel-Country-Region').val() || $('#sel-Country').val();
-    const locRcrds = _state('getEntityRcrds', ['location'])
-    _map('initFormMap', [prntId, locRcrds, type]);
+function initLocFormMap(type, pId) {
+    const mData = {
+        pLoc: pId,
+        locRcrds:  _state('getEntityRcrds', ['location']),
+        formConfg: _confg('getConfgData', ['Location', 'misc']),
+        type: type
+    };
+    _map('initFormMap', [mData]);
 }
 /* ---------------------------- ON MAP LOADED ------------------------------- */
 function afterMapLoads(onLoadFunc, id) {
@@ -149,8 +153,7 @@ function afterMapLoads(onLoadFunc, id) {
 /* ------------------------- LOAD COUNTRY LOCATIONS ------------------------- */
 export function focusParentAndShowChildLocs(type, val) {
     if (!val) { return; }                                           /*dbug-log*///console.log('               --focusParentAndShowChildLocs [%s] [%s]', type, val);
-    const locRcrds = _state('getEntityRcrds', ['location'])
-    _map('initFormMap', [val, locRcrds, type]);
+    initLocFormMap(type, val);
 }
 /** ====================== COORD FIELDS ===================================== */
 /* ------------------------------ LISTENERS --------------------------------- */
