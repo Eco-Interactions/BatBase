@@ -30,8 +30,8 @@ export default function(action, entity) {
                     "Curacao",
                     "Sint Maarten"  ],
                 Norway: [
-                    "Jan Mayen Island",
-                    "Svalbard"  ], //paused
+                    "Jan Mayen Island", //cur location is Svalbard and Jan Mayen
+                    "Svalbard"  ], //split
                 "United States": [
                     "Guam",
                     "United States Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, US Line and Wake island groups]",
