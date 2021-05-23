@@ -1,0 +1,384 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Migrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use App\Entity\Location;
+use App\Entity\GeoJson;
+use App\Service\DataManager;
+/**
+ * TODO
+ * Misc data cleanup.
+ */
+final class Version20210518DataCleanup extends AbstractMigration implements ContainerAwareInterface
+{
+
+    private $em;
+    protected $container;
+    protected $dataManager;
+
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+    }
+    public function setDataManager(DataManager $manager)
+    {
+        $this->dataManager = $manager;
+    }
+
+    public function getDescription() : string
+    {
+        //update
+        return '
+            Fixes Arthropod interactions (consumption->predation)
+            Updates various Location territories.
+            Misc data cleanup.';
+    }
+
+    private function getEntity($className, $val, $prop = 'id')
+    {                                                                           print("\ngetEntity [$className] [$val]");
+        return $this->em->getRepository('App:'.$className)
+            ->findOneBy([$prop => $val]);
+    }
+
+    private function getEntities($className)
+    {
+        return $this->em->getRepository('App:'.$className)->findAll();
+    }
+
+    private function persistEntity($entity, $creating = false)
+    {
+        if ($creating) {
+            $entity->setCreatedBy($this->admin);
+        }
+        $entity->setUpdatedBy($this->admin);
+        $this->em->persist($entity);
+    }
+    private function create($cName, $data)
+    {
+        $entityData = $this->dataManager->new($cName, $data);
+        $entity = $entityData->coreEntity;
+        $this->persistEntity($entity, true);
+        return $entity;
+    }
+    private function edit($cName, $data)
+    {
+        return $this->dataManager->editEntity($cName, $data);
+    }
+    // protected function mergeEntities($ents, $coreClass, $detail = null)
+    // {
+    //     foreach ($ents as $ids) {
+    //         $this->mergeData($ids[0], $ids[1], $coreClass, $detail);
+    //     }
+    // }
+    protected function mergeData($rmvId, $addId, $coreClass, $detail = null)
+    {
+        $rmv = $this->getEntity($coreClass, $rmvId);                            print("\n Remove entity id  = ".$rmvId);
+
+        if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
+        // if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
+        $this->persistEntity($rmv);
+        $this->em->remove($rmv);
+    }
+
+    private function transferData($coreClass, $addId, $rmv)
+    {
+        $add = $this->getEntity($coreClass, $addId);
+        $this->transferChildren($rmv, $add, $coreClass);
+        $this->transferInts($rmv, $add, $coreClass);
+        $this->persistEntity($add);
+    }
+    private function transferChildren($oldPrnt, $newPrnt, $type)
+    {
+        $map = [
+            'Location' => [ 'ChildLocs', 'ParentLocation' ],
+            'Source' =>   [ 'ChildSources', 'ParentSource' ],
+            'Taxon' =>    [ 'ChildTaxa', 'ParentTaxon' ]
+        ];
+        $getFunc = 'get'.$map[$type][0];
+        $setFunc = 'set'.$map[$type][1];
+        $children = $oldPrnt->$getFunc();
+        if (!count($children)) { return; }                                      print("\nCHILDREN FOUND = ".count($children));
+
+        foreach ($children as $child) {
+            $child->$setFunc($newPrnt);
+            $this->persistEntity($child);
+        }
+    }
+    private function transferInts($rmv, $add, $coreClass)
+    {
+        $prop = $this->getInteractionProp($add, $coreClass);
+
+        foreach ($rmv->getAllInteractionIds() as $id) {
+            $int = $this->getEntity('Interaction', $id);
+            $setFunc = 'set'.$prop;
+            $int->$setFunc($add);
+            $this->persistEntity($int);
+        }
+    }
+
+    private function getInteractionProp($add, $coreClass)
+    {
+        return $coreClass === 'Taxon' ? $this->getRoleProp($add) : $coreClass;
+    }
+
+    private function getRoleProp($taxon)
+    {
+        return $taxon->getTaxonGroup()->getSlug() === 'bat' ? 'Subject' : 'Object';
+    }
+
+
+/* ============================== UP ======================================== */
+    public function up(Schema $schema) : void
+    {
+        $this->em = $this->container->get('doctrine.orm.entity_manager');
+        $this->admin = $this->getEntity('User', 6, 'id');
+
+        $this->fixArthropodConsumptionInteractions();
+        $this->handleTerritories();
+        $this->cleanUpData();
+    }
+/* +++++++++++++++++++++ PREDATION UPDATES ++++++++++++++++++++++++++++++++++ */
+     private function fixArthropodConsumptionInteractions()
+    {                                                                           print("\nfixArthropodConsumptionInteractions\n");
+        $predationType = $this->getEntity('InteractionType', 'Predation', 'displayName');
+        $cnsmptn = $this->getEntity('InteractionType', 'Consumption', 'displayName');
+        $ints = $cnsmptn->getInteractions();
+        $count = 0;
+
+        foreach ($ints as $int) {
+            if ($this->ifPlantObject($int->getObject())) { continue; }
+            $this->updateInteractionType($int, $predationType);
+            ++$count;
+        }                                                                       print("\n       ++ ".$count."\n");
+    }
+    private function ifPlantObject($taxon)
+    {
+        return $taxon->getTaxonGroup()->getDisplayName() === 'Plant';
+    }
+    private function updateInteractionType($int, $predation)
+    {
+        $int->setInteractionType($predation);
+        $this->persistEntity($int);
+    }
+/* +++++++++++++++++++ TERRITORY LOCATIONS ++++++++++++++++++++++++++++++++++ */
+/**
+ * @return [type] [description]
+ */
+    private function handleTerritories()
+    {
+        $this->createMissingTerritory();
+        $this->splitNorwayTerritories();
+        $this->updateUsIslandTerritory();
+    }
+/* ------------------------ MISSING ----------------------------------------- */
+    /**
+     * Creates French Southern and Antarctic Lands territory.
+     * Create Souther Ocean region parent
+     */
+    private function createMissingTerritory()
+    {                                                                           print("\n createMissingTerritory");
+        $data = [
+            'flat' => [
+                'DisplayName' => 'French Southern and Antarctic Lands'
+            ],
+            'rel' => [
+                'LocationType' => 2, //Country
+                'ParentLocation' => $this->createSouthernOceanRegion()->getId()
+            ]
+        ];
+        return $this->create('Location', $data);
+    }
+    private function createSouthernOceanRegion()
+    {                                                                           print("\n createSouthernOceanRegion");
+        $data = [
+            'flat' => [
+                'DisplayName' => 'Southern Ocean'
+            ],
+            'rel' => [
+                'LocationType' => 1, //Region
+            ]
+        ];
+        return $this->create('Location', $data);
+    }
+/* -------------------------- SPLIT ----------------------------------------- */
+    private function splitNorwayTerritories()
+    {                                                                           print("\n splitNorwayTerritories");
+        $curLoc = $this->getEntity('Location', 317);  //Svalbard and Jan Mayen
+        $this->updateCurrentTerritory($curLoc);
+        $this->buildNewTerritory($curLoc->getParentLocation());
+    }
+    private function updateCurrentTerritory($loc)
+    {                                                                           print("\n updateCurrentTerritory");
+        $loc->setDisplayName('Svalbard');
+        $this->renameHabitats($loc, 'Svalbard');
+    }
+    private function buildNewTerritory($parent)
+    {                                                                           print("\n buildNewTerritory");
+        $data = [
+            'flat' => [
+                'DisplayName' => 'Jan Mayen Island'
+            ],
+            'rel' => [
+                'LocationType' => 2, //Country
+                'ParentLocation' => $parent->getId(),
+                'geoJson' => $this->createGeoJsonEntity()->getId()
+            ]
+        ];
+        $loc = $this->create('Location', $data);
+        $this->createHabitats($loc, 'Jan Mayen Island');
+    }
+    private function createGeoJsonEntity()
+    {                                                                           print("\n createGeoJsonEntity");
+        $data = [
+            "flat" => [
+                'Type' => 'Point',
+                'Coordinates' => '[8.2920,71.0318]',
+                'DisplayPoint' => '[8.2920,71.0318]',
+            ]
+        ];
+       return $this->create('GeoJson', $data);
+    }
+    private function createHabitats($loc, $name)
+    {                                                                           print("\n createHabitats");
+        $habs = $this->getEntities('HabitatType');
+        foreach ($habs as $hab) {
+            $this->createHabLoc($hab->getDisplayName(), $loc, $name);
+        }
+    }
+    private function createHabLoc($habName, $parent, $name)
+    {                                                                           print("\n createHabLoc [$name-$habName]");
+        $data = [
+            'flat' => [
+                'DisplayName' => $name.'-'.$habName
+            ],
+            'rel' => [
+                'LocationType' => 3, //Habitat
+                'ParentLocation' => $parent->getId()
+            ]
+        ];
+        return $this->create('Location', $data);
+    }
+/* ------------------------- UPDATE ----------------------------------------- */
+        //change United States Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, US Line and Wake island groups]
+            //U.S. Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, Navassa, Line and Wake island groups, etc.]
+            //(in the doc: "United States Minor Outlying Islands (Johnston Atoll, Midway, Wake Islands, Navassa Island, etc.)",)
+    private function updateUsIslandTerritory()
+    {                                                                           print("\n updateUsIslandTerritory");
+        $loc = $this->getEntity('Location', 436);
+        $newName = "U.S. Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, Navassa, Line and Wake island groups, etc.]";
+        $loc->setDisplayName($newName);
+        $this->renameHabitats($loc, $newName);
+    }
+    private function renameHabitats($loc, $name)
+    {                                                                           print("\n renameHabitats");
+        foreach ($loc->getChildLocs() as $childLoc) {
+            if ($childLoc->getLocationType()->getId() !== 3) { continue; }
+            $namePieces = explode('-', $childLoc->getDisplayName());
+            $habName = end($namePieces);
+            $this->createHabLoc($habName, $loc, $name);
+        }
+    }
+/* +++++++++++++++++++++++ DATA CLEANUP +++++++++++++++++++++++++++++++++++++ */
+    private function cleanUpData()
+    {                                                                           print("\n cleanUpData");
+        $this->updatePollination();
+        $this->cleanUpTaxaData();
+        $this->deleteInteraction();
+        $this->cleanUpSrcData();
+        $this->em->flush();
+    }
+/* ------------------------- POLLINATION ------------------------------------ */
+    private function updatePollination()
+    {                                                                           print("\n updatePollination");
+        $type = $this->getEntity('InteractionType', 'Pollination', 'displayName');
+        $active = $type->getActiveForm();
+        $type->setActiveForm(lcfirst($active));
+        $this->persistEntity($type);
+    }
+/* --------------------------- TAXA ----------------------------------------- */
+    private function cleanUpTaxaData()
+    {                                                                           print("\n cleanUpTaxaData");
+        $this->deleteTaxa();
+        $this->moveTaxa();
+        $this->mergeTaxa();
+    }
+    private function deleteTaxa()
+    {                                                                           print("\n deleteTaxa");
+        $ids = [4625, 4624, 4636, 3783, 3480, 3622, 3435, 4066, 3644, 3494, 3507,
+            3552, 4166, 3437, 2034, 3110, 4623, 4577, 1659];
+        foreach ($ids as $id) {
+            $taxon = $this->getEntity('Taxon', $id);   print("\nid [$id]");
+            $this->em->remove($taxon);
+            $this->em->flush();
+            $this->em->remove($taxon);
+        }
+    }
+    private function moveTaxa()
+    {                                                                           print("\n moveTaxa");
+        $taxa = [4543 => 'Class Actinobacteria', 4585 => 'Family Corvidae'];
+        foreach ($taxa as $id => $parentName) {
+            $taxon = $this->getEntity('Taxon', $id);
+            $parent = $this->getEntity('Taxon', $parentName, 'displayName');
+            $taxon->setParentTaxon($parent);
+            $this->persistEntity($taxon);
+        }
+    }
+    private function mergeTaxa()
+    {                                                                           print("\n mergeTaxa");
+        $this->mergeData(4232, 4537, 'Taxon');
+    }
+/* ------------------------- INTERACTION ------------------------------------ */
+    private function deleteInteraction()
+    {                                                                           print("\n deleteInteraction");
+        $int = $this->getEntity('Interaction', 12618);
+        $this->em->remove($int);
+        $this->em->flush();
+        $this->em->remove($int);
+    }
+/* ------------------------- SOURCE ----------------------------------------- */
+
+    private function cleanUpSrcData()
+    {                                                                           print("\n cleanUpSrcData");
+        $srcs = $this->getEntities('Source');
+        foreach ($srcs as $src) {
+            $this->clearSourceWhitespace($src);
+            if ($src->getSourceType() === 'Author') { $this->removePunc($src); }
+            $this->persistEntity($src);
+        }
+    }
+    private function clearSourceWhitespace($src)
+    {                                                                           print("\n clearSourceWhitespace");
+        $fields = [ 'Doi', 'LinkUrl', 'Year' ];
+        foreach ($fields as $field) {
+            $getField = 'get'.$field;
+            $setField = 'set'.$field;
+            $data = $src->$getField();
+            if (!$data) { continue; }
+            $src->$setField(trim($data));
+        }
+    }
+    private function removePunc($src)
+    {                                                                           print("\n removePunc");
+        $newName = rtrim(str_replace('.', '', $src->getDisplayName()), ',');
+        if ($newName === $src->getDisplayName()) { return; }
+        $src->setDisplayName($newName);
+        $ath = $src->getAuthor();
+        $first = str_replace('.', '', $ath->getFirstName());
+        $middle = str_replace('.', '', $ath->getMiddleName());
+        $ath->setDisplayName($newName);
+        $ath->setFirstName($first);
+        $ath->setMiddleName($middle);
+        $this->persistEntity($ath);
+    }
+/* ============================ DOWN ======================================== */
+    public function down(Schema $schema) : void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+    }
+}

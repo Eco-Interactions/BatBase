@@ -7,7 +7,7 @@
 
 SINCE LAST SERVER UPDATE:
     - TABLE
-        - @ Hiding entities with '[DELETE]' from the DATABASE TABLE
+        - @ Hiding entities with '[DELETE]' from the DATABASE TABLE, bibliography, and CSV downloads
         - @ Merged [Location-HabType] with '[Location-Unspecified]' in the DATABASE TABLE
     - FORMS
         - Configuration
@@ -35,18 +35,26 @@ SINCE LAST SERVER UPDATE:
                         to show more intuitevly the blank must be filled before continuing
                 - "OTHER" type
                     - seems like it should be as broad as possible?
-                        - removed "year" requirement? Added the ability to add "editors"?
+                        - Added the ability to add "editors"
                         - 'all' fields shown always, to encourage as much data as possible
 
                 - "Journal"
-                    - removed 'year' requirement?
+                    - removed 'year' requirement
             - Location
                 - Territories are identified and they are selected as Country
                     - Also added to the possesing country's combo and map display's to prevent duplicates
-            - Subject
-                - Only groups with valid subject roles are added
-            - Object
-                - auto select bats if anything other than bats are selected as the subject
+            - Interaction
+                - Subject
+                    - Only groups with valid subject roles are added
+                - Object
+                    - auto select bats if anything other than bats are selected as the subject
+                - Type
+                    - Once both subject and Object have been selected, the combo is
+                    filled with valid types for the taxon groups selected.
+                - Tags
+                    - Once type is selected, valid tags are added to the combo. If
+                    there is a single required tag, it is autoselected. The field
+                    is required based on the Valid Interaction selected.
 
 
     - Todos

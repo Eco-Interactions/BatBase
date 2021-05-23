@@ -17,25 +17,24 @@ export default function(action, entity) {
                     "Norfolk Island"    ],
                 France: [
                     "French Polynesia [includes the island groups of the Marquesas, Society, Tuamotu and Tubai]",
-                    "French Southern and Antarctic Lands",// (new)
+                    "French Southern and Antarctic Lands",
                     "Guadeloupe",
                     "Martinique",
                     "Mayotte",
                     "New Caledonia",
                     "Réunion",
-                    "Saint Pierre and Miquelon", //Not found?
+                    "Saint Pierre and Miquelon",
                     "Wallis and Futuna" ],
                 Netherlands: [
-                    "Aruba",  //edge case
+                    "Aruba",
                     "Curacao",
                     "Sint Maarten"  ],
                 Norway: [
-                    "Jan Mayen Island", //cur location is Svalbard and Jan Mayen
-                    "Svalbard"  ], //split
+                    "Jan Mayen Island",
+                    "Svalbard"  ],
                 "United States": [
                     "Guam",
-                    "United States Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, US Line and Wake island groups]",
-                    // "United States Minor Outlying Islands (Johnston Atoll, Midway, Wake Islands, Navassa Island, etc.)",
+                    "U.S. Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, Navassa, Line and Wake island groups]",
                     "Northern Mariana Islands",
                     "Puerto Rico",
                     "Virgin Islands, U.S."

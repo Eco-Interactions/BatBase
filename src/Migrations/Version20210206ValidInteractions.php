@@ -67,7 +67,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
 
     private function create($cName, $data)
     {
-        $entityData = $this->dataManager->createEntity($cName, $data);
+        $entityData = $this->dataManager->new($cName, $data);
         return $entityData->coreEntity;
     }
 
@@ -86,7 +86,6 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         $this->renameInteractionTypes();
         $this->updateTaxonGroups();
         $this->createAllValidInteractions();
-        $this->cleanUpData();
     }
 /* +++++++++++++++++++++++++ NEW TAGS +++++++++++++++++++++++++++++++++++++++ */
     private function createTags()
@@ -129,8 +128,8 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         // $data->taxon->rel->group = $group->getId();
         $taxon = $this->create('taxon', $data);
         $rootData = $this->getTaxonData('Annelida Root');
-        $rootData->groupRoot->rel->group = $group->getId();
-        $rootData->groupRoot->rel->taxon = $taxon->getId();
+        $rootData['rel']['group'] = $group->getId();
+        $rootData['rel']['taxon'] = $taxon->getId();
         return $this->create('groupRoot', $rootData);
     }
     private function moveWormRoots($group)
@@ -176,67 +175,65 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
     {
         $data = [
             'Worm' => [
-                'group' => [
                     'flat' => [
-                        'displayName' => 'Worm',
-                        'pluralName' => 'Worms',
+                        'DisplayName' => 'Worm',
+                        'PluralName' => 'Worms',
                     ],
                     'rel' => []
-                ]
             ],
             'Annelida Taxon' => [
-                'taxon' => [
+                // 'taxon' => [
                     'flat' => [
-                        'displayName' => 'Phylum Annelida',
-                        'name' => 'Annelida',
-                        'isRoot' => true
+                        'DisplayName' => 'Phylum Annelida',
+                        'Name' => 'Annelida',
+                        'IsRoot' => true
                     ],
                     'rel' => [
-                        'parentTaxon' => 1,
-                        'rank' => 2
+                        'ParentTaxon' => 1,
+                        'Rank' => 2
                     ]
-                ]
+                // ]
             ],
             'Annelida Root' => [
-                'groupRoot' => [
+                // 'groupRoot' => [
                     'flat' => [
-                        'subRanks' => '[7, 6, 5, 4, 3]',
-                        'description' => 'Earthworms'
+                        'SubRanks' => '[7, 6, 5, 4, 3]',
+                        'Description' => 'Earthworms'
                     ],
                     'rel' => [
-                        'group' => null
+                        'Group' => null
                     ]
-                ]
+                // ]
             ],
             'Chromista Group' => [
-                'group' => [
+                // 'group' => [
                     'flat' => [
-                        'displayName' => 'Chromista',
-                        'pluralName' => 'Chromista',
+                        'DisplayName' => 'Chromista',
+                        'PluralName' => 'Chromista',
                     ],
                     'rel' => []
-                ]
+                // ]
             ],
-            'Worm' => [
-                'group' => [
-                    'flat' => [
-                        'displayName' => 'Worm',
-                        'pluralName' => 'Worms',
-                    ],
-                    'rel' => []
-                ]
-            ],
-            'Worm' => [
-                'group' => [
-                    'flat' => [
-                        'displayName' => 'Worm',
-                        'pluralName' => 'Worms',
-                    ],
-                    'rel' => []
-                ]
-            ],
+            // 'Worm' => [
+            //     'group' => [
+            //         'flat' => [
+            //             'displayName' => 'Worm',
+            //             'pluralName' => 'Worms',
+            //         ],
+            //         'rel' => []
+            //     ]
+            // ],
+            // 'Worm' => [
+            //     'group' => [
+            //         'flat' => [
+            //             'displayName' => 'Worm',
+            //             'pluralName' => 'Worms',
+            //         ],
+            //         'rel' => []
+            //     ]
+            // ],
         ];
-        return json_decode(json_encode($data[$key]), FALSE);
+        return $data[$key];
     }
 /* --------------------  ROOT DESCRIPTIONS ---------------------------------- */
     private function addDescriptionsToRoots()
@@ -296,7 +293,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
     }
     private function getGroupRoot($gName)
     {
-        if (!is_string($gName)) { return $gName; } print($gName);
+        if (!is_string($gName)) { return $gName; } print("\n".$gName);
         $group = $this->getEntity('Group', $gName, 'displayName');
         return $group->getTaxa()[0];
     }
@@ -327,109 +324,76 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
             'Bat' => [
                 [   'object' => ['Plant'],
                     'type' => 'Pollination',
-                    'tags' => ['Flower']  //required
+                    'tagRequired' => true,
+                    'tags' => ['Flower']
                 ],[
                     'object' => ['Plant'],
                     'type' => 'Visitation',
+                    'tagRequired' => true,
                     'tags' => ['Flower']
                 ],[
                     'object' => ['Plant'],
                     'type' => 'Seed Dispersal',
+                    'tagRequired' => true,
                     'tags' => ['Seed']
                 ],[
                     'object' => ['Plant'],
                     'type' => 'Consumption',
-                    'tags' => ['Flower', 'Fruit', 'Seed', 'Leaf']   //one required
+                    'tagRequired' => true,
+                    'tags' => ['Flower', 'Fruit', 'Seed', 'Leaf']
                 ],[
                     'object' => ['Fungi'],
                     'type' => 'Consumption',
+                    'tagRequired' => false,
                     'tags' => []
                 ],[
                     'object' => ['Plant'],
                     'type' => 'Roost',
-                    'tags' => ['Internal', 'External'] //one required
+                    'tagRequired' => true,
+                    'tags' => ['Internal', 'External']
                 ],[
                     'object' => ['Plant'],
                     'type' => 'Transport',
+                    'tagRequired' => true,
                     'tags' => ['Bryophyte fragment']
                 ],[
                     'object' => ['Arthropod'],
                     'type' => 'Transport',
+                    'tagRequired' => true,
                     'tags' => ['Arthropod']
                 ],[
                     'object' => ['Bat'],
                     'type' => 'Cohabitation',
+                    'tagRequired' => false,
                     'tags' => ['Coroost']
                 ],[
                     'object' => ['Arthropod', 'Bird', 'Reptile', 'Mammal', 'Amphibian'],
                     'type' => 'Cohabitation',
+                    'tagRequired' => false,
                     'tags' => []
                 ],[
                     'object' => ['Arthropod', 'Bird', 'Reptile', 'Mammal', 'Amphibian', 'Fish', 'Worm'],
                     'type' => 'Predation',
+                    'tagRequired' => false,
+                    'tags' => []
+                ],[
+                    'object' => ['Arthropod', 'Bird', 'Reptile', 'Mammal', 'Amphibian', 'Fish'],
+                    'type' => 'Prey',
+                    'tagRequired' => false,
                     'tags' => []
                 ],[
                     'object' => ['Fungi', 'Arthropod', 'Virus', 'Worm', 'Chromista', 'Protozoa', 'Bacteria'],
+                    'tagRequired' => false,
                     'tags' => [],
                     'type' => 'Host',
                 ],[
                     'object' => ['Mammal', 'Bird'],
+                    'tagRequired' => false,
                     'type' => 'Hematophagy',
                     'tags' => []
                 ]]
         ];
         return $data[$key];
-    }
-/* +++++++++++++++++++++++ DATA CLEANUP +++++++++++++++++++++++++++++++++++++ */
-    private function cleanUpData()
-    {
-        $this->deleteTaxa();
-        $this->moveTaxa();
-        $this->deleteInteraction();
-        $this->clearSourceWhitespace();
-        $this->em->flush();
-    }
-    private function deleteTaxa()
-    {
-        $ids = [4625, 4624, 4636, 3783, 3480, 3622, 3435, 4066, 3644, 3494, 3507, 3552, 4166, 3437, 2034, 3110, 4623, 4577, 1659];
-        foreach ($ids as $id) {
-            $taxon = $this->getEntity('Taxon', $id);
-            $this->em->remove($taxon);
-            $this->em->flush();
-            $this->em->remove($taxon);
-        }
-    }
-    private function moveTaxa()
-    {
-        $taxa = [4543 => 'Class Actinobacteria', 4585 => 'Family Corvidae'];
-        foreach ($taxa as $id => $parentName) {
-            $taxon = $this->getEntity('Taxon', $id);
-            $parent = $this->getEntity('Taxon', $parentName, 'displayName');
-            $taxon->setParentTaxon($parent);
-            $this->persistEntity($taxon);
-        }
-    }
-    private function deleteInteraction()
-    {
-        $int = $this->getEntity('Interaction', 12618);
-        $this->em->remove($int);
-        $this->em->flush();
-        $this->em->remove($int);
-    }
-    private function clearSourceWhitespace()
-    {
-        $srcs = $this->getEntities('Source');
-        $fields = [ 'Doi', 'LinkUrl', 'Year' ];
-        foreach ($srcs as $src) {
-            foreach ($fields as $field) {
-                $getField = 'get'.$field;
-                $setField = 'set'.$field;
-                $data = $src->$getField();
-                if (!$data) { continue; }
-                $src->$setField(trim($data));
-                $this->persistEntity($src);
-            }
-        }
     }
 /* ============================ DOWN ======================================== */
     public function down(Schema $schema) : void

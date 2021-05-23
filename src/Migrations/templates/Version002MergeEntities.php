@@ -87,7 +87,7 @@ class Version002MergeEntities extends AbstractMigration implements ContainerAwar
     private function transferChildren($oldPrnt, $newPrnt, $type)
     {
         $map = [
-            'Location' => [ 'ChildLocs', 'parentLocation' ],
+            'Location' => [ 'ChildLocs', 'ParentLocation' ],
             'Source' =>   [ 'ChildSources', 'ParentSource' ],
             'Taxon' =>    [ 'ChildTaxa', 'ParentTaxon' ]
         ];

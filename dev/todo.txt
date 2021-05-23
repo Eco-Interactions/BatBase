@@ -7,78 +7,88 @@
 > ____ LOGS ____
 SINCE LAST TEAM UPDATE:
     - Forms
+
+
+        - TODOs
+            - Align all labels for the left-most, eg 'first column', fields
+
+
+
+
     - DB Page
     - Data
 
     - Bugs
 
-    - QUESTIONS
-        - new feedback popup text
-        - set Tuli as user or editor? She'll show up on editor lists
+    - QUESTIONS -
+        - AUTO UPLOADS
+            - A
 
 
 > ____ QUESTIONS _____
 TEAM:
     - Fully remove pdf files when deleted through UI
         - or eventually add another layer where "trash" could be emptied
-    - Site activity summary
-        - new users
-        - pdf submissions
-        - feedback
-        - unique logins
-        - records added/edited
 
+    - "Christmas Island - artificial landscape" and "Christmas Island - Forest"
+        were created by our editors recently. These names are reserved for the auto-
+        generated country-habitat combinations. The only difference is capitalization
+        and spacing. If they had typed this into the location combo, it should have
+        shown as an existing location to select. We need a naming system for locations
+        that does not lead editors to naming in this way and a way to ensure they check
+        existing locations first. Especially for whole islands or countries. I think this
+        has happened with CE a few times now, creating existing entities. Can we work
+        with her to find out how she thinks these locations need to be created when
+        they exist. Perhaps she can lead us to something in the UI or tutorial that
+        we can adjust to prevent this.
+        - Perhaps they selected Australia first, and "Christmas Island" has been treated
+        as a country, so it is not included in the form dropdown after Australia is
+        selected. With our move to treat terriotries as countries, this situation
+        could come up somewhat frequently.
+        - They included GPS data and then added a note saying "Location is whole island".
+        We especially don't want editors adding gps data without it being relevant to
+        the location/interaction being created.
+
+        - merge all [name-habType] in table UI
+
+        - phrasing for
+            - Current: United States Minor Outlying Islands [includes the Howland-Baker, Johnston, Midway, US Line and Wake island groups]
+            - In doc: United States Minor Outlying Islands (Johnston Atoll, Midway, Wake Islands, Navassa Island, etc.)
 TAYLOR:
 
 
 > ____ TASKS _____
-rest is radical, joy is radical, laughter is radical, sleeping is radical
+Personal transformation can and does have global effects. As we go, so goes the world,
+for the world is us. The revolution that will save the world is ultimately a personal one. - Marianne Williamson
+
+When you get into a tight place and everything goes against you, till it seems as though you could not hang on a minute longer, never give up then, for that is just the place and time that the tide will turn. - Harriet Stowe
 CURRENT:
-    - fix year input validation
-    - hardcode 'territory' countries
+    - update how required tags are handled in forms
+    - forms
+        - when nothing but name and habtype added, prompt editor to select existing loc
+    - db migration
+    - testing!
 
 
-    - Show when a tag is required to be selected
-    - keep default tags selected regardless of type tags
-    - validate required tags are selected before form submit
-        - and that all relational fields that need values have them "required" fields
 
-    - TRACK USER ACTIVITY WITH CREATE/EDIT ACTIONS
 
-    - random
-        - disable other rank combos when a rank create formis open
-        - form fields/rows/everything em => pxs
-        - create map -> on map click, drop teal marker.
-        - refactoring
-            - replace tState with getTableState where sensible
-            - taxon parent edit form confg tag shouldn't be 'object', and that's really not what's happening anyway... rename
-
-    - migration
-        - user
-            - delete unused test users & document remaining
-                - change to QA roles
-            - add 'role_editor' to cullen and kelly
-            - remove "" from tuli
-        - regenerate all citation text
-        - remove all periods at the end of author display names, and their sources
-        - trim any field that could have accidental white space
-            - trailing commas for author display names
-        - saved fitler sets
-            - replace 'Object Realm' with 'Object Group'
-            - update view ids for taxon focus from taxon id to group id
-        - Family Alcaligenaceae (4232) needs to be moved to Bacteria, and the higher taxa should be:
+    + migration
+        _valid interactions
+            _ define when and how many tags are required
+                _ cohabitation has an optional coroost
+            _ add valid 'prey' interactions
+        _ lcfirst interaction type Pollinate active form
+        _ Family Alcaligenaceae (4232) needs to be moved to Bacteria, and the higher taxa should be:
             Class: Betaproteobacteria
             Order: Alcaligenaceae
-        - Delete Taxon 4677
-            - check for new sub-group duplicates
-        - remove int-type-tag-restrictions
 
-    - Site text update
-        - Project ->
-            - team page
+        _regenerate all citation text
+            _remove all periods at the end of author display names, and their sources
+            _trim any field that could have accidental white space
+                _trailing commas for author display names
 
 
-    - Sort invalid urls by the editor who created the source
+
 
     - fix cronjob to clean up hourly backups
 
@@ -90,12 +100,38 @@ CURRENT:
 
 
 
-    - data-publisher filter should only allow year selection
-    - fix panel elems in row containers that flex for sizing and remove custom styles.
-    - handle 'lists' like row-data-filters
 
+UNHANDLED:
+    - FORMS:
+        - Source
+            - if the authors/editors are changed in a publication, it's
+                citation authors could be affected for Books and Other publications
 
 NEXT:
+
+    After Update:
+    - - build page range elems to ensure proper format
+        - ensure 1st < 2nd number
+    - validate required tags are selected before form submit
+        - and that all relational fields that need values have them "required" fields
+    - TRACK USER ACTIVITY WITH CREATE/EDIT ACTIONS
+    - random
+        - merge [loc-hab] in database UI
+        - data-publisher filter should only allow year selection
+        - fix panel elems in row containers that flex for sizing and remove custom styles.
+        - handle 'lists' like row-data-filters
+        - disable other rank combos when a rank create formis open
+        - form fields/rows/everything em => pxs
+        - create map -> on map click, drop teal marker.
+        - refactoring
+            - replace tState with getTableState where sensible
+            - taxon parent edit form confg tag shouldn't be 'object', and that's
+                really not what's happening anyway... rename
+
+    - Site text update
+        - Project ->
+
+
     - Review Data
         * Identical tables
             - Pending Edits
@@ -131,13 +167,21 @@ NEXT:
 
 > ____ DATA CLEANUP ____
     - forms - Add 'trim' to all values before submitting
-        - Check for elevation field val when elev-max value entered.
-        - Loop through all entities that could have random spaces in fields
-        - Fix all URLs entered without http
-    - tags- leaf = external, wood = internal
-    - Visitation - removing 'flower' from verb forms
-    - update all saved filter sets into current format
 
+
+    Next:
+        - location
+            - Check for elevation field val when elev-max value entered.
+
+        - saved fitler sets
+            - update all saved filter sets into current format
+                - replace 'Object Realm' with 'Object Group'
+                - update view ids for taxon focus from taxon id to group id
+        - user
+            - delete unused test users & document remaining
+                - change to QA roles
+            - add 'role_editor' to cullen and kelly
+            - remove "" from tuli
 > ==== MEETING NOTES ====
 Prep:
     Changes:

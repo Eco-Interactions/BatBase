@@ -26,6 +26,14 @@ class ValidInteraction
     private $id;
 
     /**
+     * @var bool
+     * @JMS\Expose
+     * @JMS\SerializedName("tagRequired")
+     * @ORM\Column(name="tag_required", type="boolean", nullable=false)
+     */
+    private $tagRequired;
+
+    /**
      * @var \App\Entity\GroupRoot
      *
      * @ORM\ManyToOne(
@@ -60,10 +68,6 @@ class ValidInteraction
     private $interactionType;
 
     /**
-     * NOTE:
-     * - JS FORM VALIDATION ENSURES THAT AT LEAST ONE TAG, IF ANY HERE, WILL BE
-     * SELECTED FOR THIS TYPE OF VALID INTERACTIONS.
-     * - "Secondary" TAG IS ALWAYS VALID, AND IS NOT ADDED HERE. HANDLED IN JS CODE.
      * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="validInteractions")
      * @ORM\JoinTable(name="valid_interaction_tag")
      */
@@ -119,6 +123,30 @@ class ValidInteraction
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Set tagRequired.
+     *
+     * @param bool $tagRequired
+     *
+     * @return ValidInteraction
+     */
+    public function setTagRequired($tagRequired)
+    {
+        $this->tagRequired = $tagRequired;
+
+        return $this;
+    }
+
+    /**
+     * Get tagRequired.
+     *
+     * @return bool
+     */
+    public function getTagRequired()
+    {
+        return $this->tagRequired;
     }
 
     /**

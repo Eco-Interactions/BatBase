@@ -514,7 +514,7 @@ function addMarkerForEachInteraction(intCnt, latLng, loc) {                     
 }
 /*===================== Location Form Methods ================================*/
 /** Shows all location in containing country and selects the country in the form. */
-function showNearbyLocationsAndUpdateForm(geocode, query) {         /*dbug-log*///console.log('showNearbyLocationsAndUpdateForm geocode[%O] query?[%s]', geocode, query);
+function showNearbyLocationsAndUpdateForm(geocode, query) {         /*perm-log*/console.log('showNearbyLocationsAndUpdateForm geocode[%O] query?[%s]', geocode, query);
     if (!geocode) { return; }
     _db('getData', ['countryCodes'])
     .then(cntrys => loadCountryAndSubLocs(cntrys, geocode, query));
@@ -564,7 +564,7 @@ function fillCoordFields(latLng) {                                              
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates.
  */
-function updateUiAfterFormGeocode(latLng, zoomFlag, skipZoom, results) {/*dbug-log*///console.log('--updateUiAfterFormGeocode. zoomFlag?[%s] skipZoom?[%s] point = %O results = %O', zoomFlag, skipZoom, latLng, results);
+function updateUiAfterFormGeocode(latLng, zoomFlag, skipZoom, results) {/*perm-log*/console.log('--updateUiAfterFormGeocode. zoomFlag?[%s] skipZoom?[%s] point = %O results = %O', zoomFlag, skipZoom, latLng, results);
     if (!app.map) { return; } //form cloesd before geocode results returned.
     if (!results.length) { return updateMapPin(latLng, null, zoomFlag, skipZoom); }
     updateMapPin(latLng, results[0], zoomFlag, skipZoom)

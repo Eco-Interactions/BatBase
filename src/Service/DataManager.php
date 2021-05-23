@@ -51,9 +51,30 @@ class DataManager
     }
 
 /* ============================ ACTIONS ===================================== */
+    // Used from PHP code.
+    public function new($coreName, $dataAry)
+    {                                                                           //print("\n"); print_r($dataAry);
+        $data = new \stdClass();
+        $data->core = new \stdClass();
+        $data->core->flat = new \stdClass();
+        $data->core->rel = new \stdClass();
+
+        $this->addToData($data->core->flat, $dataAry['flat']);
+
+        if (array_key_exists('rel', $dataAry)) {
+            $this->addToData($data->core->rel, $dataAry['rel']);
+        }
+        return $this->createEntity($coreName, $data);
+    }
+    private function addToData(&$obj, $ary)
+    {
+        foreach ($ary as $prop => $value) {
+            $obj->$prop = $value;
+        }
+    }
 /* ------------------------ CREATE ENTITY ----------------------------------- */
     /**
-     * Create new entity.
+     * Create new entity from data-entry form.
      * @param  String  $coreName        Core-Entity class name.
      * @param  Array   $data            [ eName: [ // Core name, detail name (optional)
      *                                      flat: [ field => val ],
@@ -430,7 +451,8 @@ class DataManager
 /* --------------------------- GET ENTITY ----------------------------------- */
     /** Returns the entity. */
     private function getEntity($relField, $val)
-    {
+    {                                                                           //print("\ngetEntity [$relField][$val]");
+        if (!$val) { return; }
         $relClass = $this->getEntityClass($relField);
         $prop = is_numeric($val) ? 'id'  : 'displayName';//print("prop [$prop]");
         return $this->returnEntity($relClass, $val, $prop);
