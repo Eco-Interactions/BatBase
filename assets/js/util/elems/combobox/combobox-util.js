@@ -49,7 +49,8 @@ function getComboCreateFunc(createFunc, name) {
     return createFunc ? onComboCreate.bind(null, createFunc, entity) : false;
 }
 function onComboCreate(createFunc, entity, val) {                   /*dbug-log*///console.log('--onComboCreate text?[%s]', val);
-    createFunc(val);
+    const v = val === 'create' ? '' : val;
+    createFunc(v);
     return { text: `Add a new ${_u('ucfirst', [entity])}...`, value: '' };
 }
 /** For multiple combos in a container, their order number is appended to the field. */

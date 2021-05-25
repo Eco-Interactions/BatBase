@@ -86,6 +86,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         $this->renameInteractionTypes();
         $this->updateTaxonGroups();
         $this->createAllValidInteractions();
+        $this->em->flush();
     }
 /* +++++++++++++++++++++++++ NEW TAGS +++++++++++++++++++++++++++++++++++++++ */
     private function createTags()
@@ -312,8 +313,11 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         $entity->setSubjectSubGroup($subj);
         $entity->setObjectSubGroup($obj);
         $entity->setInteractionType($type);
+        $entity->setTagRequired(false);
+
         foreach ($tags as $tag) {
             $entity->addTag($tag);
+            $entity->setTagRequired(true);
         }
         $this->persistEntity($entity, true);
     }

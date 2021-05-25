@@ -145,9 +145,13 @@ function getFieldValAlertHandler(tag, action) {
         'openSubForm': {
             show: handleOpenSubFormAndReturnAlertMsg
         },
+        /* --- INTERACTION --- */
         'noValidInts': {
             show: handleNoValidIntsAndReturnAlertMsg,
             clear: false
+        },
+        'needsTypeTag': {
+            show: handleNeedsTypeTagAndReturnAlertMsg
         },
         /* --- SOURCE --- */
         'newDupAuth': {
@@ -234,6 +238,10 @@ function handleNoValidIntsAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 }
 export function clearAnyGroupAlerts() {                             /*dbug-log*///console.log('clearAnyGroupAlerts')
     clearAlert($('#InteractionType_alert')[0], 'top');
+}
+function handleNeedsTypeTagAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    const type = _cmbx('getSelTxt', ['InteractionType']);
+    return '<span>Please select a tag for the type: '+type+'.</span>';
 }
 /* ============================= SOURCE ===================================== */
 /* --------------- DUPLICATE AUTHOR ----------------------------------------- */

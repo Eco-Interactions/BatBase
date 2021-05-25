@@ -26,14 +26,15 @@ export function setFormState(fState, prop, val) {                   /*dbug-log*/
 /* ----------------------- FIELDS ------------------------ */
 export function setFieldState(fState, field, val, prop = 'value') { /*dbug-log*///console.log('    --setFieldState fields[%s] prop[%s] val?[%O] [%O]', field, prop, val, fState);//console.trace()
     let fData = fState.fields[field];
-    if (!prop) { return fData = val; }
-    fData[prop] = val;
+    if (!prop) { fData = val;
+    } else { fData[prop] = val }
     onFieldStateChange(fState, field, val, prop);
 }
 function onFieldStateChange(fState, field, val, prop) {
     const map = {
         required: toggleRequiredLabelClass
     };
+    if (!prop) { toggleRequiredLabelClass(fState, field, val.required); }
     return map[prop] ? map[prop](...arguments) : null;
 }
 function toggleRequiredLabelClass(fState, field, val, prop) {

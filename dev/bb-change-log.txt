@@ -21,7 +21,13 @@ SINCE LAST SERVER UPDATE:
                 - Fields can be stacked in the same row (eg, doi and website)
                 - arbitrary number of fields in row
                     - styled by percentage based on total "fields" in row and field size (eg, year is a "small" field)
-                        - empty "spacer" fields easy as well.
+                        - empty "spacer" fields easy as well
+            - Form Validation
+                - Form validation has improved with each field's validation able to
+                    be configured directly. Various errors are prevented by sensible
+                    UI presentation, when data is entered into a field, and before
+                    the form data is submitted to the server - showing helpful alerts
+                    as needed. (Full documentation to come.)
         - Entity Forms
             - Generally reordered fields to what seems like a more intuitive flow for
                 editors, prioritizing required fields and resizing where appropriate

@@ -132,7 +132,7 @@ export function onTypeSelection(val) {
     setInteractionTypeFieldData(validInt.interactionType);
     iForm.focusPinAndEnableSubmitIfFormValid('InteractionType');
     if (!validInt.tags.length) { return; }
-    iForm.loadInteractionTypeTags(validInt.tags);
+    iForm.loadInteractionTypeTags(validInt.tags, validInt.tagRequired);
 }
 function onTypeClear() {
     iForm.clearTypeTagData();

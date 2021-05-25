@@ -122,8 +122,8 @@ function getInteractionFieldConfg() {
                 defaultTags: ['Secondary'], //Always valid and available when tags load.
             },
             name: 'InteractionTags',
-            prep: { //func: [args]
-                renameField: ['Tags'],
+            prep: {
+                validateTags: []
             },
             prop: {
                 core: 'tags'

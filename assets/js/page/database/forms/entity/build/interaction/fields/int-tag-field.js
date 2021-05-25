@@ -18,7 +18,7 @@
  *     SHARED
  *         FIELD INIT-VAL
  */
-import { _cmbx } from '~util';
+import { _cmbx, _opts } from '~util';
 import { _confg, _state } from '~form';
 import * as iForm from '../int-form-main.js';
 /**
@@ -56,23 +56,23 @@ export function initTagField() {
 export function clearTypeTagData() {
     loadTagOpts(md.defaultTagOpts);
     md.autoTag = null;
-    _state('setFieldState', ['top', 'InteractionTags', false, 'required']);
+    updateTagsState(null, false);
 }
 /* ==================== LOAD INTERACTION-TYPE TAGS ========================== */
-export function loadInteractionTypeTags(tags) {
-    handleRequiredTag(tags[0].id, tags.length);
+export function loadInteractionTypeTags(tags, isRequired) {         /*dbug-log*///console.log('--loadInteractionTypeTags tags[%O] required?[%s]', tags, isRequired);
+    handleRequiredTag(tags, isRequired);
     addTypeTagOpts(tags);
 }
 /* -------------------------- REQUIRED TAG ---------------------------------- */
-/**
- * If the selected ValidInteraction has one tag, that tag is required and will be
- * autofilled. If there is more than one, at least one is required.
- * @param  {array} typeTags  Tags for the selected ValidInteraction type
- */
-function handleRequiredTag(tagId, count) {
-    const isRequired = !!count;
-    md.autoTag = count === 1 ? tagId : null;
-    _state('setFieldState', ['top', 'InteractionTags', isRequired, 'required']);
+function handleRequiredTag(tags, isRequired) {
+    updateTagsState(tags, isRequired);
+    md.autoTag = isRequired && tags.length === 1 ? tags[0].id : null;
+}
+function updateTagsState(tags, isRequired) {
+    const tField = _state('getFieldState', ['top', 'InteractionTags', false]);/*dbug-log*///console.log('--updateTagsState tags[%O] field[%O] required?[%s]', tags, tField, isRequired);
+    tField.required = isRequired;
+    tField.misc.typeTags = tags;
+    _state('setFieldState', ['top', 'InteractionTags', tField, null]);
 }
 function addTypeTagOpts(typeTags) {                                 /*dbug-log*///console.log('addTypeTagOpts typeTags = %O', typeTags);
     loadTagOpts(buildTagOpts(typeTags));
@@ -80,7 +80,7 @@ function addTypeTagOpts(typeTags) {                                 /*dbug-log*/
 /* ------------------------ BUILD TAG-OPTS ---------------------------------- */
 function buildTagOpts(typeTags) {
     const opts = typeTags.map(getTagOpt).concat(md.defaultTagOpts);
-    return _cmbx('alphabetizeOpts', [opts]);
+    return _opts('alphabetizeOpts', [opts]);
 }
 function getTagOpt(tag) {
     return { text: tag.displayName, value: tag.id };
@@ -96,7 +96,7 @@ function ifDefaultTag(id) {
 }
 /* ---------------------- AFTER TYPE-TAGS LOAD ------------------------------ */
 function afterTypeTagsLoaded(selectedDefaults) {
-    const vals = [getInitVal(), md.autoTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('afterTypeTagsLoaded select = %O', vals);
+    const vals = [getInitVal(), md.autoTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('--afterTypeTagsLoaded select[%O]', vals);
     if (!vals.length) { return; }
     _cmbx('setSelVal', ['InteractionTags', vals]);
 }
@@ -109,7 +109,7 @@ function getInitVal() {
     return initVal ? initVal : null;
 }
 /* ====================== ON TAG SELECTION ================================== */
-export function onTagSelection(tags) {                              /*dbug-log*///console.log('tags = ', tags);
+export function onTagSelection(tags) {                              /*dbug-log*///console.log('onTagSelection [%O]', tags);
     ensureDefaultTagStaysSelected(tags);
     iForm.checkIntFieldsAndEnableSubmit();
 }

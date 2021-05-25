@@ -21,7 +21,7 @@
  *     TRACK FAILURES
  */
 import { _alert, _cmbx, _db, _u } from '~util';
-import { _state } from '~form';
+import { _state, _val } from '~form';
 // import * as eData from './entity-data.js';
 /**
  * [ld description]
@@ -224,10 +224,21 @@ function getCoordValue(displayPoint) {
     return geoJson ? geoJson.coordinates : displayPoint;
 
 }
+    /* ------------------- INTERACTION -------------------------------------- */
+function validateTags(g, fConfg) {
+    const typeTags = fConfg.misc.typeTags;
+    if (typeTags.length && fConfg.required) { ensureTypeTagSelected(typeTags, fConfg.value); }
+    setServerData('rel', 'Tags', fConfg.value);
+}
+function ensureTypeTagSelected(typeTags, selected) {
+    const valid = typeTags.find(t => selected.indexOf(t) !== -1);
+    if (valid) { return; }
+    trackFailure('InteractionTags', selected);
+}
     /* ----------------------- TAXON ---------------------------------------- */
 function buildTaxonDisplayName(g, fConfg) {
     const rank = _cmbx('getSelTxt', ['Rank']);
-    const dName = rank === 'Species' ? fConfg.value : rank +' '+ fConfg.value;/*dbug-log*/console.log('--buildTaxonDisplayName rank[%s] name[%s]', rank, dName);
+    const dName = rank === 'Species' ? fConfg.value : rank +' '+ fConfg.value;/*dbug-log*///console.log('--buildTaxonDisplayName rank[%s] name[%s]', rank, dName);
     setServerData('flat', 'DisplayName', dName);
 }
 /* =========================== TRACK FAILUTES =============================== */
@@ -236,6 +247,22 @@ function trackFailure(prop, value) {                                 /*dbug-log*
     ld.data.fails[prop] = value;
 }
 function alertIfFailures() {
-    if (!ld.data.fails) { return; }                                 /*dbug-log*///console.log('--alertIfFailures [%O]', ld.data);
-    _alert('alertIssue', ['dataPrepFail', JSON.stringify(ld.data.fails) ]);
+    if (!ld.data.fails) { return; }
+    const genErr = handleFieldErrorsAndReturnGeneralFails(ld.data.fails);
+    if (!genErr.length) { return; }                                 /*perm-log*///console.log('--alertIfFailures allFails[%O] genErrs[%O]', ld.data.fails, genErr);
+    _alert('alertIssue', ['dataPrepFail', JSON.stringify(genErr) ]);
+}
+
+function handleFieldErrorsAndReturnGeneralFails(fails) {
+    const map = {
+        InteractionTags: showFormFieldAlert.bind(null, 'InteractionTags', 'needsTypeTag', 'top')
+    };
+    const unhandled = Object.keys(ld.data.fails).map(f => map[f] ? map[f]() : null).filter(f=>f);
+    if (!unhandled.length) { ld.data.fails = 'handled'; }
+    return unhandled;
+}
+
+function showFormFieldAlert(field, tag, fLvl) {
+    delete ld.data.fails[field];
+    _val('showFormValAlert', [...arguments]);
 }

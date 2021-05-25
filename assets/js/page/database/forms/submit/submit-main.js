@@ -30,9 +30,13 @@ export function handleFormSubmit(fLvl) {
 }
 /* ------------------------- SUBMIT FORM ------------------------------------ */
 function submitFormData(data, fLvl, confg) {                        /*dbug-log*/console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
-    if (data.fails) { return val.errUpdatingData('dataPrepFail', data.fails); }
+    if (data.fails) { return handleDataPrepFailure(data.fails); }
     toggleWaitOverlay(true);
     submitForm(data, fLvl, confg.action);
+}
+function handleDataPrepFailure(fails) {
+    if (fails === 'handled') { return; }
+    val.errUpdatingData('dataPrepFail', data.fails);
 }
 function submitForm(data, fLvl, action) {
     const url = `crud/entity/${action}`;
