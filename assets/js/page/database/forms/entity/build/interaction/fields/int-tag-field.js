@@ -59,7 +59,7 @@ export function clearTypeTagData() {
     updateTagsState(null, false);
 }
 /* ==================== LOAD INTERACTION-TYPE TAGS ========================== */
-export function loadInteractionTypeTags(tags, isRequired) {         /*dbug-log*///console.log('--loadInteractionTypeTags tags[%O] required?[%s]', tags, isRequired);
+export function loadInteractionTypeTags(tags, isRequired) {         /*perm-log*/console.log('--loadInteractionTypeTags tags[%O] required?[%s]', tags, isRequired);
     handleRequiredTag(tags, isRequired);
     addTypeTagOpts(tags);
 }

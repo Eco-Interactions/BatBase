@@ -134,7 +134,7 @@ export function addMapToLocForm(type, $form = $('#Location_fields')) {/*dbug-log
 }
 function initLocFormMap(type, pId) {
     const mData = {
-        pLoc: pId,
+        pId: pId,
         locRcrds:  _state('getEntityRcrds', ['location']),
         formConfg: _confg('getConfgData', ['Location', 'misc']),
         type: type

@@ -105,6 +105,11 @@ function getPublicationTypeConfg() {
         },
         Journal: {
             name: 'Journal',
+            fields: {
+                'Author': {
+                    required: false
+                }
+            },
             misc: {
                 defaultCitType: 'Article'
             },

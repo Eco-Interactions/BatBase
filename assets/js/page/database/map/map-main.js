@@ -682,7 +682,8 @@ function addParentLocDataToMap(id, skipZoom, type, locId) {         /*dbug-log*/
     const geoJson = loc.geoJsonId ? app.data.geo[loc.geoJsonId] : false;
     drawLocPolygon(loc, geoJson, skipZoom);
     if (type === 'map') { return; }
-    const zoomLvl = app.volatile.poly || skipZoom ? false :
+    const zoomLvl = app.volatile.poly ? false :
+        skipZoom ? (app.map.getZoom() < 5 ? 5 : false) :
         loc.locationType.displayName === 'Region' ? 3 : 8;
     showChildLocs(id, zoomLvl, type, locId);
 }

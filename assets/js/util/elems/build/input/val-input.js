@@ -41,8 +41,9 @@ function setLatitudePattern() {
     const pattern = '-?([0-8]?[0-9](\\.\\d+)?\|90(.[0]+)?)\\s?';
     return handleCoordPattern('lat', pattern);
 }
+/** Plain regex: -?(180((\.[0]+)?)|([1]?[0-7]?|[8])[0-9](\.\d+)?) */
 function setLongitudePattern() {
-    const pattern = '-?[1]?[0-7]?[0-9](\\.\\d+)?\|180((.[0]+)?)';
+    const pattern = '-?(180((\\.[0]+)?)\|([1]?[0-7]?|[8])[0-9](\\.\\d+)?)';
     handleCoordPattern('long', pattern);
 }
 function handleCoordPattern(prefix, pattern) {
