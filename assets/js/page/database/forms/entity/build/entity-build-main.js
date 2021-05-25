@@ -85,7 +85,7 @@ export function initFieldTaxonSelect() {
     return txn.initFieldTaxonSelect(...arguments);
 }
 export function getSelectedTaxon() {
-    return txn.getSelectedTaxon();
+    return txn.getSelectedTaxon(...arguments);
 }
 export function selectFieldTaxon() {
     return int.selectFieldTaxon(...arguments);

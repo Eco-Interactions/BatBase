@@ -10,11 +10,11 @@
  *     HEADER
  *     STATUS/ALERTS
  */
-import { _el } from '~util';
+import { _el, _u } from '~util';
 let fState;
 /* ======================== BUILD FORM ====================================== */
 /** [assembleForm description] */
-export function assembleForm(el, formState) {                       /*dbug-log*///console.log('+--buildForm elems[%O] fState[%O]', el, formState);
+export function assembleForm(el, formState) {                       /*dbug-log*///console.log('+--buildForm elems[%O] fState[%O]', el, _u('snapshot', [formState]));
     fState = formState;
     const cntnr = buildFormCntnr();
     const hdr = buildFormHdr(el.tutBttn);

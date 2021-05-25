@@ -14,10 +14,11 @@ import { _form, _state, _elems, _val, handleFormSubmit } from '~form';
 /* ========================= INIT =========================================== */
 export function initCreateForm(rank, v) {                           /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, v);
     _elems('initSubForm', [getTxnFormParams(rank, v)])
-    .then(finishTxnFormInit);
+    .then(status => finishTxnFormInit(v, rank, status));
 }
 function getTxnFormParams(rank, v) {
     return {
+        action: 'create',
         appendForm: form => $(`#${rank}_f`).append(form),
         combo: rank,
         group: 'sub2',
@@ -26,7 +27,7 @@ function getTxnFormParams(rank, v) {
         style: 'sml-sub-form',
         submit: validateAndSubmit.bind(null, rank), //form submit handler
         type: 'create',
-        vals: getTaxonCreateStateVals(val, rank)
+        vals: getTaxonCreateStateVals(v, rank)
     }
 }
 function getTaxonCreateStateVals(val, rank) {
@@ -34,14 +35,14 @@ function getTaxonCreateStateVals(val, rank) {
         DisplayName: val,
         Group: _state('getFieldState', ['sub', 'Group']),
         Rank: rank,
+        Parent: _form('getSelectedTaxon', [rank]).id,
         'Sub-Group': _state('getFieldState', ['sub', 'Sub-Group']),
     };
 }
 function finishTxnFormInit(val, rank, status) {
     if (!status) { return } //Error handled elsewhere
-    $(`#${rank}_f`).append(form);
     _elems('toggleSubmitBttn', ['sub2'])
-    $('#sub2-hdr')[0].innerText += ' '+ rank;
+    $('#sub2-hdr span')[0].innerText += ' '+ rank;
     $('#DisplayName_f input').focus();
 }
 /* ========================= VALIDATE ========================================= */

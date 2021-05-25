@@ -237,7 +237,7 @@ function ensureTypeTagSelected(typeTags, selected) {
 }
     /* ----------------------- TAXON ---------------------------------------- */
 function buildTaxonDisplayName(g, fConfg) {
-    const rank = _cmbx('getSelTxt', ['Rank']);
+    const rank = ld.confg.action === 'create' ? ld.confg.fields.Rank.value : _cmbx('getSelTxt', ['Rank']);
     const dName = rank === 'Species' ? fConfg.value : rank +' '+ fConfg.value;/*dbug-log*///console.log('--buildTaxonDisplayName rank[%s] name[%s]', rank, dName);
     setServerData('flat', 'DisplayName', dName);
 }

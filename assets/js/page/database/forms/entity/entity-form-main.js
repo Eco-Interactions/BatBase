@@ -67,7 +67,7 @@ export function enableTaxonFieldCombos() {
     return build.enableTaxonFieldCombos(...arguments);
 }
 export function getSelectedTaxon() {
-    return build.getSelectedTaxon();
+    return build.getSelectedTaxon(...arguments);
 }
 export function initFieldTaxonSelect() {
     return build.initFieldTaxonSelect(...arguments);

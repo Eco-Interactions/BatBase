@@ -56,7 +56,9 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         if ($creating) {
             $entity->setCreatedBy($this->admin);
         }
-        $entity->setUpdatedBy($this->admin);
+        if (method_exists($entity, 'setUpdatedBy')) {
+            $entity->setUpdatedBy($this->admin);
+        }
         $this->em->persist($entity);
     }
     private function create($cName, $data)
@@ -70,6 +72,15 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
     {
         return $this->dataManager->editEntity($cName, $data);
     }
+
+    private function removeEntity($entity, $erase = false)
+    {
+        $this->persistEntity($entity);
+        $this->em->remove($entity);
+        if (!$erase) { return; }
+        $this->em->flush();
+        $this->em->remove($entity);
+    }
     // protected function mergeEntities($ents, $coreClass, $detail = null)
     // {
     //     foreach ($ents as $ids) {
@@ -82,8 +93,7 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
 
         if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
         // if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
-        $this->persistEntity($rmv);
-        $this->em->remove($rmv);
+        $this->removeEntity($rmv, true);
     }
 
     private function transferData($coreClass, $addId, $rmv)
@@ -103,12 +113,14 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $getFunc = 'get'.$map[$type][0];
         $setFunc = 'set'.$map[$type][1];
         $children = $oldPrnt->$getFunc();
-        if (!count($children)) { return; }                                      print("\nCHILDREN FOUND = ".count($children));
+        if (!count($children)) { return; }                                      //print("\nCHILDREN FOUND = ".count($children));
 
         foreach ($children as $child) {
             $child->$setFunc($newPrnt);
             $this->persistEntity($child);
         }
+        $remaining = $oldPrnt->$getFunc();
+        if (!count($remaining)) { return; }                                      print("\nCHILDREN FOUND = ".count($remaining));
     }
     private function transferInts($rmv, $add, $coreClass)
     {
@@ -248,16 +260,18 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
     {                                                                           print("\n createHabitats");
         $habs = $this->getEntities('HabitatType');
         foreach ($habs as $hab) {
-            $this->createHabLoc($hab->getDisplayName(), $loc, $name);
+            $this->createHabLoc($hab->getId(), $hab->getDisplayName(), $loc, $name);
         }
     }
-    private function createHabLoc($habName, $parent, $name)
+    private function createHabLoc($habId, $habName, $parent, $name)
     {                                                                           print("\n createHabLoc [$name-$habName]");
+
         $data = [
             'flat' => [
                 'DisplayName' => $name.'-'.$habName
             ],
             'rel' => [
+                'HabitatType' => $habId ? $habId : $this->getEntity('HabitatType', $habName, 'displayName'),
                 'LocationType' => 3, //Habitat
                 'ParentLocation' => $parent->getId()
             ]
@@ -281,7 +295,8 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
             if ($childLoc->getLocationType()->getId() !== 3) { continue; }
             $namePieces = explode('-', $childLoc->getDisplayName());
             $habName = end($namePieces);
-            $this->createHabLoc($habName, $loc, $name);
+            $childLoc->setDisplayName($name.'-'.$habName);
+            $this->persistEntity($childLoc);
         }
     }
 /* +++++++++++++++++++++++ DATA CLEANUP +++++++++++++++++++++++++++++++++++++ */
@@ -291,6 +306,7 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $this->cleanUpTaxaData();
         $this->deleteInteraction();
         $this->cleanUpSrcData();
+        $this->deleteSpamUser();
         $this->em->flush();
     }
 /* ------------------------- POLLINATION ------------------------------------ */
@@ -309,18 +325,16 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $this->mergeTaxa();
     }
     private function deleteTaxa()
-    {                                                                           print("\n deleteTaxa");
+    {                                                                           //print("\n deleteTaxa");
         $ids = [4625, 4624, 4636, 3783, 3480, 3622, 3435, 4066, 3644, 3494, 3507,
             3552, 4166, 3437, 2034, 3110, 4623, 4577, 1659];
         foreach ($ids as $id) {
             $taxon = $this->getEntity('Taxon', $id);   print("\nid [$id]");
-            $this->em->remove($taxon);
-            $this->em->flush();
-            $this->em->remove($taxon);
+            $this->removeEntity($taxon, true);
         }
     }
     private function moveTaxa()
-    {                                                                           print("\n moveTaxa");
+    {                                                                           //print("\n moveTaxa");
         $taxa = [4543 => 'Class Actinobacteria', 4585 => 'Family Corvidae'];
         foreach ($taxa as $id => $parentName) {
             $taxon = $this->getEntity('Taxon', $id);
@@ -330,21 +344,20 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         }
     }
     private function mergeTaxa()
-    {                                                                           print("\n mergeTaxa");
-        $this->mergeData(4232, 4537, 'Taxon');
+    {                                                                           //print("\n mergeTaxa");
+        $this->mergeData(4538, 4092, 'Taxon'); //Genus Alcaligenes
+        $this->mergeData(4232, 4537, 'Taxon'); //Family Alcaligenaceae
     }
 /* ------------------------- INTERACTION ------------------------------------ */
     private function deleteInteraction()
-    {                                                                           print("\n deleteInteraction");
+    {                                                                           //print("\n deleteInteraction");
         $int = $this->getEntity('Interaction', 12618);
-        $this->em->remove($int);
-        $this->em->flush();
-        $this->em->remove($int);
+        $this->removeEntity($int, true);
     }
 /* ------------------------- SOURCE ----------------------------------------- */
 
     private function cleanUpSrcData()
-    {                                                                           print("\n cleanUpSrcData");
+    {                                                                           //print("\n cleanUpSrcData");
         $srcs = $this->getEntities('Source');
         foreach ($srcs as $src) {
             $this->clearSourceWhitespace($src);
@@ -353,7 +366,7 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         }
     }
     private function clearSourceWhitespace($src)
-    {                                                                           print("\n clearSourceWhitespace");
+    {                                                                           //print("\n clearSourceWhitespace");
         $fields = [ 'Doi', 'LinkUrl', 'Year' ];
         foreach ($fields as $field) {
             $getField = 'get'.$field;
@@ -364,7 +377,7 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         }
     }
     private function removePunc($src)
-    {                                                                           print("\n removePunc");
+    {                                                                           //print("\n removePunc");
         $newName = rtrim(str_replace('.', '', $src->getDisplayName()), ',');
         if ($newName === $src->getDisplayName()) { return; }
         $src->setDisplayName($newName);
@@ -375,6 +388,29 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $ath->setFirstName($first);
         $ath->setMiddleName($middle);
         $this->persistEntity($ath);
+    }
+
+    private function deleteSpamUser()
+    {
+        $this->deleteLists();                                                   print("\n deleteSpamUser");
+        $this->deleteUsers();
+    }
+    private function deleteLists()
+    {
+        $ids = [ 2484, 2485, 2486, 2487, 2488 ];
+        foreach ($ids as $id) {
+            $list = $this->getEntity('UserNamed', $id);
+            $this->removeEntity($list, true);
+        }
+    }
+    private function deleteUsers()
+    {
+        $usrs = [ 478, 500 ];
+
+        foreach ($usrs as $id) {
+            $usr =  $this->getEntity('User', $id);
+            $this->removeEntity($usr, true);
+        }
     }
 /* ============================ DOWN ======================================== */
     public function down(Schema $schema) : void

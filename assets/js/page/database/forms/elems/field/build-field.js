@@ -18,7 +18,6 @@
  *         SET VALUE
  *     ON FIELD CHANGE
  *         IF CITATION FORM, REGENERATE CITATION
- *         IF REQUIRED FIELD, HANDLE SUBMIT
  *         STORE FIELD-DATA
  *             MULTI-SELECT DATA
  */
@@ -86,7 +85,7 @@ function updateFormFieldState(f) {                                  /*dbug-log*/
 function handleFieldChangeListeners(f) {                            /*dbug-log*///console.log('   --handleFieldChangeListeners',);
     ifCitationFormAutoGenerateCitationOnChange(f);
     onChangeStoreFieldValue(f);
-    if (f.required) { handleRequiredField(f); }
+    // if (f.required) { handleRequiredField(f); }
 }
 /* -------------- IF CITATION FORM, REGENERATE CITATION --------------------- */
 /**
@@ -97,31 +96,6 @@ function ifCitationFormAutoGenerateCitationOnChange(f) {
     if (entity === 'Citation'){                                     /*dbug-log*///console.log('     --setAutoGenerateCitationOnChange');
         $(f.input).change(_form.bind(null, 'handleCitText', [f.group]));
     }
-}
-/* ---------------- IF REQUIRED FIELD, HANDLE SUBMIT ------------------------ */
-/**
- * Required field's have a 'required' class added which appends '*' to their
- * label. Added to the input elem is a change event reponsible for enabling/
- * disabling the submit button and a form-level data property.
- */
-function handleRequiredField(f) {
-    const input = getFieldInput(f.input, f.input.className);
-    $(f.input).change(checkRequiredFields);
-    $(f.input).data('fLvl', f.group);
-}
-function getFieldInput(input, classes) {
-    if (input.className.includes('f-input')) { return input; }
-    return input.lastChild.lastChild.lastChild.lastChild;
-}
-/**
- * On a required field's change event, the submit button for the element's form
- * is enabled if all of it's required fields have values and it has no open child
- * forms.
- */
-function checkRequiredFields(e) {                                   /*dbug-log*///console.log('   @--checkRequiredFields e[%O]', e)
-    if (e.currentTarget.className.includes('f-cntnr')) { return; }
-    const fLvl = $(e.currentTarget).data('fLvl');
-   _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ----------------------- STORE FIELD-DATA --------------------------------- */
 /**
@@ -140,8 +114,10 @@ function setCustomFieldStoreListener(f) {
     //Otherwise, handled elsewhere
 }
 function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*///console.log('   --storeFieldValue [%s][%O]', fieldName, elem);
-    const val = value || $(elem).val();
+    const val = value || $(elem).val();                             /*dbug-log*///console.log('       --val[%s]', val);
     _state('setFieldState', [fLvl, fieldName, val]);
+    if (!_state('getFieldState', [fLvl, fieldName, 'required'])) { return; }
+   _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ________________ MULTI-SELECT DATA ________________ */
 /** [setOnMultiSelectChangeListener description] */
