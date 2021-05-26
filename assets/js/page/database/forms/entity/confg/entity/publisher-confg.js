@@ -11,6 +11,9 @@ export default function(action, entity) {
         fields: {
             City: {
                 name: 'City',
+                prep: {
+                    setDetailData: []
+                },
                 prop: {
                     detail: 'city'
                 },
@@ -20,14 +23,18 @@ export default function(action, entity) {
             DisplayName: {
                 label: 'Name',
                 prep: {
-                    setCoreData: []
+                    setCoreAndDetail: []
                 },
                 prop: {
                     core: 'displayName'
                 },
+                required: true,
             },
             Country: {
                 name: 'Country',
+                prep: {
+                    setDetailData: []
+                },
                 prop: {
                     detail: 'country'
                 },

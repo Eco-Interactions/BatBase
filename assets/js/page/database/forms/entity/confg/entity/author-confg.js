@@ -10,13 +10,9 @@ export default function(action, entity) {
         },
         fields: {
             DisplayName: {
-                prep: {
-                    handleAuthorNames: [],
-                },
                 prop: {
                     core: 'displayName'
                 },
-                required: null,
                 type: null,
             },
             FirstName: {
@@ -45,6 +41,7 @@ export default function(action, entity) {
                 type: 'text',
                 name: 'LastName',
                 prep: {
+                    handleAuthorNames: [],
                     setDetailData: []
                 },
                 prop: {

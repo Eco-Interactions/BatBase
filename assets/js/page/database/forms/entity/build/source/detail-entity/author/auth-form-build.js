@@ -71,5 +71,5 @@ function getSubmitFunc(fLvl) {
 function finishFormInit(status, p) {                                /*dbug-log*///console.log('-finishFormInit status[%s] p[%O]', status, p);
     if (!p.status) { return; } //Error handled elsewhere
     _elems('toggleSubmitBttn', [p.group]);
-    $('#LastName_f input').focus();
+    $('#LastName_f .f-input').focus();
 }

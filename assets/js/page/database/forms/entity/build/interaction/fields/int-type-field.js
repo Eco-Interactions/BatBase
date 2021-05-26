@@ -131,7 +131,7 @@ export function onTypeSelection(val) {
     const validInt = md.validInts[val];                             /*dbug-log*///console.log('onTypeSelection validInt[%O]', validInt)
     setInteractionTypeFieldData(validInt.interactionType);
     iForm.focusPinAndEnableSubmitIfFormValid('InteractionType');
-    if (!validInt.tags.length) { return; }
+    if (!validInt.tags.length) { return iForm.clearTypeTagData(); }
     iForm.loadInteractionTypeTags(validInt.tags, validInt.tagRequired);
 }
 function onTypeClear() {

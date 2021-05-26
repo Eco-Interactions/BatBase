@@ -85,7 +85,6 @@ function updateFormFieldState(f) {                                  /*dbug-log*/
 function handleFieldChangeListeners(f) {                            /*dbug-log*///console.log('   --handleFieldChangeListeners',);
     ifCitationFormAutoGenerateCitationOnChange(f);
     onChangeStoreFieldValue(f);
-    // if (f.required) { handleRequiredField(f); }
 }
 /* -------------- IF CITATION FORM, REGENERATE CITATION --------------------- */
 /**

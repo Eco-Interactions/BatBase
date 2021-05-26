@@ -176,7 +176,7 @@ export function getOptionTotal(field) {
     const selApi = getSelApi(field);
     return Object.keys(selApi.options).length;
 }
-export function removeOptions(field, vals) {
+export function removeOptions(field, vals) {                       /*dbug-log*///console.log('--removeOptions field[%s] vals[%O]', field, vals);
     const selApi = getSelApi(field);
     vals.forEach(v => selApi.removeOption(v, 'silent'));
     /*dbug-log*///vals.forEach(v => { selApi.removeOption(v, 'silent'); console.log('removing[%s]', v); });

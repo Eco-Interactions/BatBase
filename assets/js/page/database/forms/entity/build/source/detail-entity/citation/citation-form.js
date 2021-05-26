@@ -98,7 +98,7 @@ function disableCitationTypeFieldIfOnlyOneTypeAvailable() {
 }
 /* --------------------- FINISH REBUILD ------------------------------------- */
 export function finishFieldLoad(fLvl) {
-    types.handleSpecialCaseTypeUpdates(_cmbx('getSelTxt', ['CitationType']), fLvl);
+    types.handleCitationTypeData(_cmbx('getSelTxt', ['CitationType']), fLvl);
     handleCitText(fLvl);
 }
 /* ======================= AUTO-GENERATE CITATION =========================== */

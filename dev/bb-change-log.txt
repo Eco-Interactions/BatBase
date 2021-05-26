@@ -39,6 +39,7 @@ SINCE LAST SERVER UPDATE:
                     - reordered/resized form-fields
                     - when a blank exists in the author order, the final empty field is removed
                         to show more intuitevly the blank must be filled before continuing
+                    - Duplicate authors are now prevented by removing selected authors from other combos
                 - "OTHER" type
                     - seems like it should be as broad as possible?
                         - Added the ability to add "editors"
@@ -46,6 +47,9 @@ SINCE LAST SERVER UPDATE:
 
                 - "Journal"
                     - removed 'year' requirement
+            - Citation
+                - Data from publication added to / removed from form automatically,
+                    with fields disabled/enabled to increase clarity and reduce errors.
             - Location
                 - Territories are identified and they are selected as Country
                     - Also added to the possesing country's combo and map display's to prevent duplicates

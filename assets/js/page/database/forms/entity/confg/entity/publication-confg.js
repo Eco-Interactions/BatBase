@@ -37,6 +37,7 @@ function getPublicationFieldConfg() {
             prop: {
                 core: 'displayName'
             },
+            required: true,
         },
         Doi: {//Source field
             info: {

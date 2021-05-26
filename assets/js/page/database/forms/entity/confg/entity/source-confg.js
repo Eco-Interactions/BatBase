@@ -28,7 +28,7 @@ function getSourceFieldConfg() {
         Description: {
             name: 'Description',
             prep: {    // TODO: DRY
-                setCoreAndDetail: [],
+                setCoreData: [],
             },
             prop: {
                 detail: 'description'
@@ -37,7 +37,6 @@ function getSourceFieldConfg() {
         },
         DisplayName: {
             name: 'DisplayName',
-            required: true,
             type: 'text',
         },
         Doi: {

@@ -58,6 +58,7 @@ function getAuthSelConfg() {
 function removeSelectedOptions(fName) {
     if (_state('isEditForm', [a.group]) || a.cnt == 1) { return; }
     const vals = _state('getFieldState', [a.group, a.type]);        /*dbug-log*///console.log('--removeSelectedOptions field[%s] vals[%O]', fName, vals);
+    if (Object.keys(vals).length >= a.cnt) { return; }
     _cmbx('removeOptions', [fName, Object.values(vals)]);
 }
 /* ======================= REMOVE FIELD ===================================== */

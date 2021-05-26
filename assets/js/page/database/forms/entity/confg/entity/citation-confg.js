@@ -64,6 +64,7 @@ function getCitationFieldConfg() {
             prep: {
                 setCitationTitle: []
             },
+            required: true,
             prop: {
                 detail: 'title'
             },
@@ -164,7 +165,7 @@ function getCitationTypeConfg() {
             name: 'Book',
             fields: {
                 Pages: {
-                    required: true
+                    required: false
                 },
                 Author: {
                     required: true
@@ -199,7 +200,16 @@ function getCitationTypeConfg() {
             name: "Master's Thesis",
             views: {
                 all: [
-                    ['Doi', 'Website']],
+                    [
+                        'Author',
+                        {
+                            class: 'flex-grow',
+                            fields: [
+                                'Doi',
+                                'Website']
+                        }
+                    ]
+                ]
             }
         },
         'Museum record': {
