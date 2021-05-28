@@ -4,7 +4,7 @@
  * Export
  *     addLocationSelectionMethodsNote
  *     enableCountryRegionField
- *     fillLocCombo
+ *     resetLocCombo
  *     selectLoc
  *     onCntryRegSelection
  *     onLocSelection
@@ -29,9 +29,9 @@ import * as iForm from '../int-form-main.js';
  * are displayed @focusParentAndShowChildLocs
  */
 export function onCntryRegSelection(val) {                          /*perm-log*/console.log("       +--onCntryRegSelection [%s]", val);
-    if (val === "" || isNaN(parseInt(val))) { return fillLocCombo(null); }
+    if (val === "" || isNaN(parseInt(val))) { return resetLocCombo(null); }
     const loc = _state('getRcrd', ['location', val]);
-    fillLocCombo(loc);
+    resetLocCombo(loc);
     iForm.focusPinAndEnableSubmitIfFormValid('Country-Region');
     if ($('#form-map').length) { showCountryDataOnMap(val); }
 }
@@ -50,10 +50,13 @@ export function enableCountryRegionField() {
  * child-locations and all habitat types. When cleared, the combobox is
  * repopulated with all locations.
  */
-export function fillLocCombo(loc) {
-    const subSet = loc ? getLocComboIds(loc) : false;               /*dbug-log*///console.log('--fillLocCombo subSet[%O]', subSet);
+export function resetLocCombo(loc) {
+    const subSet = loc ? getLocComboIds(loc) : false;               /*dbug-log*///console.log('--resetLocCombo subSet[%O]', subSet);
     const opts = _opts('getRcrdOpts', ['location', subSet]);
     _cmbx('replaceSelOpts', ['Location', opts]);
+    _panel('clearDetailPanel', ['loc']);
+    _state('setFieldState', ['top', 'Location', null]);
+    $(`#Location_pin`).prop('checked', false);
 }
 function getLocComboIds(loc) {
     const tData = _confg('getConfgData', ['Location', 'misc']).territories;

@@ -80,7 +80,7 @@ function getSubmitFunc(submitCb, cancelCb) {
 function getExitFunc(cancelCb) {
     return cancelCb ? onModalExit.bind(null, cancelCb) : onModalExit;
 }
-export function exitModal(cancelCb) {
+export function exitModal(cancelCb) {                                           //console.log('exitModal cancel[%O]', cancelCb)
     if (intro) { intro.exit(); }
     onModalExit(cancelCb);
 }

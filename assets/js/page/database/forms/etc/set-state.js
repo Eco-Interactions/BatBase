@@ -7,7 +7,7 @@
  *
  */
 import { _u } from '~util';
-import { _confg } from '~form';
+import { _confg, _elems } from '~form';
 /* ======================= SET CORE STATE =================================== */
 export function setStateProp(fS, prop, val) {                       /*dbug-log*///console.log('   --setStateProp [%s][%s][%O]', prop, val, fS);
     fS[prop] = val;
@@ -32,14 +32,15 @@ export function setFieldState(fState, field, val, prop = 'value') { /*dbug-log*/
 }
 function onFieldStateChange(fState, field, val, prop) {
     const map = {
-        required: toggleRequiredLabelClass
+        required: toggleRequiredField
     };
-    if (!prop) { toggleRequiredLabelClass(fState, field, val.required); }
+    if (!prop) { toggleRequiredField(fState, field, val.required); }
     return map[prop] ? map[prop](...arguments) : null;
 }
-function toggleRequiredLabelClass(fState, field, val, prop) {
+function toggleRequiredField(fState, field, val, prop) {            /*dbug-log*///console.log('    --toggleRequiredField fields[%s] prop[%s] val?[%O] [%O]', field, prop, val, fState);//console.trace()
     if (val) {
         $(`#${field}_lbl`).addClass('required');
+        _elems('checkReqFieldsAndToggleSubmitBttn', [fState.group]);
     } else {
         $(`#${field}_lbl`).removeClass('required');
     }

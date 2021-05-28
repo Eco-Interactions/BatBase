@@ -16,6 +16,8 @@ import { _cmbx } from '~util';
 import { _state, _elems, _panel } from '~form';
 import * as iForm from '../int-form-main.js';
 
+let fields;
+
 export function resetInteractionForm() {                            /*dbug-log*///console.log('resetInteractionForm')
     _elems('toggleFormStatusMsg', ['New Interaction successfully created.']);
     resetIntFields();
@@ -27,87 +29,66 @@ export function resetInteractionForm() {                            /*dbug-log*/
  * persisted. All other fields will be reset.
  */
 function resetIntFields() {
-    const vals = getPinnedFieldVals();                              /*dbug-log*///console.log("   --resetInFields = %O", vals);
-    _elems('toggleSubmitBttn', ['top', false]);
-    handleFieldDataReset(vals);
+    fields = _state('getFormState', ['top', 'fields']);
+    Object.values(fields).map(handleFieldDataReset);
 }
-function handleFieldDataReset(vals) {
-    const persisted = [];
-    handleFieldClearing();
-    handlePersistedFields();
-
-    function handleFieldClearing() {
-        for (let field in vals) {                                   /*dbug-log*///console.log("field %s val %s", field, vals[field]);
-            if (!vals[field]) { clearField(field, vals);
-            } else { persisted.push(field); }
-        }
+function handleFieldDataReset(field) {
+    if (!field.shown) { return; }
+    if (!$(`#${field.name}_pin`).prop('checked')) {
+        clearField(field);
+    } else {
+        handePersistedField(field);
     }
-    function handlePersistedFields() {
-        persisted.forEach(f => handePersistedField(f, vals[f]));
-    }
-}
-/* ------------------ GET PINNED FIELD DATA --------------------------------- */
-/** Returns an obj with the form fields and either their pinned values or false. */
-function getPinnedFieldVals() {
-    const pins = $('form[name="top"] [id$="_pin"]').toArray();
-    const vals = {};
-    pins.forEach(pin => {
-        if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]);
-        } else { addFalseValue(pin.id.split("_pin")[0]); }
-    });
-    return vals;
-
-    function getFieldVal(fieldName) {
-        const prefix = fieldName === 'Note' ? 'txt-' : 'sel-';
-        vals[fieldName] = $('#'+prefix+fieldName).val();
-    }
-    function addFalseValue(fieldName) {
-        vals[fieldName] = false;
-    }
-}
-/* ------------------------ CLEAR FIELD DATA -------------------------------- */
-function clearField(field, vals) {
-    _state('setFieldState', ['top', field, null]);
-    if (field === 'Note') { return $('#txt-Note').val(""); }
-    _panel('clearFieldDetails', [field]);
-    _cmbx('resetCombobox', [field]);
-    handleClearedField(field, vals);
-}
-function handleClearedField(field, vals) {
-    const map = {
-        'Location': syncWithCountryField.bind(null, vals['Country-Region']),
-        'Subject': clearTaxonField,
-        'Object': clearTaxonField,
-        'Publication': iForm.onPubClear
-    }
-    if (!map[field]) { return; }
-    map[field](field);
-}
-function clearTaxonField(field) {
-    if (['Subject', 'Object'].indexOf(field) === -1) { return; }
-    _cmbx('replaceSelOpts', [field, []]);
-    $('#sel-'+field).data('selTaxon', false);
-}
-function syncWithCountryField(cntryId, field) {
-    const cntry = cntryId ? _state('getRcrd', ['location', cntryId]) : null;
-    iForm.fillLocCombo(cntry);
 }
 /* --------------------- HANDLE PERSISTED FIELDS ---------------------------- */
-function handePersistedField(field, data) {
+function handePersistedField(field) {
     const map = {
-        'Publication': fillPubDetails,
-        'InteractionType': setFieldInitVal,
-        'InteractionTags': setFieldInitVal
+        Publication: fillPubDetails,
+        InteractionType: setFieldInitVal,
+        InteractionTags: setFieldInitVal
     }
-    if (!map[field]) { return; }
-    map[field](field, data);
+    if (!map[field.name]) { return; }
+    map[field.name](field);
 }
-function fillPubDetails(pub) {
-    if (pub) { _panel('updateSrcDetails', ['pub']);
-    } else { _cmbx('enableCombobox', ['CitationTitle', false]); }
+function fillPubDetails(pField) {
+    _panel('updateSrcDetails', ['pub']);
 }
-function setFieldInitVal(field, data) {
-    $('#sel-'+field).data('init-val', data);
+function setFieldInitVal(field) {
+    $('#sel-'+field.name).data('init-val', field.value);
+}
+/* ------------------------ CLEAR FIELD DATA -------------------------------- */
+function clearField(field) {
+    if (field.name === 'InteractionTags') { return setFieldInitVal(field); }
+    field.value = null;
+    if (field.name === 'Note') { return $('#Note_f .f-input').val(""); }
+    _panel('clearFieldDetails', [field.name]);
+    _cmbx('resetCombobox', [field.name]);
+    handleClearedField(field);
+}
+function handleClearedField(field) {
+    const map = {
+        InteractionType: clearTypeAndTags,
+        Location: syncWithCountryField,
+        Object: clearTaxonField,
+        Publication: iForm.clearCitationCombo,
+        Subject: clearTaxonField,
+    }
+    if (!map[field.name]) { return $(`#${field.name}_pin`).prop('checked', false); }
+    map[field.name](field);
+}
+function clearTypeAndTags(field) {
+    iForm.onTypeSelection(null);
+}
+function clearTaxonField(field) {
+    if (['Subject', 'Object'].indexOf(field.name) === -1) { return; }
+    _cmbx('replaceSelOpts', [field.name, []]);
+    _cmbx('enableCombobox', ['InteractionType', false]);
+    $('#sel-'+field.name).data('selTaxon', false);
+}
+function syncWithCountryField(field) {
+    const cntryId = fields['Country-Region'].value;
+    const cntry = cntryId ? _state('getRcrd', ['location', cntryId]) : null;
+    iForm.resetLocCombo(cntry);
 }
 /* ==================== RESET FORM UI ======================================= */
 function resetFormUi() {

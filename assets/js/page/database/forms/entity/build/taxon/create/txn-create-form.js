@@ -13,8 +13,9 @@ import { _form, _state, _elems, _val, handleFormSubmit } from '~form';
 
 /* ========================= INIT =========================================== */
 export function initCreateForm(rank, v) {                           /*perm-log*/console.log('           /--initTaxon[%s]Form [%s]', rank, v);
-    _elems('initSubForm', [getTxnFormParams(rank, v)])
-    .then(status => finishTxnFormInit(v, rank, status));
+    const val = v === 'create' ? '' : v;
+    _elems('initSubForm', [getTxnFormParams(rank, val)])
+    .then(status => finishTxnFormInit(val, rank, status));
 }
 function getTxnFormParams(rank, v) {
     return {

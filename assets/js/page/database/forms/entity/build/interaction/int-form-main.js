@@ -56,12 +56,12 @@ export function resetInteractionForm() {                            /*dbug-log*/
 }
 /** ====================== FORM-FIELD FACADE ================================ */
 /* ------------------------ PUBLICATION ------------------------------------- */
-export function onPubClear() {
-    fields.onPubClear();
+export function clearCitationCombo() {
+    fields.clearCitationCombo();
 }
 /* -------------------------- LOCATION -------------------------------------- */
-export function fillLocCombo() {
-    return fields.fillLocCombo(...arguments);
+export function resetLocCombo() {
+    return fields.resetLocCombo(...arguments);
 }
 export function addLocationSelectionMethodsNote() {
     return fields.addLocationSelectionMethodsNote(...arguments);
@@ -89,7 +89,9 @@ export function initTypeFieldIfBothTaxonRolesFilled() {
 export function initTypeField() {
     return fields.initTypeField(...arguments);
 }
-
+export function onTypeSelection() {
+    fields.onTypeSelection(...arguments);
+}
 export function setTypeEditVal() {
     return fields.setTypeEditVal(...arguments);
 }
@@ -105,28 +107,21 @@ export function loadInteractionTypeTags() {
 }
 /* ========================== HELPERS ======================================= */
 export function focusPinAndEnableSubmitIfFormValid(field) {
-    const editing = _state('getFormState', ['top', 'action']) === 'edit';
-    if (!editing) { $('#'+field+'_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
+    if (_state('isEditForm', ['top'])) { return; }
+    $('#'+field+'_pin').focus();
 }
 /**
  * After the interaction form is submitted, the submit button is disabled to
- * eliminate accidently creating duplicate interactions. This change event is
- * added to the non-required fields of the form to enable to submit as soon as
- * any change happens in the form, if the required fields are filled. Also
- * removes the success message from the form.
+ * eliminate accidently creating duplicate interactions. As soon as any change
+ * happens in the form, the success message is removed and the 'unchanged' flag removed.
  */
-export function checkIntFieldsAndEnableSubmit() {
+function checkIntFieldsAndEnableSubmit() {                          /*dbug-log*///console.log('--checkIntFieldsAndEnableSubmit')
     _elems('checkReqFieldsAndToggleSubmitBttn', ['top']);
     resetIfFormWaitingOnChanges();
 }
-/**
- * After an interaction is created, the form can not be submitted until changes
- * are made. This removes the change listeners from non-required elems and the
- * flag tracking the state of the new interaction form.
- */
-function resetIfFormWaitingOnChanges() {
-    if (!_state('getFormState', ['top', 'unchanged'])) { return; }
+function resetIfFormWaitingOnChanges() {                            /*dbug-log*///console.log('--resetIfFormWaitingOnChanges')
+    if (!_state('getFormState', ['top', 'unchanged'])) { return; }  /*dbug-log*///console.log('--resetting')
     _elems('toggleFormStatusMsg', [false]);
     _state('setFormState', ['top', 'unchanged', false]);
 }

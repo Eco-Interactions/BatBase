@@ -5,7 +5,7 @@
  *     EXIT FORM
  */
 import { _cmbx, _el } from '~util';
-import { _elems, _state } from '~form';
+import { _elems, _state, _val } from '~form';
 import * as build from './build/form-build-main.js';
 import * as bttn from './buttons/form-buttons.js';
 import * as footer from './footer/form-footer.js';
@@ -18,7 +18,7 @@ export function initForm(p) {                                       /*dbug-log*/
         .then(() => 'success');
 }
 export function initSubForm(p) {                                    /*dbug-log*///console.log('+--initSubForm params[%O]', p);
-    if (ifFormInUse(p.group)) { return alertInUse(p.group); }
+    if (ifFormInUse(p.group)) { return alertInUse(p.combo, p.group); }
     return _state('buildNewFormState', [p])
         .then(fState => buildAndAppendForm(fState, p.appendForm))
         .then(() => finishFormBuild(p.initCombos, p.name))
@@ -39,11 +39,13 @@ export function finishFormBuild(initCombos, entity) {               /*dbug-log*/
     initCombos();
 }
 /* ----------------- IF OPEN SUB-FORM ISSUE --------------------------------- */
-export function ifFormInUse(fLvl) {
+export function ifFormInUse(fLvl) {             /*dbug-log*///console.log('--ifFormInUse entity[%s] initCombos?[%O]', entity, initCombos);
     return fLvl ? $(`#${fLvl}-form`).length !== 0 : false;
 }
-export function alertInUse(fLvl) {
+export function alertInUse(name, fLvl) {                            /*dbug-log*///console.log('--alertInUse name[%s] fLvl[%O]', name, fLvl);
     _val('alertFormOpen', [fLvl]);
+    _cmbx('resetCombobox', [name]);
+    return Promise.resolve();
 }
 /* ============================== EXIT FORM ================================= */
 /**

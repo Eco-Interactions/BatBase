@@ -227,12 +227,12 @@ function getCoordValue(displayPoint) {
     /* ------------------- INTERACTION -------------------------------------- */
 function validateTags(g, fConfg) {
     const typeTags = fConfg.misc.typeTags;
-    if (typeTags.length && fConfg.required) { ensureTypeTagSelected(typeTags, fConfg.value); }
+    if (typeTags && typeTags.length && fConfg.required) { ensureTypeTagSelected(typeTags, fConfg.value); }
     setServerData('rel', 'Tags', fConfg.value);
 }
-function ensureTypeTagSelected(typeTags, selected) {
-    const valid = typeTags.find(t => selected.indexOf(t) !== -1);
-    if (valid) { return; }
+function ensureTypeTagSelected(typeTags, selected) {                /*dbug-log*///console.log('ensureTypeTagSelected tags[%O] selected[%O]', typeTags, selected);
+    const valid = typeTags.find(t => selected.indexOf(String(t.id) !== -1));
+    if (valid.length) { return; }
     trackFailure('InteractionTags', selected);
 }
     /* ----------------------- TAXON ---------------------------------------- */

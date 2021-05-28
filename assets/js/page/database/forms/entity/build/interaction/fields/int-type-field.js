@@ -3,9 +3,9 @@
  *
  * Exports:
  *     initTypeField
- *     onTagSelection
- *     onTypeSelectionInitTagField
+ *     onTypeSelection
  *     resetTypeAndTagMemory
+ *     setTypeEditVal
  *
  * TOC
  *     FIELD STATE
@@ -44,7 +44,7 @@ function getTypeDefaultState() {
  * @param  {int} objGroup   Taxon sub-group id
  */
 export function initTypeField(ids) {                                /*perm-log*/console.log(        '+--initTypeField subjGroup[%s] -> objGroup[%s]', ids[0], ids[1]);
-    if (ifGroupsMatchState(...ids)) { return; }
+    if (ifGroupsMatchState(...ids)) { return _cmbx('enableCombobox', ['InteractionType']); }
     md.subject = ids[0];
     md.object = ids[1];
     loadIntTypeOptions();
@@ -137,6 +137,7 @@ export function onTypeSelection(val) {
 function onTypeClear() {
     iForm.clearTypeTagData();
     setInteractionTypeFieldData(null);
+    $('#sel-InteractionType').data('init-val', null);
 }
 function setInteractionTypeFieldData(val) {
     _state('setFieldState', ['top', 'InteractionType', val]);

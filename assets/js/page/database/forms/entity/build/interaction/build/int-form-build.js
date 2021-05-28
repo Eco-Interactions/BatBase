@@ -87,6 +87,7 @@ function focusPubFieldIfNewRecord() {
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */
 function showSubmitModal() {
     const modalConfg = {
+        cancel: _elems('checkReqFieldsAndToggleSubmitBttn', ['top']),
         html: buildConfirmationModalHtml(),
         selector: '#top-submit',
         dir: 'left',

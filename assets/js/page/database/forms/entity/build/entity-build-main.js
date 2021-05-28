@@ -108,6 +108,9 @@ export function selectExistingAuthsOrEds() {
     return src.selectExistingAuthsOrEds(...arguments);
 }
 /** ---------- CITATION ------------------------- */
+export function clearCitationCombo() {
+    int.clearCitationCombo(...arguments);
+}
 export function handleCitText(fLvl) {
     src.handleCitText(fLvl);
 }

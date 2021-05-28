@@ -2,10 +2,10 @@
  * Manages the source fields in the interaction form, Publication and Citation.
  *
  * Export
- *     onPubSelection
+ *     clearCitationCombo
  *     fillCitationCombo
  *     onCitSelection
- *     onPubClear
+ *     onPubSelection
  *
  * TOC
  *     PUBLICATION
@@ -25,7 +25,7 @@ import * as iForm from '../int-form-main.js';
  */
 export function onPubSelection(val) {                               /*perm-log*/console.log('       +--onPubSelection[%s]', val);
     if (val === 'create') { return _form('createEntity', ['Publication']); }
-    if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }
+    if (val === '' || isNaN(parseInt(val)) ) { return clearCitationCombo(); }
     fillCitationCombo(val);
     _panel('updateSrcDetails', ['pub']);
     if (!hasCitation(val)) { return _form('createEntity', ['Citation']); }
@@ -35,10 +35,12 @@ function hasCitation(val) {
     const pub = _state('getRcrd', ['source', val]);
     return pub ? pub.children.length : null; //If no pub found, the issue was alerted to developer and editor
 }
-export function onPubClear() {
+export function clearCitationCombo(field) {
     _cmbx('resetCombobox', ['CitationTitle']);
     _cmbx('enableCombobox', ['CitationTitle', false]);
     _panel('clearDetailPanel', ['pub']);
+    $(`#CitationTitle_pin`).prop('checked', false);
+    $(`#Publication_pin`).prop('checked', false);
 }
 /* ======================== CITATION ======================================== */
 /* ---------------------- FILL COMBOBOX ------------------------------------- */

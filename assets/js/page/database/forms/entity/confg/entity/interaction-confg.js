@@ -58,6 +58,7 @@ function getInteractionFieldConfg() {
             prop: {
                 core: 'location'
             },
+            required: true,
             type: 'select',
         },
         Subject: {

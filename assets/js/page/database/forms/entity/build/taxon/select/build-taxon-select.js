@@ -53,7 +53,7 @@ function getObjectInitGroup(gId) {
  * or brings the first rank-combo into focus. Clears the [field]'s' combobox.
  */
 function finishTaxonSelectBuild(status, field, gId) {               /*dbug-log*///console.log('+--finishTaxonSelectBuild field[%s] gId[%s]', field, gId);
-    if (!status) { return } //Error handled elsewhere
+    if (!status) { return Promise.resolve(); } //Error handled elsewhere
     addSelectRootTaxonBttn(field);
     customizeElemsForTaxonSelectForm(field, gId);
     selectPrevTaxonAndResetField(field);

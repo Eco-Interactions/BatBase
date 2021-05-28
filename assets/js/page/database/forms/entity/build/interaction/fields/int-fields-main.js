@@ -43,12 +43,12 @@ export function onCitSelection() {
 export function onPubSelection() {
     return src.onPubSelection(...arguments);
 }
-export function onPubClear() {
-    return src.onPubClear(...arguments);
+export function clearCitationCombo() {
+    return src.clearCitationCombo(...arguments);
 }
 /* ----------------- LOCATION ----------------------------------------------- */
-export function fillLocCombo() {
-    return loc.fillLocCombo(...arguments);
+export function resetLocCombo() {
+    return loc.resetLocCombo(...arguments);
 }
 export function selectLoc() {
     return loc.selectLoc(...arguments);
@@ -94,6 +94,9 @@ export function setTypeEditVal() {
 /* ----------------------- TAGS --------------------------------------------- */
 export function initTagField() {
     return tag.initTagField(...arguments);
+}
+export function onTypeSelection() {
+    type.onTypeSelection(...arguments);
 }
 export function loadInteractionTypeTags() {
     return tag.loadInteractionTypeTags(...arguments);

@@ -143,7 +143,8 @@ function getFieldValAlertHandler(tag, action) {
             clear: clrFormLvlAlert
         },
         'openSubForm': {
-            show: handleOpenSubFormAndReturnAlertMsg
+            show: handleOpenSubFormAndReturnAlertMsg,
+            clear: false
         },
         /* --- INTERACTION --- */
         'noValidInts': {

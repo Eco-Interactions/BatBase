@@ -63,6 +63,9 @@ export function loadInteractionTypeTags(tags, isRequired) {         /*perm-log*/
     handleRequiredTag(tags, isRequired);
     addTypeTagOpts(tags);
 }
+function addTypeTagOpts(typeTags) {                                 /*dbug-log*///console.log('addTypeTagOpts typeTags = %O', typeTags);
+    loadTagOpts(buildTagOpts(typeTags));
+}
 /* -------------------------- REQUIRED TAG ---------------------------------- */
 function handleRequiredTag(tags, isRequired) {
     updateTagsState(tags, isRequired);
@@ -72,10 +75,13 @@ function updateTagsState(tags, isRequired) {
     const tField = _state('getFieldState', ['top', 'InteractionTags', false]);/*dbug-log*///console.log('--updateTagsState tags[%O] field[%O] required?[%s]', tags, tField, isRequired);
     tField.required = isRequired;
     tField.misc.typeTags = tags;
+    tField.value = getStillSelectedTags(tField.value, tags, md.defaultTagOpts);
     _state('setFieldState', ['top', 'InteractionTags', tField, null]);
 }
-function addTypeTagOpts(typeTags) {                                 /*dbug-log*///console.log('addTypeTagOpts typeTags = %O', typeTags);
-    loadTagOpts(buildTagOpts(typeTags));
+function getStillSelectedTags(val, typeTags, dTags) {
+    const valid = typeTags ? typeTags.concat(dTags) : dTags;
+    const nVal = !val ? [] : val.filter(i => valid.indexOf(i) !== -1);
+    return nVal.length ? nVal : null;
 }
 /* ------------------------ BUILD TAG-OPTS ---------------------------------- */
 function buildTagOpts(typeTags) {
@@ -111,7 +117,7 @@ function getInitVal() {
 /* ====================== ON TAG SELECTION ================================== */
 export function onTagSelection(tags) {                              /*dbug-log*///console.log('onTagSelection [%O]', tags);
     ensureDefaultTagStaysSelected(tags);
-    iForm.checkIntFieldsAndEnableSubmit();
+    iForm.focusPinAndEnableSubmitIfFormValid();
 }
 function ensureDefaultTagStaysSelected(tags) {
     if (!md.autoTag || tags.indexOf(md.autoTag) !== -1 ) { return; }

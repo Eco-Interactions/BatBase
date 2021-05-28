@@ -88,6 +88,9 @@ export function selectExistingAuthsOrEds() {
     return build.selectExistingAuthsOrEds(...arguments);
 }
 /** ---------- CITATION ------------------------- */
+export function clearCitationCombo() {
+    build.clearCitationCombo(...arguments);
+}
 export function handleCitText(formLvl) {
     build.handleCitText(formLvl);
 }

@@ -24,7 +24,7 @@ import * as sForm from '../../src-form-main.js';
 /* ========================= INIT FORM ====================================== */
 /* --------------------------- CREATE --------------------------------------- */
 export function initCreateForm(v) {                                 /*perm-log*/console.log('       /--initCreateForm [%s]', v);
-    clearCitationFormData();
+    _form('clearCitationCombo');
     return _elems('initSubForm', [getCreateFormParams(v)])
         .then(finishPubFormInit);
 }
@@ -36,10 +36,6 @@ function getCreateFormParams(v) {
         vals: { DisplayName: v === 'create' ? '' : v }
     };
     return { ...createParams, ...getFormParams('sub', 'create') };
-}
-function clearCitationFormData() {
-    _cmbx('resetCombobox', ['CitationTitle']);
-    _panel('clearFieldDetails', ['CitationTitle']);
 }
 /* ---------------------------- EDIT ---------------------------------------- */
 export function initEditForm(id) {
