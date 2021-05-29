@@ -325,7 +325,9 @@ export function updateSrcDetails(entity) {                                      
         }
         function addAbstract() {
             if (!cit || !cit.abstract) { return; }
-            data.Abstract = cit.abstract;
+            const abstract = cit.abstract.length < 400 ?
+                cit.abstract : (cit.abstract.substring(0, 400) + '...');
+            data.Abstract = abstract;
         }
         function getSrcType(rcrd, entity) {
             const lc = _u('lcfirst', [entity]);
@@ -338,14 +340,9 @@ export function updateSrcDetails(entity) {                                      
         const prop = editors ? 'editors' : 'authors';
         for (let ord in srcRcrd[prop]) {
             let authId = srcRcrd[prop][ord];
-            authStr.push(getAuthName(authId));
+            authStr.push(srcRcrds[authId].displayName);
         }
-        return authStr.length ? authStr.join('. ')+'.' : authStr;
-    }
-    /** Returns the name of the author with the passed id. */
-    function getAuthName(id) {
-        const auth = srcRcrds[id];
-        return auth.displayName;
+        return authStr.length ? authStr.join(', ') : authStr;
     }
 }
 /* =========================== CLEAR PANEL ================================== */
@@ -359,7 +356,7 @@ export function clearDetailPanel(ent, reset, html) {                            
 }
 export function clearFieldDetails(field) {
     let detailFields = {
-        'Location': 'loc', 'CitationTitle': 'src', 'Publication': 'src' };
+        'Location': 'loc', 'CitationTitle': 'cit', 'Publication': 'pub' };
     if (Object.keys(detailFields).indexOf(field) !== -1) {
         clearDetailPanel(detailFields[field]);
     }

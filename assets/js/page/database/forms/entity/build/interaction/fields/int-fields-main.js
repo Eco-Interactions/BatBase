@@ -91,12 +91,12 @@ export function initTypeField() {
 export function setTypeEditVal() {
     return type.setTypeEditVal(...arguments);
 }
+export function onTypeSelection() {
+    type.onTypeSelection(...arguments);
+}
 /* ----------------------- TAGS --------------------------------------------- */
 export function initTagField() {
     return tag.initTagField(...arguments);
-}
-export function onTypeSelection() {
-    type.onTypeSelection(...arguments);
 }
 export function loadInteractionTypeTags() {
     return tag.loadInteractionTypeTags(...arguments);

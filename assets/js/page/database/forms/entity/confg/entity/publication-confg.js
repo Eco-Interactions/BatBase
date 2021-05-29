@@ -76,9 +76,6 @@ function getPublicationFieldConfg() {
             info: {
                 tooltip: 'Copy and paste link to publication, if available',
             }
-        },
-        Year: {
-            required: true
         }
     };
 }
@@ -92,6 +89,9 @@ function getPublicationTypeConfg() {
                     required: true
                 },
                 Publisher: {
+                    required: true
+                },
+                Year: {
                     required: true
                 }
             },
@@ -123,6 +123,11 @@ function getPublicationTypeConfg() {
         },
         Other: { //Most broad options available
             name: 'Other',
+            fields: {
+                Year: {
+                    required: true
+                }
+            },
             misc: {
                 defaultCitType: 'Other'
             },
@@ -138,6 +143,9 @@ function getPublicationTypeConfg() {
                 Publisher: {
                     required: true
                 },
+                Year: {
+                    required: true
+                }
             },
             misc: {
                 defaultCitType: 'Ph.D. Dissertation'

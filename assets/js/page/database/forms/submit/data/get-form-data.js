@@ -230,10 +230,13 @@ function validateTags(g, fConfg) {
     if (typeTags && typeTags.length && fConfg.required) { ensureTypeTagSelected(typeTags, fConfg.value); }
     setServerData('rel', 'Tags', fConfg.value);
 }
-function ensureTypeTagSelected(typeTags, selected) {                /*dbug-log*///console.log('ensureTypeTagSelected tags[%O] selected[%O]', typeTags, selected);
-    const valid = typeTags.find(t => selected.indexOf(String(t.id) !== -1));
-    if (valid.length) { return; }
+function ensureTypeTagSelected(typeTags, selected) {                /*dbug-log*///console.log('--ensureTypeTagSelected tags[%O] selected[%O]', typeTags, selected);
+    if (typeTags.find(ifTypeTagSelected)) { return; }
     trackFailure('InteractionTags', selected);
+
+    function ifTypeTagSelected(tag) {                               /*dbug-log*///console.log('--ifTypeTagSelected[%O]', tag);
+        return selected.indexOf(String(tag.id)) !== -1;
+    }
 }
     /* ----------------------- TAXON ---------------------------------------- */
 function buildTaxonDisplayName(g, fConfg) {

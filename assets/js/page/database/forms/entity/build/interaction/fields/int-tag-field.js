@@ -42,13 +42,18 @@ function getTagFieldDefaultState() {
 /* ======================== INIT DEFAULT-TAGS =============================== */
 /** Loads the default interaction tags (eg. 'Secondary') and enables the combobox. */
 export function initTagField() {
-    const tags = _state('getEntityRcrds', ['tag']);
-    const defaults = _state('getFieldState', ['top', 'InteractionTags', 'misc']).defaultTags;
-    md.defaultTagOpts = Object.keys(tags).map(ifDefaultTagGetOpt).filter(o=>o);
+    handleDefaultTags(_state('getFieldState', ['top', 'InteractionTags', 'misc']));
     loadTagOpts(md.defaultTagOpts);
+}
+function handleDefaultTags() {
+    const tags = _state('getEntityRcrds', ['tag']);
+    const tData = _state('getFieldState', ['top', 'InteractionTags', 'misc']);
+    md.defaultTagOpts = Object.keys(tags).map(ifDefaultTagGetOpt).filter(o=>o);
+    tData.defaultTags = md.defaultTagOpts;
+    _state('setFieldState', ['top', 'InteractionTags', tData, 'misc']);
 
     function ifDefaultTagGetOpt(id) {
-        if (defaults.indexOf(tags[id].displayName) === -1) { return null; }
+        if (tData.defaultTags.indexOf(tags[id].displayName) === -1) { return null; }
         return { text: tags[id].displayName, value: id }
     }
 }
