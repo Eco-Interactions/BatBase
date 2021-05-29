@@ -64,12 +64,6 @@ function getSourceFieldConfg() {
         ParentSource: {
             entity: 'Source',
             name: 'ParentSource',
-            prep: {
-                setParent: ['Source']
-            },
-            prop: {
-                core: 'parent'
-            },
             type: 'text',
         },
         SourceType: {

@@ -18,8 +18,9 @@
 import { _elems, _form, _state, _val } from '~form';
 import * as sForm from '../../src-form-main.js';
 /* ======================= ON SELECTION ===================================== */
-export function onPublSelection(val) {
+export function onPublSelection(fLvl, val) {
     if (val === 'create') { return initCreateForm(val); }
+    _state('setFieldState', [fLvl, 'ParentSource', val]);
 }
 /* ======================= INIT FORM ======================================== */
 /* --------------------------- CREATE --------------------------------------- */

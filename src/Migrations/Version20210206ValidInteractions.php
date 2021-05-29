@@ -267,7 +267,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         $groups = ['Arthropod', 'Bird', 'Reptile', 'Mammal', 'Amphibian', 'Fish'];
 
         foreach ($groups as $subjectSubGroup) {
-            $this->handleCreate($subjectSubGroup, $bat, 'Predation', []);
+            $this->handleCreate($subjectSubGroup, $bat, 'Predation', [], false);
         }
 
     }
@@ -280,17 +280,17 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
             $tags = $this->getTags($intData);
 
             foreach ($intData['object'] as $oGroup) {
-                $this->handleCreate($bat, $oGroup, $intData['type'], $tags);
+                $this->handleCreate($bat, $oGroup, $intData['type'], $tags, $intData['tagRequired']);
             }
         }
     }
 /* ----------------------- CREATE ENTITIES ---------------------------------- */
-    private function handleCreate($subj, $obj, $type, $tags)
+    private function handleCreate($subj, $obj, $type, $tags, $tRequired)
     {
         $subj = $this->getGroupRoot($subj);
         $obj = $this->getGroupRoot($obj);
         $type = $this->getEntity('InteractionType', $type, 'displayName');
-        $this->createValidInteraction($subj, $obj, $type, $tags);
+        $this->createValidInteraction($subj, $obj, $type, $tags, $tRequired);
     }
     private function getGroupRoot($gName)
     {
@@ -307,17 +307,16 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         }
         return $tags;
     }
-    private function createValidInteraction($subj, $obj, $type, $tags)
+    private function createValidInteraction($subj, $obj, $type, $tags, $tRequired)
     {
         $entity = new ValidInteraction();
         $entity->setSubjectSubGroup($subj);
         $entity->setObjectSubGroup($obj);
         $entity->setInteractionType($type);
-        $entity->setTagRequired(false);
+        $entity->setTagRequired($tRequired);
 
         foreach ($tags as $tag) {
             $entity->addTag($tag);
-            $entity->setTagRequired(true);
         }
         $this->persistEntity($entity, true);
     }

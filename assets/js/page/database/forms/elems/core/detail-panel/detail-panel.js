@@ -254,7 +254,7 @@ function getAllLocData(locRcrd) {
 }
 /* ----------- SOURCE DETAILS --------- */
 /** Adds source data to the interaction form's detail panel. */
-export function updateSrcDetails(entity) {                                      //console.log('           --updateSrcDetails');
+export function updateSrcDetails(entity) {                          /*dbug-log*///console.log('--updateSrcDetails entity[%s]', entity);
     const data = {};
     const srcRcrds = _state('getEntityRcrds', ['source']);
     buildSourceData();
@@ -346,8 +346,8 @@ export function updateSrcDetails(entity) {                                      
     }
 }
 /* =========================== CLEAR PANEL ================================== */
-export function clearDetailPanel(ent, reset, html) {                            //console.log('clearDetailPanel for [%s]. html = ', ent, html)
-    if (ent === 'cit') { return updateSrcDetails('cit'); }
+export function clearDetailPanel(ent, reset, html) {                /*dbug-log*///console.log('clearDetailPanel for [%s]', ent);
+    if (ent === 'cit') { return updateSrcDetails('cit'); }          /*dbug-log*///console.log('   html[%O]', html);
     if (ent === 'pub') { ent = 'src'; }
     const newDetails = reset ? html : 'None selected.';
     $('#'+ent+'-det div').empty();

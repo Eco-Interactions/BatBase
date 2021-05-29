@@ -97,7 +97,7 @@ function disableCitationTypeFieldIfOnlyOneTypeAvailable() {
     _cmbx('enableCombobox', ['CitationType', false]);
 }
 /* --------------------- FINISH REBUILD ------------------------------------- */
-export function finishFieldLoad(fLvl) {
+export function finishFieldLoad(fLvl) {                             /*dbug-log*///console.log('   --finishFieldLoad[%s]', fLvl);
     types.handleCitationTypeData(_cmbx('getSelTxt', ['CitationType']), fLvl);
     handleCitText(fLvl);
 }

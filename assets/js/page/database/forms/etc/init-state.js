@@ -138,6 +138,9 @@ function storeSourceData(rcrds, f) {                                /*dbug-log*/
     if (f.name !== 'Citation') { return; }
     initParentSourceFieldObj(f.fields);
     addPubDataToParentSourceField(rcrds, f, f.fields.ParentSource.value);
+    if (f.action !== 'edit') { return; }
+    if (f.fields.Year.value) { return; }
+    f.fields.Year.value = f.fields.ParentSource.misc.src.year;      //Temp: fixes Citations without years
 }
 function initParentSourceFieldObj(fields) {
     if (!fields.ParentSource) { fields.ParentSource = {}; }

@@ -98,7 +98,7 @@ function validateRank(data) {                                       /*dbug-log*/
     for (let tag in issues) {
         if (issues[tag]) { return shwTxnValAlert(tag, 'Rank', 'top'); }
     }
-    clearActiveAlert('clearTaxonRankAlert');
+    clearActiveAlert('clrTaxonRankAlert');
 }
 /* -------- NEEDS HIGHER RANK -------------------- */
 function ifRankTooLow(highRank, lowRank, ranks) {                    /*dbug-log*///console.log('  --ifRankTooLow? high[%s] <= low[%s]', highRank, lowRank);
@@ -150,7 +150,7 @@ function validateParent(data) {                                     /*dbug-log*/
     for (let tag in issues) {
         if (issues[tag]) { return shwTxnValAlert(tag, 'Parent', 'top'); }
     }
-    clearActiveAlert('clearTaxonParentAlert');
+    clearActiveAlert('clrTaxonParentAlert');
     return true;
 }
 /* -------- RANK NOT AVAILABLE IN NEW GROUP ---------------- */

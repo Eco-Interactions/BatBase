@@ -108,6 +108,12 @@ function getCitationFieldConfg() {
             type: 'page',
         },
         ParentSource: {
+            prep: {
+                setParent: ['Source']
+            },
+            prop: {
+                core: 'parent'
+            },
             required: true
         },
         SourceType: {  //MERGES WITH CORE.FIELDS. ADDS/OVERWRITES FIELD PROPS

@@ -55,7 +55,7 @@ function buildTxnOpt(taxon) {
 function getRoot() {
     return _state('getFieldState', ['sub', 'Sub-Group', 'misc']);
 }
-export function buildOptAndUpdateCombo(field, id, silent = false) {/*dbug-log*///console.log("--buildOptAndUpdateCombo field[%a] opt[%O]", field, opt);
+export function buildOptAndUpdateCombo(field, id, silent = false) {/*dbug-log*///console.log("--buildOptAndUpdateCombo field[%O] id[%s]", field, id);
     const taxon = _state('getEntityRcrds', ['taxon'])[id];
     updateCombo(field, buildTxnOpt(taxon), silent);
     _cmbx('enableCombobox', [field]);

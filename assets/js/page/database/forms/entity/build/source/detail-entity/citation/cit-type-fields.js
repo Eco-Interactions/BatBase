@@ -90,7 +90,7 @@ function addPubValues(fLvl, addValues, type) {
     }
     function addPubYear() {
         fData.Year.value = addValues ? pSrc.year : '';
-            $('#Year_f input').prop('disabled', addValues);
+        $('#Year_f input').prop('disabled', addValues);
     }
     function addAuthorsToCitation() {                               /*dbug-log*///console.log('--addAuthorsToCitation');
         if (!fData.Author.value) { fData.Author.value = {}; }

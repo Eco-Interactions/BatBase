@@ -44,7 +44,7 @@ function getIntFormParams(action, id) {
         initCombos: iForm.initCombos.bind(null, 'top'),
         name: 'Interaction',
         onFormClose: onClose,
-        submit: showSubmitModal,
+        // submit: showSubmitModal,
     };
 }
 /* ======================= FINISH BUILD ===================================== */
@@ -85,29 +85,29 @@ function focusPubFieldIfNewRecord() {
     _cmbx('focusCombobox', ['Publication', action === 'create']);
 }
 /* -------------------- ON-SUBMIT CONFIRMATION MODAL ------------------------ */
-function showSubmitModal() {
-    const modalConfg = {
-        html: buildConfirmationModalHtml(),
-        selector: '#top-submit',
-        dir: 'left',
-        submit: handleFormSubmit.bind(null, 'top'),
-        bttn: 'SUBMIT INTERACTION'
-    };
-    _modal('showSaveModal', [ modalConfg ]);
-    $('#top-submit').css({'opacity': .5, cursor: 'not-allowed'})
-    window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
-}
-function buildConfirmationModalHtml() {
-    const subj = _cmbx('getSelTxt', ['Subject']);
-    const obj = _cmbx('getSelTxt', ['Object']);
-    const typeVerb = getIntTypeVerbForm();
-    return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
-}
-function getIntTypeVerbForm() {
-    const typeId = _state('getFieldState', ['top', 'InteractionType']);
-    const types = _state('getEntityRcrds', ['interactionType']);  /*dbug-log*///console.log('--getIntTypeVerbForm typeId[%s] types[%O]', typeId, types);
-    return types[typeId].activeForm;
-}
+// function showSubmitModal() {
+//     const modalConfg = {
+//         html: buildConfirmationModalHtml(),
+//         selector: '#top-submit',
+//         dir: 'left',
+//         submit: handleFormSubmit.bind(null, 'top'),
+//         bttn: 'SUBMIT INTERACTION'
+//     };
+//     _modal('showSaveModal', [ modalConfg ]);
+//     $('#top-submit').css({'opacity': .5, cursor: 'not-allowed'})
+//     window.setTimeout(() => $('.modal-msg').css({width: 'max-content'}), 500);
+// }
+// function buildConfirmationModalHtml() {
+//     const subj = _cmbx('getSelTxt', ['Subject']);
+//     const obj = _cmbx('getSelTxt', ['Object']);
+//     const typeVerb = getIntTypeVerbForm();
+//     return `${subj} <i><b>${typeVerb}</b></i> ${obj}`;
+// }
+// function getIntTypeVerbForm() {
+//     const typeId = _state('getFieldState', ['top', 'InteractionType']);
+//     const types = _state('getEntityRcrds', ['interactionType']);  /*dbug-log*///console.log('--getIntTypeVerbForm typeId[%s] types[%O]', typeId, types);
+//     return types[typeId].activeForm;
+// }
 
 /* ======================= FINISH BUILD ===================================== */
 function finishFieldFill() {
@@ -126,12 +126,8 @@ function setSourceFields(pubField, citField) {                      /*dbug-log*/
     _cmbx('setSelVal', ['CitationTitle', citField.value]);
 }
 function setTaxonFields(subId, objId) {
-    const taxa = _state('getEntityRcrds', ['taxon']);
-    iForm.buildOptAndUpdateCombo('Subject', buildTaxonOpt(taxa[subId]));
-    iForm.buildOptAndUpdateCombo('Object', buildTaxonOpt(taxa[objId]));
-}
-function buildTaxonOpt(taxon) {
-    return { text: taxon.displayName, value: taxon.id };
+    iForm.buildOptAndUpdateCombo('Subject', subId);
+    iForm.buildOptAndUpdateCombo('Object', objId);
 }
 function setTypeAndTagFields(typeField, tagsField) {
     iForm.initTypeFieldIfBothTaxonRolesFilled();

@@ -44,7 +44,7 @@ function getTypeDefaultState() {
  * @param  {int} objGroup   Taxon sub-group id
  */
 export function initTypeField(ids) {                                /*perm-log*/console.log(        '+--initTypeField subjGroup[%s] -> objGroup[%s]', ids[0], ids[1]);
-    if (ifGroupsMatchState(...ids)) { return _cmbx('enableCombobox', ['InteractionType']); }
+    // if (ifGroupsMatchState(...ids)) { return _cmbx('enableCombobox', ['InteractionType']); }
     md.subject = ids[0];
     md.object = ids[1];
     loadIntTypeOptions();
@@ -84,7 +84,7 @@ function getAllValidInteractionTypes(validInteractions) {           /*dbug-log*/
     function ifValidAddData(id) {
         const vInt = validInteractions[id];                         /*dbug-log*///console.log('--ifValidAddData = %O', vInt);
         if (!ifGroupsMatchState(vInt.subjectSubGroup, vInt.objectSubGroup)) { return; }
-        md.validInts[id] = validInteractions[id];                   /*dbug-log*///console.log('---adding ValidInteraction = %O', validInteractions[id]);
+        md.validInts[id] = validInteractions[id];                   /*dbug-log*///console.log('---adding ValidInteraction[%O]', validInteractions[id]);
         types.push({ type: validInteractions[id].interactionType, valId: id});
     }
 }
@@ -95,7 +95,7 @@ function alertNoValidInteractions() {
     _cmbx('focusCombobox', ['InteractionTags', false]);
 }
 /* ====================== LOAD OPTIONS ====================================== */
-function loadTypeOptions(opts) {                                    /*dbug-log*///console.log('loadTypeOptions = %O', opts)
+function loadTypeOptions(opts) {                                    /*dbug-log*///console.log('--loadTypeOptions[%O] md[%O]', opts, md);
     const prevType = _cmbx('getSelVal', [`InteractionType`]);
     _cmbx('replaceSelOpts', ['InteractionType', opts]);
     selectTypeInitVal(prevType, opts);
@@ -128,7 +128,7 @@ export function setTypeEditVal(tId) {
 /* ======================== ON TYPE SELECTION =============================== */
 export function onTypeSelection(val) {
     if (!val) { return onTypeClear(); }
-    const validInt = md.validInts[val];                             /*dbug-log*///console.log('onTypeSelection validInt[%O]', validInt)
+    const validInt = md.validInts[val];                             /*temp-log*/console.log('--onTypeSelection validInt[%O]', validInt)
     setInteractionTypeFieldData(validInt.interactionType);
     iForm.focusPinAndEnableSubmitIfFormValid('InteractionType');
     if (!validInt.tags.length) { return iForm.clearTypeTagData(); }

@@ -57,19 +57,19 @@ function setFieldInitVal(field) {
     $('#sel-'+field.name).data('init-val', field.value);
 }
 /* ------------------------ CLEAR FIELD DATA -------------------------------- */
-function clearField(field) {
+function clearField(field) {                                        /*dbug-log*///console.log('--clearField field[%O]', _u('snapshot', [field]));
     if (field.name === 'InteractionTags') { return handleClearedTags(field); }
     clearFieldValue(field);
     if (field.name === 'Note') { return $('#Note_f .f-input').val(""); }
     _cmbx('resetCombobox', [field.name]);
     handleClearedField(field);
-    _panel('clearFieldDetails', [field.name]);
 }
 function clearFieldValue(field) {
     $(`#${field.name}_pin`).prop('checked', false);
     field.value = null;
 }
 function handleClearedTags(field) {
+    if (!field.value || !field.value.length) { return; }
     const typeTags = fields.InteractionTags.misc.typeTags;
     const clear = fields.InteractionTags.misc.defaultTags;          /*dbug-log*///console.log('--handleClearedTags current[%O] tags[%O]', _u('snapshot', [field.value]), clear);
     const nTags = field.value.filter(i => !clear.find(t => t.value == i));/*dbug-log*///console.log('   new tags[%O]', nTags);
@@ -78,6 +78,7 @@ function handleClearedTags(field) {
 }
 function handleClearedField(field) {
     const map = {
+        CitationTitle: clearDetailPanel,
         InteractionType: clearTypeAndTags,
         Location: syncWithCountryField,
         Object: clearTaxonField,
@@ -86,6 +87,10 @@ function handleClearedField(field) {
     }
     if (!map[field.name]) { return; }
     map[field.name](field);
+}
+function clearDetailPanel(field) {
+    if (!_cmbx('getSelVal', ['Publication'])) { return; } //already cleared
+    _panel('clearFieldDetails', [field.name]);
 }
 function clearTypeAndTags(field) {
     iForm.onTypeSelection(null);
@@ -100,6 +105,7 @@ function syncWithCountryField(field) {
     const cntryId = fields['Country-Region'].value;
     const cntry = cntryId ? _state('getRcrd', ['location', cntryId]) : null;
     iForm.resetLocCombo(cntry);
+    _panel('clearFieldDetails', [field.name]);
 }
 /* ==================== RESET FORM UI ======================================= */
 function resetFormUi() {
