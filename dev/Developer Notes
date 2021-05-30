@@ -53,7 +53,7 @@ SERVER UPDATES:
         - copy 'uploads' from prod
         - OPTIMIZE COMPOSER AUTOLOADER  (https://symfony.com/doc/3.4/performance.html)
             (Necessary to apply any changes to php classes)
-            $ ssh user@batbase.org -p18765
+            $ ssh user@batbase.org
             $ cd public_html/[dir]
             $ composer install --no-dev --optimize-autoloader
             $ composer dump-autoload --no-dev --classmap-authoritative
@@ -160,8 +160,6 @@ Run Tests:
 
 
 ##------------------------- Server Stuff ---------------------------------------##
-> SSH
-    ssh user@batbase.org -p18765
 
 >.htaccess rewrite for batbase.org
     RewriteEngine on
