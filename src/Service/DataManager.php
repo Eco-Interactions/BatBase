@@ -236,7 +236,7 @@ class DataManager
             "Source" => function($id) use (&$entity, &$edits) {
                 $this->addInteractionToSource($id, $entity, $edits); }
         ];
-        foreach ($data as $rEntityName => $val) {  //print("field [$rEntityName] type of [$val][".gettype($val)."]\n");
+        foreach ($data as $rEntityName => $val) {                               //print("field [$rEntityName] type of [$val][".gettype($val)."]\n");
             if (array_key_exists($rEntityName, $edgeCases)) {
                 call_user_func($edgeCases[$rEntityName], $val);
             } else {
@@ -259,35 +259,39 @@ class DataManager
         $cur = $pubSrc->getContributorData();
         foreach ($ary as $authId => $newData) {
             if (array_key_exists($authId, $cur) ) {
-                $this->checkAuthStatus($cur[$authId], $newData);
+                $this->checkAuthStatus($cur[$authId], $newData, $edits);
                 continue;
             }
             $this->addContrib($authId, $newData, $pubSrc);
+            array_push($added, $authId);
         }
+        $this->addContribEdits($edits, 'added', $added);
     }
     /** Updates any changes to the author/editor status and/or auth/ed ord(er). */
-    private function checkAuthStatus($curData, $newData)
+    private function checkAuthStatus($curData, $newData, &$edits)
     {
         $contrib = $this->em->getRepository('App:Contribution')
             ->findOneBy(['id' => $curData['contribId'] ]);
-        $this->updateEditorStatus($curData, $newData, $contrib);
-        $this->updateOrder($curData, $newData, $contrib);
+        $this->updateEditorStatus($curData, $newData, $contrib, $edits);
+        $this->updateOrder($curData, $newData, $contrib, $edits);
         $this->em->persist($contrib);
     }
-    private function updateEditorStatus($curData, $newData, &$contrib)
+    private function updateEditorStatus($curData, $newData, &$contrib, &$edits)
     {
         $curIsEd = $curData['isEditor'];
         $newIsEd = $newData->isEditor;
-        if ($curIsEd === $newIsEd) { return; }
+        if ($curIsEd == $newIsEd) { return; }
         $contrib->setIsEditor($newIsEd);
+        $this->addContribEdits($edits, 'editorStatus', [ "old" => $curIsEd, "new" => $newIsEd]);
     }
     /** Stores auth/ed order for the citation/publication source. */
-    private function updateOrder($curData, $newData, &$contrib)
+    private function updateOrder($curData, $newData, &$contrib, &$edits)
     {
         $curOrd = $curData['ord'];
         $newOrd = $newData->ord;
-        if ($curOrd === $newOrd) { return; }
+        if ($curOrd == $newOrd) { return; }
         $contrib->setOrd($newOrd);
+        $this->addContribEdits($edits, 'order', [ "old" => $curOrd, "new" => $newOrd]);
     }
     private function addContrib($id, $data, &$pubSrc)
     {

@@ -64,6 +64,7 @@ function getSourceFieldConfg() {
         ParentSource: {
             entity: 'Source',
             name: 'ParentSource',
+            prep: {},
             type: 'text',
         },
         SourceType: {
