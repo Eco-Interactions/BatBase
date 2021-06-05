@@ -5,84 +5,48 @@
  *     getColumnConfg
  *
  * TOC
- *     ROW STYLING
+ *     TREE COLUMN
+ *     TAXONMY COLUMNS
+ *     EDITOR COLUMNS
+ *     MISC COLUMNS
+ *     INTERACTION DATA COLUMNS
  */
 import { _db, _u } from '~util';
 import { _forms, _map } from '~db';
 import { getCellStyleClass, getRowStyleClass } from './init-table-main.js';
 import unqVals from 'db/table/filter/aggrid/ag-grid-unique-filter.js';
+
 const mapIcon = require('images/icons/marker-icon.png').default;
 const pencilSvg = require('images/icons/eif.pencil.svg').default;
 const showSvg = require('images/icons/search.svg').default;
-
 let tblState;
 /**
  * Tree columns are hidden until taxon export and are used for the flattened
  * taxon-tree data. The role is set to subject for 'bats' exports, object for
  * plants and arthropods.
  */
-export function getColumnConfg(mainCol, state) {
+export function getColumnConfg(tblName, state) {
     tblState = state;
     return _db('getData', ['tagNames', true])
-        .then(tags => buildColDefs(mainCol, tags));
+        .then(tags => buildColDefs(tblName, tags));
 }
-function buildColDefs(mainCol, tags) {
-    return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-                cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 },
-                cellClass: getCellStyleClass.bind(null, tblState.curFocus), comparator: sortByRankThenName },
-            {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
-            {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
-            {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
-            {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },
-            {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
-            {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
-            {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
-            {headerName: "Object Class", field: "objClass", width: 10, hide: true },
-            {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
-            {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
-            {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
-            {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
-            {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-            {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
-            {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
-            {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-            {headerName: "Subject Taxon", field: "subject", width: respW('sub'), cellRenderer: addTitle, comparator: sortByRankThenName },
-            {headerName: "Object Taxon", field: "object", width: respW('ob'), cellRenderer: addTitle, comparator: sortByRankThenName },
-            {headerName: "Type", field: "interactionType", width: respW('typ'), cellRenderer: addTitle, filter: unqVals },
-            getTagColDef(tags),
-            {headerName: "Citation", field: "citation", width: respW('cit'), cellRenderer: addTitle},
-            {headerName: "Habitat", field: "habitat", width: respW('hab'), cellRenderer: addTitle, filter: unqVals },
-            {headerName: "Location", field: "location", width: respW('loc'), hide: ifLocView(), cellRenderer: addTitle },
-            {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
-            {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
-            {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
-            {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
-            {headerName: "Country", field: "country", width: respW('cty'), cellRenderer: addTitle, filter: unqVals },
-            {headerName: "Region", field: "region", width: respW('reg'), cellRenderer: addTitle, filter: unqVals },
-            {headerName: "Note", field: "note", width: respW('nt'), cellRenderer: addTitle} ];
+function buildColDefs(tblName, tags) {
+    return [
+        getTreeColumn(tblName),
+        ...getHiddenTaxonmyColumns(),
+        ...getEditorColumns(),
+        ...getMiscColumns(), //tree-row intCnt, map-location link
+        ...getInteractionDataColumns(tags)
+    ];
 }
-function respW(col) {
-    const pgW = $(window).width() < 1500 ? 'sml' : 'reg';
-    const map = {
-        sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 },
-        typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 },
-        hab: { sml: 90,  reg: 100 }, loc: { sml: 111, reg: 122 },
-        cty: { sml: 94,  reg: 102 }, reg: { sml: 90,  reg: 100 },
-        nt:  { sml: 100, reg: 127 }
+/** =============================== TREE COLUMN ============================= */
+function getTreeColumn(tblName) {
+    return {
+        headerName: tblName, field: "name", width: getTreeWidth(), cellRenderer: 'group',
+        suppressFilter: true, cellRendererParams: { innerRenderer: handleTreeRowRender, padding: 20 },
+        cellClass: getCellStyleClass.bind(null, tblState.curFocus), comparator: sortByRankThenName
     };
-    return map[col][pgW];
 }
-function getTagColDef(tags) {
-    const values = tags ? Object.keys(tags) : [];
-    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addTitle,
-                    filter: unqVals, filterParams: {values: values}}
-}
-/** Adds tooltip to Interaction row cells */
-function addTitle(params) {
-    var value = params.value || null;
-    return value === null ? null : '<span title="'+value+'">'+value+'</span>';
-}
-/** ------------------------------- Tree Column ----------------------------- */
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() {
     var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
@@ -163,6 +127,30 @@ function sortTaxonRows(a, b) {
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
 }
+/** =========================== TAXONMY COLUMNS ============================= */
+function getHiddenTaxonmyColumns() {
+    return [
+        {headerName: "Subject Order", field: "subjOrder", width: 10, hide: true },
+        {headerName: "Subject Family", field: "subjFamily", width: 10, hide: true },
+        {headerName: "Subject Genus", field: "subjGenus", width: 10, hide: true },
+        {headerName: "Subject Species", field: "subjSpecies", width: 10, hide: true },
+        {headerName: "Object Domain", field: "objDomain", width: 10, hide: true },
+        {headerName: "Object Kingdom", field: "objKingdom", width: 10, hide: true },
+        {headerName: "Object Phylum", field: "objPhylum", width: 10, hide: true },
+        {headerName: "Object Class", field: "objClass", width: 10, hide: true },
+        {headerName: "Object Order", field: "objOrder", width: 10, hide: true },
+        {headerName: "Object Family", field: "objFamily", width: 10, hide: true },
+        {headerName: "Object Genus", field: "objGenus", width: 10, hide: true },
+        {headerName: "Object Species", field: "objSpecies", width: 10, hide: true },
+    ];
+}
+/** ============================ EDITOR COLUMNS ============================= */
+function getEditorColumns() {
+    return [
+        {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
+        {headerName: "Editor", field: "updatedBy", width: 80, hide: true, headerTooltip: "Last Editied By", filter: unqVals },
+    ];
+}
 /** -------------------------- Edit(or) Column(s) --------------------------- */
 function isNotEditor() {
     return ['admin', 'editor', 'super'].indexOf(tblState.userRole) === -1;
@@ -188,6 +176,13 @@ function getPencilHtml(id, entity) {
     $('#search-tbl').on('click', '#edit'+entity+id,
         _forms.bind(null, 'edit', [entity, id]));
     return editPencil;
+}
+/** ============================ MISC COLUMNS =============================== */
+function getMiscColumns() {
+    return [
+        {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
+        {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
+    ];
 }
 /** -------- Map Column ---------- */
 function ifLocView() {
@@ -215,4 +210,44 @@ function getMapIconStyles() {
 }
 function getZoomLvl(loc) {
     return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;
+}
+/** ========================= INTERACTION DATA COLUMNS ====================== */
+function getInteractionDataColumns(tags) {
+    return [
+        {headerName: "Subject Taxon", field: "subject", width: respW('sub'), cellRenderer: addTitle, comparator: sortByRankThenName },
+        {headerName: "Object Taxon", field: "object", width: respW('ob'), cellRenderer: addTitle, comparator: sortByRankThenName },
+        {headerName: "Type", field: "interactionType", width: respW('typ'), cellRenderer: addTitle, filter: unqVals },
+        getTagColDef(tags),
+        {headerName: "Citation", field: "citation", width: respW('cit'), cellRenderer: addTitle},
+        {headerName: "Habitat", field: "habitat", width: respW('hab'), cellRenderer: addTitle, filter: unqVals },
+        {headerName: "Location", field: "location", width: respW('loc'), hide: ifLocView(), cellRenderer: addTitle },
+        {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+        {headerName: "Elev Max", field: "elevMax", width: 60, hide: true },
+        {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+        {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addTitle },
+        {headerName: "Country", field: "country", width: respW('cty'), cellRenderer: addTitle, filter: unqVals },
+        {headerName: "Region", field: "region", width: respW('reg'), cellRenderer: addTitle, filter: unqVals },
+        {headerName: "Note", field: "note", width: respW('nt'), cellRenderer: addTitle}
+    ];
+}
+function getTagColDef(tags) {
+    const values = tags ? Object.keys(tags) : [];
+    return {headerName: "Tags", field: "tags", width: 75, cellRenderer: addTitle,
+                    filter: unqVals, filterParams: {values: values}}
+}
+/** Adds tooltip to Interaction row cells */
+function addTitle(params) {
+    var value = params.value || null;
+    return value === null ? null : '<span title="'+value+'">'+value+'</span>';
+}
+function respW(col) {
+    const pgW = $(window).width() < 1500 ? 'sml' : 'reg';
+    const map = {
+        sub: { sml: 133, reg: 141 }, ob:  { sml: 127, reg: 135 },
+        typ: { sml: 88,  reg: 102 }, cit: { sml: 111, reg: 133 },
+        hab: { sml: 90,  reg: 100 }, loc: { sml: 111, reg: 122 },
+        cty: { sml: 94,  reg: 102 }, reg: { sml: 90,  reg: 100 },
+        nt:  { sml: 100, reg: 127 }
+    };
+    return map[col][pgW];
 }
