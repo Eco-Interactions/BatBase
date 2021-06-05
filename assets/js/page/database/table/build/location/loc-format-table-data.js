@@ -58,22 +58,35 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                /*dbug-log*/
             if (rcrd.failedFltr) {  return; }
             const locName = locRcrd.displayName === "Unspecified" ?
                 "Location" : locRcrd.displayName;
-            if (intsAry.length > 0) {
-                childRows.push({
-                    id: locRcrd.id,
-                    entity: "Location",
-                    name: 'Unspecified ' + locName + ' Interactions',
-                    isParent: true,
-                    open: false,
-                    children: getIntRowData(intsAry, treeLvl),
-                    interactions: intsAry.length > 0,
-                    treeLvl: treeLvl,
-                    groupedInts: true,
-                    type: locType
-                });
+            const rowData = {
+                id: locRcrd.id,
+                entity: "Location",
+                name: 'Unspecified ' + locName + ' Interactions',
+                isParent: true,
+                open: false,
+                children: getUnspecifiedInts(rcrd.children, intsAry, treeLvl),
+                interactions: intsAry.length > 0,
+                treeLvl: treeLvl,
+                groupedInts: true,
+                type: locType
+            };
+            if (!rowData.children.length) { return; }
+            childRows.push(rowData);
+        }
+        function getUnspecifiedInts(locs, ints, treeLvl) {
+            const ids = locs.map(getHabInts).reduce(concatInts, ints);
+            return getIntRowData(ids, pTreeLvl)
+
+            function concatInts(all, habInts) {
+                return all.concat(habInts);
             }
         }
+        function getHabInts(loc) {
+            if (loc.locationType.displayName !== 'Habitat') { return []; }
+            return loc.interactions;
+        }
         function getChildLocData(childLoc) {
+            if (childLoc.locationType.displayName === 'Habitat') { return; }
             childRows.push(getLocRowData(childLoc, pTreeLvl + 1, tblState));
         }
     }

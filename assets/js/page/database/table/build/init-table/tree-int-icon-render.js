@@ -36,7 +36,7 @@ function getTaxonGroupIcon(role, data) {
     const group = getGroupIconName(title);                          /*dbug-log*///console.log('-- getTxnGroupIconSrc role[%s] group[%s]', role, group);
     const style = getGroupIconStyle(group);
     const src = getIconSrc(group);
-    return buildIcon(src, style, title);
+    return buildIcon(src, style, title, 'txn-group-icon');
 }
 /* --------------------- GROUP NAME ----------------------------------------- */
 function getGroupIconName(gName) {
