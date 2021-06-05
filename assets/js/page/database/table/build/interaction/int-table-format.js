@@ -28,7 +28,8 @@ export function buildIntRowData(intRcrd, treeLvl, idx){                         
         name: '',               // Blank tree field
         note: intRcrd.note,     //Table data
         object: getEntityData('taxon', 'displayName', 'object'),
-        objGroup: intRcrd.objGroup.toString(),//Used for the Object Group filter in taxon->bat view
+        objGroupId: intRcrd.objGroupId.toString(),//Used for the Object Group filter in taxon->bat view and interaction-row tree-icons
+        subjGroupId: intRcrd.subjGroupId.toString(),//Used for interaction-row tree-icons
         rowColorIdx: idx,       //Not sure what this is all used for...
         subject: getEntityData('taxon', 'displayName', 'subject'),
         tags: intRcrd.tags,     //Table data

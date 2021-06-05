@@ -15,10 +15,10 @@ import { _db, _u } from '~util';
 import { _forms, _map } from '~db';
 import { getCellStyleClass, getRowStyleClass } from './init-table-main.js';
 import unqVals from 'db/table/filter/aggrid/ag-grid-unique-filter.js';
+import { getInteractionRowTreeIcons, getShowIcon } from './tree-int-icon-render.js';
 
 const mapIcon = require('images/icons/marker-icon.png').default;
 const pencilSvg = require('images/icons/eif.pencil.svg').default;
-const showSvg = require('images/icons/search.svg').default;
 let tblState;
 /**
  * Tree columns are hidden until taxon export and are used for the flattened
@@ -55,30 +55,18 @@ function getTreeWidth() {
 }
 function handleTreeRowRender (params) {
     const rowName = params.data.name || null;
-    if (!rowName) { return addShowIcon('interaction', params.data.id); }
+    if (!rowName) { return getInteractionRowTreeIcons(params.data, tblState); }
     return tblState.curFocus === 'taxa' ?
         getTxnTreeCellHtml(params.data) : getToolTipTreeCellHtml(rowName);
 }
+/* -------------------- TREE-GROUP ROWS ------------------------------------- */
 /* ----------- TOOL TIP ------------- */
 function getToolTipTreeCellHtml(name) {
     return '<span title="'+name+'">'+name+'</span>';
 }
-/* ----------- SHOW ICON ------------- */
-function addShowIcon (entity, id) {
-    const icon = getShowIconHtml(_u('ucfirst', [entity]));
-    return `<a href="${getShowLink(entity, id)}">${icon}</a>`;
-}
-function getShowIconHtml (entity) {
-    const opac = tblState.flags.allDataAvailable ? 1 : 0;
-    return`<img src=${showSvg} class="tree-show" title="Show ${entity} Details"
-        alt="Show ${entity} Details" style="opacity:${opac}">`;
-}
-function getShowLink (entity, id) {
-    return $('body').data('base-url') + entity + '/' + id;
-}
 /* --------------- TXN-TREE CELL ------------------ */
 function getTxnTreeCellHtml(data) {
-    return getToolTipTreeCellHtml(data.name) + addShowIcon('taxon', data.id);
+    return getToolTipTreeCellHtml(data.name) + getShowIcon('taxon', data.id, tblState);
 }
 /* ----------- SORT TAXON TREE AND COLUMNS --------------- */
 /**

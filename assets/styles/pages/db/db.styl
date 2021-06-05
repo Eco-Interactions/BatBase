@@ -52,8 +52,18 @@
 @import "popups"
 
 /* -------------- ICONS ------------- */
-.tree-show
-    width: 15px
+.tree-icon
     float: right
-    padding-top: .3em
     margin-right: .5em
+
+.tree-show
+    @extend .tree-icon
+    width: 1.2em
+    margin-left: 2em;
+
+// .txn-group-icon
+//     @extend .tree-icon
+
+.tree-arrow-icon
+    @extend .tree-icon
+    width: 1em

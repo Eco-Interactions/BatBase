@@ -14,16 +14,17 @@ import { getNameObj, getTypeObj } from '../init-helpers.js';
 export function modifyIntDataForLocalDb(data) {                     /*dbug-log*///console.log("modifyIntDataForLocalDb called. data = %O", data);
     db.setDataInMemory('intTypeNames', getTypeObj(data.interactionType));
     db.setDataInMemory('tagNames', getNameObj(Object.keys(data.tag), data.tag));
-    addObjGroupIdProp(data.interaction);
+    addGroupIdProps(data.interaction);
     addValidSubjectGroups(data.validInteraction);
 }
-function addObjGroupIdProp(ints) {
+function addGroupIdProps(ints) {
     const taxa = db.getMmryData('taxon');
-    Object.keys(ints).forEach(i => addObjectGroupId(ints[i]));
+    Object.keys(ints).forEach(i => addGroupIds(ints[i]));
     db.setDataInMemory('interaction', ints);
 
-    function addObjectGroupId(int) {
-        int.objGroup = taxa[int.object].group.id.toString();
+    function addGroupIds(int) {
+        int.objGroupId = taxa[int.object].group.id.toString();
+        int.subjGroupId = taxa[int.subject].group.id.toString();
     }
 }
 function addValidSubjectGroups(vInts) {

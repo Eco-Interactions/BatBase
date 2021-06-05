@@ -22,6 +22,7 @@ import { _db } from '~util';
  * {str} curView        Sub-sort of table data. Eg: bats, auths, etc
  * {obj} filters        Current filter state.
  * {obj} flags          allDataAvailable, tutorialActive
+ * {obj} groups          Taxon-group records keyed by id.
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
@@ -33,7 +34,6 @@ import { _db } from '~util';
  * {obj} allRanks        All ranks (k) and id (v)
  * {str} groupName       Stores Taxon Group name
  * {str} groupPluralName Stores Taxon Group's plural name
- * {obj} groups          Group records keyed by id.
  * {obj} subGroups       Sub-group taxa: id (k) {id, name, subRanks[], taxon(id)} (v)
  * {obj} taxaByRank      Taxon records in curTree organized by rank and keyed under their display name.
  */

@@ -172,7 +172,7 @@ function ifRowAfterDate(row, dateObj) {
 }
 /* ------------------------ OBJECT GROUP ------------------------------------ */
 function ifIntWithGroup(row, groupIds) {  							/*dbug-log*///console.log('ifIntWithGroups = %O, row = %O', groupIds, row);
-	return groupIds.indexOf(row.objGroup) !== -1;
+	return groupIds.indexOf(row.objGroupId) !== -1;
 }
 /* --------------------- USER INTERACTION-LIST ------------------------------ */
 function ifIntInUserList(row, intIds) {

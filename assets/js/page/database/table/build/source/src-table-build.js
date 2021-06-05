@@ -27,10 +27,16 @@ export function buildSrcTable(v) {                                  /*perm-log*/
     });
 }
 function getSrcDataAndBuildTable(view) {
-    return _db('getData', ['source']).then(srcs => {
-        tState().set({rcrdsById: srcs});
+    return _db('getData', [['source', 'group']]).then(data => {
+        addDataToTableParams(data)
         _ui('initSrcViewOpts', [view]);
         return startSrcTableBuildChain(view);
+    });
+}
+function addDataToTableParams(data) {
+    tState().set({
+        data:  data,
+        rcrdsById: data.source
     });
 }
 /** ================== SOURCE VIEW ========================================== */

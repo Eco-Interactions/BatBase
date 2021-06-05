@@ -18,15 +18,15 @@ const tState = _table.bind(null, 'tableState');
 /** =============== LOCATION TABLE ========================================== */
 export function buildLocTable(v) {                                  /*perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
-    return _db('getData', [['location', 'topRegionNames']]).then(beginLocationLoad);
+    return _db('getData', [['location', 'topRegionNames', 'group']]).then(beginLocationLoad);
 
     function beginLocationLoad(data) {
-        addLocDataToTableParams(data);
+        addDataToTableParams(data);
         _ui('initLocViewOpts', [view]);
         return updateLocView(view);
     }
 }
-function addLocDataToTableParams(data) {
+function addDataToTableParams(data) {
     tState().set({
         data:  data,
         rcrdsById: data.location

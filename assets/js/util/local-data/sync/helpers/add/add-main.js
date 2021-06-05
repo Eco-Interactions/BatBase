@@ -37,7 +37,8 @@ function handleEntityLocalDataUpdates(entity, rcrd) {
             'group': a.addGroupDataToRcrd
         },
         'interaction': {
-            'objGroup': a.addObjGroupIdToRcrd
+            'objGroupId': a.addGroupIdToRcrd.bind(null, 'object'),
+            'subjGroupId': a.addGroupIdToRcrd.bind(null, 'subject'),
         }
     };
     if (!update[entity]) { return; }

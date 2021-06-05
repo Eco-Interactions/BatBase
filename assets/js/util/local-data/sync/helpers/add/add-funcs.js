@@ -33,11 +33,12 @@ function getTaxonGroup(taxon, taxa, prev) {
     if (parent.group) { return parent.group; }
     return getTaxonGroup(parent, taxa, taxon);
 }
-export function addObjGroupIdToRcrd(prop, rcrd, entity) {
+export function addGroupIdToRcrd(role, prop, rcrd, entity) {
+    const rcrdProp = (role === 'Object' ? 'obj' : 'subj') + 'GroupId';
     const ints = db.getMmryData('interaction');
     const taxa = db.getMmryData('taxon');
-    const taxon = taxa[rcrd.object];                                /*dbug-log*///console.log("               --addObjGroupIdToRcrd. taxon = %O. rcrd = %O", taxon, _u('snapshot', [rcrd]));
-    rcrd.objGroup = taxon.group.id;
+    const taxon = taxa[rcrd[role]];                                 /*dbug-log*///console.log("               --addObjGroupIdToRcrd. taxon = %O. rcrd = %O", taxon, _u('snapshot', [rcrd]));
+    rcrd[rcrdProp] = taxon.group.id;
     db.setDataInMemory('interaction', ints);
 }
 /** Add the new record to the prop's stored records object.  */

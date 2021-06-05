@@ -9,7 +9,7 @@ SINCE LAST SERVER UPDATE:
     - TABLE
         - @ Hiding entities with '[DELETE]' from the DATABASE TABLE, bibliography, and CSV downloads
         - @ Merged [Location-HabType] with '[Location-Unspecified]' in the DATABASE TABLE
-        - @ add taxon-group icons to table
+        - Added taxon-group icons to interaction-row tree-cells.
     - FORMS
         - Configuration
             - all form-field configuration centralized

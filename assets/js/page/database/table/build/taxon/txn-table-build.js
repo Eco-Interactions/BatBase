@@ -33,19 +33,19 @@ function getTxnDataAndBuildTable(view) {
         .then(beginTaxonLoad.bind(null, view));
 }
 function beginTaxonLoad(groupId, data) {
-    updateTaxonTableState(data);                                    /*dbug-log*///console.log('--Building Taxon Table groupId[%s] data[%O]', groupId, _u('snapshot', [(data)]));
+    addDataToTableParams(data);                                     /*dbug-log*///console.log('--Building Taxon Table groupId[%s] data[%O]', groupId, _u('snapshot', [(data)]));
     const groupRoots = storeGroupAndReturnRootTaxa(groupId);
     _ui('initTxnViewOpts', [groupId, data.taxon, data.group]);
     return startTxnTableBuildChain(groupRoots, true);
 }
-function updateTaxonTableState(data) {
+
+function addDataToTableParams(data) {
     tState().set({
+        allRanks: data.rankNames,
+        data: data,
         rcrdsById: data.taxon,
-        groups: data.group,
-        allRanks: data.rankNames
     });
 }
-
 /**
  * Builds a taxon data-tree for the passed taxon. The taxon ranks present in
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
@@ -94,7 +94,7 @@ function buildTaxonTable(val) {
  */
 function storeGroupAndReturnRootTaxa(val) {
     const groupId = val || getSelValOrDefault(_cmbx('getSelVal', ['View']));/*dbug-log*///console.log('storeAndReturnView. val [%s], groupId [%s]', val, groupId)
-    const group = getDetachedRcrd(groupId, tState().get('groups'), 'group');/*dbug-log*///console.log("groupTaxon = %O", group);
+    const group = getDetachedRcrd(groupId, tState().get('data').group, 'group');/*dbug-log*///console.log("groupTaxon = %O", group);
     updateGroupTableState(groupId, group);
     return Object.values(group.subGroups).map(getRootTaxonRcrd);
 }
