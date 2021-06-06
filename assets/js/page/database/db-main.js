@@ -98,7 +98,14 @@ function setTableInitState(focus, isAllDataAvailable) {
 /** ==================== HELPERS ============================================ */
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds, entity) {           /*dbug-log*///console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
-    if (rcrds[rcrdKey]) { return _u('snapshot', [rcrds[rcrdKey]]); }/*perm-log*/_u('logInDevEnv', ["#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds]);
+    if (!rcrds[rcrdKey]) { return alertNoRecord(rcrdKey, entity); }
+    if (ifRecordSoftDeleted(rcrds[rcrdKey])) { return false; }
+    return _u('snapshot', [rcrds[rcrdKey]]);
+}
+function alertNoRecord(rcrdKey, entity) {                           /*perm-log*/_u('logInDevEnv', ["#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds]);
     _alert('alertIssue', ['noRcrdFound', {id: rcrdKey, entity: entity }]);
     return false;
+}
+function ifRecordSoftDeleted(rcrd) {
+    return rcrd.displayName && rcrd.displayName.includes('[DELETE]');
 }

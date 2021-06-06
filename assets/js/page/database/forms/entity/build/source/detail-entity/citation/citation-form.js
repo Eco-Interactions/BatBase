@@ -87,7 +87,7 @@ function getFormParams(fLvl, action) {
 /* ======================== FINISH BUILD ==================================== */
 function finishCitFormInit(status) {                                /*dbug-log*///console.log('           --finishCitFormInit status[%s]', status);
     if (!status) { return; } //Error handled elsewhere
-    $('#CitationText_f textarea').attr('disabled', true);
+    $('#Description_f textarea').attr('disabled', true);
     disableCitationTypeFieldIfOnlyOneTypeAvailable();
     $('#Abstract_f textarea').focus();
 }
@@ -108,6 +108,7 @@ export function handleCitText(fLvl) {                               /*dbug-log*/
     timeout = window.setTimeout(buildCitTextAndUpdateField.bind(null, fLvl), 750);
 }
 function buildCitTextAndUpdateField(fLvl) {                         /*dbug-log*///console.log('           /--buildCitTextAndUpdateField [%s]', fLvl);console.trace();
+    if (!_state('ifStateActive', ['top'])) { return; }
     cite.buildCitTextAndUpdateField(fLvl)
     .then(() => ifReqFieldsFilledHighlightEmptyAndPrompt(fLvl))
     .then(() => {timeout = null;});

@@ -14,7 +14,7 @@ export default function(action, entity) {
         types: getCitationTypeConfg(),
         views: { //fields added will be built and displayed.
             all: [  //will be merged with type.views
-                ['CitationText'],
+                ['Description'],
                 ['Abstract'],
                 [ 'Title', 'CitationType' ]
             ],
@@ -33,11 +33,11 @@ function getCitationFieldConfg() {
             },
             type: 'fullTextArea',
         },
-        CitationText: {
-            name: 'CitationText',
+        Description: {
+            name: 'Description',
             label: 'Citation',
             prep: {    // TODO: DRY
-                renameField: ['Description'],
+                // setCoreData: [],
                 renameField: ['FullText', 'detail'],
             },
             prop: {

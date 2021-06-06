@@ -12,9 +12,13 @@
     <table id="biblio_tbl" class="display" style="width: 100%;">
         <tbody>
             {% for citation in citations %}
-                <tr>
-                    <td>{{citation.fullText}}</td>
-                </tr>
+                {% if '[DELETE]' in citation.fullText %}
+                    {# continue; #}
+                {% else %}
+                    <tr>
+                        <td>{{citation.fullText}}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>

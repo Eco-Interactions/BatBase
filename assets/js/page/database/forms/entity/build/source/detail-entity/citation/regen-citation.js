@@ -14,8 +14,7 @@ import { _cmbx, _u } from '~util';
 import { _elems, _state } from '~form';
 
 export function buildCitTextAndUpdateField(fLvl) {                  /*dbug-log*///console.log('--buildCitTextAndUpdateField [%s]', fLvl);
-    if (!_state('ifStateActive', ['top'])) { return; }
-    const $elem = $('#CitationText_f textarea');
+    const $elem = $('#Description_f textarea');
     if (!$elem.val()) { initializeCitField($elem); }
 
     return getCitationFieldText($elem, fLvl)
@@ -77,5 +76,5 @@ function addEntityRecords() {
 function updateCitField(fLvl, citText, $elem) {
     if (!citText) { return; }
     $elem.val(citText); //.change(); Why was this needed
-    _state('setFieldState', [fLvl, 'CitationText', citText]);
+    _state('setFieldState', [fLvl, 'Description', citText]);
 }
