@@ -11,6 +11,7 @@ SINCE LAST SERVER UPDATE:
         - Merged interactions from [Location-HabType] groups into '[Location-Unspecified]'
         - Added taxon-group icons to interaction-row tree-cells.
            - Tool tips on each icon allow for quick taxon-group identification
+           - Note- there's a bug that prevents the bat icon from showing in some location interactions. Not sure why.
     - FORMS
         - Configuration
             - all form-field configuration centralized

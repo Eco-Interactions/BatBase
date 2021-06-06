@@ -227,6 +227,7 @@ function getCoordValue(displayPoint) {
     /* ------------------- INTERACTION -------------------------------------- */
 function validateTags(g, fConfg) {
     const typeTags = fConfg.misc.typeTags;
+    const val = fConfg.value ? fConfg.value : [];
     if (typeTags && typeTags.length && fConfg.required) { ensureTypeTagSelected(typeTags, fConfg.value); }
     setServerData('rel', 'Tags', fConfg.value);
 }

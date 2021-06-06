@@ -18,7 +18,8 @@ const tState = _table.bind(null, 'tableState');
 /** =============== LOCATION TABLE ========================================== */
 export function buildLocTable(v) {                                  /*perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
-    return _db('getData', [['location', 'topRegionNames', 'group']]).then(beginLocationLoad);
+    return _db('getData', [['location', 'topRegionNames', 'group']])
+        .then(beginLocationLoad);
 
     function beginLocationLoad(data) {
         addDataToTableParams(data);
@@ -62,7 +63,7 @@ function startLocTableBuildChain(topLocs) {
 }
 
 /** Reloads the data-table with the location selected from the map view. */
-export function showLocInDataTable(loc) {                          /*perm-log*/console.log("       --Showing Location in Table");
+export function showLocInDataTable(loc) {                           /*perm-log*/console.log("       --Showing Location in Table");
     _ui('updateUiForTableView');
     _cmbx('setSelVal', ['View', 'tree', 'silent']);
     rebuildLocTable([loc.id])
@@ -78,7 +79,7 @@ export function onLocViewChange(val) {
  * Event fired when the source view select box has been changed.
  */
 function updateLocView(v) {
-    const val = v || _cmbx('getSelVal', ['View']);                     /*perm-log*/console.log('           --updateLocView. view = [%s]', val);
+    const val = v || _cmbx('getSelVal', ['View']);                  /*perm-log*/console.log('           --updateLocView. view = [%s]', val);
     resetLocUi(val);
     _table('resetTableState');
     _ui('setTreeToggleData', [false]);
