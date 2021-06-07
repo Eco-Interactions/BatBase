@@ -151,16 +151,22 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->getEntity('User', 6, 'id');
 
-        $this->fixArthropodConsumptionInteractions();
+        $this->fixConsumptionData();
         $this->handleTerritories();
         $this->cleanUpData();
     }
 /* +++++++++++++++++++++ PREDATION UPDATES ++++++++++++++++++++++++++++++++++ */
-     private function fixArthropodConsumptionInteractions()
-    {                                                                           print("\nfixArthropodConsumptionInteractions\n");
-        $predationType = $this->getEntity('InteractionType', 'Predation', 'displayName');
+    private function fixConsumptionData()
+    {
         $cnsmptn = $this->getEntity('InteractionType', 'Consumption', 'displayName');
         $ints = $cnsmptn->getInteractions();
+        $this->fixArthropodConsumptionInteractions($ints);
+        $this->fixConsumptionTags($ints);
+    }
+
+    private function fixArthropodConsumptionInteractions($ints)
+    {                                                                           print("\nfixArthropodConsumptionInteractions\n");
+        $predationType = $this->getEntity('InteractionType', 'Predation', 'displayName');
         $count = 0;
 
         foreach ($ints as $int) {
@@ -177,6 +183,27 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
     {
         $int->setInteractionType($predation);
         $this->persistEntity($int);
+    }
+    private function fixConsumptionTags($ints)
+    {                                                                           print("\fixConsumptionTags\n");
+        $internal = $this->getEntity('Tag', 'Internal', 'displayName');
+        $iName = $internal->getDisplayName();   print("[$iName]");
+        $leaf = $this->getEntity('Tag', 'Leaf', 'displayName');
+        $count = 0;
+
+        foreach ($ints as $int) {
+            if (!$this->ifPlantObject($int->getObject())) { continue; }
+            $tData = $int->getTagData();
+
+            foreach ($tData as $tag) {
+                if ($tag['displayName'] !== $iName) { continue; }
+                $int->removeTag($internal);
+                $int->addTag($leaf);
+                $this->persistEntity($int);
+                ++$count;
+            }
+        }                                                                       print("\n       ++ ".$count."\n");
+
     }
 /* +++++++++++++++++++ TERRITORY LOCATIONS ++++++++++++++++++++++++++++++++++ */
 /**
