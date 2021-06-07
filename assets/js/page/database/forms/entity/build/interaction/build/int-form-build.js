@@ -132,5 +132,4 @@ function setTaxonFields(subId, objId) {
 function setTypeAndTagFields(typeField, tagsField) {
     iForm.initTypeFieldIfBothTaxonRolesFilled();
     iForm.setTypeEditVal(typeField.value);
-    _cmbx('setSelVal', ['InteractionTags', tagsField.value]);
 }

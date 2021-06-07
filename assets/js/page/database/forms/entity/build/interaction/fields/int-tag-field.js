@@ -39,12 +39,13 @@ function getTagFieldDefaultState() {
         validInts: {}
     };
 }
-/* ======================== INIT DEFAULT-TAGS =============================== */
 /** Loads the default interaction tags (eg. 'Secondary') and enables the combobox. */
 export function initTagField() {
     handleDefaultTags(_state('getFieldState', ['top', 'InteractionTags', 'misc']));
     loadTagOpts(md.defaultTagOpts);
+    handleEditTags(_state('getFieldState', ['top', 'InteractionTags']));
 }
+/* ======================== INIT DEFAULT-TAGS =============================== */
 function handleDefaultTags() {
     const tags = _state('getEntityRcrds', ['tag']);
     const tData = _state('getFieldState', ['top', 'InteractionTags', 'misc']);
@@ -56,6 +57,9 @@ function handleDefaultTags() {
         if (tData.defaultTags.indexOf(tags[id].displayName) === -1) { return null; }
         return { text: tags[id].displayName, value: id }
     }
+}
+function handleEditTags(tags) {
+    $('#sel-InteractionTags').data('init-val', tags);
 }
 /* =================== CLEAR INTERACTION-TYPE TAGS ========================== */
 export function clearTypeTagData() {
@@ -107,7 +111,7 @@ function ifDefaultTag(id) {
 }
 /* ---------------------- AFTER TYPE-TAGS LOAD ------------------------------ */
 function afterTypeTagsLoaded(selectedDefaults) {
-    const vals = [getInitVal(), md.autoTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('--afterTypeTagsLoaded select[%O]', vals);
+    const vals = [...getInitVal(), md.autoTag, ...selectedDefaults].filter(t=>t);/*dbug-log*///console.log('--afterTypeTagsLoaded select[%O]', vals);
     if (!vals.length) { return; }
     _cmbx('setSelVal', ['InteractionTags', vals]);
 }
@@ -117,7 +121,7 @@ function afterTypeTagsLoaded(selectedDefaults) {
  */
 function getInitVal() {
     const initVal = $('#sel-InteractionTags').data('init-val');
-    return initVal ? initVal : null;
+    return initVal ? initVal : [];
 }
 /* ====================== ON TAG SELECTION ================================== */
 export function onTagSelection(tags) {                              /*dbug-log*///console.log('onTagSelection [%O]', tags);

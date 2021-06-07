@@ -90,7 +90,7 @@ export function setSelVal(field, val, silent) {                     /*dbug-log*/
     setComboVal(selApi, field, val, silent);
     saveFieldValDataIfFieldTypeMustRemainedFilled(field, val);
 }
-function setComboVal(selApi, field, val, silent) {                  /*dbug-log*///console.log('%s setComboVal [%s] => [%s]. selApi = %O', silent, field, val, selApi);
+function setComboVal(selApi, field, val, silent = false) {          /*dbug-log*///console.log('>setComboVal [%s] => [%s] silent?[%s]. selApi = %O', field, val, silent, selApi);
     if (isMultiSelCombo(field)) {
         selApi.setValue(val, silent)
     } else if (Array.isArray(val)) {

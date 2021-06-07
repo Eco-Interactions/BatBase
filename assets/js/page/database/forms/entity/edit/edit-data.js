@@ -52,7 +52,7 @@ function setIntData(data, fState) {                                 /*dbug-log*/
         fState.fields['Country-Region'].value = parentId;
     }
     function setTagsField(tField) {
-        tField.value = tField.value.map(t => t.id);
+        tField.value = tField.value.map(t => String(t.id));
     }
     function setTaxonFields(subjField, objField) {
         setTaxonData(subjField, data.taxon[subjField.value]);
@@ -62,7 +62,6 @@ function setIntData(data, fState) {                                 /*dbug-log*/
         field.misc = { id: taxon.group.subGroup.id };
     }
 }
-
 /* ============================ LOCATION ==================================== */
 function setLocData(data, fState) {                                 /*dbug-log*///console.log('--setLocData data[%O] fState[%O]', data, fState);
     const loc = data.location[fState.id];                           /*dbug-log*///console.log('  --loc[%O]', loc);
