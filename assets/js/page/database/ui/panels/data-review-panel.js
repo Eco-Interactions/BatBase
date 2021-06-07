@@ -13,6 +13,7 @@ import * as pM from './panels-main.js';
 
 /* ============================ INIT ======================================== */
 export function initReviewPanel(userRole) {
+    if (userRole === 'visitor' || userRole === 'user') { return; }
     require('styles/pages/db/panels/rvw-data.styl');
     _review('initDataReviewPanel', [userRole]);
     $('#rvw-data').click(toggleReviewPanel);
