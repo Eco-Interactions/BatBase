@@ -23,8 +23,8 @@ import { _state, _elems, _val } from '~form';
 import * as build from './build/int-build-main.js';
 import * as fields from './fields/int-fields-main.js';
 /** ======================= BUILD FORM ====================================== */
-export function initCreateForm(entity) {
-    return build.initCreateForm();
+export function initCreateForm() {
+    return build.initCreateForm(...arguments);
 }
 export function initEditForm(entity, id) {
     return build.initEditForm(...arguments);

@@ -7,7 +7,7 @@
 
 SINCE LAST SERVER UPDATE:
     - TABLE
-        - @ Hiding entities with '[DELETE]' from the DATABASE TABLE, bibliography, and CSV downloads
+        - Hiding entities with '[DELETE]' from the DATABASE TABLE, bibliography, and CSV downloads
         - Merged interactions from [Location-HabType] groups into '[Location-Unspecified]'
         - Added taxon-group icons to interaction-row tree-cells.
            - Tool tips on each icon allow for quick taxon-group identification
@@ -31,9 +31,7 @@ SINCE LAST SERVER UPDATE:
                     UI presentation, when data is entered into a field, and before
                     the form data is submitted to the server - showing helpful alerts
                     as needed. (Full documentation to come.)
-                - @ Alerts added to fields that require edits due to invalid data previously
-                    entered and now automatically prevented - eg, a previously selected
-                    interactino-type is not available or an invalid URL format.
+                - HTML form-validation alerts added to fields that require edits due to invalid data previously entered and now automatically prevented - eg, an invalid URL or coordinate format.
         - Entity Forms
             - Generally reordered fields to what seems like a more intuitive flow for
                 editors, prioritizing required fields and resizing where appropriate
@@ -50,7 +48,7 @@ SINCE LAST SERVER UPDATE:
                 - Data from publication added to / removed from form automatically,
                     with fields disabled/enabled to increase clarity and reduce errors.
             - Location
-                - @ When nothing but name and habtype added, prompt editor to select existing loc
+                - When data entered matches region/country, optionally habitat type, an alert is show to prompt editor to select existing Location-Habitat entity.
                 - Territories are identified and they are selected as Country
                     - Also added to the possesing country's combo and map display's to prevent duplicates
             - Interaction

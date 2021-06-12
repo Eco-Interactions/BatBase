@@ -78,7 +78,6 @@ function addPinIfFieldDataCanPersistThroughMultipleSubmits(f, field) {/*dbug-log
 function updateFormFieldState(f) {                                  /*dbug-log*///console.log('       --updateFormState f[%O]', _u('snapshot', [f]));
     f.shown = true;
     delete f.input;
-    // _state('setFieldState', [f.group, f.name, f, false]);  //overwrites current field-state-data
 }
 /* =========================== ON FIELD CHANGE ============================== */
 /** [handleFieldChangeListeners description] */
@@ -115,7 +114,7 @@ function setCustomFieldStoreListener(f) {
 function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*///console.log('   --storeFieldValue [%s][%O]', fieldName, elem);
     const val = value || $(elem).val();                             /*dbug-log*///console.log('       --val[%s]', val);
     _state('setFieldState', [fLvl, fieldName, val]);
-    if (!_state('getFieldState', [fLvl, fieldName, 'required'])) { return; }
+    // if (!_state('getFieldState', [fLvl, fieldName, 'required'])) { return; }
    _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ________________ MULTI-SELECT DATA ________________ */

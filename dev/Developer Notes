@@ -15,6 +15,11 @@ STANDARDS:
     - append '_' before imported file that requires the indirect 'method string' chaining
     - alphbetize where sensible
 
+    DATA:
+        - Auto-generated entity name formats:
+            - Citations for an entire publications are appended with "(citation)"
+            - Country/Region Habitats- "[LocName]-[HabName]"
+
 ## RESET LOCAL DB ##
     - $ ./dev/resetdb.sh
 

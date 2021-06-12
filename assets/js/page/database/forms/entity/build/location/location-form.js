@@ -26,10 +26,10 @@
  */
 import { _cmbx, _el } from '~util';
 import { _map } from '~db';
-import { _confg, _elems, _form, _state } from '~form';
+import { _confg, _elems, _form, _state, _val, handleFormSubmit } from '~form';
 /* ========================= INIT FORM ====================================== */
 /* --------------------------- CREATE --------------------------------------- */
-export function initCreateForm(entity, val) {                       /*dbug-log*///console.log("       --initLocForm [%s]", val);
+export function initCreateForm(entity, val) {                       /*temp-log*/console.log("       --initLocForm [%s]", val);
     if ($('#form-map').length !== 0) { $('#form-map').remove(); }
     const p = getCreateFormParams(val);                             /*dbug-log*///console.log('--params[%O]', p);
     _elems('initSubForm', [p])
@@ -42,6 +42,7 @@ function getCreateFormParams(val) {
         onFormClose: _form.bind(null, 'enableCountryRegionField'),
         combo: 'Location',
         style: 'med-sub-form',
+        submit: checkIfLocExists.bind(null, 'sub'),
         vals: {
             DisplayName: val === 'create' ? '' : val, //clears form trigger value
             Country: $('#sel-Country-Region').val()
@@ -61,6 +62,42 @@ function disableTopFormLocNote() {
 }
 function scrollToLocFormWindow() {
     $('#top-form')[0].scrollTo(0, 150);
+}
+function checkIfLocExists(fLvl) {
+    const fields = _state('getFormState', ['sub', 'fields']);       /*dbug-log*///console.log('-- checkIfLocExists [%s]fields[%O]', fLvl, fields);
+    if (Object.values(fields).find(isSpecificData)) { return handleFormSubmit('sub'); }
+    setExistingEntityData(fLvl, fields);
+    _val('showFormValAlert', ['sub', 'existingEntity', 'sub'])
+
+    function isSpecificData(field) {
+        if (!field.shown) { return false; }
+        const habData = ['DisplayName', 'HabitatType', 'Country'];  /*dbug-log*///console.log('-- isSpecificData? field[%s]?[%s]', field.name, (habData.indexOf(field.name) === -1 ? !!field.value : false));
+        return habData.indexOf(field.name) === -1 ? !!field.value : false;
+    }
+}
+function setExistingEntityData(fLvl, fields) {
+    const name = buildExistingLocName();
+    const loc = getExistngLocRcrd(name, fields.Country.value);
+    updateLocState(fLvl, loc);
+}
+function buildExistingLocName() {
+    const name = _cmbx('getSelTxt', ['Country']);
+    const habName = _cmbx('getSelTxt', ['HabitatType']);            /*dbug-log*///console.log('-- buildExistingLocName parent[%s] habitat?[%s]', name, habName);
+    return habName ? ( name + '-' + habName ) : name;
+}
+function getExistngLocRcrd(name, id) {
+    const locs = _state('getEntityRcrds', ['location']);
+    const pLoc = locs[id];                                          /*dbug-log*///console.log('-- getExistngLocRcrd name[%s] pLoc[%O]', name, pLoc);
+    return pLoc.displayName === name ? pLoc : getLocHabRcrd(name, pLoc, locs);
+}
+function getLocHabRcrd(name, pLoc, locs) {
+    const id = pLoc.children.find(c => locs[c].displayName == name);
+    return locs[id];
+}
+function updateLocState(fLvl, loc) {
+    const misc = _state('getFormState', [fLvl, 'misc']);            /*dbug-log*///console.log('-- updateLocState loc[%O] state[%O]', loc, misc);
+    misc.existingEntity = loc;
+    misc.entityField = 'Location';
 }
 /* ---------------------------- EDIT ---------------------------------------- */
 export function initEditForm(entity, id) {                          /*perm-log*/console.log('           >--LOCATION EDIT entity[%s] id[%s]', entity, id);

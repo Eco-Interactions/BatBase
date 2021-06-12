@@ -3,6 +3,7 @@
  *
  * Export
  *     clearAlert
+ *     clearActiveAlert
  *     clrNeedsHigherRank
  *     clrContribFieldAlert
  *     errUpdatingData
@@ -170,6 +171,11 @@ function getFieldValAlertHandler(tag, action) {
             show: handleEdBlanksAndReturnAlertMsg,
             clear:false
         },
+        /* --- LOCATION --- */
+        'existingEntity': {
+            show: handleExistingEntityndReturnAlertMsg,
+            clear:false
+        },
         /* --- TAXON --- */
         'isGenusPrnt': {
             show: handleIsGenusPrntAndReturnAlertMsg,
@@ -232,6 +238,24 @@ function handleOpenSubFormAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
 /* ----------------- REQUIRED-FIELD EMPTY ----------------------------------- */
 function getRequiredFieldsEmptyAleryMsg(elem, tag, fLvl, fieldName) {
     return `<span>Please fill required fields and submit again.</span>`;
+}
+/* ----------------- SELECT EXISTING ENTITY --------------------------------- */
+function handleExistingEntityndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    const data = _state('getFormState', [fLvl, 'misc']);
+    const msg = getExistingEntityAlert(fLvl, data, fieldName);    /*dbug-log*///console.log('-- handleExistingEntityndReturnAlertMsg[%s]', msg);
+    return msg;
+}
+function getExistingEntityAlert(fLvl, data, field) {
+    const ent = data.existingEntity;
+    const handleSelect = selectExistingEntity.bind(null, fLvl, ent.id, data.entityField);
+    $(`#${fLvl}_alert`).click(handleSelect);
+    return `<span style="cursor:pointer;">The data entered matches existing data.
+        <u>Select ${ent.displayName}</u></span>`;
+}
+function selectExistingEntity(fLvl, id, field) {                    /*dbug-log*///console.log('-- selectExistingEntity [%s] field[%s] id[%s]', fLvl, field, id);
+    _elems('exitSubForm', [fLvl, false]);
+    _cmbx('setSelVal', [field, id]);
+    $(`#${field}_pin`).focus();
 }
 /* =========================== INTERACTION ================================== */
 function handleNoValidIntsAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
@@ -374,4 +398,8 @@ function enableSubmitIfFormReady(fLvl, enableSubmit) {
     if (!$(`#${fLvl}-form`).length || _elems('hasOpenSubForm', [fLvl])) { return; }
     if (!enableSubmit) { return; }                                  /*dbug-log*///console.log('enableSubmitIfFormReady [%s]', fLvl)
     _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
+}
+export function clearActiveAlert(fLvl) {
+    if (!$(`.${fLvl}-active-alert`).length) { return; }
+    clearAlert($(`#${fLvl}_alert`)[0], fLvl, false);
 }

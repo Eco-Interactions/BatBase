@@ -17,7 +17,7 @@
  *         TOGGLE FORM-FIELDS
  */
 import { _el, executeMethod } from '~util';
-import { _state } from '../forms-main.js';
+import { _state, _val } from '~form';
 import * as core from './core/elems-core-main.js';
 import * as row from './row/form-row-main.js';
 import * as eUtil from './util/form-elems-util-main.js';
@@ -64,6 +64,7 @@ export function checkReqFieldsAndToggleSubmitBttn(fLvl, entity = false) {/*dbug-
     if (!fLvl) { fLvl = _state('getEntityFormLevel', [entity]); }
     const reqFieldsFilled = ifNoOpenSubFormAndAllRequiredFieldsFilled(fLvl);
     toggleSubmitBttn(fLvl, reqFieldsFilled);
+    _val('clearActiveAlert', [fLvl]);
     return reqFieldsFilled;
 }
 /* --------------------- FORM-STATUS MESSAGES ------------------------------- */
