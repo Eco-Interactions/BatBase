@@ -81,18 +81,11 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $this->em->flush();
         $this->em->remove($entity);
     }
-    // protected function mergeEntities($ents, $coreClass, $detail = null)
-    // {
-    //     foreach ($ents as $ids) {
-    //         $this->mergeData($ids[0], $ids[1], $coreClass, $detail);
-    //     }
-    // }
     protected function mergeData($rmvId, $addId, $coreClass, $detail = null)
     {
         $rmv = $this->getEntity($coreClass, $rmvId);                            print("\n Remove entity id  = ".$rmvId);
 
         if ($addId) { $this->transferData($coreClass, $addId, $rmv); }
-        // if ($detail) { $this->removeDetailEntityData($detail, $rmv); }
         $this->removeEntity($rmv, true);
     }
 

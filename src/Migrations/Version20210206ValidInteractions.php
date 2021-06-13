@@ -105,7 +105,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
     private function renameInteractionTypes()
     {
         $type = $this->getEntity('InteractionType', 3);
-        $type->setActiveForm('Pollinated');
+        $type->setActiveForm('pollinated');
         $this->persistEntity($type);
     }
 /* +++++++++++++++++++++++++ TAXON GROUP ++++++++++++++++++++++++++++++++++++ */
@@ -126,7 +126,6 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
     }
     private function createWormRoot($group, $data)
     {
-        // $data->taxon->rel->group = $group->getId();
         $taxon = $this->create('taxon', $data);
         $rootData = $this->getTaxonData('Annelida Root');
         $rootData['rel']['group'] = $group->getId();
@@ -214,25 +213,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
                     ],
                     'rel' => []
                 // ]
-            ],
-            // 'Worm' => [
-            //     'group' => [
-            //         'flat' => [
-            //             'displayName' => 'Worm',
-            //             'pluralName' => 'Worms',
-            //         ],
-            //         'rel' => []
-            //     ]
-            // ],
-            // 'Worm' => [
-            //     'group' => [
-            //         'flat' => [
-            //             'displayName' => 'Worm',
-            //             'pluralName' => 'Worms',
-            //         ],
-            //         'rel' => []
-            //     ]
-            // ],
+            ]
         ];
         return $data[$key];
     }

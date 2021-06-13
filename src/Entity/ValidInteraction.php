@@ -71,7 +71,7 @@ class ValidInteraction
      * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="validInteractions")
      * @ORM\JoinTable(name="valid_interaction_tag")
      */
-    private $tags;  //if there are tags, one must be selected
+    private $tags;
 
     /**
      * @var \DateTime

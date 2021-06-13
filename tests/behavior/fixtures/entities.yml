@@ -541,7 +541,7 @@ App\Entity\GeoJson:
         __calls:
           - setCoordinates: [<{geo6}>]
           - setDisplayPoint: [<{geo6}>]
-App\Entity\Group:
+App\Entity\Group:  #Note: Mammals not included
     Group-1: #1
         slug: bat
         displayName: Bat
@@ -633,10 +633,28 @@ App\Entity\Group:
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Group-11:
-        slug: parasite
-        displayName: Parasite
-        pluralName: Parasites
-        taxa: ['@GroupRoot-11', '@GroupRoot-12', '@GroupRoot-13']
+        slug: protozoa
+        displayName: Protozoa
+        pluralName: Protozoas
+        taxa: ['@GroupRoot-13']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-12:
+        slug: worm
+        displayName: Worm
+        pluralName: Worms
+        taxa: ['@GroupRoot-11', '@GroupRoot-12', '@GroupRoot-14', '@GroupRoot-15']
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Group-13:
+        slug: chromista
+        displayName: Chromista
+        pluralName: Chromista
+        taxa: ['@GroupRoot-16']
         created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
@@ -645,6 +663,7 @@ App\Entity\GroupRoot:
     GroupRoot-1:
         group: '@Group-1'
         taxon: '@Taxon-2'
+        description:
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -707,7 +726,7 @@ App\Entity\GroupRoot:
         __calls:
           - setSubRanks: [<{basic_ranks}>]
     GroupRoot-9:
-        group: '@Group-9'
+        group: '@Group-9' #reptile
         taxon: '@Taxon-32'
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
@@ -715,7 +734,7 @@ App\Entity\GroupRoot:
         __calls:
           - setSubRanks: [<{basic_ranks}>]
     GroupRoot-10:
-        group: '@Group-10'
+        group: '@Group-10' #amphibian
         taxon: '@Taxon-33'
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
@@ -723,29 +742,58 @@ App\Entity\GroupRoot:
         __calls:
           - setSubRanks: [<{basic_ranks}>]
     GroupRoot-11:
-        group: '@Group-11'
-        taxon: '@Taxon-34'
+        group: '@Group-12' #worm
+        taxon: '@Taxon-34' #Phylum Acanthocephala
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         __calls:
           - setSubRanks: [<{all_ranks}>]
     GroupRoot-12:
-        group: '@Group-11'
-        taxon: '@Taxon-36'
+        description: 'Thorny-headed worms'
+        group: '@Group-12' #worm
+        taxon: '@Taxon-36' #phylum-nematoda
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         __calls:
           - setSubRanks: [<{all_ranks}>]
     GroupRoot-13:
-        group: '@Group-11'
-        taxon: '@Taxon-38'
+        description: 'Fungi-like, taxonomy unclear'
+        group: '@Group-11' #protozoa
+        taxon: '@Taxon-38' #kingdom-protozoa
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         __calls:
           - setSubRanks: [<{basic_ranks}>]
+    GroupRoot-14:
+        description: 'Earthworms'
+        group: '@Group-12' #worm
+        taxon: '@Taxon-40' #phylum-annelida
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
+    GroupRoot-15:
+        description: 'Flatworms'
+        group: '@Group-12' #worm
+        taxon: '@Taxon-41' #phylum-platyhelminthes
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
+    GroupRoot-16:
+        description: 'Contains protists & plasmodium (ie. malaria)'
+        group: '@Group-12' #chromista
+        taxon: '@Taxon-42' #kingdom-chromista
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        __calls:
+          - setSubRanks: [<{all_ranks}>]
 App\Entity\HabitatType:
     HabitatType-1:
         slug: forest
@@ -909,7 +957,7 @@ App\Entity\Interaction:
         location: '@Location-60'  #
         subject: '@Taxon-6' #
         object: '@Taxon-23'  #
-        tags: ['@Tag-5'] #Leaf
+        tags: ['@Tag-9'] #External
         created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:36", new \DateTimeZone("America/Los_Angeles")))>'
@@ -952,8 +1000,6 @@ App\Entity\InteractionType:
         slug: visitation
         displayName: Visitation
         activeForm: visited
-        passiveForm: visited by
-        validTags: ['@Tag-3']
         interactions: ['@Interaction-8']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -963,9 +1009,7 @@ App\Entity\InteractionType:
         slug: consumption
         displayName: Consumption
         activeForm: consumed
-        passiveForm: consumed by
         interactions: ['@Interaction-2', '@Interaction-6']
-        validTags: ['@Tag-2', '@Tag-3', '@Tag-4', '@Tag-5']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -974,7 +1018,6 @@ App\Entity\InteractionType:
         slug: seed-dispersal
         displayName: Seed Dispersal
         activeForm: dispersed seeds of
-        passiveForm: seeds dispersed by
         interactions: ['@Interaction-5']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -983,9 +1026,7 @@ App\Entity\InteractionType:
     InteractionType-4:
         slug: pollination
         displayName: Pollination
-        activeForm: pollinated flowers of
-        passiveForm: pollinated by
-        validTags: ['@Tag-3']
+        activeForm: pollinated
         interactions: ['@Interaction-1']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -995,9 +1036,7 @@ App\Entity\InteractionType:
         slug: transport
         displayName: Transport
         activeForm: transported
-        passiveForm: transported by
         interactions: ['@Interaction-4', '@Interaction-7']
-        validTags: ['@Tag-6', '@Tag-7']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1006,7 +1045,6 @@ App\Entity\InteractionType:
         slug: cohabitation
         displayName: Cohabitation
         activeForm: cohabitated with
-        passiveForm: cohabitated with
         interactions: []
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1016,7 +1054,6 @@ App\Entity\InteractionType:
         slug: host
         displayName: Host
         activeForm: host of
-        passiveForm: hosted by
         interactions: ['@Interaction-3']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1026,9 +1063,7 @@ App\Entity\InteractionType:
         slug: roost
         displayName: Roost
         activeForm: roosted in
-        passiveForm: roosted in by
         interactions: ['@Interaction-5', '@Interaction-9']
-        validTags: ['@Tag-5', '@Tag-8']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1037,7 +1072,6 @@ App\Entity\InteractionType:
         slug: prey
         displayName: Prey
         activeForm: preyed upon by
-        passiveForm: preyed upon
         interactions: ['@Interaction-10']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1047,7 +1081,6 @@ App\Entity\InteractionType:
         slug: hematophagy
         displayName: Hematophagy
         activeForm: fed on the blood of
-        passiveForm: blood was fed upon by
         interactions: []
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1057,7 +1090,6 @@ App\Entity\InteractionType:
         slug: predation
         displayName: Predation
         activeForm: preyed upon
-        passiveForm: preyed upon by
         interactions: []
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -2049,102 +2081,102 @@ App\Entity\SourceType:
         updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
 App\Entity\SystemDate:
     SystemDate-1:
-        description: System
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: System
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-2:
-        description: Author
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Author
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-3:
-        description: Authority
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Authority
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-4:
-        description: Citation
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Citation
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-5:
-        description: CitationType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: CitationType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
     SystemDate-6:
-        description: ContentBlock
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: ContentBlock
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-7:
-        description: Contribution
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Contribution
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-8:
-        description: Group
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Group
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-9:
-        description: Feedback
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Feedback
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-10:
-        description: HabitatType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: HabitatType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-11:
-        description: ImageUpload
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: ImageUpload
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-12:
-        description: Interaction
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Interaction
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-13:
-        description: InteractionType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: InteractionType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-14:
-        description: Rank
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Rank
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-15:
-        description: Location
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Location
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-16:
-        description: LocationType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: LocationType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
     SystemDate-17:
-        description: Naming
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Naming
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-18:
-        description: NamingType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: NamingType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-19:
-        description: Publication
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Publication
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-20:
-        description: PublicationType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: PublicationType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-21:
-        description: Source
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Source
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-22:
-        description: SourceType
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: SourceType
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-23:
-        description: Tag
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Tag
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-2'
     SystemDate-24:
-        description: Taxon
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Taxon
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
     SystemDate-25:
-        description: Taxonym
-        dateVal: '<(new \DateTime("2020-05-20 11:11:11"))>'
+        entity: Taxonym
+        updated: '<(new \DateTime("2020-05-20 11:11:11"))>'
         updatedBy: '@User-1'
 App\Entity\Tag:
     Tag-1:
@@ -2152,7 +2184,7 @@ App\Entity\Tag:
         description: null
         constrainedToEntity: Interaction
         interactions: ['@Interaction-2']
-        intTypeConstraints: ['@InteractionType-1', '@InteractionType-2', '@InteractionType-3', '@InteractionType-4', '@InteractionType-5', '@InteractionType-6', '@InteractionType-7', '@InteractionType-8', '@InteractionType-9', '@InteractionType-10', '@InteractionType-11']
+        # intTypeConstraints: ['@InteractionType-1', '@InteractionType-2', '@InteractionType-3', '@InteractionType-4', '@InteractionType-5', '@InteractionType-6', '@InteractionType-7', '@InteractionType-8', '@InteractionType-9', '@InteractionType-10', '@InteractionType-11']
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2161,8 +2193,8 @@ App\Entity\Tag:
         displayName: Seed
         description: null
         constrainedToEntity: Interaction
-        intTypeConstraints: ['@InteractionType-2']
         interactions: ['@Interaction-2']
+        # intTypeConstraints: ['@InteractionType-2']
         created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2171,8 +2203,8 @@ App\Entity\Tag:
         displayName: Flower
         description: null
         constrainedToEntity: Interaction
-        intTypeConstraints: ['@InteractionType-1', '@InteractionType-2', '@InteractionType-4']
         interactions: ['@Interaction-1', '@Interaction-8']
+        # intTypeConstraints: ['@InteractionType-1', '@InteractionType-2', '@InteractionType-4']
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2182,7 +2214,7 @@ App\Entity\Tag:
         description: null
         constrainedToEntity: Interaction
         interactions: ['@Interaction-6']
-        intTypeConstraints: ['@InteractionType-2']
+        # intTypeConstraints: ['@InteractionType-2']
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2191,8 +2223,8 @@ App\Entity\Tag:
         displayName: Leaf
         description: null
         constrainedToEntity: Interaction
-        interactions: ['@Interaction-9']
-        intTypeConstraints: ['@InteractionType-2', '@InteractionType-8']
+        interactions: []
+        # intTypeConstraints: ['@InteractionType-2', '@InteractionType-8']
         created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2202,7 +2234,7 @@ App\Entity\Tag:
         description: null
         constrainedToEntity: Interaction
         interactions: ['@Interaction-7']
-        intTypeConstraints: ['@InteractionType-5']
+        # intTypeConstraints: ['@InteractionType-5']
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2211,14 +2243,14 @@ App\Entity\Tag:
         displayName: Bryophyte Fragment
         description: null
         constrainedToEntity: Interaction
-        intTypeConstraints: ['@InteractionType-5']
         interactions: ['@Interaction-4']
+        # intTypeConstraints: ['@InteractionType-5']
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
     Tag-8:
-        displayName: Wood
+        displayName: Internal
         description: null
         constrainedToEntity: Interaction
         interactions: ['@Interaction-5']
@@ -2226,6 +2258,24 @@ App\Entity\Tag:
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Tag-9:
+        displayName: External
+        description: null
+        constrainedToEntity: Interaction
+        interactions: ['@Interaction-9']
+        created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Tag-10:
+        displayName: Coroost
+        description: null
+        constrainedToEntity: Interaction
+        interactions: []
+        created: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:58", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 App\Entity\Taxon:
     Taxon-1:
@@ -2608,7 +2658,7 @@ App\Entity\Taxon:
         displayName: 'Phylum Acanthocephala'
         name: Acanthocephala
         isRoot: true
-        group: '@GroupRoot-11'
+        group: '@GroupRoot-11'  #worm
         rank: '@Rank-2'
         childTaxa: ['@Taxon-35']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2631,7 +2681,7 @@ App\Entity\Taxon:
         displayName: 'Phylum Nematoda'
         name: Nematoda
         isRoot: true
-        group: '@GroupRoot-12'
+        group: '@GroupRoot-12'  #worm
         rank: '@Rank-2'
         childTaxa: ['@Taxon-37']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2654,7 +2704,7 @@ App\Entity\Taxon:
         displayName: 'Kingdom Protozoa'
         name: Protozoa
         isRoot: true
-        group: '@GroupRoot-13'
+        group: '@GroupRoot-13' #protozoa
         rank: '@Rank-1'
         childTaxa: ['@Taxon-39']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -2667,6 +2717,44 @@ App\Entity\Taxon:
         name: Orange
         parentTaxon: '@Taxon-38'
         rank: '@Rank-5'
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-40:
+        slug: phylum-annelida
+        displayName: 'Phylum Annelida'
+        name: Annelida
+        group: '@GroupRoot-14' #worm
+        isRoot: true
+        rank: '@Rank-2'
+        childTaxa: []
+        parentTaxon: '@Taxon-1'
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-41:
+        slug: phylum-platyhelminthes
+        displayName: 'Phylum Platyhelminthes'
+        name: Platyhelminthes
+        parentTaxon: '@Taxon-1'
+        group: '@GroupRoot-15' #worm
+        isRoot: true
+        rank: '@Rank-2'
+        childTaxa: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Taxon-42:
+        slug: kingdom-chromista
+        displayName: 'Kingdom Chromista'
+        name: Chromista
+        isRoot: true
+        group: '@GroupRoot-16' #chromista
+        rank: '@Rank-1'
         childTaxa: []
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -2726,3 +2814,374 @@ App\Entity\User:  #passwordhere
         aboutMe: 'Test admin'
         firstName: ''
         lastName: ''
+App\Entity\ValidInteraction:
+    ValidInteraction-1:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-1'
+        subjectSubGroup: '@GroupRoot-3'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-2:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-2'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-4' #pollination
+        tags: ['@Tag-3'] #flower
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-3:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-2'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-1' #visit
+        tags: ['@Tag-3'] #flower
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-4:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-2'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-3' #seed dispersal
+        tags: ['@Tag-2'] #seed
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-5:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-2'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-2'  #xonsumption
+        tags: ['@Tag-3', '@Tag-4', '@Tag-2', '@Tag-5']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-6:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-6'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-2' #consumption
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-7:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-2'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-8' #roost
+        tags: ['@Tag-8', '@Tag-9']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-8:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-2'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-5' #transport
+        tags: ['@Tag-7'] #bryofrag
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-9:
+        tagRequired: true
+        objectSubGroup: '@GroupRoot-3'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-5' #transport
+        tags: ['@Tag-6']
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-10:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-1'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-8' #cohabitation
+        tags: ['@Tag-10'] #coroost
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-11:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-3'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-8' #cohab
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-12:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-3'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-13:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-3'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-9' #prey
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-14:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-6'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-15:
+        tagRequired: false
+        objectSubGroup:  '@GroupRoot-8'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-10' #hema
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-16:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-1'
+        subjectSubGroup: '@GroupRoot-8'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-17:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-1'
+        subjectSubGroup: '@GroupRoot-9'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-18:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-1'
+        subjectSubGroup: '@GroupRoot-10'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-19:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-1'
+        subjectSubGroup: '@GroupRoot-5'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-20:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-8'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-8' #cohab
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-21:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-9'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-8' #cohab
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-22:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-10'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-8' #cohab
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-23:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-12'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-24:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-8'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-25:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-9'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-26:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-10'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-27:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-5'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-11' #predation
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-28:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-8'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-9' #prey
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-29:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-9'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-9' #prey
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-30:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-10'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-9' #prey
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-31:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-5'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-9' #prey
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-32:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-3'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-33:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-7'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-34:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-12'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-35:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-13'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-36:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-11'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    ValidInteraction-37:
+        tagRequired: false
+        objectSubGroup: '@GroupRoot-4'
+        subjectSubGroup: '@GroupRoot-1'
+        interactionType: '@InteractionType-7' #host
+        tags: []
+        created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
