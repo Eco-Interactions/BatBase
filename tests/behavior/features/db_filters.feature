@@ -107,7 +107,7 @@ Feature: Filtering the data displayed in the database table
       Given the database table is grouped by "Taxa"
       And I view interactions by "Bats"
       And I toggle "open" the filter panel
-      When I select "[Fish, Bird, Parasite]" from the "Object Groups Filter" combobox
+      When I select "[Fish, Bird, Potozoa]" from the "Object Groups Filter" combobox
       Then I should see "2" rows in the table data tree
       And data in the interaction rows
       And I should see "Object Group" in the filter status bar
@@ -115,7 +115,7 @@ Feature: Filtering the data displayed in the database table
     @javascript
     Scenario:  I should be able to filter the data tree to taxon sub-groups.
       Given the database table is grouped by "Taxa"
-      And I view interactions by "Parasites"
+      And I view interactions by "Potozoas"
       And I toggle "open" the filter panel
       When I select "[Phylum Nematoda, Phylum Acanthocephala]" from the "Sub-Group Filter" combobox
       Then I should see "2" rows in the table data tree

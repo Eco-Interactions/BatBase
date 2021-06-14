@@ -36,8 +36,8 @@ Feature: Search Page Database Initialization
         And data in the interaction rows
 
     @javascript
-    Scenario:  There should be 2 initial parasite interactions in the database table.
-        Given I view interactions by "Parasites"
+    Scenario:  There should be 2 initial Potozoa interactions in the database table.
+        Given I view interactions by "Potozoas"
         Then I see "Phylum Arthropoda"
         # And the count column should show "2" interactions
         And data in the interaction rows

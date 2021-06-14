@@ -304,7 +304,7 @@ Feature: Edit data in the database
     @javascript
     Scenario:  I should be able to edit the parent taxon of an existing taxon
         Given the database table is grouped by "Taxa"
-        And I view interactions by "Parasites"
+        And I view interactions by "Potozoas"
         And I expand "Phylum Nematoda" in the data tree
         And I click on the edit pencil for the "Class Striped" row
         And I see "Editing Taxon"

@@ -201,7 +201,7 @@ Feature: Add new data to the database
         ### Object Sub-Group ##
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        And I select "Parasite" from the "Group" combobox
+        And I select "Potozoa" from the "Group" combobox
         And I should see "Phylum Acanthocephala" in the "Sub-Group" combobox
         And I select "Phylum Nematoda" from the "Sub-Group" combobox
         And I add "O Sub-Group Family" to the "Family" combobox

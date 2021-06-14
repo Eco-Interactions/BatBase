@@ -210,7 +210,7 @@ class FeatureContext extends RawMinkContext implements Context
             'Arthropods' => $this->getComboId('Order Filter'),
             'Authors' => $this->getNameFilter('Author'),
             'Bats' => $this->getComboId('Object Groups Filter'),
-            'Parasites' => $this->getComboId('Sub-Group Filter'),
+            'Potozoas' => $this->getComboId('Species Filter'),
             'Plants' => $this->getComboId('Species Filter'),
             'Publications' => $this->getComboId('Publication Type Filter'),
             'Publishers' => $this->getNameFilter('Publisher')
