@@ -39,7 +39,7 @@ Feature: Edit data in the database
         And I click on the edit pencil for the first interaction of "Summit Experimental Gardens"
         And I see "Editing Interaction"
         When I select "Panama" from the "Location" combobox
-        And I press the "Update Interaction" button
+        And I submit the form
         And I wait for the "top" form to close
         And I uncheck the date-updated filter
         And I expand "Central America" in the data tree
@@ -59,7 +59,7 @@ Feature: Edit data in the database
         When I select "Artibeus lituratus" from the "Species" combobox
         And I should see "Artibeus" in the "Genus" combobox
         And I press the "Select Taxon" button
-        And I press the "Update Interaction" button
+        And I submit the form
         And I wait for the "top" form to close
         And I uncheck the date-updated filter
         And I expand "Family Phyllostomidae" in the data tree
@@ -79,7 +79,7 @@ Feature: Edit data in the database
         When I select "Philodendron sphalerum" from the "Species" combobox
         And I should see "Philodendron" in the "Genus" combobox
         And I press the "Select Taxon" button
-        And I press the "Update Interaction" button
+        And I submit the form
         And I wait for the "top" form to close
         And I uncheck the date-updated filter
         And I expand "Family Araceae" in the data tree
@@ -98,7 +98,7 @@ Feature: Edit data in the database
         And I remove the "Flower" interaction tag
         And I add the "Seed" interaction tag
         And I change the "Note" field "textarea" to "New Test Note Description"
-        And I press the "Update Interaction" button
+        And I submit the form
         And I wait for the "top" form to close
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
@@ -142,7 +142,7 @@ Feature: Edit data in the database
         And I change the "Latitude" field "input" to "9.7489"
         And I change the "Longitude" field "input" to "-83.7534"
         And I see the location's pin on the map
-        And I press the "Update Location" button
+        And I submit the form
         And I wait for the "top" form to close
         And I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
@@ -163,7 +163,7 @@ Feature: Edit data in the database
         And I expand "Costa Rica" in the data tree
         And I click on the edit pencil for the "Santa Ana-Forest" row
         When I select "Panama" from the "Country" combobox
-        And I press the "Update Location" button
+        And I submit the form
         And I wait for the "top" form to close
         And I expand "Central America" in the data tree
         Then I should see "Santa Ana-Forest" under "Panama" in the tree
@@ -182,8 +182,8 @@ Feature: Edit data in the database
         And I change the "Website" field "input" to "https://www.link.com"
         And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
         And I select "University of Paris VI" from the "Publisher" combobox
-        And I select "Cockle, Anya" from the "Authors" dynamic combobox
-        And I press the "Update Publication" button
+        And I select "Cockle, Anya" from the "Author" dynamic combobox
+        And I submit the form
         And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I select "Book" from the "Publication Type Filter" combobox
@@ -194,7 +194,7 @@ Feature: Edit data in the database
         Then I should see "Book" in the "Publication Type" combobox
         Then I should see "https://www.link.com" in the "Website" field "input"
         Then I should see "University of Paris VI" in the "Publisher" combobox
-        Then I should see "Cockle, Anya" in the "Authors" dynamic combobox
+        Then I should see "Cockle, Anya" in the "Author" dynamic combobox
 
     @javascript
     Scenario:  I should be able to edit the data of an existing author
@@ -207,7 +207,7 @@ Feature: Edit data in the database
         And I change the "Last Name" field "input" to "Cockel"
         And I change the "Suffix" field "input" to "Jr"
         And I change the "Website" field "input" to "https://www.link.com"
-        And I press the "Update Author" button
+        And I submit the form
         And I wait for the "top" form to close
         And I click on the edit pencil for the "Cockel, Joy Karen Jr" row
         And I see "Editing Author"
@@ -228,7 +228,7 @@ Feature: Edit data in the database
         And I change the "Country" field "input" to "France"
         And I change the "Description" field "textarea" to "Something descriptive"
         And I change the "Website" field "input" to "https://www.link.com"
-        And I press the "Update Publisher" button
+        And I submit the form
         And I wait for the "top" form to close
         And I click on the edit pencil for the "University of Paris V" row
         And I see "Editing Publisher"
@@ -250,25 +250,25 @@ Feature: Edit data in the database
         And I change the "Edition" field "input" to "4"
         And I change the "Website" field "input" to "https://www.link.com"
         And I change the "Doi" field "input" to "https://doi.org/10.1037/rmh0000008"
-        And I change "Baker, Herbert G" in the "Authors" dynamic combobox
-        And I select "Cockle, Anya" from the "Authors" dynamic combobox
-        And I see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
-        And I press the "Update Citation" button
+        And I change "Baker, Herbert G" in the "Author" dynamic combobox
+        And I select "Cockle, Anya" from the "Author" dynamic combobox
+        And I see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Description" field "textarea"
+        And I submit the form
         And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I should not see "Gardner, Alfred L" in the tree
         And I expand "Baker, Herbert G" in the data tree
         And I click on the edit pencil for the "Feeding habits" row
         And I see "Editing Citation"
-        Then I should see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
+        Then I should see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Description" field "textarea"
         And I should see "Test Abstract" in the "Abstract" field "textarea"
         And I should see "Feeding habits" in the "Title" field "input"
         And I should see "Book" in the "Citation Type" combobox
         And I should see "4" in the "Edition" field "input"
         And I should see "https://www.link.com" in the "Website" field "input"
         And I should see "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
-        And I should see "Baker, Herbert G" in the "Authors" dynamic combobox
-        And I should see "Cockle, Anya" in the "Authors" dynamic combobox
+        And I should see "Baker, Herbert G" in the "Author" dynamic combobox
+        And I should see "Cockle, Anya" in the "Author" dynamic combobox
 
     @javascript
     Scenario:  I should be able to change an interaction's publication
@@ -279,7 +279,7 @@ Feature: Edit data in the database
         And I see "Editing Interaction"
         When I select "Journal of Mammalogy" from the "Publication" combobox
         And I select "Observations on the life histories of Panama bats" from the "Citation Title" combobox
-        And I press the "Update Interaction" button
+        And I submit the form
         # And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I uncheck the date-updated filter
@@ -297,7 +297,7 @@ Feature: Edit data in the database
         And I see "Editing Taxon"
         When I change the "taxon name" field "input" to "Leopardil"
         When I select "Class" from the "Rank" combobox
-        And I press the "Update Taxon" button
+        And I submit the form
         And I wait for the "top" form to close
         Then I should see "Class Leopardil" in the tree
 
@@ -312,7 +312,7 @@ Feature: Edit data in the database
         And I see "Select New Taxon Parent"
         When I select "Arthropod" from the "Group" combobox
         And I press the "Select" button
-        And I press the "Update Taxon" button
+        And I submit the form
         And I wait for the "top" form to close
         And I view interactions by "Arthropods"
         Then I should see "Class Striped" in the tree

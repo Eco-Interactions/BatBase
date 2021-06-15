@@ -8,7 +8,7 @@
  *
  * Export
  *     buildFormField
- *     setOnMultiSelectChangeListener
+ *     storeMultiSelectValue
  *
  * TOC
  *     BUILD INPUT
@@ -120,21 +120,19 @@ function storeFieldValue(elem, fieldName, fLvl, value, e) {         /*dbug-log*/
 /* ________________ MULTI-SELECT DATA ________________ */
 /** [setOnMultiSelectChangeListener description] */
 function setOnMultiSelectChangeListener(f) {                        /*dbug-log*///console.log('--setOnMultiSelectChangeListener [%s]fConfg[%O]', f.count, f);
-    const field = f.count > 1 ? f.input.lastChild : f.input.lastChild.lastChild;
-    const input = $(field).find('.f-input');                        /*dbug-log*///console.log('     --field[%O] input[%O]', field, input);
-    $(input).change(storeMultiSelectValue.bind(null, f.group, f.count, f.name));
     if (!f.value) { f.value = {}; }
 }
 /** [storeMultiSelectValue description] */
-function storeMultiSelectValue(fLvl, cnt, fName, e) {               /*dbug-log*///console.log('@--storeMultiSelectValue lvl[%s] cnt[%s]fName[%s], e[%O]', fLvl, cnt, fName, e);
-    const vals = _state('getFieldState', [fLvl, fName]);
-    const v = e.target.value ? e.target.value : null;               /*dbug-log*///console.log('   --prev[%O] cur[%O]', _u('snapshot', [vals]), vals);
-    if (!v && Object.keys(vals).length == cnt) {
-        delete vals[cnt];
-    } else {
-        vals[cnt] = v;
+export function storeMultiSelectValue(fLvl, cnt, fName, v) {        /*dbug-log*///console.log('@--storeMultiSelectValue lvl[%s] cnt[%s]fName[%s], v[%s]', fLvl, cnt, fName, v);
+    const ord = _state('getFieldState', [fLvl, fName]);             /*dbug-log*///console.log('   --prev[%O] cur[%O]', _u('snapshot', [ord]), ord);
+    ord[cnt] = v;
+    if (!v && Object.keys(ord).length <= cnt) { deleteTrailingEmptyValues(cnt, ord);}
+    _state('setFieldState', [fLvl, fName, ord]);                   /*dbug-log*///console.log('       --after[%O]', _u('snapshot', [ord]));
+}
+function deleteTrailingEmptyValues(cnt, ord) {
+    while (cnt && !ord[cnt]) {
+        delete ord[cnt--];
     }
-    _state('setFieldState', [fLvl, fName, vals]);
 }
 /* ============================== FIELD PIN ================================= */
 /**

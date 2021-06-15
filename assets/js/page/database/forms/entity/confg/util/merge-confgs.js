@@ -60,6 +60,7 @@ export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-lo
     function mergeFieldProps(field, prop, val) {
         const edge = {
             misc: mergeObjectConfgs,
+            prep: mergeObjectConfgs,
         };
         const data = prop in edge ? edge[prop](prop, field, val) : val;
         cFields[field][prop] = data;

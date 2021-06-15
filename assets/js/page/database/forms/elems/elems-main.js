@@ -93,6 +93,9 @@ export function onFormConfgChanged(fLvl, entity) {
     toggleSubmitBttn(fLvl, false);
     return fields.rebuildFieldsOnFormConfgChanged(fLvl, entity);
 }
+export function storeMultiSelectValue() {
+    return fields.storeMultiSelectValue(...arguments);
+}
 /* -------------------------- COMBOBOXES ------------------------------------ */
 export function initFormCombos() {
     return fields.initFormCombos(...arguments);

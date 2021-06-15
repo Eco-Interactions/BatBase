@@ -61,7 +61,7 @@ function getEntityComboEvents(fLvl, entity) {
             'PublicationType': {
                 onChange: publication.loadPubTypeFields },
             'Publisher': {
-                create: initCreateForm,
+                create: publisher.initCreateForm,
                 onChange: onPublSelection.bind(null, fLvl) },
             'Author': {
                 create: author.initCreateForm.bind(null, 1, 'Author'),

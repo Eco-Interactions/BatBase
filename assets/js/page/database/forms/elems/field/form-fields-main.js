@@ -1,21 +1,12 @@
 /**
  * Builds and manages the form fields.
  *
- * Export
-= *    buildDynamicFormField
- *     fillComplexFormFields
- *     ifAllRequiredFieldsFilled
- *     initFormCombos
- *     resetFormCombobox
- *     toggleFormFields
- *
  * TOC
+ *     FORM COMBOS
  *     INIT FORM-FIELDS
  *         BUILD FIELD-ROWS
- *     TOGGLE FIELD-DISPLAY
- *     GET FIELD-DATA
- *     SET FORM-FIELD DATA
- *     IF REQUIRED FIELDS FILLED
+ *     FORM-FIELD UTILITY
+ *     ON FIELD CHANGE
  */
 import { _el } from '~util';
 import * as build from './build-field.js';
@@ -69,4 +60,8 @@ export function fillComplexFormFields() {
 /** Returns true if all the required elements for the current form have a value. */
 export function ifAllRequiredFieldsFilled() {
     return util.ifAllRequiredFieldsFilled(...arguments);
+}
+/* ======================== ON FIELD CHANGE ================================= */
+export function storeMultiSelectValue() {
+    return build.storeMultiSelectValue(...arguments);
 }

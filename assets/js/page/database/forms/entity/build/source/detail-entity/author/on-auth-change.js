@@ -16,7 +16,7 @@
  *             FIELD LABEL
  */
 import { _cmbx, _u } from '~util';
-import { _state, _val } from '~form';
+import { _elems, _state, _val } from '~form';
 import * as sForm from '../../src-form-main.js';
 import * as aForm from './auth-form-main.js';
 /* ======================= ON AUTHOR|EDITOR SELECTION ======================= */
@@ -32,6 +32,7 @@ export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*/
     if (v === '' || parseInt(v) === NaN) { return onFieldClear(aType, fLvl, ttl, cnt); }
     if (ttl === 1) { enableOtherField(aType, fLvl, false);  }
     if (v === 'create') { return aForm.initCreateForm(cnt, aType, v); }
+    _elems('storeMultiSelectValue', [fLvl, cnt, aType, v]);
     if (aForm.isDynamicFieldEmpty(aType, ttl)) { return; }
     aForm.buildNewAuthorSelect(fLvl, aType, ttl+1);
     ifPreviousAlertClearIt(aType, fLvl);
@@ -40,6 +41,7 @@ export function onAuthAndEdSelection(cnt, aType, v) {               /*dbug-log*/
 /** [onFieldClear description] */
 function onFieldClear(aType, fLvl, ttl, cnt) {                      /*dbug-log*///console.log('--onFieldClear [%s] cleared[%s] ttl[%s]', aType, cnt, ttl);
     sForm.handleCitText(fLvl);
+    _elems('storeMultiSelectValue', [fLvl, cnt, aType, null]);
     if (!aForm.isDynamicFieldEmpty(aType, ttl)) { return handleBlanks(aType, fLvl); }
     ifNoneStillSelectedEnableOtherType(aType, fLvl, cnt);
     aForm.removeAuthField(aType, ttl--);
@@ -50,9 +52,10 @@ function handleEmptyFields(aType, fLvl, ttl, cnt) {
     handleBlanks(aType, cnt, fLvl);
 }
 /** [ifFinalFieldEmptyRemove description] */
-function removeExtraEmptyFields(aType, ttl) {                       /*dbug-log*///console.log('--removeExtraEmptyFields ttl[%s] cleared[%s]', ttl);
+function removeExtraEmptyFields(aType, ttl) {                       /*dbug-log*///console.log('--removeExtraEmptyFields ttl[%s]', ttl);
     while (ttl > 1 && aForm.isDynamicFieldEmpty(aType, ttl)) {
-        if (ttl > 2 && aForm.isDynamicFieldEmpty(aType, ttl-1)) { return; }/*dbug-log*///console.log('  --Removing [%s]', ttl);
+        if (ttl > 2 && aForm.isDynamicFieldEmpty(aType, ttl-1)) { return; }
+        if (ttl === 2 && !aForm.isDynamicFieldEmpty(aType, ttl-1)) { return; }/*dbug-log*///console.log('  --Removing [%s]', ttl);
         aForm.removeAuthField(aType, ttl--);
     }
 }
@@ -64,7 +67,7 @@ function removeExtraEmptyFields(aType, ttl) {                       /*dbug-log*/
 function handleBlanks(aType, cnt, fLvl) {
     const vals = _state('getFieldState', [fLvl, aType]);            /*dbug-log*///console.log('--handleBlanks [%s][%O]', aType, vals);
     let blank = checkForBlanks(vals, cnt);
-    if (blank !== 'found') { return; }
+    if (blank !== 'found') { return ifPreviousAlertClearIt(aType, fLvl); }
     alertBlank(aType, fLvl);
     return true;
 }

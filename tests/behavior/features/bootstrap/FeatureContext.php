@@ -5,9 +5,6 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 
-// require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
-// require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
-
 /**
  * All application feature methods.
  *
@@ -53,7 +50,20 @@ class FeatureContext extends RawMinkContext implements Context
 /** __________________________ SELECTORS ______________________________________ */
     private function getComboId($label)
     {
-        return '#sel-'.str_replace(' ','',$label);
+        return '#sel-'.$this->getFieldName($label);
+    }
+    private function getInputSelector($label)
+    {
+        return '#'.$this->getFieldName($label).'_f .f-input';
+    }
+
+    private function getFieldSelector($label)
+    {
+        return $this->getOpenFormId().' '.$this->getInputSelector($label);
+    }
+    private function getFieldName($label)
+    {
+        return str_replace(' ','',$label);
     }
     private function getNameFilter($entity)
     {
@@ -62,7 +72,7 @@ class FeatureContext extends RawMinkContext implements Context
 /** __________________________ ALIASES ______________________________________ */
     private function execute($statement)
     {
-        return $this->getUserSession()->executeScript($statement);
+        $this->getUserSession()->executeScript($statement);
     }
     private function evaluate($statement)
     {
@@ -208,7 +218,7 @@ class FeatureContext extends RawMinkContext implements Context
         $val = $this->getValueToSelect($selId, $type);
         $newElems = [  //Add views with sub-groups
             'Arthropods' => $this->getComboId('Order Filter'),
-            'Authors' => $this->getNameFilter('Author'),
+            'Author' => $this->getNameFilter('Author'),
             'Bats' => $this->getComboId('Object Groups Filter'),
             'Potozoas' => $this->getComboId('Species Filter'),
             'Plants' => $this->getComboId('Species Filter'),
@@ -344,7 +354,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iAddToTheDynamicCombobox($text, $prop)
     {
         $newFormLvl = $this->getOpenFormPrefix() === 'sub' ? 'sub2' : 'sub';
-        $count = $this->getCurrentFieldCount($prop);
+        $count = $this->getCurrentFieldCount($prop);                            //print("---count?".$count);
         $this->iSelectFromTheDynamicCombobox($text, $prop, $count, 'new');
         $this->waitForTheFormToOpen($newFormLvl);
     }
@@ -353,10 +363,10 @@ class FeatureContext extends RawMinkContext implements Context
      * @When I select :text from the :prop dynamic combobox
      * Note: Changes the last empty ($new) combobox, or the last filled (!$new).
      */
-    public function iSelectFromTheDynamicCombobox($text, $prop, $count = null, $new = false)
+    public function iSelectFromTheDynamicCombobox($text, $prop, $cnt = null, $new = false)
     {
-        $count = $count ? $count : $this->getCurrentFieldCount($prop);
-        $selId = $this->getComboId($prop).$count;
+        $count = $cnt ? $cnt : $this->getCurrentFieldCount($prop);
+        $selId = $this->getComboId($prop).$count;  print($selId);
         $this->selectTextInCombobox($selId, $text, $new);
     }
 
@@ -422,11 +432,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iChangeTheFieldTo($prop, $type, $text)
     {
-        $map = [ "taxon name" => "#txn-name", 'Edition' => '#Volume_row input' ];
-        $curForm = $this->getOpenFormId();
-        $field = array_key_exists($prop, $map) ? $map[$prop] :
-            '#'.str_replace(' ','',$prop).'_row '.$type;
-        $selector = $curForm.' '.$field;
+        $selector = $this->getInputSelector($prop);
         $this->addValueToFormInput($selector, $text);
         $this->assertFieldValueIs($text, $selector);
     }
@@ -852,7 +858,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iPinTheField($prop)
     {
-        $selector = '#'.str_replace(' ','',$prop).'_pin';
+        $selector = '#'.$this->getFieldName($prop).'_pin';
         $this->execute("$('$selector').click();");
         $checked = $this->evaluate("$('$selector').prop('checked');");
         $this->handleEqualAssert($checked, true, true, "The [$prop] field is not checked.");
@@ -912,11 +918,12 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iTypeInTheField($text, $prop, $type)
     {
-        $map = [ 'Edition' => 'Volume', 'Chapter Title' => 'Title' ];
-        $name = array_key_exists($prop, $map) ? $map[$prop] : $prop;
-        $field = '#'.str_replace(' ','',$name).'_row '.$type;
-        $curForm = $this->getOpenFormId();
-        $selector = $curForm.' '.$field;
+        // $map = [ 'Edition' => 'Volume', 'Chapter Title' => 'Title' ];
+        // $name = array_key_exists($prop, $map) ? $map[$prop] : $prop;
+        // $field = '#'.str_replace(' ','',$name).'_f '.$type;
+        // $curForm = $this->getOpenFormId();
+        // $selector = $curForm.' '.$field;
+        $selector = $this->getInputSelector($prop);
         $this->addValueToFormInput($selector, $text);
     }
 
@@ -955,8 +962,9 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iSeeInTheField($text, $prop, $type)
     {
-        $field = '#'.str_replace(' ','',$prop).'_row '.$type;
-        $selector = $this->getOpenFormId().' '.$field;
+        // $field = '#'.str_replace(' ','',$prop).'_f '.$type;
+        // $selector = $this->getOpenFormId().' '.$field;
+        $selector = $this->getInputSelector($prop);
         $this->assertFieldValueIs($text, $selector);
     }
 
@@ -1031,11 +1039,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheField($text, $prop, $type)
     {
-        $map = [ 'Edition' => 'Volume' ];
-        $name = array_key_exists($prop, $map) ? $map[$prop] : $prop;
-        $field = '#'.str_replace(' ','',$name).'_row '.$type;
-        $curForm = $this->getOpenFormId();
-        $selector = $curForm.' '.$field;
+        $selector = $this->getInputSelector($prop);
         $this->assertFieldValueIs($text, $selector);
     }
 
@@ -1067,8 +1071,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theFieldShouldBeEmpty($prop)
     {
-        $map = [ 'Note' => '#Note_row textarea' ];
-        $selector = $map[str_replace(' ','',$prop)];
+        $selector = $this->getInputSelector($prop);
         $val = $this->evaluate("$('$selector')[0].innerText");
         $this->handleEqualAssert($val, '', true, "The [$prop] should be empty.");
     }
@@ -1189,17 +1192,28 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iPressTheButton($bttnText)
     {
-        if (stripos($bttnText, "Update") !== false ||
-            stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
-
+        if ($bttnText === "Update" || $bttnText === "Create") {
+            return $this->iSubmitTheForm($bttnText);
+        }
         $this->pressTheButton($bttnText);
 
-        if ($bttnText === 'Update Interaction') {
-            $this->ensureThatFormClosed();
-        }
         if ($bttnText === 'Map View') {
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
+    }
+    /**
+     * @Given I submit the form
+     */
+    public function iSubmitTheForm($text = null)
+    {
+        $selector = '#'.$this->getOpenFormPrefix().'-submit';
+        $bttnText = $text ? $text : $this->evaluate("$('$selector').val();");
+        $this->execute("$('$selector').click();");
+
+        if ($bttnText === 'Update') {
+            $this->ensureThatFormClosed();
+        }
+        self::$dbChanges = true;
     }
     private function pressTheButton($bttnText)
     {
@@ -1276,7 +1290,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function ifValIsSelected($selId, $val)
     {
-        $selected = $this->evaluate("$('$selId').val();");
+        $selected = $this->evaluate("$('$selId').val();");   print("\n    selected[$selected]");
         return $selected == $val;
     }
 
@@ -1381,8 +1395,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function getCurrentFieldCount($prop)
     {
-        $selCntnrId = '#sel-cntnr-'.str_replace(' ','',$prop);
-        return $this->evaluate("$('$selCntnrId').data('cnt');");
+        $selCntnrId = '#'.$this->getFieldName($prop).'_f-cntnr';
+        $cnt = $this->evaluate("$('$selCntnrId').data('cnt');");
+        return $cnt ? $cnt : 1;
     }
     private function getFieldTextOrValue($fieldId)
     {
@@ -1546,7 +1561,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->spin(function() {
             try {
                 $form = $this->getUserSession()->getPage()->find('css', '.form-popup');
-                if ($form) { $this->pressTheButton('Update Interaction'); }
+                if ($form) { $this->pressTheButton('Update'); }
                 return !$form;
             } catch (Exception $e) { return false;
             } finally { return true; }
@@ -1730,7 +1745,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillTaxaFields($taxaData);
         $miscData = [ 'Prey', 'Secondary', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
-        $this->curUser->getPage()->pressButton('Create Interaction');
+        $this->curUser->getPage()->pressButton('Create');
         $this->iPressSubmitInTheConfirmationPopup();
         $this->waitForInteractionFormToReset();
     }
@@ -1788,7 +1803,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iClickOnTheEditPencilForTheRow('Santa Ana-Forest');
         $this->iChangeTheFieldTo('Display Name', 'input', 'Santa Ana-Desert');
         $this->iSelectFromTheCombobox('Desert', 'Habitat Type');
-        $this->curUser->getPage()->pressButton('Update Location');
+        $this->curUser->getPage()->pressButton('Update');
         $this->iWaitForTheFormToClose('top');
     }
     private function moveLocationInteraction()
@@ -1797,7 +1812,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Santa Ana-Desert');
         $this->iSelectFromTheCombobox('Costa Rica', 'Location');
-        $this->curUser->getPage()->pressButton('Update Interaction');
+        $this->curUser->getPage()->pressButton('Update');
         $this->iWaitForTheFormToClose('top');
         $this->theDatabaseTableIsGroupedBy('Locations');
         $this->iUncheckTheDateUpdatedFilter();
@@ -1816,8 +1831,8 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheRow('Family Sphingidae');
-        $this->iChangeTheFieldTo('taxon name', 'input', 'Sphingidaey');
-        $this->curUser->getPage()->pressButton('Update Taxon');
+        $this->iChangeTheFieldTo('Name', 'input', 'Sphingidaey');
+        $this->curUser->getPage()->pressButton('Update');
         $this->iWaitForTheFormToClose('top');
     }
     private function moveTaxonInteraction()
@@ -1829,7 +1844,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iSelectFromTheCombobox('Sphingidaey', 'Family');
         $this->iPressTheButton('Select Taxon');
         $this->iWaitForTheFormToClose('sub');
-        $this->curUser->getPage()->pressButton('Update Interaction');
+        $this->curUser->getPage()->pressButton('Update');
         $this->iWaitForTheFormToClose('top');
         $this->iUncheckTheDateUpdatedFilter();
         $this->theDatabaseTableIsGroupedBy('Taxa');

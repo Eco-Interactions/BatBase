@@ -23,6 +23,7 @@ function updateAuthData(aType, fLvl, cnt) {
 /** [updateFieldState description] */
 function updateFieldState(cnt) {                                    /*dbug-log*///console.log('--updateFieldState [%s][%s][%s]', a.group, a.type, cnt);
     _state('setFieldState', [a.group, a.type, cnt, 'count']);
+    $(`#${a.type}_f-cntnr`).data('cnt', cnt); //Used in testing
 }
 /* ======================== BUILD FIELD ===================================== */
 export function buildNewAuthorSelect(fLvl, aType, cnt) {            /*dbug-log*///console.log('+--buildNewAuthorSelect[%s][%s]', aType, cnt);
