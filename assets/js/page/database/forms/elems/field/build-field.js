@@ -7,19 +7,20 @@
  * TODO: DOCUMENT
  *
  * Export
+ *     buildDynamicFormField
  *     buildFormField
  *     storeMultiSelectValue
  *
  * TOC
- *     BUILD INPUT
  *     BUILD FIELD
  *         IF PINNABLE
  *         FIELD STATE
- *         SET VALUE
  *     ON FIELD CHANGE
  *         IF CITATION FORM, REGENERATE CITATION
  *         STORE FIELD-DATA
  *             MULTI-SELECT DATA
+ *     FIELD PIN
+ *     HELPERS
  */
 import { _el, _u } from '~util';
 import { _elems, _form, _state } from '~form';

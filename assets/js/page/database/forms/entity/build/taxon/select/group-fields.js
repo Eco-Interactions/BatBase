@@ -10,6 +10,7 @@
  *         CLEAR PREVIOUS GROUP COMBOS
  *         BUILD GROUP FIELDS
  */
+import { _cmbx } from '~util';
 import { _elems, _state } from '~form';
 /**
  * Removes any previous group comboboxes. Shows a combobox for each rank present
@@ -19,10 +20,15 @@ import { _elems, _state } from '~form';
 export function onGroupSelection(val) {                             /*temp-log*/console.log("               +--onGroupSelection. [%s]", val);
     if (val === '' || isNaN(parseInt(val))) { return; }
     updateFieldValues({ Group: val, 'Sub-Group': null });
-    return rebuildTaxonSelectForm();
+    return rebuildTaxonSelectForm()
+        .then(setSubGroupCombo);
 }
 function updateFieldValues(vals) {
     Object.keys(vals).forEach(f => _state('setFieldState', ['sub', f, vals[f]]));
+}
+function setSubGroupCombo() {
+    const val = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).taxon.id;
+    _cmbx('setSelVal', ['Sub-Group', val, 'silent']);
 }
 /* ------------------ SELECT SUB-GROUP -------------------------------------- */
 export function onSubGroupSelection(val) {                          /*temp-log*/console.log("               +--onSubGroupSelection. [%s]", val)
@@ -33,8 +39,9 @@ export function onSubGroupSelection(val) {                          /*temp-log*/
 function rebuildTaxonSelectForm() {
     const field = $('#select-group').data('field');
     _state('updateTaxonGroupState', ['sub']);
-    _elems('onFormConfgChanged', ['sub', field])
-    .then(() => ifParentSelectRemoveSpecies(field));
+    return _elems('onFormConfgChanged', ['sub', field])
+        .then(() => ifParentSelectRemoveSpecies(field))
+        .then(() => Promise.resolve());
 }
 export function ifParentSelectRemoveSpecies(field) {                /*dbug-log*///console.log("--ifParentSelectRemoveSpecies field[%s]", field);
     if (field !== 'Parent') { return; }

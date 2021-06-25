@@ -54,6 +54,7 @@ export function setTaxonGroupState(rcrds, f) {                      /*dbug-log*/
     const sGroupId = getSubGroupId(rcrds, f, group);                /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
     setGroupState(rcrds.taxon, f, group);
     setSubGroupState(rcrds.taxon, f.fields, group.subGroups, sGroupId);
+    // f.views = _confg('getGroupFieldView', [f.fields['Sub-Group']]);
 }
 function getGroupEntity(rcrds, f) {
     return rcrds.group[f.fields.Group.value];
@@ -74,7 +75,7 @@ function setGroupState(taxa, fState, group) {                       /*dbug-log*/
 function setSubGroupState(rcrds, fields, subGroups, sGroupId) {     /*dbug-log*///console.log('--setSubGroupState rcrds[%O], fields[%O], subGroups[%O], sGroupId[%s]', rcrds, fields, subGroups, sGroupId);
     const subGroup = subGroups[sGroupId];
     fields['Sub-Group'].shown = Object.keys(subGroups).length > 1;
-    fields['Sub-Group'].value = subGroup.id;                        /*dbug-log*///console.log('--setSubGroupState field[%O] subGroup[%O] subGroups[%O]', fields['Sub-Group'], subGroup, subGroups);
+    fields['Sub-Group'].value = subGroup.id;                        /*dbug-log*///console.log('--setSubGroupState field[%O] subGroup[%O] subGroups[%O]', _u('snapshot', [fields['Sub-Group']]), subGroup, subGroups);
     fields['Sub-Group'].misc = {
         rcrd: subGroup,
         subRanks: subGroup.subRanks,

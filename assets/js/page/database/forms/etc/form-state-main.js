@@ -142,7 +142,7 @@ export function setFieldState(...args) {
 export function updateTaxonGroupState(fLvl) {
     const fState = fS.forms[fLvl];
     set.setTaxonGroupState(fS.records, fState);
-    _confg('onEntityTypeChangeUpdateConfg', [fLvl])
+    _confg('updateCurrentFieldView', [fState]);
 }
 export function setTaxonGroupState(rcrds, fState) {
     set.setTaxonGroupState(rcrds, fState);

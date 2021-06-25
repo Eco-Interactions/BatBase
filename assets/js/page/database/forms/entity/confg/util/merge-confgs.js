@@ -51,7 +51,7 @@ export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-lo
         delete field.required;
     }
     /** [mergeFieldConfgData description] */
-    function mergeFieldConfgData(field, prop, val) {                /*dbug-log*///console.log('--mergeFieldConfgData field[%s] prop[%s] = [%O] [%O]', field, prop, val, cFields);
+    function mergeFieldConfgData(field, prop, val) {                /*dbug-log*///console.log('--mergeFieldConfgData prop[%s] = [%O] fieldDataBefore[%O]', prop, field, val, _u('snapshot', [cFields]));
         if (!cFields[field]) { cFields[field] = {}; }
         mergeFieldProps(field, prop, val);
         cFields[field].current = true;
@@ -65,7 +65,7 @@ export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-lo
         const data = prop in edge ? edge[prop](prop, field, val) : val;
         cFields[field][prop] = data;
     }
-    function mergeObjectConfgs(prop, field, val) {                       /*dbug-log*///console.log('--getMergedPrepConfg field[%s] val[%O] [%O]', field, val, cFields);
+    function mergeObjectConfgs(prop, field, val) {                  /*dbug-log*///console.log('--getMergedPrepConfg field[%s] val[%O] [%O]', field, val, cFields);
         if (!cFields[field][prop]) { cFields[field][prop] = {}; }
         return {...cFields[field][prop], ...val};
     }
@@ -76,7 +76,7 @@ export function mergeFieldConfg(cFields, mFields, finalMerge = false) {/*dbug-lo
  * @param  {[type]} mViews [description]
  * @return {[type]}        [description]
  */
-function mergeViewConfg(cViews, mViews) {                            /*dbug-log*///console.log('--mergeViewConfg mViews[%O]', mViews);
+function mergeViewConfg(cViews, mViews) {                           /*dbug-log*///console.log('--mergeViewConfg mViews[%O]', mViews);
     handleSimpleViewMerge(cViews, mViews);
     mergeFormViewConfg('all', cViews, mViews);
 }

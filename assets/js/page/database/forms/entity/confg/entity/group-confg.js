@@ -1,6 +1,7 @@
 /**
  * Interaction subject/object role- or Taxon parent-selection form configuration.
  */
+import { _u } from '~util';
 import { _state } from '~form';
 
 export default function(action, field) {
@@ -17,7 +18,7 @@ export default function(action, field) {
         }
     };
 }
-export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getGroupFieldViewOrder sGroupField[%O]', sGroupField);
+export function getGroupFieldViewOrder(sGroupField) {                /*dbug-log*///console.log('getGroupFieldViewOrder sGroupField[%O]', _u('snapshot', [sGroupField]));
     const gFields = [['Group'], ['Sub-Group']];
     if (!sGroupField.shown) { gFields.pop(); }
     return [...gFields, ...getSubGroupRankFields(sGroupField)];

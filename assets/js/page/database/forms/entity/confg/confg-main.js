@@ -42,6 +42,7 @@
  *
  * Export
  *     getFormConfg
+ *     updateCurrentFieldView
  *     onEntityTypeChangeUpdateConfg
  *     onFieldViewChangeUpdateConfg
  *
@@ -83,16 +84,16 @@ function updateConfg(c) {                                           /*temp-log*/
     const mConfg = getBaseConfg(c.action, c.name, c.type);
     resetConfgDefaults(c);
     cUtil.mergeFieldConfg(c.fields, mConfg.fields, 'finalMerge');
-    handleCurrentFieldView(c, mConfg.views);
+    updateCurrentFieldView(c, mConfg.views);
     updateActiveFieldFlags(c.fields);
 }
-function handleCurrentFieldView(c, mViews) {
-    const views = c.action === 'select' ? getGroupFieldView(c) : mViews;/*dbug-log*///console.log(' views[%O]', views);
+export function updateCurrentFieldView(c, mViews) {
+    const views = c.action !== 'select' ? mViews : getGroupFieldView(c.fields['Sub-Group']);/*dbug-log*///console.log(' views[%O]', views);
     cUtil.buildViewConfg(c, views);
 }
-function getGroupFieldView(c) {                                     /*dbug-log*///console.log('--getGroupFieldView c[%O]', c)
+function getGroupFieldView(sGroupField) {                    /*dbug-log*///console.log('--getGroupFieldView c[%O]', c)
     return {
-        all: getGroupFieldViewOrder(c.fields['Sub-Group'])
+        all: getGroupFieldViewOrder(sGroupField)
     };
 }
 /* ---------------------- RESET VOLATILE CONFG ------------------------------ */
@@ -105,13 +106,13 @@ function resetFieldConfgDefaults(fields) {                          /*dbug-log*/
 }
 function resetFieldDefaults(fConfg) {                               /*dbug-log*///console.log('     --resetFieldDefaults [%O]', fConfg);
     const props = [ 'active', 'combo', 'input', 'shown' ];
-    props.forEach(p => delete fConfg[p]);                           /*dbug-log*///console.log('     --after reset [%O]', fConfg);
+    props.forEach(p => delete fConfg[p]);                           /*dbug-log*///console.log('     --after reset [%O]', _u('snapshot', [fConfg]));
     if (fConfg.count) { fConfg.count = 1 }
 }
-function updateActiveFieldFlags(fields) {
+function updateActiveFieldFlags(fields) {                           /*dbug-log*///console.log('  --updateActiveFieldFlags fields[%O]', fields);
     Object.values(fields).forEach(setActiveFlag);
 }
-function setActiveFlag(field) {                                     /*dbug-log*///console.log('  --setActiveFlag fields[%O]', field);
+function setActiveFlag(field) {                                     /*dbug-log*///console.log('  --setActiveFlag field[%O]', field);
     field.active = field.current || false;
     delete field.current;
 }

@@ -69,9 +69,9 @@ export function onRankSelection(rankName, val) {                    /*dbug-log*/
 /* ======================== SELECTED ======================================== */
 /** Finds the most specific rank with a selection and returns that taxon record. */
 export function getSelectedTaxon(aboveRank) {
-    const selElems = $('#sub-form .selectized').toArray();
-    if (ifEditingTaxon()) { selElems.reverse(); } //Taxon-parent edit-form.
-    const selected = selElems.find(el => isSelectedTaxon(aboveRank, el));/*dbug-log*///console.log("--getSelectedTaxon above [%s]. selElems = %O selected = %O", aboveRank, selElems, _state('getRcrd', ['taxon', $(selected).val()]));
+    const selElems = $('#sub-form .selectized').toArray().reverse();/*dbug-log*///console.log("--getSelectedTaxon above [%s]. selElems[%O]", aboveRank, selElems);
+    // if (ifEditingTaxon()) { selElems.reverse(); } /*edit-form*/
+    const selected = selElems.find(el => isSelectedTaxon(aboveRank, el));/*dbug-log*///console.log("     --selected[%s][%O]", selected, _state('getRcrd', ['taxon', $(selected).val()]));
     const id = !selected ? getRoot() : $(selected).val();
     return _state('getRcrd', ['taxon', id]);
 }
@@ -81,16 +81,17 @@ function ifEditingTaxon() {
     return action === 'edit' && entity === 'Taxon';
 }
 /** Note: On combo reset, the most specific taxon above the resetRank is selected. */
-function isSelectedTaxon(resetRank, elem) {                         /*dbug-log*///console.log('--isSelectedTaxon above?[%s] [%s] id[%s]', resetRank, $(elem)[0].id, $(elem).val())
+function isSelectedTaxon(resetRank, elem) {                         /*dbug-log*///console.log('--isSelectedTaxon above?[%s] [%s][%s]', resetRank, $(elem)[0].id, $(elem).val())
     if (!ifIsRankComboElem(elem)) { return false; }
     if (resetRank && isRankChildOfResetRank(resetRank, elem)) { return false; }
     return $(elem).val();
 }
 function isRankChildOfResetRank(resetRank, elem) {
     const fLvl = _state('getSubFormLvl', ['sub']);
-    const allRanks = Object.keys(_state('getFieldState', [fLvl, 'Sub-Group', 'misc']).subRanks);
-    const rank = elem.id.split('sel-')[1];                          /*dbug-log*///console.log('is [%s] sub-rank to [%s]', rank, resetRank, allRanks.indexOf(rank) < allRanks.indexOf(resetRank));
-    return allRanks.indexOf(rank) >= allRanks.indexOf(resetRank);
+    const allRanks = _state('getFieldState', [fLvl, 'Sub-Group', 'misc']).subRanks;
+    const rank = elem.id.split('sel-')[1];                                /*dbug-log*///console.log('--ranks[%O]', allRanks);
+    const isChild = allRanks.indexOf(rank) <= allRanks.indexOf(resetRank);/*dbug-log*///console.log('     is [%s] sub-rank to [%s]? [%s]', rank, resetRank, isChild);
+    return isChild;
 }
 function ifIsRankComboElem(elem) {
     return elem.id.includes('sel') && !elem.id.includes('Group');

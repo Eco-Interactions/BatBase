@@ -24,7 +24,7 @@ import { _u } from '~util';
  * @param  {Object} vals     [description]
  * @return {[type]}          [description]
  */
-export function buildViewConfg(c, viewSets) {                       /*dbug-log*///console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O]", c, viewSets);
+export function buildViewConfg(c, viewSets) {                       /*dbug-log*///console.log("--setDisplayedFieldConfg confg[%O] viewSets[%O]", c, _u('snapshot', [viewSets]));
     c.infoSteps = 0;
     c.view = viewSets[c.display].map(row => getRowConfg(c, row));
 }
