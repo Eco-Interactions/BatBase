@@ -121,7 +121,7 @@ function saveSelVal($elem, val) {
 export function resetCombobox(field) {                              /*dbug-log*///console.log("resetCombobox [%s]", fields);
     const selApi = getSelApi(field);
     selApi.clear('silent');
-    selApi.updatePlaceholder();     //REMOVE?    // selApi.removeOption('');  //Removes the "Creating [entity]..." placeholder.
+    selApi.updatePlaceholder();
 }
 /* ----------------- (EN/DIS)ABLE COMBOBOXES -------------------------------- */
 export function enableCombobox(field, enable = true) {              /*dbug-log*///*console.log('enableCombobox [%s] ? [%s]', fields, enable);
@@ -176,11 +176,6 @@ export function getOptionTotal(field) {
     const selApi = getSelApi(field);
     return Object.keys(selApi.options).length;
 }
-export function removeOptions(field, vals) {                       /*dbug-log*///console.log('--removeOptions field[%s] vals[%O]', field, vals);
-    const selApi = getSelApi(field);
-    vals.forEach(v => selApi.removeOption(v, 'silent'));
-    /*dbug-log*///vals.forEach(v => { selApi.removeOption(v, 'silent'); console.log('removing[%s]', v); });
-}
 export function replaceSelOpts(field, opts) {                       /*dbug-log*///console.log('--replaceSelOpts field[%s] opts[%O]', field, opts)
     const selApi = getSelApi(field);
     clearCombobox(selApi);
@@ -193,8 +188,12 @@ export function addOpt(field, opt) {
     const selApi = getSelApi(field);
     selApi.addOption(opt, 'silent');
 }
-export function removeOpt(field, val) {
+export function removeOptions(field, vals) {                       /*dbug-log*///console.log('--removeOptions field[%s] vals[%O]', field, vals);
     const selApi = getSelApi(field);
+    vals.forEach(v => removeOpt(field, v, selApi));
+}
+export function removeOpt(field, val, api = false) {
+    const selApi = api ? api : getSelApi(field);
     selApi.removeOption(val, 'silent');
 }
 /* -------------------- GET VALUE FOR TEXT ---------------------------------- */

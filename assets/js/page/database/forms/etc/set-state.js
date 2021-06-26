@@ -54,7 +54,6 @@ export function setTaxonGroupState(rcrds, f) {                      /*dbug-log*/
     const sGroupId = getSubGroupId(rcrds, f, group);                /*dbug-log*///console.log('   --setTaxonGroupState subGroupId[%s] group[%O] ', sGroupId, group);
     setGroupState(rcrds.taxon, f, group);
     setSubGroupState(rcrds.taxon, f.fields, group.subGroups, sGroupId);
-    // f.views = _confg('getGroupFieldView', [f.fields['Sub-Group']]);
 }
 function getGroupEntity(rcrds, f) {
     return rcrds.group[f.fields.Group.value];

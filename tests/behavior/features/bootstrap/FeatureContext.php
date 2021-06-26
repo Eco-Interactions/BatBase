@@ -218,7 +218,7 @@ class FeatureContext extends RawMinkContext implements Context
         $val = $this->getValueToSelect($selId, $type);
         $newElems = [  //Add views with sub-groups
             'Arthropods' => $this->getComboId('Order Filter'),
-            'Author' => $this->getNameFilter('Author'),
+            'Authors' => $this->getNameFilter('Author'),
             'Bats' => $this->getComboId('Object Groups Filter'),
             'Potozoas' => $this->getComboId('Species Filter'),
             'Plants' => $this->getComboId('Species Filter'),
@@ -1058,8 +1058,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheFormHeader($text)
     {
-        $this->getUserSession()->wait( 10000, "$('#form-main p').length;");
-        $elem = $this->getUserSession()->getPage()->find('css', '#form-main p');
+        $this->getUserSession()->wait( 10000, "$('#success p').length;");
+        $elem = $this->getUserSession()->getPage()->find('css', '#success p');
         $html = $elem->getHtml();
         $this->handleNullAssert($html, false, 'Nothing found in header. Expected ['.$text.']');
         $this->handleContainsAssert($text, $html, true,
@@ -1269,28 +1269,29 @@ class FeatureContext extends RawMinkContext implements Context
     private function selectTextInCombobox($selId, $text, $new = false)
     {
         $this->spin(function() use ($selId, $text, $new) {
-            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);    //$this->log("\n   selectTextInCombobox - [$text] in [$selId]");
+            $val = $new ? 'create' : $this->getValueToSelect($selId, $text);    //$this->log("\n   selectTextInCombobox - [$text] in [$selId] new?[$new]");
             $this->selectComboValue($selId, $val);
-            return $new || $this->ifValIsSelected($selId, $val);
+            return $val !== 'create' ? $this->ifValIsSelected($selId, $val) : true;
         }, "Could not select [$text] in [$selId]");
     }
     private function selectComboValue($selId, $val)
-    {
-        if ($this->evaluate("$('$selId')[0].multiple")) {
+    {                                                                          //$this->log("\n  selectComboValue [$selId] -> [$val]");
+        if (is_array($val)) { //$this->evaluate("$('$selId')[0].multiple")
             $this->setMultiComboboxValues($selId, $val);
         } else {
             $this->execute("$('$selId')[0].selectize.addItem('$val');");
         }
     }
     private function setMultiComboboxValues($selId, $val)
-    {
-        foreach ($val as $v) {                                                  //$this->log("\n  setting [$selId] -> [$v]");
+    {                                                                           //$this->log("\n  setting multiselect [$selId] -> [$val]");
+        foreach ($val as $v) {
             $this->execute("$('$selId')[0].selectize.addItem('$v');");
         }
     }
     private function ifValIsSelected($selId, $val)
-    {
-        $selected = $this->evaluate("$('$selId').val();");   print("\n    selected[$selected]");
+    {                                                       //$this->log("\n     val[$val] isSelected");
+        $selected = $this->evaluate("$('$selId').val();");                     //$this->log("\n     val[$val] isSelected?[$selected]");
+        if ($selId === '#sel-InteractionTags' && !is_array($val)) { $val = [$val]; }
         return $selected == $val;
     }
 

@@ -27,8 +27,9 @@ function updateFieldValues(vals) {
     Object.keys(vals).forEach(f => _state('setFieldState', ['sub', f, vals[f]]));
 }
 function setSubGroupCombo() {
-    const val = _state('getFieldState', ['sub', 'Sub-Group', 'misc']).taxon.id;
-    _cmbx('setSelVal', ['Sub-Group', val, 'silent']);
+    const sGroupData = _state('getFieldState', ['sub', 'Sub-Group', null]);
+    if (!sGroupData.shown) { return; }
+    _cmbx('setSelVal', ['Sub-Group', sGroupData.misc.taxon.id, 'silent']);
 }
 /* ------------------ SELECT SUB-GROUP -------------------------------------- */
 export function onSubGroupSelection(val) {                          /*temp-log*/console.log("               +--onSubGroupSelection. [%s]", val)

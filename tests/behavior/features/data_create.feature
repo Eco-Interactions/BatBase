@@ -76,7 +76,7 @@ Feature: Add new data to the database
         And I see "New Publication"
         And I select "Book" from the "Publication Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I select "Callaye, Bendry J Jr" from the "Editor" dynamic combobox
+        And I select "Callaye, Bendry J Jr." from the "Editor" dynamic combobox
         And I select "Test Publisher" from the "Publisher" combobox
         And I check the "Show all fields" box
         And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
@@ -87,7 +87,7 @@ Feature: Add new data to the database
         ## Chapter Citation ##
         And I see "New Citation"
         And I select "Chapter" from the "Citation Type" combobox
-        And I type "Test Title for Chapter" in the "Title" field "input"
+        And I type "Test Title for Chapter" in the "Display Name" field "input"
         And I type "666-999" in the "Pages" field "input"
         And I select "Cockle, Anya" from the "Author" dynamic combobox
         And I type "Test Abstract Text" in the "Abstract" field "textarea"
@@ -103,7 +103,7 @@ Feature: Add new data to the database
         And I see "New Citation"
         And I should see "Article" in the "Citation Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I type "Test Title for Article" in the "Title" field "input"
+        And I type "Test Title for Article" in the "Display Name" field "input"
         And I type "666-999" in the "Pages" field "input"
         And I type "4" in the "Volume" field "input"
         And I type "1" in the "Issue" field "input"
@@ -118,7 +118,7 @@ Feature: Add new data to the database
         And I check the "Show all fields" box
         And I select "Thesis/Dissertation" from the "Publication Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I select "Callaye, Bendry J Jr" from the "Author" dynamic combobox
+        And I select "Callaye, Bendry J Jr." from the "Author" dynamic combobox
         And I select "Test Publisher" from the "Publisher" combobox
         And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
         And I type "Test description" in the "Description" field "textarea"
@@ -136,7 +136,7 @@ Feature: Add new data to the database
         And I see "New Publication"
         And I select "Other" from the "Publication Type" combobox
         And I type "1990" in the "Year" field "input"
-        And I select "Callaye, Bendry J Jr" from the "Author" dynamic combobox
+        And I select "Callaye, Bendry J Jr." from the "Author" dynamic combobox
         And I select "Test Publisher" from the "Publisher" combobox
         And I check the "Show all fields" box
         And I type "https://doi.org/10.1037/rmh0000008" in the "Doi" field "input"
@@ -158,6 +158,7 @@ Feature: Add new data to the database
         # And I press the "Click to select position" button in the map
         And I type "9.79026" in the "Latitude" field "input"
         And I type "-83.91546" in the "Longitude" field "input"
+        And I select "Costa Rica" from the "Country" combobox
         And I see the "new" location's pin on the map
         And I type "Test Location With GPS" in the "Display Name" field "input"
         And I type "Test Description" in the "Description" field "textarea"
@@ -201,7 +202,7 @@ Feature: Add new data to the database
         ### Object Sub-Group ##
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        And I select "Potozoa" from the "Group" combobox
+        And I select "Worm" from the "Group" combobox
         And I should see "Phylum Acanthocephala" in the "Sub-Group" combobox
         And I select "Phylum Nematoda" from the "Sub-Group" combobox
         And I add "O Sub-Group Family" to the "Family" combobox
@@ -246,7 +247,6 @@ Feature: Add new data to the database
         And I see "New Interaction"
         And I fill the new interaction form with the test values
         And I submit the form
-        And I press submit in the confirmation popup
         Then I should see "New Interaction successfully created." in the form header
 
     @javascript
@@ -259,7 +259,6 @@ Feature: Add new data to the database
         And I pin the "Subject" field
         And I pin the "Interaction Type" field
         And I submit the form
-        And I press submit in the confirmation popup
         Then I should see "New Interaction successfully created." in the form header
         And I should see "Test Book with Editors" in the "Publication" combobox
         And I should see "Test Title for Chapter" in the "Citation Title" combobox
@@ -289,7 +288,7 @@ Feature: Add new data to the database
         And the expected data in the interaction row
         And I collapse "Cockle, Anya" in the data tree
         ## Author [Smith, George Michael Sr] ##
-        And I expand "Callaye, Bendry J Jr" in the data tree
+        And I expand "Callaye, Bendry J Jr." in the data tree
         And I expand "Test Book with Editors" in the data tree
         And I expand "Test Title for Chapter" in level "3" of the data tree
         And I should see "2" interactions attributed

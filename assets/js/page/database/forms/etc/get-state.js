@@ -67,7 +67,7 @@ export function getFieldState(fState, field, prop = 'value') {       /*dbug-log*
     return prop ? fState.fields[field][prop] : fState.fields[field];
 }
 export function getComboFields(fState) {                            /*dbug-log*///console.log('getComboFields [%O]', fState.fields);//console.trace();
-    return Object.values(fState.fields).filter(f => f.combo);
+    return Object.values(fState.fields).filter(f => f.combo && f.shown);
 }
 /** Returns an object with field names(k) and values(v) of all form fields*/
 // export function getFieldValues(fState) {
