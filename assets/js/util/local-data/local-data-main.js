@@ -15,7 +15,7 @@
  *         DATA SYNC
  *         TEMP DATA
  */
-import { _alert, _modal } from '~util';
+import { _alert, _modal, _u } from '~util';
 import { showIntroAndLoadingMsg } from '~db';
 import * as idb from './etc/idb-util.js';
 import * as init from './init/db-init-main.js';

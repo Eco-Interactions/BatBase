@@ -67,6 +67,8 @@ class Publisher
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @Groups({"normalized", "flattened"})
+     *
+     * TODO REMOVE
      */
     private $description;
 

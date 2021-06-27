@@ -92,9 +92,6 @@ export function initTypeField() {
 export function onTypeSelection() {
     fields.onTypeSelection(...arguments);
 }
-export function setTypeEditVal() {
-    return fields.setTypeEditVal(...arguments);
-}
 /* --------------------------- TAGS ----------------------------------------- */
 export function clearTypeTagData() {
     return fields.clearTypeTagData(...arguments);

@@ -67,7 +67,7 @@ function setLocData(data, fState) {                                 /*dbug-log*/
     const loc = data.location[fState.id];                           /*dbug-log*///console.log('  --loc[%O]', loc);
     Object.values(fState.fields).forEach(setLocFieldValue);
     setGeoJsonData(fState.fields.GeoJson, data.geoJson[loc.geoJsonId])
-    fState.editing.detail = loc.geoJsonId;
+    fState.editing.detail = loc.geoJsonId ? loc.geoJsonId : null;
 
     function setLocFieldValue(fConfg) {                             /*dbug-log*///console.log('  --setLocFieldValue fConfg[%O]', fConfg);
         if (!fConfg.prop) { return; }

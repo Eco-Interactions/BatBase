@@ -130,7 +130,7 @@ function updateUiAfterBaseDatabaseInit(allDataAvailable) {
     if (app.userRole === 'editor') { toggleEditorFeatures(false); }
     delete app.dbInitializing;
 }
-function toggleEditorFeatures(enable = true) {
+function toggleEditorFeatures(enable = true) {                      /*dbug-log*///console.log('--toggleEditorFeatures [%s]', enable);
     const opac = enable ? 1 : .6;
     const c = enable ? 'pointer' : 'wait';
     $('#data-opts button').css({opacity: opac, cursor: c}).prop('disabled', !enable);

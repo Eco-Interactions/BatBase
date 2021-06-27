@@ -20,6 +20,14 @@ export default function(action, entity) {
                 required: true,
                 type: 'text'
             },
+            Description: {
+                prep: {
+                    setCoreData: [],
+                },
+                prop: {
+                    core: 'description'
+                }
+            },
             DisplayName: {
                 label: 'Name',
                 prep: {

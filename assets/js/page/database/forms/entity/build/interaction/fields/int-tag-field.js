@@ -43,7 +43,6 @@ function getTagFieldDefaultState() {
 export function initTagField() {
     handleDefaultTags(_state('getFieldState', ['top', 'InteractionTags', 'misc']));
     loadTagOpts(md.defaultTagOpts);
-    handleEditTags(_state('getFieldState', ['top', 'InteractionTags']));
 }
 /* ======================== INIT DEFAULT-TAGS =============================== */
 function handleDefaultTags() {
@@ -57,9 +56,6 @@ function handleDefaultTags() {
         if (tData.defaultTags.indexOf(tags[id].displayName) === -1) { return null; }
         return { text: tags[id].displayName, value: id }
     }
-}
-function handleEditTags(tags) {
-    $('#sel-InteractionTags').data('init-val', tags);
 }
 /* =================== CLEAR INTERACTION-TYPE TAGS ========================== */
 export function clearTypeTagData() {
@@ -88,8 +84,9 @@ function updateTagsState(tags, isRequired) {
     _state('setFieldState', ['top', 'InteractionTags', tField, null]);
 }
 function getStillSelectedTags(val, typeTags, dTags) {
-    const valid = typeTags ? typeTags.concat(dTags) : dTags;
-    const nVal = !val ? [] : val.filter(i => valid.indexOf(i) !== -1);
+    let valid = typeTags ? typeTags.concat(dTags) : dTags;
+    valid = valid.map(v => v.id ? String(v.id) : v.value)
+    const nVal = !val ? [] : val.filter(i => valid.indexOf(i) !== -1);/*dbug-log*///console.log('    --getStillSelectedTags prev[%O] valid[%O] new[%s]', val, valid, nVal);
     return nVal.length ? nVal : null;
 }
 /* ------------------------ BUILD TAG-OPTS ---------------------------------- */

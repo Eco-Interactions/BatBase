@@ -28,6 +28,14 @@ function getPublicationFieldConfg() {
         Author: {
             required: true
         },
+        Description: {
+            prep: {
+                setDetailData: [],
+            },
+            prop: {
+                detail: 'description'
+            }
+        },
         DisplayName: { //Source field
             label: 'Title',
             prep: {

@@ -5,7 +5,6 @@
  *     initTypeField
  *     onTypeSelection
  *     resetTypeAndTagMemory
- *     setTypeEditVal
  *
  * TOC
  *     FIELD STATE
@@ -78,7 +77,6 @@ function buildValidInteractionTypeOptions() {
 function getAllValidInteractionTypes(validInteractions) {           /*dbug-log*///console.log('-getAllValidInteractionTypes = %O', validInteractions);
     const types = [];
     Object.keys(validInteractions).forEach(ifValidAddData);
-    // _state('setFormState', ['top', 'valData', md.validInts]); //Not needed yet.
     return types;
 
     function ifValidAddData(id) {
@@ -107,23 +105,17 @@ function loadTypeOptions(opts) {                                    /*dbug-log*/
  */
 function selectTypeInitVal(prevType, typeOpts) {
     const initVal = $('#sel-InteractionType').data('init-val') || prevType;
-    const validType = typeOpts.find(opt => opt.value == initVal);   /*dbug-log*///console.log('selectInitValIfValidType initVal?[%s] validType?[%s]', initVal, validType);
+    const validType = Object.keys(md.validInts).find(i => ifInitTypeValid(i, initVal));/*dbug-log*///console.log('selectInitValIfValidType initVal?[%s] validInts[%O] validType?[%s]', initVal, md.validInts, validType);
     if (validType) {
-        _cmbx('setSelVal', ['InteractionType', initVal]);
+        _cmbx('setSelVal', ['InteractionType', validType]);
     } else {
         iForm.clearTypeTagData();
         _cmbx('focusCombobox', ['InteractionType']);
     }
 }
-/* -------------------- FIELD INIT-VAL -------------------------------------- */
-export function setTypeEditVal(tId) {
-    const vId = Object.keys(md.validInts).find(ifTypeMatches);   /*dbug-log*///console.log('--setTypeEditVal vId[%s]', vId)
-    _cmbx('setSelVal', ['InteractionType', vId]);
-
-    function ifTypeMatches(id) {
-        return md.validInts[id].interactionType === tId;
-    }
-
+function ifInitTypeValid(i, typeId) {
+    const validInt = md.validInts[i];
+    return validInt.interactionType == typeId;
 }
 /* ======================== ON TYPE SELECTION =============================== */
 export function onTypeSelection(val) {

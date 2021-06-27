@@ -57,7 +57,7 @@ function buildCitData(fields) {                                     /*dbug-log*/
     return {
         citationType: { displayName: getCitationType(fields.CitationType.value) },
         title: fields.DisplayName.value,
-        publicationPages: fields.Pages.value,
+        publicationPages: fields.Pages.shown ? fields.Pages.value : null,
         publicationIssue: fields.Issue.value,
         publicationVolume: getVolumeOrEdition(fields.Volume, fields.Edition),
     };

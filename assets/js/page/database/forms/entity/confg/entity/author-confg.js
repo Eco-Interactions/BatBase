@@ -9,6 +9,14 @@ export default function(action, entity) {
             edit: ['source', 'author']
         },
         fields: {
+            Description: {
+                prep: {
+                    setCoreData: [],
+                },
+                prop: {
+                    core: 'description'
+                }
+            },
             DisplayName: {
                 prop: {
                     core: 'displayName'

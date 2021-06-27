@@ -169,13 +169,13 @@ Feature: Edit data in the database
         Then I should see "Santa Ana-Forest" under "Panama" in the tree
         And I should not see "Santa Ana-Forest" under "Costa Rica" in the tree
 
-  ## -------------------------- Source ---------------------------------------##
+  # -------------------------- Source ---------------------------------------##
     @javascript
     Scenario:  I should be able to edit the data of an existing publication
         Given the database table is grouped by "Sources"
         And I click on the edit pencil for the "Journal of Mammalogy" row
         And I see "Editing Publication"
-        When I change the "Title" field "input" to "Book of Mammalogy"
+        When I change the "Display Name" field "input" to "Book of Mammalogy"
         And I select "Book" from the "Publication Type" combobox
         And I change the "Description" field "textarea" to "Description..."
         And I change the "Year" field "input" to "1993"
@@ -189,7 +189,7 @@ Feature: Edit data in the database
         And I select "Book" from the "Publication Type Filter" combobox
         And I click on the edit pencil for the "Book of Mammalogy" row
         And I see "Editing Publication"
-        Then I should see "Book of Mammalogy" in the "Title" field "input"
+        Then I should see "Book of Mammalogy" in the "Display Name" field "input"
         Then I should see "Description..." in the "Description" field "textarea"
         Then I should see "Book" in the "Publication Type" combobox
         Then I should see "https://www.link.com" in the "Website" field "input"
@@ -208,8 +208,9 @@ Feature: Edit data in the database
         And I change the "Suffix" field "input" to "Jr"
         And I change the "Website" field "input" to "https://www.link.com"
         And I submit the form
+        And I press submit in the confirmation popup
         And I wait for the "top" form to close
-        And I click on the edit pencil for the "Cockel, Joy Karen Jr" row
+        And I click on the edit pencil for the "Cockel, Joy Karen Jr." row
         And I see "Editing Author"
         Then I should see "Joy" in the "First Name" field "input"
         Then I should see "Karen" in the "Middle Name" field "input"
@@ -229,6 +230,7 @@ Feature: Edit data in the database
         And I change the "Description" field "textarea" to "Something descriptive"
         And I change the "Website" field "input" to "https://www.link.com"
         And I submit the form
+        And I press submit in the confirmation popup
         And I wait for the "top" form to close
         And I click on the edit pencil for the "University of Paris V" row
         And I see "Editing Publisher"
@@ -237,7 +239,7 @@ Feature: Edit data in the database
         Then I should see "Something descriptive" in the "Description" field "textarea"
         Then I should see "https://www.link.com" in the "Website" field "input"
 
-    #todo - test proper removal of citation from authors in tree
+    todo - test proper removal of citation from authors in tree
     @javascript
     Scenario:  I should be able to edit the data of an existing citation [CHAPTER->BOOK]
         Given the database table is grouped by "Sources"
@@ -262,7 +264,7 @@ Feature: Edit data in the database
         And I see "Editing Citation"
         Then I should see "Baker, H. G. & A. Cockle. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Description" field "textarea"
         And I should see "Test Abstract" in the "Abstract" field "textarea"
-        And I should see "Feeding habits" in the "Title" field "input"
+        And I should see "Feeding habits" in the "Display Name" field "input"
         And I should see "Book" in the "Citation Type" combobox
         And I should see "4" in the "Edition" field "input"
         And I should see "https://www.link.com" in the "Website" field "input"
@@ -295,7 +297,7 @@ Feature: Edit data in the database
         And I view interactions by "Arthropods"
         And I click on the edit pencil for the "Order Lepidoptera" row
         And I see "Editing Taxon"
-        When I change the "taxon name" field "input" to "Leopardil"
+        When I change the "Display Name" field "input" to "Leopardil"
         When I select "Class" from the "Rank" combobox
         And I submit the form
         And I wait for the "top" form to close
@@ -304,11 +306,11 @@ Feature: Edit data in the database
     @javascript
     Scenario:  I should be able to edit the parent taxon of an existing taxon
         Given the database table is grouped by "Taxa"
-        And I view interactions by "Potozoas"
+        And I view interactions by "Worms"
         And I expand "Phylum Nematoda" in the data tree
         And I click on the edit pencil for the "Class Striped" row
         And I see "Editing Taxon"
-        When I press "Change Parent"
+        And I focus on the "Parent" taxon field
         And I see "Select New Taxon Parent"
         When I select "Arthropod" from the "Group" combobox
         And I press the "Select" button

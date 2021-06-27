@@ -114,8 +114,8 @@ function finishFieldFill() {
     const fields = _state('getFormState', ['top', 'fields']);       /*dbug-log*///console.log('--finishFieldFill [%O]', fields);
     setSourceFields(fields.Publication, fields.CitationTitle);
     setLocationDetailPanel(fields.Location.value);
-    setTaxonFields(fields.Subject.value, fields.Object.value);
     setTypeAndTagFields(fields.InteractionType, fields.InteractionTags);
+    setTaxonFields(fields.Subject.value, fields.Object.value);
 }
 function setLocationDetailPanel(id) {
     const locRcrd = _state('getRcrd', ['location', id]);
@@ -125,11 +125,12 @@ function setSourceFields(pubField, citField) {                      /*dbug-log*/
     iForm.fillCitationCombo(pubField.value);
     _cmbx('setSelVal', ['CitationTitle', citField.value]);
 }
+/** Note: Must happen before taxon fields filled for auto-type handling. */
+function setTypeAndTagFields(typeField, tagsField) {
+    $('#sel-InteractionType').data('init-val', typeField.value);
+    $('#sel-InteractionTags').data('init-val', tagsField.value);
+}
 function setTaxonFields(subId, objId) {
     iForm.buildOptAndUpdateCombo('Subject', subId);
     iForm.buildOptAndUpdateCombo('Object', objId);
-}
-function setTypeAndTagFields(typeField, tagsField) {
-    iForm.initTypeFieldIfBothTaxonRolesFilled();
-    iForm.setTypeEditVal(typeField.value);
 }

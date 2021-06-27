@@ -88,9 +88,6 @@ export function initTypeFieldIfBothTaxonRolesFilled() {
 export function initTypeField() {
     return type.initTypeField(...arguments);
 }
-export function setTypeEditVal() {
-    return type.setTypeEditVal(...arguments);
-}
 export function onTypeSelection() {
     type.onTypeSelection(...arguments);
 }

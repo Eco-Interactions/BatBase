@@ -318,10 +318,10 @@ class DataManager
     {
         $contributors = $entity->getContributors();
         $removed = [];
-        foreach ($contributors as $contrib) { //print("line 327");
+        foreach ($contributors as $contrib) {
             $authId = $contrib->getAuthorSource()->getId();
             if (property_exists($authObj, $authId)) { continue; }
-            $entity->removeContributor($contrib);
+            $entity->removeContributor($contrib);  //print("\ncontrib removed\n");
             array_push($removed, $authId);
         }
         $this->addContribEdits($edits, 'removed', $removed);
@@ -330,8 +330,8 @@ class DataManager
     private function addContribEdits(&$edits, $action, $ary)
     {
         if (count($ary)) {
-            if (!property_exists($edits, 'Contributor')) { $edits->contributor = []; }
-            $edits->contributor[$action] = $ary;
+            if (!property_exists($edits, 'Contributor')) { $edits->Contributor = []; }
+            $edits->Contributor[$action] = $ary;
         }
     }
 /* ___________________________ TAGS _________________________________________ */

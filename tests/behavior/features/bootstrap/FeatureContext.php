@@ -220,7 +220,7 @@ class FeatureContext extends RawMinkContext implements Context
             'Arthropods' => $this->getComboId('Order Filter'),
             'Authors' => $this->getNameFilter('Author'),
             'Bats' => $this->getComboId('Object Groups Filter'),
-            'Potozoas' => $this->getComboId('Species Filter'),
+            'Worms' => $this->getComboId('Species Filter'),
             'Plants' => $this->getComboId('Species Filter'),
             'Publications' => $this->getComboId('Publication Type Filter'),
             'Publishers' => $this->getNameFilter('Publisher')
@@ -843,14 +843,14 @@ class FeatureContext extends RawMinkContext implements Context
      * @Given I focus on the :role taxon field
      * @Given I focus on the :role combobox
      */
-    public function iFocusOnTheTaxonField($role)
+    public function iFocusOnTheTaxonField($field)
     {
-        $selId = $this->getComboId($role);
+        $selId = $this->getComboId($field);
 
         $this->spin(function() use ($selId) {
             $this->execute("$('$selId')[0].selectize.focus();");
             return $this->getUserSession()->getPage()->find('css', "#sub-form");
-        }, "[$role] select form not opened.");
+        }, "[$field] select form not opened.");
     }
 
     /**
@@ -1261,8 +1261,9 @@ class FeatureContext extends RawMinkContext implements Context
         $this->spin(function() use ($selector, $text) {
             $input = $this->getUserSession()->getPage()->find('css', $selector);
             if (!$input) { return false; }
+            if ($input->getValue() == $text) { return true; }
             $input->setValue($text);
-            $this->execute("$('$selector').change();");
+            $this->execute("$('$selector').val($text).change();");
             return $input->getValue() == $text;
         }, "Could not set [$text] in [$selector]");
     }

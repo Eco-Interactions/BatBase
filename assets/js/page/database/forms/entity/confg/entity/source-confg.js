@@ -27,13 +27,7 @@ function getSourceFieldConfg() {
         },
         Description: {
             name: 'Description',
-            prep: {    // TODO: DRY
-                setCoreData: [],
-            },
-            prop: {
-                detail: 'description'
-            },
-            type: 'textArea',
+            type: 'textArea'
         },
         DisplayName: {
             name: 'DisplayName',

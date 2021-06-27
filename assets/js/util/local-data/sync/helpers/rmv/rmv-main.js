@@ -33,10 +33,10 @@ export function hasEdits(editObj) {
 /** Updates relational storage props for the entity. */
 function removeInvalidatedDataProps(entity, rcrd, edits) {          /*dbug-log*///console.log("               --removeInvalidatedDataProps called for [%s]. edits = %O", entity, edits);
     const params = { entity: entity, rcrd: rcrd, stage: 'rmvData' };
-    const hndlrs = getRmvDataPropHndlrs(entity);
+    const handlers = getRmvDataPropHndlrs(entity);
     return Object.keys(edits).forEach(prop => {
-        if (!hndlrs[prop]) { return ; }
-        updateData(hndlrs[prop], prop, params, edits);
+        if (!handlers[prop]) { return ; }
+        updateData(handlers[prop], prop, params, edits);
     });
 }
 /* ------------------------ REMOVE HANDLERS --------------------------------- */

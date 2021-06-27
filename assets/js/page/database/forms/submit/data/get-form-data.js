@@ -229,7 +229,7 @@ function validateTags(g, fConfg) {
     const typeTags = fConfg.misc.typeTags;
     const val = fConfg.value ? fConfg.value : [];
     if (typeTags && typeTags.length && fConfg.required) { ensureTypeTagSelected(typeTags, fConfg.value); }
-    setServerData('rel', 'Tags', fConfg.value);
+    setServerData('rel', 'Tags', val);
 }
 function ensureTypeTagSelected(typeTags, selected) {                /*dbug-log*///console.log('--ensureTypeTagSelected tags[%O] selected[%O]', typeTags, selected);
     if (typeTags.find(ifTypeTagSelected)) { return; }
