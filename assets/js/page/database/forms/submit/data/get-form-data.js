@@ -222,7 +222,6 @@ function getDisplayCoordinates(lat, lng) {
 function getCoordValue(displayPoint) {
     const geoJson = _state('getFormState', ['top', 'geoJson']);
     return geoJson ? geoJson.coordinates : displayPoint;
-
 }
     /* ------------------- INTERACTION -------------------------------------- */
 function validateTags(g, fConfg) {

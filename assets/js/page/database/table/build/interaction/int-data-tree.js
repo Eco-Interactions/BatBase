@@ -5,7 +5,10 @@
  *     fillTreeWithInteractions
  */
 import { _alert, _db } from '~util';
+import { _table } from '~db';
 import { getTreeRcrds } from '../table-build-main.js';
+
+const tState = _table.bind(null, 'tableState');
 
 /** Replaces all interaction ids with records for every node in the tree.  */
 export async function fillTreeWithInteractions(focus, dataTree) {   /*dbug-log*///console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
@@ -16,7 +19,9 @@ export async function fillTreeWithInteractions(focus, dataTree) {   /*dbug-log*/
     return dataTree;
 }
 function fillTaxonTree(dataTree, entityData) {                                  //console.log("fillingTaxonTree. dataTree = %O", dataTree);
-    fillTaxaInteractions(dataTree);
+    const gRoles = []; // Taxon-group's possible interaction-roles
+    fillTaxaInteractions(dataTree);                                 /*dbug-log*///console.log('-- gRoles[%O] tState[%O]', gRoles, tState);
+    tState().set({'groupRoles': gRoles});
 
     function fillTaxaInteractions(branch) {                                     //console.log("fillTaxonInteractions called. branch = %O", branch);
         for (let key in branch) {
@@ -29,6 +34,8 @@ function fillTaxonTree(dataTree, entityData) {                                  
     function fillTaxonInteractions(taxon) {                                     //console.log("fillTaxonInteractions. taxon = %O", taxon);
         ['subjectRoles', 'objectRoles'].forEach(role => {
             taxon[role] = replaceInteractions(taxon[role], entityData);
+            if (!taxon[role].length || gRoles.indexOf(role) !== -1) { return; }
+            gRoles.push(role);
         });
     }
 } /* End fillTaxonTree */

@@ -114,13 +114,21 @@ function buildFilterData() {
         type: 'filter',
         description: $('#stored-filters textarea').val(),
         details: getFilterSetJson(app.tblState),
-    };
+    };                                                               /*dbug-log*///console.log('-- buildFilterData [%O]', data);
     return data;
 }
 /**
  * Returns a json object with the current focus, view, and active filters in the
  * table column headers and the filter panel: rebuild (rebuilds table) and
  * direct (applied to row data directly).
+ *
+ * JSON: {
+ *     direct: {}, //filter table-data directly
+ *     focus: "", //top-level data-table sort: locs, srcs, taxa
+ *     rebuild: {}, //filters reload data-table
+ *     table: {}, //AG-GRID table column filters
+ *     focus: "", //second-level table-data view
+ * }
  */
 function getFilterSetJson(tState) {
     const fState = _filter('getFilterState');

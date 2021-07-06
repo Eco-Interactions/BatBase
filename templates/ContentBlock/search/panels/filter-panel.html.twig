@@ -7,15 +7,17 @@
             <span style="flex-grow: 1.6;"></span>
         </div>
         <div id="focus-filters" class="flex-col flex-wrap"></div>
-        <div id="shw-chngd-ints" class="flex-row">
-            <input type="checkbox" id="shw-chngd">
-            <label for="shw-chngd" class="flex-row">Show interactions </label>
-            <select id="sel-DateFilterType" class="date-fltr-sel" data-field="Date Filter">
-                <option selected value="cited">published</option>
-                <option value="updated">added/edited</option>
-            </select>
-            <div>after: </div>
-            <input type="text" id="filter-cal" disabled="disabled" class="field-input">
+        <div id="default-filters" class="flex-col flex-wrap">
+            <div id="shw-chngd-ints" class="flex-row">
+                <input type="checkbox" id="shw-chngd">
+                <label for="shw-chngd" class="flex-row">Show interactions </label>
+                <select id="sel-DateFilterType" class="date-fltr-sel" data-field="Date Filter">
+                    <option selected value="cited">published</option>
+                    <option value="updated">added/edited</option>
+                </select>
+                <div>after: </div>
+                <input type="text" id="filter-cal" disabled="disabled" class="field-input">
+            </div>
         </div>
     </div>
     <div id="stored-filters" class="flex-col">

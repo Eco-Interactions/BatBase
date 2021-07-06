@@ -600,6 +600,16 @@ class Source
     }
 
     /**
+     * Get SourceType name.
+     *
+     * @return String
+     */
+    public function getSourceTypeName()
+    {
+        return $this->sourceType->getDisplayName();
+    }
+
+    /**
      * Add Tag.
      *
      * @param \App\Entity\Tag $tag

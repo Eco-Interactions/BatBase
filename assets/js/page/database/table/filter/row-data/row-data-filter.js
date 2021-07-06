@@ -1,6 +1,6 @@
 /**
  * Filters the table rowData by any active external filters: name text, date/time
- * a record was published/updated, and Object Groups in Taxon->Bat view.
+ * a record was published/updated, and taxon groups.
  *
  * 	Exports:
  * 		filterRowData
@@ -32,7 +32,7 @@ const filterFuncs = {
 		name: 	ifRowNameContainsText
 	},
 	int: {
-		combo: 	{ 'Object Group': ifIntWithGroup },
+		combo: 	{ 'Groups': ifIntWithGroup },
 		date: 	ifRowAfterDate,
 		list: 	ifIntInUserList
 	}
@@ -172,7 +172,7 @@ function ifRowAfterDate(row, dateObj) {
 }
 /* ------------------------ OBJECT GROUP ------------------------------------ */
 function ifIntWithGroup(row, groupIds) {  							/*dbug-log*///console.log('ifIntWithGroups = %O, row = %O', groupIds, row);
-	return groupIds.indexOf(row.objGroupId) !== -1;
+	return ['su', 'o'].find(pre => groupIds.indexOf(row[pre+'bjGroupId']) !== -1);
 }
 /* --------------------- USER INTERACTION-LIST ------------------------------ */
 function ifIntInUserList(row, intIds) {

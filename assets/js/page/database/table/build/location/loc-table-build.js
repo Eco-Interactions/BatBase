@@ -18,7 +18,7 @@ const tState = _table.bind(null, 'tableState');
 /** =============== LOCATION TABLE ========================================== */
 export function buildLocTable(v) {                                  /*perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
-    return _db('getData', [['location', 'topRegionNames', 'group']])
+    return _db('getData', [['location', 'topRegionNames', 'group', 'groupNames']])
         .then(beginLocationLoad);
 
     function beginLocationLoad(data) {
@@ -29,6 +29,7 @@ export function buildLocTable(v) {                                  /*perm-log*/
 }
 function addDataToTableParams(data) {
     tState().set({
+        allGroups: data.groupNames,
         data:  data,
         rcrdsById: data.location
     });

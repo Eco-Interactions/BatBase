@@ -24,7 +24,7 @@ import { _state } from '~form';
  * group is passed, an additional 'group' key is added that will serve as a category
  * for the options in the group.
  */
-function getOptions(entityObj, sortedKeys) {                        /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
+export function getOptions(entityObj, sortedKeys) {                        /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
     if (!Object.keys(entityObj).length) { return []; }
     return Object.values(entityObj)[0].group ?
         getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);

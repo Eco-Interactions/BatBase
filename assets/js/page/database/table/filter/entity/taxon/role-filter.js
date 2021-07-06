@@ -2,7 +2,8 @@
  * The table can be filtered by interaction role if Taxon Group can be in both roles.
  *
  * Export
- *      initInteractionRoleCombobox
+ *      finishRoleComboInit
+ *      getInteractionRoleFilter
  *
  * TOC
  *      INIT COMBOBOX
@@ -14,15 +15,11 @@ import * as fM from '../../filter-main.js';
 
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
-export function initInteractionRoleCombobox() {
-    $('#focus-filters').append(buildInteractionRoleFilter());
-    finishRoleComboInit();
-}
-function buildInteractionRoleFilter() {
+export function getInteractionRoleFilter() {
     const opts = buildRoleOptions();                                /*dbug-log*///console.log('buildInteractionRoleFilter')
-    const sel = fM.newSel(opts, '', 'sel-RoleFilter');
+    const sel = fM.newSel(opts, 'field-input', 'sel-RoleFilter');
     const filter = fM.getFilterField('Role', sel);
-    filter.id = 'objRoleFilterCntnr';
+    filter.id = 'roleFilterCntnr';
     return filter;
 }
 function buildRoleOptions() {
@@ -32,7 +29,7 @@ function buildRoleOptions() {
         { text: 'Object',           value: 'obj' }
     ]
 }
-function finishRoleComboInit(filterEl) {
+export function finishRoleComboInit() {                                         //console.log('-- finishRoleComboInit')
     const confg = {
         name: 'Role Filter',
         onChange: filterTableByInteractionRole,

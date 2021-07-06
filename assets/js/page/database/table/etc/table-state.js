@@ -16,6 +16,7 @@ import { _db } from '~util';
 /**
  * Stores table state params needed throughout the page.
  *
+ * {obj} allGroups      All taxon-groups (k) and id (v)
  * {obj} api            Ag-grid API (available after table-init complete)
  * {obj} columnApi      Ag-grid Column API (available after table-init complete)
  * {str} curFocus       Focus of the data in table: taxa, srcs, locs
@@ -31,6 +32,7 @@ import { _db } from '~util';
  *
  * In Taxon views:
  * {ary} allGroupRanks   Array of all ranks present in the current tree.
+ * {ary} groupRoles      Array of the group's interaction-roles
  * {obj} allRanks        All ranks (k) and id (v)
  * {str} groupName       Stores Taxon Group name
  * {str} groupPluralName Stores Taxon Group's plural name

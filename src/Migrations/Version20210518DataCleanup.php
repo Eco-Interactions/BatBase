@@ -33,7 +33,6 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
 
     public function getDescription() : string
     {
-        //update
         return '
             Fixes Arthropod interactions (consumption->predation)
             Updates various Location territories.
@@ -327,6 +326,7 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $this->deleteInteraction();
         $this->cleanUpSrcData();
         $this->deleteSpamUser();
+        $this->reformatUserNamedJsonDetails();
         $this->em->flush();
     }
 /* ------------------------- POLLINATION ------------------------------------ */
@@ -375,13 +375,14 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
         $this->removeEntity($int, true);
     }
 /* ------------------------- SOURCE ----------------------------------------- */
-
     private function cleanUpSrcData()
     {                                                                           //print("\n cleanUpSrcData");
         $srcs = $this->getEntities('Source');
         foreach ($srcs as $src) {
             $this->clearSourceWhitespace($src);
-            if ($src->getSourceType() === 'Author') { $this->removePunc($src); }
+            if ($src->getSourceTypeName() === 'Author') { $this->removePunc($src); }
+            if ($src->getSourceTypeName() === 'Citation') { $src->setDescription(null); }
+            if ($src->getSourceTypeName() === 'Publication') { $src->setDescription(null); }
             $this->persistEntity($src);
         }
     }

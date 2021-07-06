@@ -8,41 +8,36 @@
  *
  * TOC
  *      UI
- *          NAME FILTER
+ *          DEFAULT FILTERS
  *          RANK TAXON
- *          Object Group
+ *
  *      FILTER
  *          UPDATE COMBOBOXES AFTER FILTER CHANGE
  */
 import { _cmbx, _el, _db, _u } from '~util';
 import { _table, _ui, getDetachedRcrd } from '~db';
 import * as fM from '../../filter-main.js';
-import { initObjectGroupCombobox } from './obj-group-filter.js';
-import { initInteractionRoleCombobox } from './role-filter.js';
+import { finishRoleComboInit, getInteractionRoleFilter } from './role-filter.js';
 import { initSubGroupFilter } from './sub-group-filter.js';
 
 const tState = _table.bind(null, 'tableState');
 /* ========================== UI ============================================ */
 export function loadTxnFilters(tblState) {                          /*perm-log*/console.log("       --Loading taxon filters.");
+    _ui('updateTaxonFilterViewMsg', [tblState.groupPluralName]);
     loadTxnRankComboboxes(tblState);
     if ($('input[name="name-Taxon"]').length) { return; } //elems already initialized
-    initTxnNameSearchElem(tblState);
-    initTxnRoleComboIfBothRolesPossible(); //tblState.groupRoles
-    _ui('updateTaxonFilterViewMsg', [tblState.groupPluralName]);
+    addFiltersAfterDynamicRankCombos(tblState);
     return loadAsyncFilters(tblState);
 }
 function loadAsyncFilters(tblState) {
-    if (tblState.groupName === 'Bat') { return initObjectGroupCombobox(); }
     if (Object.keys(tblState.subGroups).length > 1) { return initSubGroupFilter(tblState); }
 }
-/* ------------------------ NAME FILTER ------------------------------------- */
-function initTxnNameSearchElem(tblState) {
-    const searchTreeElem = fM.getTreeTextFilterElem('Taxon');        /*dbug-log*///console.log('filter container = %O, length ?[%s] [even?]', $('#focus-filters')[0].lastChild, $('#focus-filters')[0].lastChild.children.length, $('#focus-filters')[0].lastChild.children.length % 2 === 0)
-    if ($('#focus-filters')[0].lastChild.children.length % 2 === 0) {
-        $('#focus-filters').append(searchTreeElem);
-    } else {
-        $($('#focus-filters')[0].lastChild).append(searchTreeElem);
-    }
+/* ---------------------- DEFAULT FILTERS ----------------------------------- */
+function addFiltersAfterDynamicRankCombos(tblState) {
+    fM.appendDynamicFilter(fM.getTreeTextFilterElem('Taxon'));
+    if (tblState.groupRoles.length === 1) { return; }
+    fM.appendDynamicFilter(getInteractionRoleFilter());
+    finishRoleComboInit();
 }
 /* ------------------------ RANK TAXON -------------------------------------- */
 /**
@@ -159,16 +154,6 @@ function setSelectedTaxonVals(selected, tblState) {                 /*dbug-log*/
 }
 function setSubGroupFilter(val) {
     _cmbx('setSelVal', ['Sub-GroupFilter', val, 'silent']);
-}
-/* ------------------- INTERACTION ROLE ------------------------------------- */
-/**
- * [initTxnRoleComboIfBothRolesPossible description]
- * @param  {[type]} groupRoles [description]
- * @return {[type]}            [description]
- */
-function initTxnRoleComboIfBothRolesPossible(groupRoles) {
-    // test then load
-    initInteractionRoleCombobox();
 }
 /* ====================== FILTER ============================================ */
 /**

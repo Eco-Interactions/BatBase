@@ -205,6 +205,10 @@ class UserNamed
     /**
      * Set details.
      *
+     * Examples:
+     * LIST: JSON ARRAY - Interaction IDs
+     * SET: JSON OBJ - See JS module database->table->filter->set
+     *
      * @param text $details
      *
      * @return UserNamed

@@ -89,7 +89,8 @@ export function initSearchStateAndTable(focus = 'taxa', isAllDataAvailable = tru
     setTableInitState(focus, isAllDataAvailable);
     ui.selectInitialSearchFocus(focus);
     if ($('body').data('env') === 'test' && isAllDataAvailable === false) { return; }
-    table.buildTable();
+    table.buildTable()
+    .then(() => _filter('initDefaultFilters'));
 }
 function setTableInitState(focus, isAllDataAvailable) {
     ui.resetFilterPanelOnFocusChange(focus);

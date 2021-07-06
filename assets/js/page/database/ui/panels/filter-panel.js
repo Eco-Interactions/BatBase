@@ -21,7 +21,6 @@ export function resetFilterPanelOnFocusChange(focus) {
 export function initFilterPanel() {
     require('styles/pages/db/panels/filters.styl');
     addFilterPanelEvents();
-    _filter('initDefaultFilters');
 }
 export function addFilterPanelEvents() {
     $('#filter').click(toggleFilterPanel);

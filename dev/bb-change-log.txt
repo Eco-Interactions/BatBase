@@ -6,6 +6,10 @@
 ### __________________________ CURRENT _____________________________________ ###
 
 SINCE LAST SERVER UPDATE:
+    - FILTER
+        - When in Taxon -> Group view, if the group has both subject and object
+            interactions, a combo is added to filter the data table by interaction-role.
+        - Added to all vliews, filter to any/some/all taxon-group data
     - TABLE
         - Hiding entities with '[DELETE]' from the DATABASE TABLE, bibliography, and CSV downloads
         - Merged interactions from [Location-HabType] groups into '[Location-Unspecified]'

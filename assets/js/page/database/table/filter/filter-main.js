@@ -13,8 +13,9 @@
  *             FILTER STATUS TEXT
  *     FILTER ROW DATA
  */
-import {  _el } from '~util';
 import { _table, _ui } from '~db';
+import * as fUtil from './util/filter-util.js';
+import * as fGroup from './row-data/group-filter.js';
 import * as fDate from './row-data/date-filter.js';
 import * as fLoc from './entity/loc-filters.js';
 import * as fSrc from './entity/src-filters.js';
@@ -25,8 +26,9 @@ import * as fTxn from './entity/taxon/txn-filters.js';
 import * as fRows from './row-data/row-data-filter.js';
 
 export function initDefaultFilters() {
-    fDate.initDateFilterUi();
+    fGroup.initGroupFilterCombobox();
     fSets.initFilterSetsFeature();
+    fDate.initDateFilterUi();
 }
 /* ====================== STATIC FILTERS ==================================== */
 /* ------------------ TREE-TEXT FILTER -------------------------------------- */
@@ -72,6 +74,7 @@ export function setFilterState() {
 }
 export function resetFilterState() {
     fState.resetFilterState();
+    fGroup.resetGroupFilter
 }
 export function getFilterStateForSentryErrorReport() {
     return fState.getFilterStateForSentryErrorReport();
@@ -91,17 +94,14 @@ export function getActiveFilterVals() {
     return fState.getActiveFilterVals();
 }
 /* ------------------- UTIL ------------------------------------------------- */
-export function newSel(opts, c, i, field) {
-    const elem = _el('getSelect', [opts, { class: c, id: i }]);
-    if (field) { $(elem).data('field', field+' Filter'); }
-    return elem;
+export function newSel() {
+    return fUtil.newSel(...arguments);
 }
-export function getFilterField(lblTxt, input) {
-    const classes = lblTxt ? 'flex-row field-cntnr' : 'row-field';
-    const lbl = _el('getElem', ['label', { class: classes }]);
-    const span = lblTxt ? _el('getElem', ['span', { text: lblTxt + ': ' }]) : null;
-    $(lbl).append([span, input].filter(e=>e));
-    return lbl;
+export function getFilterField() {
+    return fUtil.getFilterField(...arguments);
+}
+export function appendDynamicFilter() {
+    return fUtil.appendDynamicFilter(...arguments);
 }
 /* ====================== FILTER ROW DATA =================================== */
 export function getRowDataForCurrentFilters(rowData) {                          //console.log('getRowDataForCurrentFilters. rowData = %O', rowData);

@@ -223,7 +223,7 @@ class Group
             array_push($taxa, $groupRoot->getTaxon());
         }
 
-        return $this->taxa;
+        return $taxa;
     }
 
     /**

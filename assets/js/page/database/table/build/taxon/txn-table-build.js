@@ -29,7 +29,7 @@ export function buildTxnTable(v) {
 }
 function getTxnDataAndBuildTable(view) {
     if (isNaN(view)) { view = 1; } //Default Bat
-    return _db('getData', [['rankNames', 'group', 'taxon']])
+    return _db('getData', [['rankNames', 'group', 'groupNames', 'taxon']])
         .then(beginTaxonLoad.bind(null, view));
 }
 function beginTaxonLoad(groupId, data) {
@@ -41,6 +41,7 @@ function beginTaxonLoad(groupId, data) {
 
 function addDataToTableParams(data) {
     tState().set({
+        allGroups: data.groupNames,
         allRanks: data.rankNames,
         data: data,
         rcrdsById: data.taxon,

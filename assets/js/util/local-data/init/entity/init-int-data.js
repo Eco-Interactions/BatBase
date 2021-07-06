@@ -2,8 +2,7 @@
  * Modifies interaction-data for local storage:
  * - [entity]Names - an object with each entity's displayName(k) and id.
  * - SubjectGroups - Array of valid subject taxon-group ids.
- * * interaction - Adds the Object Group to each interaction record to filter Bat
- *     records by object group.
+ * * interaction - Adds the Taxon Group's ids to each record to filter by groups.
  *
  * Export
  *     modifyIntDataForLocalDb

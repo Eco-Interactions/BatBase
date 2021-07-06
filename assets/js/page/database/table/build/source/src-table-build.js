@@ -27,14 +27,15 @@ export function buildSrcTable(v) {                                  /*perm-log*/
     });
 }
 function getSrcDataAndBuildTable(view) {
-    return _db('getData', [['source', 'group']]).then(data => {
-        addDataToTableParams(data)
+    return _db('getData', [['source', 'group', 'groupNames']]).then(data => {
+        addDataToTableParams(data);
         _ui('initSrcViewOpts', [view]);
         return startSrcTableBuildChain(view);
     });
 }
 function addDataToTableParams(data) {
     tState().set({
+        allGroups: data.groupNames,
         data:  data,
         rcrdsById: data.source
     });

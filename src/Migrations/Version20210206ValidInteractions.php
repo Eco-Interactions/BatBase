@@ -238,7 +238,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
 /* +++++++++++++++++++ VALID INTERACTIONS +++++++++++++++++++++++++++++++++++ */
     private function createAllValidInteractions()
     {
-        $bat = $this->getGroupRoot('Bat');
+        $bat = $this->getGroupRoots('Bat');
         $this->createPredationInteractions($bat);
         $this->createValidInteractionsWithBatSubject($bat);
     }
@@ -268,16 +268,20 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
 /* ----------------------- CREATE ENTITIES ---------------------------------- */
     private function handleCreate($subj, $obj, $type, $tags, $tRequired)
     {
-        $subj = $this->getGroupRoot($subj);
-        $obj = $this->getGroupRoot($obj);
+        $subj = $this->getGroupRoots($subj);
         $type = $this->getEntity('InteractionType', $type, 'displayName');
-        $this->createValidInteraction($subj, $obj, $type, $tags, $tRequired);
+        $objs = $this->getGroupRoots($obj);
+
+        foreach ($objs as $obj) {
+            $this->createValidInteraction($subj, $obj, $type, $tags, $tRequired);
+        }
+
     }
-    private function getGroupRoot($gName)
+    private function getGroupRoots($gName)
     {
         if (!is_string($gName)) { return $gName; } print("\n".$gName);
         $group = $this->getEntity('Group', $gName, 'displayName');
-        return $group->getTaxa()[0];
+        return $group->getTaxa();
     }
     private function getTags($data)
     {
