@@ -18,20 +18,24 @@ let allOpts;
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initGroupFilterCombobox() {
-    const t = tState().get(['groupName', 'allGroups']);
+    const t = tState().get(['groupName', 'allGroups', 'treeGroups']);
     allOpts = _opts('getOptions', [t.allGroups, Object.keys(t.allGroups).sort()]);
-    $('#default-filters').prepend(buildGroupFilter(t.groupName));
+    $('#default-filters').prepend(buildGroupFilter(t.groupName, t.treeGroups));
     finishGroupComboInit();
 }
-function buildGroupFilter(tGroup) {
-    const opts = getTableGroupOpts(tGroup);                         /*dbug-log*///console.log('groups = %O', groups)
+function buildGroupFilter(tGroup, treeGroups) {
+    const opts = getTableGroupOpts(tGroup, treeGroups);              /*dbug-log*///console.log('groups = %O', groups)
     const sel = fM.newSel(opts, '', 'sel-TaxonGroupsFilter');
     const filter = fM.getFilterField(null, sel);
     filter.id = 'groupFilterCntnr';
     return filter;
 }
-function getTableGroupOpts(tableGroup) {
-    return allOpts.filter(r => r.text !== tableGroup);
+function getTableGroupOpts(tableGroup, dataGroups) {                /*dbug-log*///console.log('--getTableGroupOpts tGroup[%s] dataGroups[%O] allOpts[%O]', tableGroup, dataGroups, allOpts);
+    return allOpts.filter(ifGroupInDataTree);
+    /* Note: Does not include group if in it's taxon group view. */
+    function ifGroupInDataTree(o) {
+        return o.text !== tableGroup && dataGroups.indexOf(parseInt(o.value)) !== -1;
+    }
 }
 function finishGroupComboInit() {
     const confg = {
@@ -42,8 +46,8 @@ function finishGroupComboInit() {
     _cmbx('initCombobox', [confg]);
 }
 export function resetGroupFilter() {
-    const tableGroup = tState().get('groupName');
-    const opts = getTableGroupOpts(tGroup);                         /*dbug-log*///console.log('groups = %O', groups)
+    const t = tState().get(['groupName', 'treeGroups']);
+    const opts = getTableGroupOpts(t.groupName, t.treeGroups);                         /*dbug-log*///console.log('groups = %O', groups)
     _cmbx('replaceSelOpts', ['TaxonGroupsFilter', opts]);
 }
 /* ----------------------- APPLY FILTER ------------------------------------- */

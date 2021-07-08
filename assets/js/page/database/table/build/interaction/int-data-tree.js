@@ -9,6 +9,7 @@ import { _table } from '~db';
 import { getTreeRcrds } from '../table-build-main.js';
 
 const tState = _table.bind(null, 'tableState');
+let treeGroups = [];
 
 /** Replaces all interaction ids with records for every node in the tree.  */
 export async function fillTreeWithInteractions(focus, dataTree) {   /*dbug-log*///console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
@@ -16,6 +17,7 @@ export async function fillTreeWithInteractions(focus, dataTree) {   /*dbug-log*/
     const entities = ['interaction', 'taxon', 'location', 'source'];
     const data = await _db('getData', [entities, true]);
     fillInts[focus](dataTree, data);
+    updateStateData();
     return dataTree;
 }
 function fillTaxonTree(dataTree, entityData) {                                  //console.log("fillingTaxonTree. dataTree = %O", dataTree);
@@ -97,15 +99,19 @@ function fillIntRcrd(intRcrd, entityData) {
 function getIntTags(tagAry) {
     return tagAry.map(tag => tag.displayName).join(', ');
 }
-/**
- * Refactor. Hastily coded. Object taxa are not loaded until after interactions
- * on intial database download. They will be filled in after table loads. Rewrite
- * so a missing object record triggers the alert once all taxon data is avaiable.
- */
-function getTreeRcrd(id, entityData, entity, prop) {  //console.log('getTreeRcrd. [%s][%s] (%s) in %O', entity, id, prop, entityData);
+function getTreeRcrd(id, entityData, entity, prop) {                /*dbug-log*///console.log('--getTreeRcrd. [%s][%s] (%s)', entity, id, prop);
     if (entityData[entity] === undefined) { return {}; }
-    const rcrd = entityData[entity][id];
-    if (!rcrd && prop === 'object') { return {}; }
+    const rcrd = entityData[entity][id];                            /*dbug-log*///console.log('   --rcrd[%O]]', rcrd);
+    if (entity === 'taxon') { trackTaxonGroups(rcrd); }
+    // if (!rcrd && prop === 'object') { return {}; }
     if (!rcrd) { _alert('alertIssue', ['noRcrdFound', {id: id, entity: entity }]); }
     return rcrd ? rcrd : '_err_';
+}
+/* ===================== TRACK DATA ========================================= */
+function trackTaxonGroups(taxon) {                                  /*dbug-log*///console.log('--trackTaxonGroups [%O]', taxon);
+    if (treeGroups.indexOf(taxon.group.id) !== -1) { return; }
+    treeGroups.push(taxon.group.id);
+}
+function updateStateData(argument) {
+    tState().set({'treeGroups': treeGroups});
 }
