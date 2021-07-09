@@ -279,9 +279,9 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
     }
     private function getGroupRoots($gName)
     {
-        if (!is_string($gName)) { return $gName; } print("\n".$gName);
+        if (!is_string($gName)) { return $gName; }                          print("\n".$gName);
         $group = $this->getEntity('Group', $gName, 'displayName');
-        return $group->getTaxa();
+        return $group->getTaxaEntities();
     }
     private function getTags($data)
     {

@@ -101,7 +101,7 @@ class DataManager
                 $coreData, $data, $returnData
             );
         }
-        $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
+        $this->removeEditData($returnData->coreEdits, $returnData->detailEdits);
         $this->attemptFlushAndLogErrors($returnData);
         return $returnData;
     }
@@ -502,9 +502,17 @@ class DataManager
             $data->ids->$type : false;
         return $edits;
     }
-    private function removeEditingFlag($coreObj, $detailObj)
+    private function removeEditingFlag(&$coreObj, &$detailObj)
     {
         unset($coreObj->editing);
         unset($detailObj->editing);
+    }
+    private function removeEditData(&$core, &$detail)
+    {
+        foreach ([$core, $detail] as $obj) {
+            foreach ($obj as $key => $value) {
+                unset($obj->$key);
+            }
+        }
     }
 }

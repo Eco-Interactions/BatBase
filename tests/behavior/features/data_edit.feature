@@ -239,7 +239,7 @@ Feature: Edit data in the database
         Then I should see "Something descriptive" in the "Description" field "textarea"
         Then I should see "https://www.link.com" in the "Website" field "input"
 
-    todo - test proper removal of citation from authors in tree
+    # todo - test proper removal of citation from authors in tree
     @javascript
     Scenario:  I should be able to edit the data of an existing citation [CHAPTER->BOOK]
         Given the database table is grouped by "Sources"

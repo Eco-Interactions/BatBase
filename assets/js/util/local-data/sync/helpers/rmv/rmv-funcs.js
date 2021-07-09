@@ -56,6 +56,7 @@ export function rmvIntFromTaxon(prop, rcrd, entity, edits) {
 }
 export function rmvContrib(prop, rcrd, entity, edits) {             /*dbug-log*///console.log("               --rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
     const srcObj = db.getMmryData('source');
+    if (!edits.Contributor.removed) { return; }
     edits.Contributor.removed.forEach(id => {
         rmvIdFromAry(srcObj[id].contributions, rcrd.id)
     });

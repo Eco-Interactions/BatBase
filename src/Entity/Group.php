@@ -205,19 +205,23 @@ class Group
     }
 
     /**
-     * Get Taxa.
+     * Get Taxa group-roots.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
     public function getTaxa()
     {
-        $taxa = [];
+        return $this->taxa;
+    }
 
-        /*
-         * Note: Needed for test fixtures, but breaks migrations. Doesn't seem to
-         * affect anything otherwise. Not sure why.
-         */
-        // if (!is_array($this->taxa)) { return [];}
+    /**
+     * Get Group Taxa.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTaxaEntities()
+    {
+        $taxa = [];
 
         foreach ($this->taxa as $groupRoot) {
             array_push($taxa, $groupRoot->getTaxon());
@@ -225,7 +229,6 @@ class Group
 
         return $taxa;
     }
-
     /**
      * Get Taxa for serialization.
      * @JMS\VirtualProperty

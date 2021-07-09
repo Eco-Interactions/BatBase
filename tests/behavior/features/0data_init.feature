@@ -37,8 +37,8 @@ Feature: Search Page Database Initialization
 
     @javascript
     Scenario:  There should be 2 initial Potozoa interactions in the database table.
-        Given I view interactions by "Potozoas"
-        Then I see "Phylum Arthropoda"
+        Given I view interactions by "Protozoas"
+        Then I see "Family Orange"
         # And the count column should show "2" interactions
         And data in the interaction rows
     ##------------------------- Location View -------------------------------###

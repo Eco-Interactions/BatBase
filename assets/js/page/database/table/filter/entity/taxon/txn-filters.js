@@ -35,9 +35,9 @@ function loadAsyncFilters(tblState) {
 /* ---------------------- DEFAULT FILTERS ----------------------------------- */
 function addFiltersAfterDynamicRankCombos(tblState) {
     fM.appendDynamicFilter(fM.getTreeTextFilterElem('Taxon'));
-    if (tblState.groupRoles.length === 1) { return; }
-    fM.appendDynamicFilter(getInteractionRoleFilter());
-    finishRoleComboInit();
+    // if (tblState.groupRoles.length === 1) { return; }
+    // fM.appendDynamicFilter(getInteractionRoleFilter());
+    // finishRoleComboInit();
 }
 /* ------------------------ RANK TAXON -------------------------------------- */
 /**

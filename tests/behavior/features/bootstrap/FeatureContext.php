@@ -204,7 +204,7 @@ class FeatureContext extends RawMinkContext implements Context
         $newElems = [
             'Locations' => $this->getComboId('Region Filter'),
             'Sources' => $this->getComboId('Publication Type Filter'),
-            'Taxa' => $this->getComboId('Object Groups Filter'),
+            'Taxa' => $this->getComboId('Taxon Groups Filter'),
         ];
         $this->changeTableSort($this->getComboId('Focus'), $vals[$entity], $newElems[$entity]);
     }
@@ -219,8 +219,9 @@ class FeatureContext extends RawMinkContext implements Context
         $newElems = [  //Add views with sub-groups
             'Arthropods' => $this->getComboId('Order Filter'),
             'Authors' => $this->getNameFilter('Author'),
-            'Bats' => $this->getComboId('Object Groups Filter'),
+            'Bats' => $this->getComboId('Taxon Groups Filter'),
             'Worms' => $this->getComboId('Species Filter'),
+            'Protozoas' => $this->getComboId('Species Filter'),
             'Plants' => $this->getComboId('Species Filter'),
             'Publications' => $this->getComboId('Publication Type Filter'),
             'Publishers' => $this->getNameFilter('Publisher')
