@@ -433,6 +433,11 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
             $this->removeEntity($usr, true);
         }
     }
+
+    private function reformatUserNamedJsonDetails()
+    {
+        // code...
+    }
 /* ============================ DOWN ======================================== */
     public function down(Schema $schema) : void
     {

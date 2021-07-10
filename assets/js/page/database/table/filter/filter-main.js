@@ -30,6 +30,9 @@ export function initDefaultFilters() {
     fSets.initFilterSetsFeature();
     fDate.initDateFilterUi();
 }
+export function onTableLoadComplete() {
+    fGroup.resetGroupFilter();
+}
 /* ====================== STATIC FILTERS ==================================== */
 /* ------------------ TREE-TEXT FILTER -------------------------------------- */
 export function getTreeTextFilterElem(entity) {
@@ -74,7 +77,6 @@ export function setFilterState() {
 }
 export function resetFilterState() {
     fState.resetFilterState();
-    fGroup.resetGroupFilter
 }
 export function getFilterStateForSentryErrorReport() {
     return fState.getFilterStateForSentryErrorReport();

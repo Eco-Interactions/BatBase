@@ -5,7 +5,7 @@
  *     INIT-TABLE CHAIN
  *     INTERNAL FACADE
  */
-import { _ui, _u } from '~db';
+import { _filter, _ui, _u } from '~db';
 import { tableState } from 'db/table/table-main.js';
 import * as agGrid from 'libs/grid/ag-grid.js';
 import { getBaseTableConfg } from './table-init-confg.js';
@@ -54,6 +54,7 @@ function onTableInitComplete(rowData) {
     hideUnusedColFilterMenus();
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
     _ui('updateFilterStatusMsg');
+    _filter('onTableLoadComplete');
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group

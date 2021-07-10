@@ -107,7 +107,7 @@ Feature: Filtering the data displayed in the database table
       Given the database table is grouped by "Taxa"
       And I view interactions by "Bats"
       And I toggle "open" the filter panel
-      When I select "[Fish, Bird, Potozoa]" from the "Taxon Groups Filter" combobox
+      When I select "[Worm, Potozoa]" from the "Taxon Groups Filter" combobox
       Then I should see "2" rows in the table data tree
       And data in the interaction rows
       And I should see "Taxon Group" in the filter status bar

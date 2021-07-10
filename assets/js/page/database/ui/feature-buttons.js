@@ -59,8 +59,14 @@ function disableUserFeatures() {                                                
         #stored-filters input, #stored-filters textarea`)
         .css('cursor', 'not-allowed').prop('disabled', true).fadeTo('fast', .5)
         .prop('title', 'Please register to use these features.');
-    window.setTimeout(() => _cmbx('enableCombobox', ['FilterSet', false]), 1000); //Needs time to finish initializing first.
+        disableFilterSetOnceLoaded();
     return false;
+}
+function disableFilterSetOnceLoaded() {
+    if ($('#sel-FilterSet')[0].selectize) {
+        return _cmbx('enableCombobox', ['FilterSet', false]);
+    }
+    window.setTimeout(disableFilterSetOnceLoaded, 1000); //Needs time to finish initializing first.)
 }
 function initUserFeatures() {                                                   //console.log('enableUserFeatures')
     initUserButtons();
