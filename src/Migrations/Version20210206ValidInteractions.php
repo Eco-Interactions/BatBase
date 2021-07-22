@@ -21,7 +21,7 @@ use App\Service\DataManager;
  * Adds descriptions to group-roots.
  * Misc data cleanup.
  */
-final class Version20210205ValidInteractions extends AbstractMigration implements ContainerAwareInterface
+final class Version20210206ValidInteractions extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $em;
@@ -266,14 +266,16 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
         }
     }
 /* ----------------------- CREATE ENTITIES ---------------------------------- */
-    private function handleCreate($subj, $obj, $type, $tags, $tRequired)
+    private function handleCreate($sName, $oName, $type, $tags, $tRequired)
     {
-        $subj = $this->getGroupRoots($subj);
+        $subjs = $this->getGroupRoots($sName);
         $type = $this->getEntity('InteractionType', $type, 'displayName');
-        $objs = $this->getGroupRoots($obj);
+        $objs = $this->getGroupRoots($oName);
 
-        foreach ($objs as $obj) {
-            $this->createValidInteraction($subj, $obj, $type, $tags, $tRequired);
+        foreach ($subjs as $subj) {
+            foreach ($objs as $obj) {
+                $this->createValidInteraction($subj, $obj, $type, $tags, $tRequired);
+            }
         }
 
     }
@@ -281,7 +283,7 @@ final class Version20210205ValidInteractions extends AbstractMigration implement
     {
         if (!is_string($gName)) { return $gName; }                          print("\n".$gName);
         $group = $this->getEntity('Group', $gName, 'displayName');
-        return $group->getTaxaEntities();
+        return $group->getTaxa();
     }
     private function getTags($data)
     {

@@ -246,7 +246,8 @@ function getSteps() {
                 <br>Once "Taxon" has been selected in the “Group Interactions by”
                 box, select a group of taxa to view.<br><br>
                 <center>We have selected the "Plant" view for this tutorial.</center>`,
-            position: 'right'
+            position: 'right',
+            setUpFunc: setTableView.bind(null, 'Plants')
         },
         {
             element: '#search-tbl',
@@ -293,7 +294,7 @@ function getSteps() {
         {
             element: '#filter',
             intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>
-                <br>(Filters will not work until the database is fully downloaded.)`,
+                <br>(Filters work once the database is ready.)`,
             position: 'bottom',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -306,26 +307,23 @@ function getSteps() {
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
+            element: '#groupFilterCntnr',
+            intro: `<h3><center>Taxon-Group Filters</center></h3><br>
+                Filter to selected taxon groups, such as only bat interactions with
+                amphibians, fish, or reptiles. </b><br><br>(Filters work once the database is ready.)`,
+            position: 'top',
+        },
+        {
             element: '#focus-filters',
             intro: `<h3><center>Taxon Filters</center></h3><br>These dropdowns
                 show all taxa in the selected group present in the table.</b><br><br>
                  - Select a specific taxon from one of the rank dropdowns and the table will
                 update to show it at the top of the data tree. The other dropdowns will
-                populate with related taxa.<br><br>(Filters will not work until the database
-                is fully downloaded.)`,
+                populate with related taxa.<br><br>Some groups have multiple root-taxa, such
+                as Mammals and Parasites. These can be filtered to selected root taxa as well.
+                <br><br>(Filters work once the database is ready.)`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
-        },
-        {
-            element: '#objGroupFilterCntnr',
-            intro: `<h3><center>Taxon-Group Filters</center></h3><br>
-                When viewing by Bats, you can filter to show only interactions with
-                selected object-groups, such as only interactions with amphibians, fish,
-                and reptiles. </b><br><br>
-                Some groups contian distinct branches of taxonomy, or sub-groups. These groups
-                can be filtered to selected sub-groups as well.<br><br>(Filters will not
-                work until the database is fully downloaded.)`,
-            position: 'top',
         },
         {
             element: '#filter-col1',

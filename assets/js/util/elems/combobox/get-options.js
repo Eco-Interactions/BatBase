@@ -24,7 +24,7 @@ import { _state } from '~form';
  * group is passed, an additional 'group' key is added that will serve as a category
  * for the options in the group.
  */
-export function getOptions(entityObj, sortedKeys) {                        /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
+export function getOptions(entityObj, sortedKeys) {                 /*dbug-log*///console.log('getOptions = %O, order = %O', entityObj, sortedKeys);
     if (!Object.keys(entityObj).length) { return []; }
     return Object.values(entityObj)[0].group ?
         getOptGroups(entityObj, sortedKeys) : getSimpleOpts(entityObj, sortedKeys);
@@ -212,7 +212,7 @@ function getSubGroupName() {
     return _state('getFieldState', ['sub', 'Sub-Group', 'misc']).taxon.name;
 }
 function getRoleTaxonGroups(fName, p) {
-    const role = _state('getFormState', ['sub', 'name']);
+    const role = _state('getFormState', ['sub', 'name']);           /*dbug-log*///console.log('        --getRoleTaxonGroups role[%s]', role)
     const prop = role === 'Subject' ? 'subjectNames' : p;
     return getStoredOpts(null, prop);
 }
