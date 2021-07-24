@@ -436,7 +436,7 @@ final class Version20210518DataCleanup extends AbstractMigration implements Cont
 
     private function reformatUserNamedJsonDetails()
     {
-        // code...
+        // direct: combo: 'Object Realm' -> 'Taxon Groups'
     }
 /* ============================ DOWN ======================================== */
     public function down(Schema $schema) : void

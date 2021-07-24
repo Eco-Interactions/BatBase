@@ -42,7 +42,7 @@ function getTypeCitationGenerator(type) {
  * Citation example with all data available:
  *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author
  *     [Initials. Last]. Year. Title of article. Title of Journal
- *     Volume (Issue): Pages.
+ *     Volume (Issue): Page-Pages.
  */
 function  buildArticleCite(type) {
     const athrs = getCitAuthors();
@@ -104,7 +104,7 @@ function buildDissertThesisCite(type) {
 /**
  * Citation example with all data available:
  *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author
- *     [Initials. Last]. Year. Title. Volume (Issue): Pages. Publisher
+ *     [Initials. Last]. Year. Title. Volume (Issue): Page-Pages. Publisher
  *     Name, City, Country.
  */
 function buildOtherCite(type) {

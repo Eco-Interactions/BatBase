@@ -106,6 +106,9 @@ function getLocationFieldConfg() {
         ElevationMax: {
             class: 'w-8',
             name: 'ElevationMax',
+            prep: {
+                setElevationRange: []
+            },
             prop: {
                 core: 'elevationMax'
             },

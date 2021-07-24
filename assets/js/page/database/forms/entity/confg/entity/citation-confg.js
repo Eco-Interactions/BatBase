@@ -36,7 +36,7 @@ function getCitationFieldConfg() {
         Description: {
             name: 'Description',
             label: 'Citation',
-            prep: {    // TODO: DRY
+            prep: {
                 // setCoreData: [],
                 renameField: ['FullText', 'detail'],
             },
@@ -77,7 +77,7 @@ function getCitationFieldConfg() {
         Edition: {
             name: 'Edition',
             class: 'w-4 no-grow',
-            prep: {    // TODO: DRY
+            prep: {   // TODO: DRY
                 renameField: ['PublicationVolume', 'detail'],
             },
             prop: {
@@ -88,7 +88,7 @@ function getCitationFieldConfg() {
         Issue: {
             class: 'w-4 no-grow',
             name: 'Issue',
-            prep: {    // TODO: DRY
+            prep: {
                 renameField: ['PublicationIssue', 'detail'],
             },
             prop: {
@@ -99,8 +99,8 @@ function getCitationFieldConfg() {
         Pages: {
             class: 'w-8 no-grow',
             name: 'Pages',
-            prep: {    // TODO: DRY
-                renameField: ['PublicationPages', 'detail'],
+            prep: {
+                setCitationPages: [],
             },
             prop: {
                 detail: 'publicationPages'

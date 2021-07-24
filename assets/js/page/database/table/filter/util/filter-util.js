@@ -22,7 +22,7 @@ export function getFilterField(lblTxt, input) {
 export function appendDynamicFilter(filterEl) {
     const $el = ifRowIsFull() ?
         $('#focus-filters') : $($('#focus-filters')[0].lastChild);
-    $el.append(filterEl);  console.log('appended')
+    $el.append(filterEl);
 }
 function ifRowIsFull() {
     return $('#focus-filters')[0].lastChild.children.length % 2 === 0;

@@ -18,6 +18,7 @@ let allOpts;
 let timeout;
 /* ---------------------- INIT COMBOBOX ------------------------------------- */
 export function initGroupFilterCombobox() {                         /*dbug-log*///console.log('-- initGroupFilterCombobox data[%O] allGroupOpts[%O]', t, allOpts);
+    if ($('#groupFilterCntnr').length) { return; } //already initialized
     const t = tState().get(['groupName', 'allGroups', 'treeGroups']);
     allOpts = _opts('getOptions', [t.allGroups, Object.keys(t.allGroups).sort()]);/*dbug-log*///console.log('-- initGroupFilterCombobox data[%O] allGroupOpts[%O]', t, allOpts);
     $('#default-filters').prepend(buildGroupFilter(t.groupName, t.treeGroups));

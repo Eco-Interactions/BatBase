@@ -13,9 +13,9 @@ Encore
     /* the public path used by the web server to access the previous directory */
     // .setPublicPath('/build')
 /* -------- PROD ------- */
-    /* Sends source maps to Sentry for bug/issue tracking. */
+    /* PUSH TO MASTER FIRST. Sends source maps to Sentry for bug/issue tracking. */
     // .addPlugin(new SentryWebpackPlugin({
-    //     include: '.', test: [/\.js$/], release: '20210118_TEST',
+    //     include: '.', test: [/\.js$/], release: '20210721_BB',
     //     debug: true, ignore: ['web', 'node_modules', 'webpack.config.js',
     //         'vendor', '/assets/js/libs/*', '/assets/libs/*', 'var', 'features'],
     // }))

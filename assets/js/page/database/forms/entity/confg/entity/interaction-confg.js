@@ -63,12 +63,12 @@ function getInteractionFieldConfg() {
         },
         Subject: {
             entity: 'Taxon',
-            info: {  //@TODO
-                tooltip: 'Bats are always the subject. Check bat taxonomy and names ' +
+            info: {
+                tooltip: 'The active taxon in the interaction. Check bat taxonomy and names ' +
                 'at www.batnames.org. ' +
                 'If the name in the publication is no longer accepted, use the currently' +
                 'accepted name and note the name used in the publication in the Notes Field.',
-                intro: 'Bats are always the subject. Check bat taxonomy and names ' +
+                intro: 'The active taxon in the interaction. Check bat taxonomy and names ' +
                 'at <a href="www.batnames.org" target="_blank">www.batnames.org</a>. ' +
                 'If the name in the publication is no longer accepted, use the currently' +
                 'accepted name and note the name used in the publication in the Notes Field.',
@@ -85,6 +85,14 @@ function getInteractionFieldConfg() {
         },
         Object: {
             entity: 'Taxon',
+            info: {
+                tooltip: 'Check bat taxonomy and names at www.batnames.org. ' +
+                'If the name in the publication is no longer accepted, use the currently' +
+                'accepted name and note the name used in the publication in the Notes Field.',
+                intro: 'Check bat taxonomy and names at <a href="www.batnames.org" target="_blank">www.batnames.org</a>. ' +
+                'If the name in the publication is no longer accepted, use the currently' +
+                'accepted name and note the name used in the publication in the Notes Field.',
+            },
             name: 'Object',
             prep: {
                 renameField: ['Object']

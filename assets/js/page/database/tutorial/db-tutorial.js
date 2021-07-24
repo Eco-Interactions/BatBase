@@ -118,8 +118,10 @@ function updateFlagAndReturn(geoJson) {
 /* -------------------------- SET BUTTON EVENTS ----------------------------- */
 function addBttnEvents() {
     const map = {
-        'Full Tutorial': 'full', 'Table View': 'tbl',
-        'Map View': 'map', 'Data Entry': 'data'
+        'Filters': 'filter',
+        'Full Tutorial': 'full',
+        'Map View': 'map',
+        'Table Data': 'tbl',
     };
     window.setTimeout(function() { // Needed so events are bound when this step is revisted. afterChange event fires before fully loaded.
         $('.intro-bttn').each((i, elem) => {
@@ -138,6 +140,7 @@ function enableMapTutorialIfDataAvailable(elem, key) {
 }
 function showTutorial(tutKey) {
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
+    if (tutKey === 'filter') { intro.goToStep(8); }
     if (tutKey === 'map') { intro.goToStep(16); }
 }
 /* --------------------------- LOAD INTS ON MAP ----------------------------- */
@@ -219,19 +222,17 @@ function getSteps() {
                 through the slides.</b> You can exit the tutorial by clicking
                 'Exit', or anywhere on the greyed background.<br><br><b><center>
                 Move to the next slide or select an area to begin.<br></center>
-                </b><br><button class="intro-bttn" style="margin: 0 25px
-                5px 45px !important">Full Tutorial</button><button class="intro-bttn">
-                Table View</button><button class="intro-bttn" style="
-                margin: 0 25px 5px 45px !important; opacity: 0.3; cursor: wait;"
-                disabled="disabled">Map View</button><button class="intro-bttn"
-                disabled="disabled" title="Coming soon" style="opacity: 0.3;
-                cursor: not-allowed;">Data Entry</button>`,
+                </b><br>
+                <button class="intro-bttn" title="Full Tutorial" style="margin: 0 25px 5px 45px !important">Full Tutorial</button>
+                <button class="intro-bttn" title="Filters">Filters</button>
+                <button class="intro-bttn" title="Table Data" style="margin: 0 25px 5px 45px !important;">Table Data</button>
+                <button class="intro-bttn" title="Map View" style="opacity: 0.3; cursor: wait;" disabled="disabled">Map View</button>`,
             position: 'right',
             setUpFunc: addBttnEvents
         },
         {
             element: '#focus-opts',
-            intro: `<h3><center>The interaction records are displayed by
+            intro: `<h3><center>The interaction data are displayed by
                 <br>Location, Source, or Taxon.<center></h3><br><b>Location</b>
                 - View by region/country or view all on a map.
                 <br><br><b>Source</b> - View by publication, publisher, or author.
@@ -263,8 +264,7 @@ function getSteps() {
         {
             element: '#search-tbl',
             intro: `<h3><center>Column definitions</h3></center><br>
-                <b>"Subject Taxon"</b> shows the bat taxon that each interaction is
-                attributed to.<br><br>
+                <b>"Subject Taxon"</b> shows the active taxon in each interaction.<br><br>
                 <b>"Object Taxon"</b> shows the taxon interacted with.
                 <br><br>Note on Taxon names: Aside from genus species binomials,
                 names at all other taxonomic ranks begin with the rank (e.g.,
@@ -289,28 +289,27 @@ function getSteps() {
                 level or all at once.</b><br><br>You can try it now.</center>`,
             position: 'right'
         },
-
 /* -------------------------------- FILTER ---------------------------------- */
         {
             element: '#filter',
-            intro: `<center><b>Click here to toggle the filter panel open or closed.</b></center>
-                <br>(Filters work once the database is ready.)`,
+            intro: `<center><b>Click here to toggle the filter panel open or closed.</b>
+                <br><br>(Filters work once the database is ready.)</center>`,
             position: 'bottom',
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: '#shw-chngd-ints',
-            intro: `<center><b>Check this box to filter interaction records by
-                time published/updated.</b></center><br>Only interactions
-                published/updated after the selected time will be displayed.`,
+            intro: `<center><b>Check this box to filter interaction data by
+                time published/updated.</b><br><br>(Filters work once the database is ready.)</center>`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: '#groupFilterCntnr',
             intro: `<h3><center>Taxon-Group Filters</center></h3><br>
-                Filter to selected taxon groups, such as only bat interactions with
-                amphibians, fish, or reptiles. </b><br><br>(Filters work once the database is ready.)`,
+                Filter by taxon groups, such as only bat interactions with
+                amphibians, fish, or reptiles. (A bat is in every interaction.)</b>
+                <br><br><center>(Filters work once the database is ready.)</center>`,
             position: 'top',
         },
         {
@@ -321,12 +320,12 @@ function getSteps() {
                 update to show it at the top of the data tree. The other dropdowns will
                 populate with related taxa.<br><br>Some groups have multiple root-taxa, such
                 as Mammals and Parasites. These can be filtered to selected root taxa as well.
-                <br><br>(Filters work once the database is ready.)`,
+                <br><br><center>(Filters work once the database is ready.)</center>`,
             position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
-            element: '#filter-col1',
+            element: '#focus-filters',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 <b>Locations</b> can be filtered by region, country, and display name.<br><br>
                 <b>Sources</b> can be filtered by author, publisher, and by the type of publication.`,
@@ -467,7 +466,7 @@ export function getFilterPanelSteps() {
     },
     {
         element: '#shw-chngd-ints',
-        intro: `<h3><center>Check this box to filter interaction records by
+        intro: `<h3><center>Check this box to filter interaction data by
             time updated/created.</center></h3><br><b></b>The time defaults
             to the current date. Use the calendar to select any date. That date
             will be saved and reapplied if the filter is turned reset when switching

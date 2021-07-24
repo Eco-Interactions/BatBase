@@ -22,7 +22,6 @@
  */
 import { _alert, _cmbx, _db, _u } from '~util';
 import { _state, _val } from '~form';
-// import * as eData from './entity-data.js';
 /**
  * [ld description]
  * @type {Object}
@@ -152,6 +151,7 @@ function setCoreAndDetail(g, fConfg, emptyString) {
 }
 /* ______________________________________ ENTITY ____________________________ */
     /* ----------------------- AUTHOR --------------------------------------- */
+/** Handles Author names */
 function handleAuthorNames(g, fConfg) {
     const names = getAuthNameValues(ld.confg.fields);
     setServerData('flat', 'DisplayName', buildAuthDisplayName(names));
@@ -175,11 +175,13 @@ function buildAuthDisplayName(names) {                              /*dbug-log*/
 function buildAuthFullName(names) {                                 /*dbug-log*///console.log('--buildAuthFullName names[%O]', names);
     return Object.values(names).filter(n => n).join(' ');
 }
+/** Ensure value saved without punctuation */
 function setSuffix(g, fConfg) {
     const v = fConfg.value;
     const sufx = v && v[v.length-1] == '.' ? v.slice(0, -1) : v;
     setServerData('flat', 'Suffix', sufx, 'detail');
 }
+/** [setContributors description] */
 function setContributors(g, fConfg) {
     const data = Object.keys(fConfg.value).length ?
         getContribs(fConfg.value) : getContribs(ld.confg.fields.Editor.value, true);
@@ -199,6 +201,7 @@ function getContribs(vals, isEditor = false) {                      /*dbug-log*/
     }
 }
     /* ----------- CITATION ------------------------------------------------- */
+/** [setCitationTitle description] */
 function setCitationTitle(g, fConfg) {
     const title = fConfg.value;
     setServerData('flat', 'Title', title, 'detail');
@@ -209,21 +212,14 @@ function getUniqueCitationName(citationTitle) {
     const pubTitle = ld.confg.fields.ParentSource.misc.pub.displayName;/*dbug-log*///console.log('--getUniqueCitationName citationTitle[%s] pubTitle[%s]', citationTitle, pubTitle)
     return pubTitle == citationTitle ? citationTitle + '(citation)' : citationTitle;
 }
-    /* ----------- LOCATION/GEOJSON ----------------------------------------- */
-function setGeoJsonData(g, fConfg) {                                /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
-    const displayPoint = getDisplayCoordinates(fConfg.value, ld.confg.fields.Longitude.value);
-    setServerData('flat', 'DisplayPoint', displayPoint, 'detail');
-    setServerData('flat', 'Type', 'Point', 'detail');
-    setServerData('flat', 'Coordinates', getCoordValue(displayPoint), 'detail');
-}
-function getDisplayCoordinates(lat, lng) {
-    return JSON.stringify([ lng, lat ]);
-}
-function getCoordValue(displayPoint) {
-    const geoJson = _state('getFormState', ['top', 'geoJson']);
-    return geoJson ? geoJson.coordinates : displayPoint;
+/** Validates page range. */
+function setCitationPages(g, fConfg) {
+    const pieces = fConfg.value.split('-');
+    if (pieces.length !== 2 || pieces[0] > pieces[1]) { return trackFailure('Pages'); }
+    setServerData('flat', fConfg.name, fConfg.value);
 }
     /* ------------------- INTERACTION -------------------------------------- */
+/** [validateTags description] */
 function validateTags(g, fConfg) {
     const typeTags = fConfg.misc.typeTags;
     const val = fConfg.value ? fConfg.value : [];
@@ -238,6 +234,27 @@ function ensureTypeTagSelected(typeTags, selected) {                /*dbug-log*/
         return selected.indexOf(String(tag.id)) !== -1;
     }
 }
+    /* ----------- LOCATION/GEOJSON ----------------------------------------- */
+/** Handles detail-entity data */
+function setGeoJsonData(g, fConfg) {                                /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
+    const displayPoint = getDisplayCoordinates(fConfg.value, ld.confg.fields.Longitude.value);
+    setServerData('flat', 'DisplayPoint', displayPoint, 'detail');
+    setServerData('flat', 'Type', 'Point', 'detail');
+    setServerData('flat', 'Coordinates', getCoordValue(displayPoint), 'detail');
+}
+function getDisplayCoordinates(lat, lng) {
+    return JSON.stringify([ lng, lat ]);
+}
+function getCoordValue(displayPoint) {
+    const geoJson = _state('getFormState', ['top', 'geoJson']);
+    return geoJson ? geoJson.coordinates : displayPoint;
+}
+/** Validates and sets elevation range. */
+function setElevationRange(g, fConfg) {                             /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
+    const elevLow = ld.confg.fields.Elevation.value;
+    if (fConfg.value < elevLow) { return trackFailure('Elevation'); }
+    setServerData('flat', fConfg.name, fConfg.value);
+}
     /* ----------------------- TAXON ---------------------------------------- */
 function buildTaxonDisplayName(g, fConfg) {
     const rank = ld.confg.action === 'create' ? ld.confg.fields.Rank.value : _cmbx('getSelTxt', ['Rank']);
@@ -249,22 +266,24 @@ function trackFailure(prop, value) {                                 /*dbug-log*
     if (!ld.data.fails) { ld.data.fails = {}; }
     ld.data.fails[prop] = value;
 }
+/** Handles field-failure alerts. */
 function alertIfFailures() {
     if (!ld.data.fails) { return; }
     const genErr = handleFieldErrorsAndReturnGeneralFails(ld.data.fails);
     if (!genErr.length) { return; }                                 /*perm-log*///console.log('--alertIfFailures allFails[%O] genErrs[%O]', ld.data.fails, genErr);
     _alert('alertIssue', ['dataPrepFail', JSON.stringify(genErr) ]);
 }
-
 function handleFieldErrorsAndReturnGeneralFails(fails) {
+    const fLvl = ld.confg.group;
     const map = {
-        InteractionTags: showFormFieldAlert.bind(null, 'InteractionTags', 'needsTypeTag', 'top')
+        Elevation: showFormFieldAlert.bind(null, 'ElevationMax', 'invalidRange', fLvl),
+        Pages: showFormFieldAlert.bind(null, 'Pages', 'invalidRange', fLvl),
+        InteractionTags: showFormFieldAlert.bind(null, 'InteractionTags', 'needsTypeTag', fLvl),
     };
     const unhandled = Object.keys(ld.data.fails).map(f => map[f] ? map[f]() : null).filter(f=>f);
     if (!unhandled.length) { ld.data.fails = 'handled'; }
     return unhandled;
 }
-
 function showFormFieldAlert(field, tag, fLvl) {
     delete ld.data.fails[field];
     _val('showFormValAlert', [...arguments]);

@@ -147,6 +147,11 @@ function getFieldValAlertHandler(tag, action) {
             show: handleOpenSubFormAndReturnAlertMsg,
             clear: false
         },
+        /* --- UTIL --- */
+        'invalidRange': {
+            show: handleInvalidRangeAndReturnAlertMsg,
+            clear: false
+        },
         /* --- INTERACTION --- */
         'noValidInts': {
             show: handleNoValidIntsAndReturnAlertMsg,
@@ -256,6 +261,10 @@ function selectExistingEntity(fLvl, id, field) {                    /*dbug-log*/
     _elems('exitSubForm', [fLvl, false]);
     _cmbx('setSelVal', [field, id]);
     $(`#${field}_pin`).focus();
+}
+/* =============================== UTIL ===================================== */
+function handleInvalidRangeAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    return '<span>Invalid range entered.</span>';
 }
 /* =========================== INTERACTION ================================== */
 function handleNoValidIntsAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
