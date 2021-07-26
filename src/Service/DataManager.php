@@ -10,6 +10,7 @@ use App\Entity\Source;
 use App\Entity\Taxon;
 use App\Service\LogError;
 use App\Service\TrackEntityUpdate;
+use App\Service\TrackActivity;
 use Doctrine\ORM\EntityManagerInterface;
 /**
  * public
@@ -41,13 +42,15 @@ class DataManager
     private $em;
     private $logger;
     private $tracker;
+    private $trackActivity;
 
     public function __construct(EntityManagerInterface $em, LogError $logger,
-        TrackEntityUpdate $tracker)
+        TrackEntityUpdate $tracker, TrackActivity $trackActivity)
     {
         $this->em = $em;
         $this->logger = $logger;
         $this->tracker = $tracker;
+        $this->trackActivity = $trackActivity;
     }
 
 /* ============================ ACTIONS ===================================== */
@@ -446,6 +449,7 @@ class DataManager
      */
     private function setUpdatedAtTimes($entityData)
     {
+        $this->trackActivity->trackUserActivity();
         $this->tracker->trackEntityUpdate($entityData->core);
         if (property_exists($entityData, 'detailEntity')) {
             $this->tracker->trackEntityUpdate($entityData->detail);

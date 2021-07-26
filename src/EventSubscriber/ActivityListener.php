@@ -4,8 +4,7 @@ namespace App\EventSubscriber;
 use Symfony\Component\Security\Core\SecurityContext;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\HttpKernel;
-use Doctrine\ORM\EntityManager;
-use App\Entity\User;
+use App\Service\TrackActivity;
 
 /**
  * Listener that updates the last activity of the authenticated user
@@ -13,12 +12,12 @@ use App\Entity\User;
 class ActivityListener
 {
     protected $tokenContext;
-    protected $doctrine;
+    private $trackActivity;
 
-    public function __construct($tokenContext, $doctrine)
+    public function __construct($tokenContext, TrackActivity $trackActivity)
     {
         $this->tokenContext= $tokenContext;
-        $this->doctrine= $doctrine;
+        $this->trackActivity = $trackActivity;
     }
 
     /**
@@ -32,15 +31,9 @@ class ActivityListener
         if ($event->getRequestType() !== HttpKernel::MASTER_REQUEST) {
             return;
         }
-
         // Check token authentication availability
         if ($this->tokenContext->getToken()) {
-            $user = $this->tokenContext->getToken()->getUser();
-
-            if ( ($user instanceof User) && !($user->isActiveNow()) ) {
-                $user->setLastActivityAt(new \DateTime('now'), new \DateTimeZone('UTC'));
-                $this->doctrine->getManager()->flush($user);
-            }
+            $this->trackActivity->trackUserActivity();
         }
     }
 }
