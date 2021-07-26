@@ -226,11 +226,11 @@ function getContributorFieldData (contribs) {
 function getCitationTypeAndTitleFieldData (citation) {
     return { field: citation.citationType.displayName, content: citation.displayName };
 }
-function getCitationDisplay(source) {
+function getCitationDisplay(source) {                               /*dbug-log*///console.log('  --getCitationDisplay source[%O]', source);
     const type = source.citation.citationType.displayName;
     const doi = getDoiLink(source.doi);
     const url = getCitationWebsite(source.linkUrl, type);
-    return source.description + doi + url;
+    return source.citation.fullText + doi + url;
 }
 function getDoiLink(doi) {
     return doi ? ` <a href="${doi}" target="_blank">DOI</a>` : '';

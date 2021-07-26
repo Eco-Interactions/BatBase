@@ -334,7 +334,7 @@ class Interaction
                 'id' => $this->interactionType->getId(),
                 'displayName' => $this->interactionType->getDisplayName(),
                 'activeForm' => $this->interactionType->getActiveForm(),
-                'passiveForm' => $this->interactionType->getPassiveForm()
+                // 'passiveForm' => $this->interactionType->getPassiveForm()
             ];
         }
         return null;

@@ -481,7 +481,8 @@ class Taxon
      */
     public function getTaxonGroup()
     {
-        return $this->findGroupAndReturnObj($this)->getGroup();
+        $rootTxn = $this->findGroupAndReturnObj($this);
+        return $rootTxn ? $rootTxn->getGroup() : false;
     }
 
     private function findGroupAndReturnObj($taxon)

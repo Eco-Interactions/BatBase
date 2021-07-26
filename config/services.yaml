@@ -55,7 +55,6 @@ services:
     App\EventSubscriber\ActivityListener:
         arguments:
             - '@security.token_storage'
-            - '@doctrine'
         tags:
             - { name: kernel.event_listener,
                 event: kernel.controller,
