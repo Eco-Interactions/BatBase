@@ -24,13 +24,19 @@ export function _validation(funcName, params = []) {
 export function handleFormSubmit(fLvl) {
     $(`#${fLvl}-submit`).attr('disabled', true).fadeTo('fast', .6);
     const confg = _state('getFormState', [fLvl]);
+    if (confg.name === 'Citation') {
+        return window.setTimeout(() => buildDataAndSubmit(confg, fLvl), 1000);
+    }
+    buildDataAndSubmit(confg, fLvl);
+}
+function buildDataAndSubmit(confg, fLvl) {
     getValidatedFormData(confg)
     .then(data => submitFormData(data, fLvl, confg))
     .then(() => _state('setFormState', [fLvl, 'submit', true]));
 }
 /* ------------------------- SUBMIT FORM ------------------------------------ */
-function submitFormData(data, fLvl, confg) {                        /*dbug-log*/console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
-    if (data.fails) { return handleDataPrepFailure(data.fails); }
+function submitFormData(data, fLvl, confg) {
+    if (data.fails) { return handleDataPrepFailure(data.fails); }   /*dbug-log*/console.log("   --submitFormData [%s] data[%O] confg[%O]", fLvl, data, confg);
     toggleWaitOverlay(true);
     submitForm(data, fLvl, confg.action);
 }

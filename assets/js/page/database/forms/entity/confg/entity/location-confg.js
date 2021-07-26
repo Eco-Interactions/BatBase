@@ -115,7 +115,8 @@ function getLocationFieldConfg() {
             type: 'num',
         },
         GeoJson: {
-            misc: {} // rcrd: geoJsonRcrd used in edit form
+            misc: {}, // rcrd: geoJsonRcrd used in edit form
+            name: 'GeoJson'
         },
         HabitatType: {
             entity: 'HabitatType',

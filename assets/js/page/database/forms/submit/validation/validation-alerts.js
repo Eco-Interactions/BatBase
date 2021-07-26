@@ -224,14 +224,14 @@ function getFieldValAlertHandler(tag, action) {
 function setOnFormCloseClearAlert(elem, fLvl) {
     $(`#${fLvl}-form`).bind('destroyed', clearAlert.bind(null, elem, fLvl));
 }
-function setOnChangeClearAlert(fieldSelector, clearAlertHandler) {
+function setOnChangeClearAlert(fieldSelector, clearAlertHandler) {  /*dbug-log*///console.log(' --setOnChangeClearAlert fieldSelector[%s], clearAlertHandler[%O]', fieldSelector, clearAlertHandler);
     $(fieldSelector).change(clearAlertHandler);
 }
 function getServerValidationAlertMsg(elem, tag, fLvl, fieldName) {
     const msg = {
-        'dupContrib': 'An author is selected multiple times.',
-        'dupEnt' : 'A record with this name already exists.',
-        'genSubmitErr': 'An Error occured and the developer has been notified.'
+        dupContrib: 'An author is selected multiple times.',
+        dupEnt : 'A record with this name already exists.',
+        genSubmitErr: 'An Error occured and the developer has been notified.'
     };
     return '<span>' + msg[tag] + '</span>';
 }
@@ -264,6 +264,8 @@ function selectExistingEntity(fLvl, id, field) {                    /*dbug-log*/
 }
 /* =============================== UTIL ===================================== */
 function handleInvalidRangeAndReturnAlertMsg(elem, tag, fLvl, fieldName) {
+    const input = '#'+ elem.id.split('_alert')[0] + '_f .f-input';
+    setOnChangeClearAlert(input, clearAlertElem.bind(null, elem, fLvl));
     return '<span>Invalid range entered.</span>';
 }
 /* =========================== INTERACTION ================================== */
@@ -390,7 +392,7 @@ function clrFormLvlAlert(elem, fLvl) {
     _elems('checkReqFieldsAndToggleSubmitBttn', [fLvl]);
 }
 /* ------------------------ DEFAULT HANDLER --------------------------------- */
-export function clearAlert(elem, fLvl, enableSubmit = true) {       /*dbug-log*///console.log('clearAlert. [%O] enableSubmit?[%s]', elem, enableSubmit);
+export function clearAlert(elem, fLvl, enableSubmit = true) {       /*dbug-log*///console.log('   --clearAlert. elem[%O] enableSubmit?[%s]', elem, enableSubmit);
     $(elem).fadeTo(200, 0, clearAndEnableSubmit);
 
     function clearAndEnableSubmit() {
@@ -398,7 +400,7 @@ export function clearAlert(elem, fLvl, enableSubmit = true) {       /*dbug-log*/
         enableSubmitIfFormReady(fLvl, enableSubmit);
     }
 }
-function clearAlertElem(elem, fLvl) {
+function clearAlertElem(elem, fLvl) {                               /*dbug-log*///console.log('   --clearAlertElem. elem[%O] fLvl[%s]', elem, fLvl);
     $(elem).removeClass(fLvl+'-active-alert');
     if (elem.innerHTML) { elem.innerHTML = ''; }
     $(elem).fadeTo(0, 1);

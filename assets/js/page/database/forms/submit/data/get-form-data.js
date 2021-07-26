@@ -216,7 +216,7 @@ function getUniqueCitationName(citationTitle) {
 function setCitationPages(g, fConfg) {
     const pieces = fConfg.value.split('-');
     if (pieces.length !== 2 || pieces[0] > pieces[1]) { return trackFailure('Pages'); }
-    setServerData('flat', fConfg.name, fConfg.value);
+    setServerData('flat', 'PublicationPages', fConfg.value, 'detail');
 }
     /* ------------------- INTERACTION -------------------------------------- */
 /** [validateTags description] */
@@ -250,7 +250,7 @@ function getCoordValue(displayPoint) {
     return geoJson ? geoJson.coordinates : displayPoint;
 }
 /** Validates and sets elevation range. */
-function setElevationRange(g, fConfg) {                             /*dbug-log*///console.log('               --setGeoJsonData [%s] fConfg[%O]', g, fConfg);
+function setElevationRange(g, fConfg) {                             /*dbug-log*///console.log('               -- setElevationRange [%s] fConfg[%O]', g, fConfg);
     const elevLow = ld.confg.fields.Elevation.value;
     if (fConfg.value < elevLow) { return trackFailure('Elevation'); }
     setServerData('flat', fConfg.name, fConfg.value);
