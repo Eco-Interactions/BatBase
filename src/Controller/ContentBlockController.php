@@ -62,16 +62,24 @@ class ContentBlockController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $repo = $em->getRepository('App:ContentBlock');
-        $contentBlocks = $repo->findByPage("about");
-
+        $contentBlocks = $em->getRepository('App:ContentBlock')->findByPage("about");
         $returnData = $this->getPageBlocks($contentBlocks);
-
 
         return $this->render('ContentBlock/about.html.twig', array(
                 "entities" => $returnData,
+                "editors" => $this->getEditorData($em),
             )
         );
+    }
+    private function getEditorData($em)
+    {
+        $users = $em->getRepository('App:User')->findAll();
+        $editors = [];
+
+        foreach ($users as $user) {
+            if ($user->hasRole('ROLE_EDITOR')) { array_push($editors, $user); }
+        }
+        return $editors;
     }
 
     /**

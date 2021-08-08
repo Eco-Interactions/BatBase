@@ -28,6 +28,26 @@ class User extends BaseUser implements AdvancedUserInterface
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="first_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("firstName")
+     * @Groups({"flattened"})
+     */
+    protected $firstName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="last_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("lastName")
+     * @Groups({"flattened"})
+     */
+    protected $lastName;
+
+    /**
+     * @var string
      * @ORM\Column(name="aboutMe", type="text")
      *
      * @Assert\NotBlank(message="Tell us about your interest in bat eco-interactions")
@@ -39,26 +59,38 @@ class User extends BaseUser implements AdvancedUserInterface
      * )
      * @JMS\Expose
      * @JMS\SerializedName("aboutMe")
+     * @Groups({"flattened"})
      */
     protected $aboutMe;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="first_name", type="string", length=255)
+     * @ORM\Column(name="education", type="string", length=255, nullable=true)
      * @JMS\Expose
-     * @JMS\SerializedName("firstName")
+     * @JMS\SerializedName("education")
      */
-    protected $firstName;
+    protected $education;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="last_name", type="string", length=255)
+     * @ORM\Column(name="country", type="string", length=255, nullable=true)
      * @JMS\Expose
-     * @JMS\SerializedName("lastName")
+     * @JMS\SerializedName("country")
+     * @Groups({"flattened"})
      */
-    protected $lastName;
+    protected $country;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="interest", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("interest")
+     * @Groups({"flattened"})
+     */
+    protected $interest;
 
     /**
      * Date/Time of the last activity
@@ -92,33 +124,8 @@ class User extends BaseUser implements AdvancedUserInterface
     public function __construct()
     {
         parent::__construct();
-        // your own logic
     }
-
-    /**
-     * Set aboutMe.
-     *
-     * @param string $aboutMe
-     *
-     * @return User
-     */
-    public function setAboutMe($aboutMe)
-    {
-        $this->aboutMe = $aboutMe;
-
-        return $this;
-    }
-
-    /**
-     * Get aboutMe.
-     *
-     * @return string
-     */
-    public function getAboutMe()
-    {
-        return $this->aboutMe;
-    }
-
+/** =============================== NAME ==================================== */
     /**
      * Set firstName.
      *
@@ -171,12 +178,121 @@ class User extends BaseUser implements AdvancedUserInterface
      * Get fullName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("fullName")
+     * @Groups({"flattened"})
      *
      * @return string
      */
     public function getFullName()
     {
         return $this->firstName . ' ' . $this->lastName;
+    }
+/** ============================== ABOUT ==================================== */
+    /**
+     * Set aboutMe.
+     *
+     * @param string $aboutMe
+     *
+     * @return User
+     */
+    public function setAboutMe($aboutMe)
+    {
+        $this->aboutMe = $aboutMe;
+
+        return $this;
+    }
+
+    /**
+     * Get aboutMe.
+     *
+     * @return string
+     */
+    public function getAboutMe()
+    {
+        return $this->aboutMe;
+    }
+
+    /**
+     * Set country.
+     *
+     * @param string $country
+     *
+     * @return User
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country.
+     *
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * Set education.
+     *
+     * @param string $education
+     *
+     * @return User
+     */
+    public function setEducation($education)
+    {
+        $this->education = $education;
+
+        return $this;
+    }
+
+    /**
+     * Get education.
+     *
+     * @return string
+     */
+    public function getEducation()
+    {
+        return $this->education;
+    }
+
+    /**
+     * Set interest.
+     *
+     * @param string $interest
+     *
+     * @return User
+     */
+    public function setInterest($interest)
+    {
+        $this->interest = $interest;
+
+        return $this;
+    }
+
+    /**
+     * Get interest.
+     *
+     * @return string
+     */
+    public function getInterest()
+    {
+        return $this->interest;
+    }
+
+    /**
+     * Get fullName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("roles")
+     *
+     * @return string
+     */
+    public function getRoles()
+    {
+        return $this->roles;
     }
 
     /**
@@ -202,18 +318,6 @@ class User extends BaseUser implements AdvancedUserInterface
     {   // Delay during wich the user will be considered as still active
         $delay = new \DateTime('2 minutes ago', new \DateTimeZone('UTC'));
         return ( $this->getLastActivityAt() > $delay );
-    }
-
-    /**
-     * Get fullName.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("roles")
-     *
-     * @return string
-     */
-    public function getRoles()
-    {
-        return $this->roles;
     }
 
     /**

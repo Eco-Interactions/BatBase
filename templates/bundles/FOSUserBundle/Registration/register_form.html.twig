@@ -14,13 +14,21 @@
     {{ form_row(form.email) }}
     {{ form_row(form.plainPassword.first) }}
     {{ form_row(form.plainPassword.second) }}
+    <hr>
+    <span class="loc-gps-note">
+        The following data is optional. See the Privacy Policy in our Terms of Use below.
+    </span>
+    {{ form_row(form.country) }}
+    {{ form_row(form.education) }}
+    {{ form_row(form.interest) }}
+    <hr>
     {{ form_widget(form.captcha) }}
+    <center>
+        <input id="reg-tos" class="top-em-mrg" type="button"
+            value="Read and Agree to our Terms of Use to Submit" />
+        <input id="reg-submit" type="submit" disabled
+            value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
 
-    <input id="reg-tos" class="top-em-mrg" type="button"
-        value="Read and Agree to our Terms of Use" />
-    <input id="reg-submit" type="submit" disabled
-        value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
-
-    {{ form_end(form) }}
-
+        {{ form_end(form) }}
+    </center>
 </form>

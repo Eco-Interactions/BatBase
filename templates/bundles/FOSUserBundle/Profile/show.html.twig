@@ -8,7 +8,10 @@
         <p class="em-mrg">{{ 'profile.show.username'|trans({}, 'FOSUserBundle') }}: {{ user.username }}</p>
         <p class="em-mrg">First Name: {{ user.firstname }}</p>
         <p class="em-mrg">Last Name: {{ user.lastname }}</p>
+        <p class="em-mrg">Country: {{ user.country }}</p>
         <p class="em-mrg">About Me: {{ user.aboutMe }}</p>
+        <p class="em-mrg">Interest Area: {{ user.interest }}</p>
+        <p class="em-mrg">Education: {{ user.education }}</p>
         <a style="margin-right: 1em;" href="{{ path('fos_user_profile_edit') }}">Edit Profile</a> |
         <a  class="em-mrg"href="{{ path('fos_user_change_password') }}">Change Password</a>
     </div>

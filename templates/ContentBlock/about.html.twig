@@ -83,43 +83,20 @@
 		{% embed 'two_cols_sect.html.twig' %}
 			{% block firstcol %}
 				<div id="team-hdr"><h4>Editors</h4></div>
-				<div class="editor-info">
-					<div>
-						Name: Chanda Bennett <br>
-						Country: United States <br>
-						Education: PhD in Ecology
-					</div>
-				</div>
-				<div class="editor-info">
-					<div>
-						Name: CE Nuevo <br>
-						Country: Philippines <br>
-						Education/occupation status: MSc Graduate Student
-					</div>
-				</div>
-				<div class="editor-info">
-					<div>
-						Name: Cara Rogers <br>
-						Country: United States <br>
-						Education/occupation status: Undergraduate Senior
-					</div>
-				</div>
-				<div class="editor-info">
-					<div>
-						Name: Alice de Sampaio Kalkuhl <br>
-						Country: Belgium <br>
-						Education/occupational status: Graduate Student
-					</div>
-				</div>
-				<div class="editor-info">
-					<div>
-						Name: Baheerathan Murugavel <br>
-						Country: India <br>
-						Education: PhD Candidate, MSc Graduate
-					</div>
-				</div>
+				<div class="flex-row flex-wrap">
 
+					{% for editor in editors %}
+						<div class="editor-info">
+							Name: <b>{{ editor.fullName }}</b><br>
+							Country: <b>{{ editor.country }}</b><br>
+							Education: <b>{{ editor.education }}</b><br>
+							Interest Area: <b>{{ editor.interest }}</b><br>
+							Joined: <b>{{ editor.created|date("m/Y") }}</b><br>
+						</div>
+					{% endfor %}
+				</div>
 			{% endblock %}
+
 			{% block secondcol %}
 				<div id="team-hdr"><h4>Special Thanks</h4></div>
 				<div class="bio-img"><img src="{{ asset('build/images/team-tuli.jpg') }}" alt="Tuli Image"></div>

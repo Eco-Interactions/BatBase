@@ -15,14 +15,17 @@
             {% embed 'two_cols_sect.html.twig' %}
                 {% block firstcol %}
                     {{ form_row(form.username) }}
-                    {{ form_row(form.email) }}
+                    {{ form_row(form.first_name) }}
+                    {{ form_row(form.about_me) }}
+                    {{ form_row(form.interest) }}
                     {{ form_row(form.current_password) }}
                 {% endblock firstcol %}
 
                 {% block secondcol %}
-                    {{ form_row(form.first_name) }}
+                    {{ form_row(form.email) }}
                     {{ form_row(form.last_name) }}
-                    {{ form_row(form.about_me) }}
+                    {{ form_row(form.country) }}
+                    {{ form_row(form.education) }}
                 {% endblock secondcol %}
             {% endembed %}
 

@@ -55,7 +55,7 @@ function getTosHtml() {
     return `<div id="terms-div">
 <h3>Privacy Policy</h3>
 <br>
-<p>- We don't use cookies.<br>- We won't sell, rent or share our users' names and emails with anyone.<br>- We do use some of the local storage available in your browser to store interaction data, so you don't have to wait for it to download every time you visit the site.<br>- We do send out emails occasionally to let users know about major updates to the site. If this privacy policy ever changes, we'll email to let you know that. The same applies to our Terms of Use.<br>- We also use your email when verifying your new account and if you need to reset your password.<br>- If you have questions, please contact us at <a href="mailto:info@batbase.org" target="_top">info@batbase.org.</a><br></p>
+<p>- We don't use cookies.<br>- We won't sell, rent or share our users' names, emails, or profile data with anyone.<br>- We do use some of the local storage available in your browser to store interaction data, so you don't have to wait for it to download every time you visit the site.<br>- We do send out emails occasionally to let users know about major updates to the site. If this privacy policy ever changes, we'll email to let you know that. The same applies to our Terms of Use.<br>- We also use your email when verifying your new account and if you need to reset your password.<br>- If you have questions, please contact us at <a href="mailto:info@batbase.org" target="_top">info@batbase.org.</a><br></p>
 <br>
 <h3>Terms of Use</h3>
 <br>

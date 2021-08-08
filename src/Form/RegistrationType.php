@@ -22,6 +22,9 @@ class RegistrationType extends AbstractType
             ->add('first_name', TextType::class, ['label' => 'First Name'])
             ->add('last_name', TextType::class, ['label' => 'Last Name'])
             ->add('about_me', TextareaType::class, ['label' => 'About Me'])
+            ->add('interest', TextType::class, ['label' => 'Interest Area', 'required' => false])
+            ->add('country', TextType::class, ['label' => 'Country', 'required' => false])
+            ->add('education', TextType::class, ['label' => 'Education Level', 'required' => false])
             ->add('captcha', EWZRecaptchaType::class, [
                 'mapped'      => false,
                 'constraints' => [new RecaptchaTrue(['groups' => 'Registration'])],
