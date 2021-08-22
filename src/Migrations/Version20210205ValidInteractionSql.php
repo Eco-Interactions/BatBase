@@ -32,18 +32,20 @@ final class Version20210205ValidInteractionSql extends AbstractMigration
         $this->addSql('DROP TABLE int_type_tag_contraints');
         $this->addSql('ALTER TABLE group_root ADD description LONGTEXT DEFAULT NULL');
         $this->addSql('ALTER TABLE interaction_type DROP passive_form');
+        $this->addSql('ALTER TABLE user ADD education VARCHAR(255) DEFAULT NULL, ADD country VARCHAR(255) DEFAULT NULL, ADD interest VARCHAR(255) DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE valid_interaction_tag DROP FOREIGN KEY FK_C545DB027F8C546A');
-        $this->addSql('CREATE TABLE int_type_tag_contraints (tag_id INT NOT NULL, interaction_type_id INT NOT NULL, INDEX IDX_3E25DD7DA50ABBF2 (interaction_type_id), INDEX IDX_3E25DD7DBAD26311 (tag_id), PRIMARY KEY(tag_id, interaction_type_id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
+        $this->addSql('CREATE TABLE int_type_tag_contraints (tag_id INT NOT NULL, interaction_type_id INT NOT NULL, INDEX IDX_3E25DD7DBAD26311 (tag_id), INDEX IDX_3E25DD7DA50ABBF2 (interaction_type_id), PRIMARY KEY(tag_id, interaction_type_id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
         $this->addSql('ALTER TABLE int_type_tag_contraints ADD CONSTRAINT FK_109E44E4BAD26311 FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE int_type_tag_contraints ADD CONSTRAINT FK_3E25DD7DA50ABBF2 FOREIGN KEY (interaction_type_id) REFERENCES interaction_type (id) ON DELETE CASCADE');
         $this->addSql('DROP TABLE valid_interaction');
         $this->addSql('DROP TABLE valid_interaction_tag');
         $this->addSql('ALTER TABLE group_root DROP description');
         $this->addSql('ALTER TABLE interaction_type ADD passive_form VARCHAR(255) CHARACTER SET utf8 NOT NULL COLLATE `utf8_general_ci`');
+        $this->addSql('ALTER TABLE `user` DROP education, DROP country, DROP interest');
     }
 }

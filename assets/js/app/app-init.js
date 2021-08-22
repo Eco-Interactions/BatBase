@@ -49,7 +49,7 @@ function initSentryIssueTracking() {
 /* --------------------- INIT SENTRY ---------------------------------------- */
 function initSentry () {
     Sentry.init({
-        dsn: 'https://e4208400b3414c6d85beccfd218e194f@sentry.io/2506194',
+        dsn: 'https://28ec22ce887145e9bc4b0a243b18f94f@o955163.ingest.sentry.io/5904448',
         integrations: [new ExtraErrorData()],
         blacklistUrls: ['copy.batbase.org', 'dev.batbase.org']
     });
