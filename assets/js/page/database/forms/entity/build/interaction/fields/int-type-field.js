@@ -104,10 +104,11 @@ function loadTypeOptions(opts) {                                    /*dbug-log*/
  * edit-form build to fill the field with record data.
  */
 function selectTypeInitVal(prevType, typeOpts) {
-    const initVal = $('#sel-InteractionType').data('init-val') || prevType;
-    const validType = Object.keys(md.validInts).find(i => ifInitTypeValid(i, initVal));/*dbug-log*///console.log('selectInitValIfValidType initVal?[%s] validInts[%O] validType?[%s]', initVal, md.validInts, validType);
-    if (validType) {
-        _cmbx('setSelVal', ['InteractionType', validType]);
+    const preVal = $('#sel-InteractionType').data('init-val') || prevType;
+    const validType = Object.keys(md.validInts).find(i => ifInitTypeValid(i, preVal));/*dbug-log*///console.log('selectInitValIfValidType initVal?[%s] validInts[%O] validType?[%s]', preVal, md.validInts, validType);
+    const initVal = validType || (typeOpts.length === 1 ? typeOpts[0].value : null);
+    if (initVal) {
+        _cmbx('setSelVal', ['InteractionType', initVal]);
     } else {
         iForm.clearTypeTagData();
         _cmbx('focusCombobox', ['InteractionType']);
